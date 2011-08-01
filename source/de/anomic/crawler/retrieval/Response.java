@@ -26,7 +26,6 @@
 
 package de.anomic.crawler.retrieval;
 
-import java.io.ByteArrayInputStream;
 import java.util.Date;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -63,7 +62,7 @@ public class Response {
     private final  RequestHeader      requestHeader;
     private final  ResponseHeader     responseHeader;
     private final  String             responseStatus;
-    private final  CrawlProfile profile;
+    private final  CrawlProfile       profile;
     private        byte[]             content;
     private        int                status;          // tracker indexing status, see status defs below
     
@@ -824,7 +823,7 @@ public class Response {
         String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.mime());
         if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
         try {
-            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.content.length, new ByteArrayInputStream(this.content));
+            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.content);
         } catch (Exception e) {
             return null;
         }

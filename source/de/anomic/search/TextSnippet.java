@@ -166,69 +166,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             return;
         }
 
-
-        /* ===========================================================================
-         * LOAD RESOURCE DATA
-         * =========================================================================== */
-        // if the snippet is not in the cache, we can try to get it from the htcache
-        final Response response;
-        try {
-            // first try to get the snippet from metadata
-            String loc;
-            final boolean noCacheUsage = url.isFile() || url.isSMB() || cacheStrategy == null;
-            if (containsAllHashes(loc = comp.dc_title(), queryhashes)) {
-                // try to create the snippet from information given in the url itself
-                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
-                return;
-            } else if (containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
-                // try to create the snippet from information given in the creator metadata
-                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
-                return;
-            } else if (containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
-                // try to create the snippet from information given in the subject metadata
-                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
-                return;
-            } else if (containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
-                // try to create the snippet from information given in the url
-                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
-                return;
-            } else {
-                // try to load the resource from the cache
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), noCacheUsage ? CacheStrategy.NOCACHE : cacheStrategy, Long.MAX_VALUE, true);
-                if (response == null) {
-                    // in case that we did not get any result we can still return a success when we are not allowed to go online
-                    if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {
-                        init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
-                        return;
-                    }
-
-                    // if it is still not available, report an error
-                    init(url.hash(), null, ResultClass.ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
-                    return;
-                } else {
-                    // place entry on indexing queue
-                    Switchboard.getSwitchboard().toIndexer(response);
-                    source = ResultClass.SOURCE_WEB;
-                }
-            }
-        } catch (final Exception e) {
-            //Log.logException(e);
-            init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
-            return;
-        }
-
-        /* ===========================================================================
-         * PARSE RESOURCE
-         * =========================================================================== */
-        Document document = null;
-        try {
-            document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-        } catch (final Parser.Failure e) {
-            init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
-            return;
-        }
+        Document document = loadDocument(loader, comp, queryhashes, cacheStrategy, url, reindexing, source);
         if (document == null) {
-            init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
+            if (this.error == null) {
+            	init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
+            }
             return;
         }
 
@@ -280,6 +222,77 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
         document.close();
         init(url.hash(), snippetLine, source, null);
+    }
+    
+    private Document loadDocument(
+    		final LoaderDispatcher loader,
+    		final URIMetadataRow.Components comp,
+    		final HandleSet queryhashes,
+    		final CacheStrategy cacheStrategy,
+    		final DigestURI url,
+    		final boolean reindexing,
+    		ResultClass source) {
+    	/* ===========================================================================
+         * LOAD RESOURCE DATA
+         * =========================================================================== */
+        // if the snippet is not in the cache, we can try to get it from the htcache
+        final Response response;
+        try {
+            // first try to get the snippet from metadata
+            String loc;
+            final boolean noCacheUsage = url.isFile() || url.isSMB() || cacheStrategy == null;
+            if (containsAllHashes(loc = comp.dc_title(), queryhashes)) {
+                // try to create the snippet from information given in the url itself
+                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
+                return null;
+            } else if (containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
+                // try to create the snippet from information given in the creator metadata
+                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
+                return null;
+            } else if (containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
+                // try to create the snippet from information given in the subject metadata
+                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
+                return null;
+            } else if (containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
+                // try to create the snippet from information given in the url
+                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
+                return null;
+            } else {
+                // try to load the resource from the cache
+                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), noCacheUsage ? CacheStrategy.NOCACHE : cacheStrategy, Integer.MAX_VALUE, true);
+                if (response == null) {
+                    // in case that we did not get any result we can still return a success when we are not allowed to go online
+                    if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {
+                        init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
+                        return null;
+                    }
+
+                    // if it is still not available, report an error
+                    init(url.hash(), null, ResultClass.ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
+                    return null;
+                } else {
+                    // place entry on indexing queue
+                    Switchboard.getSwitchboard().toIndexer(response);
+                    source = ResultClass.SOURCE_WEB;
+                }
+            }
+        } catch (final Exception e) {
+            //Log.logException(e);
+            init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
+            return null;
+        }
+
+        /* ===========================================================================
+         * PARSE RESOURCE
+         * =========================================================================== */
+        Document document = null;
+        try {
+            document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+        } catch (final Parser.Failure e) {
+            init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
+            return null;
+        }
+        return document;
     }
 
     private void init(final byte[] urlhash, final String line, final ResultClass errorCode, final String errortext) {
