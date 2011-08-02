@@ -145,7 +145,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
         if (bobj.getType() != BDecoder.BType.dictionary) return null;
         Map<String, BDecoder.BObject> map = bobj.getMap();
         Map<String, byte[]> m = new HashMap<String, byte[]>();
-        for (Map.Entry<String, BDecoder.BObject> entry: map.entrySet()) {
+        for (final Map.Entry<String, BDecoder.BObject> entry: map.entrySet()) {
             if (entry.getValue().getType() != BDecoder.BType.string) continue;
             m.put(entry.getKey(), entry.getValue().getString());
         }
@@ -404,7 +404,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @param m mappings to be stored in this map
      */
     public void putAll(Map<? extends byte[], ? extends Map<String, byte[]>> map) {
-        for (Map.Entry<? extends byte[], ? extends Map<String, byte[]>> me: map.entrySet()) {
+        for (final Map.Entry<? extends byte[], ? extends Map<String, byte[]>> me: map.entrySet()) {
             try {
                 this.insert(me.getKey(), me.getValue());
             } catch (RowSpaceExceededException e) {
@@ -548,7 +548,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      */
     public ArrayList<String> columns() {
         if (this.columnames.size() == 0) {
-            for (Map.Entry<byte[], Map<String, byte[]>> row: this) {
+            for (final Map.Entry<byte[], Map<String, byte[]>> row: this) {
                 this.columnames.addAll(row.getValue().keySet());
             }
         }
@@ -572,9 +572,10 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
                 m.put("k", "111".getBytes()); map.insert("456".getBytes(), m);
                 m.put("k", "222".getBytes()); map.insert("789".getBytes(), m);
                 // iterate over keys
+                Map.Entry<byte[], Map<String, byte[]>> entry;
                 Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
                 while (i.hasNext()) {
-                    Map.Entry<byte[], Map<String, byte[]>> entry = i.next();
+                    entry = i.next();
                     System.out.println(ASCII.String(entry.getKey()) + ": " + entry.getValue());
                 }
                 // clean up
@@ -587,10 +588,11 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
         } else {
             File f = new File(args[0]);
             try {
+            	Map.Entry<byte[], Map<String, byte[]>> entry;
                 BEncodedHeap map = new BEncodedHeap(f, 12);
                 Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
                 while (i.hasNext()) {
-                    Map.Entry<byte[], Map<String, byte[]>> entry = i.next();
+                    entry = i.next();
                     System.out.println(ASCII.String(entry.getKey()) + ": " + entry.getValue());
                 }
                 map.close();

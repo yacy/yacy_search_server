@@ -216,9 +216,11 @@ public class WorkTables extends Tables {
         final HTTPClient client = new HTTPClient();
         client.setRealm(realm);
         client.setTimout(120000);
+        Tables.Row row;
+        String url;
         LinkedHashMap<String, Integer> l = new LinkedHashMap<String, Integer>();
-        for (String pk: pks) {
-            Tables.Row row = null;
+        for (final String pk: pks) {
+            row = null;
             try {
                 row = select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
             } catch (IOException e) {
@@ -227,7 +229,7 @@ public class WorkTables extends Tables {
                 Log.logException(e);
             }
             if (row == null) continue;
-            String url = "http://" + host + ":" + port + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL));
+            url = "http://" + host + ":" + port + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL));
             url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
             Log.logInfo("WorkTables", "executing url: " + url);
             try {
@@ -299,7 +301,7 @@ public class WorkTables extends Tables {
     public void failURLsRegisterMissingWord(IndexCell<WordReference> indexCell, final DigestURI url, HandleSet queryHashes, final String reason) {
 
         // remove words from index
-        for (byte[] word: queryHashes) {
+        for (final byte[] word: queryHashes) {
             indexCell.removeDelayed(word, url.hash());
         }
         
@@ -333,10 +335,12 @@ public class WorkTables extends Tables {
     public void cleanFailURLS(long timeout) {
     	if (timeout >= 0) {
     		try {
-				Iterator<Row> iter = this.iterator(WorkTables.TABLE_SEARCH_FAILURE_NAME);
+    			Row row;
+    			Date date;
+    			Iterator<Row> iter = this.iterator(WorkTables.TABLE_SEARCH_FAILURE_NAME);
 				while (iter.hasNext()) {
-					Row row = iter.next();
-					Date date = new Date();
+					row = iter.next();
+					date = new Date();
 					date = row.get(TABLE_SEARCH_FAILURE_COL_DATE, date);
 					if(date.before(new Date(System.currentTimeMillis() - timeout))) {
 						this.delete(TABLE_SEARCH_FAILURE_NAME, row.getPK());

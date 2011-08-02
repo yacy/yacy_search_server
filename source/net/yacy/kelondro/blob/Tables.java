@@ -72,7 +72,7 @@ public class Tables {
         String[] files = this.location.list();
         String tablename;
         File file;
-        for (String f: files) {
+        for (final String f: files) {
             if (f.endsWith(suffix)) {
                 file = new File(this.location, f);
                 if (file.length() == 0) {
@@ -99,7 +99,7 @@ public class Tables {
     }
 
     public void close() {
-        for (BEncodedHeap heap: this.tables.values()) heap.close();
+        for (final BEncodedHeap heap: this.tables.values()) heap.close();
         this.tables.clear();
     }
 
@@ -362,14 +362,15 @@ public class Tables {
         }
         
         protected Row next0() {
+        	Row r;
             while (i.hasNext()) {
-                Row r = new Row(i.next());
+                r = new Row(i.next());
                 if (this.whereValue != null) {
                     if (ByteBuffer.equals(r.get(this.whereColumn), this.whereValue)) return r;
                 } else if (this.wherePattern != null) {
                     if (this.whereColumn == null) {
                         // shall match any column
-                        for (byte[] b: r.values()) {
+                        for (final byte[] b: r.values()) {
                             if (this.wherePattern.matcher(UTF8.String(b)).matches()) return r;
                         }
                     } else {
@@ -461,7 +462,7 @@ public class Tables {
         public String toString() {
             StringBuilder sb = new StringBuilder(this.size() * 40);
             sb.append('{');
-            for (Map.Entry<String, byte[]> entry: this.entrySet()) {
+            for (final Map.Entry<String, byte[]> entry: this.entrySet()) {
                 sb.append(entry.getKey()).append('=').append(UTF8.String(entry.getValue())).append(", ");
             }
             if (sb.length() > 1) sb.setLength(sb.length() - 2);
