@@ -30,10 +30,10 @@ import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class MapTools {
@@ -50,7 +50,7 @@ public final class MapTools {
         }
         return p;
     }
-    
+
     public static ConcurrentHashMap<String, String> string2map(String string, final String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
@@ -72,7 +72,7 @@ public final class MapTools {
         // m must be synchronized to prevent that a ConcurrentModificationException occurs
         synchronized (m) {
             final StringBuilder buf = new StringBuilder(30 * m.size());
-            if (braces) { buf.append("{"); }
+            if (braces) { buf.append('{'); }
             int retry = 10;
             critical: while (retry > 0) {
                 try {
@@ -89,11 +89,11 @@ public final class MapTools {
                 buf.setLength(1); // fail
             }
             if (buf.length() > 1) { buf.setLength(buf.length() - 1); } // remove last separator
-            if (braces) { buf.append("}"); }
+            if (braces) { buf.append('}'); }
             return buf.toString();
         }
     }
-    
+
     public static Set<String> string2set(String string, final String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
@@ -107,7 +107,7 @@ public final class MapTools {
         }
         return set;
     }
-    
+
     public static String set2string(final Set<String> s, final String separator, final boolean braces) {
         final StringBuilder buf = new StringBuilder(s.size() * 40 + 1);
         if (braces) buf.append('{');

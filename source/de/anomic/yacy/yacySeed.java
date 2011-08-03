@@ -50,7 +50,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
@@ -71,7 +70,6 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.OS;
-
 import de.anomic.search.Switchboard;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
@@ -80,7 +78,7 @@ import de.anomic.yacy.dht.FlatWordPartitionScheme;
 public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yacySeed> {
 
     public static String ANON_PREFIX = "_anon";
-    
+
     public static final int maxsize = 16000;
     /**
      * <b>substance</b> "sI" (send index/words)
@@ -162,16 +160,16 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     public static final String SEEDLISTURL = "seedURL";
     /** zero-value */
     private static final String ZERO      = "0";
-    
+
     private static final int FLAG_DIRECT_CONNECT            = 0;
     private static final int FLAG_ACCEPT_REMOTE_CRAWL       = 1;
     private static final int FLAG_ACCEPT_REMOTE_INDEX       = 2;
-    
+
     public static final String DFLT_NETWORK_UNIT = "freeworld";
     public static final String DFLT_NETWORK_GROUP = "";
 
     private static final Random random = new Random(System.currentTimeMillis());
-    
+
     // class variables
     /** the peer-hash */
     public String hash;
@@ -194,12 +192,12 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         long b;
         try {
             b = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             b = System.currentTimeMillis();
         }
         this.birthdate = b;
     }
-    
+
     private yacySeed(final String theHash) {
         this.dna = new ConcurrentHashMap<String, String>();
 
@@ -207,7 +205,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // at first startup -
         this.hash = theHash; // the hash key of the peer - very important. should be static somehow, even after restart
         this.dna.put(yacySeed.NAME, defaultPeerName());
-        
+
         // later during operation -
         this.dna.put(yacySeed.ISPEED, yacySeed.ZERO);
         this.dna.put(yacySeed.RSPEED, yacySeed.ZERO);
@@ -240,16 +238,16 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         this.dna.put(yacySeed.INDEX_IN, yacySeed.ZERO);  // received index
         this.dna.put(yacySeed.URL_OUT, yacySeed.ZERO);   // send URLs
         this.dna.put(yacySeed.URL_IN, yacySeed.ZERO);    // received URLs
-        
+
         // default first filling
         this.dna.put(yacySeed.BDATE, my_SHORT_SECOND_FORMATTER.format());
         this.dna.put(yacySeed.LASTSEEN, this.dna.get(yacySeed.BDATE)); // just as initial setting
         this.dna.put(yacySeed.UTC, GenericFormatter.UTCDiffString());
         this.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // virgin/junior/senior/principal
-        
+
         this.birthdate = System.currentTimeMillis();
     }
-    
+
     /**
      * check the peer name: protect against usage as XSS hack
      * @param id
@@ -270,7 +268,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     private static String defaultPeerName() {
         return ANON_PREFIX + OS.infoKey() + "-" + (System.currentTimeMillis() % 77777777L) + "-" + yacyCore.speedKey;
     }
-    
+
     /**
      * Checks for the static fragments of a generated default peer name, such as the string 'dpn'
      * @see #makeDefaultPeerName()
@@ -280,7 +278,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     public static boolean isDefaultPeerName(final String name) {
         return name.startsWith("_anon");
     }
-    
+
     /**
      * used when doing routing within a cluster; this can assign a ip and a port
      * that is used instead the address stored in the seed DNA
@@ -296,7 +294,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
      * @return the IP or null
      */
     public final String getIP() {
-        String ip = get(yacySeed.IP, "127.0.0.1");
+        final String ip = get(yacySeed.IP, "127.0.0.1");
         return (ip == null || ip.length() == 0) ? "127.0.0.1" : ip;
     }
     /**
@@ -347,7 +345,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
             return ((Float) o).floatValue();
         } else return dflt;
     }
-    
+
     public final long getLong(final String key, final long dflt) {
         final Object o = this.dna.get(key);
         if (o == null) { return dflt; }
@@ -362,12 +360,12 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         } else return dflt;
     }
 
-    public final void setIP(final String ip)     { dna.put(yacySeed.IP, ip); }
-    public final void setPort(final String port) { dna.put(yacySeed.PORT, port); }
-    public final void setType(final String type) { dna.put(yacySeed.PEERTYPE, type); }
-    public final void setJunior()          { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR); }
-    public final void setSenior()          { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); }
-    public final void setPrincipal()       { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); }
+    public final void setIP(final String ip)     { this.dna.put(yacySeed.IP, ip); }
+    public final void setPort(final String port) { this.dna.put(yacySeed.PORT, port); }
+    public final void setType(final String type) { this.dna.put(yacySeed.PEERTYPE, type); }
+    public final void setJunior()          { this.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR); }
+    public final void setSenior()          { this.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); }
+    public final void setPrincipal()       { this.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); }
 
     public final void put(final String key, final String value) {
         synchronized (this.dna) {
@@ -380,12 +378,12 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         return this.dna;
     }
 
-    public final void setName(String name) {
+    public final void setName(final String name) {
         synchronized (this.dna) {
             this.dna.put(yacySeed.NAME, checkPeerName(name));
         }
     }
-    
+
     public final String getName() {
         return checkPeerName(get(yacySeed.NAME, "&empty;"));
     }
@@ -397,32 +395,32 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     public final void incSI(final int count) {
         String v = this.dna.get(yacySeed.INDEX_OUT);
         if (v == null) { v = yacySeed.ZERO; }
-        dna.put(yacySeed.INDEX_OUT, Long.toString(Long.parseLong(v) + (long) count));
+        this.dna.put(yacySeed.INDEX_OUT, Long.toString(Long.parseLong(v) + count));
     }
 
     public final void incRI(final int count) {
         String v = this.dna.get(yacySeed.INDEX_IN);
         if (v == null) { v = yacySeed.ZERO; }
-        dna.put(yacySeed.INDEX_IN, Long.toString(Long.parseLong(v) + (long) count));
+        this.dna.put(yacySeed.INDEX_IN, Long.toString(Long.parseLong(v) + count));
     }
 
     public final void incSU(final int count) {
         String v = this.dna.get(yacySeed.URL_OUT);
         if (v == null) { v = yacySeed.ZERO; }
-        dna.put(yacySeed.URL_OUT, Long.toString(Long.parseLong(v) + (long) count));
+        this.dna.put(yacySeed.URL_OUT, Long.toString(Long.parseLong(v) + count));
     }
 
     public final void incRU(final int count) {
         String v = this.dna.get(yacySeed.URL_IN);
         if (v == null) { v = yacySeed.ZERO; }
-        dna.put(yacySeed.URL_IN, Long.toString(Long.parseLong(v) + (long) count));
+        this.dna.put(yacySeed.URL_IN, Long.toString(Long.parseLong(v) + count));
     }
-    
+
     public final void resetCounters(){
-    	dna.put(yacySeed.INDEX_OUT, yacySeed.ZERO);
-    	dna.put(yacySeed.INDEX_IN, yacySeed.ZERO);
-    	dna.put(yacySeed.URL_OUT, yacySeed.ZERO);
-    	dna.put(yacySeed.URL_IN, yacySeed.ZERO);
+    	this.dna.put(yacySeed.INDEX_OUT, yacySeed.ZERO);
+    	this.dna.put(yacySeed.INDEX_IN, yacySeed.ZERO);
+    	this.dna.put(yacySeed.URL_OUT, yacySeed.ZERO);
+    	this.dna.put(yacySeed.URL_IN, yacySeed.ZERO);
     }
 
     /**
@@ -448,7 +446,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
         return Digest.encodeHex(Base64Order.enhancedCoder.decode(b64Hash));
     }
-    
+
     /**
      * @param hexHash a hexadecimal hash
      * @return the base64 representation of the given hex hash
@@ -456,9 +454,9 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     public static String hexHash2b64Hash(final String hexHash) {
         return Base64Order.enhancedCoder.encode(Digest.decodeHex(hexHash));
     }
-    
+
     /**
-     * The returned version follows this pattern: <code>MAJORVERSION . MINORVERSION 0 SVN REVISION</code> 
+     * The returned version follows this pattern: <code>MAJORVERSION . MINORVERSION 0 SVN REVISION</code>
      * @return the YaCy version of this peer as a float or <code>0</code> if no valid value could be retrieved
      * from this yacySeed object
      */
@@ -469,7 +467,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
             return 0;
         }
     }
-    
+
     /**
      * get the SVN version of the peer
      * @return
@@ -477,25 +475,25 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     public final int getRevision() {
         return yacyVersion.revision(get(yacySeed.VERSION, yacySeed.ZERO));
     }
-    
+
     /**
      * @return the public address of the peer as IP:port string or <code>null</code> if no valid values for
      * either the IP or the port could be retrieved from this yacySeed object
      */
     public final String getPublicAddress() {
-        String ip = this.getIP();
+        String ip = getIP();
         if (ip == null || ip.length() < 8 || ip.length() > 60) ip = "127.0.0.1";
-        
+
         final String port = this.dna.get(yacySeed.PORT);
         if (port == null || port.length() < 2 || port.length() > 5) return null;
 
-        StringBuilder sb = new StringBuilder(ip.length() + port.length() + 1);
+        final StringBuilder sb = new StringBuilder(ip.length() + port.length() + 1);
         sb.append(ip);
         sb.append(':');
         sb.append(port);
         return sb.toString();
     }
-    
+
     /**
      * If this seed is part of a cluster, the peer has probably the {@linkplain #alternativeIP} object set to
      * a local IP. If this is present and the public IP of this peer is identical to the public IP of the own seed,
@@ -505,20 +503,20 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
      */
     public final String getClusterAddress() {
     	if (this.alternativeIP == null) return getPublicAddress();
-    			
+
         final String port = this.dna.get(yacySeed.PORT);
         if ((port == null) || (port.length() < 2)) return null;
 
         return this.alternativeIP + ":" + port;
     }
-    
+
     /**
      * @return the IP address of the peer represented by this yacySeed object as {@link InetAddress}
      */
     public final InetAddress getInetAddress() {
-        return Domains.dnsResolve(this.getIP());
+        return Domains.dnsResolve(getIP());
     }
-    
+
     /** @return the portnumber of this seed or <code>-1</code> if not present */
     public final int getPort() {
         final String port = this.dna.get(yacySeed.PORT);
@@ -526,17 +524,17 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         /*if (port.length() < 2) return -1; It is possible to use port 0-9*/
         return Integer.parseInt(port);
     }
-    
+
     /** puts the current time into the lastseen field and cares about the time differential to UTC */
     public final void setLastSeenUTC() {
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        String ls = my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
+        final String ls = my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
         //System.out.println("SETTING LAST-SEEN of " + this.getName() + " to " + ls);
-        dna.put(yacySeed.LASTSEEN, ls );
+        this.dna.put(yacySeed.LASTSEEN, ls );
     }
-    
+
     /**
      * @return the last seen time converted to UTC in milliseconds
      */
@@ -556,24 +554,24 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
             return System.currentTimeMillis() - AbstractFormatter.dayMillis;
         }
     }
-    
+
     /**
      * test if the lastSeen time of the seed has a time-out
      * @param milliseconds the maximum age of the last-seen value
      * @return true, if the time between the last-seen time and now is greater then the given time-out
      */
-    public final boolean isLastSeenTimeout(long milliseconds) {
-        long d = Math.abs(System.currentTimeMillis() - this.getLastSeenUTC());
+    public final boolean isLastSeenTimeout(final long milliseconds) {
+        final long d = Math.abs(System.currentTimeMillis() - getLastSeenUTC());
         return d > milliseconds;
     }
 
     /** @return the age of the seed in number of days */
     public final int getAge() {
-        return (int) Math.abs((System.currentTimeMillis() - birthdate) / 1000 / 60 / 60 / 24);
+        return (int) Math.abs((System.currentTimeMillis() - this.birthdate) / 1000 / 60 / 60 / 24);
     }
 
     public void setPeerTags(final Set<String> keys) {
-        dna.put(PEERTAGS, MapTools.set2string(keys, "|", false));
+        this.dna.put(PEERTAGS, MapTools.set2string(keys, "|", false));
     }
 
     public Set<String> getPeerTags() {
@@ -633,7 +631,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if (flags.length() != 4) { flags = yacySeed.FLAGSZERO; }
         final bitfield f = new bitfield(UTF8.getBytes(flags));
         f.set(flag, value);
-        dna.put(yacySeed.FLAGS, UTF8.String(f.getBytes()));
+        this.dna.put(yacySeed.FLAGS, UTF8.String(f.getBytes()));
     }
 
     public final void setFlagDirectConnect(final boolean value) { setFlag(FLAG_DIRECT_CONNECT, value); }
@@ -679,20 +677,20 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     public final boolean isOnline(final String type) {
         return type.equals(yacySeed.PEERTYPE_SENIOR) || type.equals(yacySeed.PEERTYPE_PRINCIPAL);
     }
-    
-    public long nextLong(Random random, long n) {
+
+    public long nextLong(final Random random, final long n) {
         return Math.abs(random.nextLong()) % n;
     }
 
     private static byte[] bestGap(final yacySeedDB seedDB) {
-        byte[] randomHash = randomHash();
+        final byte[] randomHash = randomHash();
         if ((seedDB == null) || (seedDB.sizeConnected() <= 2)) {
             // use random hash
             return randomHash;
         }
         // find gaps
         final TreeMap<Long, String> gaps = hashGaps(seedDB);
-        
+
         // take one gap; prefer biggest but take also another smaller by chance
         String interval = null;
         while (!gaps.isEmpty()) {
@@ -700,14 +698,14 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
             if (random.nextBoolean()) break;
         }
         if (interval == null) return randomHash();
-        
+
         // find dht position and size of gap
-        long left = FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(0, 12)), null);
-        long right = FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(12)), null);
+        final long left = FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(0, 12)), null);
+        final long right = FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(12)), null);
         final long gap8 = FlatWordPartitionScheme.dhtDistance(left, right) >> 3; //  1/8 of a gap
-        long gapx = gap8 + (Math.abs(random.nextLong()) % (6 * gap8));
-        long gappos = (Long.MAX_VALUE - left >= gapx) ? left + gapx : (left - Long.MAX_VALUE) + gapx;
-        byte[] computedHash = FlatWordPartitionScheme.positionToHash(gappos);
+        final long gapx = gap8 + (Math.abs(random.nextLong()) % (6 * gap8));
+        final long gappos = (Long.MAX_VALUE - left >= gapx) ? left + gapx : (left - Long.MAX_VALUE) + gapx;
+        final byte[] computedHash = FlatWordPartitionScheme.positionToHash(gappos);
         // the computed hash is the perfect position (modulo gap4 population and gap alternatives)
         // this is too tight. The hash must be more randomized. We take only (!) the first two bytes
         // of the computed hash and add random bytes at the remaining positions. The first two bytes
@@ -722,11 +720,11 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         }
         return combined;
     }
-    
+
     private static TreeMap<Long, String> hashGaps(final yacySeedDB seedDB) {
         final TreeMap<Long, String>gaps = new TreeMap<Long, String>();
         if (seedDB == null) return gaps;
-        
+
         final Iterator<yacySeed> i = seedDB.seedsConnected(true, false, null, (float) 0.0);
         long l;
         yacySeed s0 = null, s1, first = null;
@@ -752,11 +750,11 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         }
         return gaps;
     }
-    
+
     public static yacySeed genLocalSeed(final yacySeedDB db) {
         return genLocalSeed(db, 0, null); // an anonymous peer
     }
-    
+
     public static yacySeed genLocalSeed(final yacySeedDB db, final int port, final String name) {
         // generate a seed for the local peer
         // this is the birthplace of a seed, that then will start to travel to other peers
@@ -781,7 +779,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         return ASCII.getBytes(hash);
     }
 
-    public static yacySeed genRemoteSeed(final String seedStr, final String key, final boolean ownSeed, String patchIP) throws IOException {
+    public static yacySeed genRemoteSeed(final String seedStr, final String key, final boolean ownSeed, final String patchIP) throws IOException {
         // this method is used to convert the external representation of a seed into a seed object
         // yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
 
@@ -791,7 +789,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         final String seed = crypt.simpleDecode(seedStr, key);
         if (seed == null) throw new IOException("seed == null");
         if (seed.length() == 0) throw new IOException("seed.length() == 0");
-        
+
         // extract hash
         final ConcurrentHashMap<String, String> dna = MapTools.string2map(seed, ",");
         final String hash = dna.remove(yacySeed.HASH);
@@ -808,7 +806,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
             testResult = resultSeed.isProper(ownSeed);
         }
         if (testResult != null) throw new IOException("seed is not proper (" + testResult + "): " + resultSeed);
-        
+
         // seed ok
         return resultSeed;
     }
@@ -816,7 +814,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     // TODO: add here IP ranges to accept also intranet networks
     public final String isProper(final boolean checkOwnIP) {
         // checks if everything is ok with that seed
-        
+
         // check hash
         if (this.hash == null) return "hash is null";
         if (this.hash.length() != Word.commonHashLength) return "wrong hash length (" + this.hash.length() + ")";
@@ -824,22 +822,22 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // name
         final String peerName = this.dna.get(yacySeed.NAME);
         if (peerName == null) return "no peer name given";
-        dna.put(yacySeed.NAME, checkPeerName(peerName));
+        this.dna.put(yacySeed.NAME, checkPeerName(peerName));
 
         // type
-        final String peerType = this.getPeerType();
-        if ((peerType == null) || 
+        final String peerType = getPeerType();
+        if ((peerType == null) ||
             !(peerType.equals(yacySeed.PEERTYPE_VIRGIN) || peerType.equals(yacySeed.PEERTYPE_JUNIOR)
               || peerType.equals(yacySeed.PEERTYPE_SENIOR) || peerType.equals(yacySeed.PEERTYPE_PRINCIPAL)))
             return "invalid peerType '" + peerType + "'";
 
         // check IP
         if (!checkOwnIP) {
-            // checking of IP is omitted if we read the own seed file        
-            final String ipCheck = isProperIP(this.getIP());
+            // checking of IP is omitted if we read the own seed file
+            final String ipCheck = isProperIP(getIP());
             if (ipCheck != null) return ipCheck;
         }
-        
+
         // seedURL
         final String seedURL = this.dna.get(SEEDLISTURL);
         if (seedURL != null && seedURL.length() > 0) {
@@ -854,13 +852,13 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         }
         return null;
     }
-    
+
     public static final String isProperIP(final String ipString) {
         // returns null if ipString is proper, a string with the cause otherwise
         if (ipString == null) return ipString + " -> IP is null";
         if (ipString.length() > 0 && ipString.length() < 8) return ipString + " -> IP is too short: ";
         if (Switchboard.getSwitchboard().isAllIPMode()) return null;
-        boolean islocal = Domains.isLocal(ipString);
+        final boolean islocal = Domains.isLocal(ipString);
         if (islocal && Switchboard.getSwitchboard().isGlobalMode()) return ipString + " - local IP for global mode rejected";
         if (!islocal && Switchboard.getSwitchboard().isIntranetMode()) return ipString + " - global IP for intranet mode rejected";
         return null;
@@ -868,27 +866,24 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
 
     @Override
     public final String toString() {
-        HashMap<String, String> copymap = new HashMap<String, String>();
+        final ConcurrentMap<String, String> copymap = new ConcurrentHashMap<String, String>();
         copymap.putAll(this.dna);
-        copymap.put(yacySeed.HASH, this.hash);                // set hash into seed code structure
+        copymap.put(yacySeed.HASH, this.hash);          // set hash into seed code structure
         return MapTools.map2string(copymap, ",", true); // generate string representation
     }
 
     public final String genSeedStr(final String key) {
         // use a default encoding
-        final String z = this.genSeedStr('z', key);
-        final String b = this.genSeedStr('b', key);
+        final String r = toString();
+        final String z = crypt.simpleEncode(r, key, 'z');
+        final String b = crypt.simpleEncode(r, key, 'b');
         // the compressed string may be longer that the uncompressed if there is too much overhead for compression meta-info
         // take simply that string that is shorter
         if (b.length() < z.length()) return b; else return z;
     }
 
-    public final String genSeedStr(final char method, final String key) {
-        return crypt.simpleEncode(this.toString(), key, method);
-    }
-
     public final void save(final File f) throws IOException {
-        final String out = this.genSeedStr('p', null);
+        final String out = crypt.simpleEncode(toString(), null, 'p');
         final FileWriter fw = new FileWriter(f);
         fw.write(out, 0, out.length());
         fw.close();
@@ -907,29 +902,29 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
 
     @Override
     public final yacySeed clone() {
-        ConcurrentHashMap<String, String> ndna = new ConcurrentHashMap<String, String>();
+        final ConcurrentHashMap<String, String> ndna = new ConcurrentHashMap<String, String>();
         ndna.putAll(this.dna);
         return new yacySeed(this.hash, ndna);
     }
 
     @Override
-    public int compareTo(yacySeed arg0) {
+    public int compareTo(final yacySeed arg0) {
         // TODO Auto-generated method stub
-        int o1 = this.hashCode();
-        int o2 = arg0.hashCode();
+        final int o1 = hashCode();
+        final int o2 = arg0.hashCode();
         if (o1 > o2) return 1;
         if (o2 > o1) return -1;
         return 0;
     }
-    
+
     @Override
     public int hashCode() {
-        return (int) (Base64Order.enhancedCoder.cardinal(this.hash) & ((long) Integer.MAX_VALUE));
+        return (int) (Base64Order.enhancedCoder.cardinal(this.hash) & (Integer.MAX_VALUE));
     }
 
     @Override
-    public int compare(yacySeed o1, yacySeed o2) {
+    public int compare(final yacySeed o1, final yacySeed o2) {
         return o1.compareTo(o2);
     }
-    
+
 }

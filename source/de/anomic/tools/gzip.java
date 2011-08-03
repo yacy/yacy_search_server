@@ -1,4 +1,4 @@
-// gzip.java 
+// gzip.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -45,7 +45,7 @@ import net.yacy.kelondro.logging.Log;
 public class gzip {
 
     private static Log logger = new Log("GZIP");
-    
+
     public static void gzipFile(final String inFile, final String outFile) {
 	try {
 	    final InputStream  fin  = new BufferedInputStream(new FileInputStream(inFile));
@@ -60,14 +60,14 @@ public class gzip {
 	}
     }
 
-    public static File gunzipFile(File in) {
+    public static File gunzipFile(final File in) {
         assert in.getName().endsWith(".gz");
-        String on = in.getName().substring(0, in.getName().length() - 3);
-        File outf = new File(in.getParent(), on);
+        final String on = in.getName().substring(0, in.getName().length() - 3);
+        final File outf = new File(in.getParent(), on);
         gunzipFile(in, outf);
         return outf;
     }
-    
+
     public static void gunzipFile(final File inFile, final File outFile) {
 	try {
 	    final InputStream  fin  = new GZIPInputStream(new BufferedInputStream(new FileInputStream(inFile)));
@@ -84,9 +84,10 @@ public class gzip {
 
     public static byte[] gzipString(final String in) {
 	try {
-	    final InputStream  fin  = new ByteArrayInputStream(in.getBytes("UTF8"));
-	    final ByteArrayOutputStream baos = new ByteArrayOutputStream(in.length() / 3);
-	    final OutputStream fout = new GZIPOutputStream(baos, 128);
+	    final InputStream fin = new ByteArrayInputStream(in.getBytes("UTF8"));
+	    final int buffersize = Math.min(1024, in.length());
+	    final ByteArrayOutputStream baos = new ByteArrayOutputStream(buffersize);
+	    final OutputStream fout = new GZIPOutputStream(baos, Math.max(buffersize, 512));
 	    copy(fout, fin, 1024);
 	    fin.close();
 	    fout.close();
@@ -96,7 +97,7 @@ public class gzip {
 	    return null;
 	}
     }
-	
+
     public static String gunzipString(final byte[] in) throws IOException {
 	    final InputStream  fin  = new GZIPInputStream(new ByteArrayInputStream(in));
 	    final ByteArrayOutputStream fout = new ByteArrayOutputStream(in.length / 3);
@@ -115,7 +116,7 @@ public class gzip {
 	bIn.close();
 	bOut.close();
     }
-	
+
 
     // some static helper methods
     public static void saveGzip(final File f, final byte[] content) throws IOException {
@@ -126,7 +127,7 @@ public class gzip {
             gzipout.write(content, 0, content.length);
         } finally {
             if (gzipout!=null)try{gzipout.close();}catch(final Exception e){}
-        }        
+        }
     }
 
     public static byte[] loadGzip(final File f) throws IOException {
@@ -143,17 +144,17 @@ public class gzip {
                 while (result.length - len < last) {
                     // the result array is too small, increase space
                     b = new byte[result.length * 2];
-                    System.arraycopy(result, 0, b, 0, len); 
+                    System.arraycopy(result, 0, b, 0, len);
                     result = b; b = null;
                 }
                 // copy the last read
-                System.arraycopy(buffer, 0, result, len, last); 
+                System.arraycopy(buffer, 0, result, len, last);
                 len += last;
             }
             gzipin.close();
             // finished with reading. now cut the result to the right size
             b = new byte[len];
-            System.arraycopy(result, 0, b, 0, len); 
+            System.arraycopy(result, 0, b, 0, len);
             return b;
         } finally {
             if (gzipin != null) try{gzipin.close();}catch(final Exception e){}
