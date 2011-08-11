@@ -167,7 +167,7 @@ public class Bookmarks {
                         bookmark.setPublic(false);
                     }
 
-                    if(post.containsKey("feed") && ("feed".equals(post.get("feed")))){
+                    if(post.containsKey("feed") && ("true".equals(post.get("feed")))){
                         bookmark.setFeed(true);
                     } else {
                         bookmark.setFeed(false);
