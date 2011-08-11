@@ -86,7 +86,7 @@ public class PerformanceQueues_p {
             if (post.containsKey("Xmx")) {
                 int xmx = post.getInt("Xmx", 500); // default maximum heap size
                 if (OS.isWin32) xmx = Math.min(2000, xmx);
-                int xms = xmx / 4;
+                int xms = xmx; // take all.. if this is not used the os will manage that. if not reserved at the beginning the OS may reject to give away more memory
 	            sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
 	            sb.setConfig("javastart_Xms", "Xms" + xms + "m");
 	            prop.put("setStartupCommit", "1");

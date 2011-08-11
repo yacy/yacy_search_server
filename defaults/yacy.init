@@ -615,7 +615,7 @@ cleanup.failedSearchURLtimeout = 86400000
 # if a high performance for large search indexes is wanted, then setting the values to equal number is recommended
 # if YaCy shall be nice in not-only-yacy environments, then the Xms value may be lower
 javastart_Xmx=Xmx600m
-javastart_Xms=Xms180m
+javastart_Xms=Xms600m
 
 # YaCy is able to use RAM copies of database tables. This needs a lot of RAM
 # To switch copying of file tables int RAM on, use this property
