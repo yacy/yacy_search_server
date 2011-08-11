@@ -196,8 +196,8 @@ public final class QueryParams {
         this.ranking = ranking;
         this.maxDistance = maxDistance;
         this.contentdom = contentdom;
-        this.itemsPerPage = Math.min((specialRights) ? 1000 : 100, itemsPerPage);
-        this.offset = Math.min((specialRights) ? 10000 : 1000, offset);
+        this.itemsPerPage = Math.min((specialRights) ? 10000 : 1000, itemsPerPage);
+        this.offset = Math.max(0, Math.min((specialRights) ? 10000 - this.itemsPerPage : 1000 - this.itemsPerPage, offset));
         try {
             this.urlMask = Pattern.compile(urlMask.toLowerCase());
         } catch (final PatternSyntaxException ex) {

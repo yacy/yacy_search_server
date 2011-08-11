@@ -45,9 +45,13 @@ public class yacyinteractive {
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-        
+
         final String query = (post == null) ? "" : post.get("query", "");
+        final String startRecord = (post == null) ? "0" : post.get("startRecord", "");
+        final String maximumRecords = (post == null) ? "1000" : post.get("maximumRecords", "");
         prop.putHTML("query", query);
+        prop.putHTML("startRecord", startRecord);
+        prop.putHTML("maximumRecords", maximumRecords);
         prop.putHTML("querys", query.replaceAll(" ", "+"));
         return prop;
     }

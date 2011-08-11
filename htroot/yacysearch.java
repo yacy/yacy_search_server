@@ -180,7 +180,7 @@ public class yacysearch {
         // collect search attributes
         final boolean newsearch =post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former","")); //new search term
 
-        int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 1000) : (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 500), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
+        int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 5000) : (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 1000), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
         int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
 
         final int newcount;

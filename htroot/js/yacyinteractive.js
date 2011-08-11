@@ -2,12 +2,14 @@ function xmlhttpPost() {
     var searchform = document.forms['searchform'];
     var rsslink = document.getElementById("rsslink");
     if (rsslink != null) rsslink.href="yacysearch.rss?query=" + searchform.query.value;
-    search(searchform.query.value);
+    search(searchform.query.value, searchform.maximumRecords.value, searchform.startRecord.value);
 }
 
 // static variables
 var start = new Date();
 var query = "";
+var maximumRecords = "1000";
+var startRecord = "0";
 var searchresult;
 var totalResults = 0;
 var filetypes;
@@ -16,8 +18,12 @@ var script = "";
 var modifier = "";
 var modifiertype = "";
 
-function search(search) {
+function search(search, count, offset) {
   query = search;
+  maximumRecords = count;
+  if (count == "") maximumRecords = 1000;
+  startRecord = offset;
+  if (offset == "") startRecord = 0;
   start = new Date();
   if (query == null || query == "") {
     return;
@@ -28,7 +34,7 @@ function search(search) {
   } else if (window.ActiveXObject) { // IE
     self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
   }
-  self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&maximumRecords=1000&nav=all&query=" + query, true);
+  self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&nav=all&maximumRecords=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
   self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {
