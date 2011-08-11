@@ -165,39 +165,46 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             init(url.hash(), snippetLine, source, null);
             return;
         }
-
-        Document document = loadDocument(loader, comp, queryhashes, cacheStrategy, url, reindexing, source);
-        if (document == null) {
-            if (this.error == null) {
-            	init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
-            }
-            return;
-        }
-
-        /* ===========================================================================
-         * COMPUTE SNIPPET
-         * =========================================================================== */
-        // we have found a parseable non-empty file: use the lines
-
-        // compute snippet from text
-        final Collection<StringBuilder> sentences = document.getSentences(pre);
-        if (sentences == null) {
-            init(url.hash(), null, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences");
-            return;
-        }
-        final SnippetExtractor tsr;
+        
         String textline = null;
         HandleSet remainingHashes = queryhashes;
-        try {
-            tsr = new SnippetExtractor(sentences, queryhashes, snippetMaxLength);
-            textline = tsr.getSnippet();
-            remainingHashes =  tsr.getRemainingWords();
-        } catch (final UnsupportedOperationException e) {
-            init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
-            return;
-        }
+        { //encapsulate potential expensive sentences
+	        final Collection<StringBuilder> sentences;
+	        { //encapsulate potential expensive document 
+		        final Document document = loadDocument(loader, comp, queryhashes, cacheStrategy, url, reindexing, source);
+		        if (document == null) {
+		            if (this.error == null) {
+		            	init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
+		            }
+		            return;
+		        }
+		
+		        /* ===========================================================================
+		         * COMPUTE SNIPPET
+		         * =========================================================================== */
+		        // we have found a parseable non-empty file: use the lines
+		
+		        // compute snippet from text
+		        sentences = document.getSentences(pre);
+		        document.close();
+	        } //encapsulate potential expensive document END
+	        
+	        if (sentences == null) {
+	            init(url.hash(), null, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences");
+	            return;
+	        }
+	        
+	        try {
+	        	final SnippetExtractor tsr = new SnippetExtractor(sentences, queryhashes, snippetMaxLength);
+	            textline = tsr.getSnippet();
+	            remainingHashes =  tsr.getRemainingWords();
+	        } catch (final UnsupportedOperationException e) {
+	            init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
+	            return;
+	        }
+        } //encapsulate potential expensive sentences END
 
-        // compute snippet from media
+        // compute snippet from media - attention document closed above!
         //String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
         //String videoline = computeMediaSnippet(document.getVideolinks(), queryhashes);
         //String appline = computeMediaSnippet(document.getApplinks(), queryhashes);
@@ -220,7 +227,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         // finally store this snippet in our own cache
         snippetsCache.put(wordhashes, urls, snippetLine);
 
-        document.close();
+//        document.close();
         init(url.hash(), snippetLine, source, null);
     }
     

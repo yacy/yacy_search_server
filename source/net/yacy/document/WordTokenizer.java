@@ -172,8 +172,7 @@ public class WordTokenizer implements Enumeration<String> {
      */
     public static SortedMap<byte[], Integer> hashSentence(final String sentence, final WordCache meaningLib) {
         final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-        Enumeration<String> words = null;
-        words = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), meaningLib);
+        final Enumeration<String> words = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), meaningLib);
         int pos = 0;
         String word;
         byte[] hash;
