@@ -56,7 +56,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
   <fieldset class="yacys">
   <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
   <input type="hidden" name="startRecord" value="#[startRecord]#" />
-  <input id="search" name="query" type="text" value="#[query]#" size="50" maxlength="80" />
+  <input id="search" name="query" type="text" value="#[query]#" size="50" maxlength="80" onFocus="this.select()" />
   #(allowrealtime)#
   <input id="Enter" type="submit" name="Enter" value="Search" />::
   #(/allowrealtime)#
