@@ -30,14 +30,6 @@
         };
       });
     </script>
-<script type="text/javascript">
-//<![CDATA[
-var q = "#[query]#";
-var s = "#[startRecord]#";
-var m = "#[maximumRecords]#";
-if (q != "") search(q, m, s);
-//]]>
-</script>
 #(topmenu)#
 #%env/templates/embeddedheader.template%#
 ::
@@ -91,7 +83,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 </div>
 <script type="text/javascript">
 //<![CDATA[
-document.getElementById("query").focus();
+var q = "#[query]#";
+var s = "#[startRecord]#";
+var m = "#[maximumRecords]#";
+if (q != "") search(q, m, s);
+document.getElementById("search").focus();
 //]]>
 </script>
 #%env/templates/footer.template%#

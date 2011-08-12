@@ -19,6 +19,8 @@ var modifier = "";
 var modifiertype = "";
 
 function search(search, count, offset) {
+  var navhtml = document.getElementById("searchnavigation");
+  if (navhtml != null) navhtml.innerHTML = "<div>loading...</div>";
   query = search;
   maximumRecords = count;
   if (count == "") maximumRecords = 1000;
@@ -51,6 +53,7 @@ function navget(list, name) {
 }
 
 function preparepage(str) {
+  document.getElementById("searchnavigation").innerHTML = "<div>parsing result...</div>";
   var raw = document.getElementById("raw");
   if (raw != null) raw.innerHTML = str;
   var rsp = eval("(" + str + ")");
@@ -69,11 +72,14 @@ function preparepage(str) {
 
 
   if (modifiertype == "png" || modifiertype == "gif" || modifiertype == "jpg") {
-    document.getElementById("searchresults").innerHTML = resultImages();
+    var tt = resultImages();
+    document.getElementById("searchresults").innerHTML = tt;
   } else {
-    document.getElementById("searchresults").innerHTML = resultList();
+    var tt = resultList();
+    document.getElementById("searchresults").innerHTML = tt;
   }
-  document.getElementById("searchnavigation").innerHTML = resultNavigation();
+  var tt = resultNavigation();
+  document.getElementById("searchnavigation").innerHTML = tt;
   document.getElementById("serverlist").innerHTML = "";
   hideDownloadScript();
 }
@@ -91,6 +97,7 @@ function hideDownloadScript() {
 
 function resultNavigation() {
   var html = "";
+  if (searchresult.length > totalResults) totalResults = searchresult.length;
   if (totalResults > 0) {
       html += "<div>" + searchresult.length + " results from a total of " + totalResults + " docs in index (not showing offline resources); search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds.&nbsp;";
       html += "<div id=\"downloadbutton\" style=\"inline\"></div></div>";
@@ -143,6 +150,7 @@ function resultNavigation() {
 function resultList() {
   var html = "";
   if (searchresult.length > 0) {
+    document.getElementById("searchnavigation").innerHTML = "<div>found " + searchresult.length + " documents, preparing table...</div>";
     html += "<table class=\"sortable\" id=\"sortable\" border=\"0\" cellpadding=\"0\" cellspacing=\"1\" width=\"99%\">";
     html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"10\">count</td><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"260\">Path</td><td width=\"360\">Name</td><td width=\"60\">Size</td><td width=\"75\">Date</td></tr>";
     for (var i = 0; i < searchresult.length; i++) { html += resultLine("row", searchresult[i], i + 1); }
@@ -153,6 +161,7 @@ function resultList() {
 
 function resultImages() {
   var html = "";
+  document.getElementById("searchnavigation").innerHTML = "<div>found " + searchresult.length + " images, preparing...</div>";
   for (var i = 0; i < searchresult.length; i++) { html += resultLine("image", searchresult[i]); }
   return html;
 }
