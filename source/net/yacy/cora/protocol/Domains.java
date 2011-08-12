@@ -522,7 +522,18 @@ public class Domains {
         }
         */
     }
-
+    
+    /**
+     * in case that the host name was resolved using a time-out request
+     * it can be nice to push that information to the name cache
+     * @param i the inet address
+     * @param host the known host name
+     */
+    public static void setHostName(final InetAddress i, String host) {
+        NAME_CACHE_HIT.insertIfAbsent(host, i);
+        cacheHit_Insert++;
+    }
+    
     public static InetAddress dnsResolve(String host) {
         if ((host == null) || (host.length() == 0)) return null;
         host = host.toLowerCase().trim();

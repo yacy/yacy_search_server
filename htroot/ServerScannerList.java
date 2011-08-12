@@ -42,8 +42,8 @@ public class ServerScannerList {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
 
-        prop.put("servertable_edit", post == null ? 0 : post.containsKey("edit") ? 1 : 0);
-        prop.put("servertable_list_edit", post == null ? 0 : post.containsKey("edit") ? 1 : 0);
+        boolean edit = post != null && post.containsKey("edit");
+        prop.put("servertable_edit", edit ? 1 : 0);
         prop.put("embedded", post == null ? 0 : post.containsKey("embedded") ? 1 : 0);
         prop.put("servertable", 0);
         
@@ -66,6 +66,7 @@ public class ServerScannerList {
                         try {
                             u = new DigestURI(host.getKey().url());
                             urlString = u.toNormalform(true, false);
+                            prop.put("servertable_list_" + i + "_edit", edit ? 1 : 0);
                             prop.put("servertable_list_" + i + "_edit_pk", ASCII.String(u.hash()));
                             prop.put("servertable_list_" + i + "_edit_count", i);
                             prop.putHTML("servertable_list_" + i + "_protocol", u.getProtocol());

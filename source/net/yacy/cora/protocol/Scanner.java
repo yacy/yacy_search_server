@@ -80,8 +80,22 @@ public class Scanner extends Thread {
             return this.inetAddress;
         }
         public String getHostName() {
-            if (this.hostname != null) return this.hostname;
-            this.hostname = Domains.getHostName(this.inetAddress);
+            if (this.hostname != null) {
+                if (this.hostname.equals(this.inetAddress.getHostAddress())) {
+                    // if the hostname was created in case of a time-out from TimoutRequest
+                    // then in rare cases we try to get that name again
+                    if ( (System.currentTimeMillis() / 1000) % 10 != 1) return this.hostname;
+                } else {
+                    return this.hostname;
+                }
+            }
+            try {
+                this.hostname = TimeoutRequest.getHostName(this.inetAddress, 100);
+                Domains.setHostName(this.inetAddress, this.hostname);
+            } catch (ExecutionException e) {
+                this.hostname = this.inetAddress.getHostAddress();
+            }
+            //this.hostname = Domains.getHostName(this.inetAddress);
             return this.hostname;
         }
         public MultiProtocolURI url() throws MalformedURLException {
