@@ -56,7 +56,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 #%env/templates/simpleheader.template%#
 #(/topmenu)#
 <div>
-<form class="search small" id="searchform" action="yacyinteractive.html" method="get" #(allowrealtime)#::onkeyup="xmlhttpPost(); return false;"::#(/allowrealtime)#>
+<form class="search small" id="searchform" action="yacyinteractive.html" method="get" #(allowrealtime)#onsubmit="document.getElementById('searchnavigation').innerHTML = '<div>loading...</div>'"::onkeyup="xmlhttpPost(); return false;"#(/allowrealtime)#>
   <h2>#[promoteSearchPageGreeting]#</h2>
   <div class="yacylogo">
     <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch"/></a>
