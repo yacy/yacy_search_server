@@ -54,6 +54,7 @@ public class yacyinteractive {
         prop.putHTML("maximumRecords", maximumRecords);
         prop.putHTML("querys", query.replaceAll(" ", "+"));
         prop.put("serverlist", query.length() == 0 ? 1 : 0);
+        prop.put("allowrealtime", sb.indexSegments.URLCount() < 100000 ? 1 : 0);
         return prop;
     }
 }
