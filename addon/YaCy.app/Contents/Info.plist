@@ -50,9 +50,9 @@
 			<string>$JAVAROOT/lib/commons-jxpath-1.3.jar</string>
 			<string>$JAVAROOT/lib/commons-logging-1.1.1.jar</string>
 			<string>$JAVAROOT/lib/fontbox-1.6.0.jar</string>
-			<string>$JAVAROOT/lib/httpclient-4.1.1.jar</string>
-			<string>$JAVAROOT/lib/httpcore-4.1.2.jar</string>
-			<string>$JAVAROOT/lib/httpmime-4.1.1.jar</string>
+			<string>$JAVAROOT/lib/httpclient-4.1.2.jar</string>
+			<string>$JAVAROOT/lib/httpcore-4.1.3.jar</string>
+			<string>$JAVAROOT/lib/httpmime-4.1.2.jar</string>
 			<string>$JAVAROOT/lib/icu4j-core.jar</string>
 			<string>$JAVAROOT/lib/J7Zip-modified.jar</string>
 			<string>$JAVAROOT/lib/jakarta-oro-2.0.8.jar</string>
