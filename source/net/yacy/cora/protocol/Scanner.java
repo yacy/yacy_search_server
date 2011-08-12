@@ -105,7 +105,7 @@ public class Scanner extends Thread {
         }
     }
     
-    private final static Map<Service, Access> scancache = new HashMap<Service, Access>();
+    private final static Map<Service, Access> scancache = new ConcurrentHashMap<Service, Access>();
     //private       static long scancacheUpdateTime = 0;
     //private       static long scancacheValidUntilTime = Long.MAX_VALUE;
     private       static Set<InetAddress> scancacheScanrange = new HashSet<InetAddress>();

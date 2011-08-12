@@ -74,6 +74,7 @@ function preparepage(str) {
     document.getElementById("searchresults").innerHTML = resultList();
   }
   document.getElementById("searchnavigation").innerHTML = resultNavigation();
+  document.getElementById("serverlist").innerHTML = "";
   hideDownloadScript();
 }
 

@@ -53,6 +53,7 @@ public class yacyinteractive {
         prop.putHTML("startRecord", startRecord);
         prop.putHTML("maximumRecords", maximumRecords);
         prop.putHTML("querys", query.replaceAll(" ", "+"));
+        prop.put("serverlist", query.length() == 0 ? 1 : 0);
         return prop;
     }
 }

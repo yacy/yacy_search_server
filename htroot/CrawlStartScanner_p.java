@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
@@ -57,7 +56,6 @@ public class CrawlStartScanner_p {
         SearchEventCache.cleanupEvents(true);
         
         prop.put("noserverdetected", 0);
-        prop.put("servertable", 0);
         prop.put("hosts", "");
         prop.put("intranet.checked", sb.isIntranetMode() ? 1 : 0);
 
@@ -186,7 +184,6 @@ public class CrawlStartScanner_p {
                     String urlString;
                     DigestURI u;
                     try {
-                        int i = 0;
                         final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
                         Map.Entry<Scanner.Service, Scanner.Access> host;
                         while (se.hasNext()) {
@@ -199,7 +196,6 @@ public class CrawlStartScanner_p {
                                     path += "&crawlingURL=" + urlString;
                                     WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8090), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), path, u.hash());
                                 }
-                                i++;
                             } catch (MalformedURLException e) {
                                 Log.logException(e);
                             }
@@ -210,49 +206,6 @@ public class CrawlStartScanner_p {
             }
         }
         
-        // write scan table
-        if (Scanner.scancacheSize() > 0) {
-            // make a comment cache
-            final Map<byte[], String> apiCommentCache = WorkTables.commentCache(sb);
-            
-            // show scancache table
-            prop.put("servertable", 1);
-            String urlString;
-            DigestURI u;
-            table: while (true) {
-                try {
-                    int i = 0;
-                    final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
-                    Map.Entry<Scanner.Service, Scanner.Access> host;
-                    while (se.hasNext()) {
-                        host = se.next();
-                        try {
-                            u = new DigestURI(host.getKey().url());
-                            urlString = u.toNormalform(true, false);
-                            prop.put("servertable_list_" + i + "_pk", ASCII.String(u.hash()));
-                            prop.put("servertable_list_" + i + "_count", i);
-                            prop.putHTML("servertable_list_" + i + "_protocol", u.getProtocol());
-                            prop.putHTML("servertable_list_" + i + "_ip", host.getKey().getInetAddress().getHostAddress());
-                            prop.putHTML("servertable_list_" + i + "_url", urlString);
-                            prop.put("servertable_list_" + i + "_accessUnknown", host.getValue() == Access.unknown ? 1 : 0);
-                            prop.put("servertable_list_" + i + "_accessEmpty", host.getValue() == Access.empty ? 1 : 0);
-                            prop.put("servertable_list_" + i + "_accessGranted", host.getValue() == Access.granted ? 1 : 0);
-                            prop.put("servertable_list_" + i + "_accessDenied", host.getValue() == Access.denied ? 1 : 0);
-                            prop.put("servertable_list_" + i + "_process", Scanner.inIndex(apiCommentCache, urlString) == null ? 0 : 1);
-                            prop.put("servertable_list_" + i + "_preselected", host.getValue() == Access.granted && Scanner.inIndex(apiCommentCache, urlString) == null ? 1 : 0);
-                            i++;
-                        } catch (MalformedURLException e) {
-                            Log.logException(e);
-                        }
-                    }
-                    prop.put("servertable_list", i);
-                    prop.put("servertable_num", i);
-                    break table;
-                } catch (ConcurrentModificationException e) {
-                    continue table;
-                }
-            }
-        }
         return prop;
     }
     
