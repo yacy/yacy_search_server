@@ -61,6 +61,7 @@ public class ReferenceIterator <ReferenceType extends Reference> extends LookAhe
         Map.Entry<byte[], byte[]> entry;
         while (this.blobs.hasNext()) {
             entry = this.blobs.next();
+            if (entry == null) break;
             try {
                 row = RowSet.importRowSet(entry.getValue(), this.factory.getRow());
                 if (row == null) {
