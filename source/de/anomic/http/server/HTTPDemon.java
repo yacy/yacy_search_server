@@ -816,15 +816,15 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
         
         // check if we have enough memory
-        if (!MemoryControl.request(request.getContentLength() * 3, false)) {
+        if (!MemoryControl.request(request.getContentLength() * 3 + 10*1024*1024, false)) {
         	throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
         }
 
         // parse data in memory
-        final FileUpload upload = new FileUpload(DISK_FILE_ITEM_FACTORY);
         final List<FileItem> items;
 
         try {
+            final FileUpload upload = new FileUpload(DISK_FILE_ITEM_FACTORY);
             items = upload.parseRequest(request);
         } catch (FileUploadException e) {
             throw new IOException("FileUploadException " + e.getMessage());
