@@ -49,6 +49,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.HeaderFramework;
 
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -177,8 +178,16 @@ public class HTTPClient {
 		HttpConnectionParams.setTcpNoDelay(httpParams, false);
 		// Defines whether the socket can be bound even though a previous connection is still in a timeout state.
 		HttpConnectionParams.setSoReuseaddr(httpParams, true);
+		
+		/**
+		 * HTTP client settings
+		 */
+		// ignore cookies, cause this may cause segfaults in default cookiestore and is not needed
+		HttpClientParams.setCookiePolicy(httpParams, CookiePolicy.IGNORE_COOKIES);
 
 		httpClient = new DefaultHttpClient(clientConnectionManager, httpParams);
+		// disable the cookiestore, cause this may cause segfaults and is not needed
+		((DefaultHttpClient) httpClient).setCookieStore(null);
 		// ask for gzip
 		((AbstractHttpClient) httpClient).addRequestInterceptor(new GzipRequestInterceptor());
 		// uncompress gzip
