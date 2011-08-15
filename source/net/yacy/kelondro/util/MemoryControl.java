@@ -8,7 +8,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -32,10 +32,10 @@ import net.yacy.kelondro.logging.Log;
  */
 public class MemoryControl {
 
-	
+
     private static final Runtime runtime = Runtime.getRuntime();
 	private static final Log log = new Log("MEMORY");
-    
+
     private static final long[] gcs = new long[5];
     private static int gcs_pos = 0;
     private static long lastGC = 0l;
@@ -61,18 +61,18 @@ public class MemoryControl {
             final long after = free();
             gcs[gcs_pos++] = after - before;
             if (gcs_pos >= gcs.length) gcs_pos = 0;
-            
+
             if (log.isFine()) log.logInfo("[gc] before: " + Formatter.bytesToString(before) +
                                               ", after: " + Formatter.bytesToString(after) +
                                               ", freed: " + Formatter.bytesToString(after - before) +
                                               ", rt: " + (lastGC - start) + " ms, call: " + info);
             return true;
         }
-        
+
         if (log.isFinest()) log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
         return false;
     }
-    
+
     /**
      * This method calculates the average amount of bytes freed by the last GCs forced by this class
      * @return the average amount of freed bytes of the last forced GCs or <code>0</code> if no
@@ -81,9 +81,9 @@ public class MemoryControl {
     public static long getAverageGCFree() {
         long x = 0;
         int y = 0;
-        for (int i=0; i<gcs.length; i++)
-            if (gcs[i] != 0) {
-                x += gcs[i];
+        for (final long gc : gcs)
+            if (gc != 0) {
+                x += gc;
                 y++;
             }
         return (y == 0) ? 0 : x / y;
@@ -96,7 +96,7 @@ public class MemoryControl {
     public static final long free() {
         return runtime.freeMemory();
     }
-    
+
     /**
      * memory that is available including increasing total memory up to maximum
      * @return bytes
@@ -104,7 +104,7 @@ public class MemoryControl {
     public static final long available() {
         return maxMemory() - total() + free();
     }
-    
+
     /**
 	 * maximum memory the Java virtual will allocate machine; may vary over time in some cases
 	 * @return bytes
@@ -137,13 +137,14 @@ public class MemoryControl {
      *   performed by this method, if the currently available memory doesn't suffice!
      * </p>
      * <p><em>Be careful with this method as GCs should always be the last measure to take</em></p>
-     * 
+     *
      * @param size the requested amount of free memory in bytes
      * @param force specifies whether a GC should be run even in case former GCs didn't provide enough memory
      * @return whether enough memory could be freed (or is free) or not
      */
     public static boolean request(final long size, final boolean force) {
-        boolean r = request0(size, force);
+        if (size <= 0) return true;
+        final boolean r = request0(size, force);
         shortStatus = !r;
         return r;
     }
@@ -155,12 +156,12 @@ public class MemoryControl {
         if (log.isFine()) {
             final String t = new Throwable("Stack trace").getStackTrace()[1].toString();
             log.logFine(t + " requested " + (size >> 10) + " KB, got " + (avail >> 10) + " KB");
-        } 
+        }
         if (force || avg == 0 || avg + avail >= size) {
             // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
-            
+
             final long memBefore = avail;
-            boolean performedGC = gc(10000, "serverMemory.runGC(...)");
+            final boolean performedGC = gc(10000, "serverMemory.runGC(...)");
             avail = available();
             if (performedGC) {
                 final long freed = avail - memBefore;
@@ -176,12 +177,12 @@ public class MemoryControl {
             return false;
         }
     }
-    
+
     public static boolean shortStatus() {
         //if (shortStatus) System.out.println("**** SHORT MEMORY ****");
         return shortStatus;
     }
-    
+
     /**
      * memory that is currently bound in objects
      * @return used bytes
@@ -189,16 +190,16 @@ public class MemoryControl {
     public static long used() {
         return total() - free();
     }
-        
+
     public static boolean getDHTallowed() {
     	return allowDHT;
     }
-    
+
     public static void setDHTallowed() {
     	allowDHT = true;
     	DHTtresholdCount = 0;
     }
-    
+
     /**
      * set the memory to be available
      */
@@ -206,7 +207,7 @@ public class MemoryControl {
     	DHTMbyte = mbyte;
     	DHTtresholdCount = 0;
     }
-    
+
     private static void checkDHTrule(final long available) {
     	// disable dht if memory is less than treshold - 4 times, maximum 11 minutes between each detection
     	if ((available >> 20) < DHTMbyte) {
@@ -216,9 +217,9 @@ public class MemoryControl {
     			if(DHTtresholdCount > 3 /* occurencies - 1 */) allowDHT = false;
     		}
     		else DHTtresholdCount = 1;
-    		
+
     		prevDHTtreshold = t;
-    		
+
 			log.logInfo("checkDHTrule: below treshold; tresholdCount: " + DHTtresholdCount + "; allowDHT: " + allowDHT);
     	}
     	else if (!allowDHT && (available >> 20) > (DHTMbyte * 2L)) // we were wrong!
@@ -239,15 +240,15 @@ public class MemoryControl {
         	if (request(mb, false))
         	{
 	            x[i] = new byte[mb];
-	            System.out.println("used = " + i + " / " + (used() /mb) + 
+	            System.out.println("used = " + i + " / " + (used() /mb) +
 	                    ", total = " + (total() / mb) +
 	                    ", free = " + (free() / mb) +
 	                    ", max = " + (maxMemory() / mb) +
-	                    ", avail = " + (available() / mb) + 
+	                    ", avail = " + (available() / mb) +
 	                    ", averageGC = " + getAverageGCFree());
         	}
         }
 
     }
-    
+
 }
