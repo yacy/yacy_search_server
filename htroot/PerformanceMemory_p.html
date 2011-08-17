@@ -20,7 +20,10 @@
     
     <p><img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph"/></p>
     <form id="optionreloadGraph" action="" method="get"><p><input type="checkbox" name="option" id="autoreload"/> <label for="autoreload">refresh graph</label></p></form>
-	    
+	<form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<p><input type="checkbox" name="simulatedshortmemory" onclick = 'this.form.submit()' #(simulatedshortmemory.checked)#:: checked="checked"#(/simulatedshortmemory.checked)#/>simulate short memory status</label></p>
+	</form>
+    
     <p><strong>Memory Usage:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">

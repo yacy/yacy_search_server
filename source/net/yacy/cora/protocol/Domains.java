@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
+import net.yacy.kelondro.util.MemoryControl;
 
 public class Domains {
 
@@ -522,18 +523,18 @@ public class Domains {
         }
         */
     }
-    
+
     /**
      * in case that the host name was resolved using a time-out request
      * it can be nice to push that information to the name cache
      * @param i the inet address
      * @param host the known host name
      */
-    public static void setHostName(final InetAddress i, String host) {
+    public static void setHostName(final InetAddress i, final String host) {
         NAME_CACHE_HIT.insertIfAbsent(host, i);
         cacheHit_Insert++;
     }
-    
+
     public static InetAddress dnsResolve(String host) {
         if ((host == null) || (host.length() == 0)) return null;
         host = host.toLowerCase().trim();
@@ -610,7 +611,14 @@ public class Domains {
                 if (localp) {
                     localHostNames.add(host);
                 } else {
-                    if (globalHosts != null) try {globalHosts.add(host);} catch (final IOException e) {}
+                    if (globalHosts != null) try {
+                        if (MemoryControl.shortStatus()) {
+                            globalHosts.close();
+                            globalHosts = null;
+                        } else {
+                            globalHosts.add(host);
+                        }
+                    } catch (final IOException e) {}
                 }
             }
             //LOOKUP_SYNC.remove(host);

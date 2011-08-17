@@ -62,7 +62,10 @@ public class PerformanceMemory_p {
                 System.gc();
                 prop.put("gc", "1");
             }
+            MemoryControl.setSimulatedShortStatus(post.containsKey("simulatedshortmemory"));
         }
+
+        prop.put("simulatedshortmemory.checked", MemoryControl.getSimulatedShortStatus() ? 1 : 0);
 
         final long memoryFreeNow = MemoryControl.free();
         final long memoryFreeAfterInitBGC = env.getConfigLong("memoryFreeAfterInitBGC", 0L);

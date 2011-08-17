@@ -43,7 +43,7 @@ public class MemoryControl {
     private static long prevDHTtreshold = 0L;
     private static int DHTtresholdCount = 0;
     private static boolean allowDHT = true;
-    private static boolean shortStatus = false;
+    private static boolean shortStatus = false, simulatedShortStatus = false;
 
     /**
      * Runs the garbage collector if last garbage collection is more than last millis ago
@@ -178,9 +178,25 @@ public class MemoryControl {
         }
     }
 
+    /**
+     * the simulated short status can be set to find out if the short status has effects to the system
+     * @param status
+     */
+    public static void setSimulatedShortStatus(final boolean status) {
+        simulatedShortStatus = status;
+    }
+
+    /**
+     * the simulated short status can be retrieved to show that option in online interfaces
+     * @return
+     */
+    public static boolean getSimulatedShortStatus() {
+        return simulatedShortStatus;
+    }
+
     public static boolean shortStatus() {
         //if (shortStatus) System.out.println("**** SHORT MEMORY ****");
-        return shortStatus;
+        return simulatedShortStatus || shortStatus;
     }
 
     /**

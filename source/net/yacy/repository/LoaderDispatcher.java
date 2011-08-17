@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -78,7 +77,7 @@ public final class LoaderDispatcher {
     private final FTPLoader ftpLoader;
     private final SMBLoader smbLoader;
     private final FileLoader fileLoader;
-    private final HashMap<String, Semaphore> loaderSteering; // a map that delivers a 'finish' semaphore for urls
+    private final ConcurrentHashMap<String, Semaphore> loaderSteering; // a map that delivers a 'finish' semaphore for urls
     private final Log log;
 
     public LoaderDispatcher(final Switchboard sb) {
@@ -91,7 +90,7 @@ public final class LoaderDispatcher {
         this.ftpLoader = new FTPLoader(sb, this.log);
         this.smbLoader = new SMBLoader(sb, this.log);
         this.fileLoader = new FileLoader(sb, this.log);
-        this.loaderSteering = new HashMap<String, Semaphore>();
+        this.loaderSteering = new ConcurrentHashMap<String, Semaphore>();
     }
 
     public boolean isSupportedProtocol(final String protocol) {
