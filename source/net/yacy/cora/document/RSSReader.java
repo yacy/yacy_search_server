@@ -23,13 +23,17 @@ package net.yacy.cora.document;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 
@@ -60,6 +64,14 @@ public class RSSReader extends DefaultHandler {
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
             final SAXParser saxParser = factory.newSAXParser();
+            // do not look at external dtd - see: http://www.ibm.com/developerworks/xml/library/x-tipcfsx/index.html
+            ((XMLReader)saxParser).setEntityResolver(new EntityResolver() {
+				@Override
+				public InputSource resolveEntity(final String arg0, final String arg1)
+						throws SAXException, IOException {
+					return new InputSource(new StringReader(""));
+				}
+            });
             saxParser.parse(stream, this);
         } catch (SAXException e) {
             throw new IOException (e.getMessage());
