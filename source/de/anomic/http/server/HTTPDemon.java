@@ -816,7 +816,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
 
         // check if we have enough memory
-        if (request.getContentLength() > 0 && !MemoryControl.request(request.getContentLength() * 3, false)) {
+        if (!MemoryControl.request(request.getContentLength() * 3, false)) {
         	throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
         }
 
