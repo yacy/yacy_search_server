@@ -63,15 +63,18 @@ public class PerformanceMemory_p {
                 prop.put("gc", "1");
             }
             MemoryControl.setSimulatedShortStatus(post.containsKey("simulatedshortmemory"));
+            final boolean std = post.containsKey("useStandardmemoryStrategy");
+            env.setConfig("memory.standardStrategy", std);
+            MemoryControl.setStandardStrategy(std);
         }
 
         prop.put("simulatedshortmemory.checked", MemoryControl.getSimulatedShortStatus() ? 1 : 0);
+        prop.put("useStandardmemoryStrategy.checked", env.getConfigBool("memory.standardStrategy", true) ? 1 : 0);
+        prop.put("memoryStrategy", MemoryControl.getStrategyName());
 
-        final long memoryFreeNow = MemoryControl.free();
         final long memoryFreeAfterInitBGC = env.getConfigLong("memoryFreeAfterInitBGC", 0L);
         final long memoryFreeAfterInitAGC = env.getConfigLong("memoryFreeAfterInitAGC", 0L);
         final long memoryFreeAfterStartup = env.getConfigLong("memoryFreeAfterStartup", 0L);
-        final long memoryTotalNow = MemoryControl.total();
         final long memoryTotalAfterInitBGC = env.getConfigLong("memoryTotalAfterInitBGC", 0L);
         final long memoryTotalAfterInitAGC = env.getConfigLong("memoryTotalAfterInitAGC", 0L);
         final long memoryTotalAfterStartup = env.getConfigLong("memoryTotalAfterStartup", 0L);
@@ -80,19 +83,19 @@ public class PerformanceMemory_p {
         prop.putNum("memoryAvailAfterStartup", (MemoryControl.maxMemory() - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
         prop.putNum("memoryAvailAfterInitBGC", (MemoryControl.maxMemory() - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / MB);
         prop.putNum("memoryAvailAfterInitAGC", (MemoryControl.maxMemory() - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / MB);
-        prop.putNum("memoryAvailNow", (MemoryControl.maxMemory() - memoryTotalNow + memoryFreeNow) / MB);
+        prop.putNum("memoryAvailNow", MemoryControl.available() / MB);
         prop.putNum("memoryTotalAfterStartup", memoryTotalAfterStartup / KB);
         prop.putNum("memoryTotalAfterInitBGC", memoryTotalAfterInitBGC / KB);
         prop.putNum("memoryTotalAfterInitAGC", memoryTotalAfterInitAGC / KB);
-        prop.putNum("memoryTotalNow", memoryTotalNow / MB);
+        prop.putNum("memoryTotalNow", MemoryControl.total() / MB);
         prop.putNum("memoryFreeAfterStartup", memoryFreeAfterStartup / KB);
         prop.putNum("memoryFreeAfterInitBGC", memoryFreeAfterInitBGC / KB);
         prop.putNum("memoryFreeAfterInitAGC", memoryFreeAfterInitAGC / KB);
-        prop.putNum("memoryFreeNow", memoryFreeNow / MB);
+        prop.putNum("memoryFreeNow", MemoryControl.free() / MB);
         prop.putNum("memoryUsedAfterStartup", (memoryTotalAfterStartup - memoryFreeAfterStartup) / KB);
         prop.putNum("memoryUsedAfterInitBGC", (memoryTotalAfterInitBGC - memoryFreeAfterInitBGC) / KB);
         prop.putNum("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / KB);
-        prop.putNum("memoryUsedNow", (memoryTotalNow - memoryFreeNow) / MB);
+        prop.putNum("memoryUsedNow", MemoryControl.used() / MB);
 
         // write table for Table index sizes
         Iterator<String> i = Table.filenames();

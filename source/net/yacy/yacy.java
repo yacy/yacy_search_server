@@ -209,6 +209,9 @@ public final class yacy {
             }
             sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), newconf);
             //sbSync.V(); // signal that the sb reference was set
+            
+            // switch the memory strategy
+            MemoryControl.setStandardStrategy(sb.getConfigBool("memory.standardStrategy", true));
 
             // save information about available memory at startup time
             sb.setConfig("memoryFreeAfterStartup", startupMemFree);

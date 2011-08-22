@@ -101,7 +101,7 @@ public class PerformanceQueues_p {
             	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, post.getInt("memoryAcceptDHT", 50));
             }
             if(post.containsKey("resetObserver")) {
-            	MemoryControl.setDHTallowed();
+            	MemoryControl.resetProperState();
             }
         }
         final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : FileUtils.loadMap(defaultSettingsFile);
@@ -350,7 +350,7 @@ public class PerformanceQueues_p {
         final long diskFree = sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000L);
         final long diskFreeHardlimit = sb.getConfigLong(SwitchboardConstants.DISK_FREE_HARDLIMIT, 1000L);
         final long memoryAcceptDHT = sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 50000L);
-        final boolean observerTrigger = !MemoryControl.getDHTallowed();
+        final boolean observerTrigger = !MemoryControl.properState();
         prop.put("diskFree", diskFree);
         prop.put("diskFreeHardlimit", diskFreeHardlimit);
         prop.put("memoryAcceptDHT", memoryAcceptDHT);

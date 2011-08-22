@@ -62,7 +62,7 @@ public class ResourceObserver {
      * checks the resources and pauses crawls if necessary
      */
     public void resourceObserverJob() {
-    	MemoryControl.setDHTMbyte(getMinFreeMemory());
+    	MemoryControl.setProperMbyte(getMinFreeMemory());
 
     	normalizedDiskFree = getNormalizedDiskFree();
     	normalizedMemoryFree = getNormalizedMemoryFree();
@@ -124,7 +124,7 @@ public class ResourceObserver {
     }
     
     private Space getNormalizedMemoryFree() {
-    	if(!MemoryControl.getDHTallowed()) return Space.LOW;
+    	if(!MemoryControl.properState()) return Space.LOW;
         return Space.HIGH;
     }
     
