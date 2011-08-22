@@ -35,9 +35,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.storage.ConcurrentScoreMap;
-import net.yacy.cora.storage.ClusteredScoreMap;
-import net.yacy.cora.storage.ScoreMap;
+import net.yacy.cora.ranking.ClusteredScoreMap;
+import net.yacy.cora.ranking.ConcurrentScoreMap;
+import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;

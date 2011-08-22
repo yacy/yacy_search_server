@@ -26,7 +26,6 @@ package net.yacy.cora.ranking;
 
 import java.util.Comparator;
 
-import net.yacy.cora.storage.ScoreMap;
 
 public class ScoreComparator<E extends Comparable<E>> implements Comparator<E>
 {

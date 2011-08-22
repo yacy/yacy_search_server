@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.storage.ScoreMap;
+import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;

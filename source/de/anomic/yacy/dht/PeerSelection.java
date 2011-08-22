@@ -35,8 +35,8 @@ import java.util.SortedMap;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.storage.ConcurrentScoreMap;
-import net.yacy.cora.storage.ScoreMap;
+import net.yacy.cora.ranking.ConcurrentScoreMap;
+import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;

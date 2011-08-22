@@ -36,7 +36,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 
-import net.yacy.cora.storage.OrderedScoreMap;
+import net.yacy.cora.ranking.OrderedScoreMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 

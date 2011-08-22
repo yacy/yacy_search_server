@@ -33,8 +33,8 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
-import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;

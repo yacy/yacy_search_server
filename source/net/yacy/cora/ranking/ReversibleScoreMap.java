@@ -22,7 +22,8 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.storage;
+package net.yacy.cora.ranking;
+
 
 public interface ReversibleScoreMap<E> extends ScoreMap<E> {
 

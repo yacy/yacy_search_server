@@ -34,8 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.storage.ClusteredScoreMap;
-import net.yacy.cora.storage.ScoreMap;
+import net.yacy.cora.ranking.ClusteredScoreMap;
+import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;

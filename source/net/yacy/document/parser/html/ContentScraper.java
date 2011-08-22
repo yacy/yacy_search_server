@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 import javax.swing.event.EventListenerList;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.storage.ClusteredScoreMap;
+import net.yacy.cora.ranking.ClusteredScoreMap;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.Evaluation.Element;

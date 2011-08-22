@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.storage;
+package net.yacy.cora.ranking;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +34,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.storage.OutOfLimitsException;
 
 public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements ReversibleScoreMap<E> {
     
