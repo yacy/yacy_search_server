@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
@@ -43,7 +44,7 @@ import net.yacy.cora.document.UTF8;
  * which is done by extending the file with just another line.
  * When is key list file is initialized, all lines are read and pushed into a java set
  */
-public class KeyList {
+public class KeyList implements Iterable<String> {
 
     private static final Object _obj = new Object();
 
@@ -107,6 +108,11 @@ public class KeyList {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+        return this.keys.keySet().iterator();
     }
 
 }
