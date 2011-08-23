@@ -23,7 +23,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.storage;
+package net.yacy.cora.ranking;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -22,12 +22,13 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.storage;
+package net.yacy.cora.sorting;
 
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
 
 
 /**

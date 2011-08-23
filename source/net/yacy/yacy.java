@@ -52,7 +52,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.ranking.OrderedScoreMap;
 import net.yacy.cora.ranking.ScoreMap;
-import net.yacy.cora.storage.Array;
+import net.yacy.cora.sorting.Array;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.kelondro.blob.MapDataMining;

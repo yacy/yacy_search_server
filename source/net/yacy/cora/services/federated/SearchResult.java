@@ -26,7 +26,7 @@
 
 package net.yacy.cora.services.federated;
 
-import net.yacy.cora.storage.WeakPriorityBlockingQueue;
+import net.yacy.cora.ranking.WeakPriorityBlockingQueue;
 
 public class SearchResult extends WeakPriorityBlockingQueue<Object> {
 

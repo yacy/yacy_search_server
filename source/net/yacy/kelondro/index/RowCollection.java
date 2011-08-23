@@ -34,8 +34,8 @@ import java.util.concurrent.Callable;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.storage.Array;
-import net.yacy.cora.storage.Sortable;
+import net.yacy.cora.sorting.Array;
+import net.yacy.cora.sorting.Sortable;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -618,7 +618,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         if (this.sortBound == this.chunkcount) return; // this is sorted
         synchronized (this) {
             if (this.sortBound == this.chunkcount) return; // check again
-            net.yacy.cora.storage.Array.sort(this);
+            net.yacy.cora.sorting.Array.sort(this);
             this.sortBound = this.chunkcount;
         }
     }
