@@ -457,7 +457,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             this.ram.references(starttermHash, rot),
             new MergeIterator<ReferenceContainer<ReferenceType>>(
                 this.ram.references(starttermHash, false),
-                this.array.wordContainerIterator(starttermHash, false),
+                this.array.referenceContainerIterator(starttermHash, false),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,
                 true),
@@ -474,7 +474,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
         return new MergeIterator<ReferenceContainer<ReferenceType>>(
                 this.ram.references(startTermHash, false),
-                this.array.wordContainerIterator(startTermHash, false),
+                this.array.referenceContainerIterator(startTermHash, false),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,
                 true);

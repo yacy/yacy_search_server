@@ -113,20 +113,16 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * objects in the cache.
      * @throws IOException 
      */
-    public CloneableIterator<ReferenceContainer<ReferenceType>> wordContainerIterator(final byte[] startWordHash, final boolean rot) {
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startWordHash, final boolean rot) {
         try {
-            return new heapCacheIterator(startWordHash, rot);
+            return new ReferenceContainerIterator(startWordHash, rot);
         } catch (IOException e) {
             Log.logException(e);
             return null;
         }
     }
 
-    /**
-     * cache iterator: iterates objects within the heap cache. This can only be used
-     * for write-enabled heaps, read-only heaps do not have a heap cache
-     */
-    public class heapCacheIterator implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
+    public class ReferenceContainerIterator implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
@@ -136,15 +132,15 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         private final boolean rot;
         protected CloneableIterator<byte[]> iterator;
         
-        public heapCacheIterator(final byte[] startWordHash, final boolean rot) throws IOException {
+        public ReferenceContainerIterator(final byte[] startWordHash, final boolean rot) throws IOException {
             this.rot = rot;
             this.iterator = array.keys(true, startWordHash);
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
         
-        public heapCacheIterator clone(final Object secondWordHash) {
+        public ReferenceContainerIterator clone(final Object secondWordHash) {
             try {
-				return new heapCacheIterator((byte[]) secondWordHash, rot);
+				return new ReferenceContainerIterator((byte[]) secondWordHash, rot);
 			} catch (IOException e) {
 			    Log.logException(e);
 				return null;
