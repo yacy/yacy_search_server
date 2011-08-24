@@ -150,7 +150,7 @@ public class ResultFetcher {
             if (this.result.sizeAvailable() + this.rankingProcess.sizeQueue() <= item  && !anyWorkerAlive() && this.rankingProcess.feedingIsFinished()) break;
             try {entry = this.result.element(item, 50);} catch (final InterruptedException e) {break;}
             if (entry != null) break;
-            if (!anyWorkerAlive() && this.rankingProcess.sizeQueue() == 0 && this.rankingProcess.feedingIsFinished()) break;
+            //if (!anyWorkerAlive() && this.rankingProcess.sizeQueue() == 0 && this.rankingProcess.feedingIsFinished()) break;
         }
 
         // finally, if there is something, return the result
@@ -347,7 +347,7 @@ public class ResultFetcher {
                 int loops = 0;
                 while (this.shallrun && System.currentTimeMillis() < this.timeout) {
                     this.lastLifeSign = System.currentTimeMillis();
-                    
+
                     if (MemoryControl.shortStatus()) {
                     	break;
                     }
