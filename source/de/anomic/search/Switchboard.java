@@ -2216,7 +2216,7 @@ public final class Switchboard extends serverSwitch {
             @Override
             public void run() {
                 try {
-                    final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, Integer.MAX_VALUE, true);
+                    final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, true);
                     if (response == null) {
                         throw new IOException("response == null");
                     }
@@ -2610,7 +2610,7 @@ public final class Switchboard extends serverSwitch {
                 // if we have an url then try to load the rss
                 RSSReader rss = null;
                 try {
-                    final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, true);
+                    final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, true);
                     final byte[] resource = (response == null) ? null : response.getContent();
                     //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);

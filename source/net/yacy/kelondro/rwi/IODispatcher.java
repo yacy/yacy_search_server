@@ -170,7 +170,7 @@ public class IODispatcher extends Thread {
                 }
 
                 // otherwise do a merge operation
-                if (!this.mergeQueue.isEmpty()) {
+                if (!this.mergeQueue.isEmpty() && !MemoryControl.shortStatus()) {
                 	File f = null, f1 = null, f2 = null;
                     try {
                         mergeJob = this.mergeQueue.take();

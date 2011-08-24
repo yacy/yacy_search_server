@@ -266,7 +266,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 return null;
             } else {
                 // try to load the resource from the cache
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), noCacheUsage ? CacheStrategy.NOCACHE : cacheStrategy, Integer.MAX_VALUE, true);
+            	response = loader == null ? null : loader.load(loader.request(url, true, reindexing), noCacheUsage ? CacheStrategy.NOCACHE : cacheStrategy, true);
                 if (response == null) {
                     // in case that we did not get any result we can still return a success when we are not allowed to go online
                     if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {

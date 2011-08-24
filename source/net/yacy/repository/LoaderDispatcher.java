@@ -147,6 +147,10 @@ public final class LoaderDispatcher {
         FileUtils.copy(b, tmp);
         tmp.renameTo(targetFile);
     }
+    
+    public Response load(final Request request, final CacheStrategy cacheStrategy, final boolean checkBlacklist) throws IOException {
+    	return load(request, cacheStrategy, protocolMaxFileSize(request.url()), checkBlacklist);
+    }
 
     public Response load(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, final boolean checkBlacklist) throws IOException {
         final String url = request.url().toNormalform(true, false);
@@ -290,6 +294,16 @@ public final class LoaderDispatcher {
 
         throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
     }
+    
+    private int protocolMaxFileSize(final DigestURI url) {
+    	if (url.isHTTP() || url.isHTTPS())
+    		return this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
+    	if (url.isFTP())
+    		return this.sb.getConfigInt("crawler.ftp.maxFileSize", (int) FTPLoader.DEFAULT_MAXFILESIZE);
+    	if (url.isSMB())
+    		return this.sb.getConfigInt("crawler.smb.maxFileSize", (int) SMBLoader.DEFAULT_MAXFILESIZE);
+    	return Integer.MAX_VALUE;
+    }
 
     /**
      * load the url as byte[] content from the web or the cache
@@ -301,8 +315,7 @@ public final class LoaderDispatcher {
      */
     public byte[] loadContent(final Request request, final CacheStrategy cacheStrategy) throws IOException {
         // try to download the resource using the loader
-        final int maxFileSize = this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-        final Response entry = load(request, cacheStrategy, maxFileSize, false);
+        final Response entry = load(request, cacheStrategy, false);
         if (entry == null) return null; // not found in web
 
         // read resource body (if it is there)
@@ -325,8 +338,7 @@ public final class LoaderDispatcher {
 
     public ContentScraper parseResource(final DigestURI location, final CacheStrategy cachePolicy) throws IOException {
         // load page
-        final int maxFileSize = this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-        final Response r = this.load(request(location, true, false), cachePolicy, maxFileSize, false);
+        final Response r = this.load(request(location, true, false), cachePolicy, false);
         final byte[] page = (r == null) ? null : r.getContent();
         if (page == null) throw new IOException("no response from url " + location.toString());
 

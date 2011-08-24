@@ -48,7 +48,6 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
 import de.anomic.crawler.NoticedURL.StackType;
 import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.search.Segments;
@@ -595,9 +594,8 @@ public class CrawlQueues {
                     // returns null if everything went fine, a fail reason string if a problem occurred
                     try {
                         this.request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
-                        final int maxFileSize = CrawlQueues.this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
                         final CrawlProfile e = CrawlQueues.this.sb.crawler.getActive(UTF8.getBytes(this.request.profileHandle()));
-                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), maxFileSize, true);
+                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), true);
                         if (response == null) {
                             this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (CrawlQueues.this.log.isFine()) CrawlQueues.this.log.logFine("problem loading " + this.request.url().toString() + ": no content (possibly caused by cache policy)");
