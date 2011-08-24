@@ -618,6 +618,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         if (this.sortBound == this.chunkcount) return; // this is sorted
         synchronized (this) {
             if (this.sortBound == this.chunkcount) return; // check again
+            //Log.logInfo("RowCollection.sort()", "sorting array of size " + this.chunkcount + ", sortBound = " + this.sortBound);
             net.yacy.cora.sorting.Array.sort(this);
             this.sortBound = this.chunkcount;
         }
@@ -839,7 +840,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         return c;
     }
 
-    protected synchronized int compare(final byte[] a, final int astart, final int chunknumber) {
+    protected int compare(final byte[] a, final int astart, final int chunknumber) {
         assert (chunknumber < this.chunkcount);
         assert a.length - astart >= this.rowdef.primaryKeyLength;
         final int len = Math.min(a.length - astart, this.rowdef.primaryKeyLength);
@@ -863,13 +864,14 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         return true;
     }
 
-    protected synchronized boolean match(final byte[] a, int astart, final int chunknumber) {
+    protected boolean match(final byte[] a, int astart, final int chunknumber) {
         if (chunknumber >= this.chunkcount) return false;
-        int p = chunknumber * this.rowdef.objectsize;
         assert a.length - astart >= this.rowdef.primaryKeyLength;
-        int len = Math.min(a.length - astart, this.rowdef.primaryKeyLength);
-        while (len-- != 0) {
-            if (a[astart++] != this.chunkcache[p++]) return false;
+        for (int p = chunknumber * this.rowdef.objectsize,
+             len = Math.min(a.length - astart, this.rowdef.primaryKeyLength);
+             len != 0;
+             len--, astart++, p++) {
+            if (a[astart] != this.chunkcache[p]) return false;
         }
         return true;
     }

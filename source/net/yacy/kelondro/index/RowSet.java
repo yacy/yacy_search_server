@@ -42,7 +42,7 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> {
 
-    private static final int collectionReSortLimit = 300;
+    private static final int collectionReSortLimit = 3000;
 
     public RowSet(final RowSet rs) {
         super(rs);
@@ -157,10 +157,6 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
     public final boolean put(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
         assert (entry.getPrimaryKeyBytes() != null);
-        // when reaching a specific amount of un-sorted entries, re-sort all
-        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
-            sort();
-        }
         synchronized (this) {
             assert entry.bytes().length >= this.rowdef.primaryKeyLength;
             final int index = find(entry.bytes(), 0);
@@ -576,70 +572,38 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         d.trim();
         System.out.println("TRIM          : " + d.toString());
 
-
-        /*
         // second test
-        c = new kelondroRowSet(new kelondroRow(new int[]{10, 3}));
-        c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        Random rand = new Random(0);
+        final Row row = new Row("byte[] key-10, Cardinal x-3 {b256}", NaturalOrder.naturalOrder);
+        RowSet c = new RowSet(row);
+        final Random rand = new Random(0);
         long start = System.currentTimeMillis();
-        long t, d = 0;
+        long t;
         String w;
-        for (long k = 0; k < 60000; k++) {
+        for (long k = 1; k <= 60000; k++) {
             t = System.currentTimeMillis();
             w = "a" + Long.toString(rand.nextLong());
-            c.add(w.getBytes());
+            try {
+                c.put(row.newEntry(new byte[][]{w.getBytes(), "000".getBytes()}));
+                //c.add(w.getBytes());
+            } catch (final RowSpaceExceededException e) {
+                e.printStackTrace();
+            }
             if (k % 10000 == 0)
                 System.out.println("added " + k + " entries in " +
                     ((t - start) / 1000) + " seconds, " +
                     (((t - start) > 1000) ? (k / ((t - start) / 1000)) : k) +
                     " entries/second, size = " + c.size());
         }
-        System.out.println("bevore sort: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-        c.shape();
-        System.out.println("after sort: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+        System.out.println("bevore sort: " + (System.currentTimeMillis() - start) + " milliseconds, size: " + c.size());
+        c.sort();
+        System.out.println("after sort: " + (System.currentTimeMillis() - start) + " milliseconds, size: " + c.size());
         c.uniq();
-        System.out.println("after uniq: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-        System.out.println("RESULT SIZE: " + c.size());
+        System.out.println("after uniq: " + (System.currentTimeMillis() - start) + " milliseconds, size: " + c.size());
         System.out.println();
 
-        // third test
-        c = new kelondroRowSet(new kelondroRow(new int[]{10, 3}), 60000);
-        c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        rand = new Random(0);
-        start = System.currentTimeMillis();
-        d = 0;
-        for (long k = 0; k < 60000; k++) {
-            t = System.currentTimeMillis();
-            w = "a" + Long.toString(rand.nextLong());
-            if (c.get(w.getBytes(), 0, 10) == null) c.add(w.getBytes()); else d++;
-            if (k % 10000 == 0)
-                System.out.println("added " + k + " entries in " +
-                    ((t - start) / 1000) + " seconds, " +
-                    (((t - start) > 1000) ? (k / ((t - start) / 1000)) : k) +
-                    " entries/second, " + d + " double, size = " + c.size() +
-                    ", sum = " + (c.size() + d));
-        }
-        System.out.println("RESULT SIZE: " + c.size());
-        */
-        /*
-        // performance test for put
-        long start = System.currentTimeMillis();
-        kelondroRowSet c = new kelondroRowSet(new kelondroRow("byte[] a-12, byte[] b-12"), 0);
-        Random random = new Random(0);
-        byte[] key;
-        for (int i = 0; i < 100000; i++) {
-            key = randomHash(random);
-            c.put(c.rowdef.newEntry(new byte[][]{key, key}));
-            if (i % 1000 == 0) System.out.println(i + " entries. ");
-        }
-        System.out.println("RESULT SIZE: " + c.size());
-        System.out.println("Time: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-        */
-
         // remove test
-        final long start = System.currentTimeMillis();
-        final RowSet c = new RowSet(new Row("byte[] a-12, byte[] b-12", Base64Order.enhancedCoder));
+        start = System.currentTimeMillis();
+        c = new RowSet(new Row("byte[] a-12, byte[] b-12", Base64Order.enhancedCoder));
         byte[] key;
         final int testsize = 5000;
         final byte[][] delkeys = new byte[testsize / 5][];
@@ -675,6 +639,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         c.sort();
         System.out.println("RESULT SIZE: " + c.size());
         System.out.println("Time: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+        System.exit(0);
     }
 
     public static byte[] randomHash(final long r0, final long r1) {
