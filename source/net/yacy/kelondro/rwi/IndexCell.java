@@ -34,7 +34,6 @@ import java.util.TreeMap;
 
 import net.yacy.cora.ranking.Order;
 import net.yacy.cora.ranking.Rating;
-import net.yacy.cora.ranking.RatingOrder;
 import net.yacy.cora.storage.ComparableARC;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.HandleSet;
@@ -453,19 +452,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
 
     public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] starttermHash, final boolean rot) {
-        final RatingOrder<byte[]> containerOrder = new RatingOrder<byte[]>(this.ram.rowdef().getOrdering());
-        containerOrder.rotate(new Rating<byte[]>(starttermHash, 0));
-        return new MergeIterator<Rating<byte[]>>(
-            this.ram.referenceCountIterator(starttermHash, rot),
-            new MergeIterator<Rating<byte[]>>(
-                this.ram.referenceCountIterator(starttermHash, false),
-                this.array.referenceCountIterator(starttermHash, false),
-                containerOrder,
-                ReferenceContainer.containerMergeMethod,
-                true),
-                containerOrder,
-            ReferenceContainer.containerMergeMethod,
-            true);
+        return this.array.referenceCountIterator(starttermHash, false);
     }
 
     public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] starttermHash, final boolean rot) {

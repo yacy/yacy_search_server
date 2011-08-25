@@ -216,9 +216,12 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public static Object mergeUnique(final Object a, final Object b) throws RowSpaceExceededException {
-        final ReferenceContainer<?> c = (ReferenceContainer<?>) a;
-        c.addAllUnique((ReferenceContainer<?>) b);
-        return c;
+        if (a instanceof ReferenceContainer<?>) {
+            final ReferenceContainer<?> c = (ReferenceContainer<?>) a;
+            c.addAllUnique((ReferenceContainer<?>) b);
+            return c;
+        }
+        throw new UnsupportedOperationException("Objects have wrong type: " + a.getClass().getName());
     }
 
     public static final Method containerMergeMethod;

@@ -185,7 +185,6 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 if (entry.getValue() != null && entry.getValue().getTermHash() != null) list.add(new Rating<ByteArray>(entry.getKey(), entry.getValue().size()));
             }
         }
-        Collections.sort(list, new Rating.ObjectComparator<ByteArray>());
         return list;
     }
 

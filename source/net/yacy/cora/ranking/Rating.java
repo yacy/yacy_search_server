@@ -48,18 +48,7 @@ public class Rating<A> {
         return this.object;
     }
 
-    @SuppressWarnings("rawtypes")
-    public final static ObjectComparator<?> objectComparator = new ObjectComparator();
     public final static ScoreComparator scoreComparator = new ScoreComparator();
-
-    public static class ObjectComparator<B> implements Comparator<Rating<B>> {
-
-        @SuppressWarnings("unchecked")
-        public int compare(final Rating<B> arg0, final Rating<B> arg1) {
-            if (!(arg0 instanceof Comparable<?>)) throw new UnsupportedOperationException("object class must implement comparable");
-            return ((Comparable<B>) arg0.getObject()).compareTo(arg1.getObject());
-        }
-    }
 
     public static class ScoreComparator implements Comparator<Rating<?>> {
 
