@@ -34,6 +34,7 @@ import java.util.TreeSet;
 
 import net.yacy.cora.ranking.Rating;
 import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -205,4 +206,10 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
      * @return
      */
     public ByteOrder termKeyOrdering();
+
+    /**
+     * ask for the Row that is used to construct one reference
+     * @return
+     */
+    public Row referenceRow();
 }

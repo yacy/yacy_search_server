@@ -21,11 +21,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.ranking.Rating;
+import net.yacy.kelondro.index.Row;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -39,7 +42,7 @@ public class termlist_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         Segment segment = null;
-        final boolean html = post != null && post.containsKey("html");
+        final boolean delete = post != null && post.containsKey("delete");
         final long mincount = post == null ? 10000 : post.getLong("mincount", 10000);
         if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
             segment = sb.indexSegments.segment(post.get("segment"));
@@ -49,9 +52,14 @@ public class termlist_p {
         Rating<byte[]> e;
         int c = 0;
         byte[] termhash, maxterm = null;
-        long count, maxcount = 0;
+        long count, maxcount = 0, totalmemory = 0;
+        int termnumber = 0;
+        final Row referenceRow = segment.termIndex().referenceRow();
+        final int rowsize = referenceRow.objectsize;
+        final ArrayList<byte[]> deleteterms = new ArrayList<byte[]>();
         while (i.hasNext()) {
             e = i.next();
+            termnumber++;
             count = e.getScore();
             if (count > maxcount) {
                 maxcount = count;
@@ -59,13 +67,27 @@ public class termlist_p {
             }
             if (count < mincount) continue;
             termhash = e.getObject();
+            if (delete) deleteterms.add(termhash);
             prop.put("terms_" + c + "_termhash", ASCII.String(termhash));
             prop.put("terms_" + c + "_count", count);
+            prop.put("terms_" + c + "_memory", 20 + count * rowsize);
             c++;
+            totalmemory += 20 + count * rowsize;
+        }
+        if (delete) {
+            for (final byte[] t: deleteterms) {
+                try {
+                    segment.termIndex().delete(t);
+                } catch (final IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
         prop.put("terms", c);
         prop.put("maxterm", maxterm == null ? "" : ASCII.String(maxterm));
         prop.put("maxcount", maxcount);
+        prop.put("termnumber", termnumber);
+        prop.put("totalmemory", totalmemory);
 
         // return rewrite properties
         return prop;

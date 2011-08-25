@@ -34,6 +34,7 @@ import java.util.TreeSet;
 
 import net.yacy.cora.ranking.Order;
 import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -209,5 +210,9 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             final int maxDistance) throws RowSpaceExceededException {
 
         return new TermSearch<ReferenceType>(this, queryHashes, excludeHashes, urlselection, termFactory, maxDistance);
+    }
+
+    public Row referenceRow() {
+        return this.factory.getRow();
     }
 }

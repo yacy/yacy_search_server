@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
-<terms>
+<terms allcount="#[termnumber]#" selectcount="#[terms]#" selectmemory="#[totalmemory]#">
 <maxterm hash="#[maxterm]#">
   	<count>#[maxcount]#</count>
 </maxterm>
 #{terms}#
   <term hash="#[termhash]#" id="#[termhash]#">
 	<count>#[count]#</count>
+	<memory>#[memory]#</memory>
   </term>
 #{/terms}#
 </terms>
