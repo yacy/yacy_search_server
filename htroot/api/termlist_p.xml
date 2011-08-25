@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<terms>
+<maxterm hash="#[maxterm]#">
+  	<count>#[maxcount]#</count>
+</maxterm>
+#{terms}#
+  <term hash="#[termhash]#" id="#[termhash]#">
+	<count>#[count]#</count>
+  </term>
+#{/terms}#
+</terms>
