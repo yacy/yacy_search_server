@@ -32,6 +32,7 @@ import java.lang.management.MemoryUsage;
 
 public class GenerationMemoryStrategy extends MemoryStrategy {
 	
+	private final static long M = 1024l*1024l;
 	private MemoryPoolMXBean eden, survivor, old;
     private MemoryMXBean heap;
     
@@ -66,7 +67,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return bytes
      */
     private final long available(final boolean force) {
-    	return force & properState() ? Math.max(youngAvailable(), oldAvailable()) : Math.min(youngAvailable(), oldAvailable());
+    	return force & properState() ? Math.max(youngAvailable(), oldAvailable()) : Math.min(youngAvailable(), Math.max(M, oldAvailable()));
     }
     
     /**
@@ -98,13 +99,13 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * after the jvm recycled unused objects
      * 
      * @param size the requested amount of free memory in bytes
-     * @param force specifies whether ignoring prefered size
+     * @param force specifies whether ignoring preferred size
      * @return whether enough memory could be freed (or is free) or not
      */
     protected final boolean request(final long size, final boolean force, boolean shortStatus) {
     	if (size == 0l) return true; // does not make sense to check - returning true without setting shortStatus (which also doesn't make sense to me)
     	final boolean unknown = size < 0l; // size < 0 indicate an unknown size - maybe from gziped streams
-    	final boolean r = unknown? properState() : size < available(force);
+    	final boolean r = unknown? properState(true) : size < available(force);
         shortStatus = !r;
         return r;
     }
@@ -113,14 +114,14 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * use this to check for temporary space
      * @return bytes available to allocate in Eden Space (Young Generation)
      */
-    protected final long youngAvailable() {
+    private final long youngAvailable() {
     	return youngUsage(true).getCommitted() - youngUsage(true).getUsed();
     }
     
     /**
      * @return bytes available to allocate in Tenured Space (Old Generation)
      */
-    protected final long oldAvailable() {
+    private final long oldAvailable() {
     	return oldUsage(true).getCommitted() - oldUsage(true).getUsed();
     }
     
@@ -132,7 +133,16 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return Memory is in proper state
      */
     protected boolean properState() {
-    	return (oldUsage(true).getUsed() + survivorUsage(false).getCommitted()) < oldUsage(false).getCommitted();
+    	return properState(false);
+    }
+    
+    /**
+     * @param force whether using used or committed survivor usage
+     * @return if survivor fits into old space
+     */
+    private boolean properState(final boolean force) {
+    	final long surv = force? Math.max(M, survivorUsage(false).getUsed()) : survivorUsage(false).getCommitted();
+    	return surv < oldAvailable();
     }
     
     /**

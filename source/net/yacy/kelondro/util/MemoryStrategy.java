@@ -25,8 +25,6 @@
 
 package net.yacy.kelondro.util;
 
-import java.lang.management.ManagementFactory;
-
 import net.yacy.kelondro.logging.Log;
 
 public abstract class MemoryStrategy {
@@ -59,7 +57,7 @@ public abstract class MemoryStrategy {
     	assert last >= 10000; // too many forced GCs will cause bad execution performance
         final long elapsed = System.currentTimeMillis() - lastGC;
         if (elapsed > last) {
-        	ManagementFactory.getMemoryMXBean().gc();
+        	System.gc();
             lastGC = System.currentTimeMillis();
             return true;
         }
