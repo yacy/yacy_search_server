@@ -27,6 +27,7 @@
 
 package net.yacy.kelondro.order;
 
+import net.yacy.cora.ranking.Order;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 

@@ -209,7 +209,7 @@ public final class yacy {
             }
             sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), newconf);
             //sbSync.V(); // signal that the sb reference was set
-            
+
             // switch the memory strategy
             MemoryControl.setStandardStrategy(sb.getConfigBool("memory.standardStrategy", true));
 
@@ -648,7 +648,7 @@ public final class yacy {
                     new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                     10000,
                     (long) Integer.MAX_VALUE, false, false);
-            final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.termIndex().references("AAAAAAAAAAAA".getBytes(), false, false);
+            final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.termIndex().referenceContainerIterator("AAAAAAAAAAAA".getBytes(), false, false);
 
             long urlCounter = 0, wordCounter = 0;
             long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
@@ -828,7 +828,7 @@ public final class yacy {
                         new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                         10000,
                         (long) Integer.MAX_VALUE, false, false);
-                indexContainerIterator = WordIndex.termIndex().references(wordChunkStartHash.getBytes(), false, false);
+                indexContainerIterator = WordIndex.termIndex().referenceContainerIterator(wordChunkStartHash.getBytes(), false, false);
             }
             int counter = 0;
             ReferenceContainer<WordReference> container = null;

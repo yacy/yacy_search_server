@@ -37,13 +37,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.ranking.AbstractOrder;
+import net.yacy.cora.ranking.Order;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.AbstractOrder;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.kelondro.order.Order;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.kelondroException;
 

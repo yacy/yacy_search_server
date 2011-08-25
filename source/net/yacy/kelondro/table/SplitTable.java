@@ -44,6 +44,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.ranking.Order;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.HandleSet;
@@ -55,7 +56,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
-import net.yacy.kelondro.order.Order;
 import net.yacy.kelondro.order.StackIterator;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;

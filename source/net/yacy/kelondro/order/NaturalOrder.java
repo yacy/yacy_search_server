@@ -29,6 +29,8 @@ package net.yacy.kelondro.order;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import net.yacy.cora.ranking.AbstractOrder;
+import net.yacy.cora.ranking.Order;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 

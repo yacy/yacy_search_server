@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -50,7 +50,7 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
     /*
      *  methods for monitoring of the buffer
      */
-    
+
     /**
      * set the size of the buffer, which can be defined with a given maximum number
      * of words that shall be stored. Because an arbitrary number of references can
@@ -60,7 +60,7 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
      * limit.
      */
     public void setBufferMaxWordCount(final int maxWords);
-    
+
     /**
      * return the maximum number of references, that one buffer entry has stored
      * @return
@@ -78,7 +78,7 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
      * @return a time as milliseconds from epoch
      */
     public long getBufferMaxAge();
-    
+
     /**
      * calculate the memory that is taken by the buffer.
      * This does not simply return a variable content. it is necessary
@@ -93,7 +93,7 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
      * @return number of word references
      */
     public int getBufferSize();
-    
+
     /**
      * iterate over entries in index. this method differs from the iterator in an Index
      * object in such a way that it has the additional 'buffer' flag. When using this method,
@@ -105,12 +105,12 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
      * @return
      * @throws IOException
      */
-    public CloneableIterator<ReferenceContainer<ReferenceType>> references(
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(
                             byte[] startHash,
                             boolean rot,
                             boolean buffer
                             ) throws IOException;
-    
+
 
     /**
      * collect reference container in index. this method differs from the collector in an Index
@@ -124,11 +124,11 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
      * @return
      * @throws IOException
      */
-    public TreeSet<ReferenceContainer<ReferenceType>> references(
+    public TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(
                             byte[] startHash,
                             boolean rot,
                             int count,
                             boolean buffer
                             ) throws IOException;
-    
+
 }

@@ -26,8 +26,8 @@
 
 package net.yacy.kelondro.rwi;
 
-import net.yacy.kelondro.order.AbstractOrder;
-import net.yacy.kelondro.order.Order;
+import net.yacy.cora.ranking.AbstractOrder;
+import net.yacy.cora.ranking.Order;
 
 public class ReferenceContainerOrder<ReferenceType extends Reference> extends AbstractOrder<ReferenceContainer<ReferenceType>> implements Order<ReferenceContainer<ReferenceType>>, Cloneable {
 

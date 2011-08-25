@@ -32,6 +32,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.cora.ranking.Order;
+import net.yacy.cora.ranking.Rating;
+import net.yacy.cora.ranking.RatingOrder;
 import net.yacy.cora.storage.ComparableARC;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.HandleSet;
@@ -40,7 +43,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
-import net.yacy.kelondro.order.Order;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -447,16 +449,32 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
 
     public Iterator<ReferenceContainer<ReferenceType>> iterator() {
-        return references(null, false);
+        return referenceContainerIterator(null, false);
     }
 
-    public CloneableIterator<ReferenceContainer<ReferenceType>> references(final byte[] starttermHash, final boolean rot) {
+    public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] starttermHash, final boolean rot) {
+        final RatingOrder<byte[]> containerOrder = new RatingOrder<byte[]>(this.ram.rowdef().getOrdering());
+        containerOrder.rotate(new Rating<byte[]>(starttermHash, 0));
+        return new MergeIterator<Rating<byte[]>>(
+            this.ram.referenceCountIterator(starttermHash, rot),
+            new MergeIterator<Rating<byte[]>>(
+                this.ram.referenceCountIterator(starttermHash, false),
+                this.array.referenceCountIterator(starttermHash, false),
+                containerOrder,
+                ReferenceContainer.containerMergeMethod,
+                true),
+                containerOrder,
+            ReferenceContainer.containerMergeMethod,
+            true);
+    }
+
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] starttermHash, final boolean rot) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(this.factory, this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new ReferenceContainer<ReferenceType>(this.factory, starttermHash));
         return new MergeIterator<ReferenceContainer<ReferenceType>>(
-            this.ram.references(starttermHash, rot),
+            this.ram.referenceContainerIterator(starttermHash, rot),
             new MergeIterator<ReferenceContainer<ReferenceType>>(
-                this.ram.references(starttermHash, false),
+                this.ram.referenceContainerIterator(starttermHash, false),
                 this.array.referenceContainerIterator(starttermHash, false),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,
@@ -466,14 +484,14 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             true);
     }
 
-    public CloneableIterator<ReferenceContainer<ReferenceType>> references(final byte[] startTermHash, final boolean rot, final boolean ram) {
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startTermHash, final boolean rot, final boolean ram) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(this.factory, this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new ReferenceContainer<ReferenceType>(this.factory, startTermHash));
         if (ram) {
-            return this.ram.references(startTermHash, rot);
+            return this.ram.referenceContainerIterator(startTermHash, rot);
         }
         return new MergeIterator<ReferenceContainer<ReferenceType>>(
-                this.ram.references(startTermHash, false),
+                this.ram.referenceContainerIterator(startTermHash, false),
                 this.array.referenceContainerIterator(startTermHash, false),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,

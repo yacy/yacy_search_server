@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.ranking.Rating;
 import net.yacy.kelondro.blob.HeapWriter;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
@@ -177,6 +178,17 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return cachecopy;
     }
 
+    protected List<Rating<ByteArray>> ratingList() {
+        final List<Rating<ByteArray>> list = new ArrayList<Rating<ByteArray>>(this.cache.size());
+        synchronized (this.cache) {
+            for (final Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> entry: this.cache.entrySet()) {
+                if (entry.getValue() != null && entry.getValue().getTermHash() != null) list.add(new Rating<ByteArray>(entry.getKey(), entry.getValue().size()));
+            }
+        }
+        Collections.sort(list, new Rating.ObjectComparator<ByteArray>());
+        return list;
+    }
+
     public int size() {
         return (this.cache == null) ? 0 : this.cache.size();
     }
@@ -195,26 +207,24 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return max;
     }
 
+    public Iterator<ReferenceContainer<ReferenceType>> iterator() {
+        return referenceContainerIterator(null, false);
+    }
+
     /**
      * return an iterator object that creates top-level-clones of the indexContainers
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
      */
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final byte[] startWordHash, final boolean rot) {
-        return new heapCacheIterator(startWordHash, rot);
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startWordHash, final boolean rot) {
+        return new ReferenceContainerIterator(startWordHash, rot);
     }
-
-
-    public Iterator<ReferenceContainer<ReferenceType>> iterator() {
-        return references(null, false);
-    }
-
 
     /**
      * cache iterator: iterates objects within the heap cache. This can only be used
      * for write-enabled heaps, read-only heaps do not have a heap cache
      */
-    public class heapCacheIterator implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
+    public class ReferenceContainerIterator implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
@@ -226,7 +236,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         private int p;
         private byte[] latestTermHash;
 
-        public heapCacheIterator(byte[] startWordHash, final boolean rot) {
+        public ReferenceContainerIterator(byte[] startWordHash, final boolean rot) {
             this.rot = rot;
             if (startWordHash != null && startWordHash.length == 0) startWordHash = null;
             this.cachecopy = sortedClone();
@@ -242,8 +252,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
 
-        public heapCacheIterator clone(final Object secondWordHash) {
-            return new heapCacheIterator((byte[]) secondWordHash, this.rot);
+        public ReferenceContainerIterator clone(final Object secondWordHash) {
+            return new ReferenceContainerIterator((byte[]) secondWordHash, this.rot);
         }
 
         public boolean hasNext() {
@@ -284,6 +294,75 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
 
         public Iterator<ReferenceContainer<ReferenceType>> iterator() {
+            return this;
+        }
+
+    }
+
+    @Override
+    public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] startHash, final boolean rot) {
+        return new ReferenceCountIterator(startHash, rot);
+    }
+
+    /**
+     * cache iterator: iterates objects within the heap cache. This can only be used
+     * for write-enabled heaps, read-only heaps do not have a heap cache
+     */
+    public class ReferenceCountIterator implements CloneableIterator<Rating<byte[]>>, Iterable<Rating<byte[]>> {
+
+        private final boolean rot;
+        private final List<Rating<ByteArray>> cachecounts;
+        private int p;
+        private byte[] latestTermHash;
+
+        public ReferenceCountIterator(byte[] startWordHash, final boolean rot) {
+            this.rot = rot;
+            if (startWordHash != null && startWordHash.length == 0) startWordHash = null;
+            this.cachecounts = ratingList();
+            assert this.cachecounts != null;
+            assert ReferenceContainerCache.this.termOrder != null;
+            this.p = 0;
+            if (startWordHash != null) {
+                while ( this.p < this.cachecounts.size() &&
+                        ReferenceContainerCache.this.termOrder.compare(this.cachecounts.get(this.p).getObject().asBytes(), startWordHash) < 0
+                      ) this.p++;
+            }
+            this.latestTermHash = null;
+            // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
+        }
+
+        public ReferenceCountIterator clone(final Object secondWordHash) {
+            return new ReferenceCountIterator((byte[]) secondWordHash, this.rot);
+        }
+
+        public boolean hasNext() {
+            if (this.rot) return this.cachecounts.size() > 0;
+            return this.p < this.cachecounts.size();
+        }
+
+        public Rating<byte[]> next() {
+            if (this.p < this.cachecounts.size()) {
+                final Rating<ByteArray> c = this.cachecounts.get(this.p++);
+                this.latestTermHash = c.getObject().asBytes();
+                return new Rating<byte[]>(c.getObject().asBytes(), c.getScore());
+            }
+            // rotation iteration
+            if (!this.rot) {
+                return null;
+            }
+            if (this.cachecounts.isEmpty()) return null;
+            this.p = 0;
+            final Rating<ByteArray> c = this.cachecounts.get(this.p++);
+            this.latestTermHash = c.getObject().asBytes();
+            return new Rating<byte[]>(c.getObject().asBytes(), c.getScore());
+        }
+
+        public void remove() {
+            System.arraycopy(this.cachecounts, this.p, this.cachecounts, this.p - 1, this.cachecounts.size() - this.p);
+            ReferenceContainerCache.this.cache.remove(new ByteArray(this.latestTermHash));
+        }
+
+        public Iterator<Rating<byte[]>> iterator() {
             return this;
         }
 

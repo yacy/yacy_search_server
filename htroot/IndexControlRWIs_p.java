@@ -305,7 +305,7 @@ public class IndexControlRWIs_p {
 
             // generate list
             if (post.containsKey("keyhashsimilar")) try {
-                final Iterator<ReferenceContainer<WordReference>> containerIt = segment.termIndex().references(keyhash, true, 256, false).iterator();
+                final Iterator<ReferenceContainer<WordReference>> containerIt = segment.termIndex().referenceContainer(keyhash, true, 256, false).iterator();
                     ReferenceContainer<WordReference> container;
                     i = 0;
                     int rows = 0, cols = 0;

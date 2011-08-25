@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,8 +31,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-
-import net.yacy.kelondro.order.Order;
+import net.yacy.cora.ranking.Order;
 
 
 public abstract class AbstractBufferedIndex<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements BufferedIndex<ReferenceType> {
@@ -40,16 +39,16 @@ public abstract class AbstractBufferedIndex<ReferenceType extends Reference> ext
     public AbstractBufferedIndex(final ReferenceFactory<ReferenceType> factory) {
         super(factory);
     }
-    
-    public synchronized TreeSet<ReferenceContainer<ReferenceType>> references(byte[] startHash, final boolean rot, int count, boolean ram) throws IOException {
+
+    public synchronized TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(byte[] startHash, final boolean rot, int count, final boolean ram) throws IOException {
         // creates a set of indexContainers
         // this does not use the cache
-        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.termKeyOrdering().clone());
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(this.factory, termKeyOrdering().clone());
         if (startHash != null && startHash.length == 0) startHash = null;
-        ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startHash);
+        final ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(this.factory, startHash);
         containerOrder.rotate(emptyContainer);
         final TreeSet<ReferenceContainer<ReferenceType>> containers = new TreeSet<ReferenceContainer<ReferenceType>>(containerOrder);
-        final Iterator<ReferenceContainer<ReferenceType>> i = references(startHash, rot, ram);
+        final Iterator<ReferenceContainer<ReferenceType>> i = referenceContainerIterator(startHash, rot, ram);
         if (ram) count = Math.min(size(), count);
         ReferenceContainer<ReferenceType> container;
         // this loop does not terminate using the i.hasNex() predicate when rot == true

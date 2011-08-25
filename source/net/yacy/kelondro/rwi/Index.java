@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.cora.ranking.Rating;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.order.ByteOrder;
@@ -39,19 +40,19 @@ import net.yacy.kelondro.order.CloneableIterator;
 
 
 public interface Index <ReferenceType extends Reference> extends Iterable<ReferenceContainer<ReferenceType>> {
-    
+
     /**
      * every index entry is made for a term which has a fixed size
      * @return the size of the term
      */
     public int termKeyLength();
-    
+
     /**
      * merge this index with another index
      * @param otherIndex
      */
     public void merge(Index<ReferenceType> otherIndex) throws IOException, RowSpaceExceededException;
-    
+
 	/**
 	 * add references to the reverse index
 	 * if no references to the word are stored, the new Entries are added,
@@ -59,7 +60,7 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
 	 * reference to be stored, then the old and the new references are merged
 	 * @param newEntries the References to be merged with existing references
 	 * @throws IOException
-	 * @throws RowSpaceExceededException 
+	 * @throws RowSpaceExceededException
 	 */
 	public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException, RowSpaceExceededException;
 
@@ -71,17 +72,17 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
 	 * @param termHash
 	 * @param entry
 	 * @throws IOException
-	 * @throws RowSpaceExceededException 
+	 * @throws RowSpaceExceededException
 	 */
     public void add(final byte[] termHash, final ReferenceType entry) throws IOException, RowSpaceExceededException;
-    
+
 	/**
 	 * check if there are references stored to the given word hash
 	 * @param termHash
 	 * @return true if references exist, false if not
 	 */
 	public boolean has(final byte[] termHash); // should only be used if in case that true is returned the getContainer is NOT called
-    
+
 	/**
 	 * count the number of references for the given word
 	 * do not use this method to check the existence of a reference by comparing
@@ -90,7 +91,7 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
 	 * @return the number of references to the given word
 	 */
 	public int count(final byte[] termHash);
-    
+
 	/**
 	 * get the references to a given word.
 	 *  if referenceselection is not null, then all url references which are not
@@ -101,7 +102,7 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
 	 * @throws IOException
 	 */
 	public ReferenceContainer<ReferenceType> get(byte[] termHash, HandleSet referenceselection) throws IOException;
-    
+
     /**
      * delete all references for a word
      * @param termHash
@@ -109,7 +110,7 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
      * @throws IOException
      */
 	public ReferenceContainer<ReferenceType> delete(byte[] termHash) throws IOException;
-    
+
 	/**
 	 * remove a specific reference entry
 	 * @param termHash
@@ -119,7 +120,7 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
 	 */
     public boolean remove(byte[] termHash, byte[] referenceHash) throws IOException;
     public void removeDelayed(byte[] termHash, byte[] referenceHash) throws IOException;
-    
+
     /**
      * remove a set of reference entries for a given word
      * @param termHash the key for the references
@@ -133,6 +134,7 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
     public void removeDelayed(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException;
 
     public void removeDelayed() throws IOException;
+
     /**
      * iterate all references from the beginning of a specific word hash
      * @param startHash
@@ -141,13 +143,26 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
      * @return
      * @throws IOException
      */
-	public CloneableIterator<ReferenceContainer<ReferenceType>> references(
-	                        byte[] startHash,
-	                        boolean rot
-	                        ) throws IOException;
-    
+    public CloneableIterator<Rating<byte[]>> referenceCountIterator(
+                            byte[] startHash,
+                            boolean rot
+                            ) throws IOException;
 
-    public TreeSet<ReferenceContainer<ReferenceType>> references(
+    /**
+     * iterate all references from the beginning of a specific word hash
+     * @param startHash
+     * @param rot if true, then rotate at the end to the beginning
+     * @param ram
+     * @return
+     * @throws IOException
+     */
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(
+                            byte[] startHash,
+                            boolean rot
+                            ) throws IOException;
+
+
+    public TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(
                             byte[] startHash,
                             boolean rot,
                             int count
@@ -160,31 +175,31 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
      * @param urlselection
      * @return map of wordhash:indexContainer
      */
-    public TreeMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final HandleSet wordHashes, final HandleSet urlselection);        
-  
+    public TreeMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final HandleSet wordHashes, final HandleSet urlselection);
+
     /**
      * delete all references entries
      * @throws IOException
      */
     public void clear() throws IOException;
-    
+
     /**
      * close the reverse index
      */
     public void close();
-    
+
     /**
      * the number of all references
      * @return the nnumber of all references
      */
     public int size();
-    
+
     /**
      * calculate needed memory
      * @return the memory needed to operate the object
      */
     public int minMem();
-    
+
     /**
      * return the order that is used for the storage of the word hashes
      * @return

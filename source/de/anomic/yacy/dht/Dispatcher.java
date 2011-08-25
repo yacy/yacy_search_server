@@ -168,7 +168,7 @@ public class Dispatcher {
 
         final ArrayList<ReferenceContainer<WordReference>> containers = new ArrayList<ReferenceContainer<WordReference>>(maxContainerCount);
 
-        final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.segment.termIndex().references(hash, true, ram);
+        final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.segment.termIndex().referenceContainerIterator(hash, true, ram);
         ReferenceContainer<WordReference> container;
         int refcount = 0;
 

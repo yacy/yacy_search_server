@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
+import net.yacy.cora.ranking.Order;
 import net.yacy.kelondro.logging.Log;
 
 
