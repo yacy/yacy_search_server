@@ -199,15 +199,51 @@ public final class TransformerWriter extends Writer {
             return result;
     }
 
+    private static final char[] mergedScrape(final char[] a, final char[] b) {
+        if (a == null) return b;
+        if (b == null) return a;
+        final StringBuilder sb = new StringBuilder(a.length + b.length + 1);
+        sb.append(a).append(' ').append(b);
+        return sb.toString().toCharArray();
+    }
+
+    /**
+     * every tag that appears is handed to the filterTag method. The method then returns text from the tag
+     * but also operates on the tag content to scrape information from it. In case that a tag is unclosed if
+     * another tag appears, both, the unclosed and the new one are merged into one new char[]
+     * @param tag
+     * @param opening
+     * @param content
+     * @param quotechar
+     * @return
+     */
     private char[] filterTag(final String tag, final boolean opening, final char[] content, final char quotechar) {
-//      System.out.println("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + UTF8.String(content)); // debug
+        //System.out.println("FILTER1: filterTag=" + ((this.filterTag == null) ? "null" : this.filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + new String(content)); // debug
+        char[] unclosed = null;
+
+        if (this.filterTag != null && opening) {
+            // there is a missing close tag for the currently parsed tag filterTag
+            // close that tag here and go on with new tag
+            if (this.scraper != null) {
+                this.scraper.scrapeTag1(this.filterTag, this.filterOpts, this.filterCont.getChars());
+            }
+            if (this.transformer != null) {
+                unclosed = this.transformer.transformTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
+            } else {
+                unclosed = genTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
+            }
+            this.filterTag = null;
+            this.filterOpts = null;
+            this.filterCont = null;
+        }
+
         if (this.filterTag == null) {
             // we are not collection tag text
             if (tag == null) {
                 // and this is not a tag opener/closer
                 if (this.scraper != null) this.scraper.scrapeText(content, null);
-                if (this.transformer != null) return this.transformer.transformText(content);
-                return content;
+                if (this.transformer != null) return mergedScrape(unclosed, this.transformer.transformText(content));
+                return mergedScrape(unclosed, content);
             }
 
             // we have a new tag
@@ -227,7 +263,7 @@ public final class TransformerWriter extends Writer {
                     // this single tag is collected at once here
                 	final CharBuffer scb = new CharBuffer(content);
                 	try {
-                		return this.transformer.transformTag0(tag, scb.propParser(), quotechar);
+                		return mergedScrape(unclosed, this.transformer.transformTag0(tag, scb.propParser(), quotechar));
                 	} finally {
                 		try {
 							scb.close();
@@ -247,15 +283,15 @@ public final class TransformerWriter extends Writer {
 					    Log.logException(e);
 					}
                     if (this.filterCont == null) this.filterCont = new CharBuffer(Math.max(100, content.length)); else this.filterCont.reset();
-                    return new char[0];
+                    return mergedScrape(unclosed, new char[0]);
                 } else {
                      // we ignore that thing and return it again
-                     return genTag0raw(tag, true, content);
+                     return mergedScrape(unclosed, genTag0raw(tag, true, content));
                 }
             }
 
             // we ignore that thing and return it again
-            return genTag0raw(tag, false, content);
+            return mergedScrape(unclosed, genTag0raw(tag, false, content));
 
         }
 
@@ -270,14 +306,14 @@ public final class TransformerWriter extends Writer {
                     this.filterCont.append(content);
                 }
             } catch (final OutOfMemoryError e) {}
-            return new char[0];
+            return mergedScrape(unclosed, new char[0]);
         }
 
         // it's a tag! which one?
-        if ((opening) || (!(tag.equalsIgnoreCase(this.filterTag)))) {
+        if (opening || !(tag.equalsIgnoreCase(this.filterTag))) {
             // this tag is not our concern. just add it
             this.filterCont.append(genTag0raw(tag, opening, content));
-            return new char[0];
+            return mergedScrape(unclosed, new char[0]);
         }
 
         // it's our closing tag! return complete result.
@@ -291,7 +327,7 @@ public final class TransformerWriter extends Writer {
         this.filterTag = null;
         this.filterOpts = null;
         this.filterCont = null;
-        return ret;
+        return mergedScrape(unclosed, ret);
     }
 
     private char[] filterFinalize(final char quotechar) {
@@ -301,7 +337,9 @@ public final class TransformerWriter extends Writer {
 
         // it's our closing tag! return complete result.
         char[] ret;
-        if (this.scraper != null) this.scraper.scrapeTag1(this.filterTag, this.filterOpts, this.filterCont.getChars());
+        if (this.scraper != null) {
+            this.scraper.scrapeTag1(this.filterTag, this.filterOpts, this.filterCont.getChars());
+        }
         if (this.transformer != null) {
             ret = this.transformer.transformTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
         } else {

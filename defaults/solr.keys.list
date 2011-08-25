@@ -73,7 +73,12 @@ text_t
 wordcount_i
 
 ## internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
-attr_inboundlinks
+attr_inboundlinks_tag
+attr_inboundlinks_protocol
+attr_inboundlinks_urlstub
+attr_inboundlinks_name
+attr_inboundlinks_rel
+attr_inboundlinks_text
 
 ## total number of inbound links, int
 inboundlinkscount_i
@@ -82,7 +87,12 @@ inboundlinkscount_i
 inboundlinksnoindexcount_i
 
 ## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
-attr_outboundlinks
+attr_outboundlinks_tag
+attr_outboundlinks_protocol
+attr_outboundlinks_urlstub
+attr_outboundlinks_name
+attr_outboundlinks_rel
+attr_outboundlinks_text
 
 ## total number of external links, int
 outboundlinkscount_i

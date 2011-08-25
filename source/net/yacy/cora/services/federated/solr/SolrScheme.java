@@ -129,36 +129,76 @@ public class SolrScheme extends ConfigurationSet {
         if (isEmpty() || contains("inboundlinkscount_i")) addSolr(solrdoc, "inboundlinkscount_i", yacydoc.inboundLinkCount());
         if (isEmpty() || contains("inboundlinksnoindexcount_i")) addSolr(solrdoc, "inboundlinksnoindexcount_i", yacydoc.inboundLinkNoindexCount());
         if (isEmpty() || contains("attr_inboundlinks")) {
-            final String[] inboundlinks = new String[yacydoc.inboundLinkCount()];
+            final String[] inboundlinksTag = new String[yacydoc.inboundLinkCount()];
+            final String[] inboundlinksURLProtocol = new String[yacydoc.inboundLinkCount()];
+            final String[] inboundlinksURLStub = new String[yacydoc.inboundLinkCount()];
+            final String[] inboundlinksName = new String[yacydoc.inboundLinkCount()];
+            final String[] inboundlinksRel = new String[yacydoc.inboundLinkCount()];
+            final String[] inboundlinksText = new String[yacydoc.inboundLinkCount()];
             for (final MultiProtocolURI url: yacydoc.inboundLinks()) {
                 final Properties p = alllinks.get(url);
-                final String name = p.getProperty("name", "");
-                final String rel = p.getProperty("rel", "");
-                inboundlinks[c++] =
+                final String name = p.getProperty("name", ""); // the name attribute
+                final String rel = p.getProperty("rel", "");   // the rel-attribute
+                final String text = p.getProperty("text", ""); // the text between the <a></a> tag
+                final String urls = url.toNormalform(false, false);
+                final int pr = urls.indexOf("://");
+                inboundlinksURLProtocol[c] = urls.substring(0, pr);
+                inboundlinksURLStub[c] = urls.substring(pr + 3);
+                inboundlinksName[c] = name.length() > 0 ? name : "";
+                inboundlinksRel[c] = rel.length() > 0 ? rel : "";
+                inboundlinksText[c] = text.length() > 0 ? rel : "";
+                inboundlinksTag[c] =
                     "<a href=\"" + url.toNormalform(false, false) + "\"" +
                     (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                     ">" +
                     ((name.length() > 0) ? name : "") + "</a>";
+                c++;
             }
-            addSolr(solrdoc, "attr_inboundlinks", inboundlinks);
+            addSolr(solrdoc, "attr_inboundlinks_tag", inboundlinksTag);
+            addSolr(solrdoc, "attr_inboundlinks_protocol", inboundlinksURLProtocol);
+            addSolr(solrdoc, "attr_inboundlinks_urlstub", inboundlinksURLStub);
+            addSolr(solrdoc, "attr_inboundlinks_name", inboundlinksName);
+            addSolr(solrdoc, "attr_inboundlinks_rel", inboundlinksRel);
+            addSolr(solrdoc, "attr_inboundlinks_text", inboundlinksText);
         }
+
         c = 0;
         if (isEmpty() || contains("outboundlinkscount_i")) addSolr(solrdoc, "outboundlinkscount_i", yacydoc.outboundLinkCount());
         if (isEmpty() || contains("outboundlinksnoindexcount_i")) addSolr(solrdoc, "outboundlinksnoindexcount_i", yacydoc.outboundLinkNoindexCount());
         if (isEmpty() || contains("attr_outboundlinks")) {
-            final String[] outboundlinks = new String[yacydoc.outboundLinkCount()];
+            final String[] outboundlinksTag = new String[yacydoc.outboundLinkCount()];
+            final String[] outboundlinksURLProtocol = new String[yacydoc.outboundLinkCount()];
+            final String[] outboundlinksURLStub = new String[yacydoc.outboundLinkCount()];
+            final String[] outboundlinksName = new String[yacydoc.outboundLinkCount()];
+            final String[] outboundlinksRel = new String[yacydoc.outboundLinkCount()];
+            final String[] outboundlinksText = new String[yacydoc.outboundLinkCount()];
             for (final MultiProtocolURI url: yacydoc.outboundLinks()) {
                 final Properties p = alllinks.get(url);
-                final String name = p.getProperty("name", "");
-                final String rel = p.getProperty("rel", "");
-                outboundlinks[c++] =
+                final String name = p.getProperty("name", ""); // the name attribute
+                final String rel = p.getProperty("rel", "");   // the rel-attribute
+                final String text = p.getProperty("text", ""); // the text between the <a></a> tag
+                final String urls = url.toNormalform(false, false);
+                final int pr = urls.indexOf("://");
+                outboundlinksURLProtocol[c] = urls.substring(0, pr);
+                outboundlinksURLStub[c] = urls.substring(pr + 3);
+                outboundlinksName[c] = name.length() > 0 ? name : "";
+                outboundlinksRel[c] = rel.length() > 0 ? rel : "";
+                outboundlinksText[c] = text.length() > 0 ? rel : "";
+                outboundlinksTag[c] =
                     "<a href=\"" + url.toNormalform(false, false) + "\"" +
                     (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                     ">" +
                     ((name.length() > 0) ? name : "") + "</a>";
+                c++;
             }
-            addSolr(solrdoc, "attr_outboundlinks", outboundlinks);
+            addSolr(solrdoc, "attr_outboundlinks_tag", outboundlinksTag);
+            addSolr(solrdoc, "attr_outboundlinks_protocol", outboundlinksURLProtocol);
+            addSolr(solrdoc, "attr_outboundlinks_urlstub", outboundlinksURLStub);
+            addSolr(solrdoc, "attr_outboundlinks_name", outboundlinksName);
+            addSolr(solrdoc, "attr_outboundlinks_rel", outboundlinksRel);
+            addSolr(solrdoc, "attr_outboundlinks_text", outboundlinksText);
         }
+
         // charset
         addSolr(solrdoc, "charset_s", yacydoc.getCharset());
 

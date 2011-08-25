@@ -242,8 +242,9 @@ public class SolrSingleConnector {
     }
 
     protected void addSolr(final Collection<SolrInputDocument> docs) throws IOException, SolrException {
+
         try {
-            this.server.add(docs);
+            if (docs.size() != 0) this.server.add(docs);
             this.server.commit();
             /* To immediately commit after adding documents, you could use:
                   UpdateRequest req = new UpdateRequest();

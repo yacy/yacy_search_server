@@ -115,13 +115,22 @@
 :: <!-- 6 -->
 	<fieldset><legend>Link List</legend>
 	<table border="0" cellpadding="2" cellspacing="1">
+		<tr class="head">
+			<td>nr</td>
+			<td class="tt">type</td>
+			<td class="tt">name</td>
+			<td class="tt">link</td>
+			<td class="tt">text</td>
+			<td class="tt">rel</td>
+		</tr>
 		#{links}#
 		<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
 			<td>#[nr]#</td>
 			<td class="tt"><tt>#[type]#</tt></td>
-			<td class="tt"><tt>#[text]#</tt></td>
+			<td class="tt"><tt>#[name]#</tt></td>
 			<td class="tt"><tt><a href="#[url]#">#[link]#</a></tt></td>
-			<td class="tt"><tt>#[attr]#</tt></td>
+			<td class="tt"><tt>#[text]#</tt></td>
+			<td class="tt"><tt>#[rel]#</tt></td>
 		</tr>#{/links}#
 	</table>
         </fieldset>

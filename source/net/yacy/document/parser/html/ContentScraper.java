@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -172,6 +173,36 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.canonical = null;
     }
 
+    private void mergeAnchors(final MultiProtocolURI url, final Properties p) {
+        final Properties p0 = this.anchors.get(url);
+        if (p0 == null) {
+            this.anchors.put(url, p);
+            return;
+        }
+        // merge properties
+        for (final Entry<Object, Object> entry: p.entrySet()) {
+            if (entry.getValue() != null && entry.getValue().toString().length() > 0) p0.put(entry.getKey(), entry.getValue());
+        }
+        this.anchors.put(url, p0);
+    }
+
+    /*
+    private void mergeAnchors(final MultiProtocolURI url, final String key, final String value) {
+        if (value == null) return;
+        if (value.length() == 0) return;
+        Properties p0 = this.anchors.get(url);
+        if (p0 == null) {
+            p0 = new Properties();
+            p0.put(key, value);
+            this.anchors.put(url, p0);
+            return;
+        }
+        // merge properties
+        p0.put(key, value);
+        this.anchors.put(url, p0);
+    }
+     */
+
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + UTF8.String(newtext));
         int p, pl, q, s = 0;
@@ -258,7 +289,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             s = p + 6;
             try {
                 url = new MultiProtocolURI(u);
-                this.anchors.put(url, new Properties());
+                mergeAnchors(url, new Properties());
                 continue;
             } catch (final MalformedURLException e) {}
         }
@@ -306,7 +337,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (final MalformedURLException e) {}
         } else if (tagname.equalsIgnoreCase("frame")) {
             final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", ""));
-            this.anchors.put(src, tagopts /* with property "name" */);
+            mergeAnchors(src, tagopts /* with property "name" */);
             this.frames.add(src);
             this.evaluationScores.match(Element.framepath, src.toNormalform(true, false));
         } else if (tagname.equalsIgnoreCase("body")) {
@@ -333,8 +364,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String areatitle = cleanLine(tagopts.getProperty("title",""));
             //String alt   = tagopts.getProperty("alt","");
             final String href  = tagopts.getProperty("href", "");
-            final Properties p = new Properties(); p.put("name", areatitle);
-            if (href.length() > 0) this.anchors.put(absolutePath(href), p);
+            tagopts.put("nme", areatitle);
+            if (href.length() > 0) mergeAnchors(absolutePath(href), tagopts);
         } else if (tagname.equalsIgnoreCase("link")) {
             final String href = tagopts.getProperty("href", "");
             final MultiProtocolURI newLink = absolutePath(href);
@@ -349,8 +380,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     this.images.put(ie.url(), ie);
                     this.favicon = newLink;
                 } else if (rel.equalsIgnoreCase("canonical")) {
-                    final Properties p = new Properties(); p.put("name", this.title);
-                    this.anchors.put(newLink, p);
+                    tagopts.put("name", this.title);
+                    mergeAnchors(newLink, tagopts);
                     this.canonical = newLink;
                 } else if (rel.equalsIgnoreCase("alternate") && type.equalsIgnoreCase("application/rss+xml")) {
                     this.rss.put(newLink, linktitle);
@@ -358,16 +389,16 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     this.css.put(newLink, rel);
                     this.evaluationScores.match(Element.csspath, href);
                 } else if (!rel.equalsIgnoreCase("stylesheet") && !rel.equalsIgnoreCase("alternate stylesheet")) {
-                    final Properties p = new Properties(); p.put("name", linktitle);
-                    this.anchors.put(newLink, p);
+                    tagopts.put("name", linktitle);
+                    mergeAnchors(newLink, tagopts);
                 }
             }
         } else if(tagname.equalsIgnoreCase("embed")) {
-            this.anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts /* with property "name" */);
+            mergeAnchors(absolutePath(tagopts.getProperty("src", "")), tagopts /* with property "name" */);
         } else if(tagname.equalsIgnoreCase("param")) {
             final String name = tagopts.getProperty("name", "");
             if (name.equalsIgnoreCase("movie")) {
-                this.anchors.put(absolutePath(tagopts.getProperty("value", "")), tagopts /* with property "name" */);
+                mergeAnchors(absolutePath(tagopts.getProperty("value", "")), tagopts /* with property "name" */);
             }
         }
 
@@ -389,8 +420,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     final ImageEntry ie = new ImageEntry(url, recursiveParse(text), -1, -1, -1);
                     addImage(this.images, ie);
                 } else {
-                    tagopts.put("name", recursiveParse(text));
-                    this.anchors.put(url, tagopts);
+                    tagopts.put("text", recursiveParse(text));
+                    mergeAnchors(url, tagopts);
                 }
             }
             this.evaluationScores.match(Element.apath, href);
@@ -430,7 +461,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (h.length() > 0) this.li.add(h);
         } else if (tagname.equalsIgnoreCase("iframe")) {
             final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", ""));
-            this.anchors.put(src, tagopts /* with property "name" */);
+            mergeAnchors(src, tagopts /* with property "name" */);
             this.iframes.add(src);
             this.evaluationScores.match(Element.iframepath, src.toNormalform(true, false));
         } else if (tagname.equalsIgnoreCase("script")) {
@@ -466,7 +497,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             Log.logException(e);
             return cleanLine(super.stripAll(inlineHtml));
         }
-        this.anchors.putAll(scraper.getAnchors());
+        for (final Map.Entry<MultiProtocolURI, Properties> entry: scraper.getAnchors().entrySet()) {
+            mergeAnchors(entry.getKey(), entry.getValue());
+        }
         this.images.putAll(scraper.images);
 
         return cleanLine(super.stripAll(scraper.content.getChars()));
@@ -559,7 +592,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     public boolean containsFlash() {
-        this.anchors = new HashMap<MultiProtocolURI, Properties>();
         String ext;
         for (final MultiProtocolURI url: this.anchors.keySet()) {
             ext = url.getFileExtension();

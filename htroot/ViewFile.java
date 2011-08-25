@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -309,8 +310,8 @@ public class ViewFile {
                 prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
                 boolean dark = true;
                 int i = 0;
-                i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
-                i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
+                i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0), document.getAnchors());
+                i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0), document.getAnchors());
                 dark = (i % 2 == 0);
 
                 final Map<MultiProtocolURI, ImageEntry> ts = document.getImages();
@@ -324,15 +325,17 @@ public class ViewFile {
                     prop.put("viewMode_links_" + i + "_text", (entry.alt().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.alt()));
                     prop.put("viewMode_links_" + i + "_url", entry.url().toNormalform(false, true));
                     prop.put("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(false, true)));
-                    if (entry.width() > 0 && entry.height() > 0)
-                        prop.put("viewMode_links_" + i + "_attr", entry.width() + "x" + entry.height() + " Pixel");
-                    else
-                        prop.put("viewMode_links_" + i + "_attr", "unknown");
+                    if (entry.width() > 0 && entry.height() > 0) {
+                        prop.put("viewMode_links_" + i + "_rel", entry.width() + "x" + entry.height() + " Pixel");
+                    } else {
+                        prop.put("viewMode_links_" + i + "_rel", "");
+                    }
+                    prop.put("viewMode_links_" + i + "_name", "");
                     dark = !dark;
                     i++;
                 }
-                i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0));
-                i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0));
+                i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0), document.getAnchors());
+                i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0), document.getAnchors());
                 prop.put("viewMode_links", i);
 
             }
@@ -382,16 +385,29 @@ public class ViewFile {
         return message;
     }
 
-    private static int putMediaInfo(final serverObjects prop, final String[] wordArray, int c, final Map<MultiProtocolURI, String> media, final String name, boolean dark) {
+    private static int putMediaInfo(
+                    final serverObjects prop,
+                    final String[] wordArray,
+                    int c,
+                    final Map<MultiProtocolURI, String> media,
+                    final String type,
+                    boolean dark,
+                    final Map<MultiProtocolURI, Properties> alllinks) {
         int i = 0;
         for (final Map.Entry<MultiProtocolURI, String> entry : media.entrySet()) {
+            final Properties p = alllinks.get(entry.getKey());
+            final String name = p.getProperty("name", ""); // the name attribute
+            final String rel = p.getProperty("rel", "");   // the rel-attribute
+            final String text = p.getProperty("text", ""); // the text between the <a></a> tag
+
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
-            prop.putHTML("viewMode_links_" + c + "_type", name);
-            prop.put("viewMode_links_" + c + "_text", ((entry.getValue().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.getValue()) ));
+            prop.putHTML("viewMode_links_" + c + "_type", type);
+            prop.put("viewMode_links_" + c + "_text", text + "/" + ((entry.getValue().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.getValue()) ));
             prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getKey().toNormalform(true, false)));
             prop.put("viewMode_links_" + c + "_url", entry.getKey().toNormalform(true, false));
-            prop.put("viewMode_links_" + c + "_attr", "&nbsp;");
+            prop.put("viewMode_links_" + c + "_rel", rel);
+            prop.put("viewMode_links_" + c + "_name", name);
             dark = !dark;
             c++;
             i++;
