@@ -147,7 +147,8 @@ public class WebStructureGraph {
         final HashSet<MultiProtocolURI> globalRefURLs = new HashSet<MultiProtocolURI>();
         final String refhost = url.getHost();
         MultiProtocolURI u;
-        while (it.hasNext()) {
+        int maxref = 1000;
+        while (it.hasNext() && maxref-- > 0) {
             u = it.next();
             if (u == null) continue;
             if (refhost != null && u.getHost() != null && !u.getHost().equals(refhost)) {
