@@ -29,6 +29,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.ranking.Rating;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.logging.Log;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -39,6 +40,7 @@ public class termlist_p {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
+    	final Log log = new Log("TERMLIST");
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         Segment segment = null;
@@ -50,10 +52,10 @@ public class termlist_p {
         if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         final Iterator<Rating<byte[]>> i = segment.termIndex().referenceCountIterator(null, false);
         Rating<byte[]> e;
-        int c = 0;
+        int c = 0, termnumber = 0;
         byte[] termhash, maxterm = null;
-        long count, maxcount = 0, totalmemory = 0;
-        int termnumber = 0;
+        long count, mem, maxcount = 0, totalmemory = 0;
+        String hstring;
         final Row referenceRow = segment.termIndex().referenceRow();
         final int rowsize = referenceRow.objectsize;
         final ArrayList<byte[]> deleteterms = new ArrayList<byte[]>();
@@ -68,17 +70,21 @@ public class termlist_p {
             if (count < mincount) continue;
             termhash = e.getObject();
             if (delete) deleteterms.add(termhash);
-            prop.put("terms_" + c + "_termhash", ASCII.String(termhash));
+            hstring = ASCII.String(termhash);
+            mem = 20 + count * rowsize;
+            prop.put("terms_" + c + "_termhash", hstring);
             prop.put("terms_" + c + "_count", count);
-            prop.put("terms_" + c + "_memory", 20 + count * rowsize);
+            prop.put("terms_" + c + "_memory", mem);
+            log.logWarning("termhash: " + hstring + " | count: " + count + " | memory: " + mem);
             c++;
-            totalmemory += 20 + count * rowsize;
+            totalmemory += mem;
         }
         if (delete) {
             for (final byte[] t: deleteterms) {
                 try {
                     segment.termIndex().delete(t);
                 } catch (final IOException e1) {
+                	log.logWarning("Error deleting " + ASCII.String(t), e1);
                     e1.printStackTrace();
                 }
             }
@@ -89,6 +95,11 @@ public class termlist_p {
         prop.put("termnumber", termnumber);
         prop.put("totalmemory", totalmemory);
 
+        log.logWarning("finished termlist_p -> terms: " + c);
+        log.logWarning("maxterm: "+ (maxterm == null ? "" : ASCII.String(maxterm)));
+        log.logWarning("maxcount:  " + maxcount);
+        log.logWarning("termnumber: " + termnumber);
+        log.logWarning("totalmemory: " + totalmemory);
         // return rewrite properties
         return prop;
     }

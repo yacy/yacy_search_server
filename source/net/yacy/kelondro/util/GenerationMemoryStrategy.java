@@ -115,14 +115,16 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return bytes available to allocate in Eden Space (Young Generation)
      */
     private final long youngAvailable() {
-    	return youngUsage(true).getCommitted() - youngUsage(true).getUsed();
+    	final MemoryUsage usage = youngUsage(true);
+    	return usage.getCommitted() - usage.getUsed();
     }
     
     /**
      * @return bytes available to allocate in Tenured Space (Old Generation)
      */
     private final long oldAvailable() {
-    	return oldUsage(true).getCommitted() - oldUsage(true).getUsed();
+    	final MemoryUsage usage = oldUsage(true);
+    	return usage.getCommitted() - usage.getUsed();
     }
     
     /**
