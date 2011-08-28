@@ -1,8 +1,8 @@
 /* base.css - Layout and general style */
 /*
-	$LastChangedDate:  23.01.2007 $
-	$LastChangedRevision:  $
-	$LastChangedBy:  netbude $
+	$LastChangedDate$
+	$LastChangedRevision$
+	$LastChangedBy$
 */
 
 /*
@@ -76,11 +76,11 @@ h4 {
 }
 
 a:link {
-  text-decoration:none;
+  text-decoration:underline;
 }
 
 a:visited {
-  text-decoration:none;
+  text-decoration:underline;
 }
 
 a:hover {
