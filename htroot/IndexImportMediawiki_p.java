@@ -1,4 +1,4 @@
-// IndexImportWikimedia.java
+// IndexImportMediawiki.java
 // -------------------------
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
 // first published 04.05.2009 on http://yacy.net
@@ -31,7 +31,7 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class IndexImportWikimedia_p {
+public class IndexImportMediawiki_p {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();

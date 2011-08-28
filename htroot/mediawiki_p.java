@@ -56,7 +56,7 @@ public class mediawiki_p {
         File dumpFile = new File(sb.getDataPath(), "DATA/HTCACHE/mediawiki/" + dump);
         if (!dumpFile.exists()) return post;
         MediawikiImporter.checkIndex(dumpFile);
-        MediawikiImporter.wikisourcerecord w = MediawikiImporter.find(title.replaceAll(" ", "_"), MediawikiImporter.idxFromWikimediaXML(dumpFile));
+        MediawikiImporter.wikisourcerecord w = MediawikiImporter.find(title.replaceAll(" ", "_"), MediawikiImporter.idxFromMediawikiXML(dumpFile));
         if (w == null) {
             return post;
         }

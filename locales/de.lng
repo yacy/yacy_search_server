@@ -936,7 +936,7 @@ Statistics about \#\[domains\]\# domains in this stack:==Statistiken über #[dom
 \(7\) Results from surrogates import==\(7\) Ergebnisse aus dem Surrogat Import
 These records had been imported from surrogate files in DATA/SURROGATES/in==Diese Datensätze wurden aus Surrogat Dateien in DATA/SURROGATES/in importiert
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>Anwendungsfall:</em> Dateien mit Dublin Core Metadaten Inhalt in das DATA/SURROGATES/in kopieren oder eine der Index Import Funktionen nutzen
-\(i.e. <a href="/IndexImportWikimedia_p.html">wikimedia import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportWikimedia_p.html">WikiMedia Dump Import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
+\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportMediawiki_p.html">MediaWiki Dump Import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
 #Domain==Domain
 #URLs=URLs
 "delete all"=="Alle Löschen"
@@ -1661,15 +1661,15 @@ The crawling queue==Der Crawler-Puffer
 Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zum Crawler-Puffer gehören
 #-----------------------------
 
-#File: IndexImportWikimedia_p.html
+#File: IndexImportMediawiki_p.html
 #---------------------------
-#Wikimedia Dump Import==Wikimedia Dump Import
+#MediaWiki Dump Import==MediaWiki Dump Import
 No import thread is running, you can start a new thread here==Sie können hier einen neuen Thread starten, da aktuell kein Import Thread läuft
 Bad input data:==Ungültige Eingabedaten:
-Wikimedia Dump File Selection: select a \'bz2\' file==Wikimedia Dump Datei Auswahl: Wähle eine 'bz2' Datei aus
-You can import Wikipedia dumps here. An example is the file==Hier können Sie Wikimedia Dumps importieren. Als Beispiel dient die Datei
-Dumps must be in XML format and must be encoded in bz2. Do not decompress the file after downloading!==Dumps müssen im XML Format vorliegen und bz2 komprimiert sein. Entpacken Sie die Datei nicht nach dem Herunterladen!
-"Import Wikimedia Dump"=="Importiere Wikimedia Dump"
+MediaWiki Dump File Selection: select a \'bz2\' file==MediaWiki Dump Datei Auswahl: Wähle eine 'bz2' Datei aus
+You can import MediaWiki dumps here. An example is the file==Hier können Sie MediaWiki Dumps importieren. Als Beispiel dient die Datei
+Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==Dumps müssen im XML Format vorliegen und bz2 komprimiert sein. Legen Sie die Datei im YaCy-Verzeichnis oder einem Unterordner ab.
+"Import MediaWiki Dump"=="Importiere MediaWiki Dump"
 When the import is started, the following happens:==Wenn der Import gestartet wird passiert Folgendes:
 The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Der Dump wird zur Laufzeit extrahiert und die Wiki Einträge werden in das Dublin Core Datenformat übersetzt. Die Ausgabe schaut wie folgt aus:
 Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Je 10000 Wiki Einträge werden zusammen in eine Ausgabedatei geschrieben und in /DATA/SURROGATES/in temporär gespeichert.
@@ -3381,7 +3381,7 @@ Advanced Properties==Erweiterte Konfiguration
 #---------------------------
 External Content Integration==Integration von externen Inhalten
 Import phpBB3 forum==Importiere phpBB3 Forum
-Import Wikimedia dumps==Importiere Wikimedia Dumps
+Import Mediawiki dumps==Importiere Mediawiki Dumps
 Import OAI-PMH Sources==Importiere OAI-PMH Quellen
 #-----------------------------
 
@@ -3451,7 +3451,7 @@ Crawl Start<br/>\(Expert\)==Crawl Start<br/>(Experte)
 Network<br/>Scanner==Netzwerk<br/>Scanner
 #>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
 Crawling of==Crawlen von
-#Media Wikis==Media Wikis
+#MediaWikis==MediaWikis
 >phpBB3 Forums<==>phpBB3 Foren<
 Content Import<==Content Importer<
 Network Harvesting<==Netzwerk Harvesting<
@@ -3460,7 +3460,7 @@ Network Harvesting<==Netzwerk Harvesting<
 Database Reader<==Datenbank Leser<
 for phpBB3 Forums==für phpBB3 Foren
 Dump Reader for==Dump Leser für
-#Wikimedia dumps==Wikimedia dumps
+#MediaWiki dumps==MediaWiki dumps
 #-----------------------------
 
 #File: env/templates/submenuPortalIntegration.template

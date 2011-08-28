@@ -77,7 +77,7 @@ public class MediawikiImporter extends Thread implements Importer {
     private static final String pageend = "</page>";
     private static final byte[] pagestartb = UTF8.getBytes(pagestart);
     private static final byte[] pageendb = UTF8.getBytes(pageend);
-    private static final int    docspermbinxmlbz2 = 800;  // documents per megabyte in a xml.bz2 wikimedia dump
+    private static final int    docspermbinxmlbz2 = 800;  // documents per megabyte in a xml.bz2 mediawiki dump
     
     public static Importer job; // if started from a servlet, this object is used to store the thread
     
@@ -274,22 +274,22 @@ public class MediawikiImporter extends Thread implements Importer {
         }
     }
     
-    public static void checkIndex(File wikimediaxml) {
-        File idx = idxFromWikimediaXML(wikimediaxml);
+    public static void checkIndex(File mediawikixml) {
+        File idx = idxFromMediawikiXML(mediawikixml);
         if (idx.exists()) return;
-        new indexMaker(wikimediaxml).start();
+        new indexMaker(mediawikixml).start();
     }
     
     public static class indexMaker extends Thread {
         
-        File wikimediaxml;
-        public indexMaker(File wikimediaxml) {
-            this.wikimediaxml = wikimediaxml;
+        File mediawikixml;
+        public indexMaker(File mediawikixml) {
+            this.mediawikixml = mediawikixml;
         }
         
         public void run() {
             try {
-                createIndex(this.wikimediaxml);
+                createIndex(this.mediawikixml);
             } catch (final IOException e) {
             } catch (final Exception e) {
                 Log.logException(e);
@@ -297,8 +297,8 @@ public class MediawikiImporter extends Thread implements Importer {
         }
     }
     
-    public static File idxFromWikimediaXML(File wikimediaxml) {
-        return new File(wikimediaxml.getAbsolutePath() + ".idx.xml");
+    public static File idxFromMediawikiXML(File mediawikixml) {
+        return new File(mediawikixml.getAbsolutePath() + ".idx.xml");
     }
     
     public static void createIndex(File dumpFile) throws IOException {
@@ -307,7 +307,7 @@ public class MediawikiImporter extends Thread implements Importer {
         
         // init reader, producer and consumer
         PositionAwareReader in = new PositionAwareReader(dumpFile);
-        indexProducer producer = new indexProducer(100, idxFromWikimediaXML(dumpFile));
+        indexProducer producer = new indexProducer(100, idxFromMediawikiXML(dumpFile));
         wikiConsumer consumer = new wikiConsumer(100, producer);
         ExecutorService service = Executors.newFixedThreadPool(2);
         Future<Integer> producerResult = service.submit(consumer);
