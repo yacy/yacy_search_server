@@ -65,7 +65,7 @@ public class RSSReader extends DefaultHandler {
         try {
             final SAXParser saxParser = factory.newSAXParser();
             // do not look at external dtd - see: http://www.ibm.com/developerworks/xml/library/x-tipcfsx/index.html
-            ((XMLReader)saxParser).setEntityResolver(new EntityResolver() {
+            saxParser.getXMLReader().setEntityResolver(new EntityResolver() {
 				@Override
 				public InputSource resolveEntity(final String arg0, final String arg1)
 						throws SAXException, IOException {
