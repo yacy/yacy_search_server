@@ -117,10 +117,10 @@ public final class TransformerWriter extends Writer {
             bb.append((int)'>');
             final char[] result = bb.getChars();
             try {
-				bb.close();
-			} catch (final IOException e) {
-			    Log.logException(e);
-			}
+                bb.close();
+            } catch (final IOException e) {
+                Log.logException(e);
+            }
             return result;
     }
 
@@ -137,10 +137,10 @@ public final class TransformerWriter extends Writer {
             bb.append((int)'<').append((int)'/').append(tagname).append((int)'>');
             final char[] result = bb.getChars();
             try {
-				bb.close();
-			} catch (final IOException e) {
-			    Log.logException(e);
-			}
+                bb.close();
+            } catch (final IOException e) {
+                Log.logException(e);
+            }
             return result;
     }
 
@@ -155,10 +155,10 @@ public final class TransformerWriter extends Writer {
             bb.append((int)'>');
             final char[] result = bb.getChars();
             try {
-				bb.close();
-			} catch (final IOException e) {
-			    Log.logException(e);
-			}
+                bb.close();
+            } catch (final IOException e) {
+                Log.logException(e);
+            }
             return result;
     }
 
@@ -168,10 +168,10 @@ public final class TransformerWriter extends Writer {
             cb.append(text).append((int)'<').append((int)'/').append(tagname).append((int)'>');
             final char[] result = cb.getChars();
             try {
-				cb.close();
-			} catch (final IOException e) {
-			    Log.logException(e);
-			}
+                cb.close();
+            } catch (final IOException e) {
+                Log.logException(e);
+            }
             return result;
     }
 
@@ -188,89 +188,53 @@ public final class TransformerWriter extends Writer {
             }
             final char[] result;
             if (bb.length() > 0)
-            	result = bb.getChars(1);
+                result = bb.getChars(1);
             else
-            	result = bb.getChars();
+                result = bb.getChars();
             try {
-				bb.close();
-			} catch (final IOException ex) {
-			    Log.logException(ex);
-			}
+                bb.close();
+            } catch (final IOException ex) {
+                Log.logException(ex);
+            }
             return result;
     }
 
-    private static final char[] mergedScrape(final char[] a, final char[] b) {
-        if (a == null) return b;
-        if (b == null) return a;
-        final StringBuilder sb = new StringBuilder(a.length + b.length + 1);
-        sb.append(a).append(' ').append(b);
-        return sb.toString().toCharArray();
-    }
-
-    /**
-     * every tag that appears is handed to the filterTag method. The method then returns text from the tag
-     * but also operates on the tag content to scrape information from it. In case that a tag is unclosed if
-     * another tag appears, both, the unclosed and the new one are merged into one new char[]
-     * @param tag
-     * @param opening
-     * @param content
-     * @param quotechar
-     * @return
-     */
     private char[] filterTag(final String tag, final boolean opening, final char[] content, final char quotechar) {
-        //System.out.println("FILTER1: filterTag=" + ((this.filterTag == null) ? "null" : this.filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + new String(content)); // debug
-        char[] unclosed = null;
-
-        if (this.filterTag != null && opening) {
-            // there is a missing close tag for the currently parsed tag filterTag
-            // close that tag here and go on with new tag
-            if (this.scraper != null) {
-                this.scraper.scrapeTag1(this.filterTag, this.filterOpts, this.filterCont.getChars());
-            }
-            if (this.transformer != null) {
-                unclosed = this.transformer.transformTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
-            } else {
-                unclosed = genTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
-            }
-            this.filterTag = null;
-            this.filterOpts = null;
-            this.filterCont = null;
-        }
-
+//      System.out.println("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + UTF8.String(content)); // debug
         if (this.filterTag == null) {
             // we are not collection tag text
             if (tag == null) {
                 // and this is not a tag opener/closer
                 if (this.scraper != null) this.scraper.scrapeText(content, null);
-                if (this.transformer != null) return mergedScrape(unclosed, this.transformer.transformText(content));
-                return mergedScrape(unclosed, content);
+                if (this.transformer != null) return this.transformer.transformText(content);
+                return content;
             }
 
             // we have a new tag
             if (opening) {
                 if ((this.scraper != null) && (this.scraper.isTag0(tag))) {
                     // this single tag is collected at once here
-                	final CharBuffer charBuffer = new CharBuffer(content);
+                    final CharBuffer charBuffer = new CharBuffer(content);
                     this.scraper.scrapeTag0(tag, charBuffer.propParser());
                     try {
-						charBuffer.close();
-					} catch (final IOException e) {
-						// TODO Auto-generated catch block
-					    Log.logException(e);
-					}
+                        charBuffer.close();
+                    } catch (final IOException e) {
+                        // TODO Auto-generated catch block
+                        Log.logException(e);
+                    }
                 }
                 if ((this.transformer != null) && (this.transformer.isTag0(tag))) {
                     // this single tag is collected at once here
-                	final CharBuffer scb = new CharBuffer(content);
-                	try {
-                		return mergedScrape(unclosed, this.transformer.transformTag0(tag, scb.propParser(), quotechar));
-                	} finally {
-                		try {
-							scb.close();
-						} catch (final IOException e) {
-						    Log.logException(e);
-						}
-                	}
+                    final CharBuffer scb = new CharBuffer(content);
+                    try {
+                        return this.transformer.transformTag0(tag, scb.propParser(), quotechar);
+                    } finally {
+                        try {
+                            scb.close();
+                        } catch (final IOException e) {
+                            Log.logException(e);
+                        }
+                    }
                 } else if (((this.scraper != null) && (this.scraper.isTag1(tag))) ||
                            ((this.transformer != null) && (this.transformer.isTag1(tag)))) {
                     // ok, start collecting
@@ -278,20 +242,20 @@ public final class TransformerWriter extends Writer {
                     final CharBuffer scb = new CharBuffer(content);
                     this.filterOpts = scb.propParser();
                     try {
-						scb.close();
-					} catch (final IOException e) {
-					    Log.logException(e);
-					}
+                        scb.close();
+                    } catch (final IOException e) {
+                        Log.logException(e);
+                    }
                     if (this.filterCont == null) this.filterCont = new CharBuffer(Math.max(100, content.length)); else this.filterCont.reset();
-                    return mergedScrape(unclosed, new char[0]);
+                    return new char[0];
                 } else {
                      // we ignore that thing and return it again
-                     return mergedScrape(unclosed, genTag0raw(tag, true, content));
+                     return genTag0raw(tag, true, content);
                 }
             }
 
             // we ignore that thing and return it again
-            return mergedScrape(unclosed, genTag0raw(tag, false, content));
+            return genTag0raw(tag, false, content);
 
         }
 
@@ -299,21 +263,19 @@ public final class TransformerWriter extends Writer {
         if (tag == null) {
             // go on collecting content
             if (this.scraper != null) this.scraper.scrapeText(content, this.filterTag);
-            try {
-                if (this.transformer != null) {
-                    this.filterCont.append(this.transformer.transformText(content));
-                } else {
-                    this.filterCont.append(content);
-                }
-            } catch (final OutOfMemoryError e) {}
-            return mergedScrape(unclosed, new char[0]);
+            if (this.transformer != null) {
+                this.filterCont.append(this.transformer.transformText(content));
+            } else {
+                this.filterCont.append(content);
+            }
+            return new char[0];
         }
 
         // it's a tag! which one?
-        if (opening || !(tag.equalsIgnoreCase(this.filterTag))) {
+        if ((opening) || (!(tag.equalsIgnoreCase(this.filterTag)))) {
             // this tag is not our concern. just add it
             this.filterCont.append(genTag0raw(tag, opening, content));
-            return mergedScrape(unclosed, new char[0]);
+            return new char[0];
         }
 
         // it's our closing tag! return complete result.
@@ -327,7 +289,7 @@ public final class TransformerWriter extends Writer {
         this.filterTag = null;
         this.filterOpts = null;
         this.filterCont = null;
-        return mergedScrape(unclosed, ret);
+        return ret;
     }
 
     private char[] filterFinalize(final char quotechar) {
@@ -337,9 +299,7 @@ public final class TransformerWriter extends Writer {
 
         // it's our closing tag! return complete result.
         char[] ret;
-        if (this.scraper != null) {
-            this.scraper.scrapeTag1(this.filterTag, this.filterOpts, this.filterCont.getChars());
-        }
+        if (this.scraper != null) this.scraper.scrapeTag1(this.filterTag, this.filterOpts, this.filterCont.getChars());
         if (this.transformer != null) {
             ret = this.transformer.transformTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
         } else {
@@ -413,7 +373,7 @@ public final class TransformerWriter extends Writer {
                     // the tag ends here. after filtering: pass on
                     filtered = filterSentence(this.buffer.getChars(), singlequote);
                     if (this.out != null) { this.out.write(filtered); }
-                    // buffer = new serverByteBuffer();
+                    // this.buffer = new serverByteBuffer();
                     this.buffer.reset();
                 }
             } else if (this.inDoubleQuote) {
@@ -425,7 +385,7 @@ public final class TransformerWriter extends Writer {
                     // the tag ends here. after filtering: pass on
                     filtered = filterSentence(this.buffer.getChars(), doublequote);
                     if (this.out != null) this.out.write(filtered);
-                    // buffer = new serverByteBuffer();
+                    // this.buffer = new serverByteBuffer();
                     this.buffer.reset();
                 }
             } else if (this.inComment) {
@@ -438,7 +398,7 @@ public final class TransformerWriter extends Writer {
                     final char[] comment = this.buffer.getChars();
                     if (this.scraper != null) this.scraper.scrapeComment(comment);
                     if (this.out != null) this.out.write(comment);
-                    // buffer = new serverByteBuffer();
+                    // this.buffer = new serverByteBuffer();
                     this.buffer.reset();
                 }
             } else if (this.inScript) {
@@ -456,7 +416,7 @@ public final class TransformerWriter extends Writer {
                     // script is at end
                     this.inScript = false;
                     if (this.out != null) this.out.write(this.buffer.getChars());
-                    // buffer = new serverByteBuffer();
+                    // this.buffer = new serverByteBuffer();
                     this.buffer.reset();
                 }
             } else if (this.inStyle) {
@@ -473,7 +433,7 @@ public final class TransformerWriter extends Writer {
                     // style is at end
                     this.inStyle = false;
                     if (this.out != null) this.out.write(this.buffer.getChars());
-                    // buffer = new serverByteBuffer();
+                    // this.buffer = new serverByteBuffer();
                     this.buffer.reset();
                 }
             } else {
@@ -517,7 +477,7 @@ public final class TransformerWriter extends Writer {
                         // the tag ends here. after filtering: pass on
                         filtered = filterSentence(this.buffer.getChars(), doublequote);
                         if (this.out != null) this.out.write(filtered);
-                        // buffer = new serverByteBuffer();
+                        // this.buffer = new serverByteBuffer();
                         this.buffer.reset();
                     } else if (c == lb) {
                         // this is an error case
@@ -526,7 +486,7 @@ public final class TransformerWriter extends Writer {
                             filtered = filterSentence(this.buffer.getChars(), doublequote);
                             if (this.out != null) this.out.write(filtered);
                         }
-                        // buffer = new serverByteBuffer();
+                        // this.buffer = new serverByteBuffer();
                         this.buffer.reset();
                         this.buffer.append(c);
                     } else {
@@ -540,7 +500,7 @@ public final class TransformerWriter extends Writer {
                             filtered = filterSentence(this.buffer.getChars(), doublequote);
                             if (this.out != null) this.out.write(filtered);
                         }
-                        // buffer = new serverByteBuffer();
+                        // this.buffer = new serverByteBuffer();
                         this.buffer.reset();
                         this.buffer.append(c);
                     } else {
@@ -566,7 +526,7 @@ public final class TransformerWriter extends Writer {
     }
 
     public void flush() throws IOException {
-        // we cannot flush the current string buffer to prevent that
+        // we cannot flush the current string this.buffer to prevent that
         // the filter process is messed up
         // instead, we simply flush the underlying output stream
         if (this.out != null) this.out.flush();
