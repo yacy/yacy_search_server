@@ -96,11 +96,8 @@ public class RSSReader extends DefaultHandler {
         if (!equals(a, UTF8.getBytes("<?xml")) && !equals(a, UTF8.getBytes("<rss"))) {
             throw new IOException("response does not contain valid xml");
         }
-        final String end = UTF8.String(a, a.length - 80, 80);
-        Type type = Type.none;
-        if (end.indexOf("rss") > 0) type = Type.rss;
-        if (end.indexOf("feed") > 0) type = Type.atom;
-        if (end.indexOf("rdf") > 0) type = Type.rdf;
+        
+        final Type type = findOutType(a);
         if (type == Type.none) {
             throw new IOException("response incomplete");
         }
@@ -118,7 +115,36 @@ public class RSSReader extends DefaultHandler {
         try { bais.close(); } catch (final IOException e) {}
         return reader;
     }
-    
+
+    /**
+     * Tries to find out the type of feed by stepping through its data
+     * starting in the end and looking at the last XML tag. Just grabbing
+     * the last few characters of the data does not work since some
+     * people add quite long comments at the end of their feeds.
+     * @param a contains the feed
+     * @return type of feed
+     */
+    private static Type findOutType(final byte[] a) {
+        String end;
+        int i = 1;
+
+        do {
+            /* In first iteration grab the last 80 characters, after that
+             * move towards the start of the data and take some more (90)
+             * to have an overlap in order to not miss anything if the tag
+             * is on the border of two 80 character blocks.
+             */
+            end = UTF8.String(a, a.length - (i * 80), (80 + ((i > 1)? 10 : 0)));
+            i++;
+        } while(!end.contains("</"));
+
+        Type type = Type.none;
+        if (end.indexOf("rss") > 0) type = Type.rss;
+        if (end.indexOf("feed") > 0) type = Type.atom;
+        if (end.indexOf("rdf") > 0) type = Type.rdf;
+        return type;
+    }
+
     private final static boolean equals(final byte[] buffer, final byte[] pattern) {
         // compares two byte arrays: true, if pattern appears completely at offset position
         if (buffer.length < pattern.length) return false;
