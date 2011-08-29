@@ -403,7 +403,7 @@ public class ViewFile {
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.putHTML("viewMode_links_" + c + "_type", type);
-            prop.put("viewMode_links_" + c + "_text", text + "/" + ((entry.getValue().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.getValue()) ));
+            prop.put("viewMode_links_" + c + "_text", text);
             prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getKey().toNormalform(true, false)));
             prop.put("viewMode_links_" + c + "_url", entry.getKey().toNormalform(true, false));
             prop.put("viewMode_links_" + c + "_rel", rel);
