@@ -45,8 +45,11 @@ keywords
 ## character encoding, string
 charset_s
 
+## tags of css entries, normalized with absolute URL, textgen
+attr_css_tag
+
 ## urls of css entries, normalized with absolute URL, textgen
-attr_css
+attr_css_url
 
 ## number of css entries, int
 csscount_i
@@ -74,11 +77,24 @@ wordcount_i
 
 ## internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
 attr_inboundlinks_tag
-attr_inboundlinks_protocol
-attr_inboundlinks_urlstub
-attr_inboundlinks_name
-attr_inboundlinks_rel
-attr_inboundlinks_text
+
+## internal links, only the protocol
+#attr_inboundlinks_protocol
+
+## internal links, the url only without the protocol
+#attr_inboundlinks_urlstub
+
+## internal links, the name property of the a-tag
+#attr_inboundlinks_name
+
+## internal links, the rel property of the a-tag
+#attr_inboundlinks_rel
+
+## internal links, the rel property of the a-tag, coded binary
+#attr_inboundlinks_relcode
+
+## internal links, the text content of the a-tag
+#attr_inboundlinks_text
 
 ## total number of inbound links, int
 inboundlinkscount_i
@@ -88,17 +104,42 @@ inboundlinksnoindexcount_i
 
 ## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
 attr_outboundlinks_tag
-attr_outboundlinks_protocol
-attr_outboundlinks_urlstub
-attr_outboundlinks_name
-attr_outboundlinks_rel
-attr_outboundlinks_text
 
-## total number of external links, int
-outboundlinkscount_i
+## external links, only the protocol
+#attr_outboundlinks_protocol
+
+## external links, the url only without the protocol
+#attr_outboundlinks_urlstub
+
+## external links, the name property of the a-tag
+#attr_outboundlinks_name
+
+## external links, the rel property of the a-tag
+#attr_outboundlinks_rel
+
+## external links, the text content of the a-tag
+#attr_outboundlinks_text
+
+## external number of inbound links, int
+outboundlinks_i
 
 ## number of external links with noindex tag, int
 outboundlinksnoindexcount_i
+
+## all image tags, encoded as <img> tag inclusive alt- and title property, textgen
+attr_images_tag
+
+## all image links without the protocol and '://'
+#attr_images_urlstub
+
+## all image link protocols
+#attr_images_protocol
+
+## all image link alt tag
+#attr_images_alt
+
+## number of images, int
+imagescount_i
 
 ## h1 header, textgen
 attr_h1
@@ -154,12 +195,6 @@ attr_italiccount
 ## total number of occurrences of <i>, int
 italic_i
 
-## all image tags, encoded as <img> tag inclusive alt- and title property, textgen
-attr_images
-
-## number of images, int
-imagescount_i
-
 ## flag that shows if a swf file is linked, boolean
 flash_b
 
@@ -204,6 +239,12 @@ attr_tracker
 
 ## number of attribute counts in attr_tracker, textgen
 attr_trackercount
+
+## names matching title expressions, textgen
+attr_title
+
+## number of matching title expressions, textgen
+attr_titlecount
 
 ## fail reason if a page was not loaded. if the page was loaded then this field is empty, text
 failreason_t

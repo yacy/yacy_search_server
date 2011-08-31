@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -34,8 +34,6 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.regex.Pattern;
 
-import com.ibm.icu.text.CharsetDetector;
-
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.document.AbstractParser;
@@ -47,47 +45,49 @@ import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.util.FileUtils;
 
+import com.ibm.icu.text.CharsetDetector;
+
 
 public class htmlParser extends AbstractParser implements Parser {
 
     private static final Pattern patternUnderline = Pattern.compile("_");
 
     public htmlParser() {
-        super("HTML Parser"); 
-        SUPPORTED_EXTENSIONS.add("htm");
-        SUPPORTED_EXTENSIONS.add("html");
-        SUPPORTED_EXTENSIONS.add("phtml");
-        SUPPORTED_EXTENSIONS.add("shtml");
-        SUPPORTED_EXTENSIONS.add("xhtml");
-        SUPPORTED_EXTENSIONS.add("php");
-        SUPPORTED_EXTENSIONS.add("php3");
-        SUPPORTED_EXTENSIONS.add("php4");
-        SUPPORTED_EXTENSIONS.add("php5");
-        SUPPORTED_EXTENSIONS.add("cfm");
-        SUPPORTED_EXTENSIONS.add("asp");
-        SUPPORTED_EXTENSIONS.add("aspx");
-        SUPPORTED_EXTENSIONS.add("tex");
-        SUPPORTED_EXTENSIONS.add("txt");
+        super("HTML Parser");
+        this.SUPPORTED_EXTENSIONS.add("htm");
+        this.SUPPORTED_EXTENSIONS.add("html");
+        this.SUPPORTED_EXTENSIONS.add("phtml");
+        this.SUPPORTED_EXTENSIONS.add("shtml");
+        this.SUPPORTED_EXTENSIONS.add("xhtml");
+        this.SUPPORTED_EXTENSIONS.add("php");
+        this.SUPPORTED_EXTENSIONS.add("php3");
+        this.SUPPORTED_EXTENSIONS.add("php4");
+        this.SUPPORTED_EXTENSIONS.add("php5");
+        this.SUPPORTED_EXTENSIONS.add("cfm");
+        this.SUPPORTED_EXTENSIONS.add("asp");
+        this.SUPPORTED_EXTENSIONS.add("aspx");
+        this.SUPPORTED_EXTENSIONS.add("tex");
+        this.SUPPORTED_EXTENSIONS.add("txt");
         //SUPPORTED_EXTENSIONS.add("js");
-        SUPPORTED_EXTENSIONS.add("jsp");
-        SUPPORTED_EXTENSIONS.add("mf");
-        SUPPORTED_EXTENSIONS.add("pl");
-        SUPPORTED_EXTENSIONS.add("py");
-        SUPPORTED_MIME_TYPES.add("text/html");
-        SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
-        SUPPORTED_MIME_TYPES.add("application/xhtml+xml");
-        SUPPORTED_MIME_TYPES.add("application/x-httpd-php");
-        SUPPORTED_MIME_TYPES.add("application/x-tex");
-        SUPPORTED_MIME_TYPES.add("text/plain");
-        SUPPORTED_MIME_TYPES.add("text/sgml");
-        SUPPORTED_MIME_TYPES.add("text/csv");
+        this.SUPPORTED_EXTENSIONS.add("jsp");
+        this.SUPPORTED_EXTENSIONS.add("mf");
+        this.SUPPORTED_EXTENSIONS.add("pl");
+        this.SUPPORTED_EXTENSIONS.add("py");
+        this.SUPPORTED_MIME_TYPES.add("text/html");
+        this.SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
+        this.SUPPORTED_MIME_TYPES.add("application/xhtml+xml");
+        this.SUPPORTED_MIME_TYPES.add("application/x-httpd-php");
+        this.SUPPORTED_MIME_TYPES.add("application/x-tex");
+        this.SUPPORTED_MIME_TYPES.add("text/plain");
+        this.SUPPORTED_MIME_TYPES.add("text/sgml");
+        this.SUPPORTED_MIME_TYPES.add("text/csv");
     }
-    
+
     public static ContentScraper parseToScraper(
-            final MultiProtocolURI location, 
-            final String documentCharset, 
+            final MultiProtocolURI location,
+            final String documentCharset,
             InputStream sourceStream) throws Parser.Failure, IOException {
-        
+
         // make a scraper
         String charset = null;
 
@@ -95,72 +95,72 @@ public class htmlParser extends AbstractParser implements Parser {
         if (documentCharset != null) {
             charset = patchCharsetEncoding(documentCharset);
         }
-        
+
         // nothing found: try to find a meta-tag
         if (charset == null) {
             try {
                 final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream,documentCharset,location,null,false);
                 sourceStream = htmlFilter;
                 charset = htmlFilter.detectCharset();
-            } catch (IOException e1) {
+            } catch (final IOException e1) {
                 throw new Parser.Failure("Charset error:" + e1.getMessage(), location);
             }
         }
 
         // the author didn't tell us the encoding, try the mozilla-heuristic
         if (charset == null) {
-        	CharsetDetector det = new CharsetDetector();
+        	final CharsetDetector det = new CharsetDetector();
         	det.enableInputFilter(true);
-        	InputStream detStream = new BufferedInputStream(sourceStream);
+        	final InputStream detStream = new BufferedInputStream(sourceStream);
         	det.setText(detStream);
         	charset = det.detect().getName();
         	sourceStream = detStream;
         }
-        
+
         // wtf? still nothing, just take system-standard
         if (charset == null) {
             charset = Charset.defaultCharset().name();
         }
-        
+
         Charset c;
         try {
         	c = Charset.forName(charset);
-        } catch (IllegalCharsetNameException e) {
+        } catch (final IllegalCharsetNameException e) {
         	c = Charset.defaultCharset();
-        } catch (UnsupportedCharsetException e) {
+        } catch (final UnsupportedCharsetException e) {
         	c = Charset.defaultCharset();
         }
-        
+
         // parsing the content
-        final ContentScraper scraper = new ContentScraper(location);        
+        final ContentScraper scraper = new ContentScraper(location);
         final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false);
         try {
             FileUtils.copy(sourceStream, writer, c);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new Parser.Failure("IO error:" + e.getMessage(), location);
         } finally {
         	sourceStream.close();
             writer.close();
         }
-        //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
+        //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
         //serverFileUtils.copy(sourceFile, hfos);
         //hfos.close();
         if (writer.binarySuspect()) {
             final String errorMsg = "Binary data found in resource";
-            throw new Parser.Failure(errorMsg, location);    
+            throw new Parser.Failure(errorMsg, location);
         }
         return scraper;
     }
 
     public Document[] parse(
-            final MultiProtocolURI location, 
-            final String mimeType, 
-            final String documentCharset, 
+            final MultiProtocolURI location,
+            final String mimeType,
+            final String documentCharset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
-        
+
         try {
 			return transformScraper(location, mimeType, documentCharset, parseToScraper(location, documentCharset, sourceStream));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new Parser.Failure("IOException in htmlParser: " + e.getMessage(), location);
 		}
     }
@@ -197,7 +197,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getRSS(),
                 scraper.getImages(),
                 scraper.indexingDenied())};
-        //scraper.close();            
+        //scraper.close();
         for (final Document ppd: ppds) {
             ppd.setFavicon(scraper.getFavicon());
         }
@@ -214,10 +214,10 @@ public class htmlParser extends AbstractParser implements Parser {
      * @return patched encoding name
      */
     public static String patchCharsetEncoding(String encoding) {
-        
+
         // do nothing with null
         if ((encoding == null) || (encoding.length() < 3)) return null;
-        
+
         // trim encoding string
         encoding = encoding.trim();
 
@@ -228,7 +228,7 @@ public class htmlParser extends AbstractParser implements Parser {
         // all other names but such with "windows" use uppercase
         if (encoding.startsWith("WINDOWS")) encoding = "windows" + encoding.substring(7);
         if (encoding.startsWith("MACINTOSH")) encoding = "MacRoman";
-        
+
         // fix wrong fill characters
         encoding = patternUnderline.matcher(encoding).replaceAll("-");
 
@@ -236,7 +236,7 @@ public class htmlParser extends AbstractParser implements Parser {
         if (encoding.matches(".*UTF[-_]?8.*")) return "UTF-8";
         if (encoding.startsWith("US")) return "US-ASCII";
         if (encoding.startsWith("KOI")) return "KOI8-R";
-        
+
         // patch missing '-'
         if (encoding.startsWith("windows") && encoding.length() > 7) {
             final char c = encoding.charAt(7);
@@ -244,7 +244,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 encoding = "windows-" + encoding.substring(7);
             }
         }
-        
+
         if (encoding.startsWith("ISO")) {
             // patch typos
             if (encoding.length() > 3) {
@@ -256,11 +256,11 @@ public class htmlParser extends AbstractParser implements Parser {
             if (encoding.length() > 8) {
                 final char c = encoding.charAt(8);
                 if ((c >= '0') && (c <= '9')) {
-                    encoding = encoding.substring(0, 8) + "-" + encoding.substring(8);           
-                } 
+                    encoding = encoding.substring(0, 8) + "-" + encoding.substring(8);
+                }
             }
         }
-        
+
         // patch wrong name
         if (encoding.startsWith("ISO-8559")) {
             // popular typo
@@ -279,26 +279,26 @@ public class htmlParser extends AbstractParser implements Parser {
 
         return encoding;
     }
- 
-    public static void main(String[] args) {
+
+    public static void main(final String[] args) {
         // test parsing of a url
         MultiProtocolURI url;
         try {
             url = new MultiProtocolURI(args[0]);
-            byte[] content = url.get(ClientIdentification.getUserAgent(), 3000);
-            Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
-            String title = document[0].dc_title();
+            final byte[] content = url.get(ClientIdentification.getUserAgent(), 3000);
+            final Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
+            final String title = document[0].dc_title();
             System.out.println(title);
             System.out.println(CharacterCoding.unicode2html(title, false));
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
-        } catch (Parser.Failure e) {
+        } catch (final Parser.Failure e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             e.printStackTrace();
         }
     }
-    
+
 }

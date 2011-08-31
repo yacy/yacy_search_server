@@ -147,7 +147,7 @@ public final class LoaderDispatcher {
         FileUtils.copy(b, tmp);
         tmp.renameTo(targetFile);
     }
-    
+
     public Response load(final Request request, final CacheStrategy cacheStrategy, final boolean checkBlacklist) throws IOException {
     	return load(request, cacheStrategy, protocolMaxFileSize(request.url()), checkBlacklist);
     }
@@ -274,7 +274,7 @@ public final class LoaderDispatcher {
         if (response != null && response.getContent() != null) {
             // we got something. Now check if we want to store that to the cache
             // first check looks if we want to store the content to the cache
-            if (!crawlProfile.storeHTCache()) {
+            if (crawlProfile == null || !crawlProfile.storeHTCache()) {
                 // no caching wanted. Thats ok, do not write any message
                 return response;
             }
@@ -294,7 +294,7 @@ public final class LoaderDispatcher {
 
         throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
     }
-    
+
     private int protocolMaxFileSize(final DigestURI url) {
     	if (url.isHTTP() || url.isHTTPS())
     		return this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);

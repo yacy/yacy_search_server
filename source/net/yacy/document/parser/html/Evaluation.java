@@ -62,6 +62,7 @@ public class Evaluation {
 
     public static enum Element {
         text,
+        title,
         bodyclass,
         divid,
         csspath,

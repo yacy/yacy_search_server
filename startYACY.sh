@@ -124,6 +124,8 @@ then
     then 
         ENABLEHUGEPAGES=1
     fi
+    # the G1 GC is on by default in Java7, so we try that here as well
+    # JAVA_ARGS="$JAVA_ARGS -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
 elif [ $OS = "SunOS" ]
 then
 	# the UseConcMarkSweepGC option caused a full CPU usage - bug on Darwin.

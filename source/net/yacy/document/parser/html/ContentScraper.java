@@ -447,6 +447,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (h.length() > 0) this.headlines[5].add(h);
         } else if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) {
             this.title = recursiveParse(text);
+            this.evaluationScores.match(Element.title, this.title);
         } else if ((tagname.equalsIgnoreCase("b")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) this.bold.inc(h);
