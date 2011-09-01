@@ -168,6 +168,8 @@ function resultImages() {
 
 function resultLine(type, item, linenumber) {
   // evaluate item
+  if (item == null) return "";
+  if (item.link == null) return "";
   p = item.link.indexOf("//");
   protocol = "";
   host = "";
