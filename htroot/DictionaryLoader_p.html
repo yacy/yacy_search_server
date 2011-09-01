@@ -94,6 +94,48 @@
       </fieldset>
     </form>
     
+    <form action="DictionaryLoader_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend>Suggestions</legend>
+        Suggestion dictionaries will help YaCy to provide better suggestions during the input of search words
+        
+        <h4><a href="http://www.ids-mannheim.de/kl/derewo/">DeReWo - Korpusbasierte Grund-/Wortformenlisten (German) of 'Institut f&uuml;r Deutsche Sprache'</a></h4>
+	    <p>This file provides 100000 most common german words for suggestions</p>
+        
+        <dl>
+          <dt><label>Download from</label></dt>
+          <dd>#[drw0URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[drw0Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(drw0Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/drw0Status)#</dd>
+          <dt>Action</dt>
+          <dd>#(drw0Status)#
+          <input type="submit" name="drw0Load" value="Load" />::
+          <input type="submit" name="drw0Deactivate" value="Deactivate" />
+          <input type="submit" name="drw0Remove" value="Remove" />::
+          <input type="submit" name="drw0Activate" value="Activate" />
+          <input type="submit" name="drw0Remove" value="Remove" />
+          #(/drw0Status)#</dd>
+          #(drw0ActionLoaded)#::
+          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
+          #(/drw0ActionLoaded)#
+          #(drw0ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/drw0ActionRemoved)#
+          #(drw0ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot deactivate dictionary file: #[error]#</div></dd>
+          #(/drw0ActionDeactivated)#
+          #(drw0ActionActivated)#::
+          <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
+          #(/drw0ActionActivated)#        
+        </dl>
+      </fieldset>
+    </form>
   #%env/templates/footer.template%#
   </body>
 </html>

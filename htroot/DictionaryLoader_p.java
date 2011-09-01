@@ -140,6 +140,50 @@ public class DictionaryLoader_p {
             prop.put("geo1ActionActivated", 1);
         }
 
+        // DRW0
+        if (post.containsKey("drw0Load")) {
+            // load from the net
+            try {
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.DRW0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final byte[] b = response.getContent();
+                FileUtils.copy(b, LibraryProvider.Dictionary.DRW0.file());
+                LibraryProvider.integrateDeReWo();
+                LibraryProvider.initDidYouMean();
+                prop.put("drw0Status", LibraryProvider.Dictionary.DRW0.file().exists() ? 1 : 0);
+                prop.put("drw0ActionLoaded", 1);
+            } catch (final MalformedURLException e) {
+                Log.logException(e);
+                prop.put("drw0ActionLoaded", 2);
+                prop.put("drw0ActionLoaded_error", e.getMessage());
+            } catch (final IOException e) {
+                Log.logException(e);
+                prop.put("drw0ActionLoaded", 2);
+                prop.put("drw0ActionLoaded_error", e.getMessage());
+            }
+        }
+
+        if (post.containsKey("drw0Remove")) {
+            LibraryProvider.removeDeReWo();
+            LibraryProvider.initDidYouMean();
+            FileUtils.deletedelete(LibraryProvider.Dictionary.DRW0.file());
+            FileUtils.deletedelete(LibraryProvider.Dictionary.DRW0.fileDisabled());
+            prop.put("drw0ActionRemoved", 1);
+        }
+
+        if (post.containsKey("drw0Deactivate")) {
+            LibraryProvider.removeDeReWo();
+            LibraryProvider.initDidYouMean();
+            LibraryProvider.Dictionary.DRW0.file().renameTo(LibraryProvider.Dictionary.DRW0.fileDisabled());
+            prop.put("drw0ActionDeactivated", 1);
+        }
+
+        if (post.containsKey("drw0Activate")) {
+            LibraryProvider.Dictionary.DRW0.fileDisabled().renameTo(LibraryProvider.Dictionary.DRW0.file());
+            LibraryProvider.integrateDeReWo();
+            LibraryProvider.initDidYouMean();
+            prop.put("drw0ActionActivated", 1);
+        }
+
         // check status again
         for (final LibraryProvider.Dictionary dictionary: LibraryProvider.Dictionary.values()) {
             prop.put(dictionary.nickname + "Status", dictionary.file().exists() ? 1 : dictionary.fileDisabled().exists() ? 2 : 0);

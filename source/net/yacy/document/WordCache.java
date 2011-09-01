@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -45,12 +45,12 @@ import net.yacy.kelondro.util.MemoryControl;
  *
  */
 public class WordCache {
-    
+
     // common word cache
     private static final int commonWordsMaxSize = 100000; // maximum size of common word cache
     private static final int commonWordsMinLength = 5;    // words must have that length at minimum
-    private OrderedScoreMap<String> commonWords = new OrderedScoreMap<String>(String.CASE_INSENSITIVE_ORDER);    
-    
+    private static OrderedScoreMap<String> commonWords = new OrderedScoreMap<String>(String.CASE_INSENSITIVE_ORDER);
+
     // dictionaries
     private final File dictionaryPath;
     private TreeSet<String> dict; // the word dictionary
@@ -67,12 +67,12 @@ public class WordCache {
         this.dictionaryPath = dictionaryPath;
         reload();
     }
-    
+
     /**
      * add a word to the generic dictionary
      * @param word
      */
-    public void learn(String word) {
+    public static void learn(final String word) {
         if (word == null) return;
         if (word.length() < commonWordsMinLength) return;
         if (MemoryControl.shortStatus()) commonWords.clear();
@@ -81,24 +81,24 @@ public class WordCache {
             commonWords.shrinkToMaxSize(commonWordsMaxSize / 2);
         }
     }
-    
+
     /**
      * scan the input directory and load all dictionaries (again)
      */
     public void reload() {
         this.dict = new TreeSet<String>();
         this.tcid = new TreeSet<String>();
-        if (dictionaryPath == null || !dictionaryPath.exists()) return;
-        final String[] files = dictionaryPath.list();
+        if (this.dictionaryPath == null || !this.dictionaryPath.exists()) return;
+        final String[] files = this.dictionaryPath.list();
         for (final String f: files) {
             if (f.endsWith(".words")) try {
-                inputStream(new File(dictionaryPath, f));
-            } catch (IOException e) {
+                inputStream(new File(this.dictionaryPath, f));
+            } catch (final IOException e) {
                 Log.logException(e);
             }
         }
     }
-    
+
     private void inputStream(final File file) throws IOException {
     	InputStream is = new FileInputStream(file);
     	if (file.getName().endsWith(".gz")) {
@@ -110,22 +110,23 @@ public class WordCache {
             while ((l = reader.readLine()) != null) {
                 if (l.length() == 0 || l.charAt(0) == '#') continue;
                 l = l.trim().toLowerCase();
+                if (l.length() < 4) continue;
                 this.dict.add(l);
                 this.tcid.add(reverse(l));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // finish
         }
     }
-    
+
     private static String reverse(final String s) {
-        StringBuilder sb = new StringBuilder(s.length());
+        final StringBuilder sb = new StringBuilder(s.length());
         for (int i = s.length() - 1; i >= 0; i--) {
             sb.append(s.charAt(i));
         }
         return sb.toString();
     }
-    
+
     /**
      * read the dictionary and construct a set of recommendations to a given string
      * @param s input value that is used to match recommendations
@@ -138,14 +139,14 @@ public class WordCache {
         for (final String r: t) {
             if (r.startsWith(string) && r.length() > string.length()) ret.add(r); else break;
         }
-        SortedMap<String, AtomicInteger> u = this.commonWords.tailMap(string);
+        final SortedMap<String, AtomicInteger> u = commonWords.tailMap(string);
         String vv;
         try {
             for (final Map.Entry<String, AtomicInteger> v: u.entrySet()) {
                 vv = v.getKey();
                 if (vv.startsWith(string) && vv.length() > string.length()) ret.add(vv); else break;
             }
-        } catch (ConcurrentModificationException e) {}
+        } catch (final ConcurrentModificationException e) {}
         string = reverse(string);
         t = this.tcid.tailSet(string);
         for (final String r: t) {
@@ -153,7 +154,7 @@ public class WordCache {
         }
         return ret;
     }
-    
+
     /**
      * check if the library contains the given word
      * @param s the given word
@@ -164,7 +165,7 @@ public class WordCache {
         // if the above case is true then it is also true for this.tcid and vice versa
         // that means it does not need to be tested as well
     }
-    
+
     /**
      * check if the library supports the given word
      * A word is supported, if the library contains a word
@@ -185,7 +186,7 @@ public class WordCache {
         }
         return false;
     }
-    
+
     /**
      * the size of the dictionay
      * @return the number of words in the dictionary
@@ -193,7 +194,7 @@ public class WordCache {
     public int size() {
         return this.dict.size();
     }
-    
+
 
     /**
      * a property that is used during the construction of recommendation:
@@ -206,5 +207,5 @@ public class WordCache {
     public boolean isRelevant(final int minimumWords) {
         return this.dict.size() >= minimumWords;
     }
-    
+
 }
