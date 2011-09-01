@@ -64,12 +64,12 @@ public class termlist_p {
             e = i.next();
             termnumber++;
             count = e.getScore();
-            if (count > 1000) over1000++;
-            if (count > 10000) over10000++;
-            if (count > 100000) over100000++;
-            if (count > 1000000) over1000000++;
-            if (count > 10000000) over10000000++;
-            if (count > 100000000) over100000000++;
+            if (count >= 1000) over1000++;
+            if (count >= 10000) over10000++;
+            if (count >= 100000) over100000++;
+            if (count >= 1000000) over1000000++;
+            if (count >= 10000000) over10000000++;
+            if (count >= 100000000) over100000000++;
             if (count > maxcount) {
                 maxcount = count;
                 maxterm = e.getObject();
