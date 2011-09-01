@@ -207,7 +207,12 @@ public final class yacy {
                 if(!oldconffile.renameTo(newconfFile))
                     Log.logSevere("STARTUP", "WARNING: the file " + oldconffile + " can not be renamed to "+ newconfFile +"!");
             }
-            sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), newconf);
+            try {
+                sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), newconf);
+            } catch (final RuntimeException e) {
+                Log.logSevere("STARTUP", "YaCy cannot start: " + e.getMessage());
+                System.exit(-1);
+            }
             //sbSync.V(); // signal that the sb reference was set
 
             // switch the memory strategy

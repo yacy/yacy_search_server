@@ -66,6 +66,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
@@ -87,6 +88,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.services.federated.solr.SolrChardingConnector;
@@ -255,11 +257,21 @@ public final class Switchboard extends serverSwitch {
 
     public Switchboard(final File dataPath, final File appPath, final String initPath, final String configPath) throws IOException {
         super(dataPath, appPath, initPath, configPath);
+
+        // check if port is already occupied
+        final int port = getConfigInt("port", 8090);
+        try {
+            if (TimeoutRequest.ping("127.0.0.1", port, 500)) {
+                throw new RuntimeException("a server is already running on the YaCy port " + port + "; possibly another YaCy process has not terminated yet. Please stop YaCy before running a new instance.");
+            }
+        } catch (final ExecutionException e1) {
+        }
+
         MemoryTracker.startSystemProfiling();
         sb = this;
 
         // set loglevel and log
-        setLog(new Log("PLASMA"));
+        setLog(new Log("YACY_SEARCH"));
 
         // set default peer name
         yacySeed.ANON_PREFIX = getConfig("peernameprefix", "_anon");
