@@ -59,10 +59,17 @@ public class termlist_p {
         final Row referenceRow = segment.termIndex().referenceRow();
         final int rowsize = referenceRow.objectsize;
         final ArrayList<byte[]> deleteterms = new ArrayList<byte[]>();
+        long over1000 = 0, over10000 = 0, over100000 = 0, over1000000 = 0, over10000000 = 0, over100000000 = 0;
         while (i.hasNext()) {
             e = i.next();
             termnumber++;
             count = e.getScore();
+            if (count > 1000) over1000++;
+            if (count > 10000) over10000++;
+            if (count > 100000) over100000++;
+            if (count > 1000000) over1000000++;
+            if (count > 10000000) over10000000++;
+            if (count > 100000000) over100000000++;
             if (count > maxcount) {
                 maxcount = count;
                 maxterm = e.getObject();
@@ -92,8 +99,15 @@ public class termlist_p {
         prop.put("terms", c);
         prop.put("maxterm", maxterm == null ? "" : ASCII.String(maxterm));
         prop.put("maxcount", maxcount);
+        prop.put("maxcountmemory", 20 + maxcount * rowsize);
         prop.put("termnumber", termnumber);
         prop.put("totalmemory", totalmemory);
+        prop.put("over1000", over1000);
+        prop.put("over10000", over10000);
+        prop.put("over100000", over100000);
+        prop.put("over1000000", over1000000);
+        prop.put("over10000000", over10000000);
+        prop.put("over100000000", over100000000);
 
         log.logWarning("finished termlist_p -> terms: " + c);
         log.logWarning("maxterm: "+ (maxterm == null ? "" : ASCII.String(maxterm)));
