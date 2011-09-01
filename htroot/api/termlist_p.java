@@ -82,7 +82,7 @@ public class termlist_p {
             prop.put("terms_" + c + "_termhash", hstring);
             prop.put("terms_" + c + "_count", count);
             prop.put("terms_" + c + "_memory", mem);
-            log.logWarning("termhash: " + hstring + " | count: " + count + " | memory: " + mem);
+            //log.logWarning("termhash: " + hstring + " | count: " + count + " | memory: " + mem);
             c++;
             totalmemory += mem;
         }
