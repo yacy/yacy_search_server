@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.document.Classification;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.WordTokenizer;
@@ -47,7 +48,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
-import de.anomic.data.MimeTable;
 
 
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
@@ -167,7 +167,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             final int ranking = removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
                            removeAppearanceHashes(desc, queryhashes).size();
             if (ranking < 2 * queryhashes.size()) {
-                result.add(new MediaSnippet(mediatype, url, MimeTable.url2mime(url), desc, document.getTextLength(), null, ranking, source));
+                result.add(new MediaSnippet(mediatype, url, Classification.url2mime(url), desc, document.getTextLength(), null, ranking, source));
             }
         }
         return result;
@@ -196,7 +196,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
                            removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
                            removeAppearanceHashes(desc, queryhashes).size();
             final long ranking = Long.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);
-            result.add(new MediaSnippet(ContentDomain.IMAGE, url, MimeTable.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, source));
+            result.add(new MediaSnippet(ContentDomain.IMAGE, url, Classification.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, source));
         }
         return result;
     }

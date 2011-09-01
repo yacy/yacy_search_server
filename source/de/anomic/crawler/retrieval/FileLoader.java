@@ -33,12 +33,12 @@ import java.util.List;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.data.MimeTable;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.ftp.FTPClient;
+import net.yacy.document.Classification;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -102,7 +102,7 @@ public class FileLoader {
         }
         
         // create response header
-        String mime = MimeTable.ext2mime(url.getFileExtension());
+        String mime = Classification.ext2mime(url.getFileExtension());
         ResponseHeader responseHeader = new ResponseHeader();
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date(url.lastModified())));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);

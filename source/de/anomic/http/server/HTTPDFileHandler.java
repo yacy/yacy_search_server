@@ -105,7 +105,6 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.data.MimeTable;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverClassLoader;
@@ -153,11 +152,11 @@ public final class HTTPDFileHandler {
         if (switchboard == null) {
             switchboard = theSwitchboard;
 
-            if (MimeTable.isEmpty()) {
+            if (Classification.countMimes() == 0) {
                 // load the mime table
                 final String mimeTablePath = theSwitchboard.getConfig("mimeTable","");
                 Log.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
-                MimeTable.init(new File(theSwitchboard.getAppPath(), mimeTablePath));
+                Classification.init(new File(theSwitchboard.getAppPath(), mimeTablePath));
             }
 
             // create default files array
@@ -586,7 +585,7 @@ public final class HTTPDFileHandler {
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
-                        final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+                        final String mimeType = Classification.ext2mime(targetExt, "text/html");
                         final ByteBuffer result = RasterPlotter.exportImage(yp.getImage(), targetExt);
 
                         // write the array to the client
@@ -600,7 +599,7 @@ public final class HTTPDFileHandler {
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
-                        final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+                        final String mimeType = Classification.ext2mime(targetExt, "text/html");
                         final ByteBuffer result = yp.getImage();
 
                         // write the array to the client
@@ -634,7 +633,7 @@ public final class HTTPDFileHandler {
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
-                        final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+                        final String mimeType = Classification.ext2mime(targetExt, "text/html");
 
                         // generate an byte array from the generated image
                         int width = i.getWidth(null); if (width < 0) width = 96; // bad hack
@@ -805,7 +804,7 @@ public final class HTTPDFileHandler {
                 // we have found a file that can be written to the client
                 // if this file uses templates, then we use the template
                 // re-write - method to create an result
-                String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+                String mimeType = Classification.ext2mime(targetExt, "text/html");
                 String ext = (String) conProp.get("EXT"); if (ext == null) ext = "";
                 final boolean zipContent = requestHeader.acceptGzip() && HTTPDemon.shallTransportZipped("." + ext);
                 if (path.endsWith("html") ||

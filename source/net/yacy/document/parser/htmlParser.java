@@ -32,15 +32,20 @@ import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.document.AbstractParser;
+import net.yacy.document.Classification;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.util.FileUtils;
@@ -83,6 +88,133 @@ public class htmlParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("text/csv");
     }
 
+    public Document[] parse(
+            final MultiProtocolURI location,
+            final String mimeType,
+            final String documentCharset,
+            final InputStream sourceStream) throws Parser.Failure, InterruptedException {
+
+        try {
+            // first get a document from the parsed html
+            ContentScraper scraper = parseToScraper(location, documentCharset, sourceStream);
+            Document document = transformScraper(location, mimeType, documentCharset, scraper);
+
+            // then produce virtual documents for each of the link that is contained in the document!
+            ArrayList<Document> docs = new ArrayList<Document>();
+            docs.add(document);
+            for (Map.Entry<MultiProtocolURI, String> link: document.getApplinks().entrySet()) {
+                addLinkDocs(docs, "application", link.getKey(), link.getValue(), scraper);
+            }
+            for (Map.Entry<MultiProtocolURI, String> link: document.getAudiolinks().entrySet()) {
+                addLinkDocs(docs, "audio", link.getKey(), link.getValue(), scraper);
+            }
+            for (Map.Entry<MultiProtocolURI, String> link: document.getVideolinks().entrySet()) {
+                addLinkDocs(docs, "video", link.getKey(), link.getValue(), scraper);
+            }
+            for (Entry<MultiProtocolURI, ImageEntry> link: document.getImages().entrySet()) {
+                addImageDocs(docs, link.getValue());
+            }
+            
+            
+            // finally return the list of documents
+            return docs.toArray(new Document[docs.size()]);
+        } catch (final IOException e) {
+			throw new Parser.Failure("IOException in htmlParser: " + e.getMessage(), location);
+		}
+    }
+    
+    private final static void addLinkDocs(ArrayList<Document> docs, String type, MultiProtocolURI uri, String descr, ContentScraper scraper) {
+        //System.out.println("HTMLPARSER-LINK " + type + ": " + uri.toNormalform(true, false) + " / " + descr);
+        final Document doc = new Document(
+                uri,
+                Classification.ext2mime(uri.getFileExtension()),
+                "UTF-8",
+                null,
+                scraper.getContentLanguages(),
+                null,
+                descr,
+                "",
+                "",
+                new String[]{descr},
+                type,
+                0.0f, 0.0f,
+                uri.toNormalform(false, false),
+                null,
+                null,
+                null,
+                false);
+        docs.add(doc);
+    }
+    
+    private final static void addImageDocs(ArrayList<Document> docs, ImageEntry img) {
+        //System.out.println("HTMLPARSER-LINK image: " + img.url().toNormalform(true, false) + " / " + img.alt());
+        final Document doc = new Document(
+                img.url(),
+                Classification.ext2mime(img.url().getFileExtension()),
+                "UTF-8",
+                null,
+                null,
+                null,
+                img.alt(),
+                "",
+                "",
+                new String[]{img.alt()},
+                "image",
+                0.0f, 0.0f,
+                img.url().toNormalform(false, false),
+                null,
+                null,
+                null,
+                false);
+        docs.add(doc);
+    }
+
+    /**
+     *  the transformScraper method transforms a scraper object into a document object
+     * @param location
+     * @param mimeType
+     * @param charSet
+     * @param scraper
+     * @return
+     */
+    private static Document transformScraper(final MultiProtocolURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
+        final String[] sections = new String[
+                 scraper.getHeadlines(1).length +
+                 scraper.getHeadlines(2).length +
+                 scraper.getHeadlines(3).length +
+                 scraper.getHeadlines(4).length +
+                 scraper.getHeadlines(5).length +
+                 scraper.getHeadlines(6).length];
+        int p = 0;
+        for (int i = 1; i <= 6; i++) {
+            for (final String headline : scraper.getHeadlines(i)) {
+                sections[p++] = headline;
+            }
+        }
+        final Document ppd = new Document(
+                location,
+                mimeType,
+                charSet,
+                scraper,
+                scraper.getContentLanguages(),
+                scraper.getKeywords(),
+                scraper.getTitle(),
+                scraper.getAuthor(),
+                scraper.getPublisher(),
+                sections,
+                scraper.getDescription(),
+                scraper.getLon(), scraper.getLat(),
+                scraper.getText(),
+                scraper.getAnchors(),
+                scraper.getRSS(),
+                scraper.getImages(),
+                scraper.indexingDenied());
+        //scraper.close();
+        ppd.setFavicon(scraper.getFavicon());
+        
+        return ppd;
+    }
+
     public static ContentScraper parseToScraper(
             final MultiProtocolURI location,
             final String documentCharset,
@@ -109,12 +241,12 @@ public class htmlParser extends AbstractParser implements Parser {
 
         // the author didn't tell us the encoding, try the mozilla-heuristic
         if (charset == null) {
-        	final CharsetDetector det = new CharsetDetector();
-        	det.enableInputFilter(true);
-        	final InputStream detStream = new BufferedInputStream(sourceStream);
-        	det.setText(detStream);
-        	charset = det.detect().getName();
-        	sourceStream = detStream;
+            final CharsetDetector det = new CharsetDetector();
+            det.enableInputFilter(true);
+            final InputStream detStream = new BufferedInputStream(sourceStream);
+            det.setText(detStream);
+            charset = det.detect().getName();
+            sourceStream = detStream;
         }
 
         // wtf? still nothing, just take system-standard
@@ -124,11 +256,11 @@ public class htmlParser extends AbstractParser implements Parser {
 
         Charset c;
         try {
-        	c = Charset.forName(charset);
+            c = Charset.forName(charset);
         } catch (final IllegalCharsetNameException e) {
-        	c = Charset.defaultCharset();
+            c = Charset.defaultCharset();
         } catch (final UnsupportedCharsetException e) {
-        	c = Charset.defaultCharset();
+            c = Charset.defaultCharset();
         }
 
         // parsing the content
@@ -139,7 +271,7 @@ public class htmlParser extends AbstractParser implements Parser {
         } catch (final IOException e) {
             throw new Parser.Failure("IO error:" + e.getMessage(), location);
         } finally {
-        	sourceStream.close();
+            sourceStream.close();
             writer.close();
         }
         //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
@@ -151,59 +283,6 @@ public class htmlParser extends AbstractParser implements Parser {
         }
         return scraper;
     }
-
-    public Document[] parse(
-            final MultiProtocolURI location,
-            final String mimeType,
-            final String documentCharset,
-            final InputStream sourceStream) throws Parser.Failure, InterruptedException {
-
-        try {
-			return transformScraper(location, mimeType, documentCharset, parseToScraper(location, documentCharset, sourceStream));
-		} catch (final IOException e) {
-			throw new Parser.Failure("IOException in htmlParser: " + e.getMessage(), location);
-		}
-    }
-
-    private static Document[] transformScraper(final MultiProtocolURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
-        final String[] sections = new String[
-                 scraper.getHeadlines(1).length +
-                 scraper.getHeadlines(2).length +
-                 scraper.getHeadlines(3).length +
-                 scraper.getHeadlines(4).length +
-                 scraper.getHeadlines(5).length +
-                 scraper.getHeadlines(6).length];
-        int p = 0;
-        for (int i = 1; i <= 6; i++) {
-            for (final String headline : scraper.getHeadlines(i)) {
-                sections[p++] = headline;
-            }
-        }
-        final Document[] ppds = new Document[]{new Document(
-                location,
-                mimeType,
-                charSet,
-                scraper,
-                scraper.getContentLanguages(),
-                scraper.getKeywords(),
-                scraper.getTitle(),
-                scraper.getAuthor(),
-                scraper.getPublisher(),
-                sections,
-                scraper.getDescription(),
-                scraper.getLon(), scraper.getLat(),
-                scraper.getText(),
-                scraper.getAnchors(),
-                scraper.getRSS(),
-                scraper.getImages(),
-                scraper.indexingDenied())};
-        //scraper.close();
-        for (final Document ppd: ppds) {
-            ppd.setFavicon(scraper.getFavicon());
-        }
-        return ppds;
-    }
-
 
     /**
      * some html authors use wrong encoding names, either because they don't know exactly what they

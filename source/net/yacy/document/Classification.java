@@ -23,11 +23,11 @@ package net.yacy.document;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.logging.Log;
 
 public class Classification {
@@ -38,22 +38,8 @@ public class Classification {
     private static final Set<String> videoExtSet = new HashSet<String>();
     private static final Set<String> appsExtSet = new HashSet<String>();
     
-    private static final Properties ext2mime = new Properties();
     
     static {
-    	// load a list of extensions from file
-        BufferedInputStream bufferedIn = null;
-        File mimeFile = new File("defaults/httpd.mime");
-        if (!mimeFile.exists()) mimeFile = new File("config/mime.properties");
-        try {
-            ext2mime.load(bufferedIn = new BufferedInputStream(new FileInputStream(mimeFile)));
-        } catch (final IOException e) {
-            Log.logSevere("Classification", "httpd.mime not found in " + mimeFile.toString(), e);
-        } finally {
-            if (bufferedIn != null) try {
-                bufferedIn.close();
-            } catch (final Exception e) {}
-        }
         
         final String apps = "7z,ace,arc,arj,apk,asf,asx,bat,bin,bkf,bz2,cab,com,css,dcm,deb,dll,dmg,exe,gho,ghs,gz,hqx,img,iso,jar,lha,rar,sh,sit,sitx,tar,tbz,tgz,tib,torrent,vbs,war,zip";
         final String audio = "aac,aif,aiff,flac,m4a,m4p,mid,mp2,mp3,oga,ogg,ram,sid,wav,wma";
@@ -102,4 +88,41 @@ public class Classification {
         return mimeType.toUpperCase().startsWith("IMAGE");
     }
 
+
+    private static final Properties mimeTable = new Properties();
+    
+    public static void init(final File mimeFile) {
+        if (mimeTable.isEmpty()) {
+            // load the mime table
+            BufferedInputStream mimeTableInputStream = null;
+            try {
+                mimeTableInputStream = new BufferedInputStream(new FileInputStream(mimeFile));
+                mimeTable.load(mimeTableInputStream);
+            } catch (final Exception e) {                
+                Log.logException(e);
+            } finally {
+                if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (final Exception e1) {}                
+            }
+        }
+    }
+    
+    public static int countMimes() {
+        return mimeTable.size();
+    }
+    
+    public static String ext2mime(final String ext) {
+        return mimeTable.getProperty(ext, "application/" + ext);
+    }
+    
+    public static String ext2mime(final String ext, final String dfltMime) {
+        return mimeTable.getProperty(ext, dfltMime);
+    }
+    
+    public static String url2mime(final MultiProtocolURI url, final String dfltMime) {
+        return ext2mime(url.getFileExtension(), dfltMime);
+    }
+    
+    public static String url2mime(final MultiProtocolURI url) {
+        return ext2mime(url.getFileExtension());
+    }
 }
