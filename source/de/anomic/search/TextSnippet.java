@@ -173,9 +173,6 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 	        { //encapsulate potential expensive document 
 		        final Document document = loadDocument(loader, comp, queryhashes, cacheStrategy, url, reindexing, source);
 		        if (document == null) {
-		            if (this.error == null) {
-		            	init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
-		            }
 		            return;
 		        }
 		
@@ -298,6 +295,9 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         } catch (final Parser.Failure e) {
             init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
             return null;
+        }
+        if (document == null) {
+            init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
         }
         return document;
     }
