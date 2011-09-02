@@ -1,0 +1,2428 @@
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+#########################################################################
+## ADDITIONAL SOURCE LICENSES                                          ##
+#########################################################################
+
+The ASN1 codec implementation in the geronimo-crypto module was
+developed by the Bouncy Castle project. (http://www.bouncycastle.org/).
+Use of the source code, thus licensed, and the resultant binary are 
+subject to the terms and conditions of the following license.
+
+=========================================================================
+==  Bouncy Castle License (ASN1 codec in geronimo-util)                ==
+=========================================================================
+
+The Bouncy Castle License
+
+Copyright (c) 2000-2005 The Legion Of The Bouncy Castle
+(http://www.bouncycastle.org)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+=========================================================================
+== W3C License (soap_encoding_1_1.xsd in geronimo-webservices-builder) ==
+=========================================================================
+
+W3C® SOFTWARE NOTICE AND LICENSE Copyright © 1994-2002 World Wide Web
+Consortium, (Massachusetts Institute of Technology, Institut National
+de Recherche en Informatique et en Automatique, Keio University). All
+Rights Reserved. http://www.w3.org/Consortium/Legal/
+
+This W3C work (including software, documents, or other related items)
+is being provided by the copyright holders under the following
+license. By obtaining, using and/or copying this work, you (the
+licensee) agree that you have read, understood, and will comply with
+the following terms and conditions:
+
+Permission to use, copy, modify, and distribute this software and its
+documentation, with or without modification, for any purpose and
+without fee or royalty is hereby granted, provided that you include
+the following on ALL copies of the software and documentation or
+portions thereof, including modifications, that you make:
+
+   1. The full text of this NOTICE in a location viewable to users of
+   the redistributed or derivative work.
+   2. Any pre-existing intellectual property disclaimers, notices, or
+   terms and conditions. If none exist, a short notice of the
+   following form (hypertext is preferred, text is permitted) should
+   be used within the body of any redistributed or derivative code:
+   "Copyright © [$date-of-software] World Wide Web Consortium,
+   (Massachusetts Institute of Technology, Institut National de
+   Recherche en Informatique et en Automatique, Keio University). All
+   Rights Reserved. http://www.w3.org/Consortium/Legal/" 3. Notice of
+   any changes or modifications to the W3C files, including the date
+   changes were made. (We recommend you provide URIs to the location
+   from which the code is derived.)
+
+THIS SOFTWARE AND DOCUMENTATION IS PROVIDED "AS IS," AND COPYRIGHT
+HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY OR FITNESS
+FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SOFTWARE OR
+DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS,
+TRADEMARKS OR OTHER RIGHTS.
+
+COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL
+OR CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE SOFTWARE OR
+DOCUMENTATION.
+
+The name and trademarks of copyright holders may NOT be used in
+advertising or publicity pertaining to the software without specific,
+written prior permission. Title to copyright in this software and any
+associated documentation will at all times remain with copyright
+holders.
+
+
+=========================================================================
+== wsdl.xsd in geronimo-webservices-builder                            ==
+=========================================================================
+
+Copyright 2001-2003 International Business Machines Corporation,
+Microsoft Corporation. All rights reserved.
+
+The presentation, distribution or other dissemination of the
+information contained herein by Microsoft is not a license,
+either expressly or impliedly, to any intellectual property owned or
+controlled by Microsoft.
+
+This document and the information contained herein is provided on an
+"AS IS" basis and to the maximum extent permitted by applicable law,
+Microsoft provides the document AS IS AND WITH ALL FAULTS, and hereby
+disclaims all other warranties and conditions, either express, implied
+or statutory, including, but not limited to, any (if any) implied
+warranties, duties or conditions of merchantability, of fitness for a
+particular purpose, of accuracy or completeness of responses, of
+results, of workmanlike effort, of lack of viruses, and of lack of
+negligence, all with regard to the document. ALSO, THERE IS NO
+WARRANTY OR CONDITION OF TITLE, QUIET ENJOYMENT, QUIET POSSESSION,
+CORRESPONDENCE TO DESCRIPTION OR NON-INFRINGEMENT WITH REGARD TO THE
+DOCUMENT.
+
+IN NO EVENT WILL MICROSOFT BE LIABLE TO ANY OTHER PARTY FOR THE COST
+OF PROCURING SUBSTITUTE GOODS OR SERVICES, LOST PROFITS, LOSS OF USE,
+LOSS OF DATA, OR ANY INCIDENTAL, CONSEQUENTIAL, DIRECT, INDIRECT, OR
+SPECIAL DAMAGES WHETHER UNDER CONTRACT, TORT, WARRANTY, OR OTHERWISE,
+ARISING IN ANY WAY OUT OF THIS OR ANY OTHER AGREEMENT RELATING TO THIS
+DOCUMENT, WHETHER OR NOT SUCH PARTY HAD ADVANCE NOTICE OF THE
+POSSIBILITY OF SUCH DAMAGES.  
+
+#########################################################################
+## APACHE GERONIMO DEPENDENCIES                                        ##
+#########################################################################
+
+An Apache Geronimo assembly includes a number of dependent packages 
+with additional copyright notices and license terms. Your use of these 
+dependent packages is subject to the terms and conditions of these 
+additional licenses. A Java EE Geronimo assembly contains artifacts
+covered by the following licenses. Alternate assemblies of Geronimo
+may may contain alternatively licensed materials.
+
+=========================================================================
+==  Apache License 2.0                                                 ==
+=========================================================================
+
+The following artifacts are covered by the Apache License Version 2.0:
+
+./bin/client.jar
+./bin/cxf-tools.jar
+./bin/deployer.jar
+./bin/jaxws-tools.jar
+./bin/jpa.jar
+./bin/server.jar
+./bin/shutdown.jar
+./lib/geronimo-cli-2.2.1.jar
+./lib/geronimo-cxf-tools-2.2.1.jar
+./lib/geronimo-deploy-jsr88-bootstrapper-2.2.1.jar
+./lib/geronimo-jaxws-sun-tools-2.2.1.jar
+./lib/geronimo-kernel-2.2.1.jar
+./lib/geronimo-system-2.2.1.jar
+./lib/geronimo-transformer-2.2.1.jar
+./lib/jsr88-deploymentfactory.jar
+./repository/org/apache/geronimo/components/geronimo-connector/2.2/geronimo-connector-2.2.jar
+./repository/org/apache/geronimo/components/geronimo-jaspi/1.0/geronimo-jaspi-1.0.jar
+./repository/org/apache/geronimo/components/geronimo-transaction/2.2/geronimo-transaction-2.2.jar
+./repository/org/apache/geronimo/configs/ca-helper-jetty/2.2.1/ca-helper-jetty-2.2.1.car/WEB-INF/lib/console-filter-2.2.1.jar
+./repository/org/apache/geronimo/configs/ca-helper-jetty/2.2.1/ca-helper-jetty-2.2.1.car/WEB-INF/lib/geronimo-ca-helper-2.2.1.jar
+./repository/org/apache/geronimo/configs/ca-helper-tomcat/2.2.1/ca-helper-tomcat-2.2.1.car/WEB-INF/lib/console-filter-2.2.1.jar
+./repository/org/apache/geronimo/configs/ca-helper-tomcat/2.2.1/ca-helper-tomcat-2.2.1.car/WEB-INF/lib/geronimo-ca-helper-2.2.1.jar
+./repository/org/apache/geronimo/configs/cxf-tools/2.2.1/cxf-tools-2.2.1.car/contents/bin/cxf-tools.jar
+./repository/org/apache/geronimo/configs/cxf-tools/2.2.1/cxf-tools-2.2.1.car/contents/lib/geronimo-cxf-tools-2.2.1.jar
+./repository/org/apache/geronimo/configs/jaxws-tools/2.2.1/jaxws-tools-2.2.1.car/contents/bin/jaxws-tools.jar
+./repository/org/apache/geronimo/configs/jaxws-tools/2.2.1/jaxws-tools-2.2.1.car/contents/lib/geronimo-jaxws-sun-tools-2.2.1.jar
+./repository/org/apache/geronimo/configs/mejb/2.2.1/mejb-2.2.1.car/ejb.jar
+./repository/org/apache/geronimo/configs/remote-deploy-jetty/2.2.1/remote-deploy-jetty-2.2.1.car/WEB-INF/lib/geronimo-remote-deploy-2.2.1.jar
+./repository/org/apache/geronimo/configs/uddi-jetty/2.2.1/uddi-jetty-2.2.1.car/WEB-INF/lib/geronimo-uddi-server-2.2.1.jar
+./repository/org/apache/geronimo/configs/welcome-jetty/2.2.1/welcome-jetty-2.2.1.car/WEB-INF/lib/geronimo-welcome-2.2.1.jar
+./repository/org/apache/geronimo/configs/remote-deploy-tomcat/2.2.1/remote-deploy-tomcat-2.2.1.car/WEB-INF/lib/geronimo-remote-deploy-2.2.1.jar
+./repository/org/apache/geronimo/configs/uddi-tomcat/2.2.1/uddi-tomcat-2.2.1.car/WEB-INF/lib/geronimo-uddi-server-2.2.1.jar
+./repository/org/apache/geronimo/configs/welcome-tomcat/2.2.1/welcome-tomcat-2.2.1.car/WEB-INF/lib/geronimo-welcome-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/bin/client.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/bin/deployer.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/bin/jpa.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/bin/server.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/bin/shutdown.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/geronimo-cli-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/geronimo-deploy-jsr88-bootstrapper-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/geronimo-kernel-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/geronimo-system-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/geronimo-transformer-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/jsr88-deploymentfactory.jar
+./repository/org/apache/geronimo/framework/geronimo-cli/2.2.1/geronimo-cli-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-commands/2.2.1/geronimo-commands-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-common/2.2.1/geronimo-common-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-config-groovy-transformer/2.2.1/geronimo-config-groovy-transformer-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-core/2.2.1/geronimo-core-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-deploy-config/2.2.1/geronimo-deploy-config-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-deploy-jsr88/2.2.1/geronimo-deploy-jsr88-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-deploy-jsr88-bootstrapper/2.2.1/geronimo-deploy-jsr88-bootstrapper-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-deploy-tool/2.2.1/geronimo-deploy-tool-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-deployment/2.2.1/geronimo-deployment-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-interceptor/2.2.1/geronimo-interceptor-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-jdbc/2.2.1/geronimo-jdbc-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-jmx-remoting/2.2.1/geronimo-jmx-remoting-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-kernel/2.2.1/geronimo-kernel-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-management/2.2.1/geronimo-management-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-naming/2.2.1/geronimo-naming-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-plugin/2.2.1/geronimo-plugin-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-security/2.2.1/geronimo-security-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-service-builder/2.2.1/geronimo-service-builder-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-system/2.2.1/geronimo-system-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-transformer/2.2.1/geronimo-transformer-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-upgrade/2.2.1/geronimo-upgrade-2.2.1.jar
+./repository/org/apache/geronimo/javamail/geronimo-javamail_1.4_mail/1.8.2/geronimo-javamail_1.4_mail-1.8.2.jar
+./repository/org/apache/geronimo/modules/geronimo-activemq/2.2.1/geronimo-activemq-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-activemq-management/2.2.1/geronimo-activemq-management-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-aspectj/2.2.1/geronimo-aspectj-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-axis/2.2.1/geronimo-axis-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-axis-builder/2.2.1/geronimo-axis-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-axis2/2.2.1/geronimo-axis2-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-axis2-builder/2.2.1/geronimo-axis2-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-axis2-ejb/2.2.1/geronimo-axis2-ejb-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-axis2-ejb-builder/2.2.1/geronimo-axis2-ejb-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-client/2.2.1/geronimo-client-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-client-builder/2.2.1/geronimo-client-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-clustering/2.2.1/geronimo-clustering-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-clustering-wadi/2.2.1/geronimo-clustering-wadi-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-concurrent/2.2.1/geronimo-concurrent-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-concurrent-builder/2.2.1/geronimo-concurrent-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-concurrent-core/2.2.1/geronimo-concurrent-core-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-concurrent-management/2.2.1/geronimo-concurrent-management-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-connector/2.2.1/geronimo-connector-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-connector-builder/2.2.1/geronimo-connector-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-converter/2.2.1/geronimo-converter-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-corba/2.2.1/geronimo-corba-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-corba-builder/2.2.1/geronimo-corba-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-cxf/2.2.1/geronimo-cxf-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-cxf-builder/2.2.1/geronimo-cxf-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-cxf-ejb/2.2.1/geronimo-cxf-ejb-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-cxf-ejb-builder/2.2.1/geronimo-cxf-ejb-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-cxf-tools/2.2.1/geronimo-cxf-tools-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-deploy-farm/2.2.1/geronimo-deploy-farm-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-derby/2.2.1/geronimo-derby-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-farm/2.2.1/geronimo-farm-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-hot-deploy/2.2.1/geronimo-hot-deploy-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-j2ee/2.2.1/geronimo-j2ee-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-j2ee-builder/2.2.1/geronimo-j2ee-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-j2ee-schema/2.2.1/geronimo-j2ee-schema-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jasper/2.2.1/geronimo-jasper-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jasper-builder/2.2.1/geronimo-jasper-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jaxws/2.2.1/geronimo-jaxws-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jaxws-builder/2.2.1/geronimo-jaxws-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jaxws-ejb-builder/2.2.1/geronimo-jaxws-ejb-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jaxws-sun-tools/2.2.1/geronimo-jaxws-sun-tools-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jetty7/2.2.1/geronimo-jetty7-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jetty7-builder/2.2.1/geronimo-jetty7-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jetty7-clustering-builder-wadi/2.2.1/geronimo-jetty7-clustering-builder-wadi-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-jetty7-clustering-wadi/2.2.1/geronimo-jetty7-clustering-wadi-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-tomcat6/2.2.1/geronimo-tomcat6-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-tomcat6-builder/2.2.1/geronimo-tomcat6-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-tomcat6-clustering-builder-wadi/2.2.1/geronimo-tomcat6-clustering-builder-wadi-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-tomcat6-clustering-wadi/2.2.1/geronimo-tomcat6-clustering-wadi-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-mail/2.2.1/geronimo-mail-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-myfaces/2.2.1/geronimo-myfaces-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-myfaces-builder/2.2.1/geronimo-myfaces-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-naming-builder/2.2.1/geronimo-naming-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-openejb/2.2.1/geronimo-openejb-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-openejb-builder/2.2.1/geronimo-openejb-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-openejb-clustering-builder-wadi/2.2.1/geronimo-openejb-clustering-builder-wadi-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-openejb-clustering-wadi/2.2.1/geronimo-openejb-clustering-wadi-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-openjpa/2.2.1/geronimo-openjpa-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-persistence-jpa10/2.2.1/geronimo-persistence-jpa10-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-persistence-jpa10-builder/2.2.1/geronimo-persistence-jpa10-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-security-builder/2.2.1/geronimo-security-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-test-ddbean/2.2.1/geronimo-test-ddbean-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-transaction/2.2.1/geronimo-transaction-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-web-2.5-builder/2.2.1/geronimo-web-2.5-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-webservices/2.2.1/geronimo-webservices-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-webservices-builder/2.2.1/geronimo-webservices-builder-2.2.1.jar
+./repository/org/apache/geronimo/modules/geronimo-yoko/2.2.1/geronimo-yoko-2.2.1.jar
+./repository/org/apache/geronimo/plugins/activemq-console-jetty/2.2.1/activemq-console-jetty-2.2.1.car/WEB-INF/lib/activemq-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/console-core/2.2.1/console-core-2.2.1.jar
+./repository/org/apache/geronimo/plugins/console-jetty/2.2.1/console-jetty-2.2.1.car/base-portlets.war/WEB-INF/lib/console-base-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/console-jetty/2.2.1/console-jetty-2.2.1.car/portal-driver.war/WEB-INF/lib/console-filter-2.2.1.jar
+./repository/org/apache/geronimo/plugins/console-jetty/2.2.1/console-jetty-2.2.1.car/portal-driver.war/WEB-INF/lib/console-portal-driver-2.2.1.jar
+./repository/org/apache/geronimo/plugins/debugviews-console-jetty/2.2.1/debugviews-console-jetty-2.2.1.car/WEB-INF/lib/debugviews-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/activemq-console-tomcat/2.2.1/activemq-console-tomcat-2.2.1.car/WEB-INF/lib/activemq-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/console-tomcat/2.2.1/console-tomcat-2.2.1.car/base-portlets.war/WEB-INF/lib/console-base-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/console-tomcat/2.2.1/console-tomcat-2.2.1.car/portal-driver.war/WEB-INF/lib/console-filter-2.2.1.jar
+./repository/org/apache/geronimo/plugins/console-tomcat/2.2.1/console-tomcat-2.2.1.car/portal-driver.war/WEB-INF/lib/console-portal-driver-2.2.1.jar
+./repository/org/apache/geronimo/plugins/debugviews-console-tomcat/2.2.1/debugviews-console-tomcat-2.2.1.car/WEB-INF/lib/debugviews-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/geronimo-pluto/2.2.1/geronimo-pluto-2.2.1.jar
+./repository/org/apache/geronimo/plugins/monitoring/agent-car-ejb/2.2.1/agent-car-ejb-2.2.1.car/ejb.jar
+./repository/org/apache/geronimo/plugins/monitoring/agent-ejb/2.2.1/agent-ejb-2.2.1.jar
+./repository/org/apache/geronimo/plugins/monitoring/agent-jar/2.2.1/agent-jar-2.2.1.jar
+./repository/org/apache/geronimo/plugins/monitoring/agent-jmx/2.2.1/agent-jmx-2.2.1.jar
+./repository/org/apache/geronimo/plugins/monitoring/agent-sql/2.2.1/agent-sql-2.2.1.jar
+./repository/org/apache/geronimo/plugins/monitoring/mconsole-jetty/2.2.1/mconsole-jetty-2.2.1.car/WEB-INF/lib/console-filter-2.2.1.jar
+./repository/org/apache/geronimo/plugins/monitoring/mconsole-jetty/2.2.1/mconsole-jetty-2.2.1.car/WEB-INF/lib/mconsole-war-2.2.1.jar
+./repository/org/apache/geronimo/plugins/openejb-console-jetty/2.2.1/openejb-console-jetty-2.2.1.car/WEB-INF/lib/openejb-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/plancreator-console-jetty/2.2.1/plancreator-console-jetty-2.2.1.car/WEB-INF/lib/plancreator-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/plugin-console-jetty/2.2.1/plugin-console-jetty-2.2.1.car/WEB-INF/lib/plugin-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/sysdb-console-jetty/2.2.1/sysdb-console-jetty-2.2.1.car/WEB-INF/lib/sysdb-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/monitoring/mconsole-tomcat/2.2.1/mconsole-tomcat-2.2.1.car/WEB-INF/lib/console-filter-2.2.1.jar
+./repository/org/apache/geronimo/plugins/monitoring/mconsole-tomcat/2.2.1/mconsole-tomcat-2.2.1.car/WEB-INF/lib/mconsole-war-2.2.1.jar
+./repository/org/apache/geronimo/plugins/openejb-console-tomcat/2.2.1/openejb-console-tomcat-2.2.1.car/WEB-INF/lib/openejb-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/plancreator-console-tomcat/2.2.1/plancreator-console-tomcat-2.2.1.car/WEB-INF/lib/plancreator-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/plugin-console-tomcat/2.2.1/plugin-console-tomcat-2.2.1.car/WEB-INF/lib/plugin-portlets-2.2.1.jar
+./repository/org/apache/geronimo/plugins/sysdb-console-tomcat/2.2.1/sysdb-console-tomcat-2.2.1.car/WEB-INF/lib/sysdb-portlets-2.2.1.jar
+./repository/org/apache/geronimo/schema/geronimo-schema-j2ee_1.4/1.2/geronimo-schema-j2ee_1.4-1.2.jar
+./repository/org/apache/geronimo/schema/geronimo-schema-jee_5/1.1/geronimo-schema-jee_5-1.1.jar
+./repository/org/apache/geronimo/specs/geronimo-activation_1.1_spec/1.0.2/geronimo-activation_1.1_spec-1.0.2.jar
+./repository/org/apache/geronimo/specs/geronimo-annotation_1.0_spec/1.1.1/geronimo-annotation_1.0_spec-1.1.1.jar
+./repository/org/apache/geronimo/specs/geronimo-concurrent_1.0_spec/1.0-EA/geronimo-concurrent_1.0_spec-1.0-EA.jar
+./repository/org/apache/geronimo/specs/geronimo-ejb_3.0_spec/1.0.1/geronimo-ejb_3.0_spec-1.0.1.jar
+./repository/org/apache/geronimo/specs/geronimo-el_1.0_spec/1.0.2/geronimo-el_1.0_spec-1.0.2.jar
+./repository/org/apache/geronimo/specs/geronimo-interceptor_3.0_spec/1.0.1/geronimo-interceptor_3.0_spec-1.0.1.jar
+./repository/org/apache/geronimo/specs/geronimo-j2ee-connector_1.5_spec/2.0.0/geronimo-j2ee-connector_1.5_spec-2.0.0.jar
+./repository/org/apache/geronimo/specs/geronimo-j2ee-management_1.1_spec/1.0.1/geronimo-j2ee-management_1.1_spec-1.0.1.jar
+./repository/org/apache/geronimo/specs/geronimo-jacc_1.1_spec/1.0.2/geronimo-jacc_1.1_spec-1.0.2.jar
+./repository/org/apache/geronimo/specs/geronimo-jaspic_1.0_spec/1.0/geronimo-jaspic_1.0_spec-1.0.jar
+./repository/org/apache/geronimo/specs/geronimo-javaee-deployment_1.1MR3_spec/1.0/geronimo-javaee-deployment_1.1MR3_spec-1.0.jar
+./repository/org/apache/geronimo/specs/geronimo-javamail_1.4_spec/1.5/geronimo-javamail_1.4_spec-1.5.jar
+./repository/org/apache/geronimo/specs/geronimo-jaxb_2.1_spec/1.0/geronimo-jaxb_2.1_spec-1.0.jar
+./repository/org/apache/geronimo/specs/geronimo-jaxr_1.0_spec/2.0.0/geronimo-jaxr_1.0_spec-2.0.0.jar
+./repository/org/apache/geronimo/specs/geronimo-jaxrpc_1.1_spec/2.0.0/geronimo-jaxrpc_1.1_spec-2.0.0.jar
+./repository/org/apache/geronimo/specs/geronimo-jaxws_2.1_spec/1.0/geronimo-jaxws_2.1_spec-1.0.jar
+./repository/org/apache/geronimo/specs/geronimo-jms_1.1_spec/1.1.1/geronimo-jms_1.1_spec-1.1.1.jar
+./repository/org/apache/geronimo/specs/geronimo-jpa_1.0_spec/1.1.2/geronimo-jpa_1.0_spec-1.1.2.jar
+./repository/org/apache/geronimo/specs/geronimo-jsp_2.1_spec/1.0.1/geronimo-jsp_2.1_spec-1.0.1.jar
+./repository/org/apache/geronimo/specs/geronimo-jta_1.1_spec/1.1.1/geronimo-jta_1.1_spec-1.1.1.jar
+./repository/org/apache/geronimo/specs/geronimo-saaj_1.3_spec/1.0.1/geronimo-saaj_1.3_spec-1.0.1.jar
+./repository/org/apache/geronimo/specs/geronimo-servlet_2.5_spec/1.2/geronimo-servlet_2.5_spec-1.2.jar
+./repository/org/apache/geronimo/specs/geronimo-stax-api_1.0_spec/1.0.1/geronimo-stax-api_1.0_spec-1.0.1.jar
+./repository/org/apache/geronimo/specs/geronimo-ws-metadata_2.0_spec/1.1.2/geronimo-ws-metadata_2.0_spec-1.1.2.jar
+./repository/org/apache/geronimo/ext/tomcat/catalina/6.0.29.0/catalina-6.0.29.0.jar
+./repository/org/apache/geronimo/ext/tomcat/catalina-ha/6.0.29.0/catalina-ha-6.0.29.0.jar
+./repository/org/apache/geronimo/ext/tomcat/jasper/6.0.29.0/jasper-6.0.29.0.jar
+./repository/org/apache/geronimo/ext/tomcat/jasper-el/6.0.29.0/jasper-el-6.0.29.0.jar
+./repository/org/apache/geronimo/ext/tomcat/juli/6.0.29.0/juli-6.0.29.0.jar
+./repository/org/apache/geronimo/ext/tomcat/shared/6.0.29.0/shared-6.0.29.0.jar
+./repository/org/apache/geronimo/ext/tomcat/tribes/6.0.29.0/tribes-6.0.29.0.jar
+./repository/org/apache/geronimo/ext/tomcat/util/6.0.29.0/util-6.0.29.0.jar
+./lib/geronimo-crypto-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/geronimo-crypto-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-crypto/2.2.1/geronimo-crypto-2.2.1.jar
+./repository/org/jasypt/jasypt/1.6/jasypt-1.6.jar
+./lib/endorsed/yoko-rmi-spec-1.0.jar
+./lib/endorsed/yoko-spec-corba-1.0.jar
+./repository/org/apache/yoko/yoko-core/1.0/yoko-core-1.0.jar
+./repository/org/apache/yoko/yoko-rmi-impl/1.0/yoko-rmi-impl-1.0.jar
+./repository/org/apache/yoko/yoko-rmi-spec/1.0/yoko-rmi-spec-1.0.jar
+./repository/org/apache/yoko/yoko-spec-corba/1.0/yoko-spec-corba-1.0.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/endorsed/yoko-rmi-spec-1.0.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/endorsed/yoko-spec-corba-1.0.jar
+./repository/org/apache/geronimo/configs/system-database/2.2.1/system-database-2.2.1.car/rar/tranql-connector-1.5.jar
+./repository/org/apache/geronimo/configs/system-database/2.2.1/system-database-2.2.1.car/rar/tranql-connector-derby-common-1.5.jar
+./repository/org/apache/geronimo/plugins/monitoring/agent-ds/2.2.1/agent-ds-2.2.1.car/rar/tranql-connector-1.5.jar
+./repository/org/apache/geronimo/plugins/monitoring/agent-ds/2.2.1/agent-ds-2.2.1.car/rar/tranql-connector-derby-common-1.5.jar
+./repository/org/apache/geronimo/plugins/monitoring/mconsole-ds/2.2.1/mconsole-ds-2.2.1.car/rar/tranql-connector-1.5.jar
+./repository/org/apache/geronimo/plugins/monitoring/mconsole-ds/2.2.1/mconsole-ds-2.2.1.car/rar/tranql-connector-derby-common-1.5.jar
+./repository/org/apache/geronimo/plugins/uddi-db/2.2.1/uddi-db-2.2.1.car/rar/tranql-connector-1.5.jar
+./repository/org/apache/geronimo/plugins/uddi-db/2.2.1/uddi-db-2.2.1.car/rar/tranql-connector-derby-common-1.5.jar
+./lib/boot/gshell-bootstrap.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/boot/gshell-bootstrap.jar
+./repository/org/apache/geronimo/gshell/commands/gshell-builtins/1.0-alpha-1/gshell-builtins-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/gshell-bootstrap/1.0-alpha-1/gshell-bootstrap-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/gshell-cli/1.0-alpha-1/gshell-cli-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/gshell-command-api/1.0-alpha-1/gshell-command-api-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/gshell-core/1.0-alpha-1/gshell-core-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/gshell-parser/1.0-alpha-1/gshell-parser-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/gshell-whisper/1.0-alpha-1/gshell-whisper-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/remote/gshell-remote-client/1.0-alpha-1/gshell-remote-client-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/remote/gshell-remote-common/1.0-alpha-1/gshell-remote-common-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/remote/gshell-remote-server/1.0-alpha-1/gshell-remote-server-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/support/gshell-ansi/1.0-alpha-1/gshell-ansi-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/support/gshell-clp/1.0-alpha-1/gshell-clp-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/support/gshell-common/1.0-alpha-1/gshell-common-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/support/gshell-i18n/1.0-alpha-1/gshell-i18n-1.0-alpha-1.jar
+./repository/org/apache/geronimo/gshell/support/gshell-prefs/1.0-alpha-1/gshell-prefs-1.0-alpha-1.jar
+./lib/cglib-nodep-2.1_3.jar
+./repository/cglib/cglib-nodep/2.1_3/cglib-nodep-2.1_3.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/cglib-nodep-2.1_3.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/commons-net-2.0.jar
+./repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar
+./repository/commons-codec/commons-codec/1.3/commons-codec-1.3.jar
+./repository/commons-collections/commons-collections/3.2/commons-collections-3.2.jar
+./repository/commons-digester/commons-digester/1.8/commons-digester-1.8.jar
+./repository/commons-discovery/commons-discovery/0.4/commons-discovery-0.4.jar
+./repository/commons-fileupload/commons-fileupload/1.1.1/commons-fileupload-1.1.1.jar
+./repository/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar
+./repository/commons-io/commons-io/1.2/commons-io-1.2.jar
+./repository/commons-jexl/commons-jexl/1.1/commons-jexl-1.1.jar
+./repository/commons-lang/commons-lang/2.3/commons-lang-2.3.jar
+./repository/commons-net/commons-net/2.0/commons-net-2.0.jar
+./repository/commons-vfs/commons-vfs/1.0/commons-vfs-1.0.jar
+./lib/log4j-1.2.15.jar
+./repository/log4j/log4j/1.2.15/log4j-1.2.15.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/log4j-1.2.15.jar
+./lib/xbean-reflect-3.7.jar
+./repository/org/apache/xbean/xbean-spring/3.7/xbean-spring-3.7.jar
+./repository/org/apache/xbean/xbean-finder/3.7/xbean-finder-3.7.jar
+./repository/org/apache/xbean/xbean-asm-shaded/3.7/xbean-asm-shaded-3.7.jar
+./repository/org/apache/xbean/xbean-naming/3.6/xbean-naming-3.6.jar
+./repository/org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/xbean-reflect-3.7.jar
+./repository/org/apache/activemq/activeio-core/3.1.2/activeio-core-3.1.2.jar
+./repository/org/apache/activemq/activemq-core/5.4.1/activemq-core-5.4.1.jar
+./repository/org/apache/activemq/kahadb/5.4.1/kahadb-5.4.1.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/activemq-core-5.4.1.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/activemq-protobuf-1.1.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/activemq-ra-5.4.1.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/kahadb-5.4.1.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/jasypt-1.6.jar
+./repository/org/apache/activemq/protobuf/activemq-protobuf/1.1/activemq-protobuf-1.1.jar
+./repository/org/apache/ant/ant/1.7.1/ant-1.7.1.jar
+./repository/org/apache/ant/ant-launcher/1.7.1/ant-launcher-1.7.1.jar
+./repository/org/apache/axis2/axis2-jaxws/1.5.2/axis2-jaxws-1.5.2.jar
+./repository/org/apache/axis2/axis2-kernel/1.5.2/axis2-kernel-1.5.2.jar
+./repository/org/apache/axis2/axis2-metadata/1.5.2/axis2-metadata-1.5.2.jar
+./repository/org/apache/axis2/axis2-saaj/1.5.2/axis2-saaj-1.5.2.jar
+./repository/org/apache/axis2/axis2-transport-http/1.5.2/axis2-transport-http-1.5.2.jar
+./repository/org/apache/axis2/axis2-transport-local/1.5.2/axis2-transport-local-1.5.2.jar
+./repository/org/apache/bcel/bcel/5.2/bcel-5.2.jar
+./repository/org/apache/cxf/cxf-tools-common/2.1.10/cxf-tools-common-2.1.10.jar
+./repository/org/apache/cxf/cxf-rt-frontend-jaxws/2.1.10/cxf-rt-frontend-jaxws-2.1.10.jar
+./repository/org/apache/cxf/cxf-common-utilities/2.1.10/cxf-common-utilities-2.1.10.jar
+./repository/org/apache/cxf/cxf-rt-bindings-xml/2.1.10/cxf-rt-bindings-xml-2.1.10.jar
+./repository/org/apache/cxf/cxf-tools-validator/2.1.10/cxf-tools-validator-2.1.10.jar
+./repository/org/apache/cxf/cxf-api/2.1.10/cxf-api-2.1.10.jar
+./repository/org/apache/cxf/cxf-tools-wsdlto-core/2.1.10/cxf-tools-wsdlto-core-2.1.10.jar
+./repository/org/apache/cxf/cxf-rt-databinding-jaxb/2.1.10/cxf-rt-databinding-jaxb-2.1.10.jar
+./repository/org/apache/cxf/cxf-rt-ws-addr/2.1.10/cxf-rt-ws-addr-2.1.10.jar
+./repository/org/apache/cxf/cxf-rt-ws-security/2.1.10/cxf-rt-ws-security-2.1.10.jar
+./repository/org/apache/cxf/cxf-common-schemas/2.1.10/cxf-common-schemas-2.1.10.jar
+./repository/org/apache/cxf/cxf-tools-java2ws/2.1.10/cxf-tools-java2ws-2.1.10.jar
+./repository/org/apache/cxf/cxf-rt-transports-http/2.1.10/cxf-rt-transports-http-2.1.10.jar
+./repository/org/apache/cxf/cxf-rt-core/2.1.10/cxf-rt-core-2.1.10.jar
+./repository/org/apache/cxf/cxf-rt-bindings-soap/2.1.10/cxf-rt-bindings-soap-2.1.10.jar
+./repository/org/apache/cxf/cxf-tools-wsdlto-databinding-jaxb/2.1.10/cxf-tools-wsdlto-databinding-jaxb-2.1.10.jar
+./repository/org/apache/cxf/cxf-tools-wsdlto-frontend-jaxws/2.1.10/cxf-tools-wsdlto-frontend-jaxws-2.1.10.jar
+./repository/org/apache/cxf/cxf-rt-frontend-simple/2.1.10/cxf-rt-frontend-simple-2.1.10.jar
+./repository/org/apache/derby/derbyclient/10.5.3.0_1/derbyclient-10.5.3.0_1.jar
+./repository/org/apache/derby/derbynet/10.5.3.0_1/derbynet-10.5.3.0_1.jar
+./repository/org/apache/derby/derbytools/10.5.3.0_1/derbytools-10.5.3.0_1.jar
+./repository/org/apache/derby/derby/10.5.3.0_1/derby-10.5.3.0_1.jar
+./repository/org/apache/httpcomponents/httpcore/4.0.1/httpcore-4.0.1.jar
+./repository/org/apache/juddi/juddi/2.0rc6/juddi-2.0rc6.jar
+./repository/org/apache/juddi/juddi-ws/2.0rc6/juddi-ws-2.0rc6.jar
+./repository/org/apache/mina/mina-core/1.1.6/mina-core-1.1.6.jar
+./repository/org/apache/mina/mina-filter-ssl/1.1.6/mina-filter-ssl-1.1.6.jar
+./repository/org/apache/myfaces/core/myfaces-api/1.2.6/myfaces-api-1.2.8.jar
+./repository/org/apache/myfaces/core/myfaces-impl/1.2.6/myfaces-impl-1.2.8.jar
+./repository/org/apache/neethi/neethi/2.0.4/neethi-2.0.4.jar
+./repository/org/apache/openejb/openejb-core/3.1.3/openejb-core-3.1.3.jar
+./repository/org/apache/openejb/ejb31-api-experimental/3.1.3/ejb31-api-experimental-3.1.3.jar
+./repository/org/apache/openejb/openejb-jee/3.1.3/openejb-jee-3.1.3.jar
+./repository/org/apache/openejb/openejb-javaagent/3.1.3/openejb-javaagent-3.1.3.jar
+./repository/org/apache/openejb/openejb-ejbd/3.1.3/openejb-ejbd-3.1.3.jar
+./repository/org/apache/openejb/openejb-loader/3.1.3/openejb-loader-3.1.3.jar
+./repository/org/apache/openejb/openejb-server/3.1.3/openejb-server-3.1.3.jar
+./repository/org/apache/openejb/openejb-api/3.1.3/openejb-api-3.1.3.jar
+./repository/org/apache/openejb/openejb-client/3.1.3/openejb-client-3.1.3.jar
+./repository/org/apache/openejb/openejb-multicast/3.1.3/openejb-multicast-3.1.3.jar
+./repository/org/apache/openejb/openejb-axis/3.1.3/openejb-axis-3.1.3.jar
+./repository/org/apache/openjpa/openjpa/1.2.2/openjpa-1.2.2.jar
+./repository/org/apache/pluto/pluto-container/1.1.6/pluto-container-1.1.6.jar
+./repository/org/apache/pluto/pluto-descriptor-api/1.1.6/pluto-descriptor-api-1.1.6.jar
+./repository/org/apache/pluto/pluto-descriptor-impl/1.1.6/pluto-descriptor-impl-1.1.6.jar
+./repository/org/apache/pluto/pluto-portal-driver/1.1.6/pluto-portal-driver-1.1.6.jar
+./repository/org/apache/pluto/pluto-portal-driver-impl/1.1.6/pluto-portal-driver-impl-1.1.6.jar
+./repository/org/apache/pluto/pluto-taglib/1.1.6/pluto-taglib-1.1.6.jar
+./repository/org/apache/portals/portlet-api_1.0_spec/1.0/portlet-api_1.0_spec-1.0.jar
+./repository/org/apache/santuario/xmlsec/1.4.3/xmlsec-1.4.3.jar
+./repository/org/apache/velocity/velocity/1.5/velocity-1.5.jar
+./repository/org/apache/woden/woden-api/1.0M8/woden-api-1.0M8.jar
+./repository/org/apache/woden/woden-impl-dom/1.0M8/woden-impl-dom-1.0M8.jar
+./repository/org/apache/ws/commons/axiom/axiom-api/1.2.9/axiom-api-1.2.9.jar
+./repository/org/apache/ws/commons/axiom/axiom-dom/1.2.9/axiom-dom-1.2.9.jar
+./repository/org/apache/ws/commons/axiom/axiom-impl/1.2.9/axiom-impl-1.2.9.jar
+./repository/org/apache/ws/commons/schema/XmlSchema/1.4.3/XmlSchema-1.4.3.jar
+./repository/org/apache/ws/scout/scout/1.1/scout-1.1.jar
+./repository/org/apache/ws/security/wss4j/1.5.8/wss4j-1.5.8.jar
+./repository/org/apache/xmlbeans/xmlbeans/2.3.0/xmlbeans-2.3.0.jar
+./repository/org/codehaus/castor/castor/1.0.5/castor-1.0.5.jar
+./repository/org/codehaus/groovy/groovy-all-minimal/1.5.6/groovy-all-minimal-1.5.6.jar
+./repository/org/codehaus/swizzle/swizzle-stream/1.0.1/swizzle-stream-1.0.1.jar
+./repository/org/codehaus/wadi/wadi-aop/2.1.2/wadi-aop-2.1.2.jar
+./repository/org/codehaus/wadi/wadi-group/2.1.2/wadi-group-2.1.2.jar
+./repository/org/codehaus/wadi/wadi-tribes/2.1.2/wadi-tribes-2.1.2.jar
+./repository/org/codehaus/wadi/wadi-core/2.1.2/wadi-core-2.1.2.jar
+./repository/org/codehaus/woodstox/wstx-asl/3.2.7/wstx-asl-3.2.7.jar
+./repository/org/directwebremoting/dwr/3.0.M1/dwr-3.0.M1.jar
+./repository/org/eclipse/jetty/jetty-ajp/7.0.0.v20091005/jetty-ajp-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-continuation/7.0.0.v20091005/jetty-continuation-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-http/7.0.0.v20091005/jetty-http-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-io/7.0.0.v20091005/jetty-io-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-jaspi/7.0.0.v20091005/jetty-jaspi-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-security/7.0.0.v20091005/jetty-security-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-server/7.0.0.v20091005/jetty-server-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-servlet/7.0.0.v20091005/jetty-servlet-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-util/7.0.0.v20091005/jetty-util-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-webapp/7.0.0.v20091005/jetty-webapp-7.0.0.v20091005.jar
+./repository/org/eclipse/jetty/jetty-xml/7.0.0.v20091005/jetty-xml-7.0.0.v20091005.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/spring-aop-3.0.3.RELEASE.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/spring-context-3.0.3.RELEASE.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/spring-expression-3.0.3.RELEASE.jar
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/spring-core-3.0.3.RELEASE.jar
+./repository/org/springframework/spring-asm/3.0.3.RELEASE/spring-asm-3.0.3.RELEASE.jar
+./repository/org/springframework/spring-web/3.0.3.RELEASE/spring-web-3.0.3.RELEASE.jar
+./repository/org/springframework/spring-aop/3.0.3.RELEASE/spring-aop-3.0.3.RELEASE.jar
+./repository/org/springframework/spring-context/3.0.3.RELEASE/spring-context-3.0.3.RELEASE.jar
+./repository/org/springframework/spring-beans/3.0.3.RELEASE/spring-beans-3.0.3.RELEASE.jar
+./repository/org/springframework/spring-core/3.0.3.RELEASE/spring-core-3.0.3.RELEASE.jar
+./repository/org/springframework/spring-expression/3.0.3.RELEASE/spring-expression-3.0.3.RELEASE.jar
+./repository/quartz/quartz/1.5.2/quartz-1.5.2.jar
+./repository/xml-resolver/xml-resolver/1.2/xml-resolver-1.2.jar
+
+./repository/org/tranql/tranql-connector-derby-embed-xa/1.5/tranql-connector-derby-embed-xa-1.5.rar
+./repository/org/tranql/tranql-connector-mysql-xa/1.3/tranql-connector-mysql-xa-1.3.rar
+./repository/org/tranql/tranql-connector-ra/1.5/tranql-connector-ra-1.5.rar
+./repository/org/tranql/tranql-connector-mysql-local/1.3/tranql-connector-mysql-local-1.3.rar
+./repository/org/tranql/tranql-connector-oracle-rac-local/1.5/tranql-connector-oracle-rac-local-1.5.rar
+./repository/org/tranql/tranql-connector-informix-xa/1.2/tranql-connector-informix-xa-1.2.rar
+./repository/org/tranql/tranql-connector-oracle-local/1.5/tranql-connector-oracle-local-1.5.rar
+./repository/org/tranql/tranql-connector-sqlserver2005-xa/1.1/tranql-connector-sqlserver2005-xa-1.1.rar
+./repository/org/tranql/tranql-connector-postgresql-local/1.2/tranql-connector-postgresql-local-1.2.rar
+./repository/org/tranql/tranql-connector-oracle-xa/1.5/tranql-connector-oracle-xa-1.5.rar
+./repository/org/tranql/tranql-connector-db2-xa/1.4/tranql-connector-db2-xa-1.4.rar
+./repository/org/tranql/tranql-connector-sqlserver2000-xa/1.1/tranql-connector-sqlserver2000-xa-1.1.rar
+./repository/org/tranql/tranql-connector-derby-client-local/1.5/tranql-connector-derby-client-local-1.5.rar
+./repository/org/tranql/tranql-connector-derby-embed-local/1.5/tranql-connector-derby-embed-local-1.5.rar
+./repository/org/tranql/tranql-connector-postgresql-xa/1.2/tranql-connector-postgresql-xa-1.2.rar
+./repository/org/tranql/tranql-connector-derby-client-xa/1.5/tranql-connector-derby-client-xa-1.5.rar
+./repository/org/apache/geronimo/modules/geronimo-activemq-ra/2.2.1/geronimo-activemq-ra-2.2.1.rar
+
+./repository/org/apache/geronimo/plugins/monitoring/agent-car-jmx/2.2.1/agent-car-jmx-2.2.1.car
+./repository/org/apache/geronimo/plugins/monitoring/agent-car-ejb/2.2.1/agent-car-ejb-2.2.1.car
+./repository/org/apache/geronimo/plugins/monitoring/mconsole-jetty/2.2.1/mconsole-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugins/monitoring/mconsole-ds/2.2.1/mconsole-ds-2.2.1.car
+./repository/org/apache/geronimo/plugins/monitoring/agent-ds/2.2.1/agent-ds-2.2.1.car
+./repository/org/apache/geronimo/plugins/uddi-db/2.2.1/uddi-db-2.2.1.car
+./repository/org/apache/geronimo/plugins/plancreator-console-jetty/2.2.1/plancreator-console-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugins/activemq-console-jetty/2.2.1/activemq-console-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugins/openejb-console-jetty/2.2.1/openejb-console-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugins/debugviews-console-jetty/2.2.1/debugviews-console-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugins/classloaders/xbean-finder/2.2.1/xbean-finder-2.2.1.car
+./repository/org/apache/geronimo/plugins/classloaders/geronimo-schema-jee_5/2.2.1/geronimo-schema-jee_5-2.2.1.car
+./repository/org/apache/geronimo/plugins/classloaders/geronimo-javaee-deployment_1.1MR3_spec/2.2.1/geronimo-javaee-deployment_1.1MR3_spec-2.2.1.car
+./repository/org/apache/geronimo/plugins/console-jetty/2.2.1/console-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugins/sysdb-console-jetty/2.2.1/sysdb-console-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugins/plugin-console-jetty/2.2.1/plugin-console-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugins/pluto-support/2.2.1/pluto-support-2.2.1.car
+./repository/org/apache/geronimo/configs/j2ee-corba-yoko/2.2.1/j2ee-corba-yoko-2.2.1.car
+./repository/org/apache/geronimo/configs/myfaces/2.2.1/myfaces-2.2.1.car
+./repository/org/apache/geronimo/configs/openejb-deployer/2.2.1/openejb-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/jasper/2.2.1/jasper-2.2.1.car
+./repository/org/apache/geronimo/configs/j2ee-server/2.2.1/j2ee-server-2.2.1.car
+./repository/org/apache/geronimo/configs/jsr88-war-configurer/2.2.1/jsr88-war-configurer-2.2.1.car
+./repository/org/apache/geronimo/configs/clustering/2.2.1/clustering-2.2.1.car
+./repository/org/apache/geronimo/configs/ca-helper-jetty/2.2.1/ca-helper-jetty-2.2.1.car
+./repository/org/apache/geronimo/configs/farming/2.2.1/farming-2.2.1.car
+./repository/org/apache/geronimo/configs/cxf-tools/2.2.1/cxf-tools-2.2.1.car
+./repository/org/apache/geronimo/configs/uddi-jetty/2.2.1/uddi-jetty-2.2.1.car
+./repository/org/apache/geronimo/configs/javamail/2.2.1/javamail-2.2.1.car
+./repository/org/apache/geronimo/configs/openejb-clustering-wadi/2.2.1/openejb-clustering-wadi-2.2.1.car
+./repository/org/apache/geronimo/configs/jsr88-jar-configurer/2.2.1/jsr88-jar-configurer-2.2.1.car
+./repository/org/apache/geronimo/configs/jaxws-sun-tools/2.2.1/jaxws-sun-tools-2.2.1.car
+./repository/org/apache/geronimo/configs/client-security/2.2.1/client-security-2.2.1.car
+./repository/org/apache/geronimo/configs/hot-deployer/2.2.1/hot-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/dojo-jetty/2.2.1/dojo-jetty-2.2.1.car
+./repository/org/apache/geronimo/configs/cxf-jaxws-tools/2.2.1/cxf-jaxws-tools-2.2.1.car
+./repository/org/apache/geronimo/configs/axis2/2.2.1/axis2-2.2.1.car
+./repository/org/apache/geronimo/configs/axis2-ejb/2.2.1/axis2-ejb-2.2.1.car
+./repository/org/apache/geronimo/configs/webservices-common/2.2.1/webservices-common-2.2.1.car
+./repository/org/apache/geronimo/configs/axis-deployer/2.2.1/axis-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/jetty7/2.2.1/jetty7-2.2.1.car
+./repository/org/apache/geronimo/configs/mejb/2.2.1/mejb-2.2.1.car
+./repository/org/apache/geronimo/configs/jsr88-rar-configurer/2.2.1/jsr88-rar-configurer-2.2.1.car
+./repository/org/apache/geronimo/configs/sharedlib/2.2.1/sharedlib-2.2.1.car
+./repository/org/apache/geronimo/configs/persistence-jpa10-deployer/2.2.1/persistence-jpa10-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/remote-deploy-jetty/2.2.1/remote-deploy-jetty-2.2.1.car
+./repository/org/apache/geronimo/configs/openjpa/2.2.1/openjpa-2.2.1.car
+./repository/org/apache/geronimo/configs/axis/2.2.1/axis-2.2.1.car
+./repository/org/apache/geronimo/configs/jaxws-deployer/2.2.1/jaxws-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/welcome-jetty/2.2.1/welcome-jetty-2.2.1.car
+./repository/org/apache/geronimo/configs/cxf-ejb-deployer/2.2.1/cxf-ejb-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/system-database/2.2.1/system-database-2.2.1.car
+./repository/org/apache/geronimo/configs/client-transaction/2.2.1/client-transaction-2.2.1.car
+./repository/org/apache/geronimo/configs/client/2.2.1/client-2.2.1.car
+./repository/org/apache/geronimo/configs/connector-deployer/2.2.1/connector-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/aspectj/2.2.1/aspectj-2.2.1.car
+./repository/org/apache/geronimo/configs/client-deployer/2.2.1/client-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/myfaces-deployer/2.2.1/myfaces-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/jetty7-clustering-builder-wadi/2.2.1/jetty7-clustering-builder-wadi-2.2.1.car
+./repository/org/apache/geronimo/configs/j2ee-deployer/2.2.1/j2ee-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/client-corba-yoko/2.2.1/client-corba-yoko-2.2.1.car
+./repository/org/apache/geronimo/configs/jetty7-deployer/2.2.1/jetty7-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/jsr88-ear-configurer/2.2.1/jsr88-ear-configurer-2.2.1.car
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car
+./repository/org/apache/geronimo/configs/transaction/2.2.1/transaction-2.2.1.car
+./repository/org/apache/geronimo/configs/openejb-clustering-builder-wadi/2.2.1/openejb-clustering-builder-wadi-2.2.1.car
+./repository/org/apache/geronimo/configs/cxf-deployer/2.2.1/cxf-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/concurrent-deployer/2.2.1/concurrent-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/jaxws-tools/2.2.1/jaxws-tools-2.2.1.car
+./repository/org/apache/geronimo/configs/activemq-broker/2.2.1/activemq-broker-2.2.1.car
+./repository/org/apache/geronimo/configs/jasper-deployer/2.2.1/jasper-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/cxf/2.2.1/cxf-2.2.1.car
+./repository/org/apache/geronimo/configs/spring/2.2.1/spring-2.2.1.car
+./repository/org/apache/geronimo/configs/wadi-clustering/2.2.1/wadi-clustering-2.2.1.car
+./repository/org/apache/geronimo/configs/openejb-corba-deployer/2.2.1/openejb-corba-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/openejb/2.2.1/openejb-2.2.1.car
+./repository/org/apache/geronimo/configs/cxf-ejb/2.2.1/cxf-ejb-2.2.1.car
+./repository/org/apache/geronimo/configs/jaxws-ejb-deployer/2.2.1/jaxws-ejb-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/jetty7-clustering-wadi/2.2.1/jetty7-clustering-wadi-2.2.1.car
+./repository/org/apache/geronimo/configs/concurrent/2.2.1/concurrent-2.2.1.car
+./repository/org/apache/geronimo/configs/axis2-ejb-deployer/2.2.1/axis2-ejb-deployer-2.2.1.car
+./repository/org/apache/geronimo/configs/derby/2.2.1/derby-2.2.1.car
+./repository/org/apache/geronimo/configs/axis2-deployer/2.2.1/axis2-deployer-2.2.1.car
+./repository/org/apache/geronimo/plugingroups/web-jetty/2.2.1/web-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugingroups/ejb/2.2.1/ejb-2.2.1.car
+./repository/org/apache/geronimo/plugingroups/client/2.2.1/client-2.2.1.car
+./repository/org/apache/geronimo/plugingroups/persistence/2.2.1/persistence-2.2.1.car
+./repository/org/apache/geronimo/plugingroups/webservices-axis2/2.2.1/webservices-axis2-2.2.1.car
+./repository/org/apache/geronimo/plugingroups/clustering-jetty/2.2.1/clustering-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugingroups/javaee5-jetty/2.2.1/javaee5-jetty-2.2.1.car
+./repository/org/apache/geronimo/plugingroups/webservices-cxf/2.2.1/webservices-cxf-2.2.1.car
+./repository/org/apache/geronimo/framework/offline-deployer/2.2.1/offline-deployer-2.2.1.car
+./repository/org/apache/geronimo/framework/jmx-security/2.2.1/jmx-security-2.2.1.car
+./repository/org/apache/geronimo/framework/xmlbeans/2.2.1/xmlbeans-2.2.1.car
+./repository/org/apache/geronimo/framework/plugin/2.2.1/plugin-2.2.1.car
+./repository/org/apache/geronimo/framework/gshell-geronimo/2.2.1/gshell-geronimo-2.2.1.car
+./repository/org/apache/geronimo/framework/jsr88-deploymentfactory/2.2.1/jsr88-deploymentfactory-2.2.1.car
+./repository/org/apache/geronimo/framework/jee-specs/2.2.1/jee-specs-2.2.1.car
+./repository/org/apache/geronimo/framework/client-system/2.2.1/client-system-2.2.1.car
+./repository/org/apache/geronimo/framework/online-deployer/2.2.1/online-deployer-2.2.1.car
+./repository/org/apache/geronimo/framework/transformer-agent/2.2.1/transformer-agent-2.2.1.car
+./repository/org/apache/geronimo/framework/j2ee-system/2.2.1/j2ee-system-2.2.1.car
+./repository/org/apache/geronimo/framework/plugingroups/framework/2.2.1/framework-2.2.1.car
+./repository/org/apache/geronimo/framework/gshell-remote/2.2.1/gshell-remote-2.2.1.car
+./repository/org/apache/geronimo/framework/jsr88-cli/2.2.1/jsr88-cli-2.2.1.car
+./repository/org/apache/geronimo/framework/geronimo-gbean-deployer/2.2.1/geronimo-gbean-deployer-2.2.1.car
+./repository/org/apache/geronimo/framework/shutdown/2.2.1/shutdown-2.2.1.car
+./repository/org/apache/geronimo/framework/gshell-framework/2.2.1/gshell-framework-2.2.1.car
+./repository/org/apache/geronimo/framework/j2ee-security/2.2.1/j2ee-security-2.2.1.car
+./repository/org/apache/geronimo/framework/rmi-naming/2.2.1/rmi-naming-2.2.1.car
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/jsr88-deploymentfactory-2.2.1.car
+./repository/org/apache/geronimo/framework/server-security-config/2.2.1/server-security-config-2.2.1.car
+./lib/jsr88-deploymentfactory-2.2.1.car
+
+
+=========================================================================
+==  Bouncy Castle License                                              ==
+=========================================================================
+
+The following artifacts are also licensed under the above Bouncy Castle
+License:
+
+./lib/geronimo-crypto-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/geronimo-crypto-2.2.1.jar
+./repository/org/apache/geronimo/framework/geronimo-crypto/2.2.1/geronimo-crypto-2.2.1.jar
+
+=========================================================================
+==  OMG License                                                        ==
+=========================================================================
+
+Object Management Group (OMG) classes  
+		
+       Copyright (c) 1999 Object Management Group. Unlimited rights to
+       duplicate and use this code are hereby granted provided that this
+       copyright notice is included.
+
+The following artifacts are also covered by the OMG License:
+
+./lib/endorsed/yoko-rmi-spec-1.0.jar
+./lib/endorsed/yoko-spec-corba-1.0.jar
+./repository/org/apache/yoko/yoko-core/1.0/yoko-core-1.0.jar
+./repository/org/apache/yoko/yoko-rmi-impl/1.0/yoko-rmi-impl-1.0.jar
+./repository/org/apache/yoko/yoko-rmi-spec/1.0/yoko-rmi-spec-1.0.jar
+./repository/org/apache/yoko/yoko-spec-corba/1.0/yoko-spec-corba-1.0.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/endorsed/yoko-rmi-spec-1.0.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/endorsed/yoko-spec-corba-1.0.jar
+
+=========================================================================
+==  ASM License                                                        ==
+=========================================================================
+
+Copyright (c) 2000-2005 INRIA, France Telecom
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holders nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
+
+The following artifacts are covered by the ASM License:
+
+./lib/asm-3.1.jar
+./lib/asm-commons-3.1.jar
+./repository/asm/asm/3.1/asm-3.1.jar
+./repository/asm/asm-commons/3.1/asm-commons-3.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/asm-3.1.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/asm-commons-3.1.jar
+./repository/org/apache/xbean/xbean-asm-shaded/3.7/xbean-asm-shaded-3.7.jar
+./repository/org/codehaus/groovy/groovy-all-minimal/1.5.6/groovy-all-minimal-1.5.6.jar
+
+
+=========================================================================
+==  Common Public License - v 1.0                                      ==
+=========================================================================
+
+Common Public License - v 1.0 
+
+
+THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS COMMON 
+PUBLIC LICENSE ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE 
+PROGRAM CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT. 
+
+
+1. DEFINITIONS 
+
+"Contribution" means: 
+
+a) in the case of the initial Contributor, the initial code and 
+   documentation distributed under this Agreement, and
+
+b) in the case of each subsequent Contributor:
+
+i) changes to the Program, and
+
+ii) additions to the Program;
+
+where such changes and/or additions to the Program originate from and are 
+distributed by that particular Contributor. A Contribution 'originates' 
+from a Contributor if it was added to the Program by such Contributor 
+itself or anyone acting on such Contributor's behalf. Contributions do not 
+include additions to the Program which: (i) are separate modules of 
+software distributed in conjunction with the Program under their own 
+license agreement, and (ii) are not derivative works of the Program. 
+
+"Contributor" means any person or entity that distributes the Program. 
+
+
+"Licensed Patents " mean patent claims licensable by a Contributor which 
+are necessarily infringed by the use or sale of its Contribution alone or 
+when combined with the Program. 
+
+
+"Program" means the Contributions distributed in accordance with this 
+Agreement. 
+
+
+"Recipient" means anyone who receives the Program under this Agreement, 
+including all Contributors. 
+
+
+2. GRANT OF RIGHTS 
+
+a) Subject to the terms of this Agreement, each Contributor hereby grants 
+Recipient a non-exclusive, worldwide, royalty-free copyright license to 
+reproduce, prepare derivative works of, publicly display, publicly 
+perform, distribute and sublicense the Contribution of such Contributor, 
+if any, and such derivative works, in source code and object code form.
+
+b) Subject to the terms of this Agreement, each Contributor hereby grants 
+Recipient a non-exclusive, worldwide, royalty-free patent license under 
+Licensed Patents to make, use, sell, offer to sell, import and otherwise 
+transfer the Contribution of such Contributor, if any, in source code and 
+object code form. This patent license shall apply to the combination of the 
+Contribution and the Program if, at the time the Contribution is added by 
+the Contributor, such addition of the Contribution causes such combination 
+to be covered by the Licensed Patents. The patent license shall not apply 
+to any other combinations which include the Contribution. No hardware per se 
+is licensed hereunder. 
+
+c) Recipient understands that although each Contributor grants the licenses 
+to its Contributions set forth herein, no assurances are provided by any 
+Contributor that the Program does not infringe the patent or other 
+intellectual property rights of any other entity. Each Contributor disclaims 
+any liability to Recipient for claims brought by any other entity based on 
+infringement of intellectual property rights or otherwise. As a condition to 
+exercising the rights and licenses granted hereunder, each Recipient hereby 
+assumes sole responsibility to secure any other intellectual property rights 
+needed, if any. For example, if a third party patent license is required to 
+allow Recipient to distribute the Program, it is Recipient's responsibility 
+to acquire that license before distributing the Program.
+
+d) Each Contributor represents that to its knowledge it has sufficient 
+copyright rights in its Contribution, if any, to grant the copyright license 
+set forth in this Agreement.
+ 
+3. REQUIREMENTS 
+
+A Contributor may choose to distribute the Program in object code form under 
+its own license agreement, provided that: 
+
+a) it complies with the terms and conditions of this Agreement; and
+
+b) its license agreement:
+   
+i) effectively disclaims on behalf of all Contributors all warranties and 
+conditions, express and implied, including warranties or conditions of title 
+and non-infringement, and implied warranties or conditions of merchantability 
+and fitness for a particular purpose; 
+
+ii) effectively excludes on behalf of all Contributors all liability for 
+damages, including direct, indirect, special, incidental and consequential 
+damages, such as lost profits; 
+
+iii) states that any provisions which differ from this Agreement are offered 
+by that Contributor alone and not by any other party; and
+
+iv) states that source code for the Program is available from such 
+Contributor, and informs licensees how to obtain it in a reasonable manner on 
+or through a medium customarily used for software exchange. 
+
+When the Program is made available in source code form: 
+
+a) it must be made available under this Agreement; and 
+
+b) a copy of this Agreement must be included with each copy of the Program. 
+
+Contributors may not remove or alter any copyright notices contained within 
+the Program. 
+
+Each Contributor must identify itself as the originator of its 
+Contribution, if any, in a manner that reasonably allows subsequent 
+Recipients to identify the originator of the Contribution. 
+
+4. COMMERCIAL DISTRIBUTION 
+
+Commercial distributors of software may accept certain responsibilities 
+with respect to end users, business partners and the like. While this 
+license is intended to facilitate the commercial use of the Program, the 
+Contributor who includes the Program in a commercial product offering 
+should do so in a manner which does not create potential liability for 
+other Contributors. Therefore, if a Contributor includes the Program in a 
+commercial product offering, such Contributor ("Commercial Contributor") 
+hereby agrees to defend and indemnify every other Contributor ("Indemnified 
+Contributor") against any losses, damages and costs (collectively "Losses") 
+arising from claims, lawsuits and other legal actions brought by a third 
+party against the Indemnified Contributor to the extent caused by the acts 
+or omissions of such Commercial Contributor in connection with its 
+distribution of the Program in a commercial product offering. The 
+obligations in this section do not apply to any claims or Losses relating 
+to any actual or alleged intellectual property infringement. In order to 
+qualify, 
+an Indemnified Contributor must: a) promptly notify the Commercial 
+Contributor in writing of such claim, and b) allow the Commercial 
+Contributor to control, and cooperate with the Commercial Contributor in, 
+the defense and any related settlement negotiations. The Indemnified 
+Contributor may participate in any such claim at its own expense. 
+
+
+For example, a Contributor might include the Program in a commercial 
+product offering, Product X. That Contributor is then a Commercial 
+Contributor. If that Commercial Contributor then makes performance claims, 
+or offers warranties related to Product X, those performance claims and 
+warranties are such Commercial Contributor's responsibility alone. Under 
+this section, the Commercial Contributor would have to defend claims 
+against the other Contributors related to those performance claims and 
+warranties, and if a court requires any other Contributor to pay any 
+damages as a result, the Commercial Contributor must pay those damages. 
+
+
+5. NO WARRANTY 
+
+EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, THE PROGRAM IS PROVIDED 
+ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER 
+EXPRESS OR IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR 
+CONDITIONS OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A 
+PARTICULAR PURPOSE. Each Recipient is solely responsible for determining 
+the appropriateness of using and distributing the Program and assumes all 
+risks associated with its exercise of rights under this Agreement, 
+including but not limited to the risks and costs of program errors, 
+compliance with applicable laws, damage to or loss of data, programs or 
+equipment, and unavailability or interruption of operations. 
+
+
+6. DISCLAIMER OF LIABILITY 
+
+EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, NEITHER RECIPIENT NOR ANY 
+CONTRIBUTORS SHALL HAVE ANY LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING WITHOUT LIMITATION 
+LOST PROFITS), HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ARISING IN ANY WAY OUT OF THE USE OR DISTRIBUTION OF THE PROGRAM OR THE 
+EXERCISE OF ANY RIGHTS GRANTED HEREUNDER, EVEN IF ADVISED OF THE 
+POSSIBILITY OF SUCH DAMAGES. 
+
+
+7. GENERAL 
+
+If any provision of this Agreement is invalid or unenforceable under 
+applicable law, it shall not affect the validity or enforceability of 
+the remainder of the terms of this Agreement, and without further action 
+by the parties hereto, such provision shall be reformed to the minimum 
+extent necessary to make such provision valid and enforceable. 
+
+
+If Recipient institutes patent litigation against a Contributor with 
+respect to a patent applicable to software (including a cross-claim or 
+counterclaim in a lawsuit), then any patent licenses granted by that 
+Contributor to such Recipient under this Agreement shall terminate as 
+of the date such litigation is filed. In addition, if Recipient 
+institutes patent litigation against any entity (including a cross-claim 
+or counterclaim in a lawsuit) alleging that the Program itself (excluding 
+combinations of the Program with other software or hardware) infringes 
+such Recipient's patent(s), then such Recipient's rights granted under 
+Section 2(b) shall terminate as of the date such litigation is filed. 
+
+
+All Recipient's rights under this Agreement shall terminate if it fails 
+to comply with any of the material terms or conditions of this Agreement 
+and does not cure such failure in a reasonable period of time after 
+becoming aware of such noncompliance. If all Recipient's rights under this 
+Agreement terminate, Recipient agrees to cease use and distribution of the 
+Program as soon as reasonably practicable. However, Recipient's obligations 
+under this Agreement and any licenses granted by Recipient relating to the 
+Program shall continue and survive. 
+
+
+Everyone is permitted to copy and distribute copies of this Agreement, 
+but in order to avoid inconsistency the Agreement is copyrighted and may 
+only be modified in the following manner. The Agreement Steward reserves 
+the right to publish new versions (including revisions) of this Agreement 
+from time to time. No one other than the Agreement Steward has the right 
+to modify this Agreement. IBM is the initial Agreement Steward. IBM may 
+assign the responsibility to serve as the Agreement Steward to a suitable 
+separate entity. Each new version of the Agreement will be given a 
+distinguishing version number. The Program (including Contributions) may 
+always be distributed subject to the version of the Agreement under which 
+it was received. In addition, after a new version of the Agreement is 
+published, Contributor may elect to distribute the Program (including its 
+Contributions) under the new version. Except as expressly stated in 
+Sections 2(a) and 2(b) above, Recipient receives no rights or licenses to 
+the intellectual property of any Contributor under this Agreement, whether 
+expressly, by implication, estoppel or otherwise. All rights in the Program 
+not expressly granted under this Agreement are reserved. 
+
+
+This Agreement is governed by the laws of the State of New York and the 
+intellectual property laws of the United States of America. No party to this 
+Agreement will bring a legal action under this Agreement more than one year 
+after the cause of action arose. Each party waives its rights to a jury 
+trial in any resulting litigation. 
+
+The following artifacts are covered by the CPL License:
+
+./lib/plexus-archiver-1.0-alpha-7.jar
+./lib/boot/plexus-classworlds-1.2-alpha-10.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2/geronimo-boilerplate-2.2.1.car/contents/lib/boot/plexus-classworlds-1.2-alpha-10.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/plexus-archiver-1.0-alpha-7.jar
+./repository/org/codehaus/plexus/plexus-archiver/1.0-alpha-7/plexus-archiver-1.0-alpha-7.jar
+./repository/org/codehaus/plexus/plexus-classworlds/1.2-alpha-10/plexus-classworlds-1.2-alpha-10.jar
+./repository/org/codehaus/plexus/plexus-component-annotations/1.0-alpha-1/plexus-component-annotations-1.0-alpha-1.jar
+./repository/org/codehaus/plexus/plexus-component-api/1.0-alpha-32/plexus-component-api-1.0-alpha-32.jar
+./repository/org/codehaus/plexus/plexus-container-default/1.0-alpha-32/plexus-container-default-1.0-alpha-32.jar
+./repository/org/codehaus/plexus/plexus-utils/1.4.5/plexus-utils-1.4.5.jar
+./repository/wsdl4j/wsdl4j/1.6.2/wsdl4j-1.6.2.jar
+
+
+=========================================================================
+==  Apache Software License, Version 1.1                               ==
+=========================================================================
+
+The Apache Software License, Version 1.1
+
+Copyright (c) 1999-2003 The Apache Software Foundation.  All rights
+reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+3. The end-user documentation included with the redistribution, if
+   any, must include the following acknowlegement:
+      "This product includes software developed by the
+       Apache Software Foundation (http://www.apache.org/)."
+   Alternately, this acknowlegement may appear in the software itself,
+   if and wherever such third-party acknowlegements normally appear.
+
+4. The names "The Jakarta Project", "Commons", and "Apache Software
+   Foundation" must not be used to endorse or promote products derived
+   from this software without prior written permission. For written
+   permission, please contact apache@apache.org.
+
+5. Products derived from this software may not be called "Apache"
+   nor may "Apache" appear in their names without prior written
+   permission of the Apache Group.
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
+ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+====================================================================
+
+This software consists of voluntary contributions made by many
+individuals on behalf of the Apache Software Foundation.  For more
+information on the Apache Software Foundation, please see
+<http://www.apache.org/>.
+
+The following artifacts are covered by the Apache Software License,
+Version 1.1:
+
+./lib/commons-cli-1.0.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/commons-cli-1.0.jar
+./repository/commons-cli/commons-cli/1.0/commons-cli-1.0.jar
+./repository/axis/axis/1.4/axis-1.4.jar
+
+
+=========================================================================
+==  SLF4J MIT License                                                  ==
+=========================================================================
+
+Copyright (c) 2004-2008 QOS.ch 
+All rights reserved. 
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions: 
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software. THE
+SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+The following artifacts are covered by the SLF4J MIT License:
+
+./lib/jcl-over-slf4j-1.5.5.jar
+./lib/slf4j-api-1.5.5.jar
+./lib/slf4j-log4j12-1.5.5.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/jcl-over-slf4j-1.5.5.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/slf4j-api-1.5.5.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/slf4j-log4j12-1.5.5.jar
+./repository/org/slf4j/jcl-over-slf4j/1.5.5/jcl-over-slf4j-1.5.5.jar
+./repository/org/slf4j/jul-to-slf4j/1.5.5/jul-to-slf4j-1.5.5.jar
+./repository/org/slf4j/slf4j-api/1.5.5/slf4j-api-1.5.5.jar
+./repository/org/slf4j/slf4j-log4j12/1.5.5/slf4j-log4j12-1.5.5.jar
+
+
+=========================================================================
+==  xpp3 License                                                       ==
+=========================================================================
+
+Indiana University Extreme! Lab Software License
+
+Version 1.1.1
+
+Copyright (c) 2002 Extreme! Lab, Indiana University. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions 
+are met:
+
+1. Redistributions of source code must retain the above copyright notice, 
+   this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright 
+   notice, this list of conditions and the following disclaimer in 
+   the documentation and/or other materials provided with the distribution.
+
+3. The end-user documentation included with the redistribution, if any, 
+   must include the following acknowledgment:
+
+  "This product includes software developed by the Indiana University 
+  Extreme! Lab (http://www.extreme.indiana.edu/)."
+
+Alternately, this acknowledgment may appear in the software itself, 
+if and wherever such third-party acknowledgments normally appear.
+
+4. The names "Indiana Univeristy" and "Indiana Univeristy Extreme! Lab" 
+must not be used to endorse or promote products derived from this 
+software without prior written permission. For written permission, 
+please contact http://www.extreme.indiana.edu/.
+
+5. Products derived from this software may not use "Indiana Univeristy" 
+name nor may "Indiana Univeristy" appear in their name, without prior 
+written permission of the Indiana University.
+
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHORS, COPYRIGHT HOLDERS OR ITS CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The following artifacts are covered by the XPP License:
+
+./lib/xpp3_min-1.1.4c.jar
+./repository/xpp3/xpp3_min/1.1.4c/xpp3_min-1.1.4c.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/xpp3_min-1.1.4c.jar
+
+
+=========================================================================
+==  XStream License                                                    ==
+=========================================================================
+
+Copyright (c) 2003-2006, Joe Walnes
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are 
+met:
+
+Redistributions of source code must retain the above copyright notice, 
+this list of conditions and the following disclaimer. Redistributions in 
+binary form must reproduce the above copyright notice, this list of 
+conditions and the following disclaimer in the documentation and/or other 
+materials provided with the distribution.
+
+Neither the name of XStream nor the names of its contributors may be used 
+to endorse or promote products derived from this software without 
+specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER 
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The following artifacts are covered by the XStream License:
+
+./lib/xstream-1.3.jar
+./repository/com/thoughtworks/xstream/xstream/1.3/xstream-1.3.jar
+./repository/org/apache/geronimo/framework/geronimo-boilerplate/2.2.1/geronimo-boilerplate-2.2.1.car/contents/lib/xstream-1.3.jar
+
+
+=========================================================================
+==  Creative Commons Public Domain License                             ==
+=========================================================================
+
+Copyright-Only Dedication (based on United States law) or Public Domain 
+Certification
+
+The person or persons who have associated work with this document (the
+"Dedicator" or "Certifier") hereby either (a) certifies that, to the
+best of his knowledge, the work of authorship identified is in the
+public domain of the country from which the work is published, or (b)
+hereby dedicates whatever copyright the dedicators holds in the work of
+authorship identified below (the "Work") to the public domain. A
+certifier, morever, dedicates any copyright interest he may have in the
+associated work, and for these purposes, is described as a "dedicator"
+below.
+
+A certifier has taken reasonable steps to verify the copyright status 
+of this work. Certifier recognizes that his good faith efforts may not 
+shield him from liability if in fact the work certified is not in the 
+public domain.
+
+Dedicator makes this dedication for the benefit of the public at large 
+and to the detriment of the Dedicator's heirs and successors. Dedicator
+intends this dedication to be an overt act of relinquishment in perpetuity
+of all present and future rights under copyright law, whether vested or
+contingent, in the Work. Dedicator understands that such relinquishment
+of all rights includes the relinquishment of all rights to enforce (by
+lawsuit or otherwise) those copyrights in the Work.
+
+Dedicator recognizes that, once placed in the public domain, the Work 
+may be freely reproduced, distributed, transmitted, used, modified, built
+upon, or otherwise exploited by anyone for any purpose, commercial or
+non-commercial, and in any way, including by methods that have not yet
+been invented or conceived.
+
+The following artifacts are covered by the Creative Commons Public Domain
+License:
+
+./repository/backport-util-concurrent/backport-util-concurrent/2.2/backport-util-concurrent-2.2.jar
+./repository/org/apache/geronimo/modules/geronimo-concurrent-core/2.2.1/geronimo-concurrent-core-2.2.1.jar(FutureTask.java,ThreadPoolExecutor.java, RejectedExecutionHandler.java)
+
+
+=========================================================================
+==  CDDL License Version 1.0                                           ==
+=========================================================================
+
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
+
+1. Definitions.
+
+1.1. Contributor means each individual or entity that creates or
+     contributes to the creation of Modifications.
+
+1.2. Contributor Version means the combination of the Original
+     Software, prior Modifications used by a Contributor (if any), and
+     the Modifications made by that particular Contributor.
+
+1.3. Covered Software means (a) the Original Software, or (b)
+     Modifications, or (c) the combination of files containing
+     Original Software with files containing Modifications, in each
+     case including portions thereof.
+
+1.4. Executable means the Covered Software in any form other than
+     Source Code.
+
+1.5. Initial Developer means the individual or entity that first makes
+     Original Software available under this License.
+
+1.6. Larger Work means a work which combines Covered Software or
+     portions thereof with code not governed by the terms of this
+     License.
+
+1.7. License means this document.
+
+1.8. Licensable means having the right to grant, to the maximum extent
+     possible, whether at the time of the initial grant or
+     subsequently acquired, any and all of the rights conveyed herein.
+
+1.9. Modifications means the Source Code and Executable form of any of
+     the following:
+
+A. Any file that results from an addition to, deletion from or
+modification of the contents of a file containing Original Software or
+previous Modifications;
+
+B. Any new file that contains any part of the Original Software or
+previous Modification; or
+
+C. Any new file that is contributed or otherwise made available under
+the terms of this License.
+
+1.10. Original Software means the Source Code and Executable form of
+      computer software code that is originally released under this
+      License.
+
+1.11. Patent Claims means any patent claim(s), now owned or hereafter
+      acquired, including without limitation, method, process, and
+      apparatus claims, in any patent Licensable by grantor.
+
+1.12. Source Code means (a) the common form of computer software code
+      in which modifications are made and (b) associated documentation
+      included in or with such code.
+
+1.13. You (or Your) means an individual or a legal entity exercising
+      rights under, and complying with all of the terms of, this
+      License. For legal entities, You includes any entity which
+      controls, is controlled by, or is under common control with
+      You. For purposes of this definition, control means (a)·the
+      power, direct or indirect, to cause the direction or management
+      of such entity, whether by contract or otherwise, or
+      (b)·ownership of more than fifty percent (50%) of the
+      outstanding shares or beneficial ownership of such entity.
+
+2. License Grants.
+
+2.1. The Initial Developer Grant.  Conditioned upon Your compliance
+with Section 3.1 below and subject to third party intellectual
+property claims, the Initial Developer hereby grants You a world-wide,
+royalty-free, non-exclusive license: (a) under intellectual property
+rights (other than patent or trademark) Licensable by Initial
+Developer, to use, reproduce, modify, display, perform, sublicense and
+distribute the Original Software (or portions thereof), with or
+without Modifications, and/or as part of a Larger Work; and (b) under
+Patent Claims infringed by the making, using or selling of Original
+Software, to make, have made, use, practice, sell, and offer for sale,
+and/or otherwise dispose of the Original Software (or portions
+thereof).  (c) The licenses granted in Sections·2.1(a) and (b) are
+effective on the date Initial Developer first distributes or otherwise
+makes the Original Software available to a third party under the terms
+of this License.  (d) Notwithstanding Section·2.1(b) above, no patent
+license is granted: (1)·for code that You delete from the Original
+Software, or (2)·for infringements caused by: (i)·the modification of
+the Original Software, or (ii)·the combination of the Original
+Software with other software or devices.
+
+2.2. Contributor Grant.  Conditioned upon Your compliance with Section
+3.1 below and subject to third party intellectual property claims,
+each Contributor hereby grants You a world-wide, royalty-free,
+non-exclusive license: (a) under intellectual property rights (other
+than patent or trademark) Licensable by Contributor to use, reproduce,
+modify, display, perform, sublicense and distribute the Modifications
+created by such Contributor (or portions thereof), either on an
+unmodified basis, with other Modifications, as Covered Software and/or
+as part of a Larger Work; and (b) under Patent Claims infringed by the
+making, using, or selling of Modifications made by that Contributor
+either alone and/or in combination with its Contributor Version (or
+portions of such combination), to make, use, sell, offer for sale,
+have made, and/or otherwise dispose of: (1)·Modifications made by that
+Contributor (or portions thereof); and (2)·the combination of
+Modifications made by that Contributor with its Contributor Version
+(or portions of such combination).  (c) The licenses granted in
+Sections·2.2(a) and 2.2(b) are effective on the date Contributor first
+distributes or otherwise makes the Modifications available to a third
+party.  (d) Notwithstanding Section·2.2(b) above, no patent license is
+granted: (1)·for any code that Contributor has deleted from the
+Contributor Version; (2)·for infringements caused by: (i)·third party
+modifications of Contributor Version, or (ii)·the combination of
+Modifications made by that Contributor with other software (except as
+part of the Contributor Version) or other devices; or (3)·under Patent
+Claims infringed by Covered Software in the absence of Modifications
+made by that Contributor.
+
+3. Distribution Obligations.
+
+3.1. Availability of Source Code.
+
+Any Covered Software that You distribute or otherwise make available
+in Executable form must also be made available in Source Code form and
+that Source Code form must be distributed only under the terms of this
+License. You must include a copy of this License with every copy of
+the Source Code form of the Covered Software You distribute or
+otherwise make available. You must inform recipients of any such
+Covered Software in Executable form as to how they can obtain such
+Covered Software in Source Code form in a reasonable manner on or
+through a medium customarily used for software exchange.
+
+3.2. Modifications.
+
+The Modifications that You create or to which You contribute are
+governed by the terms of this License. You represent that You believe
+Your Modifications are Your original creation(s) and/or You have
+sufficient rights to grant the rights conveyed by this License.
+
+3.3. Required Notices.  You must include a notice in each of Your
+Modifications that identifies You as the Contributor of the
+Modification. You may not remove or alter any copyright, patent or
+trademark notices contained within the Covered Software, or any
+notices of licensing or any descriptive text giving attribution to any
+Contributor or the Initial Developer.
+
+3.4. Application of Additional Terms.  You may not offer or impose any
+terms on any Covered Software in Source Code form that alters or
+restricts the applicable version of this License or the recipients
+rights hereunder. You may choose to offer, and to charge a fee for,
+warranty, support, indemnity or liability obligations to one or more
+recipients of Covered Software. However, you may do so only on Your
+own behalf, and not on behalf of the Initial Developer or any
+Contributor. You must make it absolutely clear that any such warranty,
+support, indemnity or liability obligation is offered by You alone,
+and You hereby agree to indemnify the Initial Developer and every
+Contributor for any liability incurred by the Initial Developer or
+such Contributor as a result of warranty, support, indemnity or
+liability terms You offer.
+
+3.5. Distribution of Executable Versions.  You may distribute the
+Executable form of the Covered Software under the terms of this
+License or under the terms of a license of Your choice, which may
+contain terms different from this License, provided that You are in
+compliance with the terms of this License and that the license for the
+Executable form does not attempt to limit or alter the recipients
+rights in the Source Code form from the rights set forth in this
+License. If You distribute the Covered Software in Executable form
+under a different license, You must make it absolutely clear that any
+terms which differ from this License are offered by You alone, not by
+the Initial Developer or Contributor. You hereby agree to indemnify
+the Initial Developer and every Contributor for any liability incurred
+by the Initial Developer or such Contributor as a result of any such
+terms You offer.
+
+3.6. Larger Works.  You may create a Larger Work by combining Covered
+Software with other code not governed by the terms of this License and
+distribute the Larger Work as a single product. In such a case, You
+must make sure the requirements of this License are fulfilled for the
+Covered Software.
+
+4. Versions of the License.
+
+4.1. New Versions.  Sun Microsystems, Inc. is the initial license
+steward and may publish revised and/or new versions of this License
+from time to time. Each version will be given a distinguishing version
+number. Except as provided in Section 4.3, no one other than the
+license steward has the right to modify this License.
+
+4.2. Effect of New Versions.
+
+You may always continue to use, distribute or otherwise make the
+Covered Software available under the terms of the version of the
+License under which You originally received the Covered Software. If
+the Initial Developer includes a notice in the Original Software
+prohibiting it from being distributed or otherwise made available
+under any subsequent version of the License, You must distribute and
+make the Covered Software available under the terms of the version of
+the License under which You originally received the Covered
+Software. Otherwise, You may also choose to use, distribute or
+otherwise make the Covered Software available under the terms of any
+subsequent version of the License published by the license steward.
+4.3. Modified Versions.
+
+When You are an Initial Developer and You want to create a new license
+for Your Original Software, You may create and use a modified version
+of this License if You: (a)·rename the license and remove any
+references to the name of the license steward (except to note that the
+license differs from this License); and (b)·otherwise make it clear
+that the license contains terms which differ from this License.
+
+5. DISCLAIMER OF WARRANTY.
+
+COVERED SOFTWARE IS PROVIDED UNDER THIS LICENSE ON AN AS IS BASIS,
+WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING,
+WITHOUT LIMITATION, WARRANTIES THAT THE COVERED SOFTWARE IS FREE OF
+DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE OR
+NON-INFRINGING. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF
+THE COVERED SOFTWARE IS WITH YOU. SHOULD ANY COVERED SOFTWARE PROVE
+DEFECTIVE IN ANY RESPECT, YOU (NOT THE INITIAL DEVELOPER OR ANY OTHER
+CONTRIBUTOR) ASSUME THE COST OF ANY NECESSARY SERVICING, REPAIR OR
+CORRECTION. THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL PART
+OF THIS LICENSE. NO USE OF ANY COVERED SOFTWARE IS AUTHORIZED
+HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
+
+6. TERMINATION.
+
+6.1. This License and the rights granted hereunder will terminate
+     automatically if You fail to comply with terms herein and fail to
+     cure such breach within 30 days of becoming aware of the
+     breach. Provisions which, by their nature, must remain in effect
+     beyond the termination of this License shall survive.
+
+6.2. If You assert a patent infringement claim (excluding declaratory
+     judgment actions) against Initial Developer or a Contributor (the
+     Initial Developer or Contributor against whom You assert such
+     claim is referred to as Participant) alleging that the
+     Participant Software (meaning the Contributor Version where the
+     Participant is a Contributor or the Original Software where the
+     Participant is the Initial Developer) directly or indirectly
+     infringes any patent, then any and all rights granted directly or
+     indirectly to You by such Participant, the Initial Developer (if
+     the Initial Developer is not the Participant) and all
+     Contributors under Sections·2.1 and/or 2.2 of this License shall,
+     upon 60 days notice from Participant terminate prospectively and
+     automatically at the expiration of such 60 day notice period,
+     unless if within such 60 day period You withdraw Your claim with
+     respect to the Participant Software against such Participant
+     either unilaterally or pursuant to a written agreement with
+     Participant.
+
+6.3. In the event of termination under Sections·6.1 or 6.2 above, all
+     end user licenses that have been validly granted by You or any
+     distributor hereunder prior to termination (excluding licenses
+     granted to You by any distributor) shall survive termination.
+
+7. LIMITATION OF LIABILITY.
+
+UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY, WHETHER TORT
+(INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL YOU, THE INITIAL
+DEVELOPER, ANY OTHER CONTRIBUTOR, OR ANY DISTRIBUTOR OF COVERED
+SOFTWARE, OR ANY SUPPLIER OF ANY OF SUCH PARTIES, BE LIABLE TO ANY
+PERSON FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOST
+PROFITS, LOSS OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR
+MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES, EVEN
+IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH
+DAMAGES. THIS LIMITATION OF LIABILITY SHALL NOT APPLY TO LIABILITY FOR
+DEATH OR PERSONAL INJURY RESULTING FROM SUCH PARTYS NEGLIGENCE TO THE
+EXTENT APPLICABLE LAW PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS DO
+NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL
+DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
+
+8. U.S. GOVERNMENT END USERS.
+
+The Covered Software is a commercial item, as that term is defined in
+48·C.F.R.·2.101 (Oct. 1995), consisting of commercial computer
+software (as that term is defined at 48 C.F.R. ·252.227-7014(a)(1))
+and commercial computer software documentation as such terms are used
+in 48·C.F.R.·12.212 (Sept. 1995). Consistent with 48 C.F.R. 12.212 and
+48 C.F.R. 227.7202-1 through 227.7202-4 (June 1995), all
+U.S. Government End Users acquire Covered Software with only those
+rights set forth herein. This U.S. Government Rights clause is in lieu
+of, and supersedes, any other FAR, DFAR, or other clause or provision
+that addresses Government rights in computer software under this
+License.
+
+9. MISCELLANEOUS.
+
+This License represents the complete agreement concerning subject
+matter hereof. If any provision of this License is held to be
+unenforceable, such provision shall be reformed only to the extent
+necessary to make it enforceable. This License shall be governed by
+the law of the jurisdiction specified in a notice contained within the
+Original Software (except to the extent applicable law, if any,
+provides otherwise), excluding such jurisdictions conflict-of-law
+provisions. Any litigation relating to this License shall be subject
+to the jurisdiction of the courts located in the jurisdiction and
+venue specified in a notice contained within the Original Software,
+with the losing party responsible for costs, including, without
+limitation, court costs and reasonable attorneys fees and
+expenses. The application of the United Nations Convention on
+Contracts for the International Sale of Goods is expressly
+excluded. Any law or regulation which provides that the language of a
+contract shall be construed against the drafter shall not apply to
+this License. You agree that You alone are responsible for compliance
+with the United States export administration regulations (and the
+export control laws and regulation of any other countries) when You
+use, distribute or otherwise make available any Covered Software.
+
+10. RESPONSIBILITY FOR CLAIMS.
+
+As between Initial Developer and the Contributors, each party is
+responsible for claims and damages arising, directly or indirectly,
+out of its utilization of rights under this License and You agree to
+work with Initial Developer and Contributors to distribute such
+responsibility on an equitable basis. Nothing herein is intended or
+shall be deemed to constitute any admission of liability.
+
+NOTICE PURSUANT TO SECTION 9 OF THE COMMON DEVELOPMENT AND
+DISTRIBUTION LICENSE (CDDL) The GlassFish code released under the CDDL
+shall be governed by the laws of the State of California (excluding
+conflict-of-law provisions). Any litigation relating to this License
+shall be subject to the jurisdiction of the Federal Courts of the
+Northern District of California and the state courts of the State of
+California, with venue lying in Santa Clara County, California.
+
+The following artifacts are covered by the Common Development and
+Distribution License:
+
+./repository/com/envoisolutions/sxc/sxc-jaxb/0.7.2/sxc-jaxb-0.7.2.jar
+./repository/com/envoisolutions/sxc/sxc-runtime/0.7.2/sxc-runtime-0.7.2.jar
+./repository/com/sun/xml/bind/jaxb-impl/2.1.7/jaxb-impl-2.1.7.jar
+./repository/com/sun/xml/bind/jaxb-xjc/2.1.7/jaxb-xjc-2.1.7.jar
+./repository/com/sun/xml/messaging/saaj/saaj-impl/1.3.2/saaj-impl-1.3.2.jar
+./repository/com/sun/xml/stream/buffer/streambuffer/0.8/streambuffer-0.8.jar
+./repository/com/sun/xml/ws/jaxws-rt/2.1.4/jaxws-rt-2.1.4.jar
+./repository/com/sun/xml/ws/jaxws-tools/2.1.4/jaxws-tools-2.1.4.jar
+./repository/javax/servlet/jstl/1.2/jstl-1.2.jar
+./repository/org/jvnet/staxex/stax-ex/1.6/stax-ex-1.6.jar
+
+
+=========================================================================
+==  JLine License                                                      ==
+=========================================================================
+
+Copyright (c) 2002-2006, Marc Prud'hommeaux <mwp1@cornell.edu>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following
+conditions are met:
+
+Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with
+the distribution.
+
+Neither the name of JLine nor the names of its contributors
+may be used to endorse or promote products derived from this
+software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The following artifacts are covered by the JLine License:
+
+./repository/jline/jline/0.9.94/jline-0.9.94.jar
+
+=========================================================================
+==  Serp License                                                       ==
+=========================================================================
+
+Copyright (c) 2002, A. Abram White
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this 
+  list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, 
+  this list of conditions and the following disclaimer in the documentation 
+  and/or other materials provided with the distribution.
+* Neither the name of 'serp' nor the names of its contributors may
+  be used to endorse or promote products derived from this software without 
+  specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The following artifacts are covered by the Serp License:
+
+./repository/net/sourceforge/serp/serp/1.11.0/serp-1.11.0.jar
+
+
+=========================================================================
+==  W3C License                                                        ==
+=========================================================================
+
+W3CÆ SOFTWARE NOTICE AND LICENSE
+http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231
+
+This work (and included software, documentation such as READMEs, or other
+related items) is being provided by the copyright holders under the following
+license. By obtaining, using and/or copying this work, you (the licensee) agree
+that you have read, understood, and will comply with the following terms and
+conditions.
+
+Permission to copy, modify, and distribute this software and its documentation,
+with or without modification, for any purpose and without fee or royalty is
+hereby granted, provided that you include the following on ALL copies of the
+software and documentation or portions thereof, including modifications:
+
+  1. The full text of this NOTICE in a location viewable to users of the
+     redistributed or derivative work. 
+  2. Any pre-existing intellectual property disclaimers, notices, or terms
+     and conditions. If none exist, the W3C Software Short Notice should be
+     included (hypertext is preferred, text is permitted) within the body
+     of any redistributed or derivative code.
+  3. Notice of any changes or modifications to the files, including the date
+     changes were made. (We recommend you provide URIs to the location from
+     which the code is derived.)
+     
+THIS SOFTWARE AND DOCUMENTATION IS PROVIDED "AS IS," AND COPYRIGHT HOLDERS MAKE
+NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO, WARRANTIES OF MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT
+THE USE OF THE SOFTWARE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY
+PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
+
+COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR
+CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE SOFTWARE OR DOCUMENTATION.
+
+The name and trademarks of copyright holders may NOT be used in advertising or
+publicity pertaining to the software without specific, written prior permission.
+Title to copyright in this software and any associated documentation will at
+all times remain with copyright holders.
+
+____________________________________
+
+This formulation of W3C's notice and license became active on December 31 2002.
+This version removes the copyright ownership notice such that this license can
+be used with materials other than those owned by the W3C, reflects that ERCIM
+is now a host of the W3C, includes references to this specific dated version of
+the license, and removes the ambiguous grant of "use". Otherwise, this version
+is the same as the previous version and is written so as to preserve the Free
+Software Foundation's assessment of GPL compatibility and OSI's certification
+under the Open Source Definition. Please see our Copyright FAQ for common
+questions about using materials from our site, including specific terms and
+conditions for packages like libwww, Amaya, and Jigsaw. Other questions about
+this notice can be directed to site-policy@w3.org.
+ 
+Joseph Reagle <site-policy@w3.org> 
+
+The following artifacts are also covered by the above W3C license:
+
+./repository/org/apache/ant/ant/1.7.1/ant-1.7.1.jar
+./repository/org/apache/ant/ant-launcher/1.7.1/ant-launcher-1.7.1.jar
+./repository/org/apache/woden/woden-api/1.0M8/woden-api-1.0M8.jar
+./repository/org/apache/woden/woden-impl-dom/1.0M8/woden-impl-dom-1.0M8.jar
+
+
+=========================================================================
+==  SAX License                                                        ==
+=========================================================================
+
+This license came from: http://www.megginson.com/SAX/copying.html
+  However please note future versions of SAX may be covered 
+  under http://saxproject.org/?selected=pd
+
+SAX2 is Free!
+
+I hereby abandon any property rights to SAX 2.0 (the Simple API for
+XML), and release all of the SAX 2.0 source code, compiled code, and
+documentation contained in this distribution into the Public Domain.
+SAX comes with NO WARRANTY or guarantee of fitness for any
+purpose.
+
+David Megginson, david@megginson.com
+2000-05-05
+
+The following artifacts are also covered by the SAX License:
+
+./repository/org/apache/ant/ant/1.7.1/ant-1.7.1.jar
+./repository/org/apache/ant/ant-launcher/1.7.1/ant-launcher-1.7.1.jar
+
+
+=========================================================================
+==  Eclipse Public License                                             ==
+=========================================================================
+
+Eclipse Public License - v 1.0
+
+THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE 
+PUBLIC LICENSE ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF 
+THE PROGRAM CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT.
+
+1. DEFINITIONS
+
+"Contribution" means:
+
+a) in the case of the initial Contributor, the initial code and 
+documentation distributed under this Agreement, and
+b) in the case of each subsequent Contributor:
+i) changes to the Program, and
+ii) additions to the Program;
+where such changes and/or additions to the Program originate from and 
+are distributed by that particular Contributor. A Contribution 
+'originates' from a Contributor if it was added to the Program by such 
+Contributor itself or anyone acting on such Contributor's behalf. 
+Contributions do not include additions to the Program which: 
+(i) are separate modules of software distributed in conjunction with 
+the Program under their own license agreement, and (ii) are not 
+derivative works of the Program.
+
+"Contributor" means any person or entity that distributes the Program.
+
+"Licensed Patents " mean patent claims licensable by a Contributor 
+which are necessarily infringed by the use or sale of its Contribution 
+alone or when combined with the Program.
+
+"Program" means the Contributions distributed in accordance with this 
+Agreement.
+
+"Recipient" means anyone who receives the Program under this Agreement, 
+including all Contributors.
+
+2. GRANT OF RIGHTS
+
+a) Subject to the terms of this Agreement, each Contributor hereby 
+grants Recipient a non-exclusive, worldwide, royalty-free copyright 
+license to reproduce, prepare derivative works of, publicly display, 
+publicly perform, distribute and sublicense the Contribution of such 
+Contributor, if any, and such derivative works, in source code and 
+object code form.
+b) Subject to the terms of this Agreement, each Contributor hereby 
+grants Recipient a non-exclusive, worldwide, royalty-free patent 
+license under Licensed Patents to make, use, sell, offer to sell, 
+import and otherwise transfer the Contribution of such Contributor, 
+if any, in source code and object code form. This patent license shall 
+apply to the combination of the Contribution and the Program if, at 
+the time the Contribution is added by the Contributor, such addition of 
+the Contribution causes such combination to be covered by the Licensed 
+Patents. The patent license shall not apply to any other combinations 
+which include the Contribution. No hardware per se is licensed hereunder.
+c) Recipient understands that although each Contributor grants the 
+licenses to its Contributions set forth herein, no assurances are 
+provided by any Contributor that the Program does not infringe the 
+patent or other intellectual property rights of any other entity. 
+Each Contributor disclaims any liability to Recipient for claims 
+brought by any other entity based on infringement of intellectual 
+property rights or otherwise. As a condition to exercising the rights 
+and licenses granted hereunder, each Recipient hereby assumes sole 
+responsibility to secure any other intellectual property rights needed, 
+if any. For example, if a third party patent license is required to
+allow Recipient to distribute the Program, it is Recipient's 
+responsibility to acquire that license before distributing the Program.
+d) Each Contributor represents that to its knowledge it has sufficient 
+copyright rights in its Contribution, if any, to grant the copyright 
+license set forth in this Agreement.
+
+3. REQUIREMENTS
+
+A Contributor may choose to distribute the Program in object code 
+form under its own license agreement, provided that:
+
+a) it complies with the terms and conditions of this Agreement; and
+b) its license agreement:
+i) effectively disclaims on behalf of all Contributors all warranties 
+and conditions, express and implied, including warranties or conditions 
+of title and non-infringement, and implied warranties or conditions of 
+merchantability and fitness for a particular purpose;
+ii) effectively excludes on behalf of all Contributors all liability 
+for damages, including direct, indirect, special, incidental and 
+consequential 
+damages, such as lost profits;
+iii) states that any provisions which differ from this Agreement are 
+offered by that Contributor alone and not by any other party; and
+iv) states that source code for the Program is available from such 
+Contributor, and informs licensees how to obtain it in a reasonable 
+manner on or through a medium customarily used for software exchange.
+
+When the Program is made available in source code form:
+a) it must be made available under this Agreement; and
+b) a copy of this Agreement must be included with each copy of the
+ Program.
+Contributors may not remove or alter any copyright notices contained 
+within the Program.
+
+Each Contributor must identify itself as the originator of its 
+Contribution, if any, in a manner that reasonably allows subsequent 
+Recipients to identify the originator of the Contribution.
+
+4. COMMERCIAL DISTRIBUTION
+
+Commercial distributors of software may accept certain responsibilities 
+with respect to end users, business partners and the like. While 
+this license is intended to facilitate the commercial use of the 
+Program, the Contributor who includes the Program in a commercial 
+product offering should do so in a manner which does not create 
+potential liability for other Contributors. Therefore, if a 
+Contributor includes the Program in a commercial product offering, 
+such Contributor ("Commercial Contributor") hereby agrees to defend 
+and indemnify every other Contributor ("Indemnified Contributor") 
+against any losses, damages and costs (collectively "Losses") arising 
+from claims, lawsuits and other legal actions brought by a third party 
+against the Indemnified Contributor to the extent caused by the acts 
+or omissions of such Commercial Contributor in connection with its
+ distribution of the Program in a commercial product offering. The 
+obligations in this section do not apply to any claims or Losses 
+relating to any actual or alleged intellectual property infringement. 
+In order to qualify, an Indemnified Contributor must: a) promptly 
+notify the Commercial Contributor in writing of such claim, and b) 
+allow the Commercial Contributor to control, and cooperate with the 
+Commercial Contributor in, the defense and any related settlement 
+negotiations. The Indemnified Contributor may participate in any such 
+claim at its own expense.
+
+For example, a Contributor might include the Program in a commercial 
+product offering, Product X. That Contributor is then a Commercial 
+Contributor. If that Commercial Contributor then makes performance 
+claims, or offers warranties related to Product X, those performance 
+claims and warranties are such Commercial Contributor's responsibility 
+alone. Under this section, the Commercial Contributor would have to 
+defend claims against the other Contributors related to those 
+performance claims and warranties, and if a court requires any other 
+Contributor to pay any damages as a result, the Commercial Contributor
+ must pay those damages.
+
+5. NO WARRANTY
+
+EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, THE PROGRAM IS 
+PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+KIND, EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT LIMITATION, ANY 
+WARRANTIES OR CONDITIONS OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY 
+OR FITNESS FOR A PARTICULAR PURPOSE. Each Recipient is solely 
+responsible for determining the appropriateness of using and 
+distributing the Program and assumes all risks associated with 
+its exercise of rights under this Agreement , including but not 
+limited to the risks and costs of program errors, compliance with 
+applicable laws, damage to or loss of data, programs or equipment, 
+and unavailability or interruption of operations.
+
+6. DISCLAIMER OF LIABILITY
+
+EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, NEITHER RECIPIENT 
+NOR ANY CONTRIBUTORS SHALL HAVE ANY LIABILITY FOR ANY DIRECT, 
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+(INCLUDING WITHOUT LIMITATION LOST PROFITS), HOWEVER CAUSED AND ON 
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
+THE USE OR DISTRIBUTION OF THE PROGRAM OR THE EXERCISE OF ANY RIGHTS 
+GRANTED HEREUNDER, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+7. GENERAL
+
+If any provision of this Agreement is invalid or unenforceable under 
+applicable law, it shall not affect the validity or enforceability of 
+the remainder of the terms of this Agreement, and without further 
+action by the parties hereto, such provision shall be reformed to the 
+minimum extent necessary to make such provision valid and enforceable.
+
+If Recipient institutes patent litigation against any entity (including 
+a cross-claim or counterclaim in a lawsuit) alleging that the Program 
+itself (excluding combinations of the Program with other software or 
+hardware) infringes such Recipient's patent(s), then such Recipient's 
+rights granted under Section 2(b) shall terminate as of the date such 
+litigation is filed.
+
+All Recipient's rights under this Agreement shall terminate if it fails 
+to comply with any of the material terms or conditions of this Agreement 
+and does not cure such failure in a reasonable period of time after 
+becoming aware of such noncompliance. If all Recipient's rights under 
+this Agreement terminate, Recipient agrees to cease use and distribution 
+of the Program as soon as reasonably practicable. However, Recipient's 
+obligations under this Agreement and any licenses granted by Recipient 
+relating to the Program shall continue and survive.
+
+Everyone is permitted to copy and distribute copies of this Agreement, 
+but in order to avoid inconsistency the Agreement is copyrighted and may 
+only be modified in the following manner. The Agreement Steward reserves 
+the right to publish new versions (including revisions) of this Agreement 
+from time to time. No one other than the Agreement Steward has the right 
+to modify this Agreement. The Eclipse Foundation is the initial Agreement 
+Steward. The Eclipse Foundation may assign the responsibility to serve as 
+the Agreement Steward to a suitable separate entity. Each new version of 
+the Agreement will be given a distinguishing version number. The Program 
+(including Contributions) may always be distributed subject to the 
+version of the Agreement under which it was received. In addition, after 
+a new version of the Agreement is published, Contributor may elect to 
+distribute the Program (including its Contributions) under the new version.
+ Except as expressly stated in Sections 2(a) and 2(b) above, Recipient 
+receives no rights or licenses to the intellectual property of any 
+Contributor under this Agreement, whether expressly, by implication, 
+estoppel or otherwise. All rights in the Program not expressly granted 
+under this Agreement are reserved.
+
+This Agreement is governed by the laws of the State of New York and the 
+intellectual property laws of the United States of America. No party to 
+this Agreement will bring a legal action under this Agreement more than 
+one year after the cause of action arose. Each party waives its rights 
+to a jury trial in any resulting litigation.
+
+The following artifacts are covered by the above Eclipse Public License:
+
+./repository/org/aspectj/aspectjrt/1.6.2/aspectjrt-1.6.2.jar
+./repository/org/aspectj/aspectjweaver/1.6.2/aspectjweaver-1.6.2.jar
+./repository/org/eclipse/jdt/core/3.3.0-v_771/core-3.3.0-v_771.jar
+
+
+=========================================================================
+==  Intalio License                                                     ==
+=========================================================================
+
+The code of this project is released under a BSD-like license [license.txt]:
+
+Copyright 1999-2004 (C) Intalio Inc., and others. All Rights
+Reserved. Redistribution and use of this software and
+associated documentation ("Software"), with or without
+modification, are permitted provided that the following
+conditions are met:
+
+1. Redistributions of source code must
+   retain copyright statements and notices. Redistributions must
+   also contain a copy of this document.
+
+2. Redistributions in
+   binary form must reproduce the above copyright notice, this
+   list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the
+   distribution.
+
+3. The name "ExoLab" must not be used to endorse
+   or promote products derived from this Software without prior
+   written permission of Intalio Inc. For written permission,
+   please contact info@exolab.org.
+
+4. Products derived from this Software may not be called "Castor" nor may
+   "Castor" appear in their names without prior written permission
+   of Intalio Inc. Exolab, Castor and Intalio are trademarks of
+   Intalio Inc.
+
+5. Due credit should be given to the ExoLab Project
+   (http://www.exolab.org/).
+
+
+THIS SOFTWARE IS PROVIDED BY INTALIO AND CONTRIBUTORS ``AS IS'' AND
+ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL INTALIO OR
+ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+The following artifacts are also covered by the Intalio License:
+
+./repository/org/codehaus/castor/castor/1.0.5/castor-1.0.5.jar
+
+
+=========================================================================
+==  HOWL License                                                       ==
+=========================================================================
+
+Copyright (c) 2004, Bull S.A.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+    
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+    
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The following artifacts are covered by the HOWL License:
+
+./repository/org/objectweb/howl/howl/1.0.1-1/howl-1.0.1-1.jar
+
+
+
+=========================================================================
+==  Dojo License                                                       ==
+=========================================================================
+
+Copyright (c) 2005-2009, The Dojo Foundation All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+  * Neither the name of the Dojo Foundation nor the names of its contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The following artifacts are covered by the above Dojo License:
+
+./repository/org/apache/geronimo/configs/dojo-jetty/2.2.1/dojo-jetty-2.2.1.car/dojo
+./repository/org/apache/geronimo/configs/dojo-jetty/2.2.1/dojo-jetty-2.2.1.car/dojox
+./repository/org/apache/geronimo/configs/dojo-jetty/2.2.1/dojo-jetty-2.2.1.car/dojox/dtl/ext-dojo
+./repository/org/apache/geronimo/configs/dojo-jetty/2.2.1/dojo-jetty-2.2.1.car/dojox/fx/ext-dojo
+./repository/org/apache/geronimo/configs/dojo-jetty/2.2.1/dojo-jetty-2.2.1.car/META-INF/maven/org.dojotoolkit
+./repository/org/apache/geronimo/configs/dojo-jetty/2.2.1/dojo-jetty-2.2.1.car/META-INF/maven/org.dojotoolkit/dojo-war
+./repository/org/apache/geronimo/configs/dojo-jetty/2.2.1/dojo-jetty-2.2.1.car/WEB-INF/classes/org/dojotoolkit
+./repository/org/apache/geronimo/configs/dojo-tomcat/2.2.1/dojo-tomcat-2.2.1.car/dojo
+./repository/org/apache/geronimo/configs/dojo-tomcat/2.2.1/dojo-tomcat-2.2.1.car/dojox
+./repository/org/apache/geronimo/configs/dojo-tomcat/2.2.1/dojo-tomcat-2.2.1.car/dojox/dtl/ext-dojo
+./repository/org/apache/geronimo/configs/dojo-tomcat/2.2.1/dojo-tomcat-2.2.1.car/dojox/fx/ext-dojo
+./repository/org/apache/geronimo/configs/dojo-tomcat/2.2.1/dojo-tomcat-2.2.1.car/META-INF/maven/org.dojotoolkit
+./repository/org/apache/geronimo/configs/dojo-tomcat/2.2.1/dojo-tomcat-2.2.1.car/META-INF/maven/org.dojotoolkit/dojo-war
+./repository/org/apache/geronimo/configs/dojo-tomcat/2.2.1/dojo-tomcat-2.2.1.car/WEB-INF/classes/org/dojotoolkit
+
+=========================================================================
+==  ICU License                                                        ==
+=========================================================================
+
+ICU License - ICU 1.8.1 and later
+
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright (c) 1995-2009 International Business Machines Corporation and others
+
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, and/or sell
+copies of the Software, and to permit persons
+to whom the Software is furnished to do so, provided that the above
+copyright notice(s) and this permission notice appear in all copies
+of the Software and that both the above copyright notice(s) and this
+permission notice appear in supporting documentation.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL
+THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM,
+OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER
+RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+USE OR PERFORMANCE OF THIS SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall not be
+used in advertising or otherwise to promote the sale, use or other dealings in
+this Software without prior written authorization of the copyright holder.
+
+All trademarks and registered trademarks mentioned herein are the property of their respective owners.
+
+The following artifacts are covered by the above ICU License:
+
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/icu4j-4.0.1.jar
+./repository/com/ibm/icu/icu4j/4.0.1/icu4j-4.0.1.jar
+
+=========================================================================
+==  UNICODE LICENSE                                                    ==
+=========================================================================
+
+UNICODE, INC. LICENSE AGREEMENT - DATA FILES AND SOFTWARE
+
+    Unicode Data Files include all data files under the directories
+http://www.unicode.org/Public/, http://www.unicode.org/reports/, and
+http://www.unicode.org/cldr/data/ . Unicode Software includes any source code
+published in the Unicode Standard or under the directories
+http://www.unicode.org/Public/, http://www.unicode.org/reports/, and
+http://www.unicode.org/cldr/data/.
+
+    NOTICE TO USER: Carefully read the following legal agreement. BY
+DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING UNICODE INC.'S DATA FILES
+("DATA FILES"), AND/OR SOFTWARE ("SOFTWARE"), YOU UNEQUIVOCALLY ACCEPT, AND
+AGREE TO BE BOUND BY, ALL OF THE TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU
+DO NOT AGREE, DO NOT DOWNLOAD, INSTALL, COPY, DISTRIBUTE OR USE THE DATA FILES
+OR SOFTWARE.
+
+    COPYRIGHT AND PERMISSION NOTICE
+
+    Copyright ¬© 1991-2007 Unicode, Inc. All rights reserved. Distributed under
+the Terms of Use in http://www.unicode.org/copyright.html.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of the Unicode data files and any associated documentation (the "Data Files") or
+Unicode software and any associated documentation (the "Software") to deal in
+the Data Files or Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, and/or sell copies of
+the Data Files or Software, and to permit persons to whom the Data Files or
+Software are furnished to do so, provided that (a) the above copyright notice(s)
+and this permission notice appear with all copies of the Data Files or Software,
+(b) both the above copyright notice(s) and this permission notice appear in
+associated documentation, and (c) there is clear notice in each modified Data
+File or in the Software as well as in the documentation associated with the Data
+File(s) or Software that the data or software has been modified.
+
+    THE DATA FILES AND SOFTWARE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD
+PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS
+NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL
+DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
+OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE DATA FILES OR
+SOFTWARE.
+
+    Except as contained in this notice, the name of a copyright holder shall not
+be used in advertising or otherwise to promote the sale, use or other dealings
+in these Data Files or Software without prior written authorization of the
+copyright holder.
+
+The following artifacts are covered by the above UNICODE License:
+
+./repository/org/apache/geronimo/configs/activemq-ra/2.2.1/activemq-ra-2.2.1.car/rar/icu4j-4.0.1.jar
+./repository/com/ibm/icu/icu4j/4.0.1/icu4j-4.0.1.jar
+
+
+
+
+=========================================================================
+==   creative commons copyright-only dedication                                                    ==
+=========================================================================
+The person or persons who have associated work with this document (the "Dedicator" or "Certifier") hereby 
+either (a) certifies that, to the best of his knowledge, the work of authorship identified is in the public domain
+ of the country from which the work is published, or (b) hereby dedicates whatever copyright the dedicators 
+ holds in the work of authorship identified below (the "Work") to the public domain. A certifier, moreover, 
+ dedicates any copyright interest he may have in the associated work, and for these purposes, is described as 
+ a "dedicator" below.
+
+A certifier has taken reasonable steps to verify the copyright status of this work. Certifier recognizes 
+that his good faith efforts may not shield him from liability if in fact the work certified is not in the public domain.
+
+Dedicator makes this dedication for the benefit of the public at large and to the detriment of the Dedicator's 
+heirs and successors. Dedicator intends this dedication to be an overt act of relinquishment in perpetuity of 
+all present and future rights under copyright law, whether vested or contingent, in the Work. Dedicator 
+understands that such relinquishment of all rights includes the relinquishment of all rights to enforce 
+(by lawsuit or otherwise) those copyrights in the Work.
+
+Dedicator recognizes that, once placed in the public domain, the Work may be freely reproduced, distributed, 
+transmitted, used, modified, built upon, or otherwise exploited by anyone for any purpose, commercial or 
+non-commercial, and in any way, including by methods that have not yet been invented or conceived.
+
+
+3 classes(FutureTask.java,ThreadPoolExecutor.java, RejectedExecutionHandler.java in ) in following artifact are covered by the above public domain License:
+./repository/org/apache/geronimo/modules/geronimo-concurrent-core/2.2.1/geronimo-concurrent-core-2.2.1.jar
