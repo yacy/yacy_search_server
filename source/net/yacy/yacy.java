@@ -170,11 +170,12 @@ public final class yacy {
 			f = new File(dataHome, "DATA/LOG/");
             mkdirsIfNeseccary(f);
 			f = new File(dataHome, "DATA/LOG/yacy.logging");
-			//if (!f.exists()) try {
-			    FileUtils.copy(new File(appHome, "yacy.logging"), f);
-            //} catch (final IOException e){
-            //    System.out.println("could not copy yacy.logging");
-            //}
+			final File f0 = new File(appHome, "yacy.logging");
+			if (!f.exists() || f0.lastModified() > f.lastModified()) try {
+			    FileUtils.copy(f0, f);
+            } catch (final IOException e){
+                System.out.println("could not copy yacy.logging");
+            }
             try{
                 Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));
             } catch (final IOException e) {

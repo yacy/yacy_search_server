@@ -67,3 +67,6 @@ de.anomic.http.server.HTTPDProxyHandler.logging.FileHandler.pattern = DATA/LOG/p
 net.yacy.kelondro.logging.LogalizerHandler.enabled = false
 net.yacy.kelondro.logging.LogalizerHandler.debug = false
 net.yacy.kelondro.logging.LogalizerHandler.parserPackage = net.yacy.kelondro.logging
+
+org.apache.http.level = OFF
+org.apache.http.wire.level = OFF
