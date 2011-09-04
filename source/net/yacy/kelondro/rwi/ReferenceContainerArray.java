@@ -45,7 +45,6 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
     protected final ReferenceFactory<ReferenceType> factory;
     protected final ArrayStack array;
-    private   final IODispatcher merger;
 
     /**
      * open a index container array based on BLOB dumps. The content of the BLOBs will not be read
@@ -62,8 +61,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     		final String prefix,
     		final ReferenceFactory<ReferenceType> factory,
     		final ByteOrder termOrder,
-    		final int termSize,
-    		final IODispatcher merger) throws IOException {
+    		final int termSize) throws IOException {
         this.factory = factory;
         this.array = new ArrayStack(
             heapLocation,
@@ -72,8 +70,6 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             termSize,
             0,
             true);
-        assert merger != null;
-        this.merger = merger;
     }
 
     public void close() {
@@ -379,47 +375,36 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         return this.array.entries();
     }
 
-    public boolean shrink(final long targetFileSize, final long maxFileSize) {
-        if (this.array.entries() < 2) return false;
-        boolean donesomething = false;
+    public boolean shrinkBestSmallFiles(final IODispatcher merger, final long targetFileSize) {
+        final File[] ff = this.array.unmountBestMatch(2.0f, targetFileSize);
+        if (ff == null) return false;
+        Log.logInfo("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
+        merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
+        return true;
+    }
 
-        // first try to merge small files that match
-        while (this.merger.queueLength() < 3 || this.array.entries() >= 50) {
-            final File[] ff = this.array.unmountBestMatch(2.0f, targetFileSize);
-            if (ff == null) break;
-            Log.logInfo("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
-            this.merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
-            donesomething = true;
-        }
+    public boolean shrinkAnySmallFiles(final IODispatcher merger, final long targetFileSize) {
+        final File[] ff = this.array.unmountSmallest(targetFileSize);
+        if (ff == null) return false;
+        Log.logInfo("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
+        merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
+        return true;
+    }
 
-        // then try to merge simply any small file
-        while (this.merger.queueLength() < 2) {
-            final File[] ff = this.array.unmountSmallest(targetFileSize);
-            if (ff == null) break;
-            Log.logInfo("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
-            this.merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
-            donesomething = true;
-        }
+    public boolean shrinkUpToMaxSizeFiles(final IODispatcher merger, final long maxFileSize) {
+        final File[] ff = this.array.unmountBestMatch(2.0f, maxFileSize);
+        if (ff == null) return false;
+        Log.logInfo("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
+        merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
+        return true;
+    }
 
-        // if there is no small file, then merge matching files up to limit
-        while (this.merger.queueLength() < 1) {
-            final File[] ff = this.array.unmountBestMatch(2.0f, maxFileSize);
-            if (ff == null) break;
-            Log.logInfo("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
-            this.merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
-            donesomething = true;
-        }
-
-        // rewrite old files (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
-        while (this.merger.queueLength() < 1) {
-            final File ff = this.array.unmountOldest();
-            if (ff == null) break;
-            Log.logInfo("RICELL-shrink4/rewrite", "unmountOldest()");
-            this.merger.merge(ff, null, this.factory, this.array, newContainerBLOBFile());
-            donesomething = true;
-        }
-
-        return donesomething;
+    public boolean shrinkOldFiles(final IODispatcher merger, final long targetFileSize) {
+        final File ff = this.array.unmountOldest();
+        if (ff == null) return false;
+        Log.logInfo("RICELL-shrink4/rewrite", "unmountOldest()");
+        merger.merge(ff, null, this.factory, this.array, newContainerBLOBFile());
+        return true;
     }
 
     public static <ReferenceType extends Reference> HandleMap referenceHashes(

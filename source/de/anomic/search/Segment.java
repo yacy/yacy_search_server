@@ -55,7 +55,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.rwi.IODispatcher;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
@@ -83,7 +82,6 @@ public class Segment {
     //private   final IndexCell<NavigationReference> authorNavIndex;
     protected final MetadataRepository             urlMetadata;
     private   final File                           segmentPath;
-    private   final IODispatcher                   merger;
 
     public Segment(
             final Log log,
@@ -101,9 +99,6 @@ public class Segment {
         this.log = log;
         this.segmentPath = segmentPath;
 
-        this.merger = new IODispatcher(1, 1, writeBufferSize);
-        this.merger.start();
-
         this.termIndex = new IndexCell<WordReference>(
                 segmentPath,
                 "text.index",
@@ -113,7 +108,6 @@ public class Segment {
                 entityCacheMaxSize,
                 targetFileSize,
                 maxFileSize,
-                this.merger,
                 writeBufferSize);
         /*
         this.authorNavIndex = new IndexCell<NavigationReference>(
@@ -258,7 +252,6 @@ public class Segment {
     }
 
     public void close() {
-        if (this.merger != null) this.merger.terminate();
         this.termIndex.close();
         this.urlMetadata.close();
     }

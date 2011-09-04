@@ -85,16 +85,16 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             final int maxRamEntries,
             final long targetFileSize,
             final long maxFileSize,
-            final IODispatcher merger,
             final int writeBufferSize
             ) throws IOException {
         super(factory);
 
-        this.array = new ReferenceContainerArray<ReferenceType>(cellPath, prefix, factory, termOrder, termSize, merger);
+        this.merger = new IODispatcher(1, 1, writeBufferSize);
+        this.array = new ReferenceContainerArray<ReferenceType>(cellPath, prefix, factory, termOrder, termSize);
         this.ram = new ReferenceContainerCache<ReferenceType>(factory, termOrder, termSize);
         this.countCache = new ComparableARC<byte[], Integer>(1000, termOrder);
         this.maxRamEntries = maxRamEntries;
-        this.merger = merger;
+        this.merger.start();
         this.lastCleanup = System.currentTimeMillis();
         this.lastDump = System.currentTimeMillis();
         this.targetFileSize = targetFileSize;
@@ -117,7 +117,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                 try { Thread.sleep(3000); } catch (final InterruptedException e) {}
             }
         }
-
 
         private void cleanCache() {
 
@@ -161,7 +160,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                 synchronized (IndexCell.this.array) {
                     if (IndexCell.this.array.entries() > 50 || (IndexCell.this.lastCleanup + cleanupCycle < System.currentTimeMillis())) try {
                         IndexCell.this.lastCleanup = System.currentTimeMillis(); // set time to prevent that this is called to soon again
-                        IndexCell.this.array.shrink(IndexCell.this.targetFileSize, IndexCell.this.maxFileSize);
+                        IndexCell.this.shrink(IndexCell.this.targetFileSize, IndexCell.this.maxFileSize);
                         IndexCell.this.lastCleanup = System.currentTimeMillis(); // set again to mark end of procedure
                     } catch (final Exception e) {
                         // catch all exceptions
@@ -171,6 +170,33 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             }
         }
 
+    }
+
+    public boolean shrink(final long targetFileSize, final long maxFileSize) {
+        if (this.array.entries() < 2) return false;
+        boolean donesomething = false;
+
+        // first try to merge small files that match
+        while (this.merger.queueLength() < 3 || this.array.entries() >= 50) {
+            donesomething = this.array.shrinkBestSmallFiles(this.merger, targetFileSize);
+        }
+
+        // then try to merge simply any small file
+        while (this.merger.queueLength() < 2) {
+            donesomething = this.array.shrinkAnySmallFiles(this.merger, targetFileSize);
+        }
+
+        // if there is no small file, then merge matching files up to limit
+        while (this.merger.queueLength() < 1) {
+            donesomething = this.array.shrinkUpToMaxSizeFiles(this.merger, maxFileSize);
+        }
+
+        // rewrite old files (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
+        while (this.merger.queueLength() < 1) {
+            donesomething = this.array.shrinkOldFiles(this.merger, targetFileSize);
+        }
+
+        return donesomething;
     }
 
     /*
@@ -508,6 +534,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         // close all
         this.cleanupShallRun = false;
         if (this.cleanupThread != null) try { this.cleanupThread.join(); } catch (final InterruptedException e) {}
+        this.merger.terminate();
         this.ram.close();
         this.array.close();
     }
