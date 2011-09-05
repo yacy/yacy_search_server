@@ -111,7 +111,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             while (IndexCell.this.cleanupShallRun) {
                 try {
                     cleanCache();
-                } catch (final Exception e) {
+                } catch (final Throwable e) {
                     Log.logException(e);
                 }
                 try { Thread.sleep(3000); } catch (final InterruptedException e) {}
@@ -147,7 +147,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                         // dump the buffer
                         IndexCell.this.merger.dump(ramdump, dumpFile, IndexCell.this.array);
                         IndexCell.this.lastDump = System.currentTimeMillis();
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) {
                         // catch all exceptions
                         Log.logException(e);
                     }
@@ -162,7 +162,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                         IndexCell.this.lastCleanup = System.currentTimeMillis(); // set time to prevent that this is called to soon again
                         IndexCell.this.shrink(IndexCell.this.targetFileSize, IndexCell.this.maxFileSize);
                         IndexCell.this.lastCleanup = System.currentTimeMillis(); // set again to mark end of procedure
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) {
                         // catch all exceptions
                         Log.logException(e);
                     }
@@ -263,7 +263,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         // read fresh values from file
         try {
             countFile = this.array.count(termHash);
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             Log.logException(e);
         }
         assert countFile >= 0;

@@ -153,7 +153,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         public ReferenceContainer<ReferenceType> next() {
 			if (this.iterator.hasNext()) try {
                 return get(this.iterator.next());
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 Log.logException(e);
                 return null;
             }
@@ -164,7 +164,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             try {
                 this.iterator = ReferenceContainerArray.this.array.keys(true, null);
                 return get(this.iterator.next());
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 Log.logException(e);
                 return null;
             }
@@ -225,7 +225,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             if (this.iterator.hasNext()) try {
                 reference = this.iterator.next();
                 return new Rating<byte[]>(reference, count(reference));
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 Log.logException(e);
                 return null;
             }
@@ -237,7 +237,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 this.iterator = ReferenceContainerArray.this.array.keys(true, null);
                 reference = this.iterator.next();
                 return new Rating<byte[]>(reference, count(reference));
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 Log.logException(e);
                 return null;
             }

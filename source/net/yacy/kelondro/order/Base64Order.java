@@ -409,7 +409,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
                 ((this.zero == null) ? compares(a, b) : compare0(a, 0, b, 0, a.length))
                 :
                 ((this.zero == null) ? compares(b, a) : compare0(b, 0, a, 0, a.length));
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             // if a or b is not well-formed, an ArrayIndexOutOfBoundsException may occur
             // in that case we don't want that the exception makes databse functions
             // unusable and effective creates a showstopper. In such cases we apply
@@ -435,7 +435,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
                     compare0(a, aoffset, b, boffset, length)
                     :
                     compare0(b, boffset, a, aoffset, length);
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             // same handling as in simple compare method above
             final boolean wfa = wellformed(a, aoffset, length);
             final boolean wfb = wellformed(b, boffset, length);

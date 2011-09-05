@@ -459,13 +459,13 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         final RowSet r = new RowSet(c0.rowdef, c0.size() + c1.size());
         try {
         	c0.sort();
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
         	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
         	c0.clear();
         }
         try {
         	c1.sort();
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
         	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
         	c1.clear();
         }

@@ -162,7 +162,7 @@ public class IODispatcher extends Thread {
                     } catch (final InterruptedException e) {
                         Log.logSevere("IODispatcher", "main run job was interrupted (1)", e);
                         Log.logException(e);
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) {
                         Log.logSevere("IODispatcher", "main run job had errors (1), dump to " + f + " failed.", e);
                         Log.logException(e);
                     }
@@ -181,7 +181,7 @@ public class IODispatcher extends Thread {
                     } catch (final InterruptedException e) {
                         Log.logSevere("IODispatcher", "main run job was interrupted (2)", e);
                         Log.logException(e);
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) {
                         if (f2 == null) {
                         Log.logSevere("IODispatcher", "main run job had errors (2), dump to " + f + " failed. Input file is " + f1, e);
                         } else {
@@ -200,12 +200,12 @@ public class IODispatcher extends Thread {
 
                 Log.logSevere("IODispatcher", "main loop in bad state, dumpQueue.size() = " + this.dumpQueue.size() + ", mergeQueue.size() = " + this.mergeQueue.size() + ", controlQueue.availablePermits() = " + this.controlQueue.availablePermits());
                 assert false : "this process statt should not be reached"; // this should never happen
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 Log.logSevere("IODispatcher", "main run job failed (X)", e);
                 Log.logException(e);
             }
             Log.logInfo("IODispatcher", "loop terminated");
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             Log.logSevere("IODispatcher", "main run job failed (4)", e);
             Log.logException(e);
         } finally {
