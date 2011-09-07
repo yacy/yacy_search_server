@@ -85,7 +85,7 @@ public class IndexControlRWIs_p {
         prop.putHTML("keystring", "");
         prop.put("keyhash", "");
         prop.put("result", "");
-        prop.put("cleanup", post == null ? 1 : 0);
+        prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
         prop.put("cleanup_solr", sb.solrConnector == null || !sb.getConfigBool("federated.service.solr.indexing.enabled", false) ? 0 : 1);
 
         String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
@@ -151,7 +151,7 @@ public class IndexControlRWIs_p {
                 }
             }
 
-            // delete everything
+         // delete everything
             if (post.containsKey("deletecomplete")) {
                 if (post.get("deleteIndex", "").equals("on")) {
                     segment.clear();
@@ -173,9 +173,19 @@ public class IndexControlRWIs_p {
                     sb.robots.clear();
                 }
                 if (post.get("deleteSearchFl", "").equals("on")) {
-                	sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
+                    sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
                 }
                 post.remove("deletecomplete");
+            }
+
+            // set reference limitation
+            if (post.containsKey("maxReferencesLimit")) {
+                if (post.get("maxReferencesRadio", "").equals("on")) {
+                    ReferenceContainer.maxReferences = post.getInt("maxReferences", 0);
+                } else {
+                    ReferenceContainer.maxReferences = 0;
+                }
+                sb.setConfig("index.maxReferences", ReferenceContainer.maxReferences);
             }
 
             // delete word
@@ -407,6 +417,9 @@ public class IndexControlRWIs_p {
 
         // insert constants
         prop.putNum("wcount", segment.termIndex().sizesMax());
+        prop.put("cleanup_maxReferencesRadioChecked", ReferenceContainer.maxReferences > 0 ? 1 : 0);
+        prop.put("cleanup_maxReferences", ReferenceContainer.maxReferences > 0 ? ReferenceContainer.maxReferences : 100000);
+
         // return rewrite properties
         return prop;
     }

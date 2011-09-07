@@ -35,8 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
-import de.anomic.search.Switchboard;
-
 import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
@@ -58,7 +56,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
 
     private   byte[] termHash;
     protected ReferenceFactory<ReferenceType> factory;
-    private static int maxReferences = Switchboard.getSwitchboard().getConfigInt("index.maxReferences", 0);
+    public static int maxReferences = 0; // overwrite this to enable automatic index shrinking. 0 means no shrinking
 
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final RowSet collection) {
         super(collection);
@@ -191,19 +189,19 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         while (i.hasNext()) count += (delete(i.next())) ? 1 : 0;
         return count;
     }
-    
+
     public void shrinkReferences() {
-    	final int diff = this.size() - maxReferences;
+    	final int diff = size() - maxReferences;
     	if (maxReferences <= 0 || diff <= 0) return;
     	final int[] indexes = oldPostions(diff);
     	Arrays.sort(indexes);
     	for (int i = indexes.length - 1; i >= 0; i--) {
     		if (indexes[i] < 0) break;
-    		this.removeRow(indexes[i], false);
+    		removeRow(indexes[i], false);
     	}
-    	this.sort();
+    	sort();
     }
-    
+
     private int[] oldPostions(final int count) {
     	final int[] indexes = new int[count];
     	int i = 0;
@@ -215,7 +213,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     	}
     	return indexes;
     }
-    
+
     private Collection<List<Integer>> positionsByLastMod() {
     	long mod;
     	List<Integer> positions;

@@ -115,6 +115,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -358,6 +359,9 @@ public final class Switchboard extends serverSwitch {
                 partitionExponent,
                 this.useTailCache,
                 this.exceed134217727);
+
+        // initialize index
+        ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File oldSingleSegment = new File(new File(indexPath, networkName), "TEXT");
         final File newSegmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
         Segments.migrateOld(oldSingleSegment, newSegmentsPath, getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default"));
