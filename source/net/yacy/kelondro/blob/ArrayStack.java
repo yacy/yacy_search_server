@@ -48,6 +48,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -988,13 +989,14 @@ public class ArrayStack implements BLOB {
         ReferenceContainer<ReferenceType> c1, c2;
         c1 = i1.next();
         c2 = i2.next();
-        int e;
+        int e, s;
         while (true) {
             assert c1 != null;
             assert c2 != null;
             e = ordering.compare(c1.getTermHash(), c2.getTermHash());
             if (e < 0) {
-            	c1.shrinkReferences();
+            	s = c1.shrinkReferences();
+            	if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
                 writer.add(c1.getTermHash(), c1.exportCollection());
                 if (i1.hasNext()) {
                     c1lh = c1.getTermHash();
@@ -1006,7 +1008,8 @@ public class ArrayStack implements BLOB {
                 break;
             }
             if (e > 0) {
-            	c2.shrinkReferences();
+                s = c2.shrinkReferences();
+                if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
                 writer.add(c2.getTermHash(), c2.exportCollection());
                 if (i2.hasNext()) {
                     c2lh = c2.getTermHash();
@@ -1020,7 +1023,8 @@ public class ArrayStack implements BLOB {
             assert e == 0;
             // merge the entries
             c1 = c1.merge(c2);
-            c1.shrinkReferences();
+            s = c1.shrinkReferences();
+            if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
             writer.add(c1.getTermHash(), c1.exportCollection());
             c1lh = c1.getTermHash();
             c2lh = c2.getTermHash();
@@ -1049,7 +1053,8 @@ public class ArrayStack implements BLOB {
         assert (c1 == null) || (c2 == null);
         while (c1 != null) {
             //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
-        	c1.shrinkReferences();
+            s = c1.shrinkReferences();
+            if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
             writer.add(c1.getTermHash(), c1.exportCollection());
             if (i1.hasNext()) {
                 c1lh = c1.getTermHash();
@@ -1061,7 +1066,8 @@ public class ArrayStack implements BLOB {
         }
         while (c2 != null) {
             //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
-        	c2.shrinkReferences();
+            s = c2.shrinkReferences();
+            if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
             writer.add(c2.getTermHash(), c2.exportCollection());
             if (i2.hasNext()) {
                 c2lh = c2.getTermHash();
@@ -1081,9 +1087,11 @@ public class ArrayStack implements BLOB {
         byte[] clh;
         ReferenceContainer<ReferenceType> c;
         c = i.next();
+        int s;
         while (true) {
             assert c != null;
-            c.shrinkReferences();
+            s = c.shrinkReferences();
+            if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c.getTermHash()) + " by " + s + " to " + c.size() + " entries");
             writer.add(c.getTermHash(), c.exportCollection());
             if (i.hasNext()) {
                 clh = c.getTermHash();

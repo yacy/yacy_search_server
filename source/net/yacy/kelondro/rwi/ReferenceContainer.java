@@ -190,16 +190,25 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return count;
     }
 
-    public void shrinkReferences() {
-    	final int diff = size() - maxReferences;
-    	if (maxReferences <= 0 || diff <= 0) return;
-    	final int[] indexes = oldPostions(diff);
-    	Arrays.sort(indexes);
-    	for (int i = indexes.length - 1; i >= 0; i--) {
-    		if (indexes[i] < 0) break;
-    		removeRow(indexes[i], false);
+    /**
+     * Shrink the reference size in such a way that it does not exceed maxReferences
+     * In case that the index is too large, old entries are deleted
+     * @return the number of deleted entries
+     */
+    public int shrinkReferences() {
+        final int oldsize = size();
+    	final int diff = oldsize - maxReferences;
+    	if (maxReferences <= 0 || diff <= 0) return 0;
+    	synchronized (this) {
+        	final int[] indexes = oldPostions(diff);
+        	Arrays.sort(indexes);
+        	for (int i = indexes.length - 1; i >= 0; i--) {
+        		if (indexes[i] < 0) break;
+        		removeRow(indexes[i], false);
+        	}
+        	sort();
     	}
-    	sort();
+    	return oldsize - size();
     }
 
     private int[] oldPostions(final int count) {
