@@ -25,8 +25,10 @@
 package net.yacy.kelondro.index;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
@@ -231,6 +233,21 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
                 exists = true;
                 super.removeRow(index, true); // keep order of collection!
             }
+        }
+    }
+
+    public final synchronized void delete(final List<byte[]> keys) {
+        final int[] indexes = new int[keys.size()];
+        for (int i = 0; i < keys.size(); i++) {
+            indexes[i] = find(keys.get(i), 0);
+        }
+        // we will delete the entries in backward order
+        // That means it is necessary that the order below the indexes is stable
+        // therefore we can delete without keeping the order (since it still is stable below the deleted index)
+        Arrays.sort(indexes);
+        for (int i = indexes.length - 1; i >= 0; i--) {
+            if (indexes[i] < 0) break;
+            super.removeRow(indexes[i], false);
         }
     }
 
