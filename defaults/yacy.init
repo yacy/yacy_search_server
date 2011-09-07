@@ -808,6 +808,11 @@ indexDistribution.maxChunkSize = 1000
 indexDistribution.startChunkSize = 200
 indexDistribution.maxChunkFails = 1
 
+# limit of references per term & blob to the younges of this value
+# a value of <= 0 disables this feature (no limit)
+# a value of e.g. 100000 can improve stability and reduce load while searching very popular words
+index.maxReferences = 0
+
 # Search sequence settings
 # collection:
 # time = time to get a RWI out of RAM cache, assortments and WORDS files

@@ -236,6 +236,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         }
     }
 
+    // perhaps not used - see ReferenceContainer.shrinkReferences()
     public final synchronized void delete(final List<byte[]> keys) {
         final int[] indexes = new int[keys.size()];
         for (int i = 0; i < keys.size(); i++) {

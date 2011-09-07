@@ -27,10 +27,15 @@
 package net.yacy.kelondro.rwi;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
+
+import de.anomic.search.Switchboard;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.HandleSet;
@@ -53,6 +58,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
 
     private   byte[] termHash;
     protected ReferenceFactory<ReferenceType> factory;
+    private static int maxReferences = Switchboard.getSwitchboard().getConfigInt("index.maxReferences", 0);
 
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final RowSet collection) {
         super(collection);
@@ -184,6 +190,48 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         final Iterator<byte[]> i = urlHashes.iterator();
         while (i.hasNext()) count += (delete(i.next())) ? 1 : 0;
         return count;
+    }
+    
+    public void shrinkReferences() {
+    	final int diff = this.size() - maxReferences;
+    	if (maxReferences <= 0 || diff <= 0) return;
+    	final int[] indexes = oldPostions(diff);
+    	Arrays.sort(indexes);
+    	for (int i = indexes.length - 1; i >= 0; i--) {
+    		if (indexes[i] < 0) break;
+    		this.removeRow(indexes[i], false);
+    	}
+    	this.sort();
+    }
+    
+    private int[] oldPostions(final int count) {
+    	final int[] indexes = new int[count];
+    	int i = 0;
+    	for (final List<Integer> positions : positionsByLastMod()) {
+    		for (final Integer pos : positions) {
+    			indexes[i++] = pos;
+    			if (i >= count) return indexes;
+    		}
+    	}
+    	return indexes;
+    }
+    
+    private Collection<List<Integer>> positionsByLastMod() {
+    	long mod;
+    	List<Integer> positions;
+    	ReferenceType r;
+		final TreeMap<Long, List<Integer>> tm = new TreeMap<Long, List<Integer>>();
+    	final Iterator<ReferenceType> i = this.entries();
+    	int pos = 0;
+    	while (i.hasNext()) {
+    		r = i.next();
+    		mod = r.lastModified();
+    		positions = tm.get(mod);
+    		if (positions == null) positions = new ArrayList<Integer>();
+    		positions.add(pos++);
+    		tm.put(mod, positions);
+    	}
+    	return tm.values();
     }
 
     public Iterator<ReferenceType> entries() {

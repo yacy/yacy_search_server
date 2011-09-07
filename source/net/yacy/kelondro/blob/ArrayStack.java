@@ -30,8 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -996,7 +994,7 @@ public class ArrayStack implements BLOB {
             assert c2 != null;
             e = ordering.compare(c1.getTermHash(), c2.getTermHash());
             if (e < 0) {
-            	shrink(c1);
+            	c1.shrinkReferences();
                 writer.add(c1.getTermHash(), c1.exportCollection());
                 if (i1.hasNext()) {
                     c1lh = c1.getTermHash();
@@ -1008,7 +1006,7 @@ public class ArrayStack implements BLOB {
                 break;
             }
             if (e > 0) {
-            	shrink(c2);
+            	c2.shrinkReferences();
                 writer.add(c2.getTermHash(), c2.exportCollection());
                 if (i2.hasNext()) {
                     c2lh = c2.getTermHash();
@@ -1022,7 +1020,7 @@ public class ArrayStack implements BLOB {
             assert e == 0;
             // merge the entries
             c1 = c1.merge(c2);
-            shrink(c1);
+            c1.shrinkReferences();
             writer.add(c1.getTermHash(), c1.exportCollection());
             c1lh = c1.getTermHash();
             c2lh = c2.getTermHash();
@@ -1051,7 +1049,7 @@ public class ArrayStack implements BLOB {
         assert (c1 == null) || (c2 == null);
         while (c1 != null) {
             //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
-        	shrink(c1);
+        	c1.shrinkReferences();
             writer.add(c1.getTermHash(), c1.exportCollection());
             if (i1.hasNext()) {
                 c1lh = c1.getTermHash();
@@ -1063,7 +1061,7 @@ public class ArrayStack implements BLOB {
         }
         while (c2 != null) {
             //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
-        	shrink(c2);
+        	c2.shrinkReferences();
             writer.add(c2.getTermHash(), c2.exportCollection());
             if (i2.hasNext()) {
                 c2lh = c2.getTermHash();
@@ -1085,7 +1083,7 @@ public class ArrayStack implements BLOB {
         c = i.next();
         while (true) {
             assert c != null;
-            shrink(c);
+            c.shrinkReferences();
             writer.add(c.getTermHash(), c.exportCollection());
             if (i.hasNext()) {
                 clh = c.getTermHash();
@@ -1096,48 +1094,6 @@ public class ArrayStack implements BLOB {
             break;
         }
         // finished with writing
-    }
-    
-    private static <ReferenceType extends Reference> void shrink(final ReferenceContainer<ReferenceType> c) {
-    	final int diff = c.size() - 100000;
-    	if (diff <= 0) return;
-    	final int[] indexes = oldPostions(diff, c);
-    	Arrays.sort(indexes);
-    	for (int i = indexes.length - 1; i >= 0; i--) {
-    		if (indexes[i] < 0) break;
-    		c.removeRow(indexes[i], false);
-    	}
-    	c.sort();
-    }
-    
-    private static <ReferenceType extends Reference> int[] oldPostions(final int count, final ReferenceContainer<ReferenceType> c) {
-    	final int[] indexes = new int[count];
-    	int i = 0;
-    	for (final List<Integer> positions : positionsByLastMod(c)) {
-    		for (final Integer pos : positions) {
-    			indexes[i++] = pos;
-    			if (i >= count) return indexes;
-    		}
-    	}
-    	return indexes;
-    }
-    
-    private static <ReferenceType extends Reference> Collection<List<Integer>> positionsByLastMod(final ReferenceContainer<ReferenceType> c) {
-    	long mod;
-    	List<Integer> positions;
-    	ReferenceType r;
-		final TreeMap<Long, List<Integer>> tm = new TreeMap<Long, List<Integer>>();
-    	final Iterator<ReferenceType> i = c.entries();
-    	int pos = 0;
-    	while (i.hasNext()) {
-    		r = i.next();
-    		mod = r.lastModified();
-    		positions = tm.get(mod);
-    		if (positions == null) positions = new ArrayList<Integer>();
-    		positions.add(pos++);
-    		tm.put(mod, positions);
-    	}
-    	return tm.values();
     }
 
     public static void main(final String[] args) {
