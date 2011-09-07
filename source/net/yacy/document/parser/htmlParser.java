@@ -32,20 +32,15 @@ import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.document.AbstractParser;
-import net.yacy.document.Classification;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ContentScraper;
-import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.util.FileUtils;
@@ -96,77 +91,13 @@ public class htmlParser extends AbstractParser implements Parser {
 
         try {
             // first get a document from the parsed html
-            ContentScraper scraper = parseToScraper(location, documentCharset, sourceStream);
-            Document document = transformScraper(location, mimeType, documentCharset, scraper);
+            final ContentScraper scraper = parseToScraper(location, documentCharset, sourceStream);
+            final Document document = transformScraper(location, mimeType, documentCharset, scraper);
 
-            // then produce virtual documents for each of the link that is contained in the document!
-            ArrayList<Document> docs = new ArrayList<Document>();
-            docs.add(document);
-            for (Map.Entry<MultiProtocolURI, String> link: document.getApplinks().entrySet()) {
-                addLinkDocs(docs, "application", link.getKey(), link.getValue(), scraper);
-            }
-            for (Map.Entry<MultiProtocolURI, String> link: document.getAudiolinks().entrySet()) {
-                addLinkDocs(docs, "audio", link.getKey(), link.getValue(), scraper);
-            }
-            for (Map.Entry<MultiProtocolURI, String> link: document.getVideolinks().entrySet()) {
-                addLinkDocs(docs, "video", link.getKey(), link.getValue(), scraper);
-            }
-            for (Entry<MultiProtocolURI, ImageEntry> link: document.getImages().entrySet()) {
-                addImageDocs(docs, link.getValue());
-            }
-            
-            
-            // finally return the list of documents
-            return docs.toArray(new Document[docs.size()]);
+            return new Document[]{document};
         } catch (final IOException e) {
 			throw new Parser.Failure("IOException in htmlParser: " + e.getMessage(), location);
 		}
-    }
-    
-    private final static void addLinkDocs(ArrayList<Document> docs, String type, MultiProtocolURI uri, String descr, ContentScraper scraper) {
-        //System.out.println("HTMLPARSER-LINK " + type + ": " + uri.toNormalform(true, false) + " / " + descr);
-        final Document doc = new Document(
-                uri,
-                Classification.ext2mime(uri.getFileExtension()),
-                "UTF-8",
-                null,
-                scraper.getContentLanguages(),
-                null,
-                descr,
-                "",
-                "",
-                new String[]{descr},
-                type,
-                0.0f, 0.0f,
-                uri.toNormalform(false, false),
-                null,
-                null,
-                null,
-                false);
-        docs.add(doc);
-    }
-    
-    private final static void addImageDocs(ArrayList<Document> docs, ImageEntry img) {
-        //System.out.println("HTMLPARSER-LINK image: " + img.url().toNormalform(true, false) + " / " + img.alt());
-        final Document doc = new Document(
-                img.url(),
-                Classification.ext2mime(img.url().getFileExtension()),
-                "UTF-8",
-                null,
-                null,
-                null,
-                img.alt(),
-                "",
-                "",
-                new String[]{img.alt()},
-                "image",
-                0.0f, 0.0f,
-                img.url().toNormalform(false, false),
-                null,
-                null,
-                null,
-                false);
-        docs.add(doc);
     }
 
     /**
@@ -211,7 +142,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.indexingDenied());
         //scraper.close();
         ppd.setFavicon(scraper.getFavicon());
-        
+
         return ppd;
     }
 

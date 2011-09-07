@@ -131,6 +131,10 @@ public class Document {
         return this.parserObject;
     }
 
+    public Set<String> getContentLanguages() {
+        return this.languages;
+    }
+
     /**
      * compute a set of languages that this document contains
      * the language is not computed using a statistical analysis of the content, only from given metadata that came with the document

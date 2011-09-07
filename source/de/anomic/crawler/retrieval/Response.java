@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -43,7 +43,7 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 
 public class Response {
-    
+
     // doctypes:
     public static final char DT_PDFPS   = 'p';
     public static final char DT_TEXT    = 't';
@@ -65,7 +65,7 @@ public class Response {
     private final  CrawlProfile       profile;
     private        byte[]             content;
     private        int                status;          // tracker indexing status, see status defs below
-    
+
     // doctype calculation
     public static char docType(final DigestURI url) {
         final String path = url.getPath().toLowerCase();
@@ -136,14 +136,14 @@ public class Response {
         //zip     = application/zip
         return doctype;
     }
-    
+
     public static final int QUEUE_STATE_FRESH             = 0;
     public static final int QUEUE_STATE_PARSING           = 1;
     public static final int QUEUE_STATE_CONDENSING        = 2;
     public static final int QUEUE_STATE_STRUCTUREANALYSIS = 3;
     public static final int QUEUE_STATE_INDEXSTORAGE      = 4;
     public static final int QUEUE_STATE_FINISHED          = 5;
-    
+
     public Response(
             final Request request,
             final RequestHeader requestHeader,
@@ -160,7 +160,7 @@ public class Response {
         this.status = QUEUE_STATE_FRESH;
         this.content = content;
     }
-    
+
     public Response(final Request request, final CrawlProfile profile) {
         this.request = request;
         // request and response headers may be zero in case that we process surrogates
@@ -172,7 +172,7 @@ public class Response {
         this.status = QUEUE_STATE_FRESH;
         this.content = request.url().toTokens().getBytes();
     }
-    
+
     public Response(
             final Request request,
             final RequestHeader requestHeader,
@@ -185,15 +185,15 @@ public class Response {
     public void updateStatus(final int newStatus) {
         this.status = newStatus;
     }
-    
+
     public ResponseHeader getResponseHeader() {
         return this.responseHeader;
     }
-    
+
     public int getStatus() {
         return this.status;
     }
-    
+
     public String name() {
         // the anchor name; can be either the text inside the anchor tag or the
         // page description after loading of the page
@@ -203,7 +203,7 @@ public class Response {
     public DigestURI url() {
         return this.request.url();
     }
-    
+
     public char docType() {
         char doctype = docType(getMimeType());
         if (doctype == DT_UNKNOWN) doctype = docType(url());
@@ -212,21 +212,21 @@ public class Response {
 
     public Date lastModified() {
         Date docDate = null;
-        
-        if (responseHeader != null) {
-            docDate = responseHeader.lastModified();
-            if (docDate == null) docDate = responseHeader.date();
+
+        if (this.responseHeader != null) {
+            docDate = this.responseHeader.lastModified();
+            if (docDate == null) docDate = this.responseHeader.date();
         }
-        if (docDate == null && request != null) docDate = request.appdate();
-        if (docDate == null) docDate = new Date(GenericFormatter.correctedUTCTime());   
-        
+        if (docDate == null && this.request != null) docDate = this.request.appdate();
+        if (docDate == null) docDate = new Date(GenericFormatter.correctedUTCTime());
+
         return docDate;
     }
-    
+
     public String language() {
         // please avoid this method if a condenser document is available, because the condenser has a built-in language detection
         // this here is only a guess using the TLD
-        return this.url().language();
+        return url().language();
     }
 
     public CrawlProfile profile() {
@@ -272,9 +272,9 @@ public class Response {
      */
     public String shallStoreCacheForProxy() {
 
-        String crawlerReason = shallStoreCacheForCrawler();
+        final String crawlerReason = shallStoreCacheForCrawler();
         if (crawlerReason != null) return crawlerReason;
-        
+
         // check profile (disabled: we will check this in the plasmaSwitchboard)
         // if (!this.profile.storeHTCache()) { return "storage_not_wanted"; }
 
@@ -285,19 +285,19 @@ public class Response {
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
         // in caches
-        if (this.url().isPOST() && this.profile != null && !this.profile.crawlingQ()) {
+        if (url().isPOST() && this.profile != null && !this.profile.crawlingQ()) {
             return "dynamic_post";
         }
-        
-        if (this.url().isCGI()) {
+
+        if (url().isCGI()) {
             return "dynamic_cgi";
         }
-        
-        if (this.url().isLocal()) {
+
+        if (url().isLocal()) {
             return "local_URL_no_cache_needed";
         }
-        
-        if (responseHeader != null) {
+
+        if (this.responseHeader != null) {
 
             // -if-modified-since in request
             // we do not care about if-modified-since, because this case only occurres if the
@@ -315,7 +315,7 @@ public class Response {
             // -pragma in response
             // if we have a pragma non-cache, we don't cache. usually if this is wanted from
             // the server, it makes sense
-            String cacheControl = responseHeader.get(HeaderFramework.PRAGMA);
+            String cacheControl = this.responseHeader.get(HeaderFramework.PRAGMA);
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return "controlled_no_cache"; }
 
             // -expires in response
@@ -324,12 +324,12 @@ public class Response {
 
             // -cache-control in response
             // the cache-control has many value options.
-            cacheControl = responseHeader.get(HeaderFramework.CACHE_CONTROL);
+            cacheControl = this.responseHeader.get(HeaderFramework.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("MAX-AGE=")) {
                     // we need also the load date
-                    final Date date = responseHeader.date();
+                    final Date date = this.responseHeader.date();
                     if (date == null) return "stale_no_date_given_in_response";
                     try {
                         final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
@@ -349,35 +349,35 @@ public class Response {
     public String shallStoreCacheForCrawler() {
         // check storage size: all files will be handled in RAM before storage, so they must not exceed
         // a given size, which we consider as 1MB
-        if (this.size() > 10 * 1024L * 1024L) return "too_large_for_caching_" + this.size();
-        
+        if (size() > 10 * 1024L * 1024L) return "too_large_for_caching_" + size();
+
         // check status code
         if (!validResponseStatus()) {
             return "bad_status_" + this.responseStatus;
         }
 
-        if (requestHeader != null) {
+        if (this.requestHeader != null) {
             // -authorization cases in request
             // authorization makes pages very individual, and therefore we cannot use the
             // content in the cache
-            if (requestHeader.containsKey(RequestHeader.AUTHORIZATION)) { return "personalized"; }
+            if (this.requestHeader.containsKey(RequestHeader.AUTHORIZATION)) { return "personalized"; }
             // -ranges in request and response
             // we do not cache partial content
-            if (requestHeader.containsKey(HeaderFramework.RANGE)) { return "partial_request"; }
+            if (this.requestHeader.containsKey(HeaderFramework.RANGE)) { return "partial_request"; }
         }
-        
-        if (responseHeader != null) {
+
+        if (this.responseHeader != null) {
             // -ranges in request and response
-            // we do not cache partial content            
-            if (responseHeader.containsKey(HeaderFramework.CONTENT_RANGE)) { return "partial_response"; }
+            // we do not cache partial content
+            if (this.responseHeader.containsKey(HeaderFramework.CONTENT_RANGE)) { return "partial_response"; }
         }
         return null;
     }
-    
+
     /**
      * decide upon header information if a specific file should be taken from
      * the cache or not
-     * 
+     *
      * @return whether the file should be taken from the cache
      */
     public boolean isFreshForProxy() {
@@ -385,27 +385,27 @@ public class Response {
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
         // in caches
-        if (this.url().isPOST()) {
+        if (url().isPOST()) {
             return false;
         }
-        if (this.url().isCGI()) {
+        if (url().isCGI()) {
             return false;
         }
 
         String cacheControl;
-        if (requestHeader != null) {
+        if (this.requestHeader != null) {
             // -authorization cases in request
-            if (requestHeader.containsKey(RequestHeader.AUTHORIZATION)) { return false; }
+            if (this.requestHeader.containsKey(RequestHeader.AUTHORIZATION)) { return false; }
 
             // -ranges in request
             // we do not cache partial content
-            if (requestHeader.containsKey(HeaderFramework.RANGE)) { return false; }
+            if (this.requestHeader.containsKey(HeaderFramework.RANGE)) { return false; }
 
             // if the client requests a un-cached copy of the resource ...
-            cacheControl = requestHeader.get(HeaderFramework.PRAGMA);
+            cacheControl = this.requestHeader.get(HeaderFramework.PRAGMA);
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
 
-            cacheControl = requestHeader.get(HeaderFramework.CACHE_CONTROL);
+            cacheControl = this.requestHeader.get(HeaderFramework.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("NO-CACHE") || cacheControl.startsWith("MAX-AGE=0")) { return false; }
@@ -414,14 +414,14 @@ public class Response {
             // -if-modified-since in request
             // The entity has to be transferred only if it has
             // been modified since the date given by the If-Modified-Since header.
-            if (requestHeader.containsKey(RequestHeader.IF_MODIFIED_SINCE)) {
+            if (this.requestHeader.containsKey(RequestHeader.IF_MODIFIED_SINCE)) {
                 // checking this makes only sense if the cached response contains
                 // a Last-Modified field. If the field does not exist, we go the safe way
-                if (!responseHeader.containsKey(HeaderFramework.LAST_MODIFIED)) { return false; }
+                if (!this.responseHeader.containsKey(HeaderFramework.LAST_MODIFIED)) { return false; }
                 // parse date
                 Date d1, d2;
-                d2 = responseHeader.lastModified(); if (d2 == null) { d2 = new Date(GenericFormatter.correctedUTCTime()); }
-                d1 = requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(GenericFormatter.correctedUTCTime()); }
+                d2 = this.responseHeader.lastModified(); if (d2 == null) { d2 = new Date(GenericFormatter.correctedUTCTime()); }
+                d1 = this.requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(GenericFormatter.correctedUTCTime()); }
                 // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                 if (d2.after(d1)) { return false; }
             }
@@ -433,48 +433,48 @@ public class Response {
                 // but we think that pictures can still be considered as fresh
                 // -set-cookie in cached response
                 // this is a similar case as for COOKIE.
-                if (requestHeader.containsKey(RequestHeader.COOKIE) ||
-                    responseHeader.containsKey(HeaderFramework.SET_COOKIE) ||
-                    responseHeader.containsKey(HeaderFramework.SET_COOKIE2)) {
+                if (this.requestHeader.containsKey(RequestHeader.COOKIE) ||
+                    this.responseHeader.containsKey(HeaderFramework.SET_COOKIE) ||
+                    this.responseHeader.containsKey(HeaderFramework.SET_COOKIE2)) {
                     return false; // too strong
                 }
             }
         }
 
-        if (responseHeader != null) {
+        if (this.responseHeader != null) {
             // -pragma in cached response
             // logically, we would not need to care about no-cache pragmas in cached response headers,
             // because they cannot exist since they are not written to the cache.
             // So this IF should always fail..
-            cacheControl = responseHeader.get(HeaderFramework.PRAGMA); 
+            cacheControl = this.responseHeader.get(HeaderFramework.PRAGMA);
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
-    
+
             // see for documentation also:
             // http://www.web-caching.com/cacheability.html
             // http://vancouver-webpages.com/CacheNow/
-    
+
             // look for freshnes information
             // if we don't have any freshnes indication, we treat the file as stale.
             // no handle for freshness control:
-    
+
             // -expires in cached response
             // the expires value gives us a very easy hint when the cache is stale
-            final Date expires = responseHeader.expires();
+            final Date expires = this.responseHeader.expires();
             if (expires != null) {
     //          System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
                 if (expires.before(new Date(GenericFormatter.correctedUTCTime()))) { return false; }
             }
-            final Date lastModified = responseHeader.lastModified();
-            cacheControl = responseHeader.get(HeaderFramework.CACHE_CONTROL);
+            final Date lastModified = this.responseHeader.lastModified();
+            cacheControl = this.responseHeader.get(HeaderFramework.CACHE_CONTROL);
             if (cacheControl == null && lastModified == null && expires == null) { return false; }
-    
+
             // -lastModified in cached response
             // we can apply a TTL (Time To Live)  heuristic here. We call the time delta between the last read
             // of the file and the last modified date as the age of the file. If we consider the file as
             // middel-aged then, the maximum TTL would be cache-creation plus age.
             // This would be a TTL factor of 100% we want no more than 10% TTL, so that a 10 month old cache
             // file may only be treated as fresh for one more month, not more.
-            Date date = responseHeader.date();
+            Date date = this.responseHeader.date();
             if (lastModified != null) {
                 if (date == null) { date = new Date(GenericFormatter.correctedUTCTime()); }
                 final long age = date.getTime() - lastModified.getTime();
@@ -484,7 +484,7 @@ public class Response {
                 // therefore the cache is stale, if serverDate.correctedGMTDate().getTime() - d2.getTime() > age/10
                 if (GenericFormatter.correctedUTCTime() - date.getTime() > age / 10) { return false; }
             }
-    
+
             // -cache-control in cached response
             // the cache-control has many value options.
             if (cacheControl != null) {
@@ -510,17 +510,17 @@ public class Response {
                 }
             }
         }
-        
+
         return true;
     }
-    
+
 
     /**
      * decide upon header information if a specific file should be indexed
      * this method returns null if the answer is 'YES'!
      * if the answer is 'NO' (do not index), it returns a string with the reason
      * to reject the crawling demand in clear text
-     * 
+     *
      * This function is used by plasmaSwitchboard#processResourceStack
      */
     public final String shallIndexCacheForProxy() {
@@ -530,7 +530,7 @@ public class Response {
 
         // check profile
         if (!profile().indexText() && !profile().indexMedia()) {
-            return "indexing not allowed - indexText and indexMedia not set (for proxy = " + profile.name()+ ")";
+            return "indexing not allowed - indexText and indexMedia not set (for proxy = " + this.profile.name()+ ")";
         }
 
         // -CGI access in request
@@ -556,7 +556,7 @@ public class Response {
             return "Media_Content_(forbidden)";
         }
          */
-        
+
         // -cookies in request
         // unfortunately, we cannot index pages which have been requested with a cookie
         // because the returned content may be special for the client
@@ -565,19 +565,19 @@ public class Response {
             return "Dynamic_(Requested_With_Cookie)";
         }
 
-        if (responseHeader != null) {
+        if (this.responseHeader != null) {
             // -set-cookie in response
             // the set-cookie from the server does not indicate that the content is special
-            // thus we do not care about it here for indexing                
-            
+            // thus we do not care about it here for indexing
+
             // a picture cannot be indexed
-            final String mimeType = responseHeader.mime();
+            final String mimeType = this.responseHeader.mime();
             /*
             if (Classification.isPictureMime(mimeType)) {
                 return "Media_Content_(Picture)";
             }
             */
-            String parserError = TextParser.supportsMime(mimeType);
+            final String parserError = TextParser.supportsMime(mimeType);
             if (parserError != null) {
                 return "Media_Content, no parser: " + parserError;
             }
@@ -585,9 +585,9 @@ public class Response {
             // -if-modified-since in request
             // if the page is fresh at the very moment we can index it
             final Date ifModifiedSince = this.requestHeader.ifModifiedSince();
-            if ((ifModifiedSince != null) && (responseHeader.containsKey(HeaderFramework.LAST_MODIFIED))) {
+            if ((ifModifiedSince != null) && (this.responseHeader.containsKey(HeaderFramework.LAST_MODIFIED))) {
                 // parse date
-                Date d = responseHeader.lastModified();
+                Date d = this.responseHeader.lastModified();
                 if (d == null) {
                     d = new Date(GenericFormatter.correctedUTCTime());
                 }
@@ -599,8 +599,8 @@ public class Response {
             }
 
             // -pragma in cached response
-            if (responseHeader.containsKey(HeaderFramework.PRAGMA) &&
-                (responseHeader.get(HeaderFramework.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
+            if (this.responseHeader.containsKey(HeaderFramework.PRAGMA) &&
+                (this.responseHeader.get(HeaderFramework.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
                 return "Denied_(pragma_no_cache)";
             }
 
@@ -613,7 +613,7 @@ public class Response {
             // the expires value gives us a very easy hint when the cache is stale
             // sometimes, the expires date is set to the past to prevent that a page is cached
             // we use that information to see if we should index it
-            final Date expires = responseHeader.expires();
+            final Date expires = this.responseHeader.expires();
             if (expires != null && expires.before(new Date(GenericFormatter.correctedUTCTime()))) {
                 return "Stale_(Expired)";
             }
@@ -624,7 +624,7 @@ public class Response {
 
             // -cache-control in cached response
             // the cache-control has many value options.
-            String cacheControl = responseHeader.get(HeaderFramework.CACHE_CONTROL);
+            String cacheControl = this.responseHeader.get(HeaderFramework.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 /* we have the following cases for cache-control:
@@ -641,7 +641,7 @@ public class Response {
 //                  // ok, do nothing
                 } else if (cacheControl.startsWith("MAX-AGE=")) {
                     // we need also the load date
-                    final Date date = responseHeader.date();
+                    final Date date = this.responseHeader.date();
                     if (date == null) {
                         return "Stale_(no_date_given_in_response)";
                     }
@@ -675,7 +675,7 @@ public class Response {
 
         // check profile
         if (!profile().indexText() && !profile().indexMedia()) {
-            return "indexing not allowed - indexText and indexMedia not set (for crawler = " + profile.name() + ")";
+            return "indexing not allowed - indexText and indexMedia not set (for crawler = " + this.profile.name() + ")";
         }
 
         // -CGI access in request
@@ -692,9 +692,9 @@ public class Response {
         // we checked that in shallStoreCache
 
         // check if document can be indexed
-        if (responseHeader != null) {
-            final String mimeType = responseHeader.mime();
-            String parserError = TextParser.supportsMime(mimeType);
+        if (this.responseHeader != null) {
+            final String mimeType = this.responseHeader.mime();
+            final String parserError = TextParser.supportsMime(mimeType);
             if (parserError != null && TextParser.supportsExtension(url()) != null)  return "no parser available: " + parserError;
         }
         /*
@@ -703,7 +703,7 @@ public class Response {
             return "Media_Content_(forbidden)";
         }
          */
-        
+
         // -if-modified-since in request
         // if the page is fresh at the very moment we can index it
         // -> this does not apply for the crawler
@@ -739,36 +739,36 @@ public class Response {
 
         return null;
     }
-    
+
     public String getMimeType() {
-        if (responseHeader == null) return null;
-        
-        String mimeType = responseHeader.mime();
+        if (this.responseHeader == null) return null;
+
+        String mimeType = this.responseHeader.mime();
         mimeType = mimeType.trim().toLowerCase();
-        
+
         final int pos = mimeType.indexOf(';');
-        return ((pos < 0) ? mimeType : mimeType.substring(0, pos));          
+        return ((pos < 0) ? mimeType : mimeType.substring(0, pos));
     }
-    
+
     public String getCharacterEncoding() {
-        if (responseHeader == null) return null;
-        return responseHeader.getCharacterEncoding();      
+        if (this.responseHeader == null) return null;
+        return this.responseHeader.getCharacterEncoding();
     }
-    
+
     public DigestURI referrerURL() {
-        if (requestHeader == null) return null;
+        if (this.requestHeader == null) return null;
         try {
-            String r = requestHeader.get(RequestHeader.REFERER, null);
+            final String r = this.requestHeader.get(RequestHeader.REFERER, null);
             if (r == null) return null;
             return new DigestURI(r);
         } catch (final Exception e) {
             return null;
         }
     }
-    
+
     public byte[] referrerHash() {
-        if (requestHeader == null) return null;
-        String u = requestHeader.get(RequestHeader.REFERER, "");
+        if (this.requestHeader == null) return null;
+        final String u = this.requestHeader.get(RequestHeader.REFERER, "");
         if (u == null || u.length() == 0) return null;
         try {
             return new DigestURI(u).hash();
@@ -776,27 +776,27 @@ public class Response {
             return null;
         }
     }
-    
+
     public boolean validResponseStatus() {
-        return (responseStatus == null) ? false : responseStatus.startsWith("200") || responseStatus.startsWith("203");
+        return (this.responseStatus == null) ? false : this.responseStatus.startsWith("200") || this.responseStatus.startsWith("203");
     }
 
     public Date ifModifiedSince() {
-        return (requestHeader == null) ? null : requestHeader.ifModifiedSince();
+        return (this.requestHeader == null) ? null : this.requestHeader.ifModifiedSince();
     }
 
     public boolean requestWithCookie() {
-        return (requestHeader == null) ? false : requestHeader.containsKey(RequestHeader.COOKIE);
+        return (this.requestHeader == null) ? false : this.requestHeader.containsKey(RequestHeader.COOKIE);
     }
 
     public boolean requestProhibitsIndexing() {
-        return (requestHeader == null) 
-        ? false 
-        : requestHeader.containsKey(HeaderFramework.X_YACY_INDEX_CONTROL) &&
-          (requestHeader.get(HeaderFramework.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
+        return (this.requestHeader == null)
+        ? false
+        : this.requestHeader.containsKey(HeaderFramework.X_YACY_INDEX_CONTROL) &&
+          (this.requestHeader.get(HeaderFramework.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
     }
-    
-    public EventOrigin processCase(String mySeedHash) {
+
+    public EventOrigin processCase(final String mySeedHash) {
         // we must distinguish the following cases: resource-load was initiated by
         // 1) global crawling: the index is extern, not here (not possible here)
         // 2) result of search queries, some indexes are here (not possible here)
@@ -818,13 +818,13 @@ public class Response {
         }
         return processCase;
     }
-    
+
     public Document[] parse() throws Parser.Failure {
-        String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.mime());
+        final String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.mime());
         if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
         try {
-            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.content);
-        } catch (Exception e) {
+            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.content, false);
+        } catch (final Exception e) {
             return null;
         }
 

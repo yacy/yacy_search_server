@@ -1921,7 +1921,7 @@ public final class Switchboard extends serverSwitch {
         assert response.getContent() != null;
         try {
             // parse the document
-            documents = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), response.getContent());
+            documents = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), response.getContent(), getConfigBool("crawler.embedLinksAsDocuments", false));
             if (documents == null) {
                 throw new Parser.Failure("Parser returned null.", response.url());
             }

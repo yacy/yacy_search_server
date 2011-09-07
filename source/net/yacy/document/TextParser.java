@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,6 +59,7 @@ import net.yacy.document.parser.vcfParser;
 import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
+import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -141,7 +143,8 @@ public final class TextParser {
             final MultiProtocolURI location,
             final String mimeType,
             final String charset,
-            final File sourceFile
+            final File sourceFile,
+            final boolean multipleVirtualDocs
         ) throws InterruptedException, Parser.Failure {
 
         BufferedInputStream sourceStream = null;
@@ -154,7 +157,7 @@ public final class TextParser {
                 throw new Parser.Failure(errorMsg, location);
             }
             sourceStream = new BufferedInputStream(new FileInputStream(sourceFile));
-            docs = parseSource(location, mimeType, charset, sourceFile.length(), sourceStream);
+            docs = parseSource(location, mimeType, charset, sourceFile.length(), sourceStream, multipleVirtualDocs);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
@@ -164,6 +167,7 @@ public final class TextParser {
             if (sourceStream != null) try { sourceStream.close(); } catch (final Exception ex) {}
         }
         for (final Document d: docs) { assert d.getText() != null; } // verify docs
+
         return docs;
     }
 
@@ -171,7 +175,8 @@ public final class TextParser {
             final MultiProtocolURI location,
             String mimeType,
             final String charset,
-            final byte[] content
+            final byte[] content,
+            final boolean multipleVirtualDocs
         ) throws Parser.Failure {
         if (log.isFine()) log.logFine("Parsing '" + location + "' from byte-array");
         mimeType = normalizeMimeType(mimeType);
@@ -185,7 +190,12 @@ public final class TextParser {
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true, false);
 
-        return parseSource(location, mimeType, idioms, charset, content);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, content);
+
+        // finally enrich the docs set with virtual docs from the enclosed documents
+        if (multipleVirtualDocs && docs.length == 1) docs = virtualDocs(docs[0]);
+
+        return docs;
     }
 
     public static Document[] parseSource(
@@ -193,7 +203,8 @@ public final class TextParser {
             String mimeType,
             final String charset,
             final long contentLength,
-            final InputStream sourceStream
+            final InputStream sourceStream,
+            final boolean multipleVirtualDocs
         ) throws Parser.Failure {
         if (log.isFine()) log.logFine("Parsing '" + location + "' from stream");
         mimeType = normalizeMimeType(mimeType);
@@ -222,7 +233,12 @@ public final class TextParser {
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
-        return parseSource(location, mimeType, idioms, charset, b);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, b);
+
+        // finally enrich the docs set with virtual docs from the enclosed documents
+        if (multipleVirtualDocs && docs.length == 1) docs = virtualDocs(docs[0]);
+
+        return docs;
     }
 
     private static Document[] parseSource(
@@ -292,6 +308,7 @@ public final class TextParser {
             }
         }
         for (final Document d: docs) { assert d.getText() != null : "mimeType = " + mimeType; } // verify docs
+
         return docs;
     }
 
@@ -429,4 +446,73 @@ public final class TextParser {
         if (grant) denyExtensionx.remove(ext); else denyExtensionx.put(ext, v);
     }
 
+    /**
+     * produce virtual documents for each of the link that is contained in the document
+     * @param document
+     * @return
+     */
+    public static Document[] virtualDocs(final Document document) {
+
+        final ArrayList<Document> docs = new ArrayList<Document>();
+        docs.add(document);
+        for (final Map.Entry<MultiProtocolURI, String> link: document.getApplinks().entrySet()) {
+            docs.add(genLinkDocs(docs, "application", link.getKey(), link.getValue(), document.getContentLanguages()));
+        }
+        for (final Map.Entry<MultiProtocolURI, String> link: document.getAudiolinks().entrySet()) {
+            docs.add(genLinkDocs(docs, "audio", link.getKey(), link.getValue(), document.getContentLanguages()));
+        }
+        for (final Map.Entry<MultiProtocolURI, String> link: document.getVideolinks().entrySet()) {
+            docs.add(genLinkDocs(docs, "video", link.getKey(), link.getValue(), document.getContentLanguages()));
+        }
+        for (final Entry<MultiProtocolURI, ImageEntry> link: document.getImages().entrySet()) {
+            docs.add(genImageDocs(docs, link.getValue()));
+        }
+
+        // finally return the list of documents
+        return docs.toArray(new Document[docs.size()]);
+    }
+
+    private final static Document genLinkDocs(final ArrayList<Document> docs, final String type, final MultiProtocolURI uri, final String descr, final Set<String> contentLanguages) {
+        //System.out.println("HTMLPARSER-LINK " + type + ": " + uri.toNormalform(true, false) + " / " + descr);
+        return new Document(
+                uri,
+                Classification.ext2mime(uri.getFileExtension()),
+                "UTF-8",
+                null,
+                contentLanguages,
+                null,
+                descr,
+                "",
+                "",
+                new String[]{descr},
+                type,
+                0.0f, 0.0f,
+                uri.toNormalform(false, false),
+                null,
+                null,
+                null,
+                false);
+    }
+
+    private final static Document genImageDocs(final ArrayList<Document> docs, final ImageEntry img) {
+        //System.out.println("HTMLPARSER-LINK image: " + img.url().toNormalform(true, false) + " / " + img.alt());
+        return new Document(
+                img.url(),
+                Classification.ext2mime(img.url().getFileExtension()),
+                "UTF-8",
+                null,
+                null,
+                null,
+                img.alt(),
+                "",
+                "",
+                new String[]{img.alt()},
+                "image",
+                0.0f, 0.0f,
+                img.url().toNormalform(false, false),
+                null,
+                null,
+                null,
+                false);
+    }
 }

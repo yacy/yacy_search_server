@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -45,31 +45,31 @@ import org.apache.tools.tar.TarInputStream;
 
 public class tarParser extends AbstractParser implements Parser {
 
-    public tarParser() {        
-        super("Tape Archive File Parser"); 
-        SUPPORTED_EXTENSIONS.add("tar");
-        SUPPORTED_MIME_TYPES.add("application/x-tar");
-        SUPPORTED_MIME_TYPES.add("application/tar");
-        SUPPORTED_MIME_TYPES.add("applicaton/x-gtar");
-        SUPPORTED_MIME_TYPES.add("multipart/x-tar");
+    public tarParser() {
+        super("Tape Archive File Parser");
+        this.SUPPORTED_EXTENSIONS.add("tar");
+        this.SUPPORTED_MIME_TYPES.add("application/x-tar");
+        this.SUPPORTED_MIME_TYPES.add("application/tar");
+        this.SUPPORTED_MIME_TYPES.add("applicaton/x-gtar");
+        this.SUPPORTED_MIME_TYPES.add("multipart/x-tar");
     }
-    
+
     public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, InputStream source) throws Parser.Failure, InterruptedException {
-        
+
         final List<Document> docacc = new ArrayList<Document>();
         Document[] subDocs = null;
         final String ext = url.getFileExtension().toLowerCase();
         if (ext.equals("gz") || ext.equals("tgz")) {
             try {
                 source = new GZIPInputStream(source);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new Parser.Failure("tar parser: " + e.getMessage(), url);
             }
         }
         TarEntry entry;
-        final TarInputStream tis = new TarInputStream(source);                      
+        final TarInputStream tis = new TarInputStream(source);
         File tmp = null;
-        
+
         // loop through the elements in the tar file and parse every single file inside
         while (true) {
             try {
@@ -83,16 +83,16 @@ public class tarParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
-                    subDocs = TextParser.parseSource(MultiProtocolURI.newURL(url,"#" + name), mime, null, tmp);
+                    subDocs = TextParser.parseSource(MultiProtocolURI.newURL(url,"#" + name), mime, null, tmp, false);
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {
-                    log.logWarning("tar parser entry " + name + ": " + e.getMessage());
+                    this.log.logWarning("tar parser entry " + name + ": " + e.getMessage());
                 } finally {
                     if (tmp != null) FileUtils.deletedelete(tmp);
                 }
-            } catch (IOException e) {
-                log.logWarning("tar parser:" + e.getMessage());
+            } catch (final IOException e) {
+                this.log.logWarning("tar parser:" + e.getMessage());
                 break;
             }
         }

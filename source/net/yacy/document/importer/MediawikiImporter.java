@@ -2,36 +2,25 @@
  *  MediawikiImporter
  *  Copyright 2008 by Michael Peter Christen
  *  First released 20.11.2008 at http://yacy.net
- *  
+ *
  *  This is a part of YaCy, a peer-to-peer based web search engine
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package net.yacy.document.importer;
-
-import net.yacy.cora.document.UTF8;
-import net.yacy.document.Document;
-import net.yacy.document.Parser;
-import net.yacy.document.TextParser;
-import net.yacy.document.content.SurrogateReader;
-import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
-
-import org.apache.tools.bzip2.CBZip2InputStream;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -61,6 +50,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.document.UTF8;
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
+import net.yacy.document.content.SurrogateReader;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.ByteBuffer;
+
+import org.apache.tools.bzip2.CBZip2InputStream;
+
 import de.anomic.data.wiki.WikiCode;
 import de.anomic.data.wiki.WikiParser;
 
@@ -78,9 +78,9 @@ public class MediawikiImporter extends Thread implements Importer {
     private static final byte[] pagestartb = UTF8.getBytes(pagestart);
     private static final byte[] pageendb = UTF8.getBytes(pageend);
     private static final int    docspermbinxmlbz2 = 800;  // documents per megabyte in a xml.bz2 mediawiki dump
-    
+
     public static Importer job; // if started from a servlet, this object is used to store the thread
-    
+
     public    File sourcefile;
     public    File targetdir;
     public    int count;
@@ -88,100 +88,100 @@ public class MediawikiImporter extends Thread implements Importer {
     private   final long docsize;
     private   final int approxdocs;
     private   String hostport, urlStub;
-    
-    
-    public MediawikiImporter(File sourcefile, File targetdir) {
+
+
+    public MediawikiImporter(final File sourcefile, final File targetdir) {
     	this.sourcefile = sourcefile;
     	this.docsize = sourcefile.length();
-    	this.approxdocs = (int) (this.docsize * (long) docspermbinxmlbz2 / 1024L / 1024L);
+    	this.approxdocs = (int) (this.docsize * docspermbinxmlbz2 / 1024L / 1024L);
     	this.targetdir = targetdir;
         this.count = 0;
         this.start = 0;
         this.hostport = null;
         this.urlStub = null;
     }
-    
+
     public int count() {
         return this.count;
     }
-    
+
     public String source() {
         return this.sourcefile.getAbsolutePath();
     }
-    
+
     public String status() {
         return "";
     }
-    
+
     /**
      * return the number of articles per second
      * @return
      */
     public int speed() {
-        if (count == 0) return 0;
-        return (int) ((long) count / Math.max(1L, runningTime() ));
+        if (this.count == 0) return 0;
+        return (int) (this.count / Math.max(1L, runningTime() ));
     }
-    
+
     /**
      * return the remaining seconds for the completion of all records in milliseconds
      * @return
      */
     public long remainingTime() {
-        return Math.max(0, this.approxdocs - count) / Math.max(1, speed() );
+        return Math.max(0, this.approxdocs - this.count) / Math.max(1, speed() );
     }
-    
+
     public long runningTime() {
-        return (System.currentTimeMillis() - start) / 1000L;
+        return (System.currentTimeMillis() - this.start) / 1000L;
     }
-    
+
     public void run() {
         this.start = System.currentTimeMillis();
         try {
-            String targetstub = sourcefile.getName();
+            String targetstub = this.sourcefile.getName();
             int p = targetstub.lastIndexOf("\\.");
             if (p > 0) targetstub = targetstub.substring(0, p);
-            InputStream is = new BufferedInputStream(new FileInputStream(sourcefile), 1024 * 1024);
-            if (sourcefile.getName().endsWith(".bz2")) {
+            InputStream is = new BufferedInputStream(new FileInputStream(this.sourcefile), 1024 * 1024);
+            if (this.sourcefile.getName().endsWith(".bz2")) {
                 int b = is.read();
                 if (b != 'B') throw new IOException("Invalid bz2 content.");
                 b = is.read();
                 if (b != 'Z') throw new IOException("Invalid bz2 content.");
                 is = new CBZip2InputStream(is);
-            } else if (sourcefile.getName().endsWith(".gz")) {
+            } else if (this.sourcefile.getName().endsWith(".gz")) {
                 is = new GZIPInputStream(is);
             }
-            BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, "UTF-8"), 4 * 1024 * 1024);
+            final BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, "UTF-8"), 4 * 1024 * 1024);
             String t;
             StringBuilder sb = new StringBuilder();
             boolean page = false, text = false;
             String title = null;
-            wikiparserrecord poison = newRecord();
-            int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
-            BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
-            BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
-            ExecutorService service = Executors.newFixedThreadPool(threads + 1);
-            convertConsumer[] consumers = new convertConsumer[threads];
-            Future<?>[] consumerResults = new Future[threads];
+            final wikiparserrecord poison = newRecord();
+            final int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
+            final BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
+            final BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
+            final ExecutorService service = Executors.newFixedThreadPool(threads + 1);
+            final convertConsumer[] consumers = new convertConsumer[threads];
+            final Future<?>[] consumerResults = new Future[threads];
             for (int i = 0; i < threads; i++) {
                 consumers[i] = new convertConsumer(in, out, poison);
                 consumerResults[i] = service.submit(consumers[i]);
             }
-            convertWriter   writer = new convertWriter(out, poison, targetdir, targetstub);
-            Future<Integer> writerResult = service.submit(writer);
-            
+            final convertWriter   writer = new convertWriter(out, poison, this.targetdir, targetstub);
+            final Future<Integer> writerResult = service.submit(writer);
+
             wikiparserrecord record;
             int q;
             while ((t = r.readLine()) != null) {
                 if ((p = t.indexOf("<base>")) >= 0 && (q = t.indexOf("</base>", p)) > 0) {
                     //urlStub = "http://" + lang + ".wikipedia.org/wiki/";
-                    urlStub = t.substring(p + 6, q);
-                    if (!urlStub.endsWith("/")) {
-                        q = urlStub.lastIndexOf('/');
-                        if (q > 0) urlStub = urlStub.substring(0, q + 1);
+                    this.urlStub = t.substring(p + 6, q);
+                    if (!this.urlStub.endsWith("/")) {
+                        q = this.urlStub.lastIndexOf('/');
+                        if (q > 0) this.urlStub = this.urlStub.substring(0, q + 1);
                     }
-                    DigestURI uri = new DigestURI(urlStub);
-                    hostport = uri.getHost();
-                    if (uri.getPort() != 80) hostport += ":" + uri.getPort();
+                    final DigestURI uri = new DigestURI(this.urlStub);
+                    this.hostport = uri.getHost();
+                    if (uri.getPort() != 80) this.hostport += ":" + uri.getPort();
                     continue;
                 }
                 if (t.indexOf(pagestart) >= 0) {
@@ -192,7 +192,7 @@ public class MediawikiImporter extends Thread implements Importer {
                     text = page;
                     q = t.indexOf('>', p + textstart.length());
                     if (q > 0) {
-                        int u = t.indexOf(textend, q + 1);
+                        final int u = t.indexOf(textend, q + 1);
                         if (u > q) {
                             sb.append(t.substring(q + 1, u));
                             Log.logInfo("WIKITRANSLATION", "[INJECT] Title: " + title);
@@ -200,11 +200,11 @@ public class MediawikiImporter extends Thread implements Importer {
                                 Log.logInfo("WIKITRANSLATION", "ERROR: " + title + " has empty content");
                                 continue;
                             }
-                            record = newRecord(hostport, urlStub, title, sb);
+                            record = newRecord(this.hostport, this.urlStub, title, sb);
                             try {
                                 in.put(record);
                                 this.count++;
-                            } catch (InterruptedException e1) {
+                            } catch (final InterruptedException e1) {
                                 Log.logException(e1);
                             }
                             sb = new StringBuilder(200);
@@ -222,11 +222,11 @@ public class MediawikiImporter extends Thread implements Importer {
                         Log.logInfo("WIKITRANSLATION", "ERROR: " + title + " has empty content");
                         continue;
                     }
-                    record = newRecord(hostport, urlStub, title, sb);
+                    record = newRecord(this.hostport, this.urlStub, title, sb);
                     try {
                         in.put(record);
                         this.count++;
-                    } catch (InterruptedException e1) {
+                    } catch (final InterruptedException e1) {
                         Log.logException(e1);
                     }
                     sb = new StringBuilder(200);
@@ -248,7 +248,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 }
             }
             r.close();
-            
+
             try {
                 for (int i = 0; i < threads; i++) {
                     in.put(poison);
@@ -258,35 +258,35 @@ public class MediawikiImporter extends Thread implements Importer {
                 }
                 out.put(poison);
                 writerResult.get(10000, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 Log.logException(e);
-            } catch (TimeoutException e) {
+            } catch (final TimeoutException e) {
                 Log.logException(e);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Log.logException(e);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Log.logException(e);
         }
     }
-    
-    public static void checkIndex(File mediawikixml) {
-        File idx = idxFromMediawikiXML(mediawikixml);
+
+    public static void checkIndex(final File mediawikixml) {
+        final File idx = idxFromMediawikiXML(mediawikixml);
         if (idx.exists()) return;
         new indexMaker(mediawikixml).start();
     }
-    
+
     public static class indexMaker extends Thread {
-        
+
         File mediawikixml;
-        public indexMaker(File mediawikixml) {
+        public indexMaker(final File mediawikixml) {
             this.mediawikixml = mediawikixml;
         }
-        
+
         public void run() {
             try {
                 createIndex(this.mediawikixml);
@@ -296,24 +296,24 @@ public class MediawikiImporter extends Thread implements Importer {
             }
         }
     }
-    
-    public static File idxFromMediawikiXML(File mediawikixml) {
+
+    public static File idxFromMediawikiXML(final File mediawikixml) {
         return new File(mediawikixml.getAbsolutePath() + ".idx.xml");
     }
-    
-    public static void createIndex(File dumpFile) throws IOException {
+
+    public static void createIndex(final File dumpFile) throws IOException {
         // calculate md5
         //String md5 = serverCodings.encodeMD5Hex(dumpFile);
-        
+
         // init reader, producer and consumer
-        PositionAwareReader in = new PositionAwareReader(dumpFile);
-        indexProducer producer = new indexProducer(100, idxFromMediawikiXML(dumpFile));
-        wikiConsumer consumer = new wikiConsumer(100, producer);
-        ExecutorService service = Executors.newFixedThreadPool(2);
-        Future<Integer> producerResult = service.submit(consumer);
-        Future<Integer> consumerResult = service.submit(producer);
+        final PositionAwareReader in = new PositionAwareReader(dumpFile);
+        final indexProducer producer = new indexProducer(100, idxFromMediawikiXML(dumpFile));
+        final wikiConsumer consumer = new wikiConsumer(100, producer);
+        final ExecutorService service = Executors.newFixedThreadPool(2);
+        final Future<Integer> producerResult = service.submit(consumer);
+        final Future<Integer> consumerResult = service.submit(producer);
         service.shutdown();
-        
+
         // read the wiki dump
         long start, stop;
         while (in.seek(pagestartb)) {
@@ -324,18 +324,18 @@ public class MediawikiImporter extends Thread implements Importer {
             consumer.consume(new wikiraw(in.bytes(), start, stop));
             in.resetBuffer();
         }
-        
+
         // shut down the services
         try {
             consumer.consume(wikiConsumer.poison);
-            try {consumerResult.get(5000, TimeUnit.MILLISECONDS);} catch (TimeoutException e) {}
+            try {consumerResult.get(5000, TimeUnit.MILLISECONDS);} catch (final TimeoutException e) {}
             producer.consume(indexProducer.poison);
             if (!consumerResult.isDone()) consumerResult.get();
             producerResult.get();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             Log.logException(e);
             return;
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             Log.logException(e);
             return;
         }
@@ -348,120 +348,120 @@ public class MediawikiImporter extends Thread implements Importer {
         PrintWriter out;
         protected static wikisourcerecord poison = new wikisourcerecord("", 0, 0);
         int count;
-        
-        public indexProducer(int bufferCount, File indexFile) throws IOException {
-            entries = new ArrayBlockingQueue<wikisourcerecord>(bufferCount);
-            out = new PrintWriter(new BufferedWriter(new FileWriter(indexFile)));
-            count = 0;
-            out.println("<index>");
-            
+
+        public indexProducer(final int bufferCount, final File indexFile) throws IOException {
+            this.entries = new ArrayBlockingQueue<wikisourcerecord>(bufferCount);
+            this.out = new PrintWriter(new BufferedWriter(new FileWriter(indexFile)));
+            this.count = 0;
+            this.out.println("<index>");
+
         }
-        
-        public void consume(wikisourcerecord b) {
+
+        public void consume(final wikisourcerecord b) {
             try {
-                entries.put(b);
-            } catch (InterruptedException e) {
+                this.entries.put(b);
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
         }
-        
+
         public Integer call() {
             wikisourcerecord r;
             try {
                 while(true) {
-                    r = entries.take();
+                    r = this.entries.take();
                     if (r == poison) {
                         Log.logInfo("WIKITRANSLATION", "producer / got poison");
                         break;
                     }
-                    out.println("  <page start=\"" + r.start + "\" length=\"" + (r.end - r.start) + "\">");
-                    out.println("    <title>" + r.title + "</title>");
-                    out.println("  </page>");
+                    this.out.println("  <page start=\"" + r.start + "\" length=\"" + (r.end - r.start) + "\">");
+                    this.out.println("    <title>" + r.title + "</title>");
+                    this.out.println("  </page>");
                     Log.logInfo("WIKITRANSLATION", "producer / record start: " + r.start + ", title : " + r.title);
-                    count++;
+                    this.count++;
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
-            entries.clear();
-            out.println("</index>");
-            out.close();
-            return Integer.valueOf(count);
+            this.entries.clear();
+            this.out.println("</index>");
+            this.out.close();
+            return Integer.valueOf(this.count);
         }
-        
+
     }
-    
+
     private static class wikiConsumer implements Callable<Integer> {
 
         private   final BlockingQueue<wikiraw> entries;
         protected static wikiraw poison = new wikiraw(new byte[0], 0, 0);
         private   final indexProducer producer;
         private   int count;
-        
-        public wikiConsumer(int bufferCount, indexProducer producer) {
-            entries = new ArrayBlockingQueue<wikiraw>(bufferCount);
+
+        public wikiConsumer(final int bufferCount, final indexProducer producer) {
+            this.entries = new ArrayBlockingQueue<wikiraw>(bufferCount);
             this.producer = producer;
-            count = 0;
+            this.count = 0;
         }
-        
-        public void consume(wikiraw b) {
+
+        public void consume(final wikiraw b) {
             try {
-                entries.put(b);
-            } catch (InterruptedException e) {
+                this.entries.put(b);
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
         }
-        
+
         public Integer call() {
             wikisourcerecord r;
             wikiraw c;
             try {
                 while(true) {
-                    c = entries.take();
+                    c = this.entries.take();
                     if (c == poison) {
                         Log.logInfo("WIKITRANSLATION", "consumer / got poison");
                         break;
                     }
                     try {
                         r = new wikisourcerecord(c.b, c.start, c.end);
-                        producer.consume(r);
+                        this.producer.consume(r);
                         Log.logInfo("WIKITRANSLATION", "consumer / record start: " + r.start + ", title : " + r.title);
-                        count++;
-                    } catch (RuntimeException e) {}
+                        this.count++;
+                    } catch (final RuntimeException e) {}
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
-            entries.clear();
-            return Integer.valueOf(count);
+            this.entries.clear();
+            return Integer.valueOf(this.count);
         }
-        
+
     }
 
     private static class wikiraw {
         public long start, end;
         public byte[] b;
-        public wikiraw(byte[] b, long start, long end) {
+        public wikiraw(final byte[] b, final long start, final long end) {
             this.b = b;
             this.start = start;
             this.end = end;
         }
     }
-    
+
     public static class wikisourcerecord {
         public long start, end;
         public String title;
-        public wikisourcerecord(String title, long start, long end) {
+        public wikisourcerecord(final String title, final long start, final long end) {
             this.title = title;
             this.start = start;
             this.end = end;
         }
-        public wikisourcerecord(byte[] chunk, long start, long end) {
+        public wikisourcerecord(final byte[] chunk, final long start, final long end) {
             String s;
             s = UTF8.String(chunk);
-            int t0 = s.indexOf("<title>");
+            final int t0 = s.indexOf("<title>");
             if (t0 >= 0) {
-                int t1 = s.indexOf("</title>", t0);
+                final int t1 = s.indexOf("</title>", t0);
                 if (t1 >= 0) {
                     this.title = s.substring(t0 + 7, t1);
                 } else {
@@ -470,7 +470,7 @@ public class MediawikiImporter extends Thread implements Importer {
             } else {
                 throw new RuntimeException("no title start in record");
             }
-            
+
             this.start = start;
             this.end = end;
         }
@@ -478,16 +478,16 @@ public class MediawikiImporter extends Thread implements Importer {
     public wikiparserrecord newRecord() {
         return new wikiparserrecord(null, null, null, null);
     }
-    public wikiparserrecord newRecord(String hostport, String urlStub, String title, StringBuilder sb) {
+    public wikiparserrecord newRecord(final String hostport, final String urlStub, final String title, final StringBuilder sb) {
         return new wikiparserrecord(hostport, urlStub, title, sb);
     }
-    
+
     public class wikiparserrecord {
         public String title;
         String source, html, hostport, urlStub;
         DigestURI url;
         Document document;
-        public wikiparserrecord(String hostport, String urlStub, String title, StringBuilder sb) {
+        public wikiparserrecord(final String hostport, final String urlStub, final String title, final StringBuilder sb) {
             this.title = title;
             this.hostport = hostport;
             this.urlStub = urlStub;
@@ -495,97 +495,97 @@ public class MediawikiImporter extends Thread implements Importer {
         }
         public void genHTML() throws IOException {
             try {
-                WikiParser wparser = new WikiCode();
-                html = wparser.transform(hostport, source);
-            } catch (Exception e) {
+                final WikiParser wparser = new WikiCode();
+                this.html = wparser.transform(this.hostport, this.source);
+            } catch (final Exception e) {
                 Log.logException(e);
                 throw new IOException(e.getMessage());
             }
         }
         public void genDocument() throws Parser.Failure {
             try {
-				url = new DigestURI(urlStub + title);
-				Document[] parsed = TextParser.parseSource(url, "text/html", "UTF-8", UTF8.getBytes(html));
-				document = Document.mergeDocuments(url, "text/html", parsed);
+				this.url = new DigestURI(this.urlStub + this.title);
+				final Document[] parsed = TextParser.parseSource(this.url, "text/html", "UTF-8", UTF8.getBytes(this.html), false);
+				this.document = Document.mergeDocuments(this.url, "text/html", parsed);
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
-				document.setTitle(title);
-			} catch (MalformedURLException e1) {
+				this.document.setTitle(this.title);
+			} catch (final MalformedURLException e1) {
 			    Log.logException(e1);
 			}
         }
-        public void writeXML(OutputStreamWriter os) throws IOException {
-            document.writeXML(os, new Date());
+        public void writeXML(final OutputStreamWriter os) throws IOException {
+            this.document.writeXML(os, new Date());
         }
     }
-    
+
     private static class PositionAwareReader {
-    
+
         private final InputStream is;
         private long seekpos;
         private ByteBuffer bb;
-        
-        public PositionAwareReader(File dumpFile) throws FileNotFoundException {
+
+        public PositionAwareReader(final File dumpFile) throws FileNotFoundException {
             this.is = new BufferedInputStream(new FileInputStream(dumpFile), 64 *1024);
             this.seekpos = 0;
             this.bb = new ByteBuffer();
         }
-        
+
         public void resetBuffer() {
-            if (bb.length() > 10 * 1024) bb = new ByteBuffer(); else bb.clear();
+            if (this.bb.length() > 10 * 1024) this.bb = new ByteBuffer(); else this.bb.clear();
         }
-        
-        public boolean seek(byte[] pattern) throws IOException {
+
+        public boolean seek(final byte[] pattern) throws IOException {
             int pp = 0;
             int c;
-            while ((c = is.read()) >= 0) {
-                seekpos++;
-                bb.append(c);
+            while ((c = this.is.read()) >= 0) {
+                this.seekpos++;
+                this.bb.append(c);
                 if (pattern[pp] == c) pp++; else pp = 0;
                 if (pp == pattern.length) return true;
             }
             return false;
         }
-        
+
         public long pos() {
-            return seekpos;
+            return this.seekpos;
         }
-        
+
         public byte[] bytes() {
-            return bb.getBytes();
+            return this.bb.getBytes();
         }
-        
+
         public void close() {
             try {
-                is.close();
-            } catch (IOException e) {
+                this.is.close();
+            } catch (final IOException e) {
                 Log.logException(e);
             }
         }
     }
 
-    public static byte[] read(File f, long start, int len) {
-        byte[] b = new byte[len];
+    public static byte[] read(final File f, final long start, final int len) {
+        final byte[] b = new byte[len];
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(f, "r");
             raf.seek(start);
             raf.read(b);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
             return null;
         } finally {
             if (raf != null) try {
                 raf.close();
-                try{raf.getChannel().close();} catch (IOException e) {}
-            } catch (IOException e) { }
+                try{raf.getChannel().close();} catch (final IOException e) {}
+            } catch (final IOException e) { }
         }
         return b;
     }
-    
-    public static wikisourcerecord find(String title, File f) throws IOException {
-        PositionAwareReader in = new PositionAwareReader(f);
+
+    public static wikisourcerecord find(final String title, final File f) throws IOException {
+        final PositionAwareReader in = new PositionAwareReader(f);
         long start;
-        String m = "<title>" + title + "</title>";
+        final String m = "<title>" + title + "</title>";
         String s;
         while (in.seek(UTF8.getBytes("<page "))) {
             start = in.pos() - 6;
@@ -607,56 +607,56 @@ public class MediawikiImporter extends Thread implements Importer {
                 p += 8;
                 q = s.indexOf('"', p + 1);
                 if (q < 0) return null;
-                int length = Integer.parseInt(s.substring(p, q));
+                final int length = Integer.parseInt(s.substring(p, q));
                 //Log.logInfo("WIKITRANSLATION", "start = " + start + ", length = " + length);
                 return new wikisourcerecord(title, start, start + length);
             }
         }
         return null;
     }
-    
+
     private static class convertConsumer implements Callable<Integer> {
 
         private final BlockingQueue<wikiparserrecord> in, out;
         private final wikiparserrecord poison;
-        
-        public convertConsumer(BlockingQueue<wikiparserrecord> in, BlockingQueue<wikiparserrecord> out, wikiparserrecord poison) {
+
+        public convertConsumer(final BlockingQueue<wikiparserrecord> in, final BlockingQueue<wikiparserrecord> out, final wikiparserrecord poison) {
             this.poison = poison;
             this.in = in;
             this.out = out;
         }
-        
+
         public Integer call() {
             wikiparserrecord record;
             try {
                 while(true) {
-                    record = in.take();
-                    if (record == poison) {
+                    record = this.in.take();
+                    if (record == this.poison) {
                         Log.logInfo("WIKITRANSLATION", "convertConsumer / got poison");
                         break;
                     }
                     try {
                         record.genHTML();
                         record.genDocument();
-                        out.put(record);
-                    } catch (RuntimeException e) {
+                        this.out.put(record);
+                    } catch (final RuntimeException e) {
                         Log.logException(e);
-                    } catch (Parser.Failure e) {
+                    } catch (final Parser.Failure e) {
                         Log.logException(e);
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
 						// TODO Auto-generated catch block
                         Log.logException(e);
 					}
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
             Log.logInfo("WIKITRANSLATION", "*** convertConsumer has terminated");
             return Integer.valueOf(0);
         }
-        
+
     }
-    
+
     private static class convertWriter implements Callable<Integer> {
 
         private final BlockingQueue<wikiparserrecord> in;
@@ -666,12 +666,12 @@ public class MediawikiImporter extends Thread implements Importer {
         private final File targetdir;
         private int fc, rc;
         private String outputfilename;
-        
+
         public convertWriter(
-                BlockingQueue<wikiparserrecord> in,
-                wikiparserrecord poison,
-                File targetdir,
-                String targetstub) {
+                final BlockingQueue<wikiparserrecord> in,
+                final wikiparserrecord poison,
+                final File targetdir,
+                final String targetstub) {
             this.poison = poison;
             this.in = in;
             this.osw = null;
@@ -681,63 +681,63 @@ public class MediawikiImporter extends Thread implements Importer {
             this.rc = 0;
             this.outputfilename = null;
         }
-        
+
         public Integer call() {
             wikiparserrecord record;
             try {
                 while(true) {
-                    record = in.take();
-                    if (record == poison) {
+                    record = this.in.take();
+                    if (record == this.poison) {
                         Log.logInfo("WIKITRANSLATION", "convertConsumer / got poison");
                         break;
                     }
-                    
-                    if (osw == null) {
+
+                    if (this.osw == null) {
                         // start writing a new file
-                        this.outputfilename = targetstub + "." + fc + ".xml.prt";
-                        this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
-                        osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
+                        this.outputfilename = this.targetstub + "." + this.fc + ".xml.prt";
+                        this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(this.targetdir, this.outputfilename))), "UTF-8");
+                        this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
                     Log.logInfo("WIKITRANSLATION", "[CONSUME] Title: " + record.title);
-                    record.document.writeXML(osw, new Date());
-                    rc++;
-                    if (rc >= 10000) {
-                        osw.write("</surrogates>\n");
-                        osw.close();
-                        String finalfilename = targetstub + "." + fc + ".xml";
-                        new File(targetdir, outputfilename).renameTo(new File(targetdir, finalfilename));
-                        rc = 0;
-                        fc++;
-                        outputfilename = targetstub + "." + fc + ".xml.prt";
-                        osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
-                        osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
+                    record.document.writeXML(this.osw, new Date());
+                    this.rc++;
+                    if (this.rc >= 10000) {
+                        this.osw.write("</surrogates>\n");
+                        this.osw.close();
+                        final String finalfilename = this.targetstub + "." + this.fc + ".xml";
+                        new File(this.targetdir, this.outputfilename).renameTo(new File(this.targetdir, finalfilename));
+                        this.rc = 0;
+                        this.fc++;
+                        this.outputfilename = this.targetstub + "." + this.fc + ".xml.prt";
+                        this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(this.targetdir, this.outputfilename))), "UTF-8");
+                        this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 Log.logException(e);
-            } catch (FileNotFoundException e) {
+            } catch (final FileNotFoundException e) {
                 Log.logException(e);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             } finally {
 	            try {
-					osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
-		            osw.close();
-		            String finalfilename = targetstub + "." + fc + ".xml";
-		            new File(targetdir, outputfilename).renameTo(new File(targetdir, finalfilename));
-				} catch (IOException e) {
+					this.osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
+		            this.osw.close();
+		            final String finalfilename = this.targetstub + "." + this.fc + ".xml";
+		            new File(this.targetdir, this.outputfilename).renameTo(new File(this.targetdir, finalfilename));
+				} catch (final IOException e) {
 				    Log.logException(e);
 				}
             }
             Log.logInfo("WIKITRANSLATION", "*** convertWriter has terminated");
             return Integer.valueOf(0);
         }
-        
+
     }
-    
-    public static void main(String[] s) {
+
+    public static void main(final String[] s) {
         if (s.length == 0) {
             Log.logInfo("WIKITRANSLATION", "usage:");
             Log.logInfo("WIKITRANSLATION", " -index <wikipedia-dump>");
@@ -751,47 +751,47 @@ public class MediawikiImporter extends Thread implements Importer {
         // java -Xmx2000m -cp classes:lib/bzip2.jar de.anomic.tools.mediawikiIndex -convert DATA/HTCACHE/dewiki-20090311-pages-articles.xml.bz2 DATA/SURROGATES/in/ http://de.wikipedia.org/wiki/
 
         if (s[0].equals("-convert") && s.length > 2) {
-            File sourcefile = new File(s[1]);
-            File targetdir = new File(s[2]);
+            final File sourcefile = new File(s[1]);
+            final File targetdir = new File(s[2]);
             //String urlStub = s[3]; // i.e. http://de.wikipedia.org/wiki/
             //String language = urlStub.substring(7,9);
             try {
-                MediawikiImporter mi = new MediawikiImporter(sourcefile, targetdir);
+                final MediawikiImporter mi = new MediawikiImporter(sourcefile, targetdir);
                 mi.start();
                 mi.join();
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
         }
-        
-        if (s[0].equals("-index")) {   
+
+        if (s[0].equals("-index")) {
             try {
                 createIndex(new File(s[1]));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
         }
-        
+
         if (s[0].equals("-read")) {
-            long start = Integer.parseInt(s[1]);
-            int  len   = Integer.parseInt(s[2]);
+            final long start = Integer.parseInt(s[1]);
+            final int  len   = Integer.parseInt(s[2]);
             System.out.println(UTF8.String(read(new File(s[3]), start, len)));
         }
-        
+
         if (s[0].equals("-find")) {
             try {
-                wikisourcerecord w = find(s[1], new File(s[2] + ".idx.xml"));
+                final wikisourcerecord w = find(s[1], new File(s[2] + ".idx.xml"));
                 if (w == null) {
                     Log.logInfo("WIKITRANSLATION", "not found");
                 } else {
                     System.out.println(UTF8.String(read(new File(s[2]), w.start, (int) (w.end - w.start))));
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
-            
+
         }
         System.exit(0);
     }
-    
+
 }
