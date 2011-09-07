@@ -184,7 +184,7 @@ public class SolrChardingConnector {
         final String[] urlAdmin = new String[this.connectors.size()];
         int i = 0;
         for (final String u: this.urls) {
-            urlAdmin[i++] = u + "/admin/";
+            urlAdmin[i++] = u + (u.endsWith("/") ? "admin/" : "/admin/");
         }
         return urlAdmin;
     }
