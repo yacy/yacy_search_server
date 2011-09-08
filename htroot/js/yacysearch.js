@@ -72,7 +72,8 @@ function addHover() {
 
 function statistics(offset, itemscount, itemsperpage, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount, navurlbase) {
   if (offset >= 0) document.getElementById("resultsOffset").firstChild.nodeValue = offset;
-  if (itemscount >= 0) document.getElementById("itemscount").firstChild.nodeValue = itemscount;
+  if (itemscount == 0) return;
+  document.getElementById("itemscount").firstChild.nodeValue = itemscount;
   document.getElementById("totalcount").firstChild.nodeValue = totalcount;
   if (document.getElementById("localResourceSize") == null) return;
   document.getElementById("localResourceSize").firstChild.nodeValue = localResourceSize;

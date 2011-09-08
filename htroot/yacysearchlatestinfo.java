@@ -17,7 +17,17 @@ public class yacysearchlatestinfo {
         final String eventID = post.get("eventID", "");
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
-            // the event does not exist, show empty page
+            // the event does not exist.
+            // to avoid missing patterns, we return dummy values
+            prop.put("offset", 0);
+            prop.put("itemscount", -1);
+            prop.put("itemsperpage", 10);
+            prop.put("totalcount", 0);
+            prop.put("localResourceSize", 0);
+            prop.put("localMissCount", 0);
+            prop.put("remoteResourceSize", 0);
+            prop.put("remoteIndexCount", 0);
+            prop.put("remotePeerCount", 0);
             return prop;
         }
         final QueryParams theQuery = theSearch.getQuery();
