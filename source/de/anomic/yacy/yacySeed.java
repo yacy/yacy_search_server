@@ -859,7 +859,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if (ipString.length() > 0 && ipString.length() < 8) return ipString + " -> IP is too short: ";
         if (Switchboard.getSwitchboard().isAllIPMode()) return null;
         final boolean islocal = Domains.isLocal(ipString);
-        if (islocal && Switchboard.getSwitchboard().isGlobalMode()) return ipString + " - local IP for global mode rejected";
+        //if (islocal && Switchboard.getSwitchboard().isGlobalMode()) return ipString + " - local IP for global mode rejected";
         if (!islocal && Switchboard.getSwitchboard().isIntranetMode()) return ipString + " - global IP for intranet mode rejected";
         return null;
     }
