@@ -25,10 +25,12 @@
 package net.yacy.cora.services.federated.solr;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -183,7 +185,11 @@ public class SolrChardingConnector {
     public String[] getAdminInterfaceList() {
         final String[] urlAdmin = new String[this.connectors.size()];
         int i = 0;
-        for (final String u: this.urls) {
+        final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
+        final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();
+        for (String u: this.urls) {
+            int p = u.indexOf("localhost"); if (p < 0) p = u.indexOf("127.0.0.1");
+            if (p >= 0) u = u.substring(0, p) + localhostExtern + u.substring(p + 9);
             urlAdmin[i++] = u + (u.endsWith("/") ? "admin/" : "/admin/");
         }
         return urlAdmin;
