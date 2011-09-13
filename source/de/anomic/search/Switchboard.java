@@ -974,7 +974,6 @@ public final class Switchboard extends serverSwitch {
             setConfig("heuristic.blekko", false);
 
             // relocate
-            this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
             this.peers.relocate(
                     this.networkRoot,
                     redundancy,
@@ -987,10 +986,10 @@ public final class Switchboard extends serverSwitch {
                     wordCacheMaxCount,
                     fileSizeMax,
                     this.useTailCache,
-
                     this.exceed134217727);
             // set the default segment names
             setDefaultSegments();
+            this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
 
             // create a crawler
             this.crawler = new CrawlSwitchboard(
