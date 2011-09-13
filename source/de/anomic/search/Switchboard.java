@@ -247,7 +247,6 @@ public final class Switchboard extends serverSwitch {
 
     private final Semaphore shutdownSync = new Semaphore(0);
     private boolean terminate = false;
-    public SolrChardingConnector solrConnector = null;
 
     //private Object  crawlingPausedSync = new Object();
     //private boolean crawlingIsPaused = false;
@@ -592,10 +591,10 @@ public final class Switchboard extends serverSwitch {
         final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
         try {
-            this.solrConnector = (usesolr) ? new SolrChardingConnector(solrurls, workingScheme, SolrChardingSelection.Method.MODULO_HOST_MD5) : null;
+            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrChardingConnector(solrurls, workingScheme, SolrChardingSelection.Method.MODULO_HOST_MD5) : null);
         } catch (final IOException e) {
             Log.logException(e);
-            this.solrConnector = null;
+            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
         }
 
         // start a loader
@@ -1314,7 +1313,6 @@ public final class Switchboard extends serverSwitch {
         Cache.close();
         this.tables.close();
         Domains.close();
-        if (this.solrConnector != null && getConfigBool("federated.service.solr.indexing.enabled", false)) this.solrConnector.close();
         AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
         UPnP.deletePortMapping();
         Tray.removeTray();
@@ -1989,7 +1987,7 @@ public final class Switchboard extends serverSwitch {
 
     public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
-        if (this.solrConnector != null && getConfigBool("federated.service.solr.indexing.enabled", false)/*in.queueEntry.profile().pushSolr()*/) {
+        if (this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() != null && getConfigBool("federated.service.solr.indexing.enabled", false)/*in.queueEntry.profile().pushSolr()*/) {
             // send the documents to solr
             for (final Document doc: in.documents) {
                 try {
@@ -2000,7 +1998,7 @@ public final class Switchboard extends serverSwitch {
                         // in case that this happens it appears that the doc id is the right one
                     }
                     try {
-                        this.solrConnector.add(id, in.queueEntry.getResponseHeader(), doc);
+                        this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().add(id, in.queueEntry.getResponseHeader(), doc);
                     } catch (final IOException e) {
                         Log.logWarning("SOLR", "failed to send " + in.queueEntry.url().toNormalform(true, false) + " to solr: " + e.getMessage());
                     }

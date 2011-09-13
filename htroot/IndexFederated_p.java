@@ -33,9 +33,12 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.SolrChardingConnector;
 import net.yacy.cora.services.federated.solr.SolrChardingSelection;
+import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrScheme;
+import net.yacy.cora.services.federated.solr.SolrSingleConnector;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -75,8 +78,8 @@ public class IndexFederated_p {
 
             if (solrWasOn) {
                 // switch off
-                sb.solrConnector.close();
-                sb.solrConnector = null;
+                sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().close();
+                sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
             }
 
             final SolrScheme scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
@@ -85,10 +88,10 @@ public class IndexFederated_p {
                 // switch on
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
                 try {
-                    sb.solrConnector = (usesolr) ? new SolrChardingConnector(solrurls, scheme, SolrChardingSelection.Method.MODULO_HOST_MD5) : null;
+                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrChardingConnector(solrurls, scheme, SolrChardingSelection.Method.MODULO_HOST_MD5) : null);
                 } catch (final IOException e) {
                     Log.logException(e);
-                    sb.solrConnector = null;
+                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
                 }
             }
 
@@ -110,12 +113,13 @@ public class IndexFederated_p {
         }
 
         // show solr host table
-        if (sb.solrConnector == null) {
+        if (sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() == null) {
             prop.put("table", 0);
         } else {
             prop.put("table", 1);
-            final long[] size = sb.solrConnector.getSizeList();
-            final String[] urls = sb.solrConnector.getAdminInterfaceList();
+            final SolrConnector solr = sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr();
+            final long[] size = (solr instanceof SolrChardingConnector) ? ((SolrChardingConnector) solr).getSizeList() : new long[]{((SolrSingleConnector) solr).getSize()};
+            final String[] urls = (solr instanceof SolrChardingConnector) ? ((SolrChardingConnector) solr).getAdminInterfaceList() : new String[]{((SolrSingleConnector) solr).getAdminInterface()};
             boolean dark = false;
             for (int i = 0; i < size.length; i++) {
                 prop.put("table_list_" + i + "_dark", dark ? 1 : 0); dark = !dark;
@@ -126,7 +130,7 @@ public class IndexFederated_p {
         }
 
         // write scheme
-        SolrScheme scheme = (sb.solrConnector == null) ? null : sb.solrConnector.getScheme();
+        SolrScheme scheme = (sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() == null) ? null : sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().getScheme();
         final String schemename = sb.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
         if (scheme == null) {
             scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));

@@ -57,7 +57,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 
 
-public class SolrSingleConnector {
+public class SolrSingleConnector implements SolrConnector {
 
     private final String solrurl, host, solrpath, solraccount, solrpw;
     private final int port;
@@ -175,6 +175,22 @@ public class SolrSingleConnector {
                 Log.logException(e);
             }
 
+        }
+    }
+
+    @Override
+    public SolrScheme getScheme() {
+        return this.scheme;
+    }
+
+    @Override
+    public long getSize() {
+        try {
+            final SolrDocumentList list = get("*:*", 0, 1);
+            return list.getNumFound();
+        } catch (final Exception e) {
+            Log.logException(e);
+            return 0;
         }
     }
 
@@ -325,6 +341,16 @@ public class SolrSingleConnector {
         //return result;
     }
 
+
+    public String getAdminInterface() {
+        final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
+        final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();
+        String u = this.solrurl;
+        int p = u.indexOf("localhost"); if (p < 0) p = u.indexOf("127.0.0.1");
+        if (p >= 0) u = u.substring(0, p) + localhostExtern + u.substring(p + 9);
+        return u + (u.endsWith("/") ? "admin/" : "/admin/");
+    }
+
     public static void main(final String args[]) {
         SolrSingleConnector solr;
         try {
@@ -347,5 +373,4 @@ public class SolrSingleConnector {
             e.printStackTrace();
         }
     }
-
 }

@@ -62,6 +62,7 @@ public class CrawlQueues {
 
     private static final String ERROR_DB_FILENAME = "urlError3.db";
     private static final String DELEGATED_DB_FILENAME = "urlDelegated3.db";
+    private static final Segments.Process PROCESS = Segments.Process.LOCALCRAWLING;
 
     protected Switchboard sb;
     protected Log log;
@@ -81,8 +82,8 @@ public class CrawlQueues {
         this.log.logConfig("Starting Crawling Management");
         this.noticeURL = new NoticedURL(queuePath, sb.peers.myBotIDs(), sb.useTailCache, sb.exceed134217727);
         FileUtils.deletedelete(new File(queuePath, ERROR_DB_FILENAME));
-        this.errorURL = new ZURL(sb.solrConnector, queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
-        this.delegatedURL = new ZURL(sb.solrConnector, queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
+        this.errorURL = new ZURL(sb.indexSegments.segment(PROCESS).getSolr(), queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
+        this.delegatedURL = new ZURL(sb.indexSegments.segment(PROCESS).getSolr(), queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
     }
 
     public void relocate(final File newQueuePath) {
@@ -93,8 +94,8 @@ public class CrawlQueues {
 
         this.noticeURL = new NoticedURL(newQueuePath, this.sb.peers.myBotIDs(), this.sb.useTailCache, this.sb.exceed134217727);
         FileUtils.deletedelete(new File(newQueuePath, ERROR_DB_FILENAME));
-        this.errorURL = new ZURL(this.sb.solrConnector, newQueuePath, ERROR_DB_FILENAME, false, this.sb.useTailCache, this.sb.exceed134217727);
-        this.delegatedURL = new ZURL(this.sb.solrConnector, newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
+        this.errorURL = new ZURL(this.sb.indexSegments.segment(PROCESS).getSolr(), newQueuePath, ERROR_DB_FILENAME, false, this.sb.useTailCache, this.sb.exceed134217727);
+        this.delegatedURL = new ZURL(this.sb.indexSegments.segment(PROCESS).getSolr(), newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
     }
 
     public void close() {
@@ -249,7 +250,7 @@ public class CrawlQueues {
                         return true;
                     }
                     try {
-                        this.sb.indexingDocumentProcessor.enQueue(new indexingQueueEntry(Segments.Process.LOCALCRAWLING, new Response(urlEntry, profile), null, null));
+                        this.sb.indexingDocumentProcessor.enQueue(new indexingQueueEntry(PROCESS, new Response(urlEntry, profile), null, null));
                         Log.logInfo("CrawlQueues", "placed NOLOAD URL on indexing queue: " + urlEntry.url().toNormalform(true, false));
                     } catch (final InterruptedException e) {
                         Log.logException(e);

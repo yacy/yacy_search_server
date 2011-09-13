@@ -24,6 +24,7 @@
 
 package de.anomic.search;
 
+import java.io.ByteArrayInputStream;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
@@ -140,6 +142,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
     public TextSnippet(
             final LoaderDispatcher loader,
+            final String solrText,
             final URIMetadataRow.Components comp,
             final HandleSet queryhashes,
             final CacheStrategy cacheStrategy,
@@ -156,7 +159,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         }
 
         // try to get snippet from snippetCache
-        ResultClass source = ResultClass.SOURCE_CACHE;
+        final ResultClass source = ResultClass.SOURCE_CACHE;
         final String wordhashes = yacySearch.set2string(queryhashes);
         final String urls = ASCII.String(url.hash());
         String snippetLine = snippetsCache.get(wordhashes, urls);
@@ -165,32 +168,37 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             init(url.hash(), snippetLine, source, null);
             return;
         }
-        
+
+        // try to get the snippet from a document at the cache (or in the web)
+        // this requires that the document is parsed after loading
         String textline = null;
         HandleSet remainingHashes = queryhashes;
         { //encapsulate potential expensive sentences
-	        final Collection<StringBuilder> sentences;
-	        { //encapsulate potential expensive document 
-		        final Document document = loadDocument(loader, comp, queryhashes, cacheStrategy, url, reindexing, source);
-		        if (document == null) {
-		            return;
-		        }
-		
-		        /* ===========================================================================
-		         * COMPUTE SNIPPET
-		         * =========================================================================== */
-		        // we have found a parseable non-empty file: use the lines
-		
-		        // compute snippet from text
-		        sentences = document.getSentences(pre);
-		        document.close();
-	        } //encapsulate potential expensive document END
-	        
-	        if (sentences == null) {
-	            init(url.hash(), null, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences");
-	            return;
-	        }
-	        
+	        Collection<StringBuilder> sentences = null;
+
+	        // try the solr text first
+	        if (solrText != null) {
+                // compute sentences from solr query
+                sentences = Document.getSentences(pre, new ByteArrayInputStream(UTF8.getBytes(solrText)));
+            }
+
+            // if then no sentences are found, we fail-over to get the content from the re-loaded document
+            if (sentences == null) {
+    	        final Document document = loadDocument(loader, comp, queryhashes, cacheStrategy, url, reindexing, source);
+    	        if (document == null) {
+    	            return;
+    	        }
+
+    	        // compute sentences from parsed document
+    	        sentences = document.getSentences(pre);
+    	        document.close();
+
+                if (sentences == null) {
+                    init(url.hash(), null, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences");
+                    return;
+                }
+            }
+
 	        try {
 	        	final SnippetExtractor tsr = new SnippetExtractor(sentences, queryhashes, snippetMaxLength);
 	            textline = tsr.getSnippet();
@@ -227,7 +235,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 //        document.close();
         init(url.hash(), snippetLine, source, null);
     }
-    
+
     private Document loadDocument(
     		final LoaderDispatcher loader,
     		final URIMetadataRow.Components comp,

@@ -34,14 +34,13 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
 
-public class SolrChardingConnector {
+public class SolrChardingConnector implements SolrConnector {
 
     private final List<SolrSingleConnector> connectors;
     private final SolrScheme scheme;
@@ -164,13 +163,7 @@ public class SolrChardingConnector {
         final long[] size = new long[this.connectors.size()];
         int i = 0;
         for (final SolrSingleConnector connector: this.connectors) {
-            try {
-                final SolrDocumentList list = connector.get("*:*", 0, 1);
-                size[i++] = list.getNumFound();
-            } catch (final Exception e) {
-                Log.logException(e);
-                size[i++] = 0;
-            }
+            size[i++] = connector.getSize();
         }
         return size;
     }

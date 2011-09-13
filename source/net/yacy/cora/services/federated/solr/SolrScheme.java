@@ -27,6 +27,8 @@ package net.yacy.cora.services.federated.solr;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -44,6 +46,7 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 public class SolrScheme extends ConfigurationSet {
@@ -349,6 +352,46 @@ public class SolrScheme extends ConfigurationSet {
         return solrdoc;
     }
 
+    public String solrGetID(final SolrDocument solr) {
+        return (String) solr.getFieldValue("id");
+    }
+
+    public DigestURI solrGetURL(final SolrDocument solr) {
+        try {
+            return new DigestURI((String) solr.getFieldValue("sku"));
+        } catch (final MalformedURLException e) {
+            return null;
+        }
+    }
+
+    public String solrGetTitle(final SolrDocument solr) {
+        return (String) solr.getFieldValue("title");
+    }
+
+    public String solrGetText(final SolrDocument solr) {
+        return (String) solr.getFieldValue("text_t");
+    }
+
+    public String solrGetAuthor(final SolrDocument solr) {
+        return (String) solr.getFieldValue("author");
+    }
+
+    public String solrGetDescription(final SolrDocument solr) {
+        return (String) solr.getFieldValue("description");
+    }
+
+    public Date solrGetDate(final SolrDocument solr) {
+        return (Date) solr.getFieldValue("last_modified");
+    }
+
+    public Collection<String> solrGetKeywords(final SolrDocument solr) {
+        final Collection<Object> c = solr.getFieldValues("keywords");
+        final ArrayList<String> a = new ArrayList<String>();
+        for (final Object s: c) {
+            a.add((String) s);
+        }
+        return a;
+    }
 
     /*
      * standard solr scheme

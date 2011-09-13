@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -81,6 +82,7 @@ public class Segment {
     protected final IndexCell<WordReference>       termIndex;
     //private   final IndexCell<NavigationReference> authorNavIndex;
     protected final MetadataRepository             urlMetadata;
+    private         SolrConnector                  solr;
     private   final File                           segmentPath;
 
     public Segment(
@@ -98,6 +100,7 @@ public class Segment {
 
         this.log = log;
         this.segmentPath = segmentPath;
+        this.solr = null;
 
         this.termIndex = new IndexCell<WordReference>(
                 segmentPath,
@@ -124,6 +127,14 @@ public class Segment {
 
         // create LURL-db
         this.urlMetadata = new MetadataRepository(segmentPath, "text.urlmd", useTailCache, exceed134217727);
+    }
+
+    public void connectSolr(final SolrConnector solr) {
+        this.solr = solr;
+    }
+
+    public SolrConnector getSolr() {
+        return this.solr;
     }
 
     public static void migrateTextIndex(final File oldSegmentPath, final File newSegmentPath) {
@@ -254,6 +265,7 @@ public class Segment {
     public void close() {
         this.termIndex.close();
         this.urlMetadata.close();
+        if (this.solr != null) this.solr.close();
     }
 
     public URIMetadataRow storeDocument(

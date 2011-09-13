@@ -66,6 +66,7 @@ import de.anomic.search.RankingProcess;
 import de.anomic.search.ReferenceOrder;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -86,7 +87,7 @@ public class IndexControlRWIs_p {
         prop.put("keyhash", "");
         prop.put("result", "");
         prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
-        prop.put("cleanup_solr", sb.solrConnector == null || !sb.getConfigBool("federated.service.solr.indexing.enabled", false) ? 0 : 1);
+        prop.put("cleanup_solr", sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() == null || !sb.getConfigBool("federated.service.solr.indexing.enabled", false) ? 0 : 1);
 
         String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
         int i = 0;
@@ -157,7 +158,7 @@ public class IndexControlRWIs_p {
                     segment.clear();
                 }
                 if (post.get("deleteSolr", "").equals("on") && sb.getConfigBool("federated.service.solr.indexing.enabled", false)) try {
-                    sb.solrConnector.clear();
+                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().clear();
                 } catch (final Exception e) {
                     Log.logException(e);
                 }

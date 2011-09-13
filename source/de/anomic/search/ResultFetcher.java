@@ -31,11 +31,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.cora.ranking.WeakPriorityBlockingQueue;
 import net.yacy.cora.ranking.WeakPriorityBlockingQueue.ReverseElement;
+import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -46,6 +48,10 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
+
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+
 import de.anomic.data.WorkTables;
 import de.anomic.http.client.Cache;
 import de.anomic.yacy.yacySeedDB;
@@ -322,6 +328,7 @@ public class ResultFetcher {
         private final int neededResults;
         private final Pattern snippetPattern;
         private boolean shallrun;
+        private final SolrConnector solr;
 
         public Worker(final int id, final long maxlifetime, final CacheStrategy cacheStrategy, final Pattern snippetPattern, final int neededResults) {
             this.id = id;
@@ -331,6 +338,7 @@ public class ResultFetcher {
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
             this.shallrun = true;
+            this.solr = ResultFetcher.this.rankingProcess.getQuery().getSegment().getSolr();
         }
 
         @Override
@@ -373,8 +381,18 @@ public class ResultFetcher {
                     }
                     if (ResultFetcher.this.query.filterfailurls && ResultFetcher.this.workTables.failURLsContains(page.hash())) continue;
 
+                    // in case that we have an attached solr, we load also the solr document
+                    String solrContent = null;
+                    if (this.solr != null) {
+                        SolrDocument sd = null;
+                        final SolrDocumentList sdl = this.solr.get("id:" + ASCII.String(page.hash()), 0, 1);
+                        if (sdl.size() > 0) sd = sdl.get(0);
+                        if (sd != null) solrContent = this.solr.getScheme().solrGetText(sd);
+                    }
+
+
                     loops++;
-                    resultEntry = fetchSnippet(page, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
+                    resultEntry = fetchSnippet(page, solrContent, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
                     rawLine = resultEntry.textSnippet() == null ? null : resultEntry.textSnippet().getLineRaw();
                     //System.out.println("***SNIPPET*** raw='" + rawLine + "', pattern='" + this.snippetPattern.toString() + "'");
@@ -412,7 +430,7 @@ public class ResultFetcher {
         }
     }
 
-    protected ResultEntry fetchSnippet(final URIMetadataRow page, final CacheStrategy cacheStrategy) {
+    protected ResultEntry fetchSnippet(final URIMetadataRow page, final String solrText, final CacheStrategy cacheStrategy) {
         // Snippet Fetching can has 3 modes:
         // 0 - do not fetch snippets
         // 1 - fetch snippets offline only
@@ -429,6 +447,7 @@ public class ResultFetcher {
         if (cacheStrategy == null) {
             final TextSnippet snippet = new TextSnippet(
                     null,
+                    solrText,
                     metadata,
                     this.snippetFetchWordHashes,
                     null,
@@ -445,6 +464,7 @@ public class ResultFetcher {
             startTime = System.currentTimeMillis();
             final TextSnippet snippet = new TextSnippet(
                     this.loader,
+                    solrText,
                     metadata,
                     this.snippetFetchWordHashes,
                     cacheStrategy,

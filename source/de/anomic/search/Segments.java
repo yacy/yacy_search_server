@@ -38,13 +38,13 @@ import net.yacy.kelondro.rwi.IndexCell;
 
 
 public class Segments implements Iterable<Segment> {
-    
+
     /**
      * process enumeration type
      * defines constants that can be used to assign process-related segment names
      */
     public enum Process {
-        
+
         RECEIPTS,
         QUERIES,
         DHTIN,
@@ -59,7 +59,7 @@ public class Segments implements Iterable<Segment> {
             throw new UnsupportedOperationException("toString not allowed");
         }
     }
-    
+
     private final Log log;
     private final File segmentsPath;
     private final int entityCacheMaxSize;
@@ -68,7 +68,7 @@ public class Segments implements Iterable<Segment> {
     private final HashMap<Process, String> process_assignment;
     private final boolean useTailCache;
     private final boolean exceed134217727;
-    
+
     public Segments(
             final Log log,
             final File segmentsPath,
@@ -96,41 +96,41 @@ public class Segments implements Iterable<Segment> {
         this.process_assignment.put(Process.PUBLIC,         "default");
         this.process_assignment.put(Process.SURROGATES,     "default");
     }
-    
-    public void setSegment(Process process, String segmentName) {
+
+    public void setSegment(final Process process, final String segmentName) {
         this.process_assignment.put(process, segmentName);
     }
-    
-    public static void migrateOld(File oldSingleSegment, File newSegmentsPath, String newSegmentName) {
+
+    public static void migrateOld(final File oldSingleSegment, final File newSegmentsPath, final String newSegmentName) {
         if (!oldSingleSegment.exists()) return;
-        File newSegmentPath = new File(newSegmentsPath, newSegmentName);
+        final File newSegmentPath = new File(newSegmentsPath, newSegmentName);
         if (!newSegmentPath.exists()) newSegmentPath.mkdirs();
         Segment.migrateTextIndex(oldSingleSegment, newSegmentPath);
         Segment.migrateTextMetadata(oldSingleSegment, newSegmentPath);
-        
-        String[] oldFiles = oldSingleSegment.list();
-        for (String oldFile: oldFiles) {
+
+        final String[] oldFiles = oldSingleSegment.list();
+        for (final String oldFile: oldFiles) {
             if (oldFile.startsWith("text.")) {
                 new File(oldSingleSegment, oldFile).renameTo(new File(newSegmentPath, oldFile));
             }
         }
     }
-    
+
     public String[] segmentNames() {
         return this.segments.keySet().toArray(new String[this.segments.size()]);
     }
-    
+
     public boolean segmentExist(final String segmentName) {
-        return segments.containsKey(segmentName);
+        return this.segments.containsKey(segmentName);
     }
-    
+
     public Segment segment(final Process process) {
         return segment(this.process_assignment.get(process));
     }
-    
+
     public Segment segment(final String segmentName) {
-        if (segments == null) return null;
-        Segment segment = segments.get(segmentName);
+        if (this.segments == null) return null;
+        Segment segment = this.segments.get(segmentName);
         if (segment == null) {
             // generate the segment
             try {
@@ -141,7 +141,7 @@ public class Segments implements Iterable<Segment> {
                         this.maxFileSize,
                         this.useTailCache,
                         this.exceed134217727);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
                 return null;
             }
@@ -149,28 +149,28 @@ public class Segments implements Iterable<Segment> {
         }
         return segment;
     }
-    
+
     public long URLCount() {
         if (this.segments == null) return 0;
         long c = 0;
-        for (Segment s: this.segments.values()) c += (long) s.urlMetadata().size();
+        for (final Segment s: this.segments.values()) c += s.urlMetadata().size();
         return c;
     }
-    
+
     public long RWICount() {
         if (this.segments == null) return 0;
         long c = 0;
-        for (Segment s: this.segments.values()) c += (long) s.termIndex().sizesMax();
+        for (final Segment s: this.segments.values()) c += s.termIndex().sizesMax();
         return c;
     }
-    
+
     public int RWIBufferCount() {
         if (this.segments == null) return 0;
         int c = 0;
-        for (Segment s: this.segments.values()) c += s.termIndex().getBufferSize();
+        for (final Segment s: this.segments.values()) c += s.termIndex().getBufferSize();
         return c;
     }
-    
+
     public MetadataRepository urlMetadata(final Process process) {
         return segment(this.process_assignment.get(process)).urlMetadata();
     }
@@ -178,11 +178,11 @@ public class Segments implements Iterable<Segment> {
     public IndexCell<WordReference> termIndex(final Process process) {
         return segment(this.process_assignment.get(process)).termIndex();
     }
-    
+
     public void clear(final Process process) {
         segment(this.process_assignment.get(process)).clear();
     }
-    
+
     public File getLocation(final Process process) {
         return segment(this.process_assignment.get(process)).getLocation();
     }
@@ -190,16 +190,16 @@ public class Segments implements Iterable<Segment> {
     public void close(final Process process) {
         segment(this.process_assignment.get(process)).close();
     }
-    
+
     public void close() {
-        if (segments != null) for (Segment s: this.segments.values()) s.close();
+        if (this.segments != null) for (final Segment s: this.segments.values()) s.close();
         this.segments = null;
     }
 
     public void finalize() {
         this.close();
     }
-    
+
     public synchronized Segment.ReferenceCleaner getReferenceCleaner(final String segmentName, final byte[] startHash) {
         return segment(segmentName).getReferenceCleaner(startHash);
     }

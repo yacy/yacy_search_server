@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.solr.SolrChardingConnector;
+import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
@@ -76,10 +77,10 @@ public class ZURL implements Iterable<ZURL.Entry> {
     // the class object
     private Index urlIndex;
     private final ConcurrentLinkedQueue<byte[]> stack;
-    private final SolrChardingConnector solrConnector;
+    private final SolrConnector solrConnector;
 
     public ZURL(
-            final SolrChardingConnector solrConnector,
+            final SolrConnector solrConnector,
     		final File cachePath,
     		final String tablename,
     		final boolean startWithEmptyFile,

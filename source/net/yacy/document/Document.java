@@ -312,8 +312,12 @@ dc_rights
     }
 
     public List<StringBuilder> getSentences(final boolean pre) {
-        if (this.text == null) return null;
-        final SentenceReader e = new SentenceReader(getText());
+        return getSentences(pre, getText());
+    }
+
+    public static List<StringBuilder> getSentences(final boolean pre, final InputStream text) {
+        if (text == null) return null;
+        final SentenceReader e = new SentenceReader(text);
         e.pre(pre);
         final List<StringBuilder> sentences = new ArrayList<StringBuilder>();
         while (e.hasNext()) {
