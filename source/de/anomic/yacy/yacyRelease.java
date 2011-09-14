@@ -53,6 +53,7 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -234,7 +235,9 @@ public final class yacyRelease extends yacyVersion {
         // returns the version info if successful, null otherwise
         ContentScraper scraper;
         try {
-            scraper = Switchboard.getSwitchboard().loader.parseResource(location.getLocationURL(), CacheStrategy.NOCACHE);
+            final DigestURI uri = location.getLocationURL();
+            Thread.currentThread().setName("allReleaseFrom - host " + uri.getHost()); // makes it more easy to see which release blocks process in thread dump
+            scraper = Switchboard.getSwitchboard().loader.parseResource(uri, CacheStrategy.NOCACHE);
         } catch (final IOException e) {
             return null;
         }

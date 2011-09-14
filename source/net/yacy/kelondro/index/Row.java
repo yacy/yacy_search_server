@@ -171,7 +171,13 @@ public final class Row {
     public final Entry newEntry(final byte[] rowinstance, final int start, final boolean clone) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
-        assert (this.objectOrder.wellformed(rowinstance, start, this.primaryKeyLength)) : "rowinstance = " + UTF8.String(rowinstance);
+        final boolean wellformed = this.objectOrder.wellformed(rowinstance, start, this.primaryKeyLength);
+        try {
+            assert (wellformed) : "rowinstance = " + UTF8.String(rowinstance);
+        } catch (final Throwable e) {
+            Log.logException(e);
+        }
+        if (!wellformed) return null;
         // this method offers the option to clone the content
         // this is necessary if it is known that the underlying byte array may change and therefore
         // the reference to the byte array does not contain the original content
