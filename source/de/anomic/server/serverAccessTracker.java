@@ -62,10 +62,12 @@ public class serverAccessTracker {
     /*
      * remove all entries from the access tracker where the age of the last access is greater than the given timeout
      */
-    private synchronized void cleanupAccessTracker() {
+    private void cleanupAccessTracker() {
 
-        if (System.currentTimeMillis() - this.lastCleanup < cleanupCycle) return; // avoid too many scans of the queues
-        this.lastCleanup = System.currentTimeMillis();
+        synchronized (this) {
+            if (System.currentTimeMillis() - this.lastCleanup < cleanupCycle) return; // avoid too many scans of the queues
+            this.lastCleanup = System.currentTimeMillis();
+        }
 
         // clear entries which had no entry for the maxTrackingTime time
         final Iterator<Map.Entry<String, ConcurrentLinkedQueue<Track>>> i = this.accessTracker.entrySet().iterator();

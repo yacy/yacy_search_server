@@ -28,6 +28,8 @@ package net.yacy.kelondro.data.word;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.Column;
@@ -202,6 +204,67 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_posintext, word.posInText);
                         this.entry.setCol(col_posinphrase, word.posInPhrase);
                         this.entry.setCol(col_posofphrase, word.numOfPhrase);
+    }
+
+    public static class ExternalParser {
+        private static final String PIN = "_";
+        private final BlockingQueue<String> in;
+        private final BlockingQueue<WordReferenceRow> out;
+        Thread[] worker;
+        public ExternalParser(final int concurrency) {
+            this.in = new LinkedBlockingQueue<String>();
+            this.out = new LinkedBlockingQueue<WordReferenceRow>();
+            for (int i = 0; i < concurrency; i++) {
+                this.worker[i] = new Thread() {
+                    public void run() {
+                        String s;
+                        try {
+                            while ((s = ExternalParser.this.in.take()) != PIN) {
+                                ExternalParser.this.out.put(new WordReferenceRow(s));
+                            }
+                        } catch (final InterruptedException e) {
+                        }
+                    }
+                };
+                this.worker[i].start();
+            }
+        }
+        public ExternalParser() {
+            this(Runtime.getRuntime().availableProcessors());
+        }
+        public void put(final String s) {
+            try {
+                this.in.put(s);
+            } catch (final InterruptedException e) {
+            }
+        }
+        public void terminate() {
+            for (@SuppressWarnings("unused") final Thread w : this.worker) {
+                try {
+                    this.in.put(PIN);
+                } catch (final InterruptedException e) {
+                }
+            }
+            for (final Thread w : this.worker) {
+                try {
+                    if (w.isAlive()) w.join();
+                } catch (final InterruptedException e) {
+                }
+            }
+            try {
+                this.out.put(poison);
+            } catch (final InterruptedException e) {
+            }
+        }
+        public WordReferenceRow take() {
+            WordReferenceRow row;
+            try {
+                row = this.out.take();
+            } catch (final InterruptedException e) {
+                return poison;
+            }
+            return row;
+        }
     }
 
     public WordReferenceRow(final String external) {

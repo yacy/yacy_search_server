@@ -175,7 +175,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
     private final ConcurrentMap<String, String> dna;
     private String alternativeIP = null;
-    private final long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
+    private long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
 
     // use our own formatter to prevent concurrency locks with other processes
     private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
@@ -188,13 +188,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         final String flags = this.dna.get(yacySeed.FLAGS);
         if ((flags == null) || (flags.length() != 4)) { this.dna.put(yacySeed.FLAGS, yacySeed.FLAGSZERO); }
         this.dna.put(yacySeed.NAME, checkPeerName(get(yacySeed.NAME, "&empty;")));
-        long b;
-        try {
-            b = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
-        } catch (final ParseException e) {
-            b = System.currentTimeMillis();
-        }
-        this.birthdate = b;
+        this.birthdate = -1; // this means 'not yet parsed', parse that later when it is used
     }
 
     private yacySeed(final String theHash) {
@@ -564,9 +558,21 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         return d > milliseconds;
     }
 
+    public final long getBirthdate() {
+        if (this.birthdate > 0) return this.birthdate;
+        long b;
+        try {
+            b = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
+        } catch (final ParseException e) {
+            b = System.currentTimeMillis();
+        }
+        this.birthdate = b;
+        return this.birthdate;
+    }
+
     /** @return the age of the seed in number of days */
     public final int getAge() {
-        return (int) Math.abs((System.currentTimeMillis() - this.birthdate) / 1000 / 60 / 60 / 24);
+        return (int) Math.abs((System.currentTimeMillis() - getBirthdate()) / 1000 / 60 / 60 / 24);
     }
 
     public void setPeerTags(final Set<String> keys) {

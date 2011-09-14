@@ -63,8 +63,9 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     public char type;
     public int hitcount, llocal, lother, phrasesintext,
                posinphrase, posofphrase,
-               urlcomps, urllength, virtualAge,
+               urlcomps, urllength,
                wordsintext, wordsintitle;
+    private int virtualAge;
     private final ConcurrentLinkedQueue<Integer> positions;
     public double termFrequency;
 
@@ -89,7 +90,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final double   termfrequency
     ) {
         if (language == null || language.length != 2) language = default_language;
-        final int mddlm = MicroDate.microDateDays(lastmodified);
         //final int mddct = MicroDate.microDateDays(updatetime);
         this.flags = flags;
         //this.freshUntil = Math.max(0, mddlm + (mddct - mddlm) * 2);
@@ -107,7 +107,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.posofphrase = posofphrase;
         this.urlcomps = urlComps;
         this.urllength = urlLength;
-        this.virtualAge = mddlm;
+        this.virtualAge = -1; // compute that later
         this.wordsintext = wordcount;
         this.wordsintitle = titleLength;
         this.termFrequency = termfrequency;
@@ -288,6 +288,8 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     }
 
     public int virtualAge() {
+        if (this.virtualAge > 0) return this.virtualAge;
+        this.virtualAge = MicroDate.microDateDays(this.lastModified);
         return this.virtualAge;
     }
 
@@ -312,7 +314,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.hitcount > (v = other.hitcount)) this.hitcount = v;
         if (this.llocal > (v = other.llocal)) this.llocal = v;
         if (this.lother > (v = other.lother)) this.lother = v;
-        if (this.virtualAge > (v = other.virtualAge)) this.virtualAge = v;
+        if (virtualAge() > (v = other.virtualAge())) this.virtualAge = v;
         if (this.wordsintext > (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext > (v = other.phrasesintext)) this.phrasesintext = v;
         if (other.positions != null) a(this.positions, min(this.positions, other.positions));
@@ -334,7 +336,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.hitcount < (v = other.hitcount)) this.hitcount = v;
         if (this.llocal < (v = other.llocal)) this.llocal = v;
         if (this.lother < (v = other.lother)) this.lother = v;
-        if (this.virtualAge < (v = other.virtualAge)) this.virtualAge = v;
+        if (virtualAge() < (v = other.virtualAge())) this.virtualAge = v;
         if (this.wordsintext < (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext < (v = other.phrasesintext)) this.phrasesintext = v;
         if (other.positions != null) a(this.positions, max(this.positions, other.positions));
