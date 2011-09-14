@@ -39,7 +39,7 @@
 			<string>$JAVAROOT/htroot</string>
 			<string>$JAVAROOT/lib/activation.jar</string>
 			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>
-			<string>$JAVAROOT/lib/apache-solr-solrj-3.3.0.jar</string>
+			<string>$JAVAROOT/lib/apache-solr-solrj-3.4.0.jar</string>
 			<string>$JAVAROOT/lib/bcmail-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/bcprov-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/bzip2.jar</string>

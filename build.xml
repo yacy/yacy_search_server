@@ -181,7 +181,7 @@
         <pathelement location="${htroot}" />
     	<pathelement location="${lib}/activation.jar" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
-        <pathelement location="${lib}/apache-solr-solrj-3.3.0.jar" />
+        <pathelement location="${lib}/apache-solr-solrj-3.4.0.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-145.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-145.jar" />
     	<pathelement location="${lib}/bzip2.jar" />
