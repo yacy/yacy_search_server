@@ -4,5 +4,9 @@
     <li><a href="/ConfigPortal.html" class="MenuItemLink">Generic Search Portal</a></li>
     <li><a href="/ConfigLiveSearch.html" class="MenuItemLink">Live Search Anywhere</a></li>
     <li><a href="/ConfigSearchBox.html" class="MenuItemLink">Search Box Anywhere</a></li>
+    <li><a href="/ConfigAppearance_p.html" class="MenuItemLink lock">Appearance</a></li>
+    <li><a href="/ConfigProfile_p.html" class="MenuItemLink lock">User Profile</a></li>
+    <li><a href="/ConfigLanguage_p.html" class="MenuItemLink lock">Language</a></li>
+    <li><a href="/Ranking_p.html" class="MenuItemLink lock">Ranking Config</a></li>
   </ul>
 </div>

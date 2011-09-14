@@ -1,8 +1,0 @@
-<div class="SubMenu">
-  <h3>Customization</h3>
-  <ul class="SubMenu">
-    <li><a href="/ConfigAppearance_p.html" class="MenuItemLink lock">Appearance</a></li>
-    <li><a href="/ConfigProfile_p.html" class="MenuItemLink lock">User Profile</a></li>
-    <li><a href="/ConfigLanguage_p.html" class="MenuItemLink lock">Language</a></li>
-  </ul>
-</div>

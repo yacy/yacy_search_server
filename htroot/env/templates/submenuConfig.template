@@ -18,5 +18,6 @@
     <li><a href="/ConfigRobotsTxt_p.html" class="MenuItemLink lock">Local robots.txt</a></li>
     <li><a href="/ConfigHTCache_p.html" class="MenuItemLink lock">Web Cache</a></li>
     <li><a href="/ConfigProperties_p.html" class="MenuItemLink lock">Advanced Properties</a></li>
+    <li><a href="/Threaddump_p.html" class="MenuItemLink lock">Thread Dump</a></li>
   </ul>
 </div>

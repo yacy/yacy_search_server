@@ -457,6 +457,7 @@ div.SubMenu h3 {
   margin:0;
   margin-bottom:1px;
   padding:1px 10px;
+  clear: both;
 }
 
 h4.bookmarkTitle {

@@ -6,19 +6,7 @@
   </head>
   <body id="CrawlResults">
     #%env/templates/header.template%#
-    <div class="SubMenu">
-      <h3>Crawl Results</h3>
-      <ul class="SubMenu">
-        <li><a href="/CrawlResults.html" class="MenuItemLink">Overview</a></li>
-        <li><a href="/CrawlResults.html?process=1" class="MenuItemLink lock">(1) Receipts</a></li>
-        <li><a href="/CrawlResults.html?process=2" class="MenuItemLink lock">(2) Queries</a></li>
-        <li><a href="/CrawlResults.html?process=3" class="MenuItemLink lock">(3) DHT Transfer</a></li>
-        <li><a href="/CrawlResults.html?process=4" class="MenuItemLink lock">(4) Proxy Use</a></li>
-        <li><a href="/CrawlResults.html?process=5" class="MenuItemLink lock">(5) Local Crawling</a></li>
-        <li><a href="/CrawlResults.html?process=6" class="MenuItemLink">(6) Global Crawling</a></li>
-        <li><a href="/CrawlResults.html?process=7" class="MenuItemLink lock">(7) Surrogate Import</a></li>
-      </ul>
-    </div>
+    #%env/templates/submenuCrawlMonitor.template%#
     
     #(process)#
     <h2>Crawl Results Overview</h2>
