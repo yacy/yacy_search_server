@@ -25,17 +25,18 @@
     evt = (evt) ? evt : ((window.event) ? event : null);
     if (evt) {
         switch (evt.keyCode) {
-            case 37:
-                window.location.href = document.getElementById("prevpage").href;
-                break;   
-            case 39:
+            case 9:
+            case 33:
                 window.location.href = document.getElementById("nextpage").href;
                 break;    
+            case 34:
+                window.location.href = document.getElementById("prevpage").href;
+                break;   
             case 40:
          }
     }
   }
-  //document.onkeydown = handleArrowKeys;
+  document.onkeydown = handleArrowKeys;
   //]]>
   </script>
 </head>
