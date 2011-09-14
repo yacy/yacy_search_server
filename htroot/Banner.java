@@ -33,7 +33,6 @@ import javax.imageio.ImageIO;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.visualization.RasterPlotter;
-
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -46,7 +45,7 @@ public class Banner {
 
     public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         final Switchboard sb = (Switchboard) env;
-        final String IMAGE = "htroot/env/grafics/yacy.gif";
+        final String IMAGE = "htroot/env/grafics/yacy.png";
         int width = 468;
         int height = 60;
         String bgcolor     = "e7effc";
@@ -109,7 +108,7 @@ public class Banner {
             final BufferedImage logo = ImageIO.read(new File(IMAGE));
             return NetworkGraph.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm, logo);
         }
-        
+
         return NetworkGraph.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm);
     }
 
