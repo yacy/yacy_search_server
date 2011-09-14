@@ -319,7 +319,8 @@ div.bookmark {
 div.SubMenugroup{
   float:left;
   margin-right:1px;
-  margin-top:0;
+  margin-top:0px;
+  margin-bottom:2px;
 }
 
 div.content {

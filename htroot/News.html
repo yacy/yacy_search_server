@@ -14,16 +14,7 @@
   </head>
   <body id="News">
     #%env/templates/header.template%#
-    <div class="SubMenu">
-      <h3>News Monitor</h3>
-      <ul class="SubMenu">
-        <li><a href="/News.html" class="MenuItemLink">Overview</a></li>
-        <li><a href="/News.html?page=1" class="MenuItemLink">Incoming&nbsp;News</a></li>
-        <li><a href="/News.html?page=2" class="MenuItemLink">Processed&nbsp;News</a></li>
-        <li><a href="/News.html?page=3" class="MenuItemLink">Outgoing&nbsp;News</a></li>
-        <li><a href="/News.html?page=4" class="MenuItemLink">Published&nbsp;News</a></li>
-      </ul>
-    </div>
+    #%env/templates/submenuComputation.template%#
     #(page)#
     <h2>Overview</h2>
     ::
