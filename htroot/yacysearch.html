@@ -110,7 +110,7 @@ $(function() {
   <h2>#[promoteSearchPageGreeting]#</h2>
   <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a></div>
   <fieldset class="yacys">
-    <input id="search" name="query" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+    <input id="search" class="searchinput" name="query" type="text" size="40" maxlength="80" value="#[former]#" onFocus="this.select()" onclick="document.getElementById('Enter').value = 'Search'" />
     <input id="Enter" type="submit" name="Enter" value="Search" />
     #(searchdomswitches)#::
     <div class="yacysearch">
@@ -179,6 +179,7 @@ document.getElementById("Enter").value = "search again";
 <!-- the search results -->
 <script type="text/javascript">
 var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
+document.getElementById("search").focus();
 </script>
 <div style="float:left; width:70%;">
 

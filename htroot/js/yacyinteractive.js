@@ -211,7 +211,7 @@ function resultLine(type, item, linenumber) {
   // make table row
   var html = "";
   if (type == "row") {
-    html += "<tr class=\"TableCellLight\">";
+    html += "<tr class=\"TableCellDark\">";
     html += "<td align=\"left\">" + linenumber + "</td>";
     html += "<td align=\"left\">" + protocol + "</td>";
     html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>";

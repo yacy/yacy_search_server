@@ -639,6 +639,10 @@ form.search.small {
   white-space:nowrap;
 }
 
+.searchinput {
+  font-size:16px;
+}
+
 /*----------
 <table>, <tr>, <th>, <td>
 */
