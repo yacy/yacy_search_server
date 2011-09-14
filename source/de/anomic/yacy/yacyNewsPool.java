@@ -57,16 +57,15 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
-
 import de.anomic.search.Switchboard;
 
 public class yacyNewsPool {
-    
+
     public static final int INCOMING_DB  = 0;
     public static final int PROCESSED_DB = 1;
     public static final int OUTGOING_DB  = 2;
     public static final int PUBLISHED_DB = 3;
-    
+
     /* ========================================================================
      * CATEGORIES for YACY NEWS
      * ======================================================================== */
@@ -90,10 +89,10 @@ public class yacyNewsPool {
      * a peer has done something bad (i.e. spammed) and gets a negative vote
      */
     private static final String CATEGORY_PROFILE_VOTE_BAD = "prflebvt";
-    
+
     /* ------------------------------------------------------------------------
      * CRAWLING related CATEGORIES
-     * ------------------------------------------------------------------------ */    
+     * ------------------------------------------------------------------------ */
     /**
      * a crawl with remote indexing was started
      */
@@ -106,10 +105,10 @@ public class yacyNewsPool {
      * a comment on a crawl with remote indexing
      */
     private static final String CATEGORY_CRAWL_COMMENT = "crwlcomm";
-    
+
     /* ------------------------------------------------------------------------
      * BLACKLIST related CATEGORIES
-     * ------------------------------------------------------------------------ */  
+     * ------------------------------------------------------------------------ */
     /**
      * a private blacklist entry was added
      */
@@ -126,10 +125,10 @@ public class yacyNewsPool {
      * a vote and comment on a private blacklist delete
      */
     private static final String CATEGORY_BLACKLIST_VOTE_DEL = "blckldvt";
-    
+
     /* ------------------------------------------------------------------------
      * FLIE-SHARE related CATEGORIES
-     * ------------------------------------------------------------------------ */    
+     * ------------------------------------------------------------------------ */
     /**
      * a file was added to the file share
      */
@@ -142,10 +141,10 @@ public class yacyNewsPool {
      * a comment to a file share entry
      */
     private static final String CATEGORY_FILESHARE_COMMENT = "flshrcom";
-    
+
     /* ------------------------------------------------------------------------
      * BOOKMARK related CATEGORIES
-     * ------------------------------------------------------------------------ */     
+     * ------------------------------------------------------------------------ */
     /**
      * a bookmark was added/created
      */
@@ -170,31 +169,31 @@ public class yacyNewsPool {
      * a vote and comment on a bookmark delete
      */
     private static final String CATEGORY_BOOKMARK_VOTE_DEL = "bkmrkdvt";
-    
+
     /* ------------------------------------------------------------------------
      * SURFTIPP related CATEGORIES
-     * ------------------------------------------------------------------------ */ 
-    /** 
+     * ------------------------------------------------------------------------ */
+    /**
      * a surf tipp was added
      */
-    public static final String CATEGORY_SURFTIPP_ADD = "stippadd";	 
+    public static final String CATEGORY_SURFTIPP_ADD = "stippadd";
 	/**
 	 * a vote and comment on a surf tipp
 	 */
     public static final String CATEGORY_SURFTIPP_VOTE_ADD = "stippavt";
-	
+
     /* ------------------------------------------------------------------------
      * WIKI related CATEGORIES
-     * ------------------------------------------------------------------------ */ 	
+     * ------------------------------------------------------------------------ */
 	/**
 	 * a wiki page was updated
 	 */
 	public static final String CATEGORY_WIKI_UPDATE = "wiki_upd";
-	/** 
+	/**
 	 * a wiki page das deleted
 	 */
 	private static final String CATEGORY_WIKI_DEL = "wiki_del";
-	
+
     /* ------------------------------------------------------------------------
      * BLOG related CATEGORIES
      * ------------------------------------------------------------------------ */
@@ -206,33 +205,33 @@ public class yacyNewsPool {
 	 * a blog page das deleted
 	 */
 	private static final String CATEGORY_BLOG_DEL = "blog_del";
-    
+
     /* ========================================================================
      * ARRAY of valid CATEGORIES
-     * ======================================================================== */	
+     * ======================================================================== */
     private static final String[] category = {
     	// PROFILE related CATEGORIES
     	CATEGORY_PROFILE_UPDATE,
         CATEGORY_PROFILE_BROADCAST,
         CATEGORY_PROFILE_VOTE_GOOD,
         CATEGORY_PROFILE_VOTE_BAD,
-    	
+
     	// CRAWLING related CATEGORIES
-    	CATEGORY_CRAWL_START, 
+    	CATEGORY_CRAWL_START,
     	CATEGORY_CRAWL_STOP,
     	CATEGORY_CRAWL_COMMENT,
-    	
+
     	// BLACKLIST related CATEGORIES
-    	CATEGORY_BLACKLIST_ADD,  
+    	CATEGORY_BLACKLIST_ADD,
     	CATEGORY_BLACKLIST_VOTE_ADD,
     	CATEGORY_BLACKLIST_DELETE,
     	CATEGORY_BLACKLIST_VOTE_DEL,
-    	
-        // FILESHARE related CATEGORIES    	
+
+        // FILESHARE related CATEGORIES
     	CATEGORY_FILESHARE_ADD,
     	CATEGORY_FILESHARE_DEL,
     	CATEGORY_FILESHARE_COMMENT,
-    	
+
     	// BOOKMARK related CATEGORIES
     	CATEGORY_BOOKMARK_ADD,
     	CATEGORY_BOOKMARK_VOTE_ADD,
@@ -240,15 +239,15 @@ public class yacyNewsPool {
     	CATEGORY_BOOKMARK_VOTE_MOVE,
     	CATEGORY_BOOKMARK_DEL,
     	CATEGORY_BOOKMARK_VOTE_DEL,
-        
+
     	// SURFTIPP related CATEGORIES
     	CATEGORY_SURFTIPP_ADD,
     	CATEGORY_SURFTIPP_VOTE_ADD,
-    	
+
     	// WIKI related CATEGORIE
     	CATEGORY_WIKI_UPDATE,
     	CATEGORY_WIKI_DEL,
-    	
+
     	// BLOG related CATEGORIES
     	CATEGORY_BLOG_ADD,
     	CATEGORY_BLOG_DEL
@@ -263,75 +262,75 @@ public class yacyNewsPool {
     private final yacyNewsDB newsDB;
     private final yacyNewsQueue outgoingNews, publishedNews, incomingNews, processedNews;
     private final int maxDistribution;
-    
+
     public yacyNewsPool(
     		final File yacyDBPath,
             final boolean useTailCache,
             final boolean exceed134217727) {
-        newsDB = new yacyNewsDB(new File(yacyDBPath, "news1024.db"), 1024, useTailCache, exceed134217727);
-        outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut.table"), newsDB);
-        publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished.table"), newsDB);
-        incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn.table"), newsDB);
-        processedNews = new yacyNewsQueue(new File(yacyDBPath, "newsProcessed.table"), newsDB);
-        maxDistribution = 30;
+        this.newsDB = new yacyNewsDB(new File(yacyDBPath, "news1024.db"), 1024, useTailCache, exceed134217727);
+        this.outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut.table"), this.newsDB);
+        this.publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished.table"), this.newsDB);
+        this.incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn.table"), this.newsDB);
+        this.processedNews = new yacyNewsQueue(new File(yacyDBPath, "newsProcessed.table"), this.newsDB);
+        this.maxDistribution = 30;
     }
-    
+
     public synchronized void close() {
-        newsDB.close();
-        outgoingNews.close();
-        publishedNews.close();
-        incomingNews.close();
-        processedNews.close();
+        this.newsDB.close();
+        this.outgoingNews.close();
+        this.publishedNews.close();
+        this.incomingNews.close();
+        this.processedNews.close();
     }
-    
+
     public Iterator<yacyNewsDB.Record> recordIterator(final int dbKey, final boolean up) {
         // returns an iterator of yacyNewsRecord-type objects
         final yacyNewsQueue queue = switchQueue(dbKey);
         return queue.records(up);
     }
-    
+
     public yacyNewsDB.Record parseExternal(final String external) {
-        return newsDB.newRecord(external);
+        return this.newsDB.newRecord(external);
     }
-    
+
     public void publishMyNews(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
-        publishMyNews(newsDB.newRecord(mySeed, category, attributes));
+        publishMyNews(this.newsDB.newRecord(mySeed, category, attributes));
     }
-    
+
     public void publishMyNews(final yacySeed mySeed, final String category, final Properties attributes) {
-        publishMyNews(newsDB.newRecord(mySeed, category, attributes));
+        publishMyNews(this.newsDB.newRecord(mySeed, category, attributes));
     }
-    
+
     private void publishMyNews(final yacyNewsDB.Record record) {
         // this shall be called if our peer generated a new news record and wants to publish it
         if (record == null) return;
         try {
-            if (newsDB.get(record.id()) == null) {
-                incomingNews.push(record); // we want to see our own news..
-                outgoingNews.push(record); // .. and put it on the publishing list
+            if (this.newsDB.get(record.id()) == null) {
+                this.incomingNews.push(record); // we want to see our own news..
+                this.outgoingNews.push(record); // .. and put it on the publishing list
             }
         } catch (final Exception e) {
             Log.logException(e);
         }
     }
-    
+
     public yacyNewsDB.Record myPublication() throws IOException, RowSpaceExceededException {
         // generate a record for next peer-ping
-        if (outgoingNews.isEmpty()) return null;
-        final yacyNewsDB.Record record = outgoingNews.pop();
+        if (this.outgoingNews.isEmpty()) return null;
+        final yacyNewsDB.Record record = this.outgoingNews.pop();
         if (record == null) return null;
-        
+
         record.incDistribution();
-        
-        if (record.distributed() >= maxDistribution) {
+
+        if (record.distributed() >= this.maxDistribution) {
             // move record to its final position. This is only for history
-            publishedNews.push(record);
+            this.publishedNews.push(record);
         } else {
-            outgoingNews.push(record);
+            this.outgoingNews.push(record);
         }
         return record;
     }
-    
+
     public void enqueueIncomingNews(final yacyNewsDB.Record record) throws IOException, RowSpaceExceededException {
         // called if a news is attached to a seed
 
@@ -354,31 +353,33 @@ public class yacyNewsPool {
                 return;
             }
         }
-        
+
         // double-check with old news
-        if (newsDB.get(record.id()) != null) return;
-        incomingNews.push(record);
-        
+        if (this.newsDB.get(record.id()) != null) return;
+        this.incomingNews.push(record);
+
         // add message to feed channel
         //RSSFeed.channels(yacyCore.channelName).addMessage(new RSSMessage("Incoming News: " + record.category() + " from " + record.originator(), record.attributes().toString()));
     }
-    
+
     public int size(final int dbKey) {
         return switchQueue(dbKey).size();
     }
-    
+
     public int automaticProcess(final yacySeedDB seedDB) throws IOException, InterruptedException, RowSpaceExceededException {
         // processes news in the incoming-db
         // returns number of processes
         yacyNewsDB.Record record;
         int pc = 0;
         synchronized (this.incomingNews) {
-            final Iterator<yacyNewsDB.Record> i = incomingNews.records(true);
-            Set<String> removeIDs = new HashSet<String>();
+            final Iterator<yacyNewsDB.Record> i = this.incomingNews.records(true);
+            final Set<String> removeIDs = new HashSet<String>();
+            // this loop should not run too long! This may happen if the incoming news are long and not deleted after processing
+            final long start = System.currentTimeMillis();
             while (i.hasNext()) {
                 // check for interruption
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
-                
+
                 // get next news record
                 record = i.next();
                 if (automaticProcessP(seedDB, record)) {
@@ -386,35 +387,40 @@ public class yacyNewsPool {
                     removeIDs.add(record.id());
                     pc++;
                 }
+                if (System.currentTimeMillis() - start > 100) break; // time-out for this to avoid deadlocks during concurrent peer-pings
             }
-            for (final String id: removeIDs) incomingNews.remove(id);
+            for (final String id: removeIDs) {
+                final yacyNewsDB.Record deletedRecord = this.incomingNews.remove(id);
+                assert deletedRecord != null;
+            }
         }
         return pc;
     }
-    
+
     private boolean automaticProcessP(final yacySeedDB seedDB, final yacyNewsDB.Record record) {
         if (record == null) return false;
         if (record.category() == null) return true;
-        if ((System.currentTimeMillis() - record.created().getTime()) > (14 * MILLISECONDS_PER_DAY)) {
+        final long created = record.created().getTime();
+        if ((System.currentTimeMillis() - created) > (7L * MILLISECONDS_PER_DAY)) {
             // remove everything after 1 week
             return true;
         }
         if ((record.category().equals(CATEGORY_WIKI_UPDATE)) &&
-                ((System.currentTimeMillis() - record.created().getTime()) > (3 * MILLISECONDS_PER_DAY))) {
+                ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
                 return true;
             }
         if ((record.category().equals(CATEGORY_BLOG_ADD)) &&
-                ((System.currentTimeMillis() - record.created().getTime()) > (3 * MILLISECONDS_PER_DAY))) {
+                ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
                 return true;
             }
         if ((record.category().equals(CATEGORY_PROFILE_UPDATE)) &&
-                ((System.currentTimeMillis() - record.created().getTime()) > (7 * MILLISECONDS_PER_DAY))) {
+                ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
                 return true;
             }
         if ((record.category().equals(CATEGORY_CRAWL_START)) &&
-            ((System.currentTimeMillis() - record.created().getTime()) > (2 * MILLISECONDS_PER_DAY))) {
+            ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
             final yacySeed seed = seedDB.get(record.originator());
-            if (seed == null) return false;
+            if (seed == null) return true;
             try {
                 return (Integer.parseInt(seed.get(yacySeed.ISPEED, "-")) < 10);
             } catch (final NumberFormatException ee) {
@@ -423,7 +429,7 @@ public class yacyNewsPool {
         }
         return false;
     }
-    
+
     public synchronized yacyNewsDB.Record getSpecific(final int dbKey, final String category, final String key, final String value) {
         final yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsDB.Record record;
@@ -456,31 +462,31 @@ public class yacyNewsPool {
 
     public synchronized yacyNewsDB.Record getByID(final int dbKey, final String id) {
         switch (dbKey) {
-            case INCOMING_DB:   return incomingNews.get(id);
-            case PROCESSED_DB:  return processedNews.get(id);
-            case OUTGOING_DB:   return outgoingNews.get(id);
-            case PUBLISHED_DB:  return publishedNews.get(id);
+            case INCOMING_DB:   return this.incomingNews.get(id);
+            case PROCESSED_DB:  return this.processedNews.get(id);
+            case OUTGOING_DB:   return this.outgoingNews.get(id);
+            case PUBLISHED_DB:  return this.publishedNews.get(id);
         }
         return null;
     }
 
     private yacyNewsQueue switchQueue(final int dbKey) {
         switch (dbKey) {
-            case INCOMING_DB:	return incomingNews;
-            case PROCESSED_DB:  return processedNews;
-            case OUTGOING_DB:   return outgoingNews;
-            case PUBLISHED_DB:  return publishedNews;
+            case INCOMING_DB:	return this.incomingNews;
+            case PROCESSED_DB:  return this.processedNews;
+            case OUTGOING_DB:   return this.outgoingNews;
+            case PUBLISHED_DB:  return this.publishedNews;
         }
         return null;
     }
-    
+
     public void clear(final int dbKey) {
         // clear a table
         switch (dbKey) {
-            case INCOMING_DB:	incomingNews.clear(); break;
-            case PROCESSED_DB:  processedNews.clear(); break;
-            case OUTGOING_DB:   outgoingNews.clear(); break;
-            case PUBLISHED_DB:  publishedNews.clear(); break;
+            case INCOMING_DB:	this.incomingNews.clear(); break;
+            case PROCESSED_DB:  this.processedNews.clear(); break;
+            case OUTGOING_DB:   this.outgoingNews.clear(); break;
+            case PUBLISHED_DB:  this.publishedNews.clear(); break;
         }
     }
 
@@ -488,10 +494,10 @@ public class yacyNewsPool {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
         switch (dbKey) {
-            case INCOMING_DB:   moveOff(incomingNews, processedNews, id); break;
-            case PROCESSED_DB:  moveOff(processedNews, null,id); break;
-            case OUTGOING_DB:   moveOff(outgoingNews, publishedNews, id); break;
-            case PUBLISHED_DB:  moveOff(publishedNews, null, id); break;
+            case INCOMING_DB:   moveOff(this.incomingNews, this.processedNews, id); break;
+            case PROCESSED_DB:  moveOff(this.processedNews, null,id); break;
+            case OUTGOING_DB:   moveOff(this.outgoingNews, this.publishedNews, id); break;
+            case PUBLISHED_DB:  moveOff(this.publishedNews, null, id); break;
         }
     }
 
@@ -503,20 +509,20 @@ public class yacyNewsPool {
         }
         if (toqueue != null) {
             toqueue.push(record);
-        } else if ((incomingNews.get(id) == null) && (processedNews.get(id) == null) && (outgoingNews.get(id) == null) && (publishedNews.get(id) == null)) {
-            newsDB.remove(id);
+        } else if ((this.incomingNews.get(id) == null) && (this.processedNews.get(id) == null) && (this.outgoingNews.get(id) == null) && (this.publishedNews.get(id) == null)) {
+            this.newsDB.remove(id);
         }
         return true;
     }
-    
+
     public void moveOffAll(final int dbKey) throws IOException, RowSpaceExceededException {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
         switch (dbKey) {
-            case INCOMING_DB:   moveOffAll(incomingNews, processedNews); break;
-            case PROCESSED_DB:  processedNews.clear(); break;
-            case OUTGOING_DB:   moveOffAll(outgoingNews, publishedNews); break;
-            case PUBLISHED_DB:  publishedNews.clear(); break;
+            case INCOMING_DB:   moveOffAll(this.incomingNews, this.processedNews); break;
+            case PROCESSED_DB:  this.processedNews.clear(); break;
+            case OUTGOING_DB:   moveOffAll(this.outgoingNews, this.publishedNews); break;
+            case PUBLISHED_DB:  this.publishedNews.clear(); break;
         }
     }
 
@@ -535,5 +541,5 @@ public class yacyNewsPool {
         fromqueue.clear();
         return c;
     }
-    
+
 }

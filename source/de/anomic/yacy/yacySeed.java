@@ -51,7 +51,6 @@ import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -374,7 +373,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     }
 
     /** @return the DNA-map of this peer */
-    public final Map<String, String> getMap() {
+    public final ConcurrentMap<String, String> getMap() {
         return this.dna;
     }
 

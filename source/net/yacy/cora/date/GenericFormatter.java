@@ -95,15 +95,15 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
 
     public String format() {
         if (Math.abs(System.currentTimeMillis() - this.last_time) < this.maxCacheDiff) return this.last_format;
-        synchronized (this.dateFormat) {
-            // threads that had been waiting here may use the cache now instead of calculating the date again
-            final long time = System.currentTimeMillis();
-            if (Math.abs(time - this.last_time) < this.maxCacheDiff) return this.last_format;
+        // threads that had been waiting here may use the cache now instead of calculating the date again
+        final long time = System.currentTimeMillis();
 
-            // if the cache is not fresh, calculate the date
+        // if the cache is not fresh, calculate the date
+        synchronized (this.dateFormat) {
+            if (Math.abs(time - this.last_time) < this.maxCacheDiff) return this.last_format;
             this.last_format = this.dateFormat.format(new Date(time));
-            this.last_time = time;
         }
+        this.last_time = time;
         return this.last_format;
     }
 
