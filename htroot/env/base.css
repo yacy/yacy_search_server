@@ -400,10 +400,10 @@ div.yacylogo {
 */
 
 div.head h1 {
-  padding:4px;
-  background:url(/env/grafics/yacy.gif) 10px center no-repeat;
+  padding:6px;
+  background:url(/env/grafics/yacy.png) 10px center no-repeat;
   font-weight: bold;
-  font-size: 1.6em;
+  font-size: 1.8em;
   text-align: center;
   margin:0;
 }
