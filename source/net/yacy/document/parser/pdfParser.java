@@ -74,7 +74,7 @@ public class pdfParser extends AbstractParser implements Parser {
             throw new Parser.Failure("Not enough Memory available for pdf parser: " + MemoryControl.available(), location);
 
         // create a pdf parser
-        PDDocument pdfDoc = null;
+        final PDDocument pdfDoc;
         //final PDFParser pdfParser;
         try {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
@@ -125,13 +125,21 @@ public class pdfParser extends AbstractParser implements Parser {
         if (docTitle == null || docTitle.length() == 0) {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
         }
-        CharBuffer writer = null;
+        final CharBuffer writer = new CharBuffer();
         try {
             // create a writer for output
-            PDFTextStripper stripper = null;
-            writer = new CharBuffer();
-            stripper = new PDFTextStripper();
-            stripper.writeText(pdfDoc, writer); // may throw a NPE
+            final PDFTextStripper  stripper = new PDFTextStripper();
+            // we start the pdf parsing in a separate thread to ensure that it can be terminated
+            final Thread t = new Thread() {
+                public void run() {
+                    try {
+                        stripper.writeText(pdfDoc, writer); // may throw a NPE
+                    } catch (final Throwable e) {}
+                }
+            };
+            t.start();
+            t.join(3000);
+            if (t.isAlive()) t.interrupt();
             pdfDoc.close();
             writer.close();
         } catch (final IOException e) {
@@ -149,7 +157,6 @@ public class pdfParser extends AbstractParser implements Parser {
         } finally {
             try {pdfDoc.close();} catch (final IOException e) {}
         }
-        pdfDoc = null;
 
         String[] docKeywords = null;
         if (docKeywordStr != null) {
