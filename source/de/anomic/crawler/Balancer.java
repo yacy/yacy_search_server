@@ -103,10 +103,10 @@ public class Balancer {
         this.cacheStacksPath.mkdirs();
         final File f = new File(this.cacheStacksPath, stackname + indexSuffix);
         try {
-            this.urlFileIndex = new BufferedObjectIndex(new Table(f, Request.rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727), objectIndexBufferSize);
+            this.urlFileIndex = new BufferedObjectIndex(new Table(f, Request.rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727, true), objectIndexBufferSize);
         } catch (final RowSpaceExceededException e) {
             try {
-                this.urlFileIndex = new BufferedObjectIndex(new Table(f, Request.rowdef, 0, 0, false, exceed134217727), objectIndexBufferSize);
+                this.urlFileIndex = new BufferedObjectIndex(new Table(f, Request.rowdef, 0, 0, false, exceed134217727, true), objectIndexBufferSize);
             } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }

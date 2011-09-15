@@ -65,7 +65,7 @@ public class yacyNewsQueue {
     private final File path;
     private Table queueStack;
     private final yacyNewsDB newsDB;
-    
+
     private static final Row rowdef = new Row(new Column[]{
             new Column("newsid", Column.celltype_string, Column.encoder_bytes, yacyNewsDB.idLength, "id = created + originator"),
             new Column("last touched", Column.celltype_string, Column.encoder_bytes, GenericFormatter.PATTERN_SHORT_SECOND.length(), "")
@@ -77,22 +77,22 @@ public class yacyNewsQueue {
         this.path = path;
         this.newsDB = newsDB;
         try {
-            this.queueStack = new Table(path, rowdef, 10, 0, false, false);
-        } catch (RowSpaceExceededException e) {
+            this.queueStack = new Table(path, rowdef, 10, 0, false, false, true);
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
             this.queueStack = null;
         }
     }
-    
+
     public void clear() {
         try {
             this.queueStack.clear();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             try {close();} catch (final Exception ee) {}
-            if (path.exists()) FileUtils.deletedelete(path);
+            if (this.path.exists()) FileUtils.deletedelete(this.path);
             try {
-                this.queueStack = new Table(path, rowdef, 10, 0, false, false);
-            } catch (RowSpaceExceededException ee) {
+                this.queueStack = new Table(this.path, rowdef, 10, 0, false, false, true);
+            } catch (final RowSpaceExceededException ee) {
                 Log.logException(e);
                 this.queueStack = null;
             }
@@ -100,8 +100,8 @@ public class yacyNewsQueue {
     }
 
     public void close() {
-        if (queueStack != null) queueStack.close();
-        queueStack = null;
+        if (this.queueStack != null) this.queueStack.close();
+        this.queueStack = null;
     }
 
     @Override
@@ -110,24 +110,24 @@ public class yacyNewsQueue {
     }
 
     public int size() {
-        return queueStack.size();
+        return this.queueStack.size();
     }
-    
+
     public boolean isEmpty() {
-        return queueStack.isEmpty();
+        return this.queueStack.isEmpty();
     }
 
     public synchronized void push(final yacyNewsDB.Record entry) throws IOException, RowSpaceExceededException {
-        if (!queueStack.consistencyCheck()) {
+        if (!this.queueStack.consistencyCheck()) {
             Log.logSevere("yacyNewsQueue", "reset of table " + this.path);
-            queueStack.clear();
+            this.queueStack.clear();
         }
-        queueStack.addUnique(r2b(entry));
+        this.queueStack.addUnique(r2b(entry));
     }
 
     public synchronized yacyNewsDB.Record pop() throws IOException {
-        if (queueStack.isEmpty()) return null;
-        return b2r(queueStack.removeOne());
+        if (this.queueStack.isEmpty()) return null;
+        return b2r(this.queueStack.removeOne());
     }
 
     public synchronized yacyNewsDB.Record get(final String id) {
@@ -148,7 +148,7 @@ public class yacyNewsQueue {
             if ((record != null) && (record.id().equals(id))) {
                 try {
                     this.queueStack.remove(UTF8.getBytes(id));
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.logException(e);
                 }
                 return record;
@@ -161,45 +161,45 @@ public class yacyNewsQueue {
         if (b == null) return null;
         final String id = b.getColString(0);
         //Date touched = yacyCore.parseUniversalDate(UTF8.String(b[1]));
-        return newsDB.get(id);
+        return this.newsDB.get(id);
     }
 
     private Row.Entry r2b(final yacyNewsDB.Record r) throws IOException, RowSpaceExceededException {
         if (r == null) return null;
-        newsDB.put(r);
-        final Row.Entry b = queueStack.row().newEntry(new byte[][]{
+        this.newsDB.put(r);
+        final Row.Entry b = this.queueStack.row().newEntry(new byte[][]{
                 UTF8.getBytes(r.id()),
                         UTF8.getBytes(GenericFormatter.SHORT_SECOND_FORMATTER.format())});
         return b;
     }
-    
+
     public Iterator<yacyNewsDB.Record> records(final boolean up) {
         // iterates yacyNewsRecord-type objects
-        if (queueStack == null) return new HashSet<yacyNewsDB.Record>().iterator();
+        if (this.queueStack == null) return new HashSet<yacyNewsDB.Record>().iterator();
         return new newsIterator(up);
     }
-    
+
     private class newsIterator implements Iterator<yacyNewsDB.Record> {
         // iterates yacyNewsRecord-type objects
-        
+
         Iterator<Row.Entry> stackNodeIterator;
-        
+
         private newsIterator(final boolean up) {
             try {
-                stackNodeIterator = queueStack.rows();
-            } catch (IOException e) {
+                this.stackNodeIterator = yacyNewsQueue.this.queueStack.rows();
+            } catch (final IOException e) {
                 Log.logException(e);
-                stackNodeIterator = null;
+                this.stackNodeIterator = null;
             }
         }
-        
+
         public boolean hasNext() {
-            return stackNodeIterator != null && stackNodeIterator.hasNext();
+            return this.stackNodeIterator != null && this.stackNodeIterator.hasNext();
         }
 
         public yacyNewsDB.Record next() {
-            if (stackNodeIterator == null) return null;
-            final Row.Entry row = stackNodeIterator.next();
+            if (this.stackNodeIterator == null) return null;
+            final Row.Entry row = this.stackNodeIterator.next();
             try {
                 return b2r(row);
             } catch (final IOException e) {
@@ -208,9 +208,9 @@ public class yacyNewsQueue {
         }
 
         public void remove() {
-            if (stackNodeIterator != null) stackNodeIterator.remove();
+            if (this.stackNodeIterator != null) this.stackNodeIterator.remove();
         }
-        
+
     }
 
 }

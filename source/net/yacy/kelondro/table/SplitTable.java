@@ -195,7 +195,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         Map.Entry<String, Long> entry;
         String maxf;
         long maxram;
-        Index table;
+        final List<Thread> warmingUp = new ArrayList<Thread>(); // for concurrent warming up
         while (!t.isEmpty()) {
             // find maximum table
             maxram = 0;
@@ -214,13 +214,24 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             t.remove(maxf);
             f = new File(this.path, maxf);
             Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
+            Table table;
             try {
-                table = new Table(f, this.rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
+                table = new Table(f, this.rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727, false);
             } catch (final RowSpaceExceededException e) {
-                table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727);
+                table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727, false);
             }
+            final Table a = table;
+            final Thread p = new Thread() {
+                public void run() {
+                    a.warmUp();
+                }
+            };
+            p.start();
+            warmingUp.add(p);
             this.tables.put(maxf, table);
         }
+        // collect warming up threads
+        for (final Thread p: warmingUp) try {p.join();} catch (final InterruptedException e) {}
         assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
 
         // init the thread pool for the keeperOf executor service
@@ -323,10 +334,10 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         final File f = new File(this.path, this.current);
         Table table = null;
         try {
-            table = new Table(f, this.rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
+            table = new Table(f, this.rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727, true);
         } catch (final RowSpaceExceededException e) {
             try {
-                table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727);
+                table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727, true);
             } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }

@@ -87,7 +87,8 @@ public class Table implements Index, Iterable<Row.Entry> {
     		final int buffersize,
     		final int initialSpace,
     		boolean useTailCache,
-    		final boolean exceed134217727) throws RowSpaceExceededException {
+    		final boolean exceed134217727,
+    		final boolean warmUp) throws RowSpaceExceededException {
         useTailCache = true; // fixed for testing
 
         this.rowdef = rowdef;
@@ -204,37 +205,8 @@ public class Table implements Index, Iterable<Row.Entry> {
             errors.close();
             assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
 
-            // remove doubles
-            if (!freshFile) {
-                final ArrayList<long[]> doubles = this.index.removeDoubles();
-                //assert index.size() + doubles.size() + fail == i;
-                //System.out.println(" -removed " + doubles.size() + " doubles- done.");
-                if (!doubles.isEmpty()) {
-                    Log.logInfo("TABLE", tablefile + ": WARNING - TABLE " + tablefile + " has " + doubles.size() + " doubles");
-                    // from all the doubles take one, put it back to the index and remove the others from the file
-                    // first put back one element each
-                    final byte[] record = new byte[rowdef.objectsize];
-                    key = new byte[rowdef.primaryKeyLength];
-                    for (final long[] ds: doubles) {
-                        this.file.get((int) ds[0], record, 0);
-                        System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
-                        this.index.putUnique(key, (int) ds[0]);
-                    }
-                    // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
-                    // first aggregate all the delete positions because the elements from the top positions must be removed first
-                    final TreeSet<Long> delpos = new TreeSet<Long>();
-                    for (final long[] ds: doubles) {
-                        for (int j = 1; j < ds.length; j++) delpos.add(ds[j]);
-                    }
-                    // now remove the entries in a sorted way (top-down)
-                    Long top;
-                    while (!delpos.isEmpty()) {
-                        top = delpos.last();
-                        delpos.remove(top);
-                        removeInFile(top.intValue());
-                    }
-                }
-            }
+            // warm up
+            if (!freshFile && warmUp) {warmUp0();}
         } catch (final FileNotFoundException e) {
             // should never happen
             Log.logSevere("Table", "", e);
@@ -246,6 +218,47 @@ public class Table implements Index, Iterable<Row.Entry> {
 
         // track this table
         tableTracker.put(tablefile.toString(), this);
+    }
+
+    public synchronized void warmUp() {
+        warmUp0();
+    }
+
+    private void warmUp0() {
+        // remove doubles
+        try {
+            final ArrayList<long[]> doubles = this.index.removeDoubles();
+            //assert index.size() + doubles.size() == i;
+            //System.out.println(" -removed " + doubles.size() + " doubles- done.");
+            if (doubles.isEmpty()) return;
+            Log.logInfo("TABLE", filename() + ": WARNING - TABLE " + filename() + " has " + doubles.size() + " doubles");
+            // from all the doubles take one, put it back to the index and remove the others from the file
+            // first put back one element each
+            final byte[] record = new byte[this.rowdef.objectsize];
+            final byte[] key = new byte[this.rowdef.primaryKeyLength];
+            for (final long[] ds: doubles) {
+                this.file.get((int) ds[0], record, 0);
+                System.arraycopy(record, 0, key, 0, this.rowdef.primaryKeyLength);
+                this.index.putUnique(key, (int) ds[0]);
+            }
+            // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
+            // first aggregate all the delete positions because the elements from the top positions must be removed first
+            final TreeSet<Long> delpos = new TreeSet<Long>();
+            for (final long[] ds: doubles) {
+                for (int j = 1; j < ds.length; j++) delpos.add(ds[j]);
+            }
+            // now remove the entries in a sorted way (top-down)
+            Long top;
+            while (!delpos.isEmpty()) {
+                top = delpos.last();
+                delpos.remove(top);
+                removeInFile(top.intValue());
+            }
+        } catch (final RowSpaceExceededException e) {
+            Log.logSevere("Table", "", e);
+        } catch (final IOException e) {
+            Log.logSevere("Table", "", e);
+        }
     }
 
     public long mem() {
@@ -964,7 +977,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     private static Table testTable(final File f, final String testentities, final boolean useTailCache, final boolean exceed134217727) throws IOException, RowSpaceExceededException {
         if (f.exists()) FileUtils.deletedelete(f);
         final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder);
-        final Table tt = new Table(f, rowdef, 100, 0, useTailCache, exceed134217727);
+        final Table tt = new Table(f, rowdef, 100, 0, useTailCache, exceed134217727, true);
         byte[] b;
         final Row.Entry row = rowdef.newEntry();
         for (int i = 0; i < testentities.length(); i++) {

@@ -206,7 +206,7 @@ public class dbtest {
             return new SplitTable(tablepath, new File(tablename).getName(), testRow, true, true);
         }
         if (dbe.equals("kelondroEcoTable")) {
-            return new Table(new File(tablename), testRow, 1000, 0, true, true);
+            return new Table(new File(tablename), testRow, 1000, 0, true, true, true);
         }
         if (dbe.equals("mysql")) {
             return new SQLTable("mysql", testRow);

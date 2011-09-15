@@ -94,9 +94,9 @@ public class Relations {
                 if (row.primaryKeyLength != keysize || row.column(1).cellwidth != payloadsize) continue; // a wrong table
                 Index table;
                 try {
-                    table = new Table(new File(this.baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
+                    table = new Table(new File(this.baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727, true);
                 } catch (final RowSpaceExceededException e) {
-                    table = new Table(new File(this.baseDir, list[i]), row, 0, 0, false, this.exceed134217727);
+                    table = new Table(new File(this.baseDir, list[i]), row, 0, 0, false, this.exceed134217727, true);
                 }
                 this.relations.put(name, table);
                 return;
@@ -106,9 +106,9 @@ public class Relations {
         final Row row = rowdef(keysize, payloadsize);
         Index table;
         try {
-            table = new Table(new File(this.baseDir, targetfilename), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
+            table = new Table(new File(this.baseDir, targetfilename), row, 1024*1024, 0, this.useTailCache, this.exceed134217727, true);
         } catch (final RowSpaceExceededException e) {
-            table = new Table(new File(this.baseDir, targetfilename), row, 0, 0, false, this.exceed134217727);
+            table = new Table(new File(this.baseDir, targetfilename), row, 0, 0, false, this.exceed134217727, true);
         }
         this.relations.put(name, table);
     }
@@ -124,9 +124,9 @@ public class Relations {
                 final Row row = rowdef(element);
                 Index table;
                 try {
-                    table = new Table(new File(this.baseDir, element), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
+                    table = new Table(new File(this.baseDir, element), row, 1024*1024, 0, this.useTailCache, this.exceed134217727, true);
                 } catch (final RowSpaceExceededException e) {
-                    table = new Table(new File(this.baseDir, element), row, 0, 0, false, this.exceed134217727);
+                    table = new Table(new File(this.baseDir, element), row, 0, 0, false, this.exceed134217727, true);
                 }
                 this.relations.put(name, table);
                 return table;

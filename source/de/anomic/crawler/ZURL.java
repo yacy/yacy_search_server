@@ -96,10 +96,10 @@ public class ZURL implements Iterable<ZURL.Entry> {
             }
         }
         try {
-            this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
+            this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727, true);
         } catch (final RowSpaceExceededException e) {
             try {
-                this.urlIndex = new Table(f, rowdef, 0, 0, false, exceed134217727);
+                this.urlIndex = new Table(f, rowdef, 0, 0, false, exceed134217727, true);
             } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }

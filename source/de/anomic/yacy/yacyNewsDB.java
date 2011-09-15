@@ -98,10 +98,10 @@ public class yacyNewsDB {
                 NaturalOrder.naturalOrder
             );
         try {
-            this.news = new Table(path, this.rowdef, 10, 0, useTailCache, exceed134217727);
+            this.news = new Table(path, this.rowdef, 10, 0, useTailCache, exceed134217727, true);
         } catch (final RowSpaceExceededException e) {
             try {
-                this.news = new Table(path, this.rowdef, 0, 0, false, exceed134217727);
+                this.news = new Table(path, this.rowdef, 0, 0, false, exceed134217727, true);
             } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }
@@ -112,10 +112,10 @@ public class yacyNewsDB {
         try {close();} catch (final Exception e) {}
         if (this.path.exists()) FileUtils.deletedelete(this.path);
         try {
-            this.news = new Table(this.path, this.rowdef, 10, 0, false, false);
+            this.news = new Table(this.path, this.rowdef, 10, 0, false, false, true);
         } catch (final RowSpaceExceededException e) {
             try {
-                this.news = new Table(this.path, this.rowdef, 0, 0, false, false);
+                this.news = new Table(this.path, this.rowdef, 0, 0, false, false, true);
             } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }
