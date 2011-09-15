@@ -29,16 +29,30 @@ public enum CacheStrategy {
 
     /** Never use the cache, all content from fresh internet source. */
     NOCACHE(0),
+    
     /** Use the cache if the cache exists and is fresh using the
-     * proxy-fresh rules. */
+     * proxy-fresh rules.
+     */
     IFFRESH(1),
+    
     /** Use the cache if the cache exists. Do not check freshness. Otherwise
-     * use online source. */
+     * use online source.
+     */
     IFEXIST(2),
+    
     /** Never go online, use all content from cache. If no cache entry exist,
-     * consider content nevertheless as available */
-    CACHEONLY(3);
-    // the fifth case may be that the CacheStrategy object is assigned NULL. That means that no snippet creation is wanted.
+     * consider content nevertheless as available
+     */
+    CACHEONLY(3),
+    
+    /** create a snippet that does not necessarily contain the searched word,
+     * but has a pretty description of the content instead
+     */
+    NIFTY(4);
+    
+    /** the fifth case may be that the CacheStrategy object is assigned NULL.
+     * That means that no snippet creation is wanted.
+     */
 
     public int code;
 
