@@ -379,7 +379,7 @@ public final class Row {
         }
 
         public final byte[] bytes() {
-            if ((this.offset == 0) && (this.rowinstance.length == Row.this.objectsize)) {
+            if (this.offset == 0 && this.rowinstance.length == Row.this.objectsize) {
                 return this.rowinstance;
             }
             final byte[] tmp = new byte[Row.this.objectsize];
@@ -518,6 +518,10 @@ public final class Row {
         }
 
         public final byte[] getPrimaryKeyBytes() {
+            if (Row.this.columns() == 1 && this.offset == 0 && this.rowinstance.length == Row.this.primaryKeyLength) {
+                // avoid memory allocation in case that the row consists in only the primary key
+                return this.rowinstance;
+            }
             final byte[] c = new byte[Row.this.primaryKeyLength];
             System.arraycopy(this.rowinstance, this.offset, c, 0, Row.this.primaryKeyLength);
             return c;

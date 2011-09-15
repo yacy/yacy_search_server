@@ -490,7 +490,9 @@ public final class yacyClient {
         }
 
         // insert results to containers
+        int term = count;
         for (final URIMetadataRow urlEntry: result.links) {
+            if (term-- <= 0) break; // do not process more that requested (in case that evil peers fill us up with rubbish)
             // get one single search result
             if (urlEntry == null) continue;
             assert (urlEntry.hash().length == 12) : "urlEntry.hash() = " + ASCII.String(urlEntry.hash());

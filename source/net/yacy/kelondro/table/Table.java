@@ -355,16 +355,17 @@ public class Table implements Index, Iterable<Row.Entry> {
             // try again with less memory
             this.index.putUnique(row.getPrimaryKeyBytes(), i);
         }
+        final byte[] rowbytes = row.bytes();
         if (this.table != null) {
             assert this.table.size() == i;
             try {
-                this.table.addUnique(this.taildef.newEntry(row.bytes(), this.rowdef.primaryKeyLength, true));
+                this.table.addUnique(this.taildef.newEntry(rowbytes, this.rowdef.primaryKeyLength, true));
             } catch (final RowSpaceExceededException e) {
                 this.table = null;
             }
             if (abandonTable()) this.table = null;
         }
-        this.file.add(row.bytes(), 0);
+        this.file.add(rowbytes, 0);
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
     }
 
@@ -511,49 +512,54 @@ public class Table implements Index, Iterable<Row.Entry> {
         return this.index.keys(up, firstKey);
     }
 
-    public synchronized Entry replace(final Entry row) throws IOException, RowSpaceExceededException {
-        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
-        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
+    public Entry replace(final Entry row) throws IOException, RowSpaceExceededException {
         assert row != null;
-        assert row.bytes() != null;
-        if (row == null || row.bytes() == null) return null;
-        final int i = (int) this.index.get(row.getPrimaryKeyBytes());
-        if (i == -1) {
-            try {
-                addUnique(row);
-            } catch (final RowSpaceExceededException e) {
-                if (this.table == null) throw e;
-                this.table = null;
-                addUnique(row);
+        if (this.file == null || row == null) return null;
+        final byte[] rowb = row.bytes();
+        assert rowb != null;
+        if (rowb == null) return null;
+        final byte[] key = row.getPrimaryKeyBytes();
+        synchronized (this) {
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
+            final int i = (int) this.index.get(key);
+            if (i == -1) {
+                try {
+                    addUnique(row);
+                } catch (final RowSpaceExceededException e) {
+                    if (this.table == null) throw e;
+                    this.table = null;
+                    addUnique(row);
+                }
+                return null;
             }
-            return null;
-        }
 
-        final byte[] b = new byte[this.rowdef.objectsize];
-        Row.Entry cacherow;
-        if (this.table == null || (cacherow = this.table.get(i, false)) == null) {
-            // read old value
-            this.file.get(i, b, 0);
-            // write new value
-            this.file.put(i, row.bytes(), 0);
-        } else {
-            // read old value
-            assert cacherow != null;
-            System.arraycopy(row.getPrimaryKeyBytes(), 0, b, 0, this.rowdef.primaryKeyLength);
-            System.arraycopy(cacherow.bytes(), 0, b, this.rowdef.primaryKeyLength, this.rowdef.objectsize - this.rowdef.primaryKeyLength);
-            // write new value
-            try {
-                this.table.set(i, this.taildef.newEntry(row.bytes(), this.rowdef.primaryKeyLength, true));
-            } catch (final RowSpaceExceededException e) {
-                this.table = null;
+            final byte[] b = new byte[this.rowdef.objectsize];
+            Row.Entry cacherow;
+            if (this.table == null || (cacherow = this.table.get(i, false)) == null) {
+                // read old value
+                this.file.get(i, b, 0);
+                // write new value
+                this.file.put(i, rowb, 0);
+            } else {
+                // read old value
+                assert cacherow != null;
+                System.arraycopy(key, 0, b, 0, this.rowdef.primaryKeyLength);
+                System.arraycopy(cacherow.bytes(), 0, b, this.rowdef.primaryKeyLength, this.rowdef.objectsize - this.rowdef.primaryKeyLength);
+                // write new value
+                try {
+                    this.table.set(i, this.taildef.newEntry(rowb, this.rowdef.primaryKeyLength, true));
+                } catch (final RowSpaceExceededException e) {
+                    this.table = null;
+                }
+                if (abandonTable()) this.table = null;
+                this.file.put(i, rowb, 0);
             }
-            if (abandonTable()) this.table = null;
-            this.file.put(i, row.bytes(), 0);
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
+            // return old value
+            return this.rowdef.newEntry(b);
         }
-        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
-        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
-        // return old value
-        return this.rowdef.newEntry(b);
     }
 
     /**
@@ -563,39 +569,44 @@ public class Table implements Index, Iterable<Row.Entry> {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
-    public synchronized boolean put(final Entry row) throws IOException, RowSpaceExceededException {
-        assert this.file == null || this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
-        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+    public boolean put(final Entry row) throws IOException, RowSpaceExceededException {
         assert row != null;
-        assert row.bytes() != null;
-        if (this.file == null || row == null || row.bytes() == null) return true;
-        final int i = (int) this.index.get(row.getPrimaryKeyBytes());
-        if (i == -1) {
-            try {
-                addUnique(row);
-            } catch (final RowSpaceExceededException e) {
-                if (this.table == null) throw e;
-                this.table = null;
-                addUnique(row);
+        if (this.file == null || row == null) return true;
+        final byte[] rowb = row.bytes();
+        assert rowb != null;
+        if (rowb == null) return true;
+        final byte[] key = row.getPrimaryKeyBytes();
+        synchronized (this) {
+            assert this.file == null || this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+            final int i = (int) this.index.get(key);
+            if (i == -1) {
+                try {
+                    addUnique(row);
+                } catch (final RowSpaceExceededException e) {
+                    if (this.table == null) throw e;
+                    this.table = null;
+                    addUnique(row);
+                }
+                return true;
             }
-            return true;
-        }
 
-        if (this.table == null) {
-            // write new value
-            this.file.put(i, row.bytes(), 0);
-        } else {
-            // write new value
-            this.file.put(i, row.bytes(), 0);
-            if (abandonTable()) this.table = null; else try {
-                this.table.set(i, this.taildef.newEntry(row.bytes(), this.rowdef.primaryKeyLength, true));
-            } catch (final RowSpaceExceededException e) {
-                this.table = null;
+            if (this.table == null) {
+                // write new value
+                this.file.put(i, rowb, 0);
+            } else {
+                // write new value
+                this.file.put(i, rowb, 0);
+                if (abandonTable()) this.table = null; else try {
+                    this.table.set(i, this.taildef.newEntry(rowb, this.rowdef.primaryKeyLength, true));
+                } catch (final RowSpaceExceededException e) {
+                    this.table = null;
+                }
             }
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
+            return false;
         }
-        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
-        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
-        return false;
     }
 
     public Entry put(final Entry row, final Date entryDate) throws IOException, RowSpaceExceededException {

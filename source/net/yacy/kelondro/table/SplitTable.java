@@ -388,8 +388,13 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         assert row.objectsize() <= this.rowdef.objectsize;
         final byte[] key = row.getPrimaryKeyBytes();
         if (this.tables == null) return true;
+        Index keeper = null;
         synchronized (this.tables) {
-            Index keeper = keeperOf(key);
+            keeper = keeperOf(key);
+        }
+        if (keeper != null) return keeper.put(row);
+        synchronized (this.tables) {
+            keeper = keeperOf(key); // we must check that again because it could have changed in between
             if (keeper != null) return keeper.put(row);
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
             keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
