@@ -72,6 +72,9 @@ public class ReferenceIterator <ReferenceType extends Reference> extends LookAhe
             } catch (final RowSpaceExceededException e) {
                 Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because of too low memory: " + e.toString());
                 continue;
+            } catch (final Throwable e) {
+                Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because of too error: " + e.toString());
+                continue;
             }
         }
         close();

@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +51,8 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
@@ -64,9 +64,9 @@ public final class RankingProcess extends Thread {
     private static final int maxDoubleDomAll = 1000, maxDoubleDomSpecial = 10000;
 
     private final QueryParams query;
-    private final SortedSet<byte[]> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    private final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
-    private final SortedSet<byte[]> misses; // contains url-hashes that could not been found in the LURL-DB
+    private final HandleSet misses; // contains url-hashes that could not been found in the LURL-DB
     private       int sortout; // counter for referenced that had been sorted out for other reasons
     //private final int[] domZones;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
@@ -107,10 +107,8 @@ public final class RankingProcess extends Thread {
         this.remote_indexCount = 0;
         this.local_resourceSize = 0;
         this.local_indexCount = 0;
-        this.urlhashes = new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder);
-        //this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-        this.misses = new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder);
-        //this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+        this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
         this.sortout = 0;
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
@@ -259,7 +257,9 @@ public final class RankingProcess extends Thread {
                 }
 
                 // finally make a double-check and insert result to stack
-                if (this.urlhashes.add(iEntry.urlhash())) {
+                // the url hashes should be unique, no reason to check that
+                //if (!this.urlhashes.has(iEntry.urlhash())) {
+                    this.urlhashes.putUnique(iEntry.urlhash());
                     rankingtryloop: while (true) {
                         try {
                             this.stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
@@ -271,10 +271,10 @@ public final class RankingProcess extends Thread {
                     }
                     // increase counter for statistics
                     if (local) this.local_indexCount++; else this.remote_indexCount++;
-                }
+                //}
             }
 
-        } catch (final InterruptedException e) {} finally {
+        } catch (final InterruptedException e) {} catch (final RowSpaceExceededException e) {} finally {
             if (finalizeAddAtEnd) this.addRunning = false;
         }
 
@@ -418,7 +418,10 @@ public final class RankingProcess extends Thread {
             if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
             final URIMetadataRow page = this.query.getSegment().urlMetadata().load(obrwi);
             if (page == null) {
-            	this.misses.add(obrwi.getElement().urlhash());
+            	try {
+                    this.misses.putUnique(obrwi.getElement().urlhash());
+                } catch (final RowSpaceExceededException e) {
+                }
             	continue;
             }
 
