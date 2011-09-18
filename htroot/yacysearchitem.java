@@ -217,6 +217,7 @@ public class yacysearchitem {
                 sb.loader.loadIfNotExistBackground(ms.href.toNormalform(true, false), 1024 * 1024 * 10);
                 prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
                 prop.putHTML("content_item_href", ms.href.toNormalform(true, false));
+                prop.putHTML("content_item_target", target);
                 prop.put("content_item_code", license);
                 prop.putHTML("content_item_name", shorten(ms.name, MAX_NAME_LENGTH));
                 prop.put("content_item_mimetype", ms.mime);
