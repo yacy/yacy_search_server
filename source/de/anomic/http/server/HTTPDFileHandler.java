@@ -1323,11 +1323,15 @@ public final class HTTPDFileHandler {
 		if (proxyurl==null) {
 			throw new IOException("no url as argument supplied");
 		}
+		String host = proxyurl.getHost();
+		if (proxyurl.getPort() != -1) {
+			host += ":" + proxyurl.getPort(); 
+		}
 
 		// set properties for proxy connection
    		final HashMap<String, Object> prop = new HashMap<String, Object>();
 		prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
-		prop.put(HeaderFramework.CONNECTION_PROP_HOST, proxyurl.getHost());
+		prop.put(HeaderFramework.CONNECTION_PROP_HOST, host);
 		prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getFile().replaceAll(" ", "%20"));
 		prop.put(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
 		prop.put("CLIENTIP", "0:0:0:0:0:0:0:1");
