@@ -52,6 +52,8 @@ public class User{
         prop.put("logged_in", "0");
         prop.put("logged-in_limit", "0");
         prop.put("status", "0");
+        prop.put("logged-in_username", "");
+        prop.put("logged-in_returnto", "");
         //identified via HTTPPassword
         entry=sb.userDB.proxyAuth((requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
@@ -91,8 +93,11 @@ public class User{
         //identified via form-login
         //TODO: this does not work for a static admin, yet.
         }else if(post != null && post.containsKey("username") && post.containsKey("password")){
+        	if (post.containsKey("returnto"))
+        		prop.putHTML("logged-in_returnto", post.get("returnto"));
             final String username=post.get("username");
             final String password=post.get("password");
+            prop.put("logged-in_username", username);
             
             entry=sb.userDB.passwordAuth(username, password);
             final boolean staticAdmin = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").equals(
@@ -154,6 +159,9 @@ public class User{
             //XXX: This should not be needed anymore, because of isLoggedout
             if(! (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
                 prop.put("AUTHENTICATE","admin log-in");
+            }
+            if(post.containsKey("returnto")){
+                prop.put("LOCATION", post.get("returnto"));
             }
         }
         // return rewrite properties

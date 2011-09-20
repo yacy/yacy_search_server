@@ -39,11 +39,11 @@ import net.yacy.kelondro.util.ByteBuffer;
 
 public class ServerSideIncludes {
 
-    public static void writeSSI(final ByteBuffer in, final OutputStream out, final String authorization, final String requesthost) throws IOException {
-        writeSSI(in, 0, out, authorization, requesthost);
+    public static void writeSSI(final ByteBuffer in, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) throws IOException {
+        writeSSI(in, 0, out, authorization, requesthost, requestHeader);
     }
 
-    public static void writeSSI(final ByteBuffer in, int off, final OutputStream out, final String authorization, final String requesthost) throws IOException {
+    public static void writeSSI(final ByteBuffer in, int off, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) throws IOException {
         int p = in.indexOf(ASCII.getBytes("<!--#"), off);
         int q;
         while (p >= 0) {
@@ -53,7 +53,7 @@ public class ServerSideIncludes {
             } else {
                 out.write(in.getBytes(off, p - off));
             }
-            parseSSI(in, p, out, authorization, requesthost);
+            parseSSI(in, p, out, authorization, requesthost, requestHeader);
             off = q + 3;
             p = in.indexOf(ASCII.getBytes("<!--#"), off);
         }
@@ -64,17 +64,17 @@ public class ServerSideIncludes {
         }
     }
 
-    private static void parseSSI(final ByteBuffer in, final int off, final OutputStream out, final String authorization, final String requesthost) {
+    private static void parseSSI(final ByteBuffer in, final int off, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) {
         if (in.startsWith(ASCII.getBytes("<!--#include virtual=\""), off)) {
             final int q = in.indexOf(ASCII.getBytes("\""), off + 22);
             if (q > 0) {
                 final String path = in.toString(off + 22, q - off - 22);
-                writeContent(path, out, authorization, requesthost);
+                writeContent(path, out, authorization, requesthost, requestHeader);
             }
         }
     }
 
-    private static void writeContent(String path, final OutputStream out, final String authorization, final String requesthost) {
+    private static void writeContent(String path, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) {
         // check if there are arguments in path string
         String args = "";
         final int argpos = path.indexOf('?');
@@ -92,6 +92,9 @@ public class ServerSideIncludes {
         conProp.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
         conProp.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, requesthost);
         header.put(RequestHeader.AUTHORIZATION, authorization);
+        if (requestHeader.containsKey(RequestHeader.COOKIE))
+        	header.put(RequestHeader.COOKIE, requestHeader.get(RequestHeader.COOKIE));
+        header.put(RequestHeader.REFERER, requestHeader.get(RequestHeader.CONNECTION_PROP_PATH));
         HTTPDFileHandler.doGet(conProp, header, out);
     }
 }

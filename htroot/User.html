@@ -11,7 +11,8 @@
     <p>
       You are not logged in.<br />
       <form action="User.html" method="post" accept-charset="UTF-8">
-        Username: <input type="text" name="username" /><br />
+        <input type="hidden" name="returnto" value="#[returnto]#" />
+        Username: <input type="text" name="username" value="#[username]#" /><br />
         Password: <input type="password" name="password" /><br />
         <input type="submit" value="login" />
       </form>

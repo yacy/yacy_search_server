@@ -105,6 +105,7 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.RasterPlotter;
+import de.anomic.data.UserDB;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverClassLoader;
@@ -537,7 +538,9 @@ public final class HTTPDFileHandler {
             // implement proxy via url (not in servlet, because we need binary access on ouputStream)
             if (path.equals("/proxy.html")) {
             	final List<Pattern> urlProxyAccess = Domains.makePatterns(sb.getConfig("proxyURL.access", "127.0.0.1"));
-            	if (sb.getConfigBool("proxyURL", false) && Domains.matchesList(clientIP, urlProxyAccess)) {
+                UserDB.Entry user = sb.userDB.getUser(requestHeader);
+                boolean user_may_see_proxyurl = Domains.matchesList(clientIP, urlProxyAccess) || (user!=null && user.hasRight(UserDB.AccessRight.PROXY_RIGHT));
+            	if (sb.getConfigBool("proxyURL", false) && user_may_see_proxyurl) {
             		doURLProxy(args, conProp, requestHeader, out);
             		return;
             	}
@@ -991,7 +994,7 @@ public final class HTTPDFileHandler {
                         final ChunkedOutputStream chos = new ChunkedOutputStream(out);
                         // GZIPOutputStream does not implement flush (this is a bug IMHO)
                         // so we can't compress this stuff, without loosing the cool SSI trickle feature
-                        ServerSideIncludes.writeSSI(o, chos, realmProp, clientIP);
+                        ServerSideIncludes.writeSSI(o, chos, realmProp, clientIP, requestHeader);
                         //chos.write(result);
                         chos.finish();
                     } else {
@@ -1005,14 +1008,14 @@ public final class HTTPDFileHandler {
 
                         if (zipContent) {
                             GZIPOutputStream zippedOut = new GZIPOutputStream(o);
-                            ServerSideIncludes.writeSSI(o1, zippedOut, realmProp, clientIP);
+                            ServerSideIncludes.writeSSI(o1, zippedOut, realmProp, clientIP, requestHeader);
                             //httpTemplate.writeTemplate(fis, zippedOut, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                             zippedOut.finish();
                             zippedOut.flush();
                             zippedOut.close();
                             zippedOut = null;
                         } else {
-                            ServerSideIncludes.writeSSI(o1, o, realmProp, clientIP);
+                            ServerSideIncludes.writeSSI(o1, o, realmProp, clientIP, requestHeader);
                             //httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         }
                         if (method.equals(HeaderFramework.METHOD_HEAD)) {

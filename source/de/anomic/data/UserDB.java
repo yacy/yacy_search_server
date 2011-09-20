@@ -210,7 +210,7 @@ public final class UserDB {
                 } catch (final Exception e) {
                     Log.logException(e);
                 }
-                return null;
+                return entry;
             }
             return entry;
         }
