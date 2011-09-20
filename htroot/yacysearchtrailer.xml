@@ -42,4 +42,5 @@
 </yacy:facet>
 #(/nav-topics)#
 </yacy:navigation>
-
+<opensearch:totalResults>#[num-results_totalcount]#</opensearch:totalResults>
+		

@@ -77,4 +77,5 @@
 #{/element}#
       ]
     }#(/nav-topics)#
-    ]
+    ],
+    "totalResults": "#[num-results_totalcount]#"

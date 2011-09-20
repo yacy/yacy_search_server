@@ -160,6 +160,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return      the modified String that was added to the map.
      */
     public String putJSON(final String key, String value) {
+        return put(key, toJSON(value));
+    }
+    
+    private static String toJSON(String value) {
         // value = value.replaceAll("\\", "\\\\");
         value = patternDoublequote.matcher(value).replaceAll("'");
         value = patternSlash.matcher(value).replaceAll("\\/");
@@ -168,7 +172,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         value = patternNewline.matcher(value).replaceAll("\\r");
         value = patternR.matcher(value).replaceAll("\\r");
         value = patternT.matcher(value).replaceAll("\\t");
-    	return put(key, value);
+        return value;
     }
     
     public String putJSON(final String key, final byte[] value) {
@@ -381,6 +385,11 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         }
         param.setLength(param.length() - 1);
         return param.toString();
+    }
+    
+    public static void main(String[] args) {
+        String v = "ein \"zitat\"";
+        System.out.println(toJSON(v));
     }
     
 }

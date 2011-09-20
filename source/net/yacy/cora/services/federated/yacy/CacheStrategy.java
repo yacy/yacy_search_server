@@ -76,6 +76,7 @@ public enum CacheStrategy {
         if (name.equals("iffresh")) return IFFRESH;
         if (name.equals("ifexist")) return IFEXIST;
         if (name.equals("cacheonly")) return CACHEONLY;
+        if (name.equals("nifty")) return NIFTY;
         if (name.equals("true")) return IFEXIST;
         if (name.equals("false")) return null; // if this cache strategy is assigned as query attribute, null means "do not create a snippet"
         return null;

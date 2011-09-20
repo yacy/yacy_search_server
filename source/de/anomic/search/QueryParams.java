@@ -467,6 +467,8 @@ public final class QueryParams {
         context.append(this.constraint);
         context.append(asterisk);
         context.append(this.maxDistance);
+        context.append(asterisk);
+        context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());        
         if (anonymized) {
             this.idCacheAnon = context.toString();
         } else {

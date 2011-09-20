@@ -30,6 +30,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.util.EventTracker;
+import net.yacy.kelondro.util.Formatter;
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
@@ -239,6 +240,9 @@ public class yacysearchtrailer {
             prop.put("cat-location_query", theQuery.queryString(true));
             prop.put("cat-location_queryenc", theQuery.queryString(true).replace(' ', '+'));
         }
+        
+        final int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
+        prop.put("num-results_totalcount", Formatter.number(indexcount, true));
 
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.FINALIZATION, "bottomline", 0, 0), false);
 
