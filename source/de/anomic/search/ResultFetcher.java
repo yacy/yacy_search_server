@@ -135,10 +135,21 @@ public class ResultFetcher {
     public ResultEntry oneResult(final int item, final long timeout) {
         // check if we already retrieved this item
     	// (happens if a search pages is accessed a second time)
-        if (!this.query.isLocal() && item == 0) try { Thread.sleep(100); } catch (final InterruptedException e1) {} // wait a little time to get first results in the search
-
         final long finishTime = System.currentTimeMillis() + timeout;
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "started, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
+
+        // we must wait some time until the first result page is full to get enough elements for ranking
+        final long waittimeout = System.currentTimeMillis() + 300;
+        while (
+          item == 0 &&
+          this.result.sizeAvailable() < this.query.neededResults() + this.query.itemsPerPage &&
+          System.currentTimeMillis() < waittimeout &&
+          anyWorkerAlive()
+          ) {
+            // wait a little time to get first results in the search
+            try { Thread.sleep(10); } catch (final InterruptedException e1) {}
+        }
+
         if (this.result.sizeAvailable() > item) {
             // we have the wanted result already in the result array .. return that
             final ResultEntry re = this.result.element(item).getElement();
