@@ -71,15 +71,18 @@ function addHover() {
 }
 
 function statistics(offset, itemscount, itemsperpage, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount, navurlbase) {
+  if (totalcount == 0) return;
   if (offset >= 0) document.getElementById("resultsOffset").firstChild.nodeValue = offset;
-  if (itemscount == 0) return;
-  document.getElementById("itemscount").firstChild.nodeValue = itemscount;
+  if (itemscount >= 0) document.getElementById("itemscount").firstChild.nodeValue = itemscount;
   document.getElementById("totalcount").firstChild.nodeValue = totalcount;
   if (document.getElementById("localResourceSize") == null) return;
   document.getElementById("localResourceSize").firstChild.nodeValue = localResourceSize;
   document.getElementById("remoteResourceSize").firstChild.nodeValue = remoteResourceSize;
   document.getElementById("remoteIndexCount").firstChild.nodeValue = remoteIndexCount;
   document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
+  
+  var resNav = document.getElementById("resNav");
+  resNav.firstChild.nodeValue = "X";
   // compose page navigation
 
   resnav = "";
@@ -117,5 +120,6 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
                 resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
                 resnav += ("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
             }
-  document.getElementById("resNav").firstChild.nodeValue = resnav;
+  
+  //document.getElementById("resNav").firstChild.nodeValue = resnav;
 }
