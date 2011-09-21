@@ -80,7 +80,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     private       String current;
     private final long  fileAgeLimit;
     private final long  fileSizeLimit;
-    private boolean useTailCache;
+    private final boolean useTailCache;
     private final boolean exceed134217727;
 
     public SplitTable(
@@ -88,7 +88,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             final String tablename,
             final Row rowdef,
             final boolean useTailCache,
-            final boolean exceed134217727) throws RowSpaceExceededException {
+            final boolean exceed134217727) {
         this(path, tablename, rowdef, ArrayStack.oneMonth, Integer.MAX_VALUE, useTailCache, exceed134217727);
     }
 
@@ -99,7 +99,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             final long fileAgeLimit,
             final long fileSizeLimit,
             final boolean useTailCache,
-            final boolean exceed134217727) throws RowSpaceExceededException {
+            final boolean exceed134217727) {
         this.path = path;
         this.prefix = tablename;
         this.rowdef = rowdef;
@@ -141,7 +141,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return this.prefix + "." + GenericFormatter.SHORT_MILSEC_FORMATTER.format() + ".table";
     }
 
-    private void init() throws RowSpaceExceededException {
+    private void init() {
         this.current = null;
 
         // initialized tables map
@@ -196,7 +196,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         String maxf;
         long maxram;
         final List<Thread> warmingUp = new ArrayList<Thread>(); // for concurrent warming up
-        while (!t.isEmpty()) {
+        maxfind: while (!t.isEmpty()) {
             // find maximum table
             maxram = 0;
             maxf = null;
@@ -218,7 +218,12 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             try {
                 table = new Table(f, this.rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727, false);
             } catch (final RowSpaceExceededException e) {
-                table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727, false);
+                try {
+                    table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727, false);
+                } catch (final RowSpaceExceededException ee) {
+                    Log.logSevere("SplitTable", "Table " + f.toString() + " cannot be initialized: " + ee.getMessage(), ee);
+                    continue maxfind;
+                }
             }
             final Table a = table;
             final Thread p = new Thread() {
@@ -252,16 +257,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     		    if (f.isDirectory()) delete(this.path, element); else FileUtils.deletedelete(f);
     		}
     	}
-    	try {
-            init();
-        } catch (final RowSpaceExceededException e) {
-            this.useTailCache = false;
-            try {
-                init();
-            } catch (final RowSpaceExceededException e1) {
-                throw new IOException(e1.getMessage());
-            }
-        }
+    	init();
     }
 
     public static void delete(final File path, final String tablename) {

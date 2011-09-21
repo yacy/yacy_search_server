@@ -47,7 +47,6 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthPolicy;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
@@ -61,7 +60,7 @@ public class SolrSingleConnector implements SolrConnector {
 
     private final String solrurl, host, solrpath, solraccount, solrpw;
     private final int port;
-    private SolrServer server;
+    private CommonsHttpSolrServer server;
     private final SolrScheme scheme;
 
     private final static int transmissionQueueCount = 4; // allow concurrent http sessions to solr
@@ -118,6 +117,8 @@ public class SolrSingleConnector implements SolrConnector {
                 throw new IOException("bad connector url: " + this.solrurl);
             }
         }
+        this.server.setDefaultMaxConnectionsPerHost( 128 );
+        this.server.setMaxTotalConnections( 256 );
 
         // start worker
         this.transmissionWorker = new Worker[transmissionQueueCount];

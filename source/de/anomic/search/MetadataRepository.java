@@ -64,10 +64,11 @@ import de.anomic.crawler.CrawlStacker;
 public final class MetadataRepository implements Iterable<byte[]> {
 
     // class objects
-    protected Index               urlIndexFile;
-    private   Export              exportthread; // will have a export thread assigned if exporter is running
-    private final   File                location;
-    private   ArrayList<HostStat> statsDump;
+    protected     Index               urlIndexFile;
+    private       Export              exportthread; // will have a export thread assigned if exporter is running
+    private final File                location;
+    private final String              tablename;
+    private       ArrayList<HostStat> statsDump;
 
     public MetadataRepository(
             final File path,
@@ -75,16 +76,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.location = path;
+        this.tablename = tablename;
         Index backupIndex = null;
-        try {
-            backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
-        } catch (final RowSpaceExceededException e) {
-            try {
-                backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, false, exceed134217727);
-            } catch (final RowSpaceExceededException e1) {
-                Log.logException(e1);
-            }
-        }
+        backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
         this.urlIndexFile = backupIndex; //new Cache(backupIndex, 20000000, 20000000);
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
@@ -97,7 +91,12 @@ public final class MetadataRepository implements Iterable<byte[]> {
 
     public void clear() throws IOException {
         if (this.exportthread != null) this.exportthread.interrupt();
-        this.urlIndexFile.clear();
+        if (this.urlIndexFile == null) {
+            SplitTable.delete(this.location, this.tablename);
+            this.urlIndexFile = new SplitTable(this.location, this.tablename, URIMetadataRow.rowdef, false, false);
+        } else {
+            this.urlIndexFile.clear();
+        }
         this.statsDump = null;
     }
 
