@@ -129,6 +129,12 @@ public class IndexControlURLs_p {
         // post values that are set on numerous input fields with same name
         String urlstring = post.get("urlstring", "").trim();
         String urlhash = post.get("urlhash", "").trim();
+        if (urlhash.length() == 0 && urlstring.length() > 0) {
+            try {
+                urlhash = ASCII.String(new DigestURI(urlstring, null).hash());
+            } catch (final MalformedURLException e) {
+            }
+        }
 
         if (!urlstring.startsWith("http://") &&
             !urlstring.startsWith("https://") &&
