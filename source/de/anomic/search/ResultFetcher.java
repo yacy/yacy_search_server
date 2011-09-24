@@ -358,7 +358,6 @@ public class ResultFetcher {
             // start fetching urls and snippets
             URIMetadataRow page;
             ResultEntry resultEntry;
-            String rawLine;
             //final int fetchAhead = snippetMode == 0 ? 0 : 10;
             final boolean nav_topics = ResultFetcher.this.query.navigators.equals("all") || ResultFetcher.this.query.navigators.indexOf("topics") >= 0;
             try {
@@ -405,9 +404,9 @@ public class ResultFetcher {
                     loops++;
                     resultEntry = fetchSnippet(page, solrContent, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
-                    rawLine = resultEntry.textSnippet() == null ? null : resultEntry.textSnippet().getLineRaw();
+                    //final String rawLine = resultEntry.textSnippet() == null ? null : resultEntry.textSnippet().getLineRaw();
                     //System.out.println("***SNIPPET*** raw='" + rawLine + "', pattern='" + this.snippetPattern.toString() + "'");
-                    if (rawLine != null && !this.snippetPattern.matcher(rawLine).matches()) continue;
+                    //if (rawLine != null && !this.snippetPattern.matcher(rawLine).matches()) continue;
 
                     //if (result.contains(resultEntry)) continue;
                     ResultFetcher.this.urlRetrievalAllTime += resultEntry.dbRetrievalTime;

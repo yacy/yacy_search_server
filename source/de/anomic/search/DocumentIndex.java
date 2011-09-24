@@ -225,7 +225,7 @@ public class DocumentIndex extends Segment {
     @Override
     public void close() {
         // send termination signal to worker threads
-        for (final Worker element : this.worker) {
+        for (@SuppressWarnings("unused") final Worker element : this.worker) {
             try {
                 this.queue.put(poison);
             } catch (final InterruptedException e) {}

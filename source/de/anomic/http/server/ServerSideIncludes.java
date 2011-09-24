@@ -94,7 +94,7 @@ public class ServerSideIncludes {
         header.put(RequestHeader.AUTHORIZATION, authorization);
         if (requestHeader.containsKey(RequestHeader.COOKIE))
         	header.put(RequestHeader.COOKIE, requestHeader.get(RequestHeader.COOKIE));
-        header.put(RequestHeader.REFERER, requestHeader.get(RequestHeader.CONNECTION_PROP_PATH));
+        header.put(RequestHeader.REFERER, requestHeader.get(HeaderFramework.CONNECTION_PROP_PATH));
         HTTPDFileHandler.doGet(conProp, header, out);
     }
 }
