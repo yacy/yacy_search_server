@@ -38,17 +38,17 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
-import de.anomic.search.Switchboard;
+import net.yacy.peers.yacyClient;
+import net.yacy.peers.yacyCore;
+import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.dht.PeerSelection;
+import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.peers.operation.yacyVersion;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyVersion;
-import de.anomic.yacy.dht.PeerSelection;
-import de.anomic.yacy.graphics.ProfilingGraph;
 
 public final class hello {
 

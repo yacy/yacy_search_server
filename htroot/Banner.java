@@ -32,13 +32,13 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.graphics.NetworkGraph;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.graphics.NetworkGraph;
 
 /** draw a banner with information about the peer */
 public class Banner {

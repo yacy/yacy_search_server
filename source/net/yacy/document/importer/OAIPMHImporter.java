@@ -36,8 +36,8 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 
 // list records from oai-pmh like
 // http://opus.bsz-bw.de/fhhv/oai2/oai2.php?verb=ListRecords&metadataPrefix=oai_dc

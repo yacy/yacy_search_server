@@ -30,9 +30,9 @@
 
 
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.search.ContentDomain;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.snippet.ContentDomain;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

@@ -89,7 +89,7 @@ public class YaCyApp {
         public void closeAndExit() {
             if (app != null) app.setVisible(false); // fake closing
             //Browser.openBrowser("http://" + host + ":" + port + "/Steering.html?shutdown=");
-            de.anomic.search.Switchboard.getSwitchboard().terminate(10, "shutdown request from gui");
+            net.yacy.search.Switchboard.getSwitchboard().terminate(10, "shutdown request from gui");
             Switchboard.shutdown();
             //System.exit(0);
         }

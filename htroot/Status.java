@@ -37,15 +37,15 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.peers.yacyPeerActions;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.operation.yacyBuildProperties;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.yacy.yacyPeerActions;
-import de.anomic.yacy.yacySeed;
 
 public class Status {
 

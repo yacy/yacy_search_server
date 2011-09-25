@@ -29,10 +29,10 @@ import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.EventTracker;
+import net.yacy.peers.graphics.ProfilingGraph;
 
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class PerformanceSearch_p {
     

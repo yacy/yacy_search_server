@@ -31,14 +31,14 @@ import java.io.File;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.yacySeed;
 
 
 public final class list {

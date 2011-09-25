@@ -31,10 +31,10 @@ import java.io.File;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 import de.anomic.http.client.Cache;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

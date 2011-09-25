@@ -25,12 +25,12 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.graphics.NetworkGraph;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.SearchEventCache;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.graphics.NetworkGraph;
 
 // draw a picture of the yacy network
 

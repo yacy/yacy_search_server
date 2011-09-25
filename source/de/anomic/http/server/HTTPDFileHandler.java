@@ -104,18 +104,18 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.graphics.EncodedImage;
+import net.yacy.peers.operation.yacyBuildProperties;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.visualization.RasterPlotter;
 import de.anomic.data.UserDB;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.graphics.EncodedImage;
 
 public final class HTTPDFileHandler {
 

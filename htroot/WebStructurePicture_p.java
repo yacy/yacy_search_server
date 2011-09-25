@@ -37,13 +37,13 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.peers.graphics.WebStructureGraph;
+import net.yacy.search.Switchboard;
 import net.yacy.visualization.GraphPlotter;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.graphics.WebStructureGraph;
 
 public class WebStructurePicture_p {
 

@@ -15,13 +15,13 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkCrawlStart;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkMetadata;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

@@ -34,14 +34,14 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.ListManager;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
 import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
 
 public class BlacklistImpExp_p {
     private final static String DISABLED = "disabled_";

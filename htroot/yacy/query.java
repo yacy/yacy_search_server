@@ -32,12 +32,12 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
+import net.yacy.peers.yacyCore;
+import net.yacy.peers.yacyNetwork;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNetwork;
 
 public final class query {
 

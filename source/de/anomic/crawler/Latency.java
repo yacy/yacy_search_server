@@ -32,8 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 
 public class Latency {
 

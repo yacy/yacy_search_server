@@ -41,10 +41,10 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.WorkTables;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 
 public class RSSLoader extends Thread {

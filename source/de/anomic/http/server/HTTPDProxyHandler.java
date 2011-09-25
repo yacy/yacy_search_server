@@ -86,13 +86,13 @@ import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 //import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 
@@ -296,7 +296,7 @@ public final class HTTPDProxyHandler {
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
             conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
-            if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
+            if (yacyTrigger) net.yacy.peers.yacyCore.triggerOnlineAction();
             sb.proxyLastAccess = System.currentTimeMillis();
 
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
@@ -739,7 +739,7 @@ public final class HTTPDProxyHandler {
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
             conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
-            if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
+            if (yacyTrigger) net.yacy.peers.yacyCore.triggerOnlineAction();
             sb.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes
@@ -856,7 +856,7 @@ public final class HTTPDProxyHandler {
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
             conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
-            if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
+            if (yacyTrigger) net.yacy.peers.yacyCore.triggerOnlineAction();
             sb.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes

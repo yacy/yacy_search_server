@@ -55,25 +55,25 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.yacyClient;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
+import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.ranking.BlockRank;
+import net.yacy.search.ranking.RankingProcess;
+import net.yacy.search.ranking.ReferenceOrder;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.data.ListManager;
 import de.anomic.data.WorkTables;
 import de.anomic.http.client.Cache;
-import de.anomic.search.BlockRank;
-import de.anomic.search.QueryParams;
-import de.anomic.search.RankingProcess;
-import de.anomic.search.ReferenceOrder;
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.dht.PeerSelection;
 
 public class IndexControlRWIs_p {
 

@@ -48,8 +48,8 @@ import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.kelondroException;
+import net.yacy.search.query.QueryParams;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.search.QueryParams;
 import de.anomic.tools.crypt;
 
 public class URIMetadataRow implements URIMetadata {

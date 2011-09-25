@@ -4,15 +4,15 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.search.Switchboard;
 
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.ListManager;
 import de.anomic.data.UserDB;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsPool;
 
 
 public class add_p {

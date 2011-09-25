@@ -40,10 +40,10 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.RotateIterator;
-import de.anomic.search.MetadataRepository;
-import de.anomic.search.Segment;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.MetadataRepository;
+import net.yacy.search.index.Segment;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

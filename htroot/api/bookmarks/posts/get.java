@@ -7,8 +7,8 @@ import java.util.List;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Digest;
+import net.yacy.search.Switchboard;
 import de.anomic.data.BookmarksDB;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

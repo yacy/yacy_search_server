@@ -28,8 +28,8 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

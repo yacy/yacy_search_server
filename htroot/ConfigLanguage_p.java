@@ -41,10 +41,10 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.search.Switchboard;
 
 import de.anomic.data.WorkTables;
 import de.anomic.data.Translator;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import java.util.Collections;

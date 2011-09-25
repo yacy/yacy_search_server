@@ -33,9 +33,9 @@ import net.yacy.document.parser.sitemapParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 
 public class SitemapImporter extends Thread {
 

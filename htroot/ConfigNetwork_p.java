@@ -34,10 +34,10 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 import de.anomic.data.WorkTables;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

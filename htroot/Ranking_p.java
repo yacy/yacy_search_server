@@ -30,11 +30,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.snippet.ContentDomain;
 
-import de.anomic.search.ContentDomain;
-import de.anomic.search.RankingProfile;
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;

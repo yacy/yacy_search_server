@@ -52,11 +52,11 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

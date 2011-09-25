@@ -30,9 +30,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.ranking.Rating;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

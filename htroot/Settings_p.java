@@ -27,13 +27,13 @@ import java.util.Iterator;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.yacyCore;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.operation.yacySeedUploader;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacySeedUploader;
 
 public final class Settings_p {
     

@@ -36,22 +36,22 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;
-import de.anomic.search.ContentDomain;
-import de.anomic.search.MediaSnippet;
-import de.anomic.search.QueryParams;
-import de.anomic.search.ResultEntry;
-import de.anomic.search.SearchEvent;
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
-import de.anomic.search.TextSnippet;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.SearchEvent;
+import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.snippet.ContentDomain;
+import net.yacy.search.snippet.MediaSnippet;
+import net.yacy.search.snippet.ResultEntry;
+import net.yacy.search.snippet.TextSnippet;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.graphics.ProfilingGraph;
 
 
 public class yacysearchitem {

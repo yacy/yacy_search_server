@@ -48,17 +48,17 @@ import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.BookmarksDB.Bookmark;
 import de.anomic.data.BookmarksDB.Tag;
 import de.anomic.data.ListManager;
 import de.anomic.data.UserDB;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsPool;
 
 
 public class Bookmarks {

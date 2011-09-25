@@ -40,11 +40,11 @@ import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.Latency;
 import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 
 public class FTPLoader {
 

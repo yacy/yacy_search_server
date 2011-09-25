@@ -28,12 +28,12 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
-import de.anomic.search.Switchboard;
+import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.graphics.WebStructureGraph;
+import net.yacy.peers.graphics.WebStructureGraph.HostReference;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.graphics.WebStructureGraph;
-import de.anomic.yacy.graphics.WebStructureGraph.HostReference;
 
 public final class idx {
 

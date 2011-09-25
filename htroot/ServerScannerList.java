@@ -29,9 +29,9 @@ import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.protocol.Scanner.Access;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.Switchboard;
 
 import de.anomic.data.WorkTables;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

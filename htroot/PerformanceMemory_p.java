@@ -38,8 +38,8 @@ import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Switchboard;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.SearchEventCache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

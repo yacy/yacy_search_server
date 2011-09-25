@@ -60,25 +60,25 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
+import net.yacy.peers.yacyChannel;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
+import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.SearchEvent;
+import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.snippet.ContentDomain;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.UserDB;
-import de.anomic.search.AccessTracker;
-import de.anomic.search.ContentDomain;
-import de.anomic.search.QueryParams;
-import de.anomic.search.RankingProfile;
-import de.anomic.search.SearchEvent;
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.yacy.yacyChannel;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class yacysearch {
 

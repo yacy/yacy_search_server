@@ -36,11 +36,11 @@ import java.io.IOException;
 import java.util.Properties;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsPool;
 
 public class ConfigProfile_p {
 

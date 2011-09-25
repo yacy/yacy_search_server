@@ -32,11 +32,11 @@ import java.io.File;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.peers.operation.yacyRelease;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyRelease;
 
 public class Steering {
 

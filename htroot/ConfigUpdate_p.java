@@ -36,13 +36,13 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
+import net.yacy.peers.operation.yacyBuildProperties;
+import net.yacy.peers.operation.yacyRelease;
+import net.yacy.peers.operation.yacyVersion;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.yacy.yacyRelease;
-import de.anomic.yacy.yacyVersion;
 
 public class ConfigUpdate_p {
 

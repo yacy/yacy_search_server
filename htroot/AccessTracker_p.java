@@ -38,15 +38,15 @@ import java.text.SimpleDateFormat;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryParams;
 
-import de.anomic.search.AccessTracker;
-import de.anomic.search.QueryParams;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverAccessTracker.Track;
-import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
 	

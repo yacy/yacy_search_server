@@ -38,8 +38,8 @@ import net.yacy.cora.services.federated.solr.SolrScheme;
 import net.yacy.cora.services.federated.solr.SolrSingleConnector;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

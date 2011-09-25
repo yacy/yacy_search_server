@@ -1,8 +1,8 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.Formatter;
-import de.anomic.search.QueryParams;
-import de.anomic.search.SearchEvent;
-import de.anomic.search.SearchEventCache;
+import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.SearchEvent;
+import net.yacy.search.query.SearchEventCache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

@@ -43,8 +43,8 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.repository.LoaderDispatcher;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.search.Segments;
 
 public class YMarkMetadata {
 	private DigestURI uri;

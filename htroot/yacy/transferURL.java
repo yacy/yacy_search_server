@@ -34,19 +34,19 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.peers.yacyChannel;
+import net.yacy.peers.yacyCore;
+import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.yacySeed;
 import net.yacy.repository.Blacklist;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyChannel;
 
 public final class transferURL {
     

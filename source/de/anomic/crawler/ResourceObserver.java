@@ -28,8 +28,8 @@ import java.io.File;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 public class ResourceObserver {
 

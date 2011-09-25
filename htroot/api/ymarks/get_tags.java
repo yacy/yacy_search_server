@@ -7,12 +7,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkTag;
 import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

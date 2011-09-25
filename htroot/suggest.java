@@ -28,11 +28,11 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
 
 import de.anomic.data.DidYouMean;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;

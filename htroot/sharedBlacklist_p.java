@@ -43,18 +43,18 @@ import java.util.Set;
 import de.anomic.data.ListManager;
 import de.anomic.data.list.ListAccumulator;
 import de.anomic.data.list.XMLBlacklistImporter;
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.yacySeed;
 import net.yacy.repository.Blacklist;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.SearchEventCache;
 
 import org.xml.sax.SAXException;
 

@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<project name="YACY - seedUpload via SCP" default="dist">
+    <description>
+            A class that allows to upload the seed list via scp
+    </description>
+
+    <property name="addonShortName" value="Scp"/>
+	<property name="addonVersion" value="0.1"/>
+
+    <property name="addonLongName" value="${addonShortName}SeedUploader"/>    	
+   	<property name="parserArchive" location="${release}/${addonLongName}_${addonVersion}.tgz"/>	    	
+    	
+    <target name="compile">
+  	  <javac srcdir="${src}/net/yacy/peers/operation/" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
+  	    <include name="yacySeedUpload${addonShortName}.java"/>
+  	  	<classpath>
+  	  	  <pathelement location="${build}" />	
+  	  	
+		  <!-- main lib needed to parse rss/atom feed files -->  	
+   		  <pathelement location="${lib}/jsch-0.1.21.jar" />  	  		    	
+  	  	</classpath>
+  	  </javac>    	
+    </target>
+	
+
+    <target name="zip" depends="compile">
+  	  <tar destfile="${parserArchive}" compression="gzip">
+  	  	<tarfileset dir="${lib}" 
+  	  				includes="jsch-0.1.21.*" 
+  	  				prefix="${releaseDir}/lib/"
+			  		dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${src}/net/yacy/peers/operation/" 
+  	  			    includes="yacySeedUpload${addonShortName}.java"
+  	  				prefix="${releaseDir}/source/net/yacy/peers/operation/"
+			  	  	dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${build}/net/yacy/peers/operation/" 
+  	  			    includes="yacySeedUpload${addonShortName}.class,SchUserInfo.class,sshc.class"  	  			    
+  	  				prefix="${releaseDir}/classes/net/yacy/peers/operation/"
+			  	  	dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${htroot}/" 
+  	  			    includes="Settings_Seed_Upload${addonShortName}.inc"
+  	  				prefix="${releaseDir}/htroot/"
+			  	  	dirmode="755" mode="644"/>				  	  					  	  		
+  	  </tar>    	
+    </target>	
+
+
+    <target name="copy" depends="compile">
+        <copy todir="${release}/source/net/yacy/peers/operation/">
+             <fileset dir="${src}/net/yacy/peers/operation/">
+                  <include name="yacySeedUpload${addonShortName}.java"/> 
+             </fileset>   
+        </copy>        
+        <copy todir="${release}/classes/net/yacy/peers/operation/">
+             <fileset dir="${build}/net/yacy/peers/operation/">
+                  <include name="yacySeedUpload${addonShortName}.class"/> 
+                  <include name="SchUserInfo.class"/> 
+                  <include name="sshc.class"/>
+             </fileset>   
+        </copy> 
+        <copy todir="${release}/htroot/yacy/seedUpload/">
+             <fileset dir="${htroot}/">
+                  <include name="Settings_Seed_Upload${addonShortName}.inc"/> 
+             </fileset>   
+        </copy>                  
+    </target> 
+    
+
+    <target name="dist" depends="compile,zip" description="Compile and zip the addon"/>        
+	
+	
+</project>
+

@@ -5,12 +5,12 @@ import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.workflow.BusyThread;
+import net.yacy.peers.graphics.NetworkGraph;
+import net.yacy.peers.graphics.NetworkGraph.CircleThreadPiece;
+import net.yacy.search.SwitchboardConstants;
 
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.graphics.NetworkGraph;
-import de.anomic.yacy.graphics.NetworkGraph.CircleThreadPiece;
 
 public class PeerLoadPicture {
     

@@ -43,11 +43,11 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.SearchEventCache;
 
 import de.anomic.data.WorkTables;
 import de.anomic.data.ListManager;
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

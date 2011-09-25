@@ -43,15 +43,15 @@ import java.util.Properties;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.peers.yacyClient;
+import net.yacy.peers.yacyCore;
+import net.yacy.peers.yacyNewsDB;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNewsDB;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacySeed;
 
 public class ViewProfile {
 

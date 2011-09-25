@@ -31,7 +31,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import de.anomic.yacy.graphics.ProfilingGraph;
+import net.yacy.peers.graphics.ProfilingGraph;
+
 
 public class EventTracker {
 

@@ -41,15 +41,15 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.yacyCore;
+import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
 
 import de.anomic.data.MessageBoard;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.yacySeed;
 
 public final class message {
 

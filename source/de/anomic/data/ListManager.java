@@ -36,9 +36,9 @@ import java.util.Vector;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.BlacklistFile;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.SearchEventCache;
 
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Switchboard;
 import java.util.List;
 import java.util.regex.Pattern;
 

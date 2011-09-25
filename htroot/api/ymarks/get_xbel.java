@@ -7,13 +7,13 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkDate;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.data.ymark.YMarkXBELImporter;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

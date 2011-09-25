@@ -9,6 +9,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.Switchboard;
 
 import org.xml.sax.SAXException;
 
@@ -19,7 +20,6 @@ import de.anomic.data.ymark.YMarkHTMLImporter;
 import de.anomic.data.ymark.YMarkJSONImporter;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkXBELImporter;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

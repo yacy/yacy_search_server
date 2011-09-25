@@ -61,9 +61,9 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainerArray;
 import net.yacy.kelondro.util.MemoryControl;
-import de.anomic.search.MetadataRepository;
-import de.anomic.search.MetadataRepository.Export;
-import de.anomic.search.Segment;
+import net.yacy.search.index.MetadataRepository;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.MetadataRepository.Export;
 
 public class URLAnalysis {
 

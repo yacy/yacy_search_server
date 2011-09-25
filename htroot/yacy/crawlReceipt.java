@@ -33,17 +33,17 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
-import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.yacySeed;
 
 public final class crawlReceipt {
 

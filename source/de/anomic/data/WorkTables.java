@@ -47,8 +47,8 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.IndexCell;
+import net.yacy.search.Switchboard;
 import de.anomic.data.ymark.YMarkTables;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 
 public class WorkTables extends Tables {

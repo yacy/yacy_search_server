@@ -65,6 +65,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.Switchboard;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -75,7 +76,6 @@ import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 
 import de.anomic.data.UserDB;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverCore.Session;
 import de.anomic.server.serverHandler;

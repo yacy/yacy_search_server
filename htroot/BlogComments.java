@@ -42,16 +42,16 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.yacyCore;
+import net.yacy.search.Switchboard;
 
 import de.anomic.data.BlogBoard;
 import de.anomic.data.BlogBoardComments;
 import de.anomic.data.MessageBoard;
 import de.anomic.data.UserDB;
 import de.anomic.data.BlogBoard.BlogEntry;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 
 public class BlogComments {
 

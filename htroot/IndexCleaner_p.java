@@ -26,10 +26,10 @@
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.search.MetadataRepository;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.MetadataRepository;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

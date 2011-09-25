@@ -5,10 +5,10 @@ import java.util.Date;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.search.Switchboard;
+import net.yacy.peers.yacyChannel;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyChannel;
 
 public class feed {
 

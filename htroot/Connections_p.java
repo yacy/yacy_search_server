@@ -36,16 +36,16 @@ import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.WorkflowThread;
+import net.yacy.peers.yacyPeerActions;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
 
 //import de.anomic.http.client.ConnectionInfo;
 //import de.anomic.http.client.Client;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverCore.Session;
-import de.anomic.yacy.yacyPeerActions;
-import de.anomic.yacy.yacySeed;
 
 public final class Connections_p {    
     

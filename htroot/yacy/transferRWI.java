@@ -41,18 +41,18 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.yacyChannel;
+import net.yacy.peers.yacyCore;
+import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.repository.Blacklist;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segments;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyChannel;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
 public final class transferRWI {
 

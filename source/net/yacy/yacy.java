@@ -53,6 +53,7 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.ranking.OrderedScoreMap;
 import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.cora.sorting.Array;
+import net.yacy.gui.Tray;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.kelondro.blob.MapDataMining;
@@ -67,19 +68,18 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
+import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.operation.yacyBuildProperties;
+import net.yacy.peers.operation.yacyRelease;
+import net.yacy.peers.operation.yacyVersion;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.MetadataRepository;
+import net.yacy.search.index.Segment;
 import de.anomic.data.Translator;
 import de.anomic.http.server.HTTPDemon;
-import de.anomic.search.MetadataRepository;
-import de.anomic.search.Segment;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.tools.enumerateFiles;
-import de.anomic.yacy.Tray;
-import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.yacy.yacyRelease;
-import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyVersion;
 
 /**
 * This is the main class of YaCy. Several threads are started from here:

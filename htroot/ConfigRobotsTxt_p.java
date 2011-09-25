@@ -30,9 +30,9 @@
 // if the shell's current path is HTROOT
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.http.server.RobotsTxtConfig;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;

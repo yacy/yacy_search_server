@@ -28,12 +28,12 @@ import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.peers.graphics.EncodedImage;
+import net.yacy.peers.graphics.NetworkGraph;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.graphics.EncodedImage;
-import de.anomic.yacy.graphics.NetworkGraph;
 
 /** draw a picture of the yacy network */
 public class NetworkPicture {

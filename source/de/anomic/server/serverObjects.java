@@ -58,8 +58,8 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 
 public class serverObjects extends HashMap<String, String> implements Cloneable {
 

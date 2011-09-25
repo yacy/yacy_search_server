@@ -55,6 +55,8 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.FTPLoader;
 import de.anomic.crawler.retrieval.FileLoader;
@@ -63,8 +65,6 @@ import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.crawler.retrieval.SMBLoader;
 import de.anomic.http.client.Cache;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 
 public final class LoaderDispatcher {
 

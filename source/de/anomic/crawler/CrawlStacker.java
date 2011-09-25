@@ -49,17 +49,17 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.peers.yacySeedDB;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.FilterEngine;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.FTPLoader;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.SMBLoader;
-import de.anomic.search.Segment;
-import de.anomic.search.Switchboard;
-import de.anomic.yacy.yacySeedDB;
 
 public final class CrawlStacker {
 

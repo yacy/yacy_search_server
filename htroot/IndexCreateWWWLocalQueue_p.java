@@ -39,15 +39,15 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
 
 public class IndexCreateWWWLocalQueue_p {
     

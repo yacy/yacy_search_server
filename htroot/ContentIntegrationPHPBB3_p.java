@@ -29,7 +29,7 @@ import net.yacy.document.content.dao.Dao;
 import net.yacy.document.content.dao.ImportDump;
 import net.yacy.document.content.dao.PhpBB3Dao;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.search.Switchboard;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

@@ -46,17 +46,17 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
+import net.yacy.peers.yacyClient;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.dht.PeerSelection;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.Switchboard.indexingQueueEntry;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.NoticedURL.StackType;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
-import de.anomic.search.Switchboard.indexingQueueEntry;
-import de.anomic.search.SwitchboardConstants;
-import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.dht.PeerSelection;
 
 public class CrawlQueues {
 

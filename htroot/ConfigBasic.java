@@ -37,17 +37,17 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.workflow.InstantBusyThread;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 import de.anomic.data.WorkTables;
 import de.anomic.data.Translator;
 import de.anomic.http.server.HTTPDFileHandler;
-import de.anomic.net.UPnP;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
+import de.anomic.tools.UPnP;
 
 public class ConfigBasic {
     

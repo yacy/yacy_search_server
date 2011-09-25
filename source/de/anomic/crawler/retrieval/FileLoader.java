@@ -30,8 +30,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.crawler.CrawlProfile;
 
 import net.yacy.cora.protocol.HeaderFramework;
@@ -43,6 +41,8 @@ import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 
 public class FileLoader {
 

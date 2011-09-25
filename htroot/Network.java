@@ -41,16 +41,16 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.MapTools;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.peers.yacyClient;
+import net.yacy.peers.yacyNewsDB;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.yacyPeerActions;
+import net.yacy.peers.yacySeed;
+import net.yacy.peers.operation.yacyVersion;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyNewsDB;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyPeerActions;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyVersion;
 
 public class Network {
 

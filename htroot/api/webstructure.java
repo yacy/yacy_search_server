@@ -29,11 +29,11 @@ import java.util.Map;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.peers.graphics.WebStructureGraph;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.graphics.WebStructureGraph;
 
 public class webstructure {
 

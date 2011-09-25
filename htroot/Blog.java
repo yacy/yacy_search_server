@@ -39,13 +39,13 @@ import java.util.Locale;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.search.Switchboard;
 
 import de.anomic.data.BlogBoard;
 import de.anomic.data.UserDB;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsPool;
 import java.util.List;
 import java.util.Map;
 

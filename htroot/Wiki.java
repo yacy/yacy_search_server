@@ -41,13 +41,13 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.search.Switchboard;
 
 import de.anomic.data.Diff;
 import de.anomic.data.wiki.WikiBoard;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsPool;
 import java.util.Map;
 
 public class Wiki {

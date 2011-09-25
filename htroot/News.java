@@ -32,12 +32,12 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.search.Switchboard;
+import net.yacy.peers.yacyNewsDB;
+import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.yacySeed;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsDB;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacySeed;
 
 public class News {
     

@@ -29,10 +29,10 @@ import java.util.Set;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.search.Switchboard;
 import net.yacy.visualization.HexGridPlotter;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
