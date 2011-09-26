@@ -97,8 +97,8 @@ import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
-import net.yacy.search.ranking.RankingProcess;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.ContentDomain;
 import net.yacy.search.snippet.TextSnippet;
@@ -440,7 +440,7 @@ public final class yacyClient {
             final int partitions,
             final yacySeed target,
             final Segment indexSegment,
-            final RankingProcess containerCache,
+            final RWIProcess containerCache,
             final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
             final Blacklist blacklist,
             final RankingProfile rankingProfile,

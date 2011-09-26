@@ -51,7 +51,6 @@ import net.yacy.peers.yacySeedDB;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
-import net.yacy.search.ranking.RankingProcess;
 import net.yacy.search.snippet.ContentDomain;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
@@ -63,10 +62,10 @@ import org.apache.solr.common.SolrDocumentList;
 import de.anomic.data.WorkTables;
 import de.anomic.http.client.Cache;
 
-public class ResultFetcher {
+public class SnippetProcess {
 
     // input values
-    final RankingProcess  rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
+    final RWIProcess  rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
     QueryParams     query;
     private final yacySeedDB      peers;
     private final WorkTables workTables;
@@ -83,9 +82,9 @@ public class ResultFetcher {
     private final boolean deleteIfSnippetFail;
     private boolean cleanupState;
 
-    public ResultFetcher(
+    public SnippetProcess(
             final LoaderDispatcher loader,
-            final RankingProcess rankedCache,
+            final RWIProcess rankedCache,
             final QueryParams query,
             final yacySeedDB peers,
             final WorkTables workTables,
@@ -355,7 +354,7 @@ public class ResultFetcher {
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
             this.shallrun = true;
-            this.solr = ResultFetcher.this.rankingProcess.getQuery().getSegment().getSolr();
+            this.solr = SnippetProcess.this.rankingProcess.getQuery().getSegment().getSolr();
         }
 
         @Override
@@ -365,7 +364,7 @@ public class ResultFetcher {
             URIMetadataRow page;
             ResultEntry resultEntry;
             //final int fetchAhead = snippetMode == 0 ? 0 : 10;
-            final boolean nav_topics = ResultFetcher.this.query.navigators.equals("all") || ResultFetcher.this.query.navigators.indexOf("topics") >= 0;
+            final boolean nav_topics = SnippetProcess.this.query.navigators.equals("all") || SnippetProcess.this.query.navigators.indexOf("topics") >= 0;
             try {
                 //System.out.println("DEPLOYED WORKER " + id + " FOR " + this.neededResults + " RESULTS, timeoutd = " + (this.timeout - System.currentTimeMillis()));
                 int loops = 0;
@@ -377,25 +376,25 @@ public class ResultFetcher {
                     }
 
                     // check if we have enough
-                    if (ResultFetcher.this.result.sizeAvailable() >= this.neededResults) {
+                    if (SnippetProcess.this.result.sizeAvailable() >= this.neededResults) {
                         //Log.logWarning("ResultFetcher", ResultFetcher.this.result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
                         break;
                     }
 
                     // check if we can succeed if we try to take another url
-                    if (ResultFetcher.this.rankingProcess.feedingIsFinished() && ResultFetcher.this.rankingProcess.sizeQueue() == 0) {
+                    if (SnippetProcess.this.rankingProcess.feedingIsFinished() && SnippetProcess.this.rankingProcess.sizeQueue() == 0) {
                         //Log.logWarning("ResultFetcher", "rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0");
                         break;
                     }
 
                     // get next entry
-                    page = ResultFetcher.this.rankingProcess.takeURL(true, Math.min(100, this.timeout - System.currentTimeMillis()));
+                    page = SnippetProcess.this.rankingProcess.takeURL(true, Math.min(100, this.timeout - System.currentTimeMillis()));
                     //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
                     if (page == null) {
                         //System.out.println("page == null");
                         break; // no more available
                     }
-                    if (ResultFetcher.this.query.filterfailurls && ResultFetcher.this.workTables.failURLsContains(page.hash())) continue;
+                    if (SnippetProcess.this.query.filterfailurls && SnippetProcess.this.workTables.failURLsContains(page.hash())) continue;
 
                     // in case that we have an attached solr, we load also the solr document
                     String solrContent = null;
@@ -415,16 +414,16 @@ public class ResultFetcher {
                     //if (rawLine != null && !this.snippetPattern.matcher(rawLine).matches()) continue;
 
                     //if (result.contains(resultEntry)) continue;
-                    ResultFetcher.this.urlRetrievalAllTime += resultEntry.dbRetrievalTime;
-                    ResultFetcher.this.snippetComputationAllTime += resultEntry.snippetComputationTime;
+                    SnippetProcess.this.urlRetrievalAllTime += resultEntry.dbRetrievalTime;
+                    SnippetProcess.this.snippetComputationAllTime += resultEntry.snippetComputationTime;
 
                     // place the result to the result vector
                     // apply post-ranking
-                    long ranking = Long.valueOf(ResultFetcher.this.rankingProcess.getOrder().cardinal(resultEntry.word()));
-                    ranking += postRanking(resultEntry, ResultFetcher.this.rankingProcess.getTopicNavigator(10));
+                    long ranking = Long.valueOf(SnippetProcess.this.rankingProcess.getOrder().cardinal(resultEntry.word()));
+                    ranking += postRanking(resultEntry, SnippetProcess.this.rankingProcess.getTopicNavigator(10));
                     resultEntry.ranking = ranking;
-                    ResultFetcher.this.result.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
-                    if (nav_topics) ResultFetcher.this.rankingProcess.addTopics(resultEntry);
+                    SnippetProcess.this.result.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
+                    if (nav_topics) SnippetProcess.this.rankingProcess.addTopics(resultEntry);
                 }
                 //System.out.println("FINISHED WORKER " + id + " FOR " + this.neededResults + " RESULTS, loops = " + loops);
             } catch (final Exception e) {

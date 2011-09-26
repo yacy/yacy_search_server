@@ -36,8 +36,8 @@ import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
-import net.yacy.search.ranking.RankingProcess;
 import net.yacy.search.ranking.RankingProfile;
 
 
@@ -49,7 +49,7 @@ public class yacySearch extends Thread {
     final private boolean global;
     final private int partitions;
     final private Segment indexSegment;
-    final private RankingProcess containerCache;
+    final private RWIProcess containerCache;
     final private SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser;
     final private Blacklist blacklist;
     final private yacySeed targetPeer;
@@ -75,7 +75,7 @@ public class yacySearch extends Thread {
               final yacySeed targetPeer,
               final Segment indexSegment,
               final yacySeedDB peers,
-              final RankingProcess containerCache,
+              final RWIProcess containerCache,
               final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
               final Blacklist blacklist,
               final RankingProfile rankingProfile,
@@ -162,7 +162,7 @@ public class yacySearch extends Thread {
             final int count, long time, final int maxDist,
             final Segment indexSegment,
             final yacySeedDB peers,
-            final RankingProcess containerCache,
+            final RWIProcess containerCache,
             final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
             final Blacklist blacklist,
             final RankingProfile rankingProfile,
@@ -211,7 +211,7 @@ public class yacySearch extends Thread {
             final long time,
             final Segment indexSegment,
             final yacySeedDB peers,
-            final RankingProcess containerCache,
+            final RWIProcess containerCache,
             final String targethash, final Blacklist blacklist,
             final RankingProfile rankingProfile,
             final Bitfield constraint, final SortedMap<byte[], String> clusterselection) {

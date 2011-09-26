@@ -63,8 +63,8 @@ import net.yacy.kelondro.util.ISO639;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
+import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
-import net.yacy.search.ranking.RankingProcess;
 import de.anomic.crawler.retrieval.Response;
 
 public class Segment {
@@ -219,7 +219,7 @@ public class Segment {
             final int outlinksOther,
             final SearchEvent searchEvent,
             final String sourceName) {
-        final RankingProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
+        final RWIProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
         if (rankingProcess != null) rankingProcess.moreFeeders(1);
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();

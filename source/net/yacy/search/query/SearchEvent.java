@@ -53,8 +53,7 @@ import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
-import net.yacy.search.query.ResultFetcher.Worker;
-import net.yacy.search.ranking.RankingProcess;
+import net.yacy.search.query.SnippetProcess.Worker;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ResultEntry;
 import de.anomic.data.WorkTables;
@@ -73,8 +72,8 @@ public final class SearchEvent {
     private QueryParams query;
     private final yacySeedDB peers;
     private final WorkTables workTables;
-    private RankingProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
-    private ResultFetcher resultFetcher;
+    private RWIProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
+    private SnippetProcess resultFetcher;
 
     private final SecondarySearchSuperviser secondarySearchSuperviser;
 
@@ -122,7 +121,7 @@ public final class SearchEvent {
         if (remote) {
         	// initialize a ranking process that is the target for data
         	// that is generated concurrently from local and global search threads
-            this.rankingProcess = new RankingProcess(this.query, this.order, max_results_preparation);
+            this.rankingProcess = new RWIProcess(this.query, this.order, max_results_preparation);
 
             // start a local search concurrently
             this.rankingProcess.start();
@@ -163,10 +162,10 @@ public final class SearchEvent {
             }
 
             // start worker threads to fetch urls and snippets
-            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, this.peers, this.workTables, 3000, deleteIfSnippetFail);
+            this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, query, this.peers, this.workTables, 3000, deleteIfSnippetFail);
         } else {
             // do a local search
-            this.rankingProcess = new RankingProcess(this.query, this.order, max_results_preparation);
+            this.rankingProcess = new RWIProcess(this.query, this.order, max_results_preparation);
 
             if (generateAbstracts) {
                 this.rankingProcess.run(); // this is not started concurrently here on purpose!
@@ -207,7 +206,7 @@ public final class SearchEvent {
             }
 
             // start worker threads to fetch urls and snippets
-            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, this.peers, this.workTables, 500, deleteIfSnippetFail);
+            this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, query, this.peers, this.workTables, 500, deleteIfSnippetFail);
         }
 
         // clean up events
@@ -330,7 +329,7 @@ public final class SearchEvent {
         return this.secondarySearchThreads;
     }
 
-    public RankingProcess getRankingResult() {
+    public RWIProcess getRankingResult() {
         return this.rankingProcess;
     }
 
@@ -571,7 +570,7 @@ public final class SearchEvent {
 
     }
 
-    public ResultFetcher result() {
+    public SnippetProcess result() {
         return this.resultFetcher;
     }
 

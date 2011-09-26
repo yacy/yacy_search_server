@@ -162,6 +162,7 @@ public class SolrScheme extends ConfigurationSet {
         if (isEmpty() || contains("attr_inboundlinks_urlstub")) addSolr(solrdoc, "attr_inboundlinks_urlstub", inboundlinksURLStub);
         if (isEmpty() || contains("attr_inboundlinks_name")) addSolr(solrdoc, "attr_inboundlinks_name", inboundlinksName);
         if (isEmpty() || contains("attr_inboundlinks_rel")) addSolr(solrdoc, "attr_inboundlinks_rel", inboundlinksRel);
+        if (isEmpty() || contains("attr_inboundlinks_relflags")) addSolr(solrdoc, "attr_inboundlinks_relflags", relEval(inboundlinksRel));
         if (isEmpty() || contains("attr_inboundlinks_text")) addSolr(solrdoc, "attr_inboundlinks_text", inboundlinksText);
 
         c = 0;
@@ -198,6 +199,7 @@ public class SolrScheme extends ConfigurationSet {
         if (isEmpty() || contains("attr_outboundlinks_urlstub")) addSolr(solrdoc, "attr_outboundlinks_urlstub", outboundlinksURLStub);
         if (isEmpty() || contains("attr_outboundlinks_name")) addSolr(solrdoc, "attr_outboundlinks_name", outboundlinksName);
         if (isEmpty() || contains("attr_outboundlinks_rel")) addSolr(solrdoc, "attr_outboundlinks_rel", outboundlinksRel);
+        if (isEmpty() || contains("attr_outboundlinks_relflags")) addSolr(solrdoc, "attr_outboundlinks_relflags", relEval(inboundlinksRel));
         if (isEmpty() || contains("attr_outboundlinks_text")) addSolr(solrdoc, "attr_outboundlinks_text", outboundlinksText);
 
 
@@ -352,6 +354,16 @@ public class SolrScheme extends ConfigurationSet {
         return solrdoc;
     }
 
+    private int relEval(String[] rel) {
+        int i = 0;
+        for (String s: rel) {
+            String s0 = s.toLowerCase().trim();
+            if ("me".equals(s0)) i += 1;
+            if ("nofollow".equals(s0)) i += 2;
+        }
+        return i;
+    }
+    
     public String solrGetID(final SolrDocument solr) {
         return (String) solr.getFieldValue("id");
     }

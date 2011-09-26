@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package net.yacy.search.ranking;
+package net.yacy.search.query;
 
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -60,13 +60,11 @@ import net.yacy.kelondro.util.EventTracker;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.SearchEvent;
-import net.yacy.search.query.SearchEvent.Type;
+import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ContentDomain;
 import net.yacy.search.snippet.ResultEntry;
 
-public final class RankingProcess extends Thread {
+public final class RWIProcess extends Thread {
 
     private static final int maxDoubleDomAll = 1000, maxDoubleDomSpecial = 10000;
 
@@ -79,7 +77,7 @@ public final class RankingProcess extends Thread {
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
 
     private int remote_resourceSize, remote_indexCount, remote_peerCount;
-    private int local_resourceSize, local_indexCount;
+    private int local_indexCount;
     private final WeakPriorityBlockingQueue<WordReferenceVars> stack;
     private int feeders;
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
@@ -99,7 +97,7 @@ public final class RankingProcess extends Thread {
     private final ScoreMap<String> filetypeNavigator; // a counter for file types
 
 
-    public RankingProcess(final QueryParams query, final ReferenceOrder order, final int maxentries) {
+    public RWIProcess(final QueryParams query, final ReferenceOrder order, final int maxentries) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -112,7 +110,6 @@ public final class RankingProcess extends Thread {
         this.remote_peerCount = 0;
         this.remote_resourceSize = 0;
         this.remote_indexCount = 0;
-        this.local_resourceSize = 0;
         this.local_indexCount = 0;
         this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
         this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
@@ -181,9 +178,7 @@ public final class RankingProcess extends Thread {
         assert (index != null);
         if (index.isEmpty()) return;
 
-        if (local) {
-            this.local_resourceSize += index.size();
-        } else {
+        if (!local) {
             assert fullResource >= 0 : "fullResource = " + fullResource;
             this.remote_resourceSize += fullResource;
             this.remote_peerCount++;

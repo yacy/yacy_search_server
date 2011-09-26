@@ -91,7 +91,7 @@ attr_inboundlinks_tag
 #attr_inboundlinks_rel
 
 ## internal links, the rel property of the a-tag, coded binary
-#attr_inboundlinks_relcode
+#attr_inboundlinks_relflags
 
 ## internal links, the text content of the a-tag
 #attr_inboundlinks_text
@@ -116,6 +116,9 @@ attr_outboundlinks_tag
 
 ## external links, the rel property of the a-tag
 #attr_outboundlinks_rel
+
+## external links, the rel property of the a-tag, coded binary
+#attr_outboundlinks_relflags
 
 ## external links, the text content of the a-tag
 #attr_outboundlinks_text

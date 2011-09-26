@@ -64,9 +64,9 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
 import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
-import net.yacy.search.ranking.RankingProcess;
 import net.yacy.search.ranking.ReferenceOrder;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.data.ListManager;
@@ -134,7 +134,7 @@ public class IndexControlRWIs_p {
             if (post.containsKey("keystringsearch")) {
                 keyhash = Word.word2hash(keystring);
                 prop.put("keyhash", keyhash);
-                final RankingProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
+                final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 1);
                     prop.putHTML("searchresult_word", keystring);
@@ -145,7 +145,7 @@ public class IndexControlRWIs_p {
                 if (keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
-                final RankingProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
+                final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", ASCII.String(keyhash));
@@ -240,7 +240,7 @@ public class IndexControlRWIs_p {
                 }
                 final Bitfield flags = compileFlags(post);
                 final int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
-                final RankingProcess ranking = genSearchresult(prop, sb, segment, keyhash, flags);
+                final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, flags);
                 genURLList(prop, keyhash, keystring, ranking, flags, count);
             }
 
@@ -425,7 +425,7 @@ public class IndexControlRWIs_p {
         return prop;
     }
 
-    public static void genURLList(final serverObjects prop, final byte[] keyhash, final String keystring, final RankingProcess ranked, final Bitfield flags, final int maxlines) {
+    public static void genURLList(final serverObjects prop, final byte[] keyhash, final String keystring, final RWIProcess ranked, final Bitfield flags, final int maxlines) {
         // search for a word hash and generate a list of url links
         final String keyhashs = ASCII.String(keyhash);
         prop.put("genUrlList_keyHash", keyhashs);
@@ -557,10 +557,10 @@ public class IndexControlRWIs_p {
         prop.put("searchresult_hosts", hc);
     }
 
-    public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, final Segment segment, final byte[] keyhash, final Bitfield filter) {
+    public static RWIProcess genSearchresult(final serverObjects prop, final Switchboard sb, final Segment segment, final byte[] keyhash, final Bitfield filter) {
         final QueryParams query = new QueryParams(ASCII.String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
         final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
-        final RankingProcess ranked = new RankingProcess(query, order, Integer.MAX_VALUE);
+        final RWIProcess ranked = new RWIProcess(query, order, Integer.MAX_VALUE);
         ranked.run();
 
         if (ranked.filteredCount() == 0) {
