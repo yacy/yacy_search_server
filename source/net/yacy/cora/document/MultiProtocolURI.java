@@ -35,6 +35,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1118,6 +1119,10 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return baos.toByteArray();
     }
 
+
+    public Locale getLocale() {
+        return Domains.getLocale(this.host);
+    }
 
     //---------------------
 

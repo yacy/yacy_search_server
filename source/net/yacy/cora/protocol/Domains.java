@@ -26,6 +26,8 @@ package net.yacy.cora.protocol;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -38,17 +40,30 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
 import net.yacy.kelondro.util.MemoryControl;
 
 public class Domains {
+
+
+    private static Class<?> InetAddressLocatorClass;
+    private static Method InetAddressLocatorGetLocaleInetAddressMethod;
+
+    static {
+        // using http://javainetlocator.sourceforge.net/ if library is present
+        // we use this class using reflection to be able to remove it because that class is old and without maintenancy
+        InetAddressLocatorClass = ClassProvider.load("net.sf.javainetlocator.InetAddressLocator", new File("lib/InetAddressLocator.jar"));
+        InetAddressLocatorGetLocaleInetAddressMethod = ClassProvider.getStaticMethod(InetAddressLocatorClass, "getLocale", new Class[]{InetAddress.class});
+    }
 
     private static final String PRESENT = "";
     private static final String LOCAL_PATTERNS = "10\\..*,127\\..*,172\\.(1[6-9]|2[0-9]|3[0-1])\\..*,169\\.254\\..*,192\\.168\\..*,localhost";
@@ -894,6 +909,45 @@ public class Domains {
             a.isSiteLocalAddress() ||
             isLocal(a.getHostAddress(), false);
         return localp;
+    }
+
+    /**
+     * find the locale for a given host. This feature is only available in full quality,
+     * if the file InetAddressLocator.jar is placed in the /lib directory (as a plug-in)
+     * from http://javainetlocator.sourceforge.net/
+     * @param host
+     * @return the locale for the host
+     */
+    public static Locale getLocale(final String host) {
+        if (host == null) return null;
+        final Locale locale = getLocale(dnsResolve(host));
+        if (locale != null) return locale;
+        final int p = host.lastIndexOf('.');
+        if (p < 0) return null;
+        String tld = host.substring(p + 1).toUpperCase();
+        if (tld.length() < 2) return null;
+        if (tld.length() > 2) tld = "US";
+        return new Locale("en", tld);
+    }
+
+    /**
+     * find the locale for a given Address
+     * @param address
+     * @return
+     */
+    public static Locale getLocale(final InetAddress address) {
+        if (InetAddressLocatorGetLocaleInetAddressMethod == null) return null;
+        if (address == null) return null;
+        if (isLocal(address)) return null;
+        try {
+            return (Locale) InetAddressLocatorGetLocaleInetAddressMethod.invoke(null, new Object[]{address});
+        } catch (final IllegalArgumentException e) {
+            return null;
+        } catch (final IllegalAccessException e) {
+            return null;
+        } catch (final InvocationTargetException e) {
+            return null;
+        }
     }
 
     public static void main(final String[] args) {
