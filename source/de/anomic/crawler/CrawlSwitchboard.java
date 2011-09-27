@@ -63,7 +63,8 @@ public final class CrawlSwitchboard {
     public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
 
     private final Log       log;
-    private Map<byte[], Map<String, String>> profilesActiveCrawls, profilesPassiveCrawls, profilesInvalidCrawls;
+    private Map<byte[], Map<String, String>> profilesActiveCrawls;
+    private final Map<byte[], Map<String, String>> profilesPassiveCrawls, profilesInvalidCrawls;
     public  CrawlProfile    defaultProxyProfile;
     public  CrawlProfile    defaultRemoteProfile;
     public  CrawlProfile    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
@@ -91,28 +92,28 @@ public final class CrawlSwitchboard {
 
         final File profilesInvalidFile = new File(queuesRoot, DBFILE_INVALID_CRAWL_PROFILES);
         this.profilesInvalidCrawls = loadFromDB(profilesInvalidFile);
-        
+
         final File profilesActiveFile = new File(queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         this.profilesActiveCrawls = loadFromDB(profilesActiveFile);
         for (final byte[] handle : this.profilesActiveCrawls.keySet()) {
             final CrawlProfile p;
             p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
-            if (!RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_MUSTMATCH))) {
-                this.removeActive(handle);
-                this.putInvalid(handle, p);
+            if (!RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_URL_MUSTMATCH))) {
+                removeActive(handle);
+                putInvalid(handle, p);
                 Log.logWarning("CrawlProfiles", "removed Profile " + p.handle() + ": " + p.name()
-                        + " from active crawls since " + CrawlProfile.FILTER_MUSTMATCH 
-                        + " is no valid regular expression: " + p.get(CrawlProfile.FILTER_MUSTMATCH));
-            } else if (!RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_MUSTNOTMATCH))) {
-                this.putInvalid(handle, p);
-                this.removeActive(handle);
+                        + " from active crawls since " + CrawlProfile.FILTER_URL_MUSTMATCH
+                        + " is no valid regular expression: " + p.get(CrawlProfile.FILTER_URL_MUSTMATCH));
+            } else if (!RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_URL_MUSTNOTMATCH))) {
+                putInvalid(handle, p);
+                removeActive(handle);
                 Log.logWarning("CrawlProfiles", "removed Profile " + p.handle() + ": " + p.name()
-                        + " from active crawls since " + CrawlProfile.FILTER_MUSTNOTMATCH 
-                        + " is no valid regular expression: " + p.get(CrawlProfile.FILTER_MUSTNOTMATCH));
+                        + " from active crawls since " + CrawlProfile.FILTER_URL_MUSTNOTMATCH
+                        + " is no valid regular expression: " + p.get(CrawlProfile.FILTER_URL_MUSTNOTMATCH));
             } else {
                 Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
             }
-            
+
         }
         initActiveCrawlProfiles();
         log.logInfo("Loaded active crawl profiles from file " + profilesActiveFile.getName() + ", " + this.profilesActiveCrawls.size() + " entries");
@@ -134,7 +135,7 @@ public final class CrawlSwitchboard {
         if (m == null) return null;
         return new CrawlProfile(m);
     }
-    
+
     public CrawlProfile getInvalid(final byte[] profileKey) {
         if (profileKey == null) return null;
         final Map<String, String> m = this.profilesInvalidCrawls.get(profileKey);
@@ -152,7 +153,7 @@ public final class CrawlSwitchboard {
     public Set<byte[]> getActive() {
         return this.profilesActiveCrawls.keySet();
     }
-    
+
     public Set<byte[]> getInvalid() {
         return this.profilesInvalidCrawls.keySet();
     }
@@ -165,7 +166,7 @@ public final class CrawlSwitchboard {
         if (profileKey == null) return;
         this.profilesActiveCrawls.remove(profileKey);
     }
-    
+
     public void removeInvalid(final byte[] profileKey) {
         if (profileKey == null) return;
         this.profilesInvalidCrawls.remove(profileKey);
@@ -179,7 +180,7 @@ public final class CrawlSwitchboard {
     public void putActive(final byte[] profileKey, final CrawlProfile profile) {
         this.profilesActiveCrawls.put(profileKey, profile);
     }
-    
+
     public void putInvalid(final byte[] profileKey, final CrawlProfile profile) {
         this.profilesInvalidCrawls.put(profileKey, profile);
     }
@@ -227,7 +228,10 @@ public final class CrawlSwitchboard {
         if (this.defaultProxyProfile == null) {
             // generate new default entry for proxy crawling
             this.defaultProxyProfile = new CrawlProfile(
-                    "proxy", null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
+                    "proxy", null,
+                    CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
+                    CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
+                    "",
                     0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE), -1, false,
                     true /*getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true)*/,
@@ -239,38 +243,38 @@ public final class CrawlSwitchboard {
         }
         if (this.defaultRemoteProfile == null) {
             // generate new default entry for remote crawling
-            this.defaultRemoteProfile = new CrawlProfile(CRAWL_PROFILE_REMOTE, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+            this.defaultRemoteProfile = new CrawlProfile(CRAWL_PROFILE_REMOTE, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, "", CrawlProfile.MATCH_NEVER, 0,
                     -1, -1, true, true, true, false, false, true, true, false, CacheStrategy.IFFRESH);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultRemoteProfile.handle()), this.defaultRemoteProfile);
         }
         if (this.defaultTextSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            this.defaultTextSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+            this.defaultTextSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, "", 0,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE), -1, true, false, false, true, false, true, true, false, CacheStrategy.IFEXIST);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultTextSnippetLocalProfile.handle()), this.defaultTextSnippetLocalProfile);
         }
         if (this.defaultTextSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            this.defaultTextSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+            this.defaultTextSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, "", 0,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE), -1, true, true, true, true, false, true, true, false, CacheStrategy.IFEXIST);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()), this.defaultTextSnippetGlobalProfile);
         }
         this.defaultTextSnippetGlobalProfile.setCacheStrategy(CacheStrategy.IFEXIST);
         if (this.defaultMediaSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            this.defaultMediaSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+            this.defaultMediaSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, "", 0,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE), -1, true, false, false, true, false, true, true, false, CacheStrategy.IFEXIST);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultMediaSnippetLocalProfile.handle()), this.defaultMediaSnippetLocalProfile);
         }
         if (this.defaultMediaSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            this.defaultMediaSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+            this.defaultMediaSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, "", 0,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE), -1, true, false, true, true, false, true, true, false, CacheStrategy.IFEXIST);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultMediaSnippetGlobalProfile.handle()), this.defaultMediaSnippetGlobalProfile);
         }
         if (this.defaultSurrogateProfile == null) {
             // generate new default entry for surrogate parsing
-            this.defaultSurrogateProfile = new CrawlProfile(CRAWL_PROFILE_SURROGATE, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+            this.defaultSurrogateProfile = new CrawlProfile(CRAWL_PROFILE_SURROGATE, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, "", 0,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE), -1, true, true, false, false, false, true, true, false, CacheStrategy.NOCACHE);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultSurrogateProfile.handle()), this.defaultSurrogateProfile);
         }
@@ -324,8 +328,8 @@ public final class CrawlSwitchboard {
         ((MapHeap) this.profilesInvalidCrawls).close();
         ((MapHeap) this.profilesPassiveCrawls).close();
     }
-    
-    
+
+
     /**
      * Loads crawl profiles from a DB file.
      * @param file DB file

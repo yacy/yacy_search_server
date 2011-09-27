@@ -48,8 +48,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String HANDLE           = "handle";
     public static final String NAME             = "name";
     public static final String START_URL        = "startURL";
-    public static final String FILTER_MUSTMATCH = "generalFilter";
-    public static final String FILTER_MUSTNOTMATCH = "nevermatch";
     public static final String DEPTH            = "generalDepth";
     public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
     public static final String DOM_MAX_PAGES    = "domMaxPages";
@@ -63,6 +61,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String XDSTOPW          = "xdstopw";
     public static final String XPSTOPW          = "xpstopw";
     public static final String CACHE_STRAGEGY   = "cacheStrategy";
+    public static final String FILTER_URL_MUSTMATCH     = "generalFilter"; // for URLs
+    public static final String FILTER_URL_MUSTNOTMATCH  = "nevermatch";    // for URLs
+    public static final String FILTER_IP_MUSTMATCH      = "crawlingIPMustMatch";
+    public static final String FILTER_IP_MUSTNOTMATCH   = "crawlingIPMustNotMatch";
+    public static final String FILTER_COUNTRY_MUSTMATCH = "crawlingCountryMustMatch";
 
     private Pattern mustmatch = null, mustnotmatch = null;
 
@@ -70,8 +73,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * Constructor which creates CrawlPofile from parameters.
      * @param name name of the crawl profile
      * @param startURL root URL of the crawl
-     * @param mustmatch URLs which do not match this regex will be ignored
-     * @param mustnotmatch URLs which match this regex will be ignored
+     * @param urlMustMatch URLs which do not match this regex will be ignored
+     * @param urlMustNotMatch URLs which match this regex will be ignored
      * @param depth height of the tree which will be created by the crawler
      * @param recrawlIfOlder documents which have been indexed in the past will
      * be indexed again if they are older than the time (ms) in this parameter
@@ -89,8 +92,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public CrawlProfile(
                  final String name,
                  final DigestURI startURL,
-                 final String mustmatch,
-                 final String mustnotmatch,
+                 final String urlMustMatch,
+                 final String urlMustNotMatch,
+                 final String ipMustMatch,
+                 final String ipMustNotMatch,
+                 final String countryMustMatch,
                  final int depth,
                  final long recrawlIfOlder /*date*/,
                  final int domMaxPages,
@@ -107,14 +113,17 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (name == null || name.isEmpty()) {
             throw new NullPointerException("name must not be null or empty");
         }
-        final String handle = (startURL == null) 
+        final String handle = (startURL == null)
                 ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength)
                 : ASCII.String(startURL.hash());
         put(HANDLE,           handle);
         put(NAME,             name);
         put(START_URL,        (startURL == null) ? "" : startURL.toNormalform(true, false));
-        put(FILTER_MUSTMATCH,   (mustmatch == null) ? CrawlProfile.MATCH_ALL : mustmatch);
-        put(FILTER_MUSTNOTMATCH,   (mustnotmatch == null) ? CrawlProfile.MATCH_NEVER : mustnotmatch);
+        put(FILTER_URL_MUSTMATCH,     (urlMustMatch == null) ? CrawlProfile.MATCH_ALL : urlMustMatch);
+        put(FILTER_URL_MUSTNOTMATCH,  (urlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER : urlMustNotMatch);
+        put(FILTER_IP_MUSTMATCH,      (ipMustMatch == null) ? CrawlProfile.MATCH_ALL : ipMustMatch);
+        put(FILTER_IP_MUSTNOTMATCH,   (ipMustNotMatch == null) ? CrawlProfile.MATCH_NEVER : ipMustNotMatch);
+        put(FILTER_COUNTRY_MUSTMATCH, (countryMustMatch == null) ? "" : countryMustMatch);
         put(DEPTH,            depth);
         put(RECRAWL_IF_OLDER, recrawlIfOlder);
         put(DOM_MAX_PAGES,    domMaxPages);
@@ -137,7 +146,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         super(ext == null ? 1 : ext.size());
         if (ext != null) putAll(ext);
     }
-    
+
     /**
      * Adds a parameter to CrawlProfile.
      * @param key name of the parameter
@@ -174,7 +183,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         //if (r == null) return null;
         return r;
     }
-    
+
     /**
      * Gets the name of the CrawlProfile.
      * @return  name of the profile
@@ -184,7 +193,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (r == null) return "";
         return r;
     }
-    
+
     /**
      * Gets the root URL of the crawl job.
      * @return root URL
@@ -193,35 +202,35 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         final String r = get(START_URL);
         return r;
     }
-    
+
     /**
      * Gets the regex which must be matched by URLs in order to be crawled.
      * @return regex which must be matched
      */
     public Pattern mustMatchPattern() {
         if (this.mustmatch == null) {
-            String r = get(FILTER_MUSTMATCH);
+            String r = get(FILTER_URL_MUSTMATCH);
             if (r == null) r = CrawlProfile.MATCH_ALL;
             this.mustmatch = Pattern.compile(r);
         }
         return this.mustmatch;
     }
-    
+
     /**
      * Gets the regex which must not be matched by URLs in order to be crawled.
      * @return regex which must not be matched
      */
     public Pattern mustNotMatchPattern() {
         if (this.mustnotmatch == null) {
-            String r = get(FILTER_MUSTNOTMATCH);
+            String r = get(FILTER_URL_MUSTNOTMATCH);
             if (r == null) r = CrawlProfile.MATCH_NEVER;
             this.mustnotmatch = Pattern.compile(r);
         }
         return this.mustnotmatch;
     }
-    
+
     /**
-     * Gets depth of crawl job (or height of the tree which will be 
+     * Gets depth of crawl job (or height of the tree which will be
      * created by the crawler).
      * @return depth of crawl job
      */
@@ -235,7 +244,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             return 0;
         }
     }
-    
+
     public CacheStrategy cacheStrategy() {
         final String r = get(CACHE_STRAGEGY);
         if (r == null) return CacheStrategy.IFEXIST;
@@ -246,11 +255,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             return CacheStrategy.IFEXIST;
         }
     }
-    
+
     public void setCacheStrategy(final CacheStrategy newStrategy) {
         put(CACHE_STRAGEGY, newStrategy.toString());
     }
-    
+
     /**
      * Gets the minimum age that an entry must have to be re-crawled.
      * @return time in ms
@@ -268,7 +277,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             return 0L;
         }
     }
-    
+
     public int domMaxPages() {
         // this is the maximum number of pages that are crawled for a single domain
         // if -1, this means no limit
@@ -283,31 +292,31 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             return Integer.MAX_VALUE;
         }
     }
-    
+
     public boolean crawlingQ() {
         final String r = get(CRAWLING_Q);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public boolean pushSolr() {
         final String r = get(PUSH_SOLR);
         if (r == null) return true;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public boolean indexText() {
         final String r = get(INDEX_TEXT);
         if (r == null) return true;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public boolean indexMedia() {
         final String r = get(INDEX_MEDIA);
         if (r == null) return true;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public boolean storeHTCache() {
         final String r = get(STORE_HTCACHE);
         if (r == null) return false;
@@ -318,19 +327,19 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public boolean excludeStaticStopwords() {
         final String r = get(XSSTOPW);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public boolean excludeDynamicStopwords() {
         final String r = get(XDSTOPW);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public boolean excludeParentStopwords() {
         final String r = get(XPSTOPW);
         if (r == null) return false;

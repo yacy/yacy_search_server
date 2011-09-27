@@ -136,7 +136,7 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td><label for="mustmatch">Must-Match Filter</label>:</td>
+          <td><label for="mustmatch">Must-Match Filter for URLs</label>:</td>
           <td>
 			<input type="radio" name="range" id="rangeWide" value="wide" checked="checked" />Use filter&nbsp;&nbsp;
 			<input name="mustmatch" id="mustmatch" type="text" size="60" maxlength="100" value="#[mustmatch]#" /><br />
@@ -151,7 +151,7 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">
-          <td><label for="mustnotmatch">Must-Not-Match Filter</label>:</td>
+          <td><label for="mustnotmatch">Must-Not-Match Filter for URLs</label>:</td>
           <td>
 			<input name="mustnotmatch" id="mustnotmatch" type="text" size="60" maxlength="100" value="#[mustnotmatch]#" />
 		  </td>
@@ -160,6 +160,37 @@
             that <b>must not match</b> to allow that the page is accepted for crawling.
             The empty string is a never-match filter which should do well for most cases.
             If you don't know what this means, please leave this field empty.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td><label for="ipMustmatch">Must-Match Filter for IPs</label>:</td>
+          <td>
+			<input name="ipMustmatch" id="ipMustmatch" type="text" size="60" maxlength="100" value="#[ipMustmatch]#" />
+		  </td>
+          <td>
+            Like the MUST-Match Filter for URLs this filter must match, but only for the IP of the host.
+            YaCy performs a DNS lookup for each host and this filter restricts the crawl to specific IPs
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td><label for="ipMustnotmatch">Must-Not-Match Filter for IPs</label>:</td>
+          <td>
+			<input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="60" maxlength="100" value="#[ipMustnotmatch]#" />
+		  </td>
+          <td>
+            This filter must not match on the IP of the crawled host.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td><label for="crawlingCountryMustMatch">Must-Match List for Country Codes</label>:</td>
+          <td>
+			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="true" />Use filter&nbsp;&nbsp;
+			<input name="crawlingCountryMustMatch" id="crawlingCountryMustMatch" type="text" size="60" maxlength="100" value="#[crawlingCountryMustMatch]#" />
+			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="false" checked="checked" />no country code restriction
+		  </td>
+          <td>
+            Crawls can be restricted to specific countries. This uses the country code that can be computed from
+            the IP of the server that hosts the page. The filter is not a regular expressions but a list of country codes, separated by comma.
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">

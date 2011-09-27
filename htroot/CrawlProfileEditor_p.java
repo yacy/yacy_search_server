@@ -86,8 +86,8 @@ public class CrawlProfileEditor_p {
     static {
         labels.add(new eentry(CrawlProfile.NAME,                "Name",                  true,  eentry.STRING));
         labels.add(new eentry(CrawlProfile.START_URL,           "Start URL",             true,  eentry.STRING));
-        labels.add(new eentry(CrawlProfile.FILTER_MUSTMATCH,    "Must-Match Filter",     false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.FILTER_MUSTNOTMATCH, "Must-Not-Match Filter", false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.FILTER_URL_MUSTMATCH,    "Must-Match Filter",     false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.FILTER_URL_MUSTNOTMATCH, "Must-Not-Match Filter", false, eentry.STRING));
         labels.add(new eentry(CrawlProfile.DEPTH,               "Crawl Depth",           false, eentry.INTEGER));
         labels.add(new eentry(CrawlProfile.RECRAWL_IF_OLDER,    "Recrawl If Older",      false, eentry.INTEGER));
         labels.add(new eentry(CrawlProfile.DOM_MAX_PAGES,       "Domain Max. Pages",     false, eentry.INTEGER));
@@ -159,8 +159,8 @@ public class CrawlProfileEditor_p {
         if ((post != null) && (selentry != null)) {
             if (post.containsKey("submit")) {
                 try {
-                	Pattern.compile(post.get(CrawlProfile.FILTER_MUSTMATCH, CrawlProfile.MATCH_ALL));
-                	Pattern.compile(post.get(CrawlProfile.FILTER_MUSTNOTMATCH, CrawlProfile.MATCH_NEVER));
+                	Pattern.compile(post.get(CrawlProfile.FILTER_URL_MUSTMATCH, CrawlProfile.MATCH_ALL));
+                	Pattern.compile(post.get(CrawlProfile.FILTER_URL_MUSTNOTMATCH, CrawlProfile.MATCH_NEVER));
                     final Iterator<eentry> lit = labels.iterator();
                     eentry tee;
                     while (lit.hasNext()) {

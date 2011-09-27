@@ -557,6 +557,12 @@ xpstopw=true
 # Change to false if requesting hits from peers with modified stopwords-file and using the unchanged client-version
 filterOutStopwordsFromTopwords=true
 
+# crawling steering: must-match/must-not-match
+crawlingIPMustMatch=.*
+crawlingIPMustNotMatch=
+# the default country codes are all codes for countries in Europe
+crawlingCountryMustMatch=AD,AL,AT,BA,BE,BG,BY,CH,CY,CZ,DE,DK,EE,ES,FI,FO,FR,GG,GI,GR,HR,HU,IE,IM,IS,IT,JE,LI,LT,LU,LV,MC,MD,MK,MT,NL,NO,PL,PT,RO,RU,SE,SI,SJ,SK,SM,TR,UA,UK,VA,YU
+
 # performance-settings
 # delay-times for permanent loops (milliseconds)
 # the idlesleep is the pause that an proces sleeps if the last call to the

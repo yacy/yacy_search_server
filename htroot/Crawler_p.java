@@ -156,6 +156,14 @@ public class Crawler_p {
                 String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL);
                 final String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
                 if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL; // avoid that all urls are filtered out if bad value was submitted
+                String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL);
+                final String ipMustNotMatch = post.get("ipMustnotmatch", CrawlProfile.MATCH_NEVER);
+                if (ipMustMatch.length() < 2) ipMustMatch = CrawlProfile.MATCH_ALL;
+                final String countryMustMatch = post.getBoolean("countryMustMatchSwitch", false) ? post.get("countryMustMatchList", "") : "";
+                sb.setConfig("crawlingIPMustMatch", ipMustMatch);
+                sb.setConfig("crawlingIPMustNotMatch", ipMustNotMatch);
+                if (countryMustMatch.length() > 0) sb.setConfig("crawlingCountryMustMatch", countryMustMatch);
+
                 // special cases:
                 if (crawlingStartURL!= null && fullDomain) {
                     if (crawlingStartURL.isFile()) {
@@ -249,7 +257,10 @@ public class Crawler_p {
                                 crawlingStart,
                                 crawlingStartURL,
                                 newcrawlingMustMatch,
-                                CrawlProfile.MATCH_NEVER,
+                                newcrawlingMustNotMatch,
+                                ipMustMatch,
+                                ipMustNotMatch,
+                                countryMustMatch,
                                 newcrawlingdepth,
                                 crawlingIfOlder,
                                 crawlingDomMaxPages,
@@ -306,6 +317,9 @@ public class Crawler_p {
                                 crawlingStartURL,
                                 newcrawlingMustMatch,
                                 newcrawlingMustNotMatch,
+                                ipMustMatch,
+                                ipMustNotMatch,
+                                countryMustMatch,
                                 newcrawlingdepth,
                                 crawlingIfOlder,
                                 crawlingDomMaxPages,
@@ -426,6 +440,9 @@ public class Crawler_p {
                                     crawlURL,
                                     newcrawlingMustMatch,
                                     CrawlProfile.MATCH_NEVER,
+                                    ipMustMatch,
+                                    ipMustNotMatch,
+                                    countryMustMatch,
                                     newcrawlingdepth,
                                     crawlingIfOlder,
                                     crawlingDomMaxPages,
@@ -463,6 +480,9 @@ public class Crawler_p {
                 				sitemapURL,
                 				CrawlProfile.MATCH_ALL,
                 				CrawlProfile.MATCH_NEVER,
+                                ipMustMatch,
+                                ipMustNotMatch,
+                                countryMustMatch,
                 				0,
                 				crawlingIfOlder,
                 				crawlingDomMaxPages,
@@ -504,6 +524,9 @@ public class Crawler_p {
                                 sitelistURL,
                                 newcrawlingMustMatch,
                                 CrawlProfile.MATCH_NEVER,
+                                ipMustMatch,
+                                ipMustNotMatch,
+                                countryMustMatch,
                                 newcrawlingdepth,
                                 crawlingIfOlder,
                                 crawlingDomMaxPages,

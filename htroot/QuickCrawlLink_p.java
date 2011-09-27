@@ -149,6 +149,9 @@ public class QuickCrawlLink_p {
                         crawlingStartURL.getHost(),
                         crawlingStartURL,
                         crawlingMustMatch,
+                        CrawlProfile.MATCH_ALL,
+                        CrawlProfile.MATCH_NEVER,
+                        "",
                         crawlingMustNotMatch,
                         CrawlingDepth,
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
