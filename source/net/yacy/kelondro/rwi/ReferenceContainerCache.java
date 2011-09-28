@@ -61,7 +61,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     private final int termSize;
     private final ByteOrder termOrder;
     private final ContainerOrder<ReferenceType> containerOrder;
-    private Map<ByteArray, ReferenceContainer<ReferenceType>> cache;
+    private ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>> cache;
 
     /**
      * open an existing heap file in undefined mode
@@ -511,20 +511,22 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         container.put(newEntry);
 
         // synchronization: check if the entry is still empty and set new value
-        synchronized (this.cache) {
-            final ReferenceContainer<ReferenceType> containerNew = this.cache.put(tha, container);
+        final ReferenceContainer<ReferenceType> container0 = this.cache.put(tha, container);
+        if (container0 != null) synchronized (this.cache) {
+            // no luck here, we get a lock exclusively to sort this out
+            final ReferenceContainer<ReferenceType> containerNew = this.cache.put(tha, container0);
             if (containerNew == null) return;
-            if (container == containerNew) {
+            if (container0 == containerNew) {
                 // The containers are the same, so nothing needs to be done
                 return;
             }
             // Now merge the smaller container into the lager.
             // The other way around can become very slow
-            if (container.size() >= containerNew.size()) {
-                container.putAllRecent(containerNew);
-       	        this.cache.put(tha, container);
+            if (container0.size() >= containerNew.size()) {
+                container0.putAllRecent(containerNew);
+       	        this.cache.put(tha, container0);
             } else {
-                containerNew.putAllRecent(container);
+                containerNew.putAllRecent(container0);
                 this.cache.put(tha, containerNew);
             }
         }

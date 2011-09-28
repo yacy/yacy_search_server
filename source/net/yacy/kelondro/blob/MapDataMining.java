@@ -259,14 +259,14 @@ public class MapDataMining extends MapHeap {
         if (key == null) return;
         
         // update elementCount
-        if ((sortfields != null) || (longaccfields != null) || (floataccfields != null)) {
+        if (sortfields != null || longaccfields != null || floataccfields != null) {
             Map<String, String> map;
             try {
                 map = super.get(key, false);
                 if (map != null) {
 
                     // update accumulators (subtract)
-                    if ((longaccfields != null) || (floataccfields != null)) updateAcc(map, false);
+                    if (longaccfields != null || floataccfields != null) updateAcc(map, false);
 
                     // remove from sortCluster
                     if (sortfields != null) deleteSortCluster(UTF8.String(key));

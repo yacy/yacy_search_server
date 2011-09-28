@@ -178,9 +178,6 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     private String alternativeIP = null;
     private long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
 
-    // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
-
     public yacySeed(final String theHash, final ConcurrentMap<String, String> theDna) {
         // create a seed with a pre-defined hash map
         assert theHash != null;
@@ -234,7 +231,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         this.dna.put(yacySeed.URL_IN, yacySeed.ZERO);    // received URLs
 
         // default first filling
-        this.dna.put(yacySeed.BDATE, my_SHORT_SECOND_FORMATTER.format());
+        this.dna.put(yacySeed.BDATE, GenericFormatter.SHORT_SECOND_FORMATTER.format());
         this.dna.put(yacySeed.LASTSEEN, this.dna.get(yacySeed.BDATE)); // just as initial setting
         this.dna.put(yacySeed.UTC, GenericFormatter.UTCDiffString());
         this.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // virgin/junior/senior/principal
@@ -524,6 +521,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
+        GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
         final String ls = my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
         //System.out.println("SETTING LAST-SEEN of " + this.getName() + " to " + ls);
         this.dna.put(yacySeed.LASTSEEN, ls );
@@ -534,6 +532,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
      */
     public final long getLastSeenUTC() {
         try {
+            GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
             final long t = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
@@ -563,6 +562,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if (this.birthdate > 0) return this.birthdate;
         long b;
         try {
+            GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
             b = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
         } catch (final ParseException e) {
             b = System.currentTimeMillis();

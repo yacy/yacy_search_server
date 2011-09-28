@@ -117,19 +117,21 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         
         // try to get the thread dump from yacy.log which is available when YaCy is started with
         // startYACY.sh -l
-        if (!canProduceLockedBy(logFile)) return;
-        long sizeBefore = logFile.length();
-        
-        // get the current process PID
-        int pid = OS.getPID();
-        
-        // call kill -3 on the pid
-        if (pid >= 0) try {OS.execSynchronous("kill -3 " + pid);} catch (IOException e) {}
+        long sizeBefore = 0;
+        if (canProduceLockedBy(logFile)) {
+            sizeBefore = logFile.length();
+            
+            // get the current process PID
+            int pid = OS.getPID();
+            
+            // call kill -3 on the pid
+            if (pid >= 0) try {OS.execSynchronous("kill -3 " + pid);} catch (IOException e) {}
+        }
 
         // read the log from the dump
         long sizeAfter = logFile.length();
         if (sizeAfter <= sizeBefore) return;
-
+        
         RandomAccessFile raf = new RandomAccessFile(logFile, "r");
         raf.seek(sizeBefore);
         byte[] b = new byte[(int) (sizeAfter - sizeBefore)];
@@ -412,7 +414,9 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             }
         }
         //dump.print();
+        assert dump != null;
         Map<StackTrace, Integer> locks = dump.countLocks();
+        assert locks != null;
         System.out.println("*** Thread Dump Lock report; dump size = " + dump.size() + ", locks = " + locks.size());
         for (int i = 0; i < dump.size() + 10; i++) {
             for (Map.Entry<StackTrace, Integer> entry: locks.entrySet()) {

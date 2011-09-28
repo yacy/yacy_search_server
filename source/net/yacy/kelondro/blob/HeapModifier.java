@@ -109,7 +109,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             if (seek < 0) return;
             
             // check consistency of the index
-            assert (checkKey(key, seek)) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + seek;
+            //assert (checkKey(key, seek)) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + seek;
             
             // access the file and read the container
             this.file.seek(seek);
@@ -262,7 +262,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             if (pos < 0) return 0;
             
             // check consistency of the index
-            assert checkKey(key, pos) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + pos;
+            //assert checkKey(key, pos) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + pos;
             
             // access the file and read the container
             file.seek(pos);
