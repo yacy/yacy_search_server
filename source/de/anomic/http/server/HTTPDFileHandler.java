@@ -1412,7 +1412,9 @@ public final class HTTPDFileHandler {
 				if(m.group(8) != null) url = m.group(8);
 				if(m.group(10) != null) url = m.group(10);
 				if (url.startsWith("data:") || url.startsWith("#") || url.startsWith("mailto:") || url.startsWith("javascript:")) {
-				    m.appendReplacement(result, init + url);
+					String newurl = init + url;
+					newurl = newurl.replaceAll("\\$","\\\\\\$");
+				    m.appendReplacement(result, newurl);
 
 				} else if (url.startsWith("http")) {
 					// absoulte url of form href="http://domain.com/path"
@@ -1422,17 +1424,36 @@ public final class HTTPDFileHandler {
 						}
 					}
 
-				    m.appendReplacement(result, init + "/proxy.html?url=" + url);
+					String newurl = init + "/proxy.html?url=" + url;
+					newurl = newurl.replaceAll("\\$","\\\\\\$");
+				    m.appendReplacement(result, newurl);
+
+				} else if (url.startsWith("//")) {
+					// absoulte url but same protocol of form href="//domain.com/path"
+					String complete_url = proxyurl.getProtocol() + ":" +  url;
+					if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
+						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI(complete_url)) != null) {
+							continue;
+						}
+					}
+
+					String newurl = init + "/proxy.html?url=" + complete_url;
+					newurl = newurl.replaceAll("\\$","\\\\\\$");
+				    m.appendReplacement(result, newurl);
 
 				} else if (url.startsWith("/")) {
 					// absolute path of form href="/absolute/path/to/linked/page"
-				    m.appendReplacement(result, init + "/proxy.html?url=http://" + proxyurl.getHost() + url);
+					String newurl = init + "/proxy.html?url=http://" + host + url;
+					newurl = newurl.replaceAll("\\$","\\\\\\$");
+				    m.appendReplacement(result, newurl);
 
 				} else {
 					// relative path of form href="relative/path"
 					try {
-						target = new MultiProtocolURI(proxyurl.getHost() + directory + "/" + url);						
-						m.appendReplacement(result, init + "/proxy.html?url=" + target.toString());
+						target = new MultiProtocolURI("http://" + host + directory + "/" + url);
+						String newurl = init + "/proxy.html?url=" + target.toString();
+						newurl = newurl.replaceAll("\\$","\\\\\\$");
+						m.appendReplacement(result, newurl);
 					}
 					catch (MalformedURLException e) {}
 
