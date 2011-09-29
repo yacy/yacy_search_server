@@ -117,6 +117,8 @@
         #(showDate)#::<td><strong>Modified</strong></td>#(/showDate)#
         #(showWords)#::<td><strong>Words</strong></td>#(/showWords)#
         #(showTitle)#::<td><strong>Title</strong></td>#(/showTitle)#
+        #(showCountry)#::<td><strong>Country</strong></td>#(/showCountry)#
+        #(showIP)#::<td><strong>IP of Host</strong></td>#(/showIP)#
         #(showURL)#::<td><strong>URL</strong></td>#(/showURL)#
       </tr>
       #{indexed}#
@@ -146,6 +148,9 @@
           #(/available)#
         </td>
         #(/showTitle)#
+        
+        #(showCountry)#::<td>#[country]#</td>#(/showCountry)#
+        #(showIP)#::<td>#[ip]#</td>#(/showIP)#
 
         #(showURL)#
         ::
