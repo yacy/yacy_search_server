@@ -153,12 +153,12 @@ public class Crawler_p {
                 final boolean subPath    = "subpath".equals(post.get("range", "wide")); // special property in simple crawl start
 
                 // set the crawl filter
-                String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL);
-                final String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
-                if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL; // avoid that all urls are filtered out if bad value was submitted
-                String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL);
-                final String ipMustNotMatch = post.get("ipMustnotmatch", CrawlProfile.MATCH_NEVER);
-                if (ipMustMatch.length() < 2) ipMustMatch = CrawlProfile.MATCH_ALL;
+                String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
+                final String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+                if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // avoid that all urls are filtered out if bad value was submitted
+                String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
+                final String ipMustNotMatch = post.get("ipMustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+                if (ipMustMatch.length() < 2) ipMustMatch = CrawlProfile.MATCH_ALL_STRING;
                 final String countryMustMatch = post.getBoolean("countryMustMatchSwitch", false) ? post.get("countryMustMatchList", "") : "";
                 sb.setConfig("crawlingIPMustMatch", ipMustMatch);
                 sb.setConfig("crawlingIPMustNotMatch", ipMustNotMatch);
@@ -439,7 +439,7 @@ public class Crawler_p {
                                     crawlingFileName,
                                     crawlURL,
                                     newcrawlingMustMatch,
-                                    CrawlProfile.MATCH_NEVER,
+                                    CrawlProfile.MATCH_NEVER_STRING,
                                     ipMustMatch,
                                     ipMustNotMatch,
                                     countryMustMatch,
@@ -478,8 +478,8 @@ public class Crawler_p {
                 		final CrawlProfile pe = new CrawlProfile(
                 				sitemapURLStr,
                 				sitemapURL,
-                				CrawlProfile.MATCH_ALL,
-                				CrawlProfile.MATCH_NEVER,
+                				CrawlProfile.MATCH_ALL_STRING,
+                				CrawlProfile.MATCH_NEVER_STRING,
                                 ipMustMatch,
                                 ipMustNotMatch,
                                 countryMustMatch,
@@ -523,7 +523,7 @@ public class Crawler_p {
                                 sitelistURL.getHost(),
                                 sitelistURL,
                                 newcrawlingMustMatch,
-                                CrawlProfile.MATCH_NEVER,
+                                CrawlProfile.MATCH_NEVER_STRING,
                                 ipMustMatch,
                                 ipMustNotMatch,
                                 countryMustMatch,

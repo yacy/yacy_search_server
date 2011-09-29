@@ -279,7 +279,7 @@ public class SolrSingleConnector implements SolrConnector {
             final SolrInputDocument solrdoc = new SolrInputDocument();
             solrdoc.addField("id", ASCII.String(digestURI.hash()));
             solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
-            final InetAddress address = Domains.dnsResolve(digestURI.getHost());
+            final InetAddress address = digestURI.getInetAddress();
             if (address != null) solrdoc.addField("ip_s", address.getHostAddress());
             if (digestURI.getHost() != null) solrdoc.addField("host_s", digestURI.getHost());
 

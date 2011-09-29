@@ -232,6 +232,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     	int pos = 0;
     	while (i.hasNext()) {
     		r = i.next();
+    		if (r == null) continue;
     		mod = r.lastModified();
     		positions = tm.get(mod);
     		if (positions == null) positions = new ArrayList<Integer>();

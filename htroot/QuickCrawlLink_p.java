@@ -108,8 +108,8 @@ public class QuickCrawlLink_p {
         final String title = post.get("title",null);
 
         // get other parameters if set
-        final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL);
-        final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
+        final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
+        final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         final int CrawlingDepth      = post.getInt("crawlingDepth", 0);
         final boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
         final boolean indexText      = post.get("indexText", "on").equals("on");
@@ -149,8 +149,8 @@ public class QuickCrawlLink_p {
                         crawlingStartURL.getHost(),
                         crawlingStartURL,
                         crawlingMustMatch,
-                        CrawlProfile.MATCH_ALL,
-                        CrawlProfile.MATCH_NEVER,
+                        CrawlProfile.MATCH_ALL_STRING,
+                        CrawlProfile.MATCH_NEVER_STRING,
                         "",
                         crawlingMustNotMatch,
                         CrawlingDepth,

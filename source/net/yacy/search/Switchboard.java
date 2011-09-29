@@ -1909,8 +1909,8 @@ public final class Switchboard extends serverSwitch {
             this.log.logFine("processResourceStack processCase=" + processCase +
                 ", depth=" + response.depth() +
                 ", maxDepth=" + ((response.profile() == null) ? "null" : Integer.toString(response.profile().depth())) +
-                ", must-match=" + ((response.profile() == null) ? "null" : response.profile().mustMatchPattern().toString()) +
-                ", must-not-match=" + ((response.profile() == null) ? "null" : response.profile().mustNotMatchPattern().toString()) +
+                ", must-match=" + ((response.profile() == null) ? "null" : response.profile().urlMustMatchPattern().toString()) +
+                ", must-not-match=" + ((response.profile() == null) ? "null" : response.profile().urlMustNotMatchPattern().toString()) +
                 ", initiatorHash=" + ((response.initiator() == null) ? "null" : ASCII.String(response.initiator())) +
                 //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
                 ", url=" + response.url()); // DEBUG

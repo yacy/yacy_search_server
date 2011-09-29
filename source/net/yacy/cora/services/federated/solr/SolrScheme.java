@@ -37,7 +37,6 @@ import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.ConfigurationSet;
@@ -103,7 +102,7 @@ public class SolrScheme extends ConfigurationSet {
         addSolr(solrdoc, "failreason_t", ""); // overwrite a possible fail reason (in case that there was a fail reason before)
         addSolr(solrdoc, "id", id);
         addSolr(solrdoc, "sku", digestURI.toNormalform(true, false), 3.0f);
-        final InetAddress address = Domains.dnsResolve(digestURI.getHost());
+        final InetAddress address = digestURI.getInetAddress();
         if (address != null) addSolr(solrdoc, "ip_s", address.getHostAddress());
         if (digestURI.getHost() != null) addSolr(solrdoc, "host_s", digestURI.getHost());
         addSolr(solrdoc, "title", yacydoc.dc_title());
@@ -354,16 +353,16 @@ public class SolrScheme extends ConfigurationSet {
         return solrdoc;
     }
 
-    private int relEval(String[] rel) {
+    private int relEval(final String[] rel) {
         int i = 0;
-        for (String s: rel) {
-            String s0 = s.toLowerCase().trim();
+        for (final String s: rel) {
+            final String s0 = s.toLowerCase().trim();
             if ("me".equals(s0)) i += 1;
             if ("nofollow".equals(s0)) i += 2;
         }
         return i;
     }
-    
+
     public String solrGetID(final SolrDocument solr) {
         return (String) solr.getFieldValue("id");
     }

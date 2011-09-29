@@ -42,11 +42,11 @@ public class CrawlStartExpert_p {
         prop.put("starturl", /*(intranet) ? repository :*/ "http://");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", Math.min(3, env.getConfigLong("crawlingDepth", 0)));
-        prop.put("mustmatch", /*(intranet) ? repository + ".*" :*/ CrawlProfile.MATCH_ALL);
-        prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER);
-        prop.put("ipMustmatch", sb.getConfig("crawlingIPMustMatch", CrawlProfile.MATCH_ALL));
-        prop.put("ipMustnotmatch", sb.getConfig("crawlingIPMustNotMatch", CrawlProfile.MATCH_NEVER));
-        prop.put("crawlingCountryMustMatch", sb.getConfig("crawlingCountryMustMatch", ""));
+        prop.put("mustmatch", /*(intranet) ? repository + ".*" :*/ CrawlProfile.MATCH_ALL_STRING);
+        prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+        prop.put("ipMustmatch", sb.getConfig("crawlingIPMustMatch", CrawlProfile.MATCH_ALL_STRING));
+        prop.put("ipMustnotmatch", sb.getConfig("crawlingIPMustNotMatch", CrawlProfile.MATCH_NEVER_STRING));
+        prop.put("countryMustMatch", sb.getConfig("crawlingCountryMustMatch", ""));
 
         prop.put("crawlingIfOlderCheck", "0");
         prop.put("crawlingIfOlderUnitYearCheck", "0");

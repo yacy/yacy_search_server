@@ -550,6 +550,11 @@ public class Domains {
         cacheHit_Insert++;
     }
 
+    /**
+     * resolve a host address using a local DNS cache and a DNS lookup if necessary
+     * @param host
+     * @return the hosts InetAddress or null if the address cannot be resolved
+     */
     public static InetAddress dnsResolve(String host) {
         if ((host == null) || (host.length() == 0)) return null;
         host = host.toLowerCase().trim();
@@ -921,7 +926,7 @@ public class Domains {
     public static Locale getLocale(final String host) {
         if (host == null) return null;
         final Locale locale = getLocale(dnsResolve(host));
-        if (locale != null) return locale;
+        if (locale != null && locale.getCountry() != null && locale.getCountry().length() > 0) return locale;
         final int p = host.lastIndexOf('.');
         if (p < 0) return null;
         String tld = host.substring(p + 1).toUpperCase();

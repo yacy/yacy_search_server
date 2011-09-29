@@ -34,6 +34,7 @@ import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -438,8 +439,9 @@ public final class CrawlStacker {
 
         // check if the protocol is supported
         final String urlProtocol = url.getProtocol();
+        final String urlstring = url.toString();
         if (!Switchboard.getSwitchboard().loader.isSupportedProtocol(urlProtocol)) {
-            this.log.logSevere("Unsupported protocol in URL '" + url.toString() + "'.");
+            this.log.logSevere("Unsupported protocol in URL '" + urlstring + "'.");
             return "unsupported protocol";
         }
 
@@ -452,31 +454,31 @@ public final class CrawlStacker {
 
         // check blacklist
         if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is in blacklist.");
+            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is in blacklist.");
             return "url in blacklist";
         }
 
-        // filter with must-match
-        if ((depth > 0) && !profile.mustMatchPattern().matcher(url.toString()).matches()) {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' does not match must-match crawling filter '" + profile.mustMatchPattern().toString() + "'.");
+        // filter with must-match for URLs
+        if ((depth > 0) && !profile.urlMustMatchPattern().matcher(urlstring).matches()) {
+            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' does not match must-match crawling filter '" + profile.urlMustMatchPattern().toString() + "'.");
             return "url does not match must-match filter";
         }
 
-        // filter with must-not-match
-        if ((depth > 0) && profile.mustNotMatchPattern().matcher(url.toString()).matches()) {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' does matches do-not-match crawling filter '" + profile.mustNotMatchPattern().toString() + "'.");
+        // filter with must-not-match for URLs
+        if ((depth > 0) && profile.urlMustNotMatchPattern().matcher(urlstring).matches()) {
+            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.urlMustNotMatchPattern().toString() + "'.");
             return "url matches must-not-match filter";
         }
 
         // deny cgi
         if (url.isIndividual() && !(profile.crawlingQ()))  { // TODO: make special property for crawlingIndividual
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is CGI URL.");
+            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is CGI URL.");
             return "individual url (sessionid etc) not wanted";
         }
 
         // deny post properties
         if (url.isPOST() && !(profile.crawlingQ()))  {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is post URL.");
+            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is post URL.");
             return "post url not allowed";
         }
 
@@ -486,7 +488,7 @@ public final class CrawlStacker {
         if (oldEntry == null) {
             if (dbocc != null) {
                 // do double-check
-                if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is double registered in '" + dbocc + "'.");
+                if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is double registered in '" + dbocc + "'.");
                 if (dbocc.equals("errors")) {
                     final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
                     return "double in: errors (" + errorEntry.anycause() + ")";
@@ -498,13 +500,13 @@ public final class CrawlStacker {
             final boolean recrawl = profile.recrawlIfOlder() > oldEntry.loaddate().getTime();
             if (recrawl) {
                 if (this.log.isInfo())
-                    this.log.logInfo("RE-CRAWL of URL '" + url.toString() + "': this url was crawled " +
+                    this.log.logInfo("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                         ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
             } else {
                 if (dbocc == null) {
                     return "double in: LURL-DB";
                 } else {
-                    if (this.log.isInfo()) this.log.logInfo("URL '" + url.toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
+                    if (this.log.isInfo()) this.log.logInfo("URL '" + urlstring + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
                     if (dbocc.equals("errors")) {
                         final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
                         return "double in: errors (" + errorEntry.anycause() + ")";
@@ -520,13 +522,48 @@ public final class CrawlStacker {
         if (maxAllowedPagesPerDomain < Integer.MAX_VALUE) {
             final DomProfile dp = this.doms.get(url.getHost());
             if (dp != null && dp.count >= maxAllowedPagesPerDomain) {
-                if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' appeared too often in crawl stack, a maximum of " + profile.domMaxPages() + " is allowed.");
+                if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + profile.domMaxPages() + " is allowed.");
                 return "crawl stack domain counter exceeded";
             }
 
             if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= profile.domMaxPages()) {
-                if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' appeared too often in result stack, a maximum of " + profile.domMaxPages() + " is allowed.");
+                if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' appeared too often in result stack, a maximum of " + profile.domMaxPages() + " is allowed.");
                 return "result stack domain counter exceeded";
+            }
+        }
+
+        // the following filters use a DNS lookup to check if the url matches with IP filter
+        // this is expensive and those filters are check at the end of all other tests
+
+        // filter with must-match for IPs
+        if ((depth > 0) && profile.ipMustMatchPattern() != CrawlProfile.MATCH_ALL_PATTERN && !profile.ipMustMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
+            if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' does not match must-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
+            return "ip " + url.getInetAddress().getHostAddress() + " of url does not match must-match filter";
+        }
+
+        // filter with must-not-match for IPs
+        if ((depth > 0) && profile.ipMustMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.ipMustNotMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
+            if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
+            return "ip " + url.getInetAddress().getHostAddress() + " of url matches must-not-match filter";
+        }
+
+        // filter with must-match for IPs
+        final String[] countryMatchList = profile.countryMustMatchList();
+        if (depth > 0 && countryMatchList != null && countryMatchList.length > 0) {
+            final Locale locale = url.getLocale();
+            if (locale != null) {
+                final String c0 = locale.getCountry();
+                boolean granted = false;
+                matchloop: for (final String c: countryMatchList) {
+                    if (c0.equals(c)) {
+                        granted = true;
+                        break matchloop;
+                    }
+                }
+                if (!granted) {
+                    if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' does not match must-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
+                    return "country " + c0 + " of url does not match must-match filter for countries";
+                }
             }
         }
 

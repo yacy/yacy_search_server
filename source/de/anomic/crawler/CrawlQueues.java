@@ -299,8 +299,8 @@ public class CrawlQueues {
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
                             + ", depth=" + urlEntry.depth()
                             + ", crawlDepth=" + profile.depth()
-                            + ", must-match=" + profile.mustMatchPattern().toString()
-                            + ", must-not-match=" + profile.mustNotMatchPattern().toString()
+                            + ", must-match=" + profile.urlMustMatchPattern().toString()
+                            + ", must-not-match=" + profile.urlMustNotMatchPattern().toString()
                             + ", permission=" + ((this.sb.peers == null) ? "undefined" : (((this.sb.peers.mySeed().isSenior()) || (this.sb.peers.mySeed().isPrincipal())) ? "true" : "false")));
 
                 // work off one Crawl stack entry

@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -38,10 +38,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlStacker;
 import de.anomic.crawler.CrawlSwitchboard;
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -63,7 +62,7 @@ public class CrawlProfileEditor_p {
         ignoreNames.add(CrawlSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES);
         ignoreNames.add(CrawlSwitchboard.DBFILE_PASSIVE_CRAWL_PROFILES);
     }
-    
+
     public static class eentry {
         public static final int BOOLEAN = 0;
         public static final int INTEGER = 1;
@@ -73,7 +72,7 @@ public class CrawlProfileEditor_p {
         public final String label;
         public final boolean readonly;
         public final int type;
-        
+
         public eentry(final String name, final String label, final boolean readonly, final int type) {
             this.name = name;
             this.label = label;
@@ -81,7 +80,7 @@ public class CrawlProfileEditor_p {
             this.type = type;
         }
     }
-    
+
     private static final List <eentry> labels = new ArrayList<eentry>();
     static {
         labels.add(new eentry(CrawlProfile.NAME,                "Name",                  true,  eentry.STRING));
@@ -100,14 +99,14 @@ public class CrawlProfileEditor_p {
         labels.add(new eentry(CrawlProfile.XDSTOPW,             "Dynamic stop-words",    false, eentry.BOOLEAN));
         labels.add(new eentry(CrawlProfile.XPSTOPW,             "Parent stop-words",     false, eentry.BOOLEAN));
     }
-    
+
     public static serverObjects respond(
-            final RequestHeader header, 
+            final RequestHeader header,
             final serverObjects post,
             final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final Switchboard sb = (Switchboard)env;
-        
+
         // read post for handle
         final String handle = (post == null) ? "" : post.get("handle", "");
         if (post != null) {
@@ -117,8 +116,8 @@ public class CrawlProfileEditor_p {
                 if (p != null) sb.crawler.putPassive(handle.getBytes(), p);
                 // delete all entries from the crawl queue that are deleted here
                 sb.crawler.removeActive(handle.getBytes());
-                sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000); 
-            } catch (RowSpaceExceededException e) {
+                sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }
             if (post.containsKey("delete")) {
@@ -131,7 +130,7 @@ public class CrawlProfileEditor_p {
                 }
             }
         }
-        
+
         // generate handle list: first sort by handle name
         CrawlProfile selentry;
         final Map<String, String> orderdHandles = new TreeMap<String, String>();
@@ -141,7 +140,7 @@ public class CrawlProfileEditor_p {
                 orderdHandles.put(selentry.name(), selentry.handle());
             }
         }
-        
+
         // then write into pop-up menu list
         int count = 0;
         for (final Map.Entry<String, String> NameHandle: orderdHandles.entrySet()) {
@@ -159,8 +158,8 @@ public class CrawlProfileEditor_p {
         if ((post != null) && (selentry != null)) {
             if (post.containsKey("submit")) {
                 try {
-                	Pattern.compile(post.get(CrawlProfile.FILTER_URL_MUSTMATCH, CrawlProfile.MATCH_ALL));
-                	Pattern.compile(post.get(CrawlProfile.FILTER_URL_MUSTNOTMATCH, CrawlProfile.MATCH_NEVER));
+                	Pattern.compile(post.get(CrawlProfile.FILTER_URL_MUSTMATCH, CrawlProfile.MATCH_ALL_STRING));
+                	Pattern.compile(post.get(CrawlProfile.FILTER_URL_MUSTNOTMATCH, CrawlProfile.MATCH_NEVER_STRING));
                     final Iterator<eentry> lit = labels.iterator();
                     eentry tee;
                     while (lit.hasNext()) {
@@ -179,7 +178,7 @@ public class CrawlProfileEditor_p {
                 }
             }
         }
-        
+
         // generate crawl profile table
         count = 0;
         boolean dark = true;
@@ -231,10 +230,10 @@ public class CrawlProfileEditor_p {
             }
             prop.put("edit_entries", count);
         }
-        
+
         return prop;
     }
-    
+
     private static void putProfileEntry(
             final servletProperties prop,
             final CrawlStacker crawlStacker,
@@ -253,8 +252,8 @@ public class CrawlProfileEditor_p {
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_startURL", profile.startURL());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_handle", profile.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", profile.depth());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustmatch", profile.mustMatchPattern().toString());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", profile.mustNotMatchPattern().toString());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustmatch", profile.urlMustMatchPattern().toString());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", profile.urlMustNotMatchPattern().toString());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", "inactive");
 
@@ -270,7 +269,7 @@ public class CrawlProfileEditor_p {
             i++;
         }
         }
-        
+
         prop.put(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent", i);
 
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(profile.domMaxPages()));

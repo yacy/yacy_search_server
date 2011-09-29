@@ -41,8 +41,10 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
 
     private static final long serialVersionUID = 5527325718810703504L;
 
-    public static final String MATCH_ALL = ".*";
-    public static final String MATCH_NEVER = "";
+    public static final String  MATCH_ALL_STRING    = ".*";
+    public static final String  MATCH_NEVER_STRING  = "";
+    public static final Pattern MATCH_ALL_PATTERN   = Pattern.compile(MATCH_ALL_STRING);
+    public static final Pattern MATCH_NEVER_PATTERN = Pattern.compile(MATCH_NEVER_STRING);
 
     // this is a simple record structure that hold all properties of a single crawl start
     public static final String HANDLE           = "handle";
@@ -67,7 +69,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String FILTER_IP_MUSTNOTMATCH   = "crawlingIPMustNotMatch";
     public static final String FILTER_COUNTRY_MUSTMATCH = "crawlingCountryMustMatch";
 
-    private Pattern mustmatch = null, mustnotmatch = null;
+    private Pattern urlmustmatch = null, urlmustnotmatch = null, ipmustmatch = null, ipmustnotmatch = null;
 
     /**
      * Constructor which creates CrawlPofile from parameters.
@@ -119,10 +121,10 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(HANDLE,           handle);
         put(NAME,             name);
         put(START_URL,        (startURL == null) ? "" : startURL.toNormalform(true, false));
-        put(FILTER_URL_MUSTMATCH,     (urlMustMatch == null) ? CrawlProfile.MATCH_ALL : urlMustMatch);
-        put(FILTER_URL_MUSTNOTMATCH,  (urlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER : urlMustNotMatch);
-        put(FILTER_IP_MUSTMATCH,      (ipMustMatch == null) ? CrawlProfile.MATCH_ALL : ipMustMatch);
-        put(FILTER_IP_MUSTNOTMATCH,   (ipMustNotMatch == null) ? CrawlProfile.MATCH_NEVER : ipMustNotMatch);
+        put(FILTER_URL_MUSTMATCH,     (urlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : urlMustMatch);
+        put(FILTER_URL_MUSTNOTMATCH,  (urlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : urlMustNotMatch);
+        put(FILTER_IP_MUSTMATCH,      (ipMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : ipMustMatch);
+        put(FILTER_IP_MUSTNOTMATCH,   (ipMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : ipMustNotMatch);
         put(FILTER_COUNTRY_MUSTMATCH, (countryMustMatch == null) ? "" : countryMustMatch);
         put(DEPTH,            depth);
         put(RECRAWL_IF_OLDER, recrawlIfOlder);
@@ -207,26 +209,77 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * Gets the regex which must be matched by URLs in order to be crawled.
      * @return regex which must be matched
      */
-    public Pattern mustMatchPattern() {
-        if (this.mustmatch == null) {
-            String r = get(FILTER_URL_MUSTMATCH);
-            if (r == null) r = CrawlProfile.MATCH_ALL;
-            this.mustmatch = Pattern.compile(r);
+    public Pattern urlMustMatchPattern() {
+        if (this.urlmustmatch == null) {
+            final String r = get(FILTER_URL_MUSTMATCH);
+            if (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) {
+                this.urlmustmatch = CrawlProfile.MATCH_ALL_PATTERN;
+            } else {
+                this.urlmustmatch = Pattern.compile(r);
+            }
         }
-        return this.mustmatch;
+        return this.urlmustmatch;
     }
 
     /**
      * Gets the regex which must not be matched by URLs in order to be crawled.
      * @return regex which must not be matched
      */
-    public Pattern mustNotMatchPattern() {
-        if (this.mustnotmatch == null) {
-            String r = get(FILTER_URL_MUSTNOTMATCH);
-            if (r == null) r = CrawlProfile.MATCH_NEVER;
-            this.mustnotmatch = Pattern.compile(r);
+    public Pattern urlMustNotMatchPattern() {
+        if (this.urlmustnotmatch == null) {
+            final String r = get(FILTER_URL_MUSTNOTMATCH);
+            if (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) {
+                this.urlmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN;
+            } else {
+                this.urlmustnotmatch = Pattern.compile(r);
+            }
         }
-        return this.mustnotmatch;
+        return this.urlmustnotmatch;
+    }
+
+    /**
+     * Gets the regex which must be matched by IPs in order to be crawled.
+     * @return regex which must be matched
+     */
+    public Pattern ipMustMatchPattern() {
+        if (this.ipmustmatch == null) {
+            final String r = get(FILTER_IP_MUSTMATCH);
+            if (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) {
+                this.ipmustmatch = CrawlProfile.MATCH_ALL_PATTERN;
+            } else {
+                this.ipmustmatch = Pattern.compile(r);
+            }
+        }
+        return this.ipmustmatch;
+    }
+
+    /**
+     * Gets the regex which must not be matched by IPs in order to be crawled.
+     * @return regex which must not be matched
+     */
+    public Pattern ipMustNotMatchPattern() {
+        if (this.ipmustnotmatch == null) {
+            final String r = get(FILTER_IP_MUSTNOTMATCH);
+            if (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) {
+                this.ipmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN;
+            } else {
+                this.ipmustnotmatch = Pattern.compile(r);
+            }
+        }
+        return this.ipmustnotmatch;
+    }
+
+    /**
+     * get the list of countries that must match for the locations of the URLs IPs
+     * @return a list of country codes
+     */
+    public String[] countryMustMatchList() {
+        String countryMustMatch = get(FILTER_COUNTRY_MUSTMATCH);
+        if (countryMustMatch == null) countryMustMatch = "";
+        if (countryMustMatch.length() == 0) return new String[0];
+        String[] list = countryMustMatch.split(",");
+        if (list.length == 1 && list.length == 0) list = new String[0];
+        return list;
     }
 
     /**

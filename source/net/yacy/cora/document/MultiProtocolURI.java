@@ -88,6 +88,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     protected final String protocol, userInfo;
     protected       String host, path, quest, ref;
     protected       int port;
+    private         InetAddress hostAddress;
 
     /**
      * initialization of a MultiProtocolURI to produce poison pills for concurrent blocking queues
@@ -95,6 +96,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public MultiProtocolURI()  {
         this.protocol = null;
         this.host = null;
+        this.hostAddress = null;
         this.userInfo = null;
         this.path = null;
         this.quest = null;
@@ -109,6 +111,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     protected MultiProtocolURI(final MultiProtocolURI url) {
         this.protocol = url.protocol;
         this.host = url.host;
+        this.hostAddress = null;
         this.userInfo = url.userInfo;
         this.path = url.path;
         this.quest = url.quest;
@@ -118,6 +121,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     public MultiProtocolURI(String url) throws MalformedURLException {
         if (url == null) throw new MalformedURLException("url string is null");
+
+        this.hostAddress = null;
 
         // identify protocol
         assert (url != null);
@@ -688,6 +693,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return this.host;
     }
 
+    public InetAddress getInetAddress() {
+        if (this.hostAddress != null) return this.hostAddress;
+        this.hostAddress = Domains.dnsResolve(this.host.toLowerCase());
+        return this.hostAddress;
+    }
+
     public int getPort() {
         return this.port;
     }
@@ -827,7 +838,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             }
             final String hl = getHost().toLowerCase();
             if (resolveHost) {
-                final InetAddress r = Domains.dnsResolve(hl);
+                final InetAddress r = getInetAddress();
                 u.append(r == null ? hl : r.getHostAddress());
             } else {
                 u.append(hl);
@@ -1119,8 +1130,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return baos.toByteArray();
     }
 
-
     public Locale getLocale() {
+        if (this.hostAddress != null) {
+            final Locale locale = Domains.getLocale(this.hostAddress);
+            if (locale != null && locale.getCountry() != null && locale.getCountry().length() > 0) return locale;
+        }
         return Domains.getLocale(this.host);
     }
 

@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -53,22 +53,22 @@ public class Scanner extends Thread {
 
     private static final Service POISONSERVICE = new Service(Protocol.http, null);
     private static final Object PRESENT = new Object();
-    
+
     public static enum Access {unknown, empty, granted, denied;}
     public static enum Protocol {http(80), https(443), ftp(21), smb(445);
         public int port;
-        private Protocol(int port) {this.port = port;}
+        private Protocol(final int port) {this.port = port;}
     }
     public static class Service {
         public Protocol protocol;
         public InetAddress inetAddress;
         private String hostname;
-        public Service(Protocol protocol, InetAddress inetAddress) {
+        public Service(final Protocol protocol, final InetAddress inetAddress) {
             this.protocol = protocol;
             this.inetAddress = inetAddress;
             this.hostname = null;
         }
-        public Service(String protocol, InetAddress inetAddress) {
+        public Service(final String protocol, final InetAddress inetAddress) {
             this.protocol = protocol.equals("http") ? Protocol.http : protocol.equals("https") ? Protocol.https : protocol.equals("ftp") ? Protocol.ftp : Protocol.smb;
             this.inetAddress = inetAddress;
             this.hostname = null;
@@ -92,7 +92,7 @@ public class Scanner extends Thread {
             try {
                 this.hostname = TimeoutRequest.getHostName(this.inetAddress, 100);
                 Domains.setHostName(this.inetAddress, this.hostname);
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 this.hostname = this.inetAddress.getHostAddress();
             }
             //this.hostname = Domains.getHostName(this.inetAddress);
@@ -105,7 +105,7 @@ public class Scanner extends Thread {
         public String toString() {
             try {
                 return new MultiProtocolURI(this.protocol.name() + "://" + this.inetAddress.getHostAddress() + "/").toNormalform(true, false);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 return "";
             }
         }
@@ -114,11 +114,11 @@ public class Scanner extends Thread {
             return this.inetAddress.hashCode();
         }
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             return (o instanceof Service) && ((Service) o).protocol == this.protocol && ((Service) o).inetAddress.equals(this.inetAddress);
         }
     }
-    
+
     private final static Map<Service, Access> scancache = new ConcurrentHashMap<Service, Access>();
     //private       static long scancacheUpdateTime = 0;
     //private       static long scancacheValidUntilTime = Long.MAX_VALUE;
@@ -127,17 +127,17 @@ public class Scanner extends Thread {
     public static int scancacheSize() {
         return scancache.size();
     }
-    
-    public static void scancacheReplace(Scanner newScanner, long validTime) {
+
+    public static void scancacheReplace(final Scanner newScanner, final long validTime) {
         scancache.clear();
         scancache.putAll(newScanner.services());
         //scancacheUpdateTime = System.currentTimeMillis();
         //scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
         scancacheScanrange = newScanner.scanrange;
     }
-    
-    public static void scancacheExtend(Scanner newScanner, long validTime) {
-        Iterator<Map.Entry<Service, Access>> i = Scanner.scancache.entrySet().iterator();
+
+    public static void scancacheExtend(final Scanner newScanner, final long validTime) {
+        final Iterator<Map.Entry<Service, Access>> i = Scanner.scancache.entrySet().iterator();
         Map.Entry<Service, Access> entry;
         while (i.hasNext()) {
             entry = i.next();
@@ -148,11 +148,11 @@ public class Scanner extends Thread {
         //scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
         scancacheScanrange = newScanner.scanrange;
     }
-    
+
     public static Iterator<Map.Entry<Service, Scanner.Access>> scancacheEntries() {
         return scancache.entrySet().iterator();
     }
-    
+
     /**
      * check if the url can be accepted by the scanner. the scanner accepts the url if:
      * - the host of the url is not supervised (it is not in the scan range), or
@@ -160,100 +160,100 @@ public class Scanner extends Thread {
      * @param url
      * @return true if the url shall be part of a search result
      */
-    public static boolean acceptURL(MultiProtocolURI url) {
+    public static boolean acceptURL(final MultiProtocolURI url) {
         // if the scan range is empty, then all urls are accepted
         if (scancacheScanrange == null || scancacheScanrange.isEmpty()) return true;
-        
+
         //if (System.currentTimeMillis() > scancacheValidUntilTime) return true;
-        InetAddress a = Domains.dnsResolve(url.getHost()); // try to avoid that!
+        final InetAddress a = url.getInetAddress(); // try to avoid that!
         if (a == null) return true;
-        InetAddress n = normalize(a);
+        final InetAddress n = normalize(a);
         if (!scancacheScanrange.contains(n)) return true;
-        Access access = scancache.get(new Service(url.getProtocol(), a));
+        final Access access = scancache.get(new Service(url.getProtocol(), a));
         if (access == null) return false;
         return access == Access.granted;
     }
 
-    private static InetAddress normalize(InetAddress a) {
+    private static InetAddress normalize(final InetAddress a) {
         if (a == null) return null;
-        byte[] b = a.getAddress();
+        final byte[] b = a.getAddress();
         if (b[3] == 1) return a;
         b[3] = 1;
         try {
             return InetAddress.getByAddress(b);
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             return a;
         }
     }
-    
-    private int runnerCount;
-    private Set<InetAddress> scanrange;
-    private BlockingQueue<Service> scanqueue;
-    private Map<Service, Access> services;
-    private Map<Runner, Object> runner;
-    private int timeout;
 
-    public Scanner(Set<InetAddress> scanrange, int concurrentRunner, int timeout) {
+    private final int runnerCount;
+    private final Set<InetAddress> scanrange;
+    private final BlockingQueue<Service> scanqueue;
+    private final Map<Service, Access> services;
+    private final Map<Runner, Object> runner;
+    private final int timeout;
+
+    public Scanner(final Set<InetAddress> scanrange, final int concurrentRunner, final int timeout) {
         this.runnerCount = concurrentRunner;
         this.scanrange = new HashSet<InetAddress>();
-        for (InetAddress a: scanrange) this.scanrange.add(normalize(a));
+        for (final InetAddress a: scanrange) this.scanrange.add(normalize(a));
         this.scanqueue = new LinkedBlockingQueue<Service>();
         this.services = Collections.synchronizedMap(new HashMap<Service, Access>());
         this.runner = new ConcurrentHashMap<Runner, Object>();
         this.timeout = timeout;
     }
-    
-    public Scanner(int concurrentRunner, int timeout) {
+
+    public Scanner(final int concurrentRunner, final int timeout) {
         this(Domains.myIntranetIPs(), concurrentRunner, timeout);
     }
-    
+
     @Override
     public void run() {
         Service uri;
         try {
-            while ((uri = scanqueue.take()) != POISONSERVICE) {
-                while (runner.size() >= this.runnerCount) {
+            while ((uri = this.scanqueue.take()) != POISONSERVICE) {
+                while (this.runner.size() >= this.runnerCount) {
                     /*for (Runner r: runner.keySet()) {
                         if (r.age() > 3000) synchronized(r) { r.interrupt(); }
                     }*/
-                    if (runner.size() >= this.runnerCount) Thread.sleep(20);
+                    if (this.runner.size() >= this.runnerCount) Thread.sleep(20);
                 }
-                Runner runner = new Runner(uri);
+                final Runner runner = new Runner(uri);
                 this.runner.put(runner, PRESENT);
                 runner.start();
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
     }
 
     public int pending() {
         return this.scanqueue.size();
     }
-    
+
     public void terminate() {
-        for (int i = 0; i < runnerCount; i++) try {
+        for (int i = 0; i < this.runnerCount; i++) try {
             this.scanqueue.put(POISONSERVICE);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         try {
             this.join();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
     }
-    
+
     public class Runner extends Thread {
-        private Service service;
-        private long starttime;
-        public Runner(Service service) {
+        private final Service service;
+        private final long starttime;
+        public Runner(final Service service) {
             this.service = service;
             this.starttime = System.currentTimeMillis();
         }
         @Override
         public void run() {
             try {
-                if (TimeoutRequest.ping(this.service.getInetAddress().getHostAddress(), this.service.getProtocol().port, timeout)) {
+                if (TimeoutRequest.ping(this.service.getInetAddress().getHostAddress(), this.service.getProtocol().port, Scanner.this.timeout)) {
                     Access access = this.service.getProtocol() == Protocol.http || this.service.getProtocol() == Protocol.https ? Access.granted : Access.unknown;
-                    services.put(service, access);
+                    Scanner.this.services.put(this.service, access);
                     if (access == Access.unknown) {
                         // ask the service if it lets us in
                         if (this.service.getProtocol() == Protocol.ftp) {
@@ -261,35 +261,35 @@ public class Scanner extends Thread {
                             try {
                                 ftpClient.open(this.service.getInetAddress().getHostAddress(), this.service.getProtocol().port);
                                 ftpClient.login("anonymous", "anomic@");
-                                List<String> list = ftpClient.list("/", false);
+                                final List<String> list = ftpClient.list("/", false);
                                 ftpClient.CLOSE();
                                 access = list == null || list.isEmpty() ? Access.empty : Access.granted;
-                            } catch (IOException e) {
+                            } catch (final IOException e) {
                                 access = Access.denied;
                             }
                         }
                         if (this.service.getProtocol() == Protocol.smb) {
                             try {
-                                MultiProtocolURI uri = new MultiProtocolURI(this.service.toString());
-                                String[] list = uri.list();
+                                final MultiProtocolURI uri = new MultiProtocolURI(this.service.toString());
+                                final String[] list = uri.list();
                                 access = list == null || list.length == 0 ? Access.empty : Access.granted;
-                            } catch (IOException e) {
+                            } catch (final IOException e) {
                                 access = Access.denied;
                             }
                         }
                     }
-                    if (access != Access.unknown) services.put(this.service, access);
+                    if (access != Access.unknown) Scanner.this.services.put(this.service, access);
                 }
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
             }
-            Object r = runner.remove(this);
+            final Object r = Scanner.this.runner.remove(this);
             assert r != null;
         }
         public long age() {
             return System.currentTimeMillis() - this.starttime;
         }
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             return (o instanceof Runner) && this.service.equals(((Runner) o).service);
         }
         @Override
@@ -297,76 +297,76 @@ public class Scanner extends Thread {
             return this.service.hashCode();
         }
     }
-    
-    public void addHTTP(boolean bigrange) {
+
+    public void addHTTP(final boolean bigrange) {
         addProtocol(Protocol.http, bigrange);
     }
 
-    public void addHTTPS(boolean bigrange) {
+    public void addHTTPS(final boolean bigrange) {
         addProtocol(Protocol.https, bigrange);
     }
 
-    public void addSMB(boolean bigrange) {
+    public void addSMB(final boolean bigrange) {
         addProtocol(Protocol.smb, bigrange);
     }
-    
-    public void addFTP(boolean bigrange) {
+
+    public void addFTP(final boolean bigrange) {
         addProtocol(Protocol.ftp, bigrange);
     }
-    
-    private void addProtocol(Protocol protocol, boolean bigrange) {
-        for (InetAddress i: genlist(bigrange)) {
+
+    private void addProtocol(final Protocol protocol, final boolean bigrange) {
+        for (final InetAddress i: genlist(bigrange)) {
             try {
                 this.scanqueue.put(new Service(protocol, i));
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
             }
         }
     }
-    
-    private final List<InetAddress> genlist(boolean bigrange) {
-        ArrayList<InetAddress> c = new ArrayList<InetAddress>(10);
-        for (InetAddress i: scanrange) {
+
+    private final List<InetAddress> genlist(final boolean bigrange) {
+        final ArrayList<InetAddress> c = new ArrayList<InetAddress>(10);
+        for (final InetAddress i: this.scanrange) {
             for (int br = bigrange ? 1 : i.getAddress()[2]; br < (bigrange ? 255 : i.getAddress()[2] + 1); br++) {
                 for (int j = 1; j < 255; j++) {
-                    byte[] address = i.getAddress();
+                    final byte[] address = i.getAddress();
                     address[2] = (byte) br;
                     address[3] = (byte) j;
                     try {
                         c.add(InetAddress.getByAddress(address));
-                    } catch (UnknownHostException e) {
+                    } catch (final UnknownHostException e) {
                     }
                 }
             }
         }
         return c;
     }
-    
+
     public Map<Service, Access> services() {
         return this.services;
     }
-    
-    public static byte[] inIndex(Map<byte[], String> commentCache, String url) {
-        for (Map.Entry<byte[], String> comment: commentCache.entrySet()) {
+
+    public static byte[] inIndex(final Map<byte[], String> commentCache, final String url) {
+        for (final Map.Entry<byte[], String> comment: commentCache.entrySet()) {
             if (comment.getValue().contains(url)) return comment.getKey();
         }
         return null;
     }
-    
-    public static void main(String[] args) {
+
+    public static void main(final String[] args) {
         //try {System.out.println("192.168.1.91: " + ping(new MultiProtocolURI("smb://192.168.1.91/"), 1000));} catch (MalformedURLException e) {}
-        Scanner scanner = new Scanner(100, 10);
+        final Scanner scanner = new Scanner(100, 10);
         scanner.addFTP(false);
         scanner.addHTTP(false);
         scanner.addHTTPS(false);
         scanner.addSMB(false);
         scanner.start();
         scanner.terminate();
-        for (Service service: scanner.services().keySet()) {
+        for (final Service service: scanner.services().keySet()) {
             System.out.println(service.toString());
         }
         try {
             HTTPClient.closeConnectionManager();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
     }
 }
