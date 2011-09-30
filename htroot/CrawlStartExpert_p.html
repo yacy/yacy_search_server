@@ -78,8 +78,11 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td><label for="crawlingDepth">Crawling Depth</label>:</td>
-          <td><input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" /></td>
+          <td>Crawling Depth:</td>
+          <td>
+            <input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" />&nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="directDocByURL" id="directDocByURL" #(directDocByURLChecked)#::checked="checked"#(/directDocByURLChecked)# />also all linked non-parsable documents
+          </td>
           <td>
             This defines how often the Crawler will follow links (of links..) embedded in websites.
             0 means that only the page you enter under "Starting Point" will be added

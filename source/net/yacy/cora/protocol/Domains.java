@@ -875,18 +875,17 @@ public class Domains {
                 );
     }
 
-    public static boolean isLocal(final String host, final InetAddress hostaddress) {
-        return isLocal(host, hostaddress, true);
-    }
-
     /**
      * check if the given host is a local address.
      * the hostaddress is optional and shall be given if the address is already known
      * @param host
      * @param hostaddress may be null if not known yet
-     * @param recursive
      * @return true if the given host is local
      */
+    public static boolean isLocal(final String host, final InetAddress hostaddress) {
+        return isLocal(host, hostaddress, true);
+    }
+
     private static boolean isLocal(final String host, InetAddress hostaddress, final boolean recursive) {
 
         if (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
@@ -912,7 +911,7 @@ public class Domains {
         return isLocal(hostaddress);
     }
 
-    public static boolean isLocal(final InetAddress a) {
+    private static boolean isLocal(final InetAddress a) {
         final boolean
             localp = noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
             a == null ||
@@ -928,6 +927,8 @@ public class Domains {
      * find the locale for a given host. This feature is only available in full quality,
      * if the file InetAddressLocator.jar is placed in the /lib directory (as a plug-in)
      * from http://javainetlocator.sourceforge.net/
+     * In case that that you know the InetAddress of the host, DO NOT call this method but the
+     * other method with the InetAddress first to get better results.
      * @param host
      * @return the locale for the host
      */
@@ -935,6 +936,7 @@ public class Domains {
         if (host == null) return null;
         final Locale locale = getLocale(dnsResolve(host));
         if (locale != null && locale.getCountry() != null && locale.getCountry().length() > 0) return locale;
+
         final int p = host.lastIndexOf('.');
         if (p < 0) return null;
         String tld = host.substring(p + 1).toUpperCase();
@@ -945,6 +947,8 @@ public class Domains {
 
     /**
      * find the locale for a given Address
+     * This uses the InetAddressLocator.jar library
+     * TODO: integrate http://www.maxmind.com/app/geolitecountry
      * @param address
      * @return
      */

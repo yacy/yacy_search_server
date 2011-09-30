@@ -187,6 +187,9 @@ public class Crawler_p {
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
 
+                final boolean directDocByURL = "on".equals(post.get("directDocByURL", "on"));
+                env.setConfig("crawlingDirectDocByURL", directDocByURL);
+
                 // recrawl
                 final String recrawl = post.get("recrawl", "nodoubles"); // nodoubles, reload, scheduler
                 boolean crawlingIfOlderCheck = "on".equals(post.get("crawlingIfOlderCheck", "off"));
@@ -262,6 +265,7 @@ public class Crawler_p {
                                 ipMustNotMatch,
                                 countryMustMatch,
                                 newcrawlingdepth,
+                                directDocByURL,
                                 crawlingIfOlder,
                                 crawlingDomMaxPages,
                                 crawlingQ,
@@ -321,6 +325,7 @@ public class Crawler_p {
                                 ipMustNotMatch,
                                 countryMustMatch,
                                 newcrawlingdepth,
+                                directDocByURL,
                                 crawlingIfOlder,
                                 crawlingDomMaxPages,
                                 crawlingQ,
@@ -444,6 +449,7 @@ public class Crawler_p {
                                     ipMustNotMatch,
                                     countryMustMatch,
                                     newcrawlingdepth,
+                                    false,
                                     crawlingIfOlder,
                                     crawlingDomMaxPages,
                                     crawlingQ,
@@ -484,6 +490,7 @@ public class Crawler_p {
                                 ipMustNotMatch,
                                 countryMustMatch,
                 				0,
+                				false,
                 				crawlingIfOlder,
                 				crawlingDomMaxPages,
                 				true,
@@ -528,6 +535,7 @@ public class Crawler_p {
                                 ipMustNotMatch,
                                 countryMustMatch,
                                 newcrawlingdepth,
+                                directDocByURL,
                                 crawlingIfOlder,
                                 crawlingDomMaxPages,
                                 crawlingQ,

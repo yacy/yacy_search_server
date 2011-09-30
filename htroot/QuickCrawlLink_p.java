@@ -154,6 +154,7 @@ public class QuickCrawlLink_p {
                         "",
                         crawlingMustNotMatch,
                         CrawlingDepth,
+                        true,
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
                         -1, // domMaxPages, if negative: no count restriction
                         crawlDynamic,

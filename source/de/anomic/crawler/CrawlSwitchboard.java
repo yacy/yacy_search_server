@@ -233,6 +233,7 @@ public final class CrawlSwitchboard {
                     CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING,
                     "",
                     0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
+                    true,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE), -1, false,
                     true /*getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true)*/,
                     true /*getConfigBool(PROXY_INDEXING_LOCAL_MEDIA, true)*/,
@@ -243,38 +244,38 @@ public final class CrawlSwitchboard {
         }
         if (this.defaultRemoteProfile == null) {
             // generate new default entry for remote crawling
-            this.defaultRemoteProfile = new CrawlProfile(CRAWL_PROFILE_REMOTE, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", CrawlProfile.MATCH_NEVER_STRING, 0,
+            this.defaultRemoteProfile = new CrawlProfile(CRAWL_PROFILE_REMOTE, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", CrawlProfile.MATCH_NEVER_STRING, 0, true,
                     -1, -1, true, true, true, false, false, true, true, false, CacheStrategy.IFFRESH);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultRemoteProfile.handle()), this.defaultRemoteProfile);
         }
         if (this.defaultTextSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            this.defaultTextSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0,
+            this.defaultTextSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0, true,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE), -1, true, false, false, true, false, true, true, false, CacheStrategy.IFEXIST);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultTextSnippetLocalProfile.handle()), this.defaultTextSnippetLocalProfile);
         }
         if (this.defaultTextSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            this.defaultTextSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0,
+            this.defaultTextSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0, true,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE), -1, true, true, true, true, false, true, true, false, CacheStrategy.IFEXIST);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()), this.defaultTextSnippetGlobalProfile);
         }
         this.defaultTextSnippetGlobalProfile.setCacheStrategy(CacheStrategy.IFEXIST);
         if (this.defaultMediaSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            this.defaultMediaSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0,
+            this.defaultMediaSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0, true,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE), -1, true, false, false, true, false, true, true, false, CacheStrategy.IFEXIST);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultMediaSnippetLocalProfile.handle()), this.defaultMediaSnippetLocalProfile);
         }
         if (this.defaultMediaSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            this.defaultMediaSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0,
+            this.defaultMediaSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0, true,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE), -1, true, false, true, true, false, true, true, false, CacheStrategy.IFEXIST);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultMediaSnippetGlobalProfile.handle()), this.defaultMediaSnippetGlobalProfile);
         }
         if (this.defaultSurrogateProfile == null) {
             // generate new default entry for surrogate parsing
-            this.defaultSurrogateProfile = new CrawlProfile(CRAWL_PROFILE_SURROGATE, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0,
+            this.defaultSurrogateProfile = new CrawlProfile(CRAWL_PROFILE_SURROGATE, null, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, "", 0, false,
                     CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE), -1, true, true, false, false, false, true, true, false, CacheStrategy.NOCACHE);
             this.profilesActiveCrawls.put(UTF8.getBytes(this.defaultSurrogateProfile.handle()), this.defaultSurrogateProfile);
         }

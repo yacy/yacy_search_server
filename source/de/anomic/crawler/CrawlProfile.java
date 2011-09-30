@@ -51,6 +51,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String NAME             = "name";
     public static final String START_URL        = "startURL";
     public static final String DEPTH            = "generalDepth";
+    public static final String DIRECT_DOC_BY_URL= "directDocByURL";
     public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
     public static final String DOM_MAX_PAGES    = "domMaxPages";
     public static final String CRAWLING_Q       = "crawlingQ";
@@ -77,7 +78,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @param startURL root URL of the crawl
      * @param urlMustMatch URLs which do not match this regex will be ignored
      * @param urlMustNotMatch URLs which match this regex will be ignored
+     * @param ipMustMatch IPs from URLs which do not match this regex will be ignored
+     * @param ipMustNotMatch IPs from URLs which match this regex will be ignored
+     * @param countryMustMatch URLs from a specific country must match
      * @param depth height of the tree which will be created by the crawler
+     * @param directDocByURL if true, then linked documents that cannot be parsed are indexed as document
      * @param recrawlIfOlder documents which have been indexed in the past will
      * be indexed again if they are older than the time (ms) in this parameter
      * @param domMaxPages maximum number from one domain which will be indexed
@@ -100,6 +105,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final String ipMustNotMatch,
                  final String countryMustMatch,
                  final int depth,
+                 final boolean directDocByURL,
                  final long recrawlIfOlder /*date*/,
                  final int domMaxPages,
                  final boolean crawlingQ,
@@ -127,6 +133,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(FILTER_IP_MUSTNOTMATCH,   (ipMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : ipMustNotMatch);
         put(FILTER_COUNTRY_MUSTMATCH, (countryMustMatch == null) ? "" : countryMustMatch);
         put(DEPTH,            depth);
+        put(DIRECT_DOC_BY_URL, directDocByURL);
         put(RECRAWL_IF_OLDER, recrawlIfOlder);
         put(DOM_MAX_PAGES,    domMaxPages);
         put(CRAWLING_Q,       crawlingQ); // crawling of urls with '?'
@@ -296,6 +303,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             Log.logException(e);
             return 0;
         }
+    }
+
+    public boolean directDocByURL() {
+        final String r = get(DIRECT_DOC_BY_URL);
+        if (r == null) return false;
+        return (r.equals(Boolean.TRUE.toString()));
     }
 
     public CacheStrategy cacheStrategy() {

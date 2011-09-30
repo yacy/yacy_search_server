@@ -516,6 +516,7 @@ proxyURL.rewriteURLs=domainlist
 # Be careful with this number. Consider a branching factor of average 20;
 # A prefetch-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
 crawlingDepth=3
+crawlingDirectDocByURL=true
 crawlingIfOlder=-1
 crawlingDomFilterDepth=-1
 crawlingDomMaxPages=-1
@@ -709,10 +710,6 @@ crawler.file.maxFileSize=100000000
 
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 200
-
-# flag: consider all embedded image/audio/video document links
-# from all crawled documents as its own document
-crawler.embedLinksAsDocuments = true
 
 # maximum size of indexing queue
 indexer.slots = 100
