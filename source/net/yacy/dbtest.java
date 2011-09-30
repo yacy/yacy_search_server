@@ -402,7 +402,7 @@ public class dbtest {
                     Row.Entry row;
                     while (i.hasNext()) {
                         row = i.next();
-                        for (int j = 0; j < row.columns(); j++) System.out.print(row.getColString(j) + ",");
+                        for (int j = 0; j < row.columns(); j++) System.out.print(row.getColUTF8(j) + ",");
                         System.out.println();
                     }
                 }

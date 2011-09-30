@@ -36,6 +36,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.ranking.AbstractOrder;
 import net.yacy.cora.ranking.Order;
@@ -475,15 +476,57 @@ public final class Row {
             throw new kelondroException("ROW", "addCol did not find appropriate encoding");
         }
 
-        public final String getColString(final int column) {
+        public final byte[] getPrimaryKeyBytes() {
+            if (this.rowinstance[this.offset] == 0) return null;
+            if (Row.this.row.length == 1 && this.offset == 0 && this.rowinstance.length == Row.this.primaryKeyLength) {
+                // avoid memory allocation in case that the row consists in only the primary key
+                return this.rowinstance;
+            }
+            final byte[] c = new byte[Row.this.primaryKeyLength];
+            System.arraycopy(this.rowinstance, this.offset, c, 0, Row.this.primaryKeyLength);
+            return c;
+        }
+
+        public final String getPrimaryKeyUTF8() {
+            if (this.rowinstance[this.offset] == 0) return null;
+            if (Row.this.row.length == 1 && this.offset == 0 && this.rowinstance.length == Row.this.primaryKeyLength) {
+                // avoid memory allocation in case that the row consists in only the primary key
+                return UTF8.String(this.rowinstance);
+            }
+            return UTF8.String(this.rowinstance, this.offset, Row.this.primaryKeyLength);
+        }
+
+        public final String getPrimaryKeyASCII() {
+            if (this.rowinstance[this.offset] == 0) return null;
+            if (Row.this.row.length == 1 && this.offset == 0 && this.rowinstance.length == Row.this.primaryKeyLength) {
+                // avoid memory allocation in case that the row consists in only the primary key
+                return ASCII.String(this.rowinstance);
+            }
+            return ASCII.String(this.rowinstance, this.offset, Row.this.primaryKeyLength);
+        }
+
+        public final String getColUTF8(final int column) {
             final int clstrt = Row.this.colstart[column];
-            int length = Row.this.row[column].cellwidth;
             if (this.rowinstance[this.offset + clstrt] == 0) return null;
+            final int length = getColLength(column, clstrt);
+            if (length == 0) return null;
+            return UTF8.String(this.rowinstance, this.offset + clstrt, length);
+        }
+
+        public final String getColASCII(final int column) {
+            final int clstrt = Row.this.colstart[column];
+            if (this.rowinstance[this.offset + clstrt] == 0) return null;
+            final int length = getColLength(column, clstrt);
+            if (length == 0) return null;
+            return ASCII.String(this.rowinstance, this.offset + clstrt, length);
+        }
+
+        private final int getColLength(final int column, final int clstrt) {
+            int length = Row.this.row[column].cellwidth;
             assert length <= this.rowinstance.length - this.offset - clstrt;
             if (length > this.rowinstance.length - this.offset - clstrt) length = this.rowinstance.length - this.offset - clstrt;
             while ((length > 0) && (this.rowinstance[this.offset + clstrt + length - 1] == 0)) length--;
-            if (length == 0) return null;
-            return UTF8.String(this.rowinstance, this.offset + clstrt, length);
+            return length;
         }
 
         public final long getColLong(final int column) {
@@ -515,16 +558,6 @@ public final class Row {
 
         public final byte getColByte(final int column) {
             return this.rowinstance[this.offset + Row.this.colstart[column]];
-        }
-
-        public final byte[] getPrimaryKeyBytes() {
-            if (Row.this.columns() == 1 && this.offset == 0 && this.rowinstance.length == Row.this.primaryKeyLength) {
-                // avoid memory allocation in case that the row consists in only the primary key
-                return this.rowinstance;
-            }
-            final byte[] c = new byte[Row.this.primaryKeyLength];
-            System.arraycopy(this.rowinstance, this.offset, c, 0, Row.this.primaryKeyLength);
-            return c;
         }
 
         public final int getPrimaryKeyLength() {

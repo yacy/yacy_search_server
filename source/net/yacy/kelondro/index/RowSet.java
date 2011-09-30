@@ -583,7 +583,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         Row.Entry entry;
         while (ii.hasNext()) {
             entry = ii.next();
-            s = ASCII.String(entry.getPrimaryKeyBytes()).trim();
+            s = entry.getPrimaryKeyASCII().trim();
             System.out.print(s + ", ");
             if (s.equals("drei")) ii.remove();
         }

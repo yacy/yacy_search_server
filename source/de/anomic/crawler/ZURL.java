@@ -278,7 +278,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             this.executor = entry.getColBytes(1, true);
             this.workdate = new Date(entry.getColLong(2));
             this.workcount = (int) entry.getColLong(3);
-            this.anycause = entry.getColString(4);
+            this.anycause = entry.getColUTF8(4);
             this.bentry = new Request(Request.rowdef.newEntry(entry.getColBytes(5, false)));
             assert (Base64Order.enhancedCoder.equal(entry.getPrimaryKeyBytes(), this.bentry.url().hash()));
             this.stored = true;
@@ -337,7 +337,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             try {
                 return new Entry(e);
             } catch (final IOException ex) {
-                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getColString(0));
+                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getPrimaryKeyASCII());
             }
         }
 

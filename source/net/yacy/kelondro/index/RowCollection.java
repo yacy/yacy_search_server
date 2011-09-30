@@ -105,7 +105,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             this.chunkcount = chunkcachelength / rowdef.objectsize; // patch problem
         }
         this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
-        final String sortOrderKey = exportedCollection.getColString(exp_order_type);
+        final String sortOrderKey = exportedCollection.getColASCII(exp_order_type);
         ByteOrder oldOrder = null;
         if ((sortOrderKey == null) || (sortOrderKey.equals("__"))) {
             oldOrder = null;

@@ -302,7 +302,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     final Row.Entry entry = this.urlIndexFile.get(urlHashBytes, true);
 
                     // getting the wrong url string
-                    oldUrlStr = entry.getColString(1).trim();
+                    oldUrlStr = entry.getColUTF8(1).trim();
 
                     int pos = -1;
                     if ((pos = oldUrlStr.indexOf("://")) != -1) {

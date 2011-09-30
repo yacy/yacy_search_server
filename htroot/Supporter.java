@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -45,7 +45,6 @@ import net.yacy.peers.yacyNewsPool;
 import net.yacy.peers.yacySeed;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -56,19 +55,19 @@ public class Supporter {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
-        
+
         final boolean showScore = ((post != null) && (post.containsKey("score")));
-        
+
         // access control
         final boolean publicPage = sb.getConfigBool("publicSurftips", true);
         final boolean authorizedAccess = sb.verifyAuthentication(header, false);
-        
+
         if ((publicPage) || (authorizedAccess)) {
-        
+
             // read voting
             String hash;
             if ((post != null) && ((hash = post.get("voteNegative", null)) != null)) {
@@ -101,7 +100,7 @@ public class Supporter {
                 map.put("comment", post.get("comment", ""));
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
             }
-        
+
             // create Supporter
             final HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
             final HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
@@ -114,7 +113,7 @@ public class Supporter {
             accumulateSupporter(sb, Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-        
+
             // read out surftipp array and create property entries
             final Iterator<String> k = ranking.keys(false);
             int i = 0;
@@ -124,19 +123,19 @@ public class Supporter {
             while (k.hasNext()) {
                 urlhash = k.next();
                 if (urlhash == null) continue;
-                
+
                 row = Supporter.get(urlhash);
                 if (row == null) continue;
-                
-                url = row.getColString(0);
+
+                url = row.getPrimaryKeyUTF8();
                 try {
                     if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, new DigestURI(url, urlhash.getBytes()))) continue;
                 } catch(final MalformedURLException e) {continue;}
-                title = row.getColString(1);
-                description = row.getColString(2);
+                title = row.getColUTF8(1);
+                description = row.getColUTF8(2);
                 if ((url == null) || (title == null) || (description == null)) continue;
-                refid = row.getColString(3);
-                voted = (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
+                refid = row.getColUTF8(3);
+                voted = (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) ||
                         (sb.peers.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 prop.put("supporter_results_" + i + "_authorized", authenticated ? "1" : "0");
                 prop.put("supporter_results_" + i + "_authorized_recommend", voted ? "0" : "1");
@@ -156,7 +155,7 @@ public class Supporter {
                 prop.putHTML("supporter_results_" + i + "_title", (showScore) ? ("(" + ranking.get(urlhash) + ") " + title) : title);
                 prop.putHTML("supporter_results_" + i + "_description", description);
                 i++;
-                
+
                 if (i >= 50) break;
             }
             prop.put("supporter_results", i);
@@ -164,14 +163,14 @@ public class Supporter {
         } else {
             prop.put("supporter", "0");
         }
-        
+
         return prop;
     }
 
     private static int timeFactor(final Date created) {
         return (int) Math.max(0, 10 - ((System.currentTimeMillis() - created.getTime()) / 24 / 60 / 60 / 1000));
     }
-    
+
     private static void accumulateVotes(final Switchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
         yacyNewsDB.Record record;
@@ -180,7 +179,7 @@ public class Supporter {
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
             if (record == null) continue;
-            
+
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                 final String urlhash = record.attribute("urlhash", "");
                 final String vote    = record.attribute("vote", "");
@@ -198,7 +197,7 @@ public class Supporter {
             }
         }
     }
-    
+
     private static void accumulateSupporter(
             final Switchboard sb,
             final HashMap<String, Entry> Supporter, final ScoreMap<String> ranking, final Row rowdef,
@@ -215,7 +214,7 @@ public class Supporter {
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
             if (record == null) continue;
-            
+
             entry = null;
             if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) &&
                 ((seed = sb.peers.getConnected(record.originator())) != null)) {

@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -44,7 +44,6 @@ import net.yacy.peers.yacyNewsPool;
 import net.yacy.peers.yacySeed;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -55,13 +54,13 @@ public class Surftips {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
-        
+
         final boolean showScore = ((post != null) && (post.containsKey("score")));
-        
+
         // access control
         boolean publicPage = sb.getConfigBool("publicSurftips", true);
         final boolean authorizedAccess = sb.verifyAuthentication(header, false);
@@ -73,9 +72,9 @@ public class Surftips {
             publicPage = post.get("publicPage", "0").equals("1");
             sb.setConfig("publicSurftips", publicPage);
         }
-        
+
         if ((publicPage) || (authorizedAccess)) {
-        
+
             // read voting
             String hash;
             if ((post != null) && ((hash = post.get("voteNegative", null)) != null)) {
@@ -108,7 +107,7 @@ public class Surftips {
                 map.put("comment", post.get("comment", ""));
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
             }
-        
+
             // create surftips
             final HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
             final HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
@@ -121,7 +120,7 @@ public class Surftips {
             accumulateSurftips(sb, surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-        
+
             // read out surftipp array and create property entries
             final Iterator<String> k = ranking.keys(false);
             int i = 0;
@@ -131,20 +130,20 @@ public class Surftips {
             while (k.hasNext()) {
                 urlhash = k.next();
                 if (urlhash == null) continue;
-                
+
                 row = surftips.get(urlhash);
                 if (row == null) continue;
-                
-                url = row.getColString(0);
+
+                url = row.getPrimaryKeyUTF8();
                 try{
                 	if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new DigestURI(url)))
                 		continue;
                 }catch(final MalformedURLException e){continue;};
-                title = row.getColString(1);
-                description = row.getColString(2);
+                title = row.getColUTF8(1);
+                description = row.getColUTF8(2);
                 if ((url == null) || (title == null) || (description == null)) continue;
-                refid = row.getColString(3);
-                voted = (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
+                refid = row.getColUTF8(3);
+                voted = (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) ||
                 		(sb.peers.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 prop.put("surftips_results_" + i + "_authorized", (authenticated) ? "1" : "0");
                 prop.put("surftips_results_" + i + "_authorized_recommend", (voted) ? "0" : "1");
@@ -164,7 +163,7 @@ public class Surftips {
                 prop.putXML("surftips_results_" + i + "_title", (showScore) ? ("(" + ranking.get(urlhash) + ") " + title) : title);
                 prop.putHTML("surftips_results_" + i + "_description", description);
                 i++;
-                
+
                 if (i >= 50) break;
             }
             prop.put("surftips_results", i);
@@ -172,14 +171,14 @@ public class Surftips {
         } else {
             prop.put("surftips", "0");
         }
-        
+
         return prop;
     }
 
     private static int timeFactor(final Date created) {
         return (int) Math.max(0, 10 - ((System.currentTimeMillis() - created.getTime()) / 24 / 60 / 60 / 1000));
     }
-    
+
     private static void accumulateVotes(final Switchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
         yacyNewsDB.Record record;
@@ -188,7 +187,7 @@ public class Surftips {
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
             if (record == null) continue;
-            
+
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                 final String urlhash = record.attribute("urlhash", "");
                 final String vote    = record.attribute("vote", "");
@@ -206,7 +205,7 @@ public class Surftips {
             }
         }
     }
-    
+
     private static void accumulateSurftips(
             final Switchboard sb,
             final HashMap<String, Entry> surftips, final ScoreMap<String> ranking, final Row rowdef,
@@ -222,7 +221,7 @@ public class Surftips {
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
             if (record == null) continue;
-            
+
             entry = null;
             if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                 final String intention = record.attribute("intention", "");
@@ -236,7 +235,7 @@ public class Surftips {
                         });
                 score = 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created());
             }
-            
+
             if (record.category().equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) {
                 url = record.attribute("url", "");
                 if (url.length() < 12) continue;
@@ -248,7 +247,7 @@ public class Surftips {
                         });
                 score = 8 + timeFactor(record.created());
             }
-            
+
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) {
                 url = record.attribute("url", "");
                 if (url.length() < 12) continue;
@@ -260,7 +259,7 @@ public class Surftips {
                         });
                 score = 5 + timeFactor(record.created());
             }
-            
+
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                 if (!(record.attribute("vote", "negative").equals("positive"))) continue;
                 url = record.attribute("url", "");
@@ -273,7 +272,7 @@ public class Surftips {
                         });
                 score = 5 + timeFactor(record.created());
             }
-            
+
             if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
                 yacySeed seed = sb.peers.getConnected(record.originator());
                 if (seed == null) seed = sb.peers.getDisconnected(record.originator());
@@ -288,7 +287,7 @@ public class Surftips {
                     score = 4 + timeFactor(record.created());
                 }
             }
-            
+
             if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
                 yacySeed seed = sb.peers.getConnected(record.originator());
                 if (seed == null) seed = sb.peers.getDisconnected(record.originator());
