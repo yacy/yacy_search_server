@@ -147,6 +147,8 @@ public class Balancer {
         synchronized (this.delayed) {
         	this.delayed.clear();
         }
+        this.double_push_check.clear();
+        this.ddc.clear();
     }
 
     public Request get(final byte[] urlhash) throws IOException {

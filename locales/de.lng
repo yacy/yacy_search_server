@@ -3397,7 +3397,7 @@ Outgoing&nbsp;Cookies==Ausgehende Cookies
 Processing Monitor==Prozess Monitor
 Crawler Queues==Crawler Puffer
 Loader<==Lade Puffer<
-Parser Errors==Parser Fehler
+Rejected URLs==Abgelehnte URLs
 >Queues<==>Warteschlangen<
 Local<==Lokal<
 #Global==Global
