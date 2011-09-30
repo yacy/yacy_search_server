@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -56,31 +56,31 @@ import net.yacy.cora.document.UTF8;
  */
 public class HeaderFramework extends TreeMap<String, String> implements Map<String, String> {
 
-    
+
     private static final long serialVersionUID = 18L;
-    
+
     static final String DEFAULT_CHARSET = "ISO-8859-1";
-	
+
     /* =============================================================
      * Constants defining http versions
      * ============================================================= */
     public static final String HTTP_VERSION_0_9 = "HTTP/0.9";
     public static final String HTTP_VERSION_1_0 = "HTTP/1.0";
     public static final String HTTP_VERSION_1_1 = "HTTP/1.1";
-    
+
     /* =============================================================
      * Constants defining http header names
-     * ============================================================= */    
-    
+     * ============================================================= */
+
 
     public static final String HOST = "Host";
     public static final String USER_AGENT = "User-Agent";
-    
+
     public static final String ACCEPT = "Accept";
     public static final String ACCEPT_LANGUAGE = "Accept-Language";
     public static final String ACCEPT_ENCODING = "Accept-Encoding";
     public static final String ACCEPT_CHARSET = "Accept-Charset";
-    
+
 
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_TYPE = "Content-Type";
@@ -90,11 +90,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String TRANSFER_ENCODING = "Transfer-Encoding";
     public static final String PRAGMA = "Pragma";
     public static final String CACHE_CONTROL = "Cache-Control";
-    
+
     public static final String DATE = "Date";
     public static final String LAST_MODIFIED = "Last-modified";
     public static final String SERVER = "Server";
-    
+
     public static final String ACCEPT_RANGES = "Accept-Ranges";
     public static final String CONTENT_RANGE = "Content-Range";
     public static final String RANGE = "Range";
@@ -102,35 +102,38 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String LOCATION = "Location";
     public static final String ETAG = "ETag";
     public static final String VIA = "Via";
-    
+
     public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+    public static final String X_ROBOTS_TAG = "X-Robots-Tag"; // see http://googleblog.blogspot.com/2007/07/robots-exclusion-protocol-now-with-even.html
+    public static final String X_ROBOTS = "X-Robots";
+
     public static final String X_YACY_INDEX_CONTROL = "X-YACY-Index-Control";
     //public static final String X_YACY_PREVIOUS_REQUEST_LINE = "X-Previous-Request-Line";
     public static final String X_YACY_KEEP_ALIVE_REQUEST_COUNT = "X-Keep-Alive-Request-Count";
     public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
-    
+
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String SET_COOKIE2 = "Set-Cookie2";
     public static final String EXPIRES = "Expires";
-    
+
     public static final String CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin"; // Cross-Origin Resource Sharing properties (http://www.w3.org/TR/cors/)
 
     public static final String RESPONSE_TIME_MILLIS = "ResponseTimeMillis";
 
-    
+
     /* =============================================================
      * Constants for content-encodings
      * ============================================================= */
     public static final String CONTENT_ENCODING_GZIP = "gzip";
-    
+
     /* =============================================================
      * Constants defining http methods
      * ============================================================= */
     public static final String METHOD_GET = "GET";
     public static final String METHOD_HEAD = "HEAD";
     public static final String METHOD_POST = "POST";
-    public static final String METHOD_CONNECT = "CONNECT";    
-    
+    public static final String METHOD_CONNECT = "CONNECT";
+
     /* =============================================================
      * defining default http status messages
      * ============================================================= */
@@ -153,9 +156,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         http1_0.put("500","Internal Server Error");
         http1_0.put("501","Not Implemented");
         http1_0.put("502","Bad Gateway");
-        http1_0.put("503","Service Unavailable");        
+        http1_0.put("503","Service Unavailable");
     }
-    public static final Map<String, String> http1_1 = new ConcurrentHashMap<String, String>(); 
+    public static final Map<String, String> http1_1 = new ConcurrentHashMap<String, String>();
     static {
         http1_1.putAll(http1_0);
         http1_1.put("100","Continue");
@@ -182,10 +185,10 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         http1_1.put("416","Requested range not satisfiable");
         http1_1.put("417","Expectation Failed");
         http1_1.put("504","Gateway Time-out");
-        http1_1.put("505","HTTP Version not supported");        
+        http1_1.put("505","HTTP Version not supported");
     }
-    
-    /* PROPERTIES: General properties */    
+
+    /* PROPERTIES: General properties */
     public static final String CONNECTION_PROP_HTTP_VER = "HTTP";
     public static final String CONNECTION_PROP_HOST = "HOST";
     public static final String CONNECTION_PROP_USER = "USER";
@@ -203,15 +206,15 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CONNECTION_PROP_REQUEST_END = "REQUEST_END";
     //public static final String CONNECTION_PROP_INPUTSTREAM = "INPUTSTREAM";
     //public static final String CONNECTION_PROP_OUTPUTSTREAM = "OUTPUTSTREAM";
-    
+
     /* PROPERTIES: Client -> Proxy */
     public static final String CONNECTION_PROP_CLIENT_REQUEST_HEADER = "CLIENT_REQUEST_HEADER";
-    
+
     /* PROPERTIES: Proxy -> Client */
     public static final String CONNECTION_PROP_PROXY_RESPOND_CODE = "PROXY_RESPOND_CODE";
     public static final String CONNECTION_PROP_PROXY_RESPOND_STATUS = "PROXY_RESPOND_STATUS";
     public static final String CONNECTION_PROP_PROXY_RESPOND_HEADER = "PROXY_RESPOND_HEADER";
-    public static final String CONNECTION_PROP_PROXY_RESPOND_SIZE = "PROXY_REQUEST_SIZE";    
+    public static final String CONNECTION_PROP_PROXY_RESPOND_SIZE = "PROXY_REQUEST_SIZE";
 
     private final Map<String, String> reverseMappingCache;
 
@@ -235,19 +238,19 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         this.reverseMappingCache = reverseMappingCache;
 
         // load with data
-        if (othermap != null) this.putAll(othermap);
+        if (othermap != null) putAll(othermap);
     }
-    
+
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
     private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss Z"; // with numeric time zone indicator as defined in RFC5322
     private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
     private static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
     private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
-    private static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US); 
-    private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US); 
+    private static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US);
+    private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
     private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
-    
+
     /**
      * RFC 2616 requires that HTTP clients are able to parse all 3 different
      * formats. All times MUST be in GMT/UTC, but ...
@@ -260,11 +263,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
             FORMAT_ANSIC,
     };
-    
+
 
     private static long lastRFC1123long = 0;
     private static String lastRFC1123string = "";
-    
+
     public static final String formatRFC1123(final Date date) {
         if (date == null) return "";
         if (Math.abs(date.getTime() - lastRFC1123long) < 1000) {
@@ -272,7 +275,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             return lastRFC1123string;
         }
         synchronized (FORMAT_RFC1123) {
-            String s = FORMAT_RFC1123.format(date);
+            final String s = FORMAT_RFC1123.format(date);
             lastRFC1123long = date.getTime();
             lastRFC1123string = s;
             return s;
@@ -285,8 +288,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         // we need to detect the real year by adding 1900 or 2000 to
         // the year value starting with 1970
         CAL_GMT.setTimeInMillis(0);
-        
-        for (SimpleDateFormat format: FORMATS_HTTP) {
+
+        for (final SimpleDateFormat format: FORMATS_HTTP) {
             format.setTimeZone(TZ_GMT);
             format.set2DigitYearStart(CAL_GMT.getTime());
         }
@@ -300,29 +303,29 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static Date parseHTTPDate(String s) {
         s = s.trim();
         if (s == null || s.length() < 9) return null;
-        for (SimpleDateFormat format: FORMATS_HTTP) synchronized (format) {
+        for (final SimpleDateFormat format: FORMATS_HTTP) synchronized (format) {
             try { return format.parse(s); } catch (final ParseException e) {}
         }
         return null;
     }
-    
+
     // we override the put method to make use of the reverseMappingCache
     @Override
     public String put(final String key, final String value) {
         final String upperK = key.toUpperCase();
-        
-        if (reverseMappingCache == null) {
+
+        if (this.reverseMappingCache == null) {
             return super.put(key, value);
         }
-        
-        if (reverseMappingCache.containsKey(upperK)) {
+
+        if (this.reverseMappingCache.containsKey(upperK)) {
             // we put in the value using the reverse mapping
-            return super.put(reverseMappingCache.get(upperK), value);
+            return super.put(this.reverseMappingCache.get(upperK), value);
         }
-        
+
         // we put in without a cached key and store the key afterwards
         final String r = super.put(key, value);
-        reverseMappingCache.put(upperK, key);
+        this.reverseMappingCache.put(upperK, key);
         return r;
     }
 
@@ -332,15 +335,15 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         if (c == 0) return put(key, value);
         return put("*" + key + "-" + Integer.toString(c), value);
     }
-    
+
     public int keyCount(final String key) {
         if (!(containsKey(key))) return 0;
         int c = 1;
-        String h = "*" + key + "-";
+        final String h = "*" + key + "-";
         while (containsKey(h + Integer.toString(c))) c++;
         return c;
     }
-    
+
     // a convenience method to access the map with fail-over defaults
     public String get(final String key, final String dflt) {
         final String result = get(key);
@@ -353,20 +356,20 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         if (count == 0) return get(key, null);
         return get("*" + key + "-" + count, null);
     }
-    
+
     public Object[] getMultiple(final String key) {
         final int count = keyCount(key);
         final Object[] result = new Object[count];
         for (int i = 0; i < count; i++) result[i] = getSingle(key, i);
         return result;
     }
-    
+
     // convenience methods for storing and loading to a file system
     public void store(final File f) throws IOException {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(f);
-            for (java.util.Map.Entry<String, String> entry: entrySet()) {
+            for (final java.util.Map.Entry<String, String> entry: entrySet()) {
                 fos.write(UTF8.getBytes(entry.getKey() + "=" + entry.getValue() + "\r\n"));
             }
             fos.flush();
@@ -379,7 +382,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public String toString() {
         return super.toString();
     }
-    
+
 
     /*
      * example header
@@ -390,25 +393,25 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
       Date=Mon, 05 Jan 2004 11:55:10 GMT
       Server=Apache/1.3.26
     */
-    
+
     public String mime() {
         return get(CONTENT_TYPE, "application/octet-stream");
     }
-    
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.commons.fileupload.RequestContext#getCharacterEncoding()
      */
     public String getCharacterEncoding() {
         final String mimeType = mime();
         if (mimeType == null) return null;
-        
+
         final String[] parts = mimeType.split(";");
         if (parts == null || parts.length <= 1) return null;
-        
-        for (int i=1; i < parts.length; i++) {    
+
+        for (int i=1; i < parts.length; i++) {
             final String param = parts[i].trim();
             if (param.startsWith("charset=")) {
                 String charset = param.substring("charset=".length()).trim();
@@ -417,13 +420,13 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
                 return charset.trim();
             }
         }
-        
-        return null;            
+
+        return null;
     }
-    
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.commons.fileupload.RequestContext#getContentLength()
      */
     public int getContentLength() {
@@ -440,7 +443,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     /*
      * provide method, which can handle big filelengths (for example from ftp)
      * because we can't change the interface in apache httpclient
-     * 
+     *
      * @see org.apache.commons.fileupload.RequestContext#getContentLength()
      */
     public long getContentLengthLong() {
@@ -456,14 +459,14 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.commons.fileupload.RequestContext#getContentType()
      */
     //@Override
     public String getContentType() {
         return get(CONTENT_TYPE);
     }
-    
+
     protected Date headerDate(final String kind) {
         if (containsKey(kind)) {
             Date parsedDate = parseHTTPDate(get(kind));
@@ -472,56 +475,56 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         }
         return null;
     }
-    
+
     public static boolean supportChunkedEncoding(final Properties conProp) {
     	// getting the http version of the client
-    	final String httpVer = conProp.getProperty(CONNECTION_PROP_HTTP_VER); 
-    	
+    	final String httpVer = conProp.getProperty(CONNECTION_PROP_HTTP_VER);
+
     	// only clients with http version 1.1 supports chunk
         return !(httpVer.equals(HTTP_VERSION_0_9) || httpVer.equals(HTTP_VERSION_1_0));
-    }    
-    
+    }
+
     public StringBuilder toHeaderString(
-            final String httpVersion, 
-            final int httpStatusCode, 
+            final String httpVersion,
+            final int httpStatusCode,
             final String httpStatusText) {
         // creating a new buffer to store the header as string
         final StringBuilder theHeader = new StringBuilder(180);
-        
+
         // generating the header string
         this.toHeaderString(httpVersion,httpStatusCode,httpStatusText,theHeader);
-        
+
         // returning the result
         return theHeader;
     }
-    
-    
+
+
     public void toHeaderString(
-            String httpVersion, 
-            final int httpStatusCode, 
-            String httpStatusText, 
-            final StringBuilder theHeader) {        
-        
+            String httpVersion,
+            final int httpStatusCode,
+            String httpStatusText,
+            final StringBuilder theHeader) {
+
         if (theHeader == null) throw new IllegalArgumentException();
-        
+
         // setting the http version if it was not already set
         if (httpVersion == null) httpVersion = "HTTP/1.0";
-        
+
         // setting the status text if it was not already set
         if ((httpStatusText == null)||(httpStatusText.length()==0)) {
-            if (httpVersion.equals("HTTP/1.0") && HeaderFramework.http1_0.containsKey(Integer.toString(httpStatusCode))) 
+            if (httpVersion.equals("HTTP/1.0") && HeaderFramework.http1_0.containsKey(Integer.toString(httpStatusCode)))
                 httpStatusText = HeaderFramework.http1_0.get(Integer.toString(httpStatusCode));
             else if (httpVersion.equals("HTTP/1.1") && HeaderFramework.http1_1.containsKey(Integer.toString(httpStatusCode)))
                 httpStatusText = HeaderFramework.http1_1.get(Integer.toString(httpStatusCode));
             else httpStatusText = "Unknown";
         }
-        
-        
+
+
         // write status line
         theHeader.append(httpVersion).append(" ")
                  .append(Integer.toString(httpStatusCode)).append(" ")
                  .append(httpStatusText).append("\r\n");
-        
+
         // write header
         final Iterator<String> i = keySet().iterator();
         String key;
@@ -533,28 +536,28 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
                 count = keyCount(key);
                 for (int j = 0; j < count; j++) {
-                    theHeader.append(key).append(": ").append(getSingle(key, j)).append("\r\n");  
+                    theHeader.append(key).append(": ").append(getSingle(key, j)).append("\r\n");
                 }
-            }            
+            }
         }
         // end header
-        theHeader.append("\r\n");                
-    }    
-    
+        theHeader.append("\r\n");
+    }
+
     public static MultiProtocolURI getRequestURL(final HashMap<String, Object> conProp) throws MalformedURLException {
         String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
         final String path =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
         final String args =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
         //String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
-        
-        int port, pos;        
+
+        int port, pos;
         if ((pos = host.indexOf(':')) < 0) {
             port = 80;
         } else {
             port = Integer.parseInt(host.substring(pos + 1));
             host = host.substring(0, pos);
         }
-        
+
         final MultiProtocolURI url = new MultiProtocolURI("http", host, port, (args == null) ? path : path + "?" + args);
         return url;
     }
@@ -592,7 +595,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      */
     //Since properties such as cookies can be multiple, we cannot use HashMap here. We have to use Vector.
     private Vector<Entry> headerProps = new Vector<Entry>();
-    
+
     /**
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
      */
@@ -604,10 +607,10 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             this.v = v;
         }
         public String getKey() {
-            return k;
+            return this.k;
         }
         public String getValue() {
-            return v;
+            return this.v;
         }
         public String setValue(final String v) {
             final String r = this.v;
@@ -639,7 +642,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         if (path != null) cookieString += " path=" + path + ";";
         if (domain != null) cookieString += " domain=" + domain + ";";
         if (secure) cookieString += " secure;";
-        headerProps.add(new Entry("Set-Cookie", cookieString));
+        this.headerProps.add(new Entry("Set-Cookie", cookieString));
     }
     /**
      * Sets Cookie on the client machine.
@@ -700,7 +703,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         setCookie( name,  value,  null,  null,  null, false);
     }
     public String getHeaderCookies(){
-        final Iterator<Map.Entry<String, String>> it = this.entrySet().iterator();
+        final Iterator<Map.Entry<String, String>> it = entrySet().iterator();
         while(it.hasNext())
         {
             final Map.Entry<String, String> e = it.next();
@@ -712,19 +715,19 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         }
         return "";
     }
-    
+
     public void addHeader(final String key, final String value) {
-        headerProps.add(new Entry(key, value));
+        this.headerProps.add(new Entry(key, value));
     }
-    
+
     public Vector<Entry> getAdditionalHeaderProperties() {
-        return headerProps;
+        return this.headerProps;
     }
-    
+
     public void setAdditionalHeaderProperties(final Vector<Entry> mycookies){
-        headerProps=mycookies;
+        this.headerProps=mycookies;
     }
-    
+
     /*
      * Patch END:
      * Name: Header Property Patch

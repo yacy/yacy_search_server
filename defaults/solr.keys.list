@@ -60,8 +60,18 @@ attr_scripts
 ## number of script entries, int
 scriptscount_i
 
-## content of <meta name="robots" content=#content#> tag, text
-metarobots_t
+## encoded as binary value into an integer:
+## bit  0: "all" contained in html header meta
+## bit  1: "index" contained in html header meta
+## bit  2: "noindex" contained in html header meta
+## bit  3: "nofollow" contained in html header meta
+## bit  8: "noarchive" contained in http header properties
+## bit  9: "nosnippet" contained in http header properties
+## bit 10: "noindex" contained in http header properties
+## bit 11: "nofollow" contained in http header properties
+## bit 12: "unavailable_after" contained in http header properties
+## content of <meta name="robots" content=#content#> tag and the "X-Robots-Tag" HTTP property
+robots_i
 
 ## html status return code (i.e. "200" for ok), -1 if not loaded, int
 httpstatus_i
