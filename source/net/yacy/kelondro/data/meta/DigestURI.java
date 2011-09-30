@@ -175,7 +175,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
 
         assert this.hash == null; // should only be called if the hash was not computed before
 
-        final int id = Domains.getDomainID(this.host); // id=7: tld is local
+        final int id = Domains.getDomainID(this.host, this.hostAddress); // id=7: tld is local
         final boolean isHTTP = isHTTP();
         int p = (this.host == null) ? -1 : this.host.lastIndexOf('.');
         String dom = (p > 0) ? dom = this.host.substring(0, p) : "";
@@ -278,7 +278,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      */
     public static final String hosthash6(final String protocol, final String host, final int port) {
         final StringBuilder hash = new StringBuilder(12);
-        final int id = Domains.getDomainID(host); // id=7: tld is local
+        final int id = Domains.getDomainID(host, null); // id=7: tld is local
         int p = host.lastIndexOf('.');
         String dom = (p > 0) ? dom = host.substring(0, p) : "";
         p = dom.lastIndexOf('.');

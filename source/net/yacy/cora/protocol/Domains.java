@@ -850,8 +850,8 @@ public class Domains {
         return isThisHostIP;
     }
 
-    public static int getDomainID(final String host) {
-        if (host == null || host.isEmpty() || isLocal(host)) return TLD_Local_ID;
+    public static int getDomainID(final String host, final InetAddress hostaddress) {
+        if (host == null || host.isEmpty() || isLocal(host, hostaddress)) return TLD_Local_ID;
         final int p = host.lastIndexOf('.');
         final String tld = (p > 0) ? host.substring(p + 1) : "";
         final Integer i = TLDID.get(tld);
@@ -875,11 +875,19 @@ public class Domains {
                 );
     }
 
-    public static boolean isLocal(final String host) {
-        return isLocal(host, true);
+    public static boolean isLocal(final String host, final InetAddress hostaddress) {
+        return isLocal(host, hostaddress, true);
     }
 
-    private static boolean isLocal(final String host, final boolean recursive) {
+    /**
+     * check if the given host is a local address.
+     * the hostaddress is optional and shall be given if the address is already known
+     * @param host
+     * @param hostaddress may be null if not known yet
+     * @param recursive
+     * @return true if the given host is local
+     */
+    private static boolean isLocal(final String host, InetAddress hostaddress, final boolean recursive) {
 
         if (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
             host == null ||
@@ -900,8 +908,8 @@ public class Domains {
 
         // check dns lookup: may be a local address even if the domain name looks global
         if (!recursive) return false;
-        final InetAddress a = dnsResolve(host);
-        return isLocal(a);
+        if (hostaddress == null) hostaddress = dnsResolve(host);
+        return isLocal(hostaddress);
     }
 
     public static boolean isLocal(final InetAddress a) {
@@ -912,7 +920,7 @@ public class Domains {
             a.isLinkLocalAddress() |
             a.isLoopbackAddress() ||
             a.isSiteLocalAddress() ||
-            isLocal(a.getHostAddress(), false);
+            isLocal(a.getHostAddress(), a, false);
         return localp;
     }
 

@@ -88,7 +88,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     protected final String protocol, userInfo;
     protected       String host, path, quest, ref;
     protected       int port;
-    private         InetAddress hostAddress;
+    protected       InetAddress hostAddress;
 
     /**
      * initialization of a MultiProtocolURI to produce poison pills for concurrent blocking queues
@@ -920,7 +920,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     // checks for local/global IP range and local IP
     public boolean isLocal() {
-        return this.isFile() || this.isSMB() || Domains.isLocal(this.host);
+        return this.isFile() || this.isSMB() || Domains.isLocal(this.host, this.hostAddress);
     }
 
     // language calculation

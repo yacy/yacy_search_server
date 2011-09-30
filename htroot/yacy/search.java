@@ -167,7 +167,7 @@ public final class search {
                 block = true;
             }
         }
-        if (block && Domains.isLocal(client)) block = false;
+        if (block && Domains.isLocal(client, null)) block = false;
         if (block) {
             prop.put("links", "");
             prop.put("linkcount", "0");

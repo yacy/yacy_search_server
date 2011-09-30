@@ -1,4 +1,4 @@
-// Collage.java 
+// Collage.java
 // -----------------------
 // part of YaCy
 // (C) by Detlef Reichl; detlef!reichl()gmx!org
@@ -28,18 +28,17 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
-
 import de.anomic.crawler.ResultImages;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class Collage {
     private static           int fifoMax  = 20;
-    
+
     private static           int fifoPos  = -1;
     private static           int fifoSize = 0;
     private static           long zIndex  = 0;
-    
+
     private static           ResultImages.OriginEntry    origins[]      = new ResultImages.OriginEntry[fifoMax];
     private static           Integer   imgWidth[]    = new Integer[fifoMax];
     private static           Integer   imgHeight[]   = new Integer[fifoMax];
@@ -47,7 +46,7 @@ public class Collage {
     private static           Integer   imgPosY[]     = new Integer[fifoMax];
     private static           long      imgZIndex[]   = new long[fifoMax];
     private static final     Random rand = new Random();
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
@@ -56,7 +55,7 @@ public class Collage {
         int posXMax  = 800;
         int posYMax  = 500;
         boolean embed = false;
-        
+
         if (post != null) {
         	embed = post.containsKey("emb");
         	posXMax = post.getInt("width", posXMax);
@@ -64,40 +63,40 @@ public class Collage {
         	if (post.containsKey("max")) fifoMax = post.getInt("max", fifoMax);
         }
         prop.put("emb", (embed) ? "0" : "1");
-        
+
         if (nextOrigin != null) {
         	System.out.println("NEXTORIGIN=" + nextOrigin.imageEntry.url().toNormalform(true, false));
             if (fifoSize == 0 || origins[fifoPos] != nextOrigin) {
                 fifoPos = fifoPos + 1 >= fifoMax ? 0 : fifoPos + 1;
                 fifoSize = fifoSize + 1 > fifoMax ? fifoMax : fifoSize + 1;
                 origins[fifoPos] = nextOrigin;
-                
+
                 final float scale = rand.nextFloat() * 1.5f + 1;
                 imgWidth[fifoPos]  = (int) ((nextOrigin.imageEntry.width()) / scale);
                 imgHeight[fifoPos] = (int) ((nextOrigin.imageEntry.height()) / scale);
 
                 imgPosX[fifoPos]   = rand.nextInt((imgWidth[fifoPos] == 0) ? posXMax / 2 : Math.max(1, posXMax - imgWidth[fifoPos]));
                 imgPosY[fifoPos]   = rand.nextInt((imgHeight[fifoPos] == 0) ? posYMax / 2 : Math.max(1, posYMax - imgHeight[fifoPos]));
-                
+
                 imgZIndex[fifoPos] = zIndex;
                 zIndex += 1;
             }
         }
-        
+
         if (fifoSize > 0) {
-            prop.put("imgurl", "1");        
+            prop.put("imgurl", "1");
             int c = 0;
             final int yOffset = embed ? 0 : 70;
             for (int i = 0; i < fifoSize; i++) {
-             
+
                 final MultiProtocolURI baseURL = origins[i].baseURL;
                 final MultiProtocolURI imageURL = origins[i].imageEntry.url();
-                
+
                 // check if this loads a page from localhost, which must be prevented to protect the server
                 // against attacks to the administration interface when localhost access is granted
-                if ((Domains.isLocal(baseURL.getHost()) || Domains.isLocal(imageURL.getHost())) &&
+                if ((Domains.isLocal(baseURL.getHost(), null) || Domains.isLocal(imageURL.getHost(), null)) &&
                     sb.getConfigBool("adminAccountForLocalhost", false)) continue;
-                
+
                 final long z = imgZIndex[i];
                 prop.put("imgurl_list_" + c + "_url",
                        "<a href=\"" + baseURL.toNormalform(true, false) + "\">"
@@ -118,7 +117,7 @@ public class Collage {
         } else {
             prop.put("imgurl", "0");
         }
-        
+
         prop.putNum("refresh", Math.max(2, Math.min(5, 500 / (1 + ResultImages.queueSize(!authenticated)))));
         prop.put("emb_privateQueueSize", ResultImages.privateQueueHighSize() + "+" + ResultImages.privateQueueLowSize());
         prop.put("emb_publicQueueSize", ResultImages.publicQueueHighSize()  + "+" + ResultImages.publicQueueLowSize());

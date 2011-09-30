@@ -521,7 +521,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+        final GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
         final String ls = my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
         //System.out.println("SETTING LAST-SEEN of " + this.getName() + " to " + ls);
         this.dna.put(yacySeed.LASTSEEN, ls );
@@ -532,7 +532,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
      */
     public final long getLastSeenUTC() {
         try {
-            GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+            final GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
             final long t = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
@@ -562,7 +562,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if (this.birthdate > 0) return this.birthdate;
         long b;
         try {
-            GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+            final GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
             b = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
         } catch (final ParseException e) {
             b = System.currentTimeMillis();
@@ -864,7 +864,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if (ipString == null) return ipString + " -> IP is null";
         if (ipString.length() > 0 && ipString.length() < 8) return ipString + " -> IP is too short: ";
         if (Switchboard.getSwitchboard().isAllIPMode()) return null;
-        final boolean islocal = Domains.isLocal(ipString);
+        final boolean islocal = Domains.isLocal(ipString, null);
         //if (islocal && Switchboard.getSwitchboard().isGlobalMode()) return ipString + " - local IP for global mode rejected";
         if (!islocal && Switchboard.getSwitchboard().isIntranetMode()) return ipString + " - global IP for intranet mode rejected";
         return null;
