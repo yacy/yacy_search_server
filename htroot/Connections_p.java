@@ -36,8 +36,8 @@ import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.WorkflowThread;
-import net.yacy.peers.yacyPeerActions;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.PeerActions;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 
 //import de.anomic.http.client.ConnectionInfo;
@@ -96,11 +96,11 @@ public final class Connections_p {
             String prot = "http"; // only httpd sessions listed
             
             // determining if the source is a yacy host
-            yacySeed seed = null;
+            Seed seed = null;
             if (doNameLookup) {
                 seed = sb.peers.lookupByIP(userAddress,true,false,false);
                 if (seed != null && (seed.hash.equals(sb.peers.mySeed().hash)) &&
-                        (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
+                        (!seed.get(Seed.PORT,"").equals(Integer.toString(userPort)))) {
                     seed = null;
                 }
             }
@@ -117,7 +117,7 @@ public final class Connections_p {
             prop.put("list_" + idx + "_proto", prot);
             if (sessionTime > 1000*60) {
                 prop.put("list_" + idx + "_ms", "0");
-                prop.put("list_" + idx + "_ms_duration",yacyPeerActions.formatInterval(sessionTime));
+                prop.put("list_" + idx + "_ms_duration",PeerActions.formatInterval(sessionTime));
             } else {
                 prop.put("list_" + idx + "_ms", "1");
                 prop.putNum("list_" + idx + "_ms_duration", sessionTime);

@@ -38,7 +38,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.ISO639;
-import net.yacy.peers.yacyCore;
+import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
@@ -119,7 +119,7 @@ public final class timeline {
         prop.put("event", c);
         
         // log
-        yacyCore.log.logInfo("EXIT TIMELINE SEARCH: " +
+        Network.log.logInfo("EXIT TIMELINE SEARCH: " +
                 QueryParams.anonymizedQueryHashes(q) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +

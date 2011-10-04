@@ -31,8 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacyPeerActions;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.PeerActions;
+import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -85,9 +85,9 @@ public class RemoteCrawl_p {
         int conCount = 0;
 
         boolean dark = true;
-        yacySeed seed;
-        Iterator<yacySeed> e = null;
-        e = sb.peers.seedsSortedConnected(false, yacySeed.RCOUNT);
+        Seed seed;
+        Iterator<Seed> e = null;
+        e = sb.peers.seedsSortedConnected(false, Seed.RCOUNT);
         //e = sb.peers.seedsSortedConnected(false, yacySeed.LCOUNT);
         Pattern peerSearchPattern = null;
         while (e.hasNext() && conCount < 300) {
@@ -96,7 +96,7 @@ public class RemoteCrawl_p {
             if (seed != null) {
                 final long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                 if (lastseen > 720) continue;
-                long rcount = seed.getLong(yacySeed.RCOUNT, 0);
+                long rcount = seed.getLong(Seed.RCOUNT, 0);
                 if (rcount == 0) continue;
                 if ((post != null && post.containsKey("search"))  && peerSearchPattern != null /*(wrongregex == null)*/) {
                     boolean abort = true;
@@ -111,15 +111,15 @@ public class RemoteCrawl_p {
                     if (abort) continue;
                 }
                 prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                String shortname = seed.get(yacySeed.NAME, "deadlink");
+                String shortname = seed.get(Seed.NAME, "deadlink");
                 if (shortname.length() > 20) shortname = shortname.substring(0, 20) + "..."; 
                 prop.putHTML(STR_TABLE_LIST + conCount + "_shortname", shortname);
-                prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
+                prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(Seed.NAME, "deadlink"));
                 prop.put(STR_TABLE_LIST + conCount + "_age", seed.getAge());
-                prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
+                prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(Seed.VERSION, "0.1"), shortname));
                 prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
-                prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
-                prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", yacyPeerActions.formatInterval(60000 * seed.getLong(yacySeed.UPTIME, 0L)));
+                prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(Seed.UTC, "-"));
+                prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", PeerActions.formatInterval(60000 * seed.getLong(Seed.UPTIME, 0L)));
                 prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLinkCount());
                 prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getWordCount());
                 prop.putNum(STR_TABLE_LIST + conCount + "_RCount", rcount);

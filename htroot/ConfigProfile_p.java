@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
 
 import de.anomic.server.serverObjects;
@@ -94,7 +94,7 @@ public class ConfigProfile_p {
                 // generate a news message
                 final Properties news = profile;
                 news.remove("comment");
-                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_PROFILE_UPDATE, news);
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_PROFILE_UPDATE, news);
                 //yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsRecord.CATEGORY_PROFILE_UPDATE, profile));
             } catch(final IOException e) {
             } finally {

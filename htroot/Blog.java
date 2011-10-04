@@ -39,7 +39,7 @@ import java.util.Locale;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
 
 import de.anomic.data.BlogBoard;
@@ -163,7 +163,7 @@ public class Blog {
                 map.put("page", pagename);
                 map.put("subject", StrSubject.replace(',', ' '));
                 map.put("author", StrAuthor.replace(',', ' '));
-                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map);
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_BLOG_ADD, map);
             }
         }
 

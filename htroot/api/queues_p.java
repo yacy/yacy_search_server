@@ -6,7 +6,7 @@ import java.util.Locale;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
@@ -43,7 +43,7 @@ public class queues_p {
         prop.put("rejected", "0");
         //int showRejectedCount = 10;
         
-        yacySeed initiator;
+        Seed initiator;
         
         // index size
         prop.putNum("urlpublictextSize", segment.urlMetadata().size());
@@ -99,7 +99,7 @@ public class queues_p {
     public static final void addNTable(final Switchboard sb, final serverObjects prop, final String tableName, final List<Request> crawlerList) {
 
         int showNum = 0;
-        yacySeed initiator;
+        Seed initiator;
         for (final Request urle : crawlerList) {
             if ((urle != null) && (urle.url() != null)) {
                 initiator = sb.peers.getConnected((urle.initiator() == null) ? "" : UTF8.String(urle.initiator()));

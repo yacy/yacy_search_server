@@ -38,7 +38,7 @@ import java.text.SimpleDateFormat;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
@@ -267,7 +267,7 @@ public class AccessTracker_p {
                 prop.put("page_list_" + m + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.putHTML("page_list_" + m + "_host", host);
                 if (page == 5) {
-                    final yacySeed remotepeer = sb.peers.lookupByIP(Domains.dnsResolve(host), true, true, true);
+                    final Seed remotepeer = sb.peers.lookupByIP(Domains.dnsResolve(host), true, true, true);
                     prop.putHTML("page_list_" + m + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
                 prop.putNum("page_list_" + m + "_count", handles.size());

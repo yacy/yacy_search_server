@@ -36,8 +36,8 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;
-import net.yacy.peers.yacyNewsPool;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.NewsPool;
+import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -128,7 +128,7 @@ public class yacysearchitem {
             prop.put("content_showParser", sb.getConfigBool("search.result.show.parser", true) ? 1 : 0);
             prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
             prop.put("content_authorized", authenticated ? "1" : "0");
-            prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
+            prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
             prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + ASCII.String(result.hash()) + "&urlmaskfilter=.*");
             prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + ASCII.String(result.hash()) + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", ASCII.String(result.hash()));
@@ -145,7 +145,7 @@ public class yacysearchitem {
             prop.put("content_ranking", result.ranking);
             prop.put("content_showMetadata_urlhash", resulthashString);
             prop.put("content_showParser_urlhash", resulthashString);
-            prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(resulthashString));
+            prop.put("content_urlhexhash", Seed.b64Hash2hexHash(resulthashString));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));
             prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
             prop.put("content_date822", HeaderFramework.formatRFC1123(result.modified()));

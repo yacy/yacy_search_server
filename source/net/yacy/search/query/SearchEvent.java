@@ -47,8 +47,8 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
-import net.yacy.peers.yacySearch;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.RemoteSearch;
+import net.yacy.peers.SeedDB;
 import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
@@ -70,7 +70,7 @@ public final class SearchEvent {
     // class variables that may be implemented with an abstract class
     private long eventTime;
     private QueryParams query;
-    private final yacySeedDB peers;
+    private final SeedDB peers;
     private final WorkTables workTables;
     private RWIProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
     private SnippetProcess resultFetcher;
@@ -78,7 +78,7 @@ public final class SearchEvent {
     private final SecondarySearchSuperviser secondarySearchSuperviser;
 
     // class variables for remote searches
-    private yacySearch[] primarySearchThreads, secondarySearchThreads;
+    private RemoteSearch[] primarySearchThreads, secondarySearchThreads;
     private final SortedMap<byte[], String> preselectedPeerHashes;
     private final Thread localSearchThread;
     private final SortedMap<byte[], Integer> IACount;
@@ -88,7 +88,7 @@ public final class SearchEvent {
     private final ReferenceOrder order;
 
     protected SearchEvent(final QueryParams query,
-                             final yacySeedDB peers,
+                             final SeedDB peers,
                              final WorkTables workTables,
                              final SortedMap<byte[], String> preselectedPeerHashes,
                              final boolean generateAbstracts,
@@ -128,7 +128,7 @@ public final class SearchEvent {
 
             // start global searches
             final long timer = System.currentTimeMillis();
-            this.primarySearchThreads = (query.queryHashes.isEmpty()) ? null : yacySearch.primaryRemoteSearches(
+            this.primarySearchThreads = (query.queryHashes.isEmpty()) ? null : RemoteSearch.primaryRemoteSearches(
                     QueryParams.hashSet2hashString(query.queryHashes),
                     QueryParams.hashSet2hashString(query.excludeHashes),
                     query.prefer,
@@ -245,14 +245,14 @@ public final class SearchEvent {
 
        // stop all threads
        if (this.primarySearchThreads != null) {
-           for (final yacySearch search : this.primarySearchThreads) {
+           for (final RemoteSearch search : this.primarySearchThreads) {
                if (search != null) synchronized (search) {
                    if (search.isAlive()) search.interrupt();
                }
            }
        }
        if (this.secondarySearchThreads != null) {
-           for (final yacySearch search : this.secondarySearchThreads) {
+           for (final RemoteSearch search : this.secondarySearchThreads) {
                if (search != null) synchronized (search) {
                    if (search.isAlive()) search.interrupt();
                }
@@ -308,24 +308,24 @@ public final class SearchEvent {
    boolean anyRemoteSearchAlive() {
         // check primary search threads
         if ((this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0)) {
-            for (final yacySearch primarySearchThread : this.primarySearchThreads) {
+            for (final RemoteSearch primarySearchThread : this.primarySearchThreads) {
                 if ((primarySearchThread != null) && (primarySearchThread.isAlive())) return true;
             }
         }
         // maybe a secondary search thread is alive, check this
         if ((this.secondarySearchThreads != null) && (this.secondarySearchThreads.length != 0)) {
-            for (final yacySearch secondarySearchThread : this.secondarySearchThreads) {
+            for (final RemoteSearch secondarySearchThread : this.secondarySearchThreads) {
                 if ((secondarySearchThread != null) && (secondarySearchThread.isAlive())) return true;
             }
         }
         return false;
     }
 
-    public yacySearch[] getPrimarySearchThreads() {
+    public RemoteSearch[] getPrimarySearchThreads() {
         return this.primarySearchThreads;
     }
 
-    public yacySearch[] getSecondarySearchThreads() {
+    public RemoteSearch[] getSecondarySearchThreads() {
         return this.secondarySearchThreads;
     }
 
@@ -548,7 +548,7 @@ public final class SearchEvent {
 
             // compute words for secondary search and start the secondary searches
             String words;
-            SearchEvent.this.secondarySearchThreads = new yacySearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs.size()];
+            SearchEvent.this.secondarySearchThreads = new RemoteSearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs.size()];
             int c = 0;
             for (final Map.Entry<String, StringBuilder> entry: secondarySearchURLs.entrySet()) {
                 peer = entry.getKey();
@@ -561,7 +561,7 @@ public final class SearchEvent {
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls + " from words: " + words);
                 SearchEvent.this.rankingProcess.moreFeeders(1);
                 this.checkedPeers.add(peer);
-                SearchEvent.this.secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
+                SearchEvent.this.secondarySearchThreads[c++] = RemoteSearch.secondaryRemoteSearch(
                         words, urls.toString(), 6000, SearchEvent.this.query.getSegment(), SearchEvent.this.peers, SearchEvent.this.rankingProcess, peer, Switchboard.urlBlacklist,
                         SearchEvent.this.query.ranking, SearchEvent.this.query.constraint, SearchEvent.this.preselectedPeerHashes);
             }

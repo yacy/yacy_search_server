@@ -47,7 +47,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
@@ -67,7 +67,7 @@ public class SnippetProcess {
     // input values
     final RWIProcess  rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
     QueryParams     query;
-    private final yacySeedDB      peers;
+    private final SeedDB      peers;
     private final WorkTables workTables;
 
     // result values
@@ -86,7 +86,7 @@ public class SnippetProcess {
             final LoaderDispatcher loader,
             final RWIProcess rankedCache,
             final QueryParams query,
-            final yacySeedDB peers,
+            final SeedDB peers,
             final WorkTables workTables,
             final int taketimeout,
             final boolean deleteIfSnippetFail) {

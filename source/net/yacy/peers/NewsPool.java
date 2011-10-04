@@ -59,7 +59,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 
-public class yacyNewsPool {
+public class NewsPool {
 
     public static final int INCOMING_DB  = 0;
     public static final int PROCESSED_DB = 1;
@@ -259,19 +259,19 @@ public class yacyNewsPool {
 
     private final static long MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 
-    private final yacyNewsDB newsDB;
-    private final yacyNewsQueue outgoingNews, publishedNews, incomingNews, processedNews;
+    private final NewsDB newsDB;
+    private final NewsQueue outgoingNews, publishedNews, incomingNews, processedNews;
     private final int maxDistribution;
 
-    public yacyNewsPool(
+    public NewsPool(
     		final File yacyDBPath,
             final boolean useTailCache,
             final boolean exceed134217727) {
-        this.newsDB = new yacyNewsDB(new File(yacyDBPath, "news1024.db"), 1024, useTailCache, exceed134217727);
-        this.outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut.table"), this.newsDB);
-        this.publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished.table"), this.newsDB);
-        this.incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn.table"), this.newsDB);
-        this.processedNews = new yacyNewsQueue(new File(yacyDBPath, "newsProcessed.table"), this.newsDB);
+        this.newsDB = new NewsDB(new File(yacyDBPath, "news1024.db"), 1024, useTailCache, exceed134217727);
+        this.outgoingNews  = new NewsQueue(new File(yacyDBPath, "newsOut.table"), this.newsDB);
+        this.publishedNews = new NewsQueue(new File(yacyDBPath, "newsPublished.table"), this.newsDB);
+        this.incomingNews  = new NewsQueue(new File(yacyDBPath, "newsIn.table"), this.newsDB);
+        this.processedNews = new NewsQueue(new File(yacyDBPath, "newsProcessed.table"), this.newsDB);
         this.maxDistribution = 30;
     }
 
@@ -283,25 +283,25 @@ public class yacyNewsPool {
         this.processedNews.close();
     }
 
-    public Iterator<yacyNewsDB.Record> recordIterator(final int dbKey, final boolean up) {
+    public Iterator<NewsDB.Record> recordIterator(final int dbKey, final boolean up) {
         // returns an iterator of yacyNewsRecord-type objects
-        final yacyNewsQueue queue = switchQueue(dbKey);
+        final NewsQueue queue = switchQueue(dbKey);
         return queue.records(up);
     }
 
-    public yacyNewsDB.Record parseExternal(final String external) {
+    public NewsDB.Record parseExternal(final String external) {
         return this.newsDB.newRecord(external);
     }
 
-    public void publishMyNews(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
+    public void publishMyNews(final Seed mySeed, final String category, final Map<String, String> attributes) {
         publishMyNews(this.newsDB.newRecord(mySeed, category, attributes));
     }
 
-    public void publishMyNews(final yacySeed mySeed, final String category, final Properties attributes) {
+    public void publishMyNews(final Seed mySeed, final String category, final Properties attributes) {
         publishMyNews(this.newsDB.newRecord(mySeed, category, attributes));
     }
 
-    private void publishMyNews(final yacyNewsDB.Record record) {
+    private void publishMyNews(final NewsDB.Record record) {
         // this shall be called if our peer generated a new news record and wants to publish it
         if (record == null) return;
         try {
@@ -314,10 +314,10 @@ public class yacyNewsPool {
         }
     }
 
-    public yacyNewsDB.Record myPublication() throws IOException, RowSpaceExceededException {
+    public NewsDB.Record myPublication() throws IOException, RowSpaceExceededException {
         // generate a record for next peer-ping
         if (this.outgoingNews.isEmpty()) return null;
-        final yacyNewsDB.Record record = this.outgoingNews.pop();
+        final NewsDB.Record record = this.outgoingNews.pop();
         if (record == null) return null;
 
         record.incDistribution();
@@ -331,12 +331,12 @@ public class yacyNewsPool {
         return record;
     }
 
-    public void enqueueIncomingNews(final yacyNewsDB.Record record) throws IOException, RowSpaceExceededException {
+    public void enqueueIncomingNews(final NewsDB.Record record) throws IOException, RowSpaceExceededException {
         // called if a news is attached to a seed
 
         // check consistency
         if (record.id() == null) return;
-        if (record.id().length() != yacyNewsDB.idLength) return;
+        if (record.id().length() != NewsDB.idLength) return;
         if (record.category() == null) return;
         if (!(categories.contains(record.category()))) return;
         if (record.created().getTime() == 0) return;
@@ -366,13 +366,13 @@ public class yacyNewsPool {
         return switchQueue(dbKey).size();
     }
 
-    public int automaticProcess(final yacySeedDB seedDB) throws IOException, InterruptedException, RowSpaceExceededException {
+    public int automaticProcess(final SeedDB seedDB) throws IOException, InterruptedException, RowSpaceExceededException {
         // processes news in the incoming-db
         // returns number of processes
-        yacyNewsDB.Record record;
+        NewsDB.Record record;
         int pc = 0;
         synchronized (this.incomingNews) {
-            final Iterator<yacyNewsDB.Record> i = this.incomingNews.records(true);
+            final Iterator<NewsDB.Record> i = this.incomingNews.records(true);
             final Set<String> removeIDs = new HashSet<String>();
             // this loop should not run too long! This may happen if the incoming news are long and not deleted after processing
             final long start = System.currentTimeMillis();
@@ -390,14 +390,14 @@ public class yacyNewsPool {
                 if (System.currentTimeMillis() - start > 100) break; // time-out for this to avoid deadlocks during concurrent peer-pings
             }
             for (final String id: removeIDs) {
-                final yacyNewsDB.Record deletedRecord = this.incomingNews.remove(id);
+                final NewsDB.Record deletedRecord = this.incomingNews.remove(id);
                 assert deletedRecord != null;
             }
         }
         return pc;
     }
 
-    private boolean automaticProcessP(final yacySeedDB seedDB, final yacyNewsDB.Record record) {
+    private boolean automaticProcessP(final SeedDB seedDB, final NewsDB.Record record) {
         if (record == null) return false;
         if (record.category() == null) return true;
         final long created = record.created().getTime();
@@ -419,10 +419,10 @@ public class yacyNewsPool {
             }
         if ((record.category().equals(CATEGORY_CRAWL_START)) &&
             ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
-            final yacySeed seed = seedDB.get(record.originator());
+            final Seed seed = seedDB.get(record.originator());
             if (seed == null) return true;
             try {
-                return (Integer.parseInt(seed.get(yacySeed.ISPEED, "-")) < 10);
+                return (Integer.parseInt(seed.get(Seed.ISPEED, "-")) < 10);
             } catch (final NumberFormatException ee) {
                 return true;
             }
@@ -430,11 +430,11 @@ public class yacyNewsPool {
         return false;
     }
 
-    public synchronized yacyNewsDB.Record getSpecific(final int dbKey, final String category, final String key, final String value) {
-        final yacyNewsQueue queue = switchQueue(dbKey);
-        yacyNewsDB.Record record;
+    public synchronized NewsDB.Record getSpecific(final int dbKey, final String category, final String key, final String value) {
+        final NewsQueue queue = switchQueue(dbKey);
+        NewsDB.Record record;
         String s;
-        final Iterator<yacyNewsDB.Record> i = queue.records(true);
+        final Iterator<NewsDB.Record> i = queue.records(true);
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.category().equals(category))) {
@@ -445,10 +445,10 @@ public class yacyNewsPool {
         return null;
     }
 
-    public synchronized yacyNewsDB.Record getByOriginator(final int dbKey, final String category, final String originatorHash) {
-        final yacyNewsQueue queue = switchQueue(dbKey);
-        yacyNewsDB.Record record;
-        final Iterator<yacyNewsDB.Record> i = queue.records(true);
+    public synchronized NewsDB.Record getByOriginator(final int dbKey, final String category, final String originatorHash) {
+        final NewsQueue queue = switchQueue(dbKey);
+        NewsDB.Record record;
+        final Iterator<NewsDB.Record> i = queue.records(true);
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) &&
@@ -460,7 +460,7 @@ public class yacyNewsPool {
         return null;
     }
 
-    public synchronized yacyNewsDB.Record getByID(final int dbKey, final String id) {
+    public synchronized NewsDB.Record getByID(final int dbKey, final String id) {
         switch (dbKey) {
             case INCOMING_DB:   return this.incomingNews.get(id);
             case PROCESSED_DB:  return this.processedNews.get(id);
@@ -470,7 +470,7 @@ public class yacyNewsPool {
         return null;
     }
 
-    private yacyNewsQueue switchQueue(final int dbKey) {
+    private NewsQueue switchQueue(final int dbKey) {
         switch (dbKey) {
             case INCOMING_DB:	return this.incomingNews;
             case PROCESSED_DB:  return this.processedNews;
@@ -501,9 +501,9 @@ public class yacyNewsPool {
         }
     }
 
-    private boolean moveOff(final yacyNewsQueue fromqueue, final yacyNewsQueue toqueue, final String id) throws IOException, RowSpaceExceededException {
+    private boolean moveOff(final NewsQueue fromqueue, final NewsQueue toqueue, final String id) throws IOException, RowSpaceExceededException {
         // called if a published news shall be removed
-        final yacyNewsDB.Record record = fromqueue.remove(id);
+        final NewsDB.Record record = fromqueue.remove(id);
         if (record == null) {
             return false;
         }
@@ -526,10 +526,10 @@ public class yacyNewsPool {
         }
     }
 
-    private int moveOffAll(final yacyNewsQueue fromqueue, final yacyNewsQueue toqueue) throws IOException, RowSpaceExceededException {
+    private int moveOffAll(final NewsQueue fromqueue, final NewsQueue toqueue) throws IOException, RowSpaceExceededException {
         // move off all news from a specific queue to another queue
-        final Iterator<yacyNewsDB.Record> i = fromqueue.records(true);
-        yacyNewsDB.Record record;
+        final Iterator<NewsDB.Record> i = fromqueue.records(true);
+        NewsDB.Record record;
         if (toqueue == null) return 0;
         int c = 0;
         while (i.hasNext()) {

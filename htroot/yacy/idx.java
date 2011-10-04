@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -28,7 +28,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
-import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.Protocol;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.peers.graphics.WebStructureGraph.HostReference;
 import net.yacy.search.Switchboard;
@@ -39,7 +39,7 @@ public final class idx {
 
     // example:
     // http://localhost:8090/yacy/idx.json?object=host
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
 
@@ -50,20 +50,20 @@ public final class idx {
 
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
-        
-        if (sb.adminAuthenticated(header) < 2 && !yacyNetwork.authentifyRequest(post, env)) {
+
+        if (sb.adminAuthenticated(header) < 2 && !Protocol.authentifyRequest(post, env)) {
             return prop;
         }
-        
+
         if (post.get("object", "").equals("host")) {
             prop.put("name","host");
-            ReferenceContainerCache<HostReference> idx = sb.webStructure.incomingReferences();
+            final ReferenceContainerCache<HostReference> idx = sb.webStructure.incomingReferences();
             prop.put("rowdef", WebStructureGraph.hostReferenceFactory.getRow().toString());
             int count = 0;
-            for (ReferenceContainer<HostReference> references: idx) {
+            for (final ReferenceContainer<HostReference> references: idx) {
                 prop.put("list_" + count + "_term", ASCII.String(references.getTermHash()));
-                Iterator<HostReference> referenceIterator = references.entries();
-                StringBuilder s = new StringBuilder();
+                final Iterator<HostReference> referenceIterator = references.entries();
+                final StringBuilder s = new StringBuilder();
                 HostReference reference;
                 while (referenceIterator.hasNext()) {
                     reference = referenceIterator.next();

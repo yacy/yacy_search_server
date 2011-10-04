@@ -37,10 +37,10 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.yacyChannel;
-import net.yacy.peers.yacySearch;
-import net.yacy.peers.yacySeed;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.EventChannel;
+import net.yacy.peers.RemoteSearch;
+import net.yacy.peers.Seed;
+import net.yacy.peers.SeedDB;
 import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -114,11 +114,11 @@ public class NetworkGraph {
     private static BufferedImage logo = null;
     private static long          bannerPictureDate = 0;
 
-    public static RasterPlotter getSearchEventPicture(final yacySeedDB seedDB, final String eventID, final int coronaangle, final int cyc) {
+    public static RasterPlotter getSearchEventPicture(final SeedDB seedDB, final String eventID, final int coronaangle, final int cyc) {
         final SearchEvent event = SearchEventCache.getEvent(eventID);
         if (event == null) return null;
-        final yacySearch[] primarySearches = event.getPrimarySearchThreads();
-        final yacySearch[] secondarySearches = event.getSecondarySearchThreads();
+        final RemoteSearch[] primarySearches = event.getPrimarySearchThreads();
+        final RemoteSearch[] secondarySearches = event.getSecondarySearchThreads();
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
@@ -134,7 +134,7 @@ public class NetworkGraph {
         int angle;
 
         // draw in the primary search peers
-        for (final yacySearch primarySearche : primarySearches) {
+        for (final RemoteSearch primarySearche : primarySearches) {
             if (primarySearche == null) continue;
             eventPicture.setColor((primarySearche.isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
             angle = cyc + (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(primarySearche.target().hash), null)) / ((double) Long.MAX_VALUE)));
@@ -143,7 +143,7 @@ public class NetworkGraph {
 
         // draw in the secondary search peers
         if (secondarySearches != null) {
-            for (final yacySearch secondarySearche : secondarySearches) {
+            for (final RemoteSearch secondarySearche : secondarySearches) {
                 if (secondarySearche == null) continue;
                 eventPicture.setColor((secondarySearche.isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
                 angle = cyc + (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(secondarySearche.target().hash), null)) / ((double) Long.MAX_VALUE)));
@@ -167,12 +167,12 @@ public class NetworkGraph {
         return eventPicture;
     }
 
-    public static RasterPlotter getNetworkPicture(final yacySeedDB seedDB, final long maxAge, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final int coronaangle, final long communicationTimeout, final String networkName, final String networkTitle, final String bgcolor, final int cyc) {
+    public static RasterPlotter getNetworkPicture(final SeedDB seedDB, final long maxAge, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final int coronaangle, final long communicationTimeout, final String networkName, final String networkTitle, final String bgcolor, final int cyc) {
         return drawNetworkPicture(seedDB, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, networkName, networkTitle, bgcolor, cyc);
     }
 
     private static RasterPlotter drawNetworkPicture(
-            final yacySeedDB seedDB, final int width, final int height,
+            final SeedDB seedDB, final int width, final int height,
             final int passiveLimit, final int potentialLimit,
             final int maxCount, final int coronaangle,
             final long communicationTimeout,
@@ -194,13 +194,13 @@ public class NetworkGraph {
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
         //System.out.println("Seed Minimum distance is       " + yacySeed.minDHTNumber);
 
-        yacySeed seed;
+        Seed seed;
         long lastseen;
 
         // draw connected senior and principals
         int count = 0;
         int totalCount = 0;
-        Iterator<yacySeed> e = seedDB.seedsConnected(true, false, null, (float) 0.0);
+        Iterator<Seed> e = seedDB.seedsConnected(true, false, null, (float) 0.0);
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
             if (seed == null) {
@@ -215,7 +215,7 @@ public class NetworkGraph {
 
         // draw disconnected senior and principals that have been seen lately
         count = 0;
-        e = seedDB.seedsSortedDisconnected(false, yacySeed.LASTSEEN);
+        e = seedDB.seedsSortedDisconnected(false, Seed.LASTSEEN);
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
             if (seed == null) {
@@ -233,7 +233,7 @@ public class NetworkGraph {
 
         // draw juniors that have been seen lately
         count = 0;
-        e = seedDB.seedsSortedPotential(false, yacySeed.LASTSEEN);
+        e = seedDB.seedsSortedPotential(false, Seed.LASTSEEN);
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
             if (seed == null) {
@@ -255,14 +255,14 @@ public class NetworkGraph {
         // draw DHT activity
         if (communicationTimeout >= 0) {
             final Date horizon = new Date(System.currentTimeMillis() - communicationTimeout);
-            for (final Hit event: yacyChannel.channels(yacyChannel.DHTRECEIVE)) {
+            for (final Hit event: EventChannel.channels(EventChannel.DHTRECEIVE)) {
                 if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTRECEIVE: " + event.getLink());
                     drawNetworkPictureDHT(networkPicture, width / 2, height / 2, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTIN, coronaangle, false, cyc);
                 }
             }
-            for (final Hit event: yacyChannel.channels(yacyChannel.DHTSEND)) {
+            for (final Hit event: EventChannel.channels(EventChannel.DHTSEND)) {
                 if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTSEND: " + event.getLink());
@@ -281,7 +281,7 @@ public class NetworkGraph {
         return networkPicture;
     }
 
-    private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final yacySeed mySeed, final yacySeed otherSeed, final String colorLine, final int coronaangle, final boolean out, final int cyc) {
+    private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final Seed mySeed, final Seed otherSeed, final String colorLine, final int coronaangle, final boolean out, final int cyc) {
         final int angleMy = cyc + (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(mySeed.hash), null)) / ((double) Long.MAX_VALUE)));
         final int angleOther = cyc + (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(otherSeed.hash), null)) / ((double) Long.MAX_VALUE)));
         // draw line
@@ -296,7 +296,7 @@ public class NetworkGraph {
     private static void drawNetworkPicturePeer(
             final RasterPlotter img, final int centerX, final int centerY,
             final int innerradius, final int outerradius,
-            final yacySeed seed,
+            final Seed seed,
             final String colorDot, final String colorLine, final String colorText,
             final int coronaangle,
             final int cyc) {

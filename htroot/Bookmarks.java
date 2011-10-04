@@ -48,7 +48,7 @@ import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
 import de.anomic.data.BookmarkHelper;
@@ -458,7 +458,7 @@ public class Bookmarks {
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));
     	map.put("tags", tagsString.replace(',', ' '));
-    	sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map);
+    	sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_BOOKMARK_ADD, map);
     }
 
 }

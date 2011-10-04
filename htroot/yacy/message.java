@@ -1,4 +1,4 @@
-// message.java 
+// message.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -41,11 +41,10 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.yacyCore;
-import net.yacy.peers.yacyNetwork;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
-
 import de.anomic.data.MessageBoard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -65,13 +64,13 @@ public final class message {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        if (!Protocol.authentifyRequest(post, env)) return prop;
 
         final String process = post.get("process", "permission");
         final String key =  post.get("key", "");
         final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
         final InetAddress ias = Domains.dnsResolve(clientip);
-        
+
         final int messagesize = 10240;
         final int attachmentsize = 0;
 
@@ -93,7 +92,7 @@ public final class message {
         	prop.put("response", "-1"); // request rejected
             return prop;
         }
-        
+
         prop.put("messagesize", Integer.toString(messagesize));
         prop.put("attachmentsize", Integer.toString(attachmentsize));
 
@@ -112,10 +111,10 @@ public final class message {
                 return prop;
             }
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
-            yacySeed otherSeed;
+            Seed otherSeed;
             try {
-                otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, false, ias.getHostAddress());
-            } catch (IOException e) {
+                otherSeed = Seed.genRemoteSeed(otherSeedString, key, false, ias.getHostAddress());
+            } catch (final IOException e) {
                 prop.put("response", "-1"); // don't accept messages for bad seeds
                 return prop;
             }
@@ -132,7 +131,7 @@ public final class message {
                 prop.put("response", "-1"); // don't accept empty messages
                 return prop;
             }
-            
+
             prop.put("response", "Thank you!");
 
             // save message
@@ -141,7 +140,7 @@ public final class message {
             mb = UTF8.getBytes(message);
             sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                     "remote",
-                    otherSeed.get(yacySeed.NAME, "anonymous"), otherSeed.hash,
+                    otherSeed.get(Seed.NAME, "anonymous"), otherSeed.hash,
                     sb.peers.mySeed().getName(), sb.peers.mySeed().hash,
                     subject, mb));
 
@@ -154,7 +153,7 @@ public final class message {
                 FileUtils.copy(notifierSource, notifierDest);
             } catch (final IOException e) {
             	Log.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
-              
+
             }
         }
 //      System.out.println("respond = " + prop.toString());
@@ -177,7 +176,7 @@ public final class message {
 
             // get the recipient address
             final String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
-			
+
             // get the sendmail configuration
             final String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
             final String[] sendMail = sendMailStr.trim().split(" ");
@@ -199,7 +198,7 @@ public final class message {
             .append("/")
             .append(msgEntry.authorHash())
             .append("\nMessage to:   ")
-            .append(msgEntry.recipient()) 
+            .append(msgEntry.recipient())
             .append("/")
             .append(msgEntry.recipientHash())
             .append("\nCategory:     ")
@@ -210,15 +209,15 @@ public final class message {
             final Process process=Runtime.getRuntime().exec(sendMail);
             final PrintWriter email = new PrintWriter(process.getOutputStream());
             email.print(emailTxt.toString());
-            email.close();                        
+            email.close();
         } catch (final Exception e) {
-            yacyCore.log.logWarning("message: message forwarding via email failed. ",e);
+            Network.log.logWarning("message: message forwarding via email failed. ",e);
         }
 
     }
 
     /*
-     on 83 
+     on 83
      DEBUG: message post values = {youare=Ty2F86ekSWM5, key=pPQSZaXD, iam=WSjicAx1hRio, process=permission}
      von 93 wurde gesendet:
      DEBUG: PUT BODY=------------1090394265522

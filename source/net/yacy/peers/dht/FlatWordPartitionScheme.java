@@ -34,7 +34,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 
 /**
  * A flat word partition scheme is a metric for words on the range of a distributed
@@ -60,7 +60,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
         return Base64Order.enhancedCoder.cardinal(wordHash);
     }
 
-    public final long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer) {
+    public final long dhtDistance(final byte[] word, final String urlHash, final Seed peer) {
         return dhtDistance(word, urlHash, ASCII.getBytes(peer.hash));
     }
     

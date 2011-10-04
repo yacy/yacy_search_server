@@ -1,4 +1,4 @@
-// list.java 
+// list.java
 // -----------------------
 // (C) 2004 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2004 on http://yacy.net
@@ -10,7 +10,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,11 +31,10 @@ import java.io.File;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.yacyNetwork;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
+import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -52,23 +51,23 @@ public final class list {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-        
+        if (!Protocol.authentifyRequest(post, env)) return prop;
+
         final String col = post.get("col", "");
         final File listsPath = env.getDataPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
-        
+
         String otherPeerName = null;
         if (post.containsKey("iam")) {
-            final yacySeed bla = sb.peers.get(post.get("iam", ""));
+            final Seed bla = sb.peers.get(post.get("iam", ""));
             if (bla != null) otherPeerName = bla.getName();
         }
         if (otherPeerName == null) otherPeerName = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
-        
+
         if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(otherPeerName))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
             return null;
         }
-        
+
         if (col.equals("black")) {
             final StringBuilder out = new StringBuilder(10000);
 
@@ -76,9 +75,8 @@ public final class list {
             final String[] filenamesarray = filenames.split(",");
 
             if (filenamesarray.length > 0){
-                for (int i = 0;i < filenamesarray.length; i++) {
-                    if (blackListName.equals("") || filenamesarray[i].equals(blackListName)) {
-                        final String filename = filenamesarray[i];
+                for (final String filename : filenamesarray) {
+                    if (blackListName.equals("") || filename.equals(blackListName)) {
                         final File fileObj = new File(listsPath,filename);
                         out.append(FileUtils.getListString(fileObj, false)).append(serverCore.CRLF_STRING);
                     }
@@ -89,7 +87,7 @@ public final class list {
         } else {
             prop.put("list","");
         }
-        
+
         return prop;
     }
 }

@@ -46,8 +46,8 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
-import net.yacy.peers.yacyClient;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -408,10 +408,10 @@ public class CrawlQueues {
         }
 
         // check if we have an entry in the provider list, otherwise fill the list
-        yacySeed seed;
+        Seed seed;
         if (this.remoteCrawlProviderHashes.isEmpty()) {
             if (this.sb.peers != null && this.sb.peers.sizeConnected() > 0) {
-                final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(this.sb.peers);
+                final Iterator<Seed> e = PeerSelection.getProvidesRemoteCrawlURLs(this.sb.peers);
                 while (e.hasNext()) {
                     seed = e.next();
                     if (seed != null) this.remoteCrawlProviderHashes.add(seed.hash);
@@ -437,7 +437,7 @@ public class CrawlQueues {
         if (seed == null) return false;
 
         // we know a peer which should provide remote crawl entries. load them now.
-        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(this.sb.peers, seed, 60, 8000);
+        final RSSFeed feed = Protocol.queryRemoteCrawlURLs(this.sb.peers, seed, 60, 8000);
         if (feed == null || feed.isEmpty()) {
             // something is wrong with this provider. To prevent that we get not stuck with this peer
             // we remove it from the peer list

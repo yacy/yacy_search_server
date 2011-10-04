@@ -66,7 +66,7 @@ import de.anomic.http.server.HTTPDemon;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSwitch;
 
-public final class yacySeedDB implements AlternativeDomainNames {
+public final class SeedDB implements AlternativeDomainNames {
 
     // global statics
 
@@ -78,9 +78,9 @@ public final class yacySeedDB implements AlternativeDomainNames {
      */
     public static final String DBFILE_OWN_SEED = "mySeed.txt";
 
-    public static final String[]      sortFields = new String[] {yacySeed.LCOUNT, yacySeed.RCOUNT, yacySeed.ICOUNT, yacySeed.UPTIME, yacySeed.VERSION, yacySeed.LASTSEEN};
-    public static final String[]   longaccFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.ISPEED};
-    public static final String[] doubleaccFields = new String[] {yacySeed.RSPEED};
+    public static final String[]      sortFields = new String[] {Seed.LCOUNT, Seed.RCOUNT, Seed.ICOUNT, Seed.UPTIME, Seed.VERSION, Seed.LASTSEEN};
+    public static final String[]   longaccFields = new String[] {Seed.LCOUNT, Seed.ICOUNT, Seed.ISPEED};
+    public static final String[] doubleaccFields = new String[] {Seed.RSPEED};
 
     // class objects
     private File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
@@ -91,18 +91,18 @@ public final class yacySeedDB implements AlternativeDomainNames {
     public long lastSeedUpload_timeStamp = System.currentTimeMillis();
     protected String lastSeedUpload_myIP = "";
 
-    public  yacyPeerActions peerActions;
-    public  yacyNewsPool newsPool;
+    public  PeerActions peerActions;
+    public  NewsPool newsPool;
 
     private int netRedundancy;
     public  PartitionScheme scheme;
 
-    private yacySeed mySeed; // my own seed
+    private Seed mySeed; // my own seed
     private final Set<String> myBotIDs; // list of id's that this bot accepts as robots.txt identification
     private final Hashtable<String, String> nameLookupCache; // a name-to-hash relation
-    private final Hashtable<InetAddress, SoftReference<yacySeed>> ipLookupCache;
+    private final Hashtable<InetAddress, SoftReference<Seed>> ipLookupCache;
 
-    public yacySeedDB(
+    public SeedDB(
             final File networkRoot,
             final String seedActiveDBFileName,
             final String seedPassiveDBFileName,
@@ -133,7 +133,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         this.nameLookupCache = new Hashtable<String, String>();
 
         // cache for reverse name lookup
-        this.ipLookupCache = new Hashtable<InetAddress, SoftReference<yacySeed>>();
+        this.ipLookupCache = new Hashtable<InetAddress, SoftReference<Seed>>();
 
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
@@ -144,10 +144,10 @@ public final class yacySeedDB implements AlternativeDomainNames {
         HTTPDemon.setAlternativeResolver(this);
 
         // create or init news database
-        this.newsPool = new yacyNewsPool(networkRoot, useTailCache, exceed134217727);
+        this.newsPool = new NewsPool(networkRoot, useTailCache, exceed134217727);
 
         // deploy peer actions
-        this.peerActions = new yacyPeerActions(this, this.newsPool);
+        this.peerActions = new PeerActions(this, this.newsPool);
     }
 
     public void relocate(
@@ -173,7 +173,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         // but keep the seed name
         final String peername = myName();
         this.mySeed = null; // my own seed
-        this.myOwnSeedFile = new File(newNetworkRoot, yacySeedDB.DBFILE_OWN_SEED);
+        this.myOwnSeedFile = new File(newNetworkRoot, SeedDB.DBFILE_OWN_SEED);
         initMySeed();
         this.mySeed.setName(peername);
 
@@ -200,10 +200,10 @@ public final class yacySeedDB implements AlternativeDomainNames {
         HTTPDemon.setAlternativeResolver(this);
 
         // create or init news database
-        this.newsPool = new yacyNewsPool(newNetworkRoot, useTailCache, exceed134217727);
+        this.newsPool = new NewsPool(newNetworkRoot, useTailCache, exceed134217727);
 
         // deploy peer actions
-        this.peerActions = new yacyPeerActions(this, this.newsPool);
+        this.peerActions = new PeerActions(this, this.newsPool);
     }
 
     private synchronized void initMySeed() {
@@ -212,12 +212,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
         // create or init own seed
         if (this.myOwnSeedFile.length() > 0) try {
             // load existing identity
-            this.mySeed = yacySeed.load(this.myOwnSeedFile);
+            this.mySeed = Seed.load(this.myOwnSeedFile);
             if (this.mySeed == null) throw new IOException("current seed is null");
         } catch (final IOException e) {
             // create new identity
             Log.logSevere("SEEDDB", "could not load stored mySeed.txt from " + this.myOwnSeedFile.toString() + ": " + e.getMessage() + ". creating new seed.", e);
-            this.mySeed = yacySeed.genLocalSeed(this);
+            this.mySeed = Seed.genLocalSeed(this);
             try {
                 this.mySeed.save(this.myOwnSeedFile);
             } catch (final IOException ee) {
@@ -228,7 +228,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         } else {
             // create new identity
             Log.logInfo("SEEDDB", "could not find stored mySeed.txt at " + this.myOwnSeedFile.toString() + ": " + ". creating new seed.");
-            this.mySeed = yacySeed.genLocalSeed(this);
+            this.mySeed = Seed.genLocalSeed(this);
             try {
                 this.mySeed.save(this.myOwnSeedFile);
             } catch (final IOException ee) {
@@ -240,7 +240,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         this.myBotIDs.add(this.mySeed.getName() + ".yacy");
         this.myBotIDs.add(this.mySeed.hash + ".yacyh");
         this.mySeed.setIP("");       // we delete the old information to see what we have now
-        this.mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // markup startup condition
+        this.mySeed.put(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); // markup startup condition
     }
 
     public Set<String> myBotIDs() {
@@ -256,7 +256,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return this.mySeed != null;
     }
 
-    public yacySeed mySeed() {
+    public Seed mySeed() {
         if (this.mySeed == null) {
             if (sizeConnected() == 0) try {Thread.sleep(5000);} catch (final InterruptedException e) {} // wait for init
             initMySeed();
@@ -340,7 +340,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
     private synchronized MapDataMining resetSeedTable(MapDataMining seedDB, final File seedDBFile) {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
-        yacyCore.log.logWarning("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
+        Network.log.logWarning("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
         seedDB.close();
         FileUtils.deletedelete(seedDBFile);
         if (seedDBFile.exists())
@@ -362,17 +362,17 @@ public final class yacySeedDB implements AlternativeDomainNames {
         this.peerActions.close();
     }
 
-    public Iterator<yacySeed> seedsSortedConnected(final boolean up, final String field) {
+    public Iterator<Seed> seedsSortedConnected(final boolean up, final String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, this.seedActiveDB);
     }
 
-    public Iterator<yacySeed> seedsSortedDisconnected(final boolean up, final String field) {
+    public Iterator<Seed> seedsSortedDisconnected(final boolean up, final String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, this.seedPassiveDB);
     }
 
-    public Iterator<yacySeed> seedsSortedPotential(final boolean up, final String field) {
+    public Iterator<Seed> seedsSortedPotential(final boolean up, final String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, this.seedPotentialDB);
     }
@@ -388,7 +388,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
     	// clusterdef ::= {address}{','address}*
     	final String[] addresses = (clusterdefinition.length() == 0) ? new String[0] : clusterdefinition.split(",");
     	final TreeMap<byte[], String> clustermap = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
-    	yacySeed seed;
+    	Seed seed;
     	String hash, yacydom, ipport;
     	int p;
     	for (final String addresse : addresses) {
@@ -402,10 +402,10 @@ public final class yacySeedDB implements AlternativeDomainNames {
     		}
     		if (yacydom.endsWith(".yacyh")) {
     			// find a peer with its hexhash
-    			hash = yacySeed.hexHash2b64Hash(yacydom.substring(0, yacydom.length() - 6));
+    			hash = Seed.hexHash2b64Hash(yacydom.substring(0, yacydom.length() - 6));
     			seed = get(hash);
     			if (seed == null) {
-    				yacyCore.log.logWarning("cluster peer '" + yacydom + "' was not found.");
+    				Network.log.logWarning("cluster peer '" + yacydom + "' was not found.");
     			} else {
     				clustermap.put(ASCII.getBytes(hash), ipport);
     			}
@@ -413,35 +413,35 @@ public final class yacySeedDB implements AlternativeDomainNames {
     			// find a peer with its name
     			seed = lookupByName(yacydom.substring(0, yacydom.length() - 5));
     			if (seed == null) {
-    				yacyCore.log.logWarning("cluster peer '" + yacydom + "' was not found.");
+    				Network.log.logWarning("cluster peer '" + yacydom + "' was not found.");
     			} else {
     				clustermap.put(ASCII.getBytes(seed.hash), ipport);
     			}
     		} else {
-    			yacyCore.log.logWarning("cluster peer '" + addresse + "' has wrong syntax. the name must end with .yacy or .yacyh");
+    			Network.log.logWarning("cluster peer '" + addresse + "' has wrong syntax. the name must end with .yacy or .yacyh");
     		}
     	}
     	return clustermap;
     }
 
-    public Iterator<yacySeed> seedsConnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
+    public Iterator<Seed> seedsConnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, this.seedActiveDB, minVersion);
     }
 
-    private Iterator<yacySeed> seedsDisconnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
+    private Iterator<Seed> seedsDisconnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, this.seedPassiveDB, minVersion);
     }
 
-    private Iterator<yacySeed> seedsPotential(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
+    private Iterator<Seed> seedsPotential(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, this.seedPotentialDB, minVersion);
     }
 
-    public yacySeed anySeedVersion(final float minVersion) {
+    public Seed anySeedVersion(final float minVersion) {
         // return just any seed that has a specific minimum version number
-        final Iterator<yacySeed> e = seedsConnected(true, true, yacySeed.randomHash(), minVersion);
+        final Iterator<Seed> e = seedsConnected(true, true, Seed.randomHash(), minVersion);
         return e.next();
     }
 
@@ -452,8 +452,8 @@ public final class yacySeedDB implements AlternativeDomainNames {
      */
     public int sizeActiveSince(final long limit) {
         int c = this.seedActiveDB.size();
-        yacySeed seed;
-        Iterator<yacySeed> i = seedsSortedDisconnected(false, yacySeed.LASTSEEN);
+        Seed seed;
+        Iterator<Seed> i = seedsSortedDisconnected(false, Seed.LASTSEEN);
         while (i.hasNext()) {
             seed = i.next();
             if (seed != null) {
@@ -461,7 +461,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 c++;
             }
         }
-        i = seedsSortedPotential(false, yacySeed.LASTSEEN);
+        i = seedsSortedPotential(false, Seed.LASTSEEN);
         while (i.hasNext()) {
             seed = i.next();
             if (seed != null) {
@@ -484,16 +484,16 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return this.seedPotentialDB.size();
     }
 
-    public long countActiveURL() { return this.seedActiveDB.getLongAcc(yacySeed.LCOUNT); }
-    public long countActiveRWI() { return this.seedActiveDB.getLongAcc(yacySeed.ICOUNT); }
-    public long countActivePPM() { return this.seedActiveDB.getLongAcc(yacySeed.ISPEED); }
-    public float countActiveQPM() { return this.seedActiveDB.getFloatAcc(yacySeed.RSPEED); }
-    public long countPassiveURL() { return this.seedPassiveDB.getLongAcc(yacySeed.LCOUNT); }
-    public long countPassiveRWI() { return this.seedPassiveDB.getLongAcc(yacySeed.ICOUNT); }
-    public long countPotentialURL() { return this.seedPotentialDB.getLongAcc(yacySeed.LCOUNT); }
-    public long countPotentialRWI() { return this.seedPotentialDB.getLongAcc(yacySeed.ICOUNT); }
+    public long countActiveURL() { return this.seedActiveDB.getLongAcc(Seed.LCOUNT); }
+    public long countActiveRWI() { return this.seedActiveDB.getLongAcc(Seed.ICOUNT); }
+    public long countActivePPM() { return this.seedActiveDB.getLongAcc(Seed.ISPEED); }
+    public float countActiveQPM() { return this.seedActiveDB.getFloatAcc(Seed.RSPEED); }
+    public long countPassiveURL() { return this.seedPassiveDB.getLongAcc(Seed.LCOUNT); }
+    public long countPassiveRWI() { return this.seedPassiveDB.getLongAcc(Seed.ICOUNT); }
+    public long countPotentialURL() { return this.seedPotentialDB.getLongAcc(Seed.LCOUNT); }
+    public long countPotentialRWI() { return this.seedPotentialDB.getLongAcc(Seed.ICOUNT); }
 
-    public void addConnected(final yacySeed seed) {
+    public void addConnected(final Seed seed) {
         if (seed.isProper(false) != null) return;
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         synchronized (this) {
@@ -504,13 +504,13 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 this.seedPassiveDB.delete(ASCII.getBytes(seed.hash));
                 this.seedPotentialDB.delete(ASCII.getBytes(seed.hash));
             } catch (final Exception e) {
-                yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                Network.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 resetActiveTable();
             }
         }
     }
 
-    protected void addDisconnected(final yacySeed seed) {
+    protected void addDisconnected(final Seed seed) {
         if (seed.isProper(false) != null) return;
         synchronized (this) {
             try {
@@ -523,13 +523,13 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 final ConcurrentMap<String, String> seedPropMap = seed.getMap();
                 this.seedPassiveDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
             } catch (final Exception e) {
-                yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                Network.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 resetPassiveTable();
             }
         }
     }
 
-    protected void addPotential(final yacySeed seed) {
+    protected void addPotential(final Seed seed) {
         if (seed.isProper(false) != null) return;
         synchronized (this) {
             try {
@@ -542,7 +542,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 final ConcurrentMap<String, String> seedPropMap = seed.getMap();
                 this.seedPotentialDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
             } catch (final Exception e) {
-                yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                Network.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 resetPotentialTable();
             }
         }
@@ -574,7 +574,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return this.seedPotentialDB.containsKey(hash);
     }
 
-    private yacySeed get(final String hash, final MapDataMining database) {
+    private Seed get(final String hash, final MapDataMining database) {
         if (hash == null || hash.length() == 0) return null;
         if ((this.mySeed != null) && (hash.equals(this.mySeed.hash))) return this.mySeed;
         final ConcurrentHashMap<String, String> entry = new ConcurrentHashMap<String, String>();
@@ -589,36 +589,36 @@ public final class yacySeedDB implements AlternativeDomainNames {
             Log.logException(e);
             return null;
         }
-        return new yacySeed(hash, entry);
+        return new Seed(hash, entry);
     }
 
-    public yacySeed getConnected(final String hash) {
+    public Seed getConnected(final String hash) {
         return get(hash, this.seedActiveDB);
     }
 
-    public yacySeed getDisconnected(final String hash) {
+    public Seed getDisconnected(final String hash) {
         return get(hash, this.seedPassiveDB);
     }
 
-    public yacySeed getPotential(final String hash) {
+    public Seed getPotential(final String hash) {
         return get(hash, this.seedPotentialDB);
     }
 
-    public yacySeed get(final String hash) {
-        yacySeed seed = getConnected(hash);
+    public Seed get(final String hash) {
+        Seed seed = getConnected(hash);
         if (seed == null) seed = getDisconnected(hash);
         if (seed == null) seed = getPotential(hash);
         return seed;
     }
 
-    public void update(final String hash, final yacySeed seed) {
+    public void update(final String hash, final Seed seed) {
         if (this.mySeed == null) initMySeed();
         if (hash.equals(this.mySeed.hash)) {
             this.mySeed = seed;
             return;
         }
         final byte[] hashb = ASCII.getBytes(hash);
-        yacySeed s = get(hash, this.seedActiveDB);
+        Seed s = get(hash, this.seedActiveDB);
         if (s != null) try { this.seedActiveDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
 
         s = get(hash, this.seedPassiveDB);
@@ -628,7 +628,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if (s != null) try { this.seedPotentialDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
     }
 
-    public yacySeed lookupByName(String peerName) {
+    public Seed lookupByName(String peerName) {
         // reads a seed by searching by name
         if (peerName.endsWith(".yacy")) peerName = peerName.substring(0, peerName.length() - 5);
 
@@ -640,7 +640,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
 
         // then try to use the cache
         final String seedhash = this.nameLookupCache.get(peerName);
-        yacySeed seed;
+        Seed seed;
         if (seedhash != null) {
         	seed = this.get(seedhash);
         	if (seed != null) return seed;
@@ -649,7 +649,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         // enumerate the cache and simultanous insert values
         String name;
     	for (int table = 0; table < 2; table++) {
-            final Iterator<yacySeed> e = (table == 0) ? seedsConnected(true, false, null, (float) 0.0) : seedsDisconnected(true, false, null, (float) 0.0);
+            final Iterator<Seed> e = (table == 0) ? seedsConnected(true, false, null, (float) 0.0) : seedsDisconnected(true, false, null, (float) 0.0);
         	while (e.hasNext()) {
         		seed = e.next();
         		if (seed != null) {
@@ -668,7 +668,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return null;
     }
 
-    public yacySeed lookupByIP(
+    public Seed lookupByIP(
             final InetAddress peerIP,
             final boolean lookupConnected,
             final boolean lookupDisconnected,
@@ -676,7 +676,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
     ) {
 
         if (peerIP == null) return null;
-        yacySeed seed = null;
+        Seed seed = null;
 
         // local peer?
         if (Domains.isThisHostIP(peerIP)) {
@@ -685,7 +685,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
 
         // then try to use the cache
-        final SoftReference<yacySeed> ref = this.ipLookupCache.get(peerIP);
+        final SoftReference<Seed> ref = this.ipLookupCache.get(peerIP);
         if (ref != null) {
             seed = ref.get();
             if (seed != null) return seed;
@@ -698,7 +698,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
 
         if (lookupConnected) {
             // enumerate the cache and simultanous insert values
-            final Iterator<yacySeed> e = seedsConnected(true, false, null, (float) 0.0);
+            final Iterator<Seed> e = seedsConnected(true, false, null, (float) 0.0);
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) {
@@ -718,7 +718,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                     }
                     seedIPAddress = Domains.dnsResolve(addressStr);
                     if (seedIPAddress == null) continue;
-                    if (seed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
+                    if (seed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress, new SoftReference<Seed>(seed));
                     if (seedIPAddress.equals(peerIP)) return seed;
                 }
             }
@@ -730,7 +730,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
 
         if (lookupDisconnected) {
             // enumerate the cache and simultanous insert values
-            final Iterator<yacySeed>e = seedsDisconnected(true, false, null, (float) 0.0);
+            final Iterator<Seed>e = seedsDisconnected(true, false, null, (float) 0.0);
 
             while (e.hasNext()) {
                 seed = e.next();
@@ -751,7 +751,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                     }
                     seedIPAddress = Domains.dnsResolve(addressStr);
                     if (seedIPAddress == null) continue;
-                    if (seed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
+                    if (seed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress, new SoftReference<Seed>(seed));
                     if (seedIPAddress.equals(peerIP)) return seed;
                 }
             }
@@ -763,7 +763,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
 
         if (lookupPotential) {
             // enumerate the cache and simultanous insert values
-            final Iterator<yacySeed> e = seedsPotential(true, false, null, (float) 0.0);
+            final Iterator<Seed> e = seedsPotential(true, false, null, (float) 0.0);
 
             while (e.hasNext()) {
                 seed = e.next();
@@ -773,7 +773,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                     }
                     seedIPAddress = Domains.dnsResolve(addressStr);
                     if (seedIPAddress == null) continue;
-                    if (seed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
+                    if (seed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress, new SoftReference<Seed>(seed));
                     if (seedIPAddress.equals(peerIP)) return seed;
                 }
             }
@@ -788,7 +788,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
         seedIPAddress = Domains.dnsResolve(addressStr);
         if (seedIPAddress == null) return null;
-        if (this.mySeed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress,  new SoftReference<yacySeed>(this.mySeed));
+        if (this.mySeed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress,  new SoftReference<Seed>(this.mySeed));
         if (seedIPAddress.equals(peerIP)) return this.mySeed;
         // nothing found
         return null;
@@ -811,8 +811,8 @@ public final class yacySeedDB implements AlternativeDomainNames {
             }
 
             // store active peer seeds
-            yacySeed ys;
-            Iterator<yacySeed> se = seedsConnected(true, false, null, (float) 0.0);
+            Seed ys;
+            Iterator<Seed> se = seedsConnected(true, false, null, (float) 0.0);
             while (se.hasNext()) {
                 ys = se.next();
                 if (ys != null) {
@@ -843,7 +843,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
 
     protected String uploadSeedList(final yacySeedUploader uploader,
             final serverSwitch sb,
-            final yacySeedDB seedDB,
+            final SeedDB seedDB,
             final DigestURI seedURL) throws Exception {
 
         // upload a seed file, if possible
@@ -939,7 +939,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
      * resolve a yacy address
      */
     public String resolve(String host) {
-        yacySeed seed;
+        Seed seed;
         int p;
         String subdom = null;
         if (host.endsWith(".yacyh")) {
@@ -954,7 +954,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             String hash = host.substring(0, host.length() - 6);
             if (hash.length() > Word.commonHashLength) {
                 // this is probably a hex-hash
-                hash = yacySeed.hexHash2b64Hash(hash);
+                hash = Seed.hexHash2b64Hash(hash);
             }
             // check remote seeds
             seed = getConnected(hash); // checks only remote, not local
@@ -994,7 +994,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if (targetHash.equals(mySeed().hash)) {
             address = mySeed().getClusterAddress();
         } else {
-            final yacySeed targetSeed = getConnected(targetHash);
+            final Seed targetSeed = getConnected(targetHash);
             if (targetSeed == null) { return null; }
             address = targetSeed.getClusterAddress();
         }
@@ -1002,10 +1002,10 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return address;
     }
 
-    private class seedEnum implements Iterator<yacySeed> {
+    private class seedEnum implements Iterator<Seed> {
 
         private MapDataMining.mapIterator it;
-        private yacySeed nextSeed;
+        private Seed nextSeed;
         private final MapDataMining database;
         private float minVersion;
 
@@ -1023,15 +1023,15 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 }
             } catch (final IOException e) {
                 Log.logException(e);
-                yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-                if (database == yacySeedDB.this.seedActiveDB) yacySeedDB.this.seedActiveDB = resetSeedTable(yacySeedDB.this.seedActiveDB, yacySeedDB.this.seedActiveDBFile);
-                if (database == yacySeedDB.this.seedPassiveDB) yacySeedDB.this.seedPassiveDB = resetSeedTable(yacySeedDB.this.seedPassiveDB, yacySeedDB.this.seedPassiveDBFile);
+                Network.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                if (database == SeedDB.this.seedActiveDB) SeedDB.this.seedActiveDB = resetSeedTable(SeedDB.this.seedActiveDB, SeedDB.this.seedActiveDBFile);
+                if (database == SeedDB.this.seedPassiveDB) SeedDB.this.seedPassiveDB = resetSeedTable(SeedDB.this.seedPassiveDB, SeedDB.this.seedPassiveDBFile);
                 this.it = null;
             } catch (final kelondroException e) {
                 Log.logException(e);
-                yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-                if (database == yacySeedDB.this.seedActiveDB) yacySeedDB.this.seedActiveDB = resetSeedTable(yacySeedDB.this.seedActiveDB, yacySeedDB.this.seedActiveDBFile);
-                if (database == yacySeedDB.this.seedPassiveDB) yacySeedDB.this.seedPassiveDB = resetSeedTable(yacySeedDB.this.seedPassiveDB, yacySeedDB.this.seedPassiveDBFile);
+                Network.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                if (database == SeedDB.this.seedActiveDB) SeedDB.this.seedActiveDB = resetSeedTable(SeedDB.this.seedActiveDB, SeedDB.this.seedActiveDBFile);
+                if (database == SeedDB.this.seedPassiveDB) SeedDB.this.seedPassiveDB = resetSeedTable(SeedDB.this.seedPassiveDB, SeedDB.this.seedPassiveDBFile);
                 this.it = null;
             }
         }
@@ -1043,10 +1043,10 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 this.nextSeed = internalNext();
             } catch (final kelondroException e) {
                 Log.logException(e);
-                yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-                if (database == yacySeedDB.this.seedActiveDB) yacySeedDB.this.seedActiveDB = resetSeedTable(yacySeedDB.this.seedActiveDB, yacySeedDB.this.seedActiveDBFile);
-                if (database == yacySeedDB.this.seedPassiveDB) yacySeedDB.this.seedPassiveDB = resetSeedTable(yacySeedDB.this.seedPassiveDB, yacySeedDB.this.seedPassiveDBFile);
-                if (database == yacySeedDB.this.seedPotentialDB) yacySeedDB.this.seedPotentialDB = resetSeedTable(yacySeedDB.this.seedPotentialDB, yacySeedDB.this.seedPotentialDBFile);
+                Network.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                if (database == SeedDB.this.seedActiveDB) SeedDB.this.seedActiveDB = resetSeedTable(SeedDB.this.seedActiveDB, SeedDB.this.seedActiveDBFile);
+                if (database == SeedDB.this.seedPassiveDB) SeedDB.this.seedPassiveDB = resetSeedTable(SeedDB.this.seedPassiveDB, SeedDB.this.seedPassiveDBFile);
+                if (database == SeedDB.this.seedPotentialDB) SeedDB.this.seedPotentialDB = resetSeedTable(SeedDB.this.seedPotentialDB, SeedDB.this.seedPotentialDBFile);
                 this.it = null;
             }
         }
@@ -1055,7 +1055,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             return (this.nextSeed != null);
         }
 
-        private yacySeed internalNext() {
+        private Seed internalNext() {
             if (this.it == null || !(this.it.hasNext())) return null;
             try {
                 Map<String, String> dna0;
@@ -1078,21 +1078,21 @@ public final class yacySeedDB implements AlternativeDomainNames {
                     final String hash = dna.remove("key");
                     //assert hash != null;
                     if (hash == null) continue; // bad seed
-                    return new yacySeed(hash, dna);
+                    return new Seed(hash, dna);
                 }
                 return null;
             } catch (final Exception e) {
                 Log.logException(e);
-                yacyCore.log.logSevere("ERROR internalNext: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-                if (this.database == yacySeedDB.this.seedActiveDB) yacySeedDB.this.seedActiveDB = resetSeedTable(yacySeedDB.this.seedActiveDB, yacySeedDB.this.seedActiveDBFile);
-                if (this.database == yacySeedDB.this.seedPassiveDB) yacySeedDB.this.seedPassiveDB = resetSeedTable(yacySeedDB.this.seedPassiveDB, yacySeedDB.this.seedPassiveDBFile);
-                if (this.database == yacySeedDB.this.seedPotentialDB) yacySeedDB.this.seedPotentialDB = resetSeedTable(yacySeedDB.this.seedPotentialDB, yacySeedDB.this.seedPotentialDBFile);
+                Network.log.logSevere("ERROR internalNext: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                if (this.database == SeedDB.this.seedActiveDB) SeedDB.this.seedActiveDB = resetSeedTable(SeedDB.this.seedActiveDB, SeedDB.this.seedActiveDBFile);
+                if (this.database == SeedDB.this.seedPassiveDB) SeedDB.this.seedPassiveDB = resetSeedTable(SeedDB.this.seedPassiveDB, SeedDB.this.seedPassiveDBFile);
+                if (this.database == SeedDB.this.seedPotentialDB) SeedDB.this.seedPotentialDB = resetSeedTable(SeedDB.this.seedPotentialDB, SeedDB.this.seedPotentialDBFile);
                 return null;
             }
         }
 
-        public yacySeed next() {
-            final yacySeed seed = this.nextSeed;
+        public Seed next() {
+            final Seed seed = this.nextSeed;
             float version;
             try {while (true) {
                 this.nextSeed = internalNext();
@@ -1102,7 +1102,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             }} catch (final kelondroException e) {
                 Log.logException(e);
             	// emergency reset
-            	yacyCore.log.logSevere("seed-db emergency reset", e);
+            	Network.log.logSevere("seed-db emergency reset", e);
             	this.database.clear();
 				this.nextSeed = null;
 				return null;

@@ -42,8 +42,8 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.util.ByteArray;
-import net.yacy.peers.yacySeed;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.Seed;
+import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;
 
 
@@ -62,7 +62,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     
     public ResultEntry(final URIMetadataRow urlentry,
                        final Segment indexSegment,
-                       yacySeedDB peers,
+                       SeedDB peers,
                        final TextSnippet textSnippet,
                        final List<MediaSnippet> mediaSnippets,
                        final long dbRetrievalTime, final long snippetComputationTime) {
@@ -78,8 +78,8 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         if (host != null && host.endsWith(".yacyh")) {
             // translate host into current IP
             int p = host.indexOf('.');
-            final String hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
-            final yacySeed seed = peers.getConnected(hash);
+            final String hash = Seed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
+            final Seed seed = peers.getConnected(hash);
             final String filename = urlcomps.url().getFile();
             String address = null;
             if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {

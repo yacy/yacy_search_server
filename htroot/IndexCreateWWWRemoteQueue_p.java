@@ -31,7 +31,7 @@ import java.util.Locale;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 
 import de.anomic.crawler.CrawlProfile;
@@ -87,7 +87,7 @@ public class IndexCreateWWWRemoteQueue_p {
             
             Request urle;
             boolean dark = true;
-            yacySeed initiator;
+            Seed initiator;
             String profileHandle;
             CrawlProfile profileEntry;
             int i, showNum = 0;

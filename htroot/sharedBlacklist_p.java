@@ -51,7 +51,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
@@ -121,11 +121,11 @@ public class sharedBlacklist_p {
                 // generate the download URL
                 String downloadURLOld = null;
                 if( sb.peers != null ){ //no nullpointer error..
-                    final yacySeed seed = sb.peers.getConnected(hash);
+                    final Seed seed = sb.peers.getConnected(hash);
                     if (seed != null) {
                         final String IP = seed.getIP(); 
-                        final String Port = seed.get(yacySeed.PORT, "8090");
-                        final String peerName = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
+                        final String Port = seed.get(Seed.PORT, "8090");
+                        final String peerName = seed.get(Seed.NAME, "<" + IP + ":" + Port + ">");
                         prop.putHTML("page_source", peerName);
                         downloadURLOld = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
                     } else {

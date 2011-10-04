@@ -32,9 +32,9 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.yacyNewsDB;
-import net.yacy.peers.yacyNewsPool;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.NewsDB;
+import net.yacy.peers.NewsPool;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -75,7 +75,7 @@ public class News {
                     return prop; // this button needs authentication, force log-in
                 }
                 try {
-                    if ((tableID == yacyNewsPool.PROCESSED_DB) || (tableID == yacyNewsPool.PUBLISHED_DB)) {
+                    if ((tableID == NewsPool.PROCESSED_DB) || (tableID == NewsPool.PUBLISHED_DB)) {
                         sb.peers.newsPool.clear(tableID);
                     } else {
                         sb.peers.newsPool.moveOffAll(tableID);
@@ -91,10 +91,10 @@ public class News {
             // show overview
             prop.put("table", "0");
             prop.put("page", "0");
-            prop.putNum("table_insize", sb.peers.newsPool.size(yacyNewsPool.INCOMING_DB));
-            prop.putNum("table_prsize", sb.peers.newsPool.size(yacyNewsPool.PROCESSED_DB));
-            prop.putNum("table_ousize", sb.peers.newsPool.size(yacyNewsPool.OUTGOING_DB));
-            prop.putNum("table_pusize", sb.peers.newsPool.size(yacyNewsPool.PUBLISHED_DB));
+            prop.putNum("table_insize", sb.peers.newsPool.size(NewsPool.INCOMING_DB));
+            prop.putNum("table_prsize", sb.peers.newsPool.size(NewsPool.PROCESSED_DB));
+            prop.putNum("table_ousize", sb.peers.newsPool.size(NewsPool.OUTGOING_DB));
+            prop.putNum("table_pusize", sb.peers.newsPool.size(NewsPool.PUBLISHED_DB));
         } else {
             // generate table
             prop.put("table", "1");
@@ -103,9 +103,9 @@ public class News {
             
             if (sb.peers != null) {
                 final int maxCount = Math.min(1000, sb.peers.newsPool.size(tableID));
-                final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(tableID, false);
-                yacyNewsDB.Record record;
-                yacySeed seed;
+                final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(tableID, false);
+                NewsDB.Record record;
+                Seed seed;
                 int i = 0;
                 while ((recordIterator.hasNext()) && (i < maxCount)) {
                     record = recordIterator.next();
@@ -136,31 +136,31 @@ public class News {
                                         
                     // generating link / title / description (taken over from Surftips.java)
                     String link, title, description;
-                    if (category.equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
+                    if (category.equals(NewsPool.CATEGORY_CRAWL_START)) {
                     	link = record.attribute("startURL", "");
                     	title = (record.attribute("intention", "").isEmpty()) ? link : record.attribute("intention", "");
                     	description = "Crawl Start Point";
-                    } else if (category.equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
+                    } else if (category.equals(NewsPool.CATEGORY_PROFILE_UPDATE)) {
                     	link = record.attribute("homepage", "");
                     	title = "Home Page of " + record.attribute("nickname", "");
                     	description = "Profile Update";
-                    } else if (category.equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) {
+                    } else if (category.equals(NewsPool.CATEGORY_BOOKMARK_ADD)) {
                     	link = record.attribute("url", "");
                     	title = record.attribute("title", "");
                     	description = "Bookmark: " + record.attribute("description", "");
-                    } else if (category.equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) {
+                    } else if (category.equals(NewsPool.CATEGORY_SURFTIPP_ADD)) {
                     	link = record.attribute("url", "");
                     	title = record.attribute("title", "");
                     	description = "Surf Tipp: " + record.attribute("description", "");
-                    } else if (category.equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
+                    } else if (category.equals(NewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                     	link = record.attribute("url", "");
                     	title = record.attribute("title", "");
                     	description = record.attribute("url", "");
-                    } else if (category.equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
+                    } else if (category.equals(NewsPool.CATEGORY_WIKI_UPDATE)) {
                     	link = (seed == null)? "" : "http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Wiki Update: " + record.attribute("description", "");
-                    } else if (category.equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
+                    } else if (category.equals(NewsPool.CATEGORY_BLOG_ADD)) {
                     	link = (seed == null)? "" : "http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Blog Entry: " + record.attribute("subject", "");

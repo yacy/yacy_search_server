@@ -37,8 +37,8 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
-import net.yacy.peers.yacyPeerActions;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.PeerActions;
+import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -61,7 +61,7 @@ public class Status {
         prop.put("forwardToConfigBasic", 0);
         if ((post == null || !post.containsKey("noforward")) &&
             sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic.html") < 0 &&
-            yacySeed.isDefaultPeerName(sb.peers.mySeed().getName())) {
+            Seed.isDefaultPeerName(sb.peers.mySeed().getName())) {
             // forward to ConfigBasic
             prop.put("forwardToConfigBasic", 1);
         }
@@ -197,15 +197,15 @@ public class Status {
             prop.put("peerAddress", "0");    // not assigned
             prop.put("peerStatistics", "0"); // unknown
         } else {
-            final long uptime = 60000 * sb.peers.mySeed().getLong(yacySeed.UPTIME, 0L);
+            final long uptime = 60000 * sb.peers.mySeed().getLong(Seed.UPTIME, 0L);
             prop.put("peerStatistics", "1");
-            prop.put("peerStatistics_uptime", yacyPeerActions.formatInterval(uptime));
+            prop.put("peerStatistics_uptime", PeerActions.formatInterval(uptime));
             prop.putNum("peerStatistics_pagesperminute", sb.peers.mySeed().getPPM());
             prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.peers.mySeed().getQPM()) / 100d);
             prop.putNum("peerStatistics_links", sb.peers.mySeed().getLinkCount());
             prop.put("peerStatistics_words", Formatter.number(sb.peers.mySeed().getWordCount()));
             prop.putNum("peerStatistics_disconnects", sb.peers.peerActions.disconnects);
-            prop.put("peerStatistics_connects", Formatter.number(sb.peers.mySeed().get(yacySeed.CCOUNT, "0")));
+            prop.put("peerStatistics_connects", Formatter.number(sb.peers.mySeed().get(Seed.CCOUNT, "0")));
             thisHash = sb.peers.mySeed().hash;
             if (sb.peers.mySeed().getPublicAddress() == null) {
                 prop.put("peerAddress", "0"); // not assigned + instructions
@@ -216,20 +216,20 @@ public class Status {
                 prop.putXML("peerAddress_peername", sb.peers.mySeed().getName().toLowerCase());
             }
         }
-        final String peerStatus = ((sb.peers.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
-        if (yacySeed.PEERTYPE_VIRGIN.equals(peerStatus) && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))) {
+        final String peerStatus = ((sb.peers.mySeed() == null) ? Seed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN));
+        if (Seed.PEERTYPE_VIRGIN.equals(peerStatus) && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))) {
             prop.put(PEERSTATUS, "0");
             prop.put("urgentStatusVirgin", "1");
-        } else if (yacySeed.PEERTYPE_JUNIOR.equals(peerStatus) && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))) {
+        } else if (Seed.PEERTYPE_JUNIOR.equals(peerStatus) && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))) {
             prop.put(PEERSTATUS, "1");
             prop.put("warningStatusJunior", "1");
-        } else if (yacySeed.PEERTYPE_SENIOR.equals(peerStatus)) {
+        } else if (Seed.PEERTYPE_SENIOR.equals(peerStatus)) {
             prop.put(PEERSTATUS, "2");
             prop.put("hintStatusSenior", "1");
-        } else if (yacySeed.PEERTYPE_PRINCIPAL.equals(peerStatus)) {
+        } else if (Seed.PEERTYPE_PRINCIPAL.equals(peerStatus)) {
             prop.put(PEERSTATUS, "3");
             prop.put("hintStatusPrincipal", "1");
-            prop.put("hintStatusPrincipal_seedURL", sb.peers.mySeed().get(yacySeed.SEEDLISTURL, "?"));
+            prop.put("hintStatusPrincipal_seedURL", sb.peers.mySeed().get(Seed.SEEDLISTURL, "?"));
         }
         prop.putHTML("peerName", thisName);
         prop.put("hash", thisHash);
@@ -258,7 +258,7 @@ public class Status {
                 prop.putHTML("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
             prop.put("seedServer_lastUpload",
-                    yacyPeerActions.formatInterval(System.currentTimeMillis() - sb.peers.lastSeedUpload_timeStamp));
+                    PeerActions.formatInterval(System.currentTimeMillis() - sb.peers.lastSeedUpload_timeStamp));
         } else {
             prop.put(SEEDSERVER, "0"); // disabled
         }

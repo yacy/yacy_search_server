@@ -36,7 +36,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 
 import de.anomic.data.MessageBoard;
@@ -68,10 +68,10 @@ public class Messages_p {
             int peerCount = 0;
             try {
                 final TreeMap<String, String> hostList = new TreeMap<String, String>();
-                final Iterator<yacySeed> e = sb.peers.seedsConnected(true, false, null, (float) 0.0);
+                final Iterator<Seed> e = sb.peers.seedsConnected(true, false, null, (float) 0.0);
                 while (e.hasNext()) {
-                    final yacySeed seed = e.next();
-                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
+                    final Seed seed = e.next();
+                    if (seed != null) hostList.put(seed.get(Seed.NAME, "nameless"),seed.hash);
                 }
 
                 String peername;

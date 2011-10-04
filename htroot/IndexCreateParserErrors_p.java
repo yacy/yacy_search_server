@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.ZURL;
 import de.anomic.server.serverObjects;
@@ -72,7 +72,7 @@ public class IndexCreateParserErrors_p {
             dark = true;
             DigestURI url; 
             byte[] initiatorHash, executorHash;
-            yacySeed initiatorSeed, executorSeed;
+            Seed initiatorSeed, executorSeed;
             int j=0;
             ArrayList<ZURL.Entry> l = sb.crawlQueues.errorURL.list(showRejectedCount);
             ZURL.Entry entry;

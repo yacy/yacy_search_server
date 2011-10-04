@@ -41,7 +41,7 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.ranking.RankingProfile;
 
 
-public class yacySearch extends Thread {
+public class RemoteSearch extends Thread {
 
     private static final ThreadGroup ysThreadGroup = new ThreadGroup("yacySearchThreadGroup");
     
@@ -52,7 +52,7 @@ public class yacySearch extends Thread {
     final private RWIProcess containerCache;
     final private SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser;
     final private Blacklist blacklist;
-    final private yacySeed targetPeer;
+    final private Seed targetPeer;
     private int urls;
     private final int count, maxDistance;
     private final long time;
@@ -60,9 +60,9 @@ public class yacySearch extends Thread {
     final private Pattern prefer, filter, snippet;
     final private String language;
     final private Bitfield constraint;
-    final private yacySeedDB peers;
+    final private SeedDB peers;
     
-    public yacySearch(
+    public RemoteSearch(
               final String wordhashes, final String excludehashes,
               final String urlhashes,
               final Pattern prefer,
@@ -72,9 +72,9 @@ public class yacySearch extends Thread {
               final String sitehash, final String authorhash,
               final int count, final long time, final int maxDistance, 
               final boolean global, final int partitions,
-              final yacySeed targetPeer,
+              final Seed targetPeer,
               final Segment indexSegment,
-              final yacySeedDB peers,
+              final SeedDB peers,
               final RWIProcess containerCache,
               final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
               final Blacklist blacklist,
@@ -111,7 +111,7 @@ public class yacySearch extends Thread {
     @Override
     public void run() {
         try {
-            this.urls = yacyClient.search(
+            this.urls = Protocol.search(
                         peers.mySeed(),
                         wordhashes, excludehashes, urlhashes,
                         prefer, filter, snippet,
@@ -121,11 +121,11 @@ public class yacySearch extends Thread {
                         blacklist, rankingProfile, constraint);
             if (urls >= 0) {
                 // urls is an array of url hashes. this is only used for log output
-                if (urlhashes != null && urlhashes.length() > 0) yacyCore.log.logInfo("SECONDARY REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + this.urls + " links for word hash " + wordhashes);
+                if (urlhashes != null && urlhashes.length() > 0) Network.log.logInfo("SECONDARY REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + this.urls + " links for word hash " + wordhashes);
                 peers.mySeed().incRI(urls);
                 peers.mySeed().incRU(urls);
             } else {
-                yacyCore.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
+                Network.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
             }
         } catch (final Exception e) {
             Log.logException(e);
@@ -149,11 +149,11 @@ public class yacySearch extends Thread {
         return this.count;
     }
     
-    public yacySeed target() {
+    public Seed target() {
         return targetPeer;
     }
     
-    public static yacySearch[] primaryRemoteSearches(
+    public static RemoteSearch[] primaryRemoteSearches(
             final String wordhashes, final String excludehashes,
             final Pattern prefer, final Pattern filter, final Pattern snippet,
             final String language,
@@ -161,7 +161,7 @@ public class yacySearch extends Thread {
             final String authorhash,
             final int count, long time, final int maxDist,
             final Segment indexSegment,
-            final yacySeedDB peers,
+            final SeedDB peers,
             final RWIProcess containerCache,
             final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
             final Blacklist blacklist,
@@ -176,7 +176,7 @@ public class yacySearch extends Thread {
         // prepare seed targets and threads
         assert language != null;
         assert wordhashes.length() >= 12 : "wordhashes = " + wordhashes;
-        final yacySeed[] targetPeers =
+        final Seed[] targetPeers =
             (clusterselection == null) ?
                     PeerSelection.selectSearchTargets(
                             peers,
@@ -185,14 +185,14 @@ public class yacySearch extends Thread {
                             burstRobinsonPercent,
                             burstMultiwordPercent)
                   : PeerSelection.selectClusterPeers(peers, clusterselection);
-        if (targetPeers == null) return new yacySearch[0];
+        if (targetPeers == null) return new RemoteSearch[0];
         int targets = targetPeers.length;
-        if (targets == 0) return new yacySearch[0];
-        final yacySearch[] searchThreads = new yacySearch[targets];
+        if (targets == 0) return new RemoteSearch[0];
+        final RemoteSearch[] searchThreads = new RemoteSearch[targets];
         for (int i = 0; i < targets; i++) {
             if (targetPeers[i] == null || targetPeers[i].hash == null) continue;
             try {
-                searchThreads[i] = new yacySearch(
+                searchThreads[i] = new RemoteSearch(
                     wordhashes, excludehashes, "", prefer, filter, snippet,
                     language, sitehash, authorhash,
                     count, time, maxDist, true, targets, targetPeers[i],
@@ -206,11 +206,11 @@ public class yacySearch extends Thread {
         return searchThreads;
     }
     
-    public static yacySearch secondaryRemoteSearch(
+    public static RemoteSearch secondaryRemoteSearch(
             final String wordhashes, final String urlhashes,
             final long time,
             final Segment indexSegment,
-            final yacySeedDB peers,
+            final SeedDB peers,
             final RWIProcess containerCache,
             final String targethash, final Blacklist blacklist,
             final RankingProfile rankingProfile,
@@ -223,28 +223,28 @@ public class yacySearch extends Thread {
         assert urlhashes.length() > 0;
         
         // prepare seed targets and threads
-        final yacySeed targetPeer = peers.getConnected(targethash);
+        final Seed targetPeer = peers.getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(ASCII.getBytes(targetPeer.hash)));
-        final yacySearch searchThread = new yacySearch(
+        final RemoteSearch searchThread = new RemoteSearch(
                 wordhashes, "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, QueryParams.catchall_pattern, "", "", "", 20, time, 9999, true, 0, targetPeer,
                 indexSegment, peers, containerCache, null, blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;
     }
     
-    public static int remainingWaiting(final yacySearch[] searchThreads) {
+    public static int remainingWaiting(final RemoteSearch[] searchThreads) {
         if (searchThreads == null) return 0;
         int alive = 0;
-        for (final yacySearch searchThread : searchThreads) {
+        for (final RemoteSearch searchThread : searchThreads) {
             if (searchThread.isAlive()) alive++;
         }
         return alive;
     }
     
-    public static int collectedLinks(final yacySearch[] searchThreads) {
+    public static int collectedLinks(final RemoteSearch[] searchThreads) {
         int links = 0;
-        for (final yacySearch searchThread : searchThreads) {
+        for (final RemoteSearch searchThread : searchThreads) {
             if (!(searchThread.isAlive()) && searchThread.urls > 0) {
                 links += searchThread.urls;
             }
@@ -252,8 +252,8 @@ public class yacySearch extends Thread {
         return links;
     }
     
-    public static void interruptAlive(final yacySearch[] searchThreads) {
-        for (final yacySearch searchThread : searchThreads) {
+    public static void interruptAlive(final RemoteSearch[] searchThreads) {
+        for (final RemoteSearch searchThread : searchThreads) {
             if (searchThread.isAlive()) searchThread.interrupt();
         }
     }

@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.SeedDB;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
@@ -115,7 +115,7 @@ public class SearchEventCache {
 
     public static SearchEvent getEvent(
             final QueryParams query,
-            final yacySeedDB peers,
+            final SeedDB peers,
             final WorkTables workTables,
             final SortedMap<byte[], String> preselectedPeerHashes,
             final boolean generateAbstracts,

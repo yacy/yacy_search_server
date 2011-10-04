@@ -35,7 +35,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 
 
-public class yacyAccessible {
+public class Accessible {
     public long lastUpdated;
     public boolean IWasAccessed;
     

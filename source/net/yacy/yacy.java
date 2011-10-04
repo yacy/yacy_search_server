@@ -68,7 +68,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.SeedDB;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.peers.operation.yacyRelease;
 import net.yacy.peers.operation.yacyVersion;
@@ -897,7 +897,7 @@ public final class yacy {
             final String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (final String dbFileName : dbFileNames) {
                 final File dbFile = new File(yacyDBPath,dbFileName);
-                final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null);
+                final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, SeedDB.sortFields, SeedDB.longaccFields, SeedDB.doubleaccFields, null);
 
                 MapDataMining.mapIterator it;
                 it = db.maps(true, false);

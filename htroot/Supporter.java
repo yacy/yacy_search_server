@@ -40,9 +40,9 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.peers.yacyNewsDB;
-import net.yacy.peers.yacyNewsPool;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.NewsDB;
+import net.yacy.peers.NewsPool;
+import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -81,7 +81,7 @@ public class Supporter {
                     map.put("urlhash", hash);
                     map.put("vote", "negative");
                     map.put("refid", post.get("refid", ""));
-                    sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                    sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
                 }
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
@@ -98,19 +98,19 @@ public class Supporter {
                 map.put("vote", "positive");
                 map.put("refid", post.get("refid", ""));
                 map.put("comment", post.get("comment", ""));
-                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
             }
 
             // create Supporter
             final HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
             final HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
-            accumulateVotes(sb, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            accumulateVotes(sb, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
             final ScoreMap<String> ranking = new ConcurrentScoreMap<String>(); // score cluster for url hashes
             final Row rowdef = new Row("String url-255, String title-120, String description-120, String refid-" + (GenericFormatter.PATTERN_SHORT_SECOND.length() + 12), NaturalOrder.naturalOrder);
             final HashMap<String, Entry> Supporter = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
-            accumulateSupporter(sb, Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            accumulateSupporter(sb, Supporter, ranking, rowdef, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
 
@@ -135,8 +135,8 @@ public class Supporter {
                 description = row.getColUTF8(2);
                 if ((url == null) || (title == null) || (description == null)) continue;
                 refid = row.getColUTF8(3);
-                voted = (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) ||
-                        (sb.peers.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
+                voted = (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) ||
+                        (sb.peers.newsPool.getSpecific(NewsPool.PUBLISHED_DB, NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 prop.put("supporter_results_" + i + "_authorized", authenticated ? "1" : "0");
                 prop.put("supporter_results_" + i + "_authorized_recommend", voted ? "0" : "1");
 
@@ -173,17 +173,17 @@ public class Supporter {
 
     private static void accumulateVotes(final Switchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
-        yacyNewsDB.Record record;
-        final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        NewsDB.Record record;
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
         int j = 0;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
             if (record == null) continue;
 
-            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
+            if (record.category().equals(NewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                 final String urlhash = record.attribute("urlhash", "");
                 final String vote    = record.attribute("vote", "");
-                final int factor = ((dbtype == yacyNewsPool.OUTGOING_DB) || (dbtype == yacyNewsPool.PUBLISHED_DB)) ? 2 : 1;
+                final int factor = ((dbtype == NewsPool.OUTGOING_DB) || (dbtype == NewsPool.PUBLISHED_DB)) ? 2 : 1;
                 if (vote.equals("negative")) {
                     final Integer i = negativeHashes.get(urlhash);
                     if (i == null) negativeHashes.put(urlhash, Integer.valueOf(factor));
@@ -203,20 +203,20 @@ public class Supporter {
             final HashMap<String, Entry> Supporter, final ScoreMap<String> ranking, final Row rowdef,
             final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
-        yacyNewsDB.Record record;
-        final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        NewsDB.Record record;
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
         int j = 0;
         String url = "", urlhash;
         Row.Entry entry;
         int score = 0;
         Integer vote;
-        yacySeed seed;
+        Seed seed;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
             if (record == null) continue;
 
             entry = null;
-            if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) &&
+            if ((record.category().equals(NewsPool.CATEGORY_PROFILE_UPDATE)) &&
                 ((seed = sb.peers.getConnected(record.originator())) != null)) {
                 url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
@@ -229,7 +229,7 @@ public class Supporter {
                 score = 1 + timeFactor(record.created());
             }
 
-            if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_BROADCAST)) &&
+            if ((record.category().equals(NewsPool.CATEGORY_PROFILE_BROADCAST)) &&
                 ((seed = sb.peers.getConnected(record.originator())) != null)) {
                 url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;

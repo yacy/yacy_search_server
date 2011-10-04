@@ -60,20 +60,20 @@ import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
 
 
-public class yacyNewsQueue {
+public class NewsQueue {
 
     private final File path;
     private Table queueStack;
-    private final yacyNewsDB newsDB;
+    private final NewsDB newsDB;
 
     private static final Row rowdef = new Row(new Column[]{
-            new Column("newsid", Column.celltype_string, Column.encoder_bytes, yacyNewsDB.idLength, "id = created + originator"),
+            new Column("newsid", Column.celltype_string, Column.encoder_bytes, NewsDB.idLength, "id = created + originator"),
             new Column("last touched", Column.celltype_string, Column.encoder_bytes, GenericFormatter.PATTERN_SHORT_SECOND.length(), "")
         },
         NaturalOrder.naturalOrder
     );
 
-    public yacyNewsQueue(final File path, final yacyNewsDB newsDB) {
+    public NewsQueue(final File path, final NewsDB newsDB) {
         this.path = path;
         this.newsDB = newsDB;
         try {
@@ -117,7 +117,7 @@ public class yacyNewsQueue {
         return this.queueStack.isEmpty();
     }
 
-    public synchronized void push(final yacyNewsDB.Record entry) throws IOException, RowSpaceExceededException {
+    public synchronized void push(final NewsDB.Record entry) throws IOException, RowSpaceExceededException {
         if (!this.queueStack.consistencyCheck()) {
             Log.logSevere("yacyNewsQueue", "reset of table " + this.path);
             this.queueStack.clear();
@@ -125,14 +125,14 @@ public class yacyNewsQueue {
         this.queueStack.addUnique(r2b(entry));
     }
 
-    public synchronized yacyNewsDB.Record pop() throws IOException {
+    public synchronized NewsDB.Record pop() throws IOException {
         if (this.queueStack.isEmpty()) return null;
         return b2r(this.queueStack.removeOne());
     }
 
-    public synchronized yacyNewsDB.Record get(final String id) {
-        yacyNewsDB.Record record;
-        final Iterator<yacyNewsDB.Record> i = records(true);
+    public synchronized NewsDB.Record get(final String id) {
+        NewsDB.Record record;
+        final Iterator<NewsDB.Record> i = records(true);
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) return record;
@@ -140,9 +140,9 @@ public class yacyNewsQueue {
         return null;
     }
 
-    public synchronized yacyNewsDB.Record remove(final String id) {
-        yacyNewsDB.Record record;
-        final Iterator<yacyNewsDB.Record> i = records(true);
+    public synchronized NewsDB.Record remove(final String id) {
+        NewsDB.Record record;
+        final Iterator<NewsDB.Record> i = records(true);
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) {
@@ -157,14 +157,14 @@ public class yacyNewsQueue {
         return null;
     }
 
-    yacyNewsDB.Record b2r(final Row.Entry b) throws IOException {
+    NewsDB.Record b2r(final Row.Entry b) throws IOException {
         if (b == null) return null;
         final String id = b.getPrimaryKeyASCII();
         //Date touched = yacyCore.parseUniversalDate(UTF8.String(b[1]));
         return this.newsDB.get(id);
     }
 
-    private Row.Entry r2b(final yacyNewsDB.Record r) throws IOException, RowSpaceExceededException {
+    private Row.Entry r2b(final NewsDB.Record r) throws IOException, RowSpaceExceededException {
         if (r == null) return null;
         this.newsDB.put(r);
         final Row.Entry b = this.queueStack.row().newEntry(new byte[][]{
@@ -173,20 +173,20 @@ public class yacyNewsQueue {
         return b;
     }
 
-    public Iterator<yacyNewsDB.Record> records(final boolean up) {
+    public Iterator<NewsDB.Record> records(final boolean up) {
         // iterates yacyNewsRecord-type objects
-        if (this.queueStack == null) return new HashSet<yacyNewsDB.Record>().iterator();
+        if (this.queueStack == null) return new HashSet<NewsDB.Record>().iterator();
         return new newsIterator(up);
     }
 
-    private class newsIterator implements Iterator<yacyNewsDB.Record> {
+    private class newsIterator implements Iterator<NewsDB.Record> {
         // iterates yacyNewsRecord-type objects
 
         Iterator<Row.Entry> stackNodeIterator;
 
         private newsIterator(final boolean up) {
             try {
-                this.stackNodeIterator = yacyNewsQueue.this.queueStack.rows();
+                this.stackNodeIterator = NewsQueue.this.queueStack.rows();
             } catch (final IOException e) {
                 Log.logException(e);
                 this.stackNodeIterator = null;
@@ -197,7 +197,7 @@ public class yacyNewsQueue {
             return this.stackNodeIterator != null && this.stackNodeIterator.hasNext();
         }
 
-        public yacyNewsDB.Record next() {
+        public NewsDB.Record next() {
             if (this.stackNodeIterator == null) return null;
             final Row.Entry row = this.stackNodeIterator.next();
             try {

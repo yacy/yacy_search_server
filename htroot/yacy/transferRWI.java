@@ -41,10 +41,10 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.yacyChannel;
-import net.yacy.peers.yacyCore;
-import net.yacy.peers.yacyNetwork;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
+import net.yacy.peers.EventChannel;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Network;
 import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
@@ -66,7 +66,7 @@ public final class transferRWI {
             logWarning(contentType, "post or env is null!");
             return prop;
         }
-        if (!yacyNetwork.authentifyRequest(post, env)) {
+        if (!Protocol.authentifyRequest(post, env)) {
             logWarning(contentType, "not authentified");
             return prop;
         }
@@ -89,7 +89,7 @@ public final class transferRWI {
         boolean granted       = sb.getConfigBool("allowReceiveIndex", false);
         final boolean blockBlacklist = sb.getConfigBool("indexReceiveBlockBlacklist", false);
         final long cachelimit = sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
-        final yacySeed otherPeer = sb.peers.get(iam);
+        final Seed otherPeer = sb.peers.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
 
         // response values
@@ -170,7 +170,7 @@ public final class transferRWI {
 
                 // block blacklisted entries
                 if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + ASCII.String(urlHash) + "' from peer " + otherPeerName);
+                    if (Network.log.isFine()) Network.log.logFine("transferRWI: blocked blacklisted URLHash '" + ASCII.String(urlHash) + "' from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }
@@ -178,7 +178,7 @@ public final class transferRWI {
                 // check if the entry is in our network domain
                 final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomainHash(urlHash);
                 if (urlRejectReason != null) {
-                    yacyCore.log.logWarning("transferRWI: blocked URL hash '" + ASCII.String(urlHash) + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
+                    Network.log.logWarning("transferRWI: blocked URL hash '" + ASCII.String(urlHash) + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
                     //if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked URL hash '" + urlHash + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     blocked++;
                     continue;
@@ -223,7 +223,7 @@ public final class transferRWI {
                 final String lastHash = wordhashes.get(wordhashes.size() - 1);
                 final long avdist = (FlatWordPartitionScheme.std.dhtDistance(firstHash.getBytes(), null, sb.peers.mySeed()) + FlatWordPartitionScheme.std.dhtDistance(lastHash.getBytes(), null, sb.peers.mySeed())) / 2;
                 sb.getLog().logInfo("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName);
-                yacyChannel.channels(yacyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName, "", otherPeer.hash));
+                EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName, "", otherPeer.hash));
             }
             result = "ok";
 

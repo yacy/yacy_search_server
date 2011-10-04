@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
 
 import de.anomic.data.BookmarkHelper;
@@ -85,6 +85,6 @@ public class add_p {
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));
     	map.put("tags", tagsString.replace(',', ' '));
-    	sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map);
+    	sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_BOOKMARK_ADD, map);
     }
 }

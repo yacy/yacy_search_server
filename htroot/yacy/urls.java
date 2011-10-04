@@ -9,7 +9,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -32,7 +32,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
 import de.anomic.crawler.NoticedURL;
@@ -42,10 +42,10 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class urls {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-        
+
         // insert default values
         final serverObjects prop = new serverObjects();
         prop.put("iam", sb.peers.mySeed().hash);
@@ -54,16 +54,16 @@ public class urls {
         prop.put("channel_description", "");
         prop.put("channel_pubDate", "");
         prop.put("item", "0");
-        
+
         if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-        
+        if (!Protocol.authentifyRequest(post, env)) return prop;
+
         if (post.get("call", "").equals("remotecrawl")) {
             // perform a remote crawl url handover
             final NoticedURL.StackType stackType = NoticedURL.StackType.LIMIT;
             int maxCount = Math.min(100, post.getInt("count", 10));
-            long maxTime = Math.min(20000, Math.max(1000, post.getInt("time", 10000)));
-            long timeout = System.currentTimeMillis() + maxTime;
+            final long maxTime = Math.min(20000, Math.max(1000, post.getInt("time", 10000)));
+            final long timeout = System.currentTimeMillis() + maxTime;
             int c = 0;
             Request entry;
             DigestURI referrer;
@@ -76,10 +76,10 @@ public class urls {
                     break;
                 }
                 if (entry == null) break;
-                
+
                 // find referrer, if there is one
                 referrer = sb.getURL(Segments.Process.PUBLIC, entry.referrerhash());
-                
+
                 // place url to notice-url db
                 sb.crawlQueues.delegatedURL.push(
                                 entry,
@@ -89,7 +89,7 @@ public class urls {
                                 FailCategory.FINAL_PROCESS_CONTEXT,
                                 "client=____________",
                                 -1);
-                
+
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");
                 prop.putXML("item_" + c + "_link", entry.url().toNormalform(true, false));
@@ -104,7 +104,7 @@ public class urls {
             prop.put("item", c);
             prop.putXML("response", "ok");
         }
-        
+
         if (post.get("call", "").equals("urlhashlist")) {
             // retrieve a list of urls from the LURL-db by a given list of url hashes
             final String urlhashes = post.get("hashes", "");
@@ -137,5 +137,5 @@ public class urls {
         // return rewrite properties
         return prop;
     }
-    
+
 }

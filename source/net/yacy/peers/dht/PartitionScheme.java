@@ -25,7 +25,7 @@
 
 package net.yacy.peers.dht;
 
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 
 /**
  * A PartitionScheme is a calculation of index storage positions in the network of peers.
@@ -68,7 +68,7 @@ public interface PartitionScheme {
 
     public long[] dhtPositions(final byte[] wordHash);
  
-    public long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer);
+    public long dhtDistance(final byte[] word, final String urlHash, final Seed peer);
     
     
 }

@@ -54,7 +54,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.SetTools;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.ContentDomain;
@@ -102,7 +102,7 @@ public final class QueryParams {
     public final String sitehash; // this is a domain hash, 6 bytes long or null
     public final String authorhash;
     public final String tenant;
-    public yacySeed remotepeer;
+    public Seed remotepeer;
     public final Long time;
     // values that are set after a search:
     public int resultcount; // number of found results

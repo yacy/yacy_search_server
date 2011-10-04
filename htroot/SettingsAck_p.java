@@ -41,9 +41,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.Formatter;
-import net.yacy.peers.yacyCore;
-import net.yacy.peers.yacyPeerActions;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Network;
+import net.yacy.peers.PeerActions;
+import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -225,7 +225,7 @@ public class SettingsAck_p {
             } else {
                 serverCore.useStaticIP = true;
             }
-            if (yacySeed.isProperIP(staticIP) == null) sb.peers.mySeed().setIP(staticIP);
+            if (Seed.isProperIP(staticIP) == null) sb.peers.mySeed().setIP(staticIP);
             env.setConfig("staticIP", staticIP);
 
             // server access data
@@ -319,7 +319,7 @@ public class SettingsAck_p {
 
         if (post.containsKey("seedUploadRetry")) {
             String error;
-            if ((error = yacyCore.saveSeedList(sb)) == null) {
+            if ((error = Network.saveSeedList(sb)) == null) {
                 // trying to upload the seed-list file
                 prop.put("info", "13");
                 prop.put("info_success", "1");
@@ -335,22 +335,22 @@ public class SettingsAck_p {
             // get the currently used uploading method
             final String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
             final String newSeedUploadMethod = post.get("seedUploadMethod");
-            final String oldSeedURLStr = sb.peers.mySeed().get(yacySeed.SEEDLISTURL, "");
+            final String oldSeedURLStr = sb.peers.mySeed().get(Seed.SEEDLISTURL, "");
             final String newSeedURLStr = post.get("seedURL");
 
             final boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
             boolean uploadMethodChanged = !oldSeedUploadMethod.equals(newSeedUploadMethod);
             if (uploadMethodChanged) {
-                uploadMethodChanged = yacyCore.changeSeedUploadMethod(newSeedUploadMethod);
+                uploadMethodChanged = Network.changeSeedUploadMethod(newSeedUploadMethod);
             }
 
             if (seedUrlChanged || uploadMethodChanged) {
                 env.setConfig("seedUploadMethod", newSeedUploadMethod);
-                sb.peers.mySeed().put(yacySeed.SEEDLISTURL, newSeedURLStr);
+                sb.peers.mySeed().put(Seed.SEEDLISTURL, newSeedURLStr);
 
                 // try an upload
                 String error;
-                if ((error = yacyCore.saveSeedList(sb)) == null) {
+                if ((error = Network.saveSeedList(sb)) == null) {
                     // we have successfully uploaded the seed-list file
                     prop.put("info_seedUploadMethod", newSeedUploadMethod);
                     prop.putHTML("info_seedURL",newSeedURLStr);
@@ -369,7 +369,7 @@ public class SettingsAck_p {
          * Loop through the available seed uploaders to see if the
          * configuration of one of them has changed
          */
-        final HashMap<String, String> uploaders = yacyCore.getSeedUploadMethods();
+        final HashMap<String, String> uploaders = Network.getSeedUploadMethods();
         final Iterator<String> uploaderKeys = uploaders.keySet().iterator();
         while (uploaderKeys.hasNext()) {
             // get the uploader module name
@@ -379,7 +379,7 @@ public class SettingsAck_p {
             // determining if the user has reconfigured the settings of this uploader
             if (post.containsKey("seed" + uploaderName + "Settings")) {
                 nothingChanged = true;
-                final yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
+                final yacySeedUploader theUploader = Network.getSeedUploader(uploaderName);
                 final String[] configOptions = theUploader.getConfigurationOptions();
                 if (configOptions != null) {
                     for (final String configOption : configOptions) {
@@ -397,7 +397,7 @@ public class SettingsAck_p {
                     // were changed, we now try to upload the seed list with the new settings
                     if (env.getConfig("seedUploadMethod","none").equalsIgnoreCase(uploaderName)) {
                         String error;
-                        if ((error = yacyCore.saveSeedList(sb)) == null) {
+                        if ((error = Network.saveSeedList(sb)) == null) {
 
                             // we have successfully uploaded the seed file
                             prop.put("info", "13");
@@ -512,7 +512,7 @@ public class SettingsAck_p {
             }
 
             // everything is ok
-            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :yacyPeerActions.formatInterval(crawlerTimeout));
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :PeerActions.formatInterval(crawlerTimeout));
             prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":Formatter.bytesToString(maxHttpSize));
             prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxFtpSize));
             prop.put("info_crawler.smb.maxFileSize", (maxSmbSize==-1) ? "-1":Formatter.bytesToString(maxSmbSize));

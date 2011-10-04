@@ -44,9 +44,9 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.rwi.ReferenceIterator;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.yacyClient;
-import net.yacy.peers.yacySeed;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
+import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.peers.graphics.WebStructureGraph.HostReference;
 import net.yacy.search.index.Segment;
@@ -64,12 +64,12 @@ public class BlockRank {
      * @param seeds
      * @return a merged host index from all peers
      */
-    public static ReferenceContainerCache<HostReference> collect(final yacySeedDB seeds, final WebStructureGraph myGraph) {
+    public static ReferenceContainerCache<HostReference> collect(final SeedDB seeds, final WebStructureGraph myGraph) {
         
         ReferenceContainerCache<HostReference> index = new ReferenceContainerCache<HostReference>(WebStructureGraph.hostReferenceFactory, Base64Order.enhancedCoder, 6);
         
         // start all jobs
-        Iterator<yacySeed> si = seeds.seedsConnected(true, false, null, 0.99f);
+        Iterator<Seed> si = seeds.seedsConnected(true, false, null, 0.99f);
         ArrayList<IndexRetrieval> jobs = new ArrayList<IndexRetrieval>();
         while (si.hasNext()) {
             IndexRetrieval loader = new IndexRetrieval(index, si.next());
@@ -98,15 +98,15 @@ public class BlockRank {
     public static class IndexRetrieval extends Thread {
         
         ReferenceContainerCache<HostReference> index;
-        yacySeed seed;
+        Seed seed;
         
-        public IndexRetrieval(ReferenceContainerCache<HostReference> index, yacySeed seed) {
+        public IndexRetrieval(ReferenceContainerCache<HostReference> index, Seed seed) {
             this.index = index;
             this.seed = seed;
         }
         
         public void run() {
-            ReferenceContainerCache<HostReference> partialIndex = yacyClient.loadIDXHosts(this.seed);
+            ReferenceContainerCache<HostReference> partialIndex = Protocol.loadIDXHosts(this.seed);
             if (partialIndex == null || partialIndex.size() == 0) return;
             Log.logInfo("BlockRank", "loaded " + partialIndex.size() + " host indexes from peer " + this.seed.getName());
             try {

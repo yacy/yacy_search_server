@@ -55,8 +55,8 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.yacyClient;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
@@ -252,7 +252,7 @@ public class IndexControlRWIs_p {
 
                 // find host & peer
                 String host = post.get("host", ""); // get host from input field
-                yacySeed seed = null;
+                Seed seed = null;
                 if (host.length() != 0) {
                     if (host.length() == 12) {
                         // the host string is a peer hash
@@ -302,7 +302,7 @@ public class IndexControlRWIs_p {
                 // transport to other peer
                 final boolean gzipBody = sb.getConfigBool("indexControl.gzipBody", false);
                 final int timeout = (int) sb.getConfigLong("indexControl.timeout", 60000);
-                final String error = yacyClient.transferIndex(
+                final String error = Protocol.transferIndex(
                              seed,
                              icc,
                              knownURLs,
@@ -542,15 +542,15 @@ public class IndexControlRWIs_p {
 
     public static void listHosts(final serverObjects prop, final byte[] startHash, final Switchboard sb) {
         // list known hosts
-        yacySeed seed;
+        Seed seed;
         int hc = 0;
         prop.put("searchresult_keyhash", startHash);
-        final Iterator<yacySeed> e = PeerSelection.getAcceptRemoteIndexSeeds(sb.peers, startHash, sb.peers.sizeConnected(), true);
+        final Iterator<Seed> e = PeerSelection.getAcceptRemoteIndexSeeds(sb.peers, startHash, sb.peers.sizeConnected(), true);
         while (e.hasNext()) {
             seed = e.next();
             if (seed != null) {
                 prop.put("searchresult_hosts_" + hc + "_hosthash", seed.hash);
-                prop.putHTML("searchresult_hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless"));
+                prop.putHTML("searchresult_hosts_" + hc + "_hostname", seed.hash + " " + seed.get(Seed.NAME, "nameless"));
                 hc++;
             }
         }

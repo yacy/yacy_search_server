@@ -104,7 +104,7 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
@@ -885,7 +885,7 @@ public final class HTTPDFileHandler {
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((Switchboard) switchboard).peers.myID());
                             templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
-                            final yacySeed myPeer = sb.peers.mySeed();
+                            final Seed myPeer = sb.peers.mySeed();
                             templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                             templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug

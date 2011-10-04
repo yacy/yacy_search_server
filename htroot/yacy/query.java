@@ -28,12 +28,13 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.yacyCore;
-import net.yacy.peers.yacyNetwork;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
@@ -43,7 +44,7 @@ public final class query {
 
     // example:
     // http://localhost:8090/yacy/query.html?youare=sCJ6Tq8T0N9x&object=lurlcount
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch ss) {
         if (post == null || ss == null) { return null; }
 
@@ -51,13 +52,13 @@ public final class query {
         final Switchboard sb = (Switchboard) ss;
         final serverObjects prop = new serverObjects();
 
-        prop.put("magic", yacyCore.magic);
-        
-        if ((post == null) || (ss == null) || !yacyNetwork.authentifyRequest(post, ss)) {
+        prop.put("magic", Network.magic);
+
+        if ((post == null) || (ss == null) || !Protocol.authentifyRequest(post, ss)) {
             prop.put("response", "-1"); // request rejected
             return prop;
         }
-        
+
         if ((sb.isRobinsonMode()) &&
             (!sb.isPublicRobinson()) &&
             (!sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))) {
@@ -68,7 +69,7 @@ public final class query {
         	prop.put("response", "-1"); // request rejected
             return prop;
         }
-                  
+
 //      System.out.println("YACYQUERY: RECEIVED POST = " + ((post == null) ? "NULL" : post.toString()));
 
 //      final String iam    = post.get("iam", "");    // complete seed of the requesting peer
@@ -92,7 +93,7 @@ public final class query {
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
             prop.put("response", sb.indexSegments.termIndex(Segments.Process.PUBLIC).get(env.getBytes(), null).size());
             return prop;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
 

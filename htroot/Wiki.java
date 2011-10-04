@@ -41,7 +41,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
 
 import de.anomic.data.Diff;
@@ -120,7 +120,7 @@ public class Wiki {
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !ByteBuffer.equals(page.page(), content)) {
-                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map);
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_WIKI_UPDATE, map);
             }
             page = newEntry;
             prop.putHTML("LOCATION", "/Wiki.html?page=" + pagename);

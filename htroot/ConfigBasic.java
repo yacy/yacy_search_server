@@ -37,7 +37,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.workflow.InstantBusyThread;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
@@ -101,7 +101,7 @@ public class ConfigBasic {
         }
 
         // check if peer name already exists
-        final yacySeed oldSeed = sb.peers.lookupByName(peerName);
+        final Seed oldSeed = sb.peers.lookupByName(peerName);
         if (oldSeed == null &&
             !peerName.equals(sb.peers.mySeed().getName()) &&
             Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches()) {
@@ -218,7 +218,7 @@ public class ConfigBasic {
         
         // check if values are proper
         final boolean properPassword = (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
-        final boolean properName = (sb.peers.mySeed().getName().length() >= 3) && (!(yacySeed.isDefaultPeerName(sb.peers.mySeed().getName())));
+        final boolean properName = (sb.peers.mySeed().getName().length() >= 3) && (!(Seed.isDefaultPeerName(sb.peers.mySeed().getName())));
         final boolean properPort = (sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal());
         
         if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {

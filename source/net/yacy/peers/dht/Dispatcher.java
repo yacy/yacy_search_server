@@ -42,8 +42,8 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
-import net.yacy.peers.yacySeed;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.Seed;
+import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;
 
 public class Dispatcher {
@@ -88,7 +88,7 @@ public class Dispatcher {
     private final Segment segment;
 
     // the seed database
-    private final yacySeedDB seeds;
+    private final SeedDB seeds;
 
     // the log
     private final Log log;
@@ -101,7 +101,7 @@ public class Dispatcher {
 
     public Dispatcher(
             final Segment segment,
-            final yacySeedDB seeds,
+            final SeedDB seeds,
             final boolean gzipBody,
             final int timeout
             ) {
@@ -285,7 +285,7 @@ public class Dispatcher {
 
             // get or make a entry object
             entry = this.transmissionCloud.get(pTArray); // if this is not null, the entry is extended here
-            final List<yacySeed> targets = PeerSelection.getAcceptRemoteIndexSeedsList(
+            final List<Seed> targets = PeerSelection.getAcceptRemoteIndexSeedsList(
                     this.seeds,
                     primaryTarget,
                     this.seeds.redundancy() * 3,

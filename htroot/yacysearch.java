@@ -60,8 +60,8 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
-import net.yacy.peers.yacyChannel;
-import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.EventChannel;
+import net.yacy.peers.NewsPool;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -510,7 +510,7 @@ public class yacysearch {
                         map.put("urlhash", delHash);
                         map.put("vote", "negative");
                         map.put("refid", "");
-                        sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                        sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
                     }
                 } catch (final IOException e) {
                     Log.logException(e);
@@ -541,7 +541,7 @@ public class yacysearch {
                         map.put("description", documents[0].dc_title().replace(',', ' '));
                         map.put("author", documents[0].dc_creator());
                         map.put("tags", documents[0].dc_subject(' '));
-                        sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map);
+                        sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_SURFTIPP_ADD, map);
                         documents[0].close();
                     }
                 }
@@ -614,7 +614,7 @@ public class yacysearch {
 
             // log
             Log.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + QueryParams.hashSet2hashString(theQuery.queryHashes) + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
-            yacyChannel.channels(yacyChannel.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
+            EventChannel.channels(EventChannel.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event

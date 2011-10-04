@@ -47,7 +47,7 @@ import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.yacyNewsPool;
+import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
@@ -383,7 +383,7 @@ public class Crawler_p {
                                 m.remove("generalFilter");
                                 m.remove("specificFilter");
                                 m.put("intention", post.get("intention", "").replace(',', '/'));
-                                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m);
+                                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_CRAWL_START, m);
                             }
                         } else {
                             prop.put("info", "5"); //Crawling failed

@@ -32,8 +32,8 @@ import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacyClient;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 
 import de.anomic.server.serverObjects;
@@ -69,18 +69,18 @@ public class MessageSend_p {
 
             // open an editor page for the message
             // first ask if the other peer is online, and also what kind of document it accepts
-            final Map<String, String> result = yacyClient.permissionMessage(sb.peers, hash);
+            final Map<String, String> result = Protocol.permissionMessage(sb.peers, hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
             String peerName;
-            yacySeed targetPeer = null;
+            Seed targetPeer = null;
             if (hash.equals(sb.peers.mySeed().hash)) {
-                peerName = sb.peers.mySeed().get(yacySeed.NAME,"nameless");
+                peerName = sb.peers.mySeed().get(Seed.NAME,"nameless");
             } else {
                 targetPeer = sb.peers.getConnected(hash);
                 if (targetPeer == null)
                     peerName = "nameless";
                 else
-                    peerName = targetPeer.get(yacySeed.NAME,"nameless");
+                    peerName = targetPeer.get(Seed.NAME,"nameless");
             }
 
             prop.putXML("mode_permission_peerName", peerName);
@@ -128,7 +128,7 @@ public class MessageSend_p {
                 if (subject.length() > 100) subject = subject.substring(0, 100);
                 if (message.length() > messagesize) message = message.substring(0, messagesize);
                 final byte[] mb = UTF8.getBytes(message);
-                final Map<String, String> result = yacyClient.postMessage(sb.peers, hash, subject, mb);
+                final Map<String, String> result = Protocol.postMessage(sb.peers, hash, subject, mb);
 
                 //message has been sent
                 prop.put("mode_status_response", result.get("response"));

@@ -41,11 +41,11 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.MapTools;
-import net.yacy.peers.yacyClient;
-import net.yacy.peers.yacyNewsDB;
-import net.yacy.peers.yacyNewsPool;
-import net.yacy.peers.yacyPeerActions;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.NewsDB;
+import net.yacy.peers.NewsPool;
+import net.yacy.peers.PeerActions;
+import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -70,8 +70,8 @@ public class Network {
         prop.putHTML("page_networkName", sb.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
 
-        final String mySeedType = sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
-        final boolean iAmActive = (mySeedType.equals(yacySeed.PEERTYPE_SENIOR) || mySeedType.equals(yacySeed.PEERTYPE_PRINCIPAL));
+        final String mySeedType = sb.peers.mySeed().get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN);
+        final boolean iAmActive = (mySeedType.equals(Seed.PEERTYPE_SENIOR) || mySeedType.equals(Seed.PEERTYPE_PRINCIPAL));
 
         if (overview) {
             long accActLinks = sb.peers.countActiveURL();
@@ -92,17 +92,17 @@ public class Network {
             double myqph = 0d;
 
             // create own peer info
-            final yacySeed seed = sb.peers.mySeed();
+            final Seed seed = sb.peers.mySeed();
             if (sb.peers.mySeed() != null){ //our Peer
                 // update seed info
                 sb.updateMySeed();
 
                 final long LCount = seed.getLinkCount();
                 final long ICount = seed.getWordCount();
-                final long RCount = seed.getLong(yacySeed.RCOUNT, 0L);
+                final long RCount = seed.getLong(Seed.RCOUNT, 0L);
 
                 // my-info
-                prop.putHTML("table_my-name", seed.get(yacySeed.NAME, "-") );
+                prop.putHTML("table_my-name", seed.get(Seed.NAME, "-") );
                 prop.put("table_my-hash", seed.hash );
                 if (sb.peers.mySeed().isVirgin()) {
                     prop.put("table_my-info", 0);
@@ -125,30 +125,30 @@ public class Network {
 
                 myppm = sb.currentPPM();
                 myqph = 60d * sb.averageQPM();
-                prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
-                prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
-                prop.put("table_my-uptime", yacyPeerActions.formatInterval(60000 * seed.getLong(yacySeed.UPTIME, 0)));
+                prop.put("table_my-version", seed.get(Seed.VERSION, "-"));
+                prop.put("table_my-utc", seed.get(Seed.UTC, "-"));
+                prop.put("table_my-uptime", PeerActions.formatInterval(60000 * seed.getLong(Seed.UPTIME, 0)));
                 prop.putNum("table_my-LCount", LCount);
                 prop.putNum("table_my-ICount", ICount);
                 prop.putNum("table_my-RCount", RCount);
-                prop.putNum("table_my-sI", seed.getLong(yacySeed.INDEX_OUT, 0L));
-                prop.putNum("table_my-sU", seed.getLong(yacySeed.URL_OUT, 0L));
-                prop.putNum("table_my-rI", seed.getLong(yacySeed.INDEX_IN, 0L));
-                prop.putNum("table_my-rU", seed.getLong(yacySeed.URL_IN, 0L));
+                prop.putNum("table_my-sI", seed.getLong(Seed.INDEX_OUT, 0L));
+                prop.putNum("table_my-sU", seed.getLong(Seed.URL_OUT, 0L));
+                prop.putNum("table_my-rI", seed.getLong(Seed.INDEX_IN, 0L));
+                prop.putNum("table_my-rU", seed.getLong(Seed.URL_IN, 0L));
                 prop.putNum("table_my-ppm", myppm);
                 prop.putNum("table_my-qph", Math.round(100d * myqph) / 100d);
                 prop.putNum("table_my-qph-publocal", Math.round(6000d * sb.averageQPMPublicLocal()) / 100d);
                 prop.putNum("table_my-qph-pubremote", Math.round(6000d * sb.averageQPMGlobal()) / 100d);
-                prop.putNum("table_my-seeds", seed.getLong(yacySeed.SCOUNT, 0L));
-                prop.putNum("table_my-connects", seed.getFloat(yacySeed.CCOUNT, 0F));
-                prop.put("table_my-url", seed.get(yacySeed.SEEDLISTURL, ""));
+                prop.putNum("table_my-seeds", seed.getLong(Seed.SCOUNT, 0L));
+                prop.putNum("table_my-connects", seed.getFloat(Seed.CCOUNT, 0F));
+                prop.put("table_my-url", seed.get(Seed.SEEDLISTURL, ""));
 
                 // generating the location string
                 prop.putHTML("table_my-location", ClientIdentification.generateLocation());
             }
 
             // overall results: Network statistics
-            if (iAmActive) conCount++; else if (mySeedType.equals(yacySeed.PEERTYPE_JUNIOR)) potCount++;
+            if (iAmActive) conCount++; else if (mySeedType.equals(Seed.PEERTYPE_JUNIOR)) potCount++;
             final int activeLastMonth = sb.peers.sizeActiveSince(30 * 1440);
             final int activeLastWeek = sb.peers.sizeActiveSince(7 * 1440);
             final int activeLastDay = sb.peers.sizeActiveSince(1440);
@@ -196,12 +196,12 @@ public class Network {
                 }
 
                 final ConcurrentMap<String, String> map = new ConcurrentHashMap<String, String>();
-                map.put(yacySeed.IP, post.get("peerIP"));
-                map.put(yacySeed.PORT, post.get("peerPort"));
-                yacySeed peer = new yacySeed(post.get("peerHash"), map);
+                map.put(Seed.IP, post.get("peerIP"));
+                map.put(Seed.PORT, post.get("peerPort"));
+                Seed peer = new Seed(post.get("peerHash"), map);
 
                 sb.updateMySeed();
-                final int added = yacyClient.hello(sb.peers.mySeed(), sb.peers.peerActions, peer.getPublicAddress(), peer.hash, peer.getName());
+                final int added = Protocol.hello(sb.peers.mySeed(), sb.peers.peerActions, peer.getPublicAddress(), peer.hash, peer.getName());
 
                 if (added <= 0) {
                     prop.put("table_comment",1);
@@ -213,7 +213,7 @@ public class Network {
                         prop.putHTML("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN");
                     } else {
                         prop.put("table_comment",2);
-                        prop.putHTML("table_comment_status","publish: handshaked " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress());
+                        prop.putHTML("table_comment_status","publish: handshaked " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress());
                         prop.putHTML("table_comment_details",peer.toString());
                     }
                 }
@@ -257,33 +257,33 @@ public class Network {
                     final HashMap<String, Map<String, String>> updatedWiki = new HashMap<String, Map<String, String>>();
                     final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
                     final HashMap<String, String> isCrawling = new HashMap<String, String>();
-                    yacyNewsDB.Record record;
-                    final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+                    NewsDB.Record record;
+                    final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB, true);
                     while (recordIterator.hasNext()) {
                         record = recordIterator.next();
                         if (record == null) {
                             continue;
-                        } else if (record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
+                        } else if (record.category().equals(NewsPool.CATEGORY_PROFILE_UPDATE)) {
                             updatedProfile.add(record.originator());
-                        } else if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
+                        } else if (record.category().equals(NewsPool.CATEGORY_WIKI_UPDATE)) {
                             updatedWiki.put(record.originator(), record.attributes());
-                        } else if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
+                        } else if (record.category().equals(NewsPool.CATEGORY_BLOG_ADD)) {
                             updatedBlog.put(record.originator(), record.attributes());
-                        } else if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
+                        } else if (record.category().equals(NewsPool.CATEGORY_CRAWL_START)) {
                             isCrawling.put(record.originator(), record.attributes().get("startURL"));
                         }
                     }
 
                     boolean dark = true;
-                    yacySeed seed;
+                    Seed seed;
                     final boolean complete = (post != null && post.containsKey("ip"));
-                    Iterator<yacySeed> e = null;
+                    Iterator<Seed> e = null;
                     final boolean order = (post != null && post.get("order", "down").equals("up"));
                     final String sort = (post == null ? null : post.get("sort", null));
                     switch (page) {
-                        case 1 : e = sb.peers.seedsSortedConnected(order, (sort == null ? yacySeed.LCOUNT : sort)); break;
-                        case 2 : e = sb.peers.seedsSortedDisconnected(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
-                        case 3 : e = sb.peers.seedsSortedPotential(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
+                        case 1 : e = sb.peers.seedsSortedConnected(order, (sort == null ? Seed.LCOUNT : sort)); break;
+                        case 2 : e = sb.peers.seedsSortedDisconnected(order, (sort == null ? Seed.LASTSEEN : sort)); break;
+                        case 3 : e = sb.peers.seedsSortedPotential(order, (sort == null ? Seed.LASTSEEN : sort)); break;
                         default: break;
                     }
                     String startURL;
@@ -356,12 +356,12 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_isCrawling_page", startURL);
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_hash", seed.hash);
-                            String shortname = seed.get(yacySeed.NAME, "deadlink");
+                            String shortname = seed.get(Seed.NAME, "deadlink");
                             if (shortname.length() > 20) {
                                 shortname = shortname.substring(0, 20) + "...";
                             }
                             prop.putHTML(STR_TABLE_LIST + conCount + "_shortname", shortname);
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(Seed.NAME, "deadlink"));
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
                                 userAgent = ClientIdentification.getUserAgent();
@@ -374,11 +374,11 @@ public class Network {
                             if (complete) {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_ip", seed.getIP() );
-                                prop.put(STR_TABLE_LIST + conCount + "_complete_port", seed.get(yacySeed.PORT, "-") );
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_port", seed.get(Seed.PORT, "-") );
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_hash", seed.hash);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_age", seed.getAge());
-                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_seeds", seed.getLong(yacySeed.SCOUNT, 0L));
-                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_connects", seed.getFloat(yacySeed.CCOUNT, 0F));
+                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_seeds", seed.getLong(Seed.SCOUNT, 0L));
+                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_connects", seed.getFloat(Seed.CCOUNT, 0F));
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_complete_userAgent", userAgent);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 0);
@@ -392,7 +392,7 @@ public class Network {
                             } else if(seed.isPrincipal()) {
                                 prop.put(STR_TABLE_LIST + conCount + "_type", 2);
                             }
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_type_url", seed.get(yacySeed.SEEDLISTURL, "http://nowhere/"));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_type_url", seed.get(Seed.SEEDLISTURL, "http://nowhere/"));
 
                             final long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                             if (page == 1 && lastseen > 720) {
@@ -428,17 +428,17 @@ public class Network {
                                 final String peertags = MapTools.set2string(seed.getPeerTags(), ",", false);
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.length() == 0)) ? "no tags given" : ("tags = " + peertags));
                             }
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(Seed.VERSION, "0.1"), shortname));
                             prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
-                            prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", yacyPeerActions.formatInterval(60000 * seed.getLong(yacySeed.UPTIME, 0)));
+                            prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(Seed.UTC, "-"));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", PeerActions.formatInterval(60000 * seed.getLong(Seed.UPTIME, 0)));
                             prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLinkCount());
                             prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getWordCount());
-                            prop.putNum(STR_TABLE_LIST + conCount + "_RCount", seed.getLong(yacySeed.RCOUNT, 0));
-                            prop.putNum(STR_TABLE_LIST + conCount + "_sI", seed.getLong(yacySeed.INDEX_OUT, 0));
-                            prop.putNum(STR_TABLE_LIST + conCount + "_sU", seed.getLong(yacySeed.URL_OUT, 0));
-                            prop.putNum(STR_TABLE_LIST + conCount + "_rI", seed.getLong(yacySeed.INDEX_IN, 0));
-                            prop.putNum(STR_TABLE_LIST + conCount + "_rU", seed.getLong(yacySeed.URL_IN, 0));
+                            prop.putNum(STR_TABLE_LIST + conCount + "_RCount", seed.getLong(Seed.RCOUNT, 0));
+                            prop.putNum(STR_TABLE_LIST + conCount + "_sI", seed.getLong(Seed.INDEX_OUT, 0));
+                            prop.putNum(STR_TABLE_LIST + conCount + "_sU", seed.getLong(Seed.URL_OUT, 0));
+                            prop.putNum(STR_TABLE_LIST + conCount + "_rI", seed.getLong(Seed.INDEX_IN, 0));
+                            prop.putNum(STR_TABLE_LIST + conCount + "_rU", seed.getLong(Seed.URL_IN, 0));
                             prop.putNum(STR_TABLE_LIST + conCount + "_ppm", PPM);
                             prop.putNum(STR_TABLE_LIST + conCount + "_qph", Math.round(6000d * QPM) / 100d);
                             conCount++;
@@ -459,7 +459,7 @@ public class Network {
             switch (page) {
                 case 1 : prop.putHTML("table_peertype", "senior/principal"); break;
                 case 2 : prop.putHTML("table_peertype", "senior/principal"); break;
-                case 3 : prop.putHTML("table_peertype", yacySeed.PEERTYPE_JUNIOR); break;
+                case 3 : prop.putHTML("table_peertype", Seed.PEERTYPE_JUNIOR); break;
                 default: break;
             }
         }

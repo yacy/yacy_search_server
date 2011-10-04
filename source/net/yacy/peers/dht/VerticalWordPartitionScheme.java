@@ -27,7 +27,7 @@ package net.yacy.peers.dht;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 
 public class VerticalWordPartitionScheme implements PartitionScheme {
     
@@ -108,7 +108,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         return l;
     }
  
-    public final long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer) {
+    public final long dhtDistance(final byte[] word, final String urlHash, final Seed peer) {
         return dhtDistance(word, urlHash, ASCII.getBytes(peer.hash));
     }
     

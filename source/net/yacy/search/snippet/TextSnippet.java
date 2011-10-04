@@ -50,7 +50,7 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.peers.yacySearch;
+import net.yacy.peers.RemoteSearch;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.retrieval.Response;
@@ -160,7 +160,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
         // try to get snippet from snippetCache
         final ResultClass source = ResultClass.SOURCE_CACHE;
-        final String wordhashes = yacySearch.set2string(queryhashes);
+        final String wordhashes = RemoteSearch.set2string(queryhashes);
         final String urls = ASCII.String(url.hash());
         String snippetLine = snippetsCache.get(wordhashes, urls);
         if (snippetLine != null) {

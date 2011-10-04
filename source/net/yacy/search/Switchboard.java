@@ -128,12 +128,12 @@ import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.kelondro.workflow.WorkflowThread;
-import net.yacy.peers.yacyChannel;
-import net.yacy.peers.yacyClient;
-import net.yacy.peers.yacyCore;
-import net.yacy.peers.yacyNewsPool;
-import net.yacy.peers.yacySeed;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.EventChannel;
+import net.yacy.peers.Network;
+import net.yacy.peers.NewsPool;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
+import net.yacy.peers.SeedDB;
 import net.yacy.peers.dht.Dispatcher;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.peers.graphics.WebStructureGraph;
@@ -225,7 +225,7 @@ public final class Switchboard extends serverSwitch {
     public  RobotsTxt                      robots;
     public  Map<String, Object[]>          outgoingCookies, incomingCookies;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
-    public  yacyCore                       yc;
+    public  Network                       yc;
     public  ResourceObserver               observer;
     public  UserDB                         userDB;
     public  BookmarksDB                    bookmarksDB;
@@ -241,7 +241,7 @@ public final class Switchboard extends serverSwitch {
     public  FilterEngine                   domainList;
     private Dispatcher                     dhtDispatcher;
     public  LinkedBlockingQueue<String>    trail;
-    public  yacySeedDB                     peers;
+    public  SeedDB                         peers;
     public  WorkTables                     tables;
 
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
@@ -282,7 +282,7 @@ public final class Switchboard extends serverSwitch {
         setLog(new Log("YACY_SEARCH"));
 
         // set default peer name
-        yacySeed.ANON_PREFIX = getConfig("peernameprefix", "_anon");
+        Seed.ANON_PREFIX = getConfig("peernameprefix", "_anon");
 
         // UPnP port mapping
         if (getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) {
@@ -355,8 +355,8 @@ public final class Switchboard extends serverSwitch {
         this.queuesRoot = new File(new File(indexPath, networkName), "QUEUES");
         this.networkRoot.mkdirs();
         this.queuesRoot.mkdirs();
-        final File mySeedFile = new File(this.networkRoot, yacySeedDB.DBFILE_OWN_SEED);
-        this.peers = new yacySeedDB(
+        final File mySeedFile = new File(this.networkRoot, SeedDB.DBFILE_OWN_SEED);
+        this.peers = new SeedDB(
                 this.networkRoot,
                 "seed.new.heap",
                 "seed.old.heap",
@@ -404,8 +404,8 @@ public final class Switchboard extends serverSwitch {
 
         // start yacy core
         this.log.logConfig("Starting YaCy Protocol Core");
-        this.yc = new yacyCore(this);
-        InstantBusyThread.oneTimeJob(this, "loadSeedLists", yacyCore.log, 0);
+        this.yc = new Network(this);
+        InstantBusyThread.oneTimeJob(this, "loadSeedLists", Network.log, 0);
         //final long startedSeedListAquisition = System.currentTimeMillis();
 
         // init a DHT transmission dispatcher
@@ -1171,7 +1171,7 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
-    public boolean isInMyCluster(final yacySeed seed) {
+    public boolean isInMyCluster(final Seed seed) {
         // check if the given peer is in the own network, if this is a robinson cluster
         // if this robinson mode does not define a cluster membership, false is returned
         if (seed == null) return false;
@@ -1730,24 +1730,24 @@ public final class Switchboard extends serverSwitch {
             checkInterruption();
             try {
                 if (this.log.isFine()) {
-                    this.log.logFine("Cleaning Incoming News, " + this.peers.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
+                    this.log.logFine("Cleaning Incoming News, " + this.peers.newsPool.size(NewsPool.INCOMING_DB) + " entries on stack");
                 }
                 this.peers.newsPool.automaticProcess(this.peers);
             } catch (final Exception e) {
                 Log.logException(e);
             }
             if (getConfigBool("cleanup.deletionProcessedNews", true)) {
-                this.peers.newsPool.clear(yacyNewsPool.PROCESSED_DB);
+                this.peers.newsPool.clear(NewsPool.PROCESSED_DB);
             }
             if (getConfigBool("cleanup.deletionPublishedNews", true)) {
-                this.peers.newsPool.clear(yacyNewsPool.PUBLISHED_DB);
+                this.peers.newsPool.clear(NewsPool.PUBLISHED_DB);
             }
 
             // clean up seed-dbs
             if (getConfigBool("routing.deleteOldSeeds.permission",true)) {
                 final long deleteOldSeedsTime = getConfigLong("routing.deleteOldSeeds.time",7)*24*3600000;
-                Iterator<yacySeed> e = this.peers.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
-                yacySeed seed = null;
+                Iterator<Seed> e = this.peers.seedsSortedDisconnected(true,Seed.LASTSEEN);
+                Seed seed = null;
                 final List<String> deleteQueue = new ArrayList<String>();
                 checkInterruption();
                 // clean passive seeds
@@ -1761,7 +1761,7 @@ public final class Switchboard extends serverSwitch {
                 }
                 for (int i = 0; i < deleteQueue.size(); ++i) this.peers.removeDisconnected(deleteQueue.get(i));
                 deleteQueue.clear();
-                e = this.peers.seedsSortedPotential(true,yacySeed.LASTSEEN);
+                e = this.peers.seedsSortedPotential(true,Seed.LASTSEEN);
                 checkInterruption();
                 // clean potential seeds
                 while (e.hasNext()) {
@@ -1795,7 +1795,7 @@ public final class Switchboard extends serverSwitch {
             }
 
             // initiate broadcast about peer startup to spread supporter url
-            if (!isRobinsonMode() && this.peers.newsPool.size(yacyNewsPool.OUTGOING_DB) == 0) {
+            if (!isRobinsonMode() && this.peers.newsPool.size(NewsPool.OUTGOING_DB) == 0) {
                 // read profile
                 final Properties profile = new Properties();
                 FileInputStream fileIn = null;
@@ -1814,7 +1814,7 @@ public final class Switchboard extends serverSwitch {
                 if ((homepage != null) && (homepage.length() > 10)) {
                     final Properties news = new Properties();
                     news.put("homepage", profile.get("homepage"));
-                    this.peers.newsPool.publishMyNews(this.peers.mySeed(), yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news);
+                    this.peers.newsPool.publishMyNews(this.peers.mySeed(), NewsPool.CATEGORY_PROFILE_BROADCAST, news);
                 }
             }
 
@@ -2123,7 +2123,7 @@ public final class Switchboard extends serverSwitch {
                     condenser,
                     searchEvent,
                     sourceName);
-            final RSSFeed feed = yacyChannel.channels(queueEntry.initiator() == null ? yacyChannel.PROXY : Base64Order.enhancedCoder.equal(queueEntry.initiator(), ASCII.getBytes(this.peers.mySeed().hash)) ? yacyChannel.LOCALINDEXING : yacyChannel.REMOTEINDEXING);
+            final RSSFeed feed = EventChannel.channels(queueEntry.initiator() == null ? EventChannel.PROXY : Base64Order.enhancedCoder.equal(queueEntry.initiator(), ASCII.getBytes(this.peers.mySeed().hash)) ? EventChannel.LOCALINDEXING : EventChannel.REMOTEINDEXING);
             feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
@@ -2167,7 +2167,7 @@ public final class Switchboard extends serverSwitch {
 
         // if this was performed for a remote crawl request, notify requester
         if ((processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
-            final yacySeed initiatorPeer = this.peers.get(ASCII.String(queueEntry.initiator()));
+            final Seed initiatorPeer = this.peers.get(ASCII.String(queueEntry.initiator()));
             if (initiatorPeer != null) {
                 if (this.clusterhashes != null) {
                     initiatorPeer.setAlternativeAddress(this.clusterhashes.get(queueEntry.initiator()));
@@ -2270,16 +2270,16 @@ public final class Switchboard extends serverSwitch {
     }
 
     public class receiptSending implements Runnable {
-        private final yacySeed initiatorPeer;
+        private final Seed initiatorPeer;
         private final URIMetadataRow reference;
 
-        public receiptSending(final yacySeed initiatorPeer, final URIMetadataRow reference) {
+        public receiptSending(final Seed initiatorPeer, final URIMetadataRow reference) {
             this.initiatorPeer = initiatorPeer;
             this.reference = reference;
         }
         public void run() {
             final long t = System.currentTimeMillis();
-            final Map<String, String> response = yacyClient.crawlReceipt(Switchboard.this.peers.mySeed(), this.initiatorPeer, "crawl", "fill", "indexed", this.reference, "");
+            final Map<String, String> response = Protocol.crawlReceipt(Switchboard.this.peers.mySeed(), this.initiatorPeer, "crawl", "fill", "indexed", this.reference, "");
             if (response == null) {
                 Switchboard.this.log.logInfo("Sending crawl receipt for '" + this.reference.metadata().url().toNormalform(false, true) + "' to " + this.initiatorPeer.getName() + " FAILED, send time = " + (System.currentTimeMillis() - t));
                 return;
@@ -2680,23 +2680,23 @@ public final class Switchboard extends serverSwitch {
     }
 
     public void updateMySeed() {
-        this.peers.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8090"))));
+        this.peers.mySeed().put(Seed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8090"))));
 
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
-        this.peers.mySeed().put(yacySeed.ISPEED, Integer.toString(currentPPM()));
-        this.peers.mySeed().put(yacySeed.RSPEED, Float.toString(averageQPM()));
-        this.peers.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        this.peers.mySeed().put(yacySeed.LCOUNT, Long.toString(this.indexSegments.URLCount())); // the number of links that the peer has stored (LURL's)
-        this.peers.mySeed().put(yacySeed.NCOUNT, Integer.toString(this.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
-        this.peers.mySeed().put(yacySeed.RCOUNT, Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
-        this.peers.mySeed().put(yacySeed.ICOUNT, Long.toString(this.indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
-        this.peers.mySeed().put(yacySeed.SCOUNT, Integer.toString(this.peers.sizeConnected())); // the number of seeds that the peer has stored
-        this.peers.mySeed().put(yacySeed.CCOUNT, Float.toString(((int) ((this.peers.sizeConnected() + this.peers.sizeDisconnected() + this.peers.sizePotential()) * 60.0f / (uptime + 1.01f)) * 100.0f) / 100.0f)); // the number of clients that the peer connects (as connects/hour)
-        this.peers.mySeed().put(yacySeed.VERSION, yacyBuildProperties.getLongVersion());
+        this.peers.mySeed().put(Seed.ISPEED, Integer.toString(currentPPM()));
+        this.peers.mySeed().put(Seed.RSPEED, Float.toString(averageQPM()));
+        this.peers.mySeed().put(Seed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        this.peers.mySeed().put(Seed.LCOUNT, Long.toString(this.indexSegments.URLCount())); // the number of links that the peer has stored (LURL's)
+        this.peers.mySeed().put(Seed.NCOUNT, Integer.toString(this.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
+        this.peers.mySeed().put(Seed.RCOUNT, Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
+        this.peers.mySeed().put(Seed.ICOUNT, Long.toString(this.indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
+        this.peers.mySeed().put(Seed.SCOUNT, Integer.toString(this.peers.sizeConnected())); // the number of seeds that the peer has stored
+        this.peers.mySeed().put(Seed.CCOUNT, Float.toString(((int) ((this.peers.sizeConnected() + this.peers.sizeDisconnected() + this.peers.sizePotential()) * 60.0f / (uptime + 1.01f)) * 100.0f) / 100.0f)); // the number of clients that the peer connects (as connects/hour)
+        this.peers.mySeed().put(Seed.VERSION, yacyBuildProperties.getLongVersion());
         this.peers.mySeed().setFlagDirectConnect(true);
         this.peers.mySeed().setLastSeenUTC();
-        this.peers.mySeed().put(yacySeed.UTC, GenericFormatter.UTCDiffString());
+        this.peers.mySeed().put(Seed.UTC, GenericFormatter.UTCDiffString());
         this.peers.mySeed().setFlagAcceptRemoteCrawl(getConfig("crawlResponse", "").equals("true"));
         this.peers.mySeed().setFlagAcceptRemoteIndex(getConfig("allowReceiveIndex", "").equals("true"));
         //mySeed.setFlagAcceptRemoteIndex(true);
@@ -2705,7 +2705,7 @@ public final class Switchboard extends serverSwitch {
     public void loadSeedLists() {
         // uses the superseed to initialize the database with known seeds
 
-        yacySeed           ys;
+        Seed           ys;
         String             seedListFileURL;
         DigestURI          url;
         Iterator<String>   enu;
@@ -2721,7 +2721,7 @@ public final class Switchboard extends serverSwitch {
         client.setHeader(reqHeader.entrySet());
         client.setTimout((int) getConfigLong("bootstrapLoadTimeout", 20000));
 
-        yacyCore.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
+        Network.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
 
         // - use the superseed to further fill up the seedDB
         int ssc = 0, c = 0;
@@ -2753,9 +2753,9 @@ public final class Switchboard extends serverSwitch {
                             yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, no content");
                         }
                     } else*/ if (header.lastModified() == null) {
-                        yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not usable, last-modified is missing");
+                        Network.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not usable, last-modified is missing");
                     } else if ((header.age() > 86400000) && (ssc > 0)) {
-                        yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
+                        Network.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
                         final byte[] content = client.GETbytes(url);
@@ -2763,7 +2763,7 @@ public final class Switchboard extends serverSwitch {
                         lc = 0;
                         while (enu.hasNext()) {
                             try {
-                                ys = yacySeed.genRemoteSeed(enu.next(), null, false, null);
+                                ys = Seed.genRemoteSeed(enu.next(), null, false, null);
                                 if ((ys != null) &&
                                     (!this.peers.mySeedIsDefined() || !this.peers.mySeed().hash.equals(ys.hash))) {
                                         final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
@@ -2774,22 +2774,22 @@ public final class Switchboard extends serverSwitch {
                                         }
                                     }
                             } catch (final IOException e) {
-                                yacyCore.log.logInfo("BOOTSTRAP: bad seed: " + e.getMessage());
+                                Network.log.logInfo("BOOTSTRAP: bad seed: " + e.getMessage());
                             }
                         }
-                        yacyCore.log.logInfo("BOOTSTRAP: " + lc + " seeds from seed-list URL " + seedListFileURL + ", AGE=" + (header.age() / 3600000) + "h");
+                        Network.log.logInfo("BOOTSTRAP: " + lc + " seeds from seed-list URL " + seedListFileURL + ", AGE=" + (header.age() / 3600000) + "h");
                     }
 
                 } catch (final IOException e) {
                     // this is when wget fails, commonly because of timeout
-                    yacyCore.log.logWarning("BOOTSTRAP: failed (1) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage());
+                    Network.log.logWarning("BOOTSTRAP: failed (1) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage());
                 } catch (final Exception e) {
                     // this is when wget fails; may be because of missing internet connection
-                    yacyCore.log.logSevere("BOOTSTRAP: failed (2) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage(), e);
+                    Network.log.logSevere("BOOTSTRAP: failed (2) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage(), e);
                 }
             }
         }
-        yacyCore.log.logInfo("BOOTSTRAP: " + (this.peers.sizeConnected() - sc) + " new seeds while bootstraping.");
+        Network.log.logInfo("BOOTSTRAP: " + (this.peers.sizeConnected() - sc) + " new seeds while bootstraping.");
     }
 
     public void initRemoteProxy() {

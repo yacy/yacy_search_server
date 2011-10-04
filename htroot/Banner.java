@@ -32,7 +32,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -74,9 +74,9 @@ public class Banner {
         long   nppm    = sb.peers.countActivePPM();
         double nqph    = 0;
 
-        final yacySeed seed = sb.peers.mySeed();
+        final Seed seed = sb.peers.mySeed();
         if (seed != null){
-            name    = seed.get(yacySeed.NAME, "-").toUpperCase();
+            name    = seed.get(Seed.NAME, "-").toUpperCase();
             links   = seed.getLinkCount();
             words   = seed.getWordCount();
             myppm   = seed.getPPM();

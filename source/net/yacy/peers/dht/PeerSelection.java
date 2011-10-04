@@ -44,9 +44,9 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.kelondroException;
-import net.yacy.peers.yacyCore;
-import net.yacy.peers.yacySeed;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.Network;
+import net.yacy.peers.Seed;
+import net.yacy.peers.SeedDB;
 import net.yacy.peers.operation.yacyVersion;
 
 
@@ -58,11 +58,11 @@ import net.yacy.peers.operation.yacyVersion;
 
 public class PeerSelection {
 
-    public static yacySeed[] selectClusterPeers(final yacySeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
+    public static Seed[] selectClusterPeers(final SeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
         final Iterator<Map.Entry<byte[], String>> i = peerhashes.entrySet().iterator();
-        final List<yacySeed> l = new ArrayList<yacySeed>();
+        final List<Seed> l = new ArrayList<Seed>();
         Map.Entry<byte[], String> entry;
-        yacySeed s;
+        Seed s;
         while (i.hasNext()) {
             entry = i.next();
             s = seedDB.get(ASCII.String(entry.getKey())); // should be getConnected; get only during testing time
@@ -71,11 +71,11 @@ public class PeerSelection {
                 l.add(s);
             }
         }
-        return l.toArray(new yacySeed[l.size()]);
+        return l.toArray(new Seed[l.size()]);
     }
 
-    public static yacySeed[] selectSearchTargets(
-            final yacySeedDB seedDB,
+    public static Seed[] selectSearchTargets(
+            final SeedDB seedDB,
             final HandleSet wordhashes,
             int redundancy,
             int burstRobinsonPercent,
@@ -86,9 +86,9 @@ public class PeerSelection {
         if (seedDB == null) { return null; }
         
         // put in seeds according to dht
-        final Map<String, yacySeed> regularSeeds = new HashMap<String, yacySeed>(); // dht position seeds
-        yacySeed seed;
-        Iterator<yacySeed> dhtEnum;         
+        final Map<String, Seed> regularSeeds = new HashMap<String, Seed>(); // dht position seeds
+        Seed seed;
+        Iterator<Seed> dhtEnum;         
         Iterator<byte[]> iter = wordhashes.iterator();
         while (iter.hasNext()) {
             selectDHTPositions(seedDB, iter.next(), redundancy, regularSeeds);
@@ -98,7 +98,7 @@ public class PeerSelection {
         
         // put in some seeds according to size of peer.
         // But not all, that would produce too much load on the largest peers
-        dhtEnum = seedDB.seedsSortedConnected(false, yacySeed.ICOUNT);
+        dhtEnum = seedDB.seedsSortedConnected(false, Seed.ICOUNT);
         int c = Math.max(Math.min(5, seedDB.sizeConnected()), wordhashes.size() > 1 ? seedDB.sizeConnected() * burstMultiwordPercent / 100 : 0);
         while (dhtEnum.hasNext() && c-- > 0) {
             seed = dhtEnum.next();
@@ -118,7 +118,7 @@ public class PeerSelection {
 
         // create a set that contains only robinson peers because these get a special handling
         dhtEnum = seedDB.seedsConnected(true, false, null, 0.50f);
-        Set<yacySeed> robinson = new HashSet<yacySeed>();
+        Set<Seed> robinson = new HashSet<Seed>();
         while (dhtEnum.hasNext()) {
             seed = dhtEnum.next();
             if (seed == null) continue;
@@ -161,22 +161,22 @@ public class PeerSelection {
         }
         
         // produce return set
-        yacySeed[] result = new yacySeed[regularSeeds.size()];
+        Seed[] result = new Seed[regularSeeds.size()];
         result = regularSeeds.values().toArray(result);
         return result;
     }
 
     private static void selectDHTPositions(
-            final yacySeedDB seedDB, 
+            final SeedDB seedDB, 
             byte[] wordhash,
             int redundancy, 
-            Map<String, yacySeed> regularSeeds) {
+            Map<String, Seed> regularSeeds) {
         // this method is called from the search target computation
         final long[] dhtVerticalTargets = seedDB.scheme.dhtPositions(wordhash);
-        yacySeed seed;
+        Seed seed;
         for (long  dhtVerticalTarget : dhtVerticalTargets) {
             wordhash = FlatWordPartitionScheme.positionToHash(dhtVerticalTarget);
-            Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, false);
+            Iterator<Seed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, false);
             int c = Math.min(seedDB.sizeConnected(), redundancy);
             int cc = 2; // select a maximum of 3, this is enough redundancy
             while (dhtEnum.hasNext() && c > 0 && cc-- > 0) {
@@ -194,19 +194,19 @@ public class PeerSelection {
         return ASCII.getBytes(Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + Word.commonHashLength));
     }
     
-    public static byte[] limitOver(final yacySeedDB seedDB, final byte[] startHash) {
-        final Iterator<yacySeed> seeds = getAcceptRemoteIndexSeeds(seedDB, startHash, 1, false);
+    public static byte[] limitOver(final SeedDB seedDB, final byte[] startHash) {
+        final Iterator<Seed> seeds = getAcceptRemoteIndexSeeds(seedDB, startHash, 1, false);
         if (seeds.hasNext()) return ASCII.getBytes(seeds.next().hash);
         return null;
     }
 
-    protected static List<yacySeed> getAcceptRemoteIndexSeedsList(
-            yacySeedDB seedDB,
+    protected static List<Seed> getAcceptRemoteIndexSeedsList(
+            SeedDB seedDB,
             final byte[] starthash,
             int max,
             boolean alsoMyOwn) {
-        final Iterator<yacySeed> seedIter = getAcceptRemoteIndexSeeds(seedDB, starthash, max, alsoMyOwn);
-        final ArrayList<yacySeed> targets = new ArrayList<yacySeed>();
+        final Iterator<Seed> seedIter = getAcceptRemoteIndexSeeds(seedDB, starthash, max, alsoMyOwn);
+        final ArrayList<Seed> targets = new ArrayList<Seed>();
         while (seedIter.hasNext() && max-- > 0) targets.add(seedIter.next());
         return targets;
     }
@@ -220,20 +220,20 @@ public class PeerSelection {
      * @param alsoMyOwn
      * @return
      */
-    public static Iterator<yacySeed> getAcceptRemoteIndexSeeds(final yacySeedDB seedDB, final byte[] starthash, final int max, final boolean alsoMyOwn) {
+    public static Iterator<Seed> getAcceptRemoteIndexSeeds(final SeedDB seedDB, final byte[] starthash, final int max, final boolean alsoMyOwn) {
         return new acceptRemoteIndexSeedEnum(seedDB, starthash, Math.min(max, seedDB.sizeConnected()), alsoMyOwn);
     }
     
-    private static class acceptRemoteIndexSeedEnum implements Iterator<yacySeed> {
+    private static class acceptRemoteIndexSeedEnum implements Iterator<Seed> {
 
-        private final Iterator<yacySeed> se;
-        private yacySeed nextSeed;
-        private final yacySeedDB seedDB;
+        private final Iterator<Seed> se;
+        private Seed nextSeed;
+        private final SeedDB seedDB;
         private final HandleSet doublecheck;
         private int remaining;
         private boolean alsoMyOwn;
         
-        private acceptRemoteIndexSeedEnum(yacySeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
+        private acceptRemoteIndexSeedEnum(SeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
             this.seedDB = seedDB;
             this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
             this.remaining = max;
@@ -246,9 +246,9 @@ public class PeerSelection {
             return nextSeed != null;
         }
 
-        private yacySeed nextInternal() {
+        private Seed nextInternal() {
             if (this.remaining <= 0) return null;
-            yacySeed s;
+            Seed s;
             try {
                 while (se.hasNext()) {
                     s = se.next();
@@ -268,20 +268,20 @@ public class PeerSelection {
                 }
             } catch (final kelondroException e) {
                 System.out.println("DEBUG acceptRemoteIndexSeedEnum:" + e.getMessage());
-                yacyCore.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
+                Network.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
                 seedDB.resetActiveTable();
                 return null;
             }
             return null;
         }
         
-        public yacySeed next() {
+        public Seed next() {
             if (alsoMyOwn && Base64Order.enhancedCoder.compare(ASCII.getBytes(seedDB.mySeed().hash), ASCII.getBytes(nextSeed.hash)) < 0) {
                 // take my own seed hash instead the enumeration result
                 alsoMyOwn = false;
                 return seedDB.mySeed();
             } else {
-                final yacySeed next = nextSeed;
+                final Seed next = nextSeed;
                 nextSeed = nextInternal();
                 return next;
             }
@@ -300,19 +300,19 @@ public class PeerSelection {
      * @param minVersion
      * @return
      */
-    protected static Iterator<yacySeed> getDHTSeeds(final yacySeedDB seedDB, final byte[] firstHash, final float minVersion) {
+    protected static Iterator<Seed> getDHTSeeds(final SeedDB seedDB, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
         return new seedDHTEnum(seedDB, firstHash, minVersion);
     }
 
-    private static class seedDHTEnum implements Iterator<yacySeed> {
+    private static class seedDHTEnum implements Iterator<Seed> {
 
-        private Iterator<yacySeed> e1, e2;
+        private Iterator<Seed> e1, e2;
         private int steps;
         private float minVersion;
-        private yacySeedDB seedDB;
+        private SeedDB seedDB;
         
-        private seedDHTEnum(final yacySeedDB seedDB, final byte[] firstHash, final float minVersion) {
+        private seedDHTEnum(final SeedDB seedDB, final byte[] firstHash, final float minVersion) {
             this.seedDB = seedDB;
             this.steps = seedDB.sizeConnected();
             this.minVersion = minVersion;
@@ -324,7 +324,7 @@ public class PeerSelection {
             return (steps > 0) && ((e2 == null) || (e2.hasNext()));
         }
 
-        public yacySeed next() {
+        public Seed next() {
             if (steps == 0) return null;
             steps--;
             
@@ -336,7 +336,7 @@ public class PeerSelection {
                 return e2.next();
             }
             
-            final yacySeed n = e1.next();
+            final Seed n = e1.next();
             if (!(e1.hasNext())) {
                 e1 = null;
                 e2 = seedDB.seedsConnected(true, false, null, minVersion);
@@ -354,17 +354,17 @@ public class PeerSelection {
      * @param seedDB
      * @return an iterator of seed objects
      */
-    public static Iterator<yacySeed> getProvidesRemoteCrawlURLs(final yacySeedDB seedDB) {
+    public static Iterator<Seed> getProvidesRemoteCrawlURLs(final SeedDB seedDB) {
         return new providesRemoteCrawlURLsEnum(seedDB);
     }
     
-    private static class providesRemoteCrawlURLsEnum implements Iterator<yacySeed> {
+    private static class providesRemoteCrawlURLsEnum implements Iterator<Seed> {
 
-        private Iterator<yacySeed> se;
-        private yacySeed nextSeed;
-        private yacySeedDB seedDB;
+        private Iterator<Seed> se;
+        private Seed nextSeed;
+        private SeedDB seedDB;
         
-        private providesRemoteCrawlURLsEnum(final yacySeedDB seedDB) {
+        private providesRemoteCrawlURLsEnum(final SeedDB seedDB) {
             this.seedDB = seedDB;
             se = getDHTSeeds(seedDB, null, yacyVersion.YACY_POVIDES_REMOTECRAWL_LISTS);
             nextSeed = nextInternal();
@@ -374,25 +374,25 @@ public class PeerSelection {
             return nextSeed != null;
         }
 
-        private yacySeed nextInternal() {
-            yacySeed s;
+        private Seed nextInternal() {
+            Seed s;
             try {
                 while (se.hasNext()) {
                     s = se.next();
                     if (s == null) return null;
-                    if (s.getLong(yacySeed.RCOUNT, 0) > 0) return s;
+                    if (s.getLong(Seed.RCOUNT, 0) > 0) return s;
                 }
             } catch (final kelondroException e) {
                 System.out.println("DEBUG providesRemoteCrawlURLsEnum:" + e.getMessage());
-                yacyCore.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
+                Network.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
                 seedDB.resetActiveTable();
                 return null;
             }
             return null;
         }
         
-        public yacySeed next() {
-            final yacySeed next = nextSeed;
+        public Seed next() {
+            final Seed next = nextSeed;
             nextSeed = nextInternal();
             return next;
         }
@@ -410,21 +410,21 @@ public class PeerSelection {
      * @param count number of wanted peers
      * @return a hash map of peer hashes to seed object
      */
-    public static Map<String, yacySeed> seedsByAge(final yacySeedDB seedDB, final boolean up, int count) {
+    public static Map<String, Seed> seedsByAge(final SeedDB seedDB, final boolean up, int count) {
         
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
 
         // fill a score object
         final ScoreMap<String> seedScore = new ConcurrentScoreMap<String>();
-        yacySeed ys;
+        Seed ys;
         long absage;
-        final Iterator<yacySeed> s = seedDB.seedsConnected(true, false, null, (float) 0.0);
+        final Iterator<Seed> s = seedDB.seedsConnected(true, false, null, (float) 0.0);
         int searchcount = 1000;
         if (searchcount > seedDB.sizeConnected()) searchcount = seedDB.sizeConnected();
         try {
             while ((s.hasNext()) && (searchcount-- > 0)) {
                 ys = s.next();
-                if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
+                if ((ys != null) && (ys.get(Seed.LASTSEEN, "").length() > 10)) try {
                     absage = Math.abs(System.currentTimeMillis() + AbstractFormatter.dayMillis - ys.getLastSeenUTC()) / 1000 / 60;
                     if (absage > Integer.MAX_VALUE) absage = Integer.MAX_VALUE;
                     seedScore.inc(ys.hash, (int) absage); // the higher absage, the older is the peer
@@ -432,7 +432,7 @@ public class PeerSelection {
             }
             
             // result is now in the score object; create a result vector
-            final Map<String, yacySeed> result = new HashMap<String, yacySeed>();
+            final Map<String, Seed> result = new HashMap<String, Seed>();
             final Iterator<String> it = seedScore.keys(up);
             int c = 0;
             while ((c < count) && (it.hasNext())) {
@@ -442,7 +442,7 @@ public class PeerSelection {
             }
             return result;
         } catch (final kelondroException e) {
-            yacyCore.log.logSevere("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
+            Network.log.logSevere("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
             return null;
         }
     }

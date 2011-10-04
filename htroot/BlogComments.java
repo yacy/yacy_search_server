@@ -42,7 +42,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.yacyCore;
+import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
 
 import de.anomic.data.BlogBoard;
@@ -322,7 +322,7 @@ public class BlogComments {
             email.print(new String(emailTxt));
             email.close();
         } catch (final Exception e) {
-            yacyCore.log.logWarning("message: message forwarding via email failed. ",e);
+            Network.log.logWarning("message: message forwarding via email failed. ",e);
         }
     }
 }

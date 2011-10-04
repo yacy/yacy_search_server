@@ -56,10 +56,10 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.peers.yacyChannel;
-import net.yacy.peers.yacyCore;
-import net.yacy.peers.yacyNetwork;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
+import net.yacy.peers.EventChannel;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Network;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -86,7 +86,7 @@ public final class search {
 
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        if (!Protocol.authentifyRequest(post, env)) return prop;
         final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
 
         //System.out.println("yacy: search received request = " + post.toString());
@@ -183,15 +183,15 @@ public final class search {
         final HandleSet abstractSet = (abstracts.length() == 0 || abstracts.equals("auto")) ? null : QueryParams.hashes2Set(abstracts);
 
         // store accessing peer
-        yacySeed remoteSeed;
+        Seed remoteSeed;
         try {
-            remoteSeed = yacySeed.genRemoteSeed(oseed, key, false, client);
+            remoteSeed = Seed.genRemoteSeed(oseed, key, false, client);
         } catch (final IOException e) {
-            yacyCore.log.logInfo("yacy.search: access with bad seed: " + e.getMessage());
+            Network.log.logInfo("yacy.search: access with bad seed: " + e.getMessage());
             remoteSeed = null;
         }
         if (sb.peers == null) {
-            yacyCore.log.logSevere("yacy.search: seed cache not initialized");
+            Network.log.logSevere("yacy.search: seed cache not initialized");
         } else {
             sb.peers.peerActions.peerArrival(remoteSeed, true);
         }
@@ -244,7 +244,7 @@ public final class search {
                     header.get(RequestHeader.USER_AGENT, ""),
                     false
                     );
-            yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
+            Network.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
@@ -304,8 +304,8 @@ public final class search {
                     header.get(RequestHeader.USER_AGENT, ""),
                     false
                     );
-            yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
-            yacyChannel.channels(yacyChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
+            Network.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
+            EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
 
             // make event
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
@@ -427,7 +427,7 @@ public final class search {
         if (MemoryControl.shortStatus()) sb.remoteSearchTracker.clear();
 
         // log
-        yacyCore.log.logInfo("EXIT HASH SEARCH: " +
+        Network.log.logInfo("EXIT HASH SEARCH: " +
                 QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +

@@ -5,7 +5,7 @@ import java.util.Date;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacyChannel;
+import net.yacy.peers.EventChannel;
 import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -35,10 +35,10 @@ public class feed {
         channelIteration: for (final String channelName: channels) {
             // prevent that unauthorized access to this servlet get results from private data
 
-            final yacyChannel channel = yacyChannel.valueOf(channelName);
+            final EventChannel channel = EventChannel.valueOf(channelName);
             if (channel == null) continue channelIteration;
 
-            if (!authorized && yacyChannel.privateChannels.contains(channel)) continue channelIteration; // allow only public channels if not authorized
+            if (!authorized && EventChannel.privateChannels.contains(channel)) continue channelIteration; // allow only public channels if not authorized
 
             if ("TEST".equals(channelName)) {
                 // for interface testing return at least one single result
@@ -56,7 +56,7 @@ public class feed {
             }
 
             // read the channel
-            final RSSFeed feed = yacyChannel.channels(channel);
+            final RSSFeed feed = EventChannel.channels(channel);
             if (feed == null || feed.isEmpty()) continue channelIteration;
 
             RSSMessage message = feed.getChannel();

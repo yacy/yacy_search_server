@@ -40,9 +40,9 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.workflow.WorkflowJob;
-import net.yacy.peers.yacyClient;
-import net.yacy.peers.yacySeed;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
+import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;
 
 import java.util.List;
@@ -52,14 +52,14 @@ public class Transmission {
 
     protected Log log;
     protected Segment segment;
-    protected yacySeedDB seeds;
+    protected SeedDB seeds;
     protected boolean gzipBody4Transfer;
     protected int timeout4Transfer;
     
     public Transmission(
             Log log,
             Segment segment, 
-            yacySeedDB seeds,
+            SeedDB seeds,
             boolean gzipBody4Transfer,
             int timeout4Transfer) {
         this.log = log;
@@ -69,7 +69,7 @@ public class Transmission {
         this.timeout4Transfer = timeout4Transfer;
     }
 
-    public Chunk newChunk(byte[] primaryTarget, final List<yacySeed> targets) {
+    public Chunk newChunk(byte[] primaryTarget, final List<Seed> targets) {
         return new Chunk(primaryTarget, targets);
     }
 
@@ -88,7 +88,7 @@ public class Transmission {
         private final ReferenceContainerCache<WordReference> containers;
         private final SortedMap<byte[], URIMetadataRow> references;
         private final HandleSet                       badReferences;
-        private final List<yacySeed>             targets;
+        private final List<Seed>             targets;
         private int                             hit, miss;
         
         /**
@@ -98,7 +98,7 @@ public class Transmission {
          * @param primaryTarget
          * @param targets
          */
-        public Chunk(byte[] primaryTarget, final List<yacySeed> targets) {
+        public Chunk(byte[] primaryTarget, final List<Seed> targets) {
             super();
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
@@ -184,7 +184,7 @@ public class Transmission {
         
         public boolean transmit() {
             if (this.targets.isEmpty()) return false;
-            yacySeed target = this.targets.remove(0);
+            Seed target = this.targets.remove(0);
             // transferring selected words to remote peer
             if (target == seeds.mySeed() || target.hash.equals(seeds.mySeed().hash)) {
             	// target is my own peer. This is easy. Just restore the indexContainer
@@ -195,7 +195,7 @@ public class Transmission {
             }
             log.logInfo("starting new index transmission request to " + ASCII.String(this.primaryTarget));
             long start = System.currentTimeMillis();
-            final String error = yacyClient.transferIndex(target, this.containers, this.references, gzipBody4Transfer, timeout4Transfer);
+            final String error = Protocol.transferIndex(target, this.containers, this.references, gzipBody4Transfer, timeout4Transfer);
             if (error == null) {
                 // words successfully transfered
                 long transferTime = System.currentTimeMillis() - start;
@@ -220,7 +220,7 @@ public class Transmission {
             // write information that peer does not receive index transmissions
             log.logInfo("Transfer failed of chunk to target " + target.hash + "/" + target.getName() + ": " + error);
             // get possibly newer target Info
-            yacySeed newTarget = seeds.get(target.hash);
+            Seed newTarget = seeds.get(target.hash);
             if (newTarget != null) {
                 String oldAddress = target.getPublicAddress();
                 if ((oldAddress != null) && (oldAddress.equals(newTarget.getPublicAddress()))) {

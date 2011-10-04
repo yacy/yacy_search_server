@@ -50,7 +50,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
-import net.yacy.peers.yacySeedDB;
+import net.yacy.peers.SeedDB;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
@@ -71,7 +71,7 @@ public final class CrawlStacker {
     private final CrawlQueues       nextQueue;
     private final CrawlSwitchboard  crawler;
     private final Segment           indexSegment;
-    private final yacySeedDB        peers;
+    private final SeedDB        peers;
     private final boolean           acceptLocalURLs, acceptGlobalURLs;
     private final FilterEngine      domainList;
 
@@ -100,7 +100,7 @@ public final class CrawlStacker {
             final CrawlQueues cq,
             final CrawlSwitchboard cs,
             final Segment indexSegment,
-            final yacySeedDB peers,
+            final SeedDB peers,
             final boolean acceptLocalURLs,
             final boolean acceptGlobalURLs,
             final FilterEngine domainList) {

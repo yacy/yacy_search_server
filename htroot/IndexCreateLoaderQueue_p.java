@@ -29,7 +29,7 @@
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.server.serverObjects;
@@ -49,7 +49,7 @@ public class IndexCreateLoaderQueue_p {
             prop.put("loader-set", "1");
             boolean dark = true;
             final Request[] w = sb.crawlQueues.activeWorkerEntries();
-            yacySeed initiator;
+            Seed initiator;
             int count = 0;
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;

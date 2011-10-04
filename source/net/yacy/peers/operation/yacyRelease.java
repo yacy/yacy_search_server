@@ -59,7 +59,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
-import net.yacy.peers.yacyCore;
+import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.tools.CryptoLib;
@@ -107,14 +107,14 @@ public final class yacyRelease extends yacyVersion {
 
         // check if release was installed by packagemanager
         if (yacyBuildProperties.isPkgManager()) {
-            yacyCore.log.logInfo("rulebasedUpdateInfo: package manager is used for update");
+            Network.log.logInfo("rulebasedUpdateInfo: package manager is used for update");
             return null;
         }
 
         // check if update process allows update retrieve
         final String process = sb.getConfig("update.process", "manual");
         if ((!manual) && (!process.equals("auto"))) {
-            yacyCore.log.logInfo("rulebasedUpdateInfo: not an automatic update selected");
+            Network.log.logInfo("rulebasedUpdateInfo: not an automatic update selected");
             return null; // no, its a manual or guided process
         }
 
@@ -122,7 +122,7 @@ public final class yacyRelease extends yacyVersion {
         final long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 60 * 60 * 1000; // update.cycle is hours
         final long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
         if ((!manual) && (timeLookup + cycle > System.currentTimeMillis())) {
-            yacyCore.log.logInfo("rulebasedUpdateInfo: too early for a lookup for a new release (timeLookup = " + timeLookup + ", cycle = " + cycle + ", now = " + System.currentTimeMillis() + ")");
+            Network.log.logInfo("rulebasedUpdateInfo: too early for a lookup for a new release (timeLookup = " + timeLookup + ", cycle = " + cycle + ", now = " + System.currentTimeMillis() + ")");
             return null; // no we have recently made a lookup
         }
 
@@ -145,7 +145,7 @@ public final class yacyRelease extends yacyVersion {
                 (!(Float.toString(latestdev.getReleaseNr()).matches(blacklist)))) {
                 // consider a dev-release
                 if (latestdev.compareTo(thisVersion()) <= 0) {
-                    yacyCore.log.logInfo(
+                    Network.log.logInfo(
                             "rulebasedUpdateInfo: latest dev " + latestdev.getName() +
                             " is not more recent than installed release " + thisVersion().getName());
                     return null;
@@ -155,13 +155,13 @@ public final class yacyRelease extends yacyVersion {
             if (latestmain != null) {
                 // consider a main release
                 if ((Float.toString(latestmain.getReleaseNr()).matches(blacklist))) {
-                    yacyCore.log.logInfo(
+                    Network.log.logInfo(
                             "rulebasedUpdateInfo: latest dev " + (latestdev == null ? "null" : latestdev.getName()) +
                             " matches with blacklist '" + blacklist + "'");
                     return null;
                 }
                 if (latestmain.compareTo(thisVersion()) <= 0) {
-                    yacyCore.log.logInfo(
+                    Network.log.logInfo(
                             "rulebasedUpdateInfo: latest main " + latestmain.getName() +
                             " is not more recent than installed release (1) " + thisVersion().getName());
                     return null;
@@ -172,20 +172,20 @@ public final class yacyRelease extends yacyVersion {
         if ((concept.equals("main")) && (latestmain != null)) {
             // return a main-release
             if ((Float.toString(latestmain.getReleaseNr()).matches(blacklist))) {
-                yacyCore.log.logInfo(
+                Network.log.logInfo(
                         "rulebasedUpdateInfo: latest main " + latestmain.getName() +
                         " matches with blacklist'" + blacklist + "'");
                 return null;
             }
             if (latestmain.compareTo(thisVersion()) <= 0) {
-                yacyCore.log.logInfo(
+                Network.log.logInfo(
                         "rulebasedUpdateInfo: latest main " + latestmain.getName() +
                         " is not more recent than installed release (2) " + thisVersion().getName());
                 return null;
             }
             return latestmain;
         }
-        yacyCore.log.logInfo("rulebasedUpdateInfo: failed to find more recent release");
+        Network.log.logInfo("rulebasedUpdateInfo: failed to find more recent release");
         return null;
     }
 

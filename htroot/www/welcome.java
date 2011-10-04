@@ -32,7 +32,7 @@ import java.io.File;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 
 import de.anomic.server.serverCore;
@@ -58,8 +58,8 @@ public class welcome {
         prop.put("port", serverCore.getPortNr(env.getConfig("port","8090")));
         prop.put("clientip", header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, ""));
 
-        final String peertype = (sb.peers.mySeed() == null) ? yacySeed.PEERTYPE_JUNIOR : sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
-        final boolean senior = (peertype.equals(yacySeed.PEERTYPE_SENIOR)) || (peertype.equals(yacySeed.PEERTYPE_PRINCIPAL));
+        final String peertype = (sb.peers.mySeed() == null) ? Seed.PEERTYPE_JUNIOR : sb.peers.mySeed().get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN);
+        final boolean senior = (peertype.equals(Seed.PEERTYPE_SENIOR)) || (peertype.equals(Seed.PEERTYPE_PRINCIPAL));
         if (senior) { prop.put("couldcan", "can"); } else { prop.put("couldcan", "could"); }
         if (senior) { prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); } else { prop.putHTML("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>"); }
         final File wwwpath = env.getDataPath("htDocsPath", "DATA/HTDOCS");

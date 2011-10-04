@@ -27,8 +27,8 @@ import java.util.Iterator;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.yacyCore;
-import net.yacy.peers.yacySeed;
+import net.yacy.peers.Network;
+import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
 
@@ -148,7 +148,7 @@ public final class Settings_p {
             env.setConfig("seedUploadMethod",enabledUploader);
         }                  
         
-        final HashMap<String, String> uploaders = yacyCore.getSeedUploadMethods();
+        final HashMap<String, String> uploaders = Network.getSeedUploadMethods();
         prop.put("seedUploadMethods", uploaders.size() + 1);
         prop.put("seedUploadMethods_0_name", "none");
         prop.put("seedUploadMethods_0_selected", enabledUploader.equals("none") ? "1" : "0");
@@ -163,7 +163,7 @@ public final class Settings_p {
             prop.put("seedUploadMethods_" +count+ "_selected", uploaderName.equals(enabledUploader) ? "1" : "0");            
             prop.put("seedUploadMethods_" +count+ "_file", "Settings_Seed_Upload" + uploaderName + ".inc");
             
-            final yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
+            final yacySeedUploader theUploader = Network.getSeedUploader(uploaderName);
             final String[] configOptions = theUploader.getConfigurationOptions();
             if (configOptions != null) {
                 for (int i=0; i<configOptions.length; i++) {
@@ -174,7 +174,7 @@ public final class Settings_p {
         }
         
         // general settings
-        prop.put("seedURL", sb.peers.mySeed().get(yacySeed.SEEDLISTURL, ""));
+        prop.put("seedURL", sb.peers.mySeed().get(Seed.SEEDLISTURL, ""));
         
         /*
          * Message forwarding configuration

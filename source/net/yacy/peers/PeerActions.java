@@ -34,14 +34,14 @@ import net.yacy.kelondro.util.MapTools;
 import net.yacy.peers.operation.yacyVersion;
 
 
-public class yacyPeerActions {
+public class PeerActions {
 
-    private final yacySeedDB seedDB;
+    private final SeedDB seedDB;
     private Map<String, String> userAgents;
     public  long disconnects;
-    private final yacyNewsPool newsPool;
+    private final NewsPool newsPool;
 
-    public yacyPeerActions(final yacySeedDB seedDB, final yacyNewsPool newsPool) {
+    public PeerActions(final SeedDB seedDB, final NewsPool newsPool) {
         this.seedDB = seedDB;
         this.newsPool = newsPool;
         this.userAgents = new ConcurrentHashMap<String, String>();
@@ -54,46 +54,46 @@ public class yacyPeerActions {
         this.userAgents = null;
     }
 
-    public boolean connectPeer(final yacySeed seed, final boolean direct) {
+    public boolean connectPeer(final Seed seed, final boolean direct) {
         // store a remote peer's seed
         // returns true if the peer is new and previously unknown
         if (seed == null) {
-            yacyCore.log.logSevere("connect: WRONG seed (NULL)");
+            Network.log.logSevere("connect: WRONG seed (NULL)");
             return false;
         }
         final String error = seed.isProper(false);
         if (error != null) {
-            yacyCore.log.logSevere("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
+            Network.log.logSevere("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
             return false;
         }
         if ((this.seedDB.mySeedIsDefined()) && (seed.hash.equals(this.seedDB.mySeed().hash))) {
-            yacyCore.log.logInfo("connect: SELF reference " + seed.getPublicAddress());
+            Network.log.logInfo("connect: SELF reference " + seed.getPublicAddress());
             return false;
         }
-        final String peerType = seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
+        final String peerType = seed.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN);
 
-        if ((peerType.equals(yacySeed.PEERTYPE_VIRGIN)) || (peerType.equals(yacySeed.PEERTYPE_JUNIOR))) {
+        if ((peerType.equals(Seed.PEERTYPE_VIRGIN)) || (peerType.equals(Seed.PEERTYPE_JUNIOR))) {
             // reject unqualified seeds
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
+            if (Network.log.isFine()) Network.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
             return false;
         }
-        if (!(peerType.equals(yacySeed.PEERTYPE_SENIOR) || peerType.equals(yacySeed.PEERTYPE_PRINCIPAL))) {
+        if (!(peerType.equals(Seed.PEERTYPE_SENIOR) || peerType.equals(Seed.PEERTYPE_PRINCIPAL))) {
             // reject unqualified seeds
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
+            if (Network.log.isFine()) Network.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
             return false;
         }
 
-        final yacySeed doubleSeed = this.seedDB.lookupByIP(seed.getInetAddress(), true, false, false);
+        final Seed doubleSeed = this.seedDB.lookupByIP(seed.getInetAddress(), true, false, false);
         if ((doubleSeed != null) && (doubleSeed.getPort() == seed.getPort()) && (!(doubleSeed.hash.equals(seed.hash)))) {
             // a user frauds with his peer different peer hashes
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting FRAUD (double hashes " + doubleSeed.hash + "/" + seed.hash + " on same port " + seed.getPort() + ") peer " + seed.getName());
+            if (Network.log.isFine()) Network.log.logFine("connect: rejecting FRAUD (double hashes " + doubleSeed.hash + "/" + seed.hash + " on same port " + seed.getPort() + ") peer " + seed.getName());
             return false;
         }
 
-        if (seed.get(yacySeed.LASTSEEN, "").length() != 14) {
+        if (seed.get(Seed.LASTSEEN, "").length() != 14) {
             // hack for peers that do not have a LastSeen date
             seed.setLastSeenUTC();
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: reset wrong date (" + seed.getName() + "/" + seed.hash + ")");
+            if (Network.log.isFine()) Network.log.logFine("connect: reset wrong date (" + seed.getName() + "/" + seed.hash + ")");
         }
 
         // connection time
@@ -108,13 +108,13 @@ public class yacyPeerActions {
         }
         if (Math.abs(nowUTC0Time - ctimeUTC0) / 1000 / 60 > 60 * 6 ) {
             // the new connection is out-of-age, we reject the connection
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
+            if (Network.log.isFine()) Network.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
             return false;
         }
 
         // disconnection time
         long dtimeUTC0;
-        final yacySeed disconnectedSeed = this.seedDB.getDisconnected(seed.hash);
+        final Seed disconnectedSeed = this.seedDB.getDisconnected(seed.hash);
         if (disconnectedSeed == null) {
             dtimeUTC0 = 0; // never disconnected: virtually disconnected maximum time ago
         } else {
@@ -145,24 +145,24 @@ public class yacyPeerActions {
             if (!direct) {
                 if (ctimeUTC0 < dtimeUTC0) {
                     // the disconnection was later, we reject the connection
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting disconnected peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+                    if (Network.log.isFine()) Network.log.logFine("connect: rejecting disconnected peer '" + seed.getName() + "' from " + seed.getPublicAddress());
                     return false;
                 }
             }
 
             // this is a return of a lost peer
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.logFine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
             this.seedDB.addConnected(seed);
             return true;
         }
-        final yacySeed connectedSeed = this.seedDB.getConnected(seed.hash);
+        final Seed connectedSeed = this.seedDB.getConnected(seed.hash);
         if (connectedSeed != null) {
             // the seed is known: this is an update
             try {
                 // if the old LastSeen date is later then the other
                 // info, then we reject the info
                 if ((ctimeUTC0 < (connectedSeed.getLastSeenUTC())) && (!direct)) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
+                    if (Network.log.isFine()) Network.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
                     return false;
                 }
 
@@ -170,10 +170,10 @@ public class yacyPeerActions {
                     // TODO: update seed name lookup cache
                 }*/
             } catch (final NumberFormatException e) {
-                if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getPublicAddress() + ". Cause: " + e.getMessage());
+                if (Network.log.isFine()) Network.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getPublicAddress() + ". Cause: " + e.getMessage());
                 return false;
             }
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
             this.seedDB.addConnected(seed);
             return true;
         }
@@ -182,53 +182,53 @@ public class yacyPeerActions {
         if ((this.seedDB.mySeedIsDefined()) && (seed.getIP().equals(this.seedDB.mySeed().getIP()))) {
             // seed from the same IP as the calling client: can be
             // the case if there runs another one over a NAT
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.logFine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());
         } else {
             // completely new seed
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.logFine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
         }
         this.seedDB.addConnected(seed);
         return true;
     }
 
-    public boolean peerArrival(final yacySeed peer, final boolean direct) {
+    public boolean peerArrival(final Seed peer, final boolean direct) {
         if (peer == null) return false;
         final boolean res = connectPeer(peer, direct);
         if (res) {
             // perform all actions if peer is effective new
             processPeerArrival(peer);
-            yacyChannel.channels(yacyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " joined the network", "", ""));
+            EventChannel.channels(EventChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " joined the network", "", ""));
         }
         return res;
     }
 
-    public void peerDeparture(final yacySeed peer, final String cause) {
+    public void peerDeparture(final Seed peer, final String cause) {
         if (peer == null) return;
         // we do this if we did not get contact with the other peer
-        if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: no contact to a " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
+        if (Network.log.isFine()) Network.log.logFine("connect: no contact to a " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
         synchronized (this.seedDB) {
             if (!this.seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { this.disconnects++; }
             peer.put("dct", Long.toString(System.currentTimeMillis()));
             this.seedDB.addDisconnected(peer); // update info
         }
-        yacyChannel.channels(yacyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " left the network", "", ""));
+        EventChannel.channels(EventChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " left the network", "", ""));
     }
 
-    public void peerPing(final yacySeed peer) {
+    public void peerPing(final Seed peer) {
         if (peer == null) return;
         // this is called only if the peer has junior status
         this.seedDB.addPotential(peer);
         // perform all actions
         processPeerArrival(peer);
-        yacyChannel.channels(yacyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " sent me a ping", "", ""));
+        EventChannel.channels(EventChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " sent me a ping", "", ""));
     }
 
-    private void processPeerArrival(final yacySeed peer) {
+    private void processPeerArrival(final Seed peer) {
         final String recordString = peer.get("news", null);
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
         if ((recordString == null) || (recordString.length() == 0)) return;
         final String decodedString = de.anomic.tools.crypt.simpleDecode(recordString, "");
-        final yacyNewsDB.Record record = this.newsPool.parseExternal(decodedString);
+        final NewsDB.Record record = this.newsPool.parseExternal(decodedString);
         if (record != null) {
             //System.out.println("### news arrival from peer " + peer.getName() + ", decoded=" + decodedString + ", record=" + recordString + ", news=" + record.toString());
             final String cre1 = MapTools.string2map(decodedString, ",").get("cre");

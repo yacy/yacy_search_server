@@ -296,7 +296,7 @@ public final class HTTPDProxyHandler {
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
             conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
-            if (yacyTrigger) net.yacy.peers.yacyCore.triggerOnlineAction();
+            if (yacyTrigger) net.yacy.peers.Network.triggerOnlineAction();
             sb.proxyLastAccess = System.currentTimeMillis();
 
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
@@ -739,7 +739,7 @@ public final class HTTPDProxyHandler {
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
             conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
-            if (yacyTrigger) net.yacy.peers.yacyCore.triggerOnlineAction();
+            if (yacyTrigger) net.yacy.peers.Network.triggerOnlineAction();
             sb.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes
@@ -856,7 +856,7 @@ public final class HTTPDProxyHandler {
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
             conProp.put(HeaderFramework.CONNECTION_PROP_REQUEST_START, Long.valueOf(requestDate.getTime()));
-            if (yacyTrigger) net.yacy.peers.yacyCore.triggerOnlineAction();
+            if (yacyTrigger) net.yacy.peers.Network.triggerOnlineAction();
             sb.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes

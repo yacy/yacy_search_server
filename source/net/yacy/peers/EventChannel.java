@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentMap;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 
-public enum yacyChannel {
+public enum EventChannel {
     TEST,
     PEERNEWS,
     REMOTESEARCH,
@@ -51,14 +51,14 @@ public enum yacyChannel {
      * the following private channels are declared to prevent that an access to the feed servlet
      * gets results from news channels that are not for the public
      */
-    public static final Set<yacyChannel> privateChannels = EnumSet.of(yacyChannel.LOCALSEARCH, yacyChannel.LOCALINDEXING, yacyChannel.PROXY);
+    public static final Set<EventChannel> privateChannels = EnumSet.of(EventChannel.LOCALSEARCH, EventChannel.LOCALINDEXING, EventChannel.PROXY);
 
     /**
      * the following static channels object is used to organize a storage array for RSS feeds
      */
-    private static final ConcurrentMap<yacyChannel, RSSFeed> channels = new ConcurrentHashMap<yacyChannel, RSSFeed>();
+    private static final ConcurrentMap<EventChannel, RSSFeed> channels = new ConcurrentHashMap<EventChannel, RSSFeed>();
 
-    public static RSSFeed channels(final yacyChannel channel) {
+    public static RSSFeed channels(final EventChannel channel) {
         RSSFeed feed = channels.get(channel);
         if (feed != null) return feed;
         feed = new RSSFeed(200);
