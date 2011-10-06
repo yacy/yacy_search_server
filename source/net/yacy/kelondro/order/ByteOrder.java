@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -35,19 +35,21 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 public interface ByteOrder extends Order<byte[]> {
 
     public boolean wellformed(byte[] a);
-    
+
     public boolean wellformed(byte[] a, int start, int len);
 
     public int compare(byte[] a, byte[] b);
-    
+
+    public int compare(byte[] a, byte[] b, int len);
+
     public int compare(byte[] a, int astart, byte[] b, int bstart, int len);
 
     public boolean equal(final byte[] a, final byte[] b);
-    
+
     public boolean equal(final byte[] a, int astart, final byte[] b, int bstart, int length);
-   
+
     public long cardinal(final byte[] a, int off, int len);
-    
+
     public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException;
 
     public byte[] smallest(byte[] a, byte[] b);

@@ -346,7 +346,7 @@ public final class Row {
             // compares only the content of the primary key
             if (Row.this.objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
             assert Row.this.primaryKeyLength == o.getPrimaryKeyLength();
-            return Row.this.objectOrder.compare(bytes(), 0, o.bytes(), 0, Row.this.primaryKeyLength);
+            return Row.this.objectOrder.compare(bytes(), o.bytes(), Row.this.primaryKeyLength);
         }
 
         public int compare(final Entry o1, final Entry o2) {
