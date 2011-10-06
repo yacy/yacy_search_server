@@ -152,15 +152,15 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
     // with filled-up char(0)-values
     public final int compare(final byte[] a, final byte[] b) {
         if (a.length == b.length) {
-            return (this.asc) ? compare0(a, 0, b, 0, a.length) : compare0(b, 0, a, 0, a.length);
+            return (this.asc) ? compare0(a, b, a.length) : compare0(b, 0, a, 0, a.length);
         }
         final int length = Math.min(a.length, b.length);
         if (this.asc) {
-            final int c = compare0(a, 0, b, 0, length);
+            final int c = compare0(a, b, length);
             if (c != 0) return c;
             return (a.length > b.length) ? 1 : -1;
         }
-        final int c = compare0(b, 0, a, 0, length);
+        final int c = compare0(b, a, length);
         if (c != 0) return c;
         return (a.length > b.length) ? -1 : 1;
     }
