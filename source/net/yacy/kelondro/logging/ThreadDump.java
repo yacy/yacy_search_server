@@ -52,7 +52,9 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
     
     public static class StackTrace {
         public String text;
-        public StackTrace(final String text) {
+        public Thread.State state;
+        public StackTrace(final String text, Thread.State state) {
+            this.state = state;
             this.text = text;
         }
         @Override
@@ -147,19 +149,42 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         importText(is);
     }
 
+    private static final String statestatement = "java.lang.Thread.State:";
+    
+    public static Thread.State threadState(String line) {
+        int p = line.indexOf(statestatement);
+        if (p >= 0) line = line.substring(p + statestatement.length()).trim();
+        p = line.indexOf(' ');
+        if (p >= 0) line = line.substring(0, p).trim();
+        try {
+            return Thread.State.valueOf(line);
+        } catch (IllegalArgumentException e) {
+            System.out.println("wong state: " + line);
+            return null;
+        }
+    }
+    
     private void importText(final InputStream is) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String line;
         String thread = null;
         int p;
         List<String> list = new ArrayList<String>();
+        Thread.State state = null;
         while ((line = br.readLine()) != null) {
+            p = line.indexOf(statestatement);
+            if (p >= 0) try {
+                state = Thread.State.valueOf(line.substring(p + statestatement.length()).trim());
+            } catch (IllegalArgumentException e) {
+                System.out.println("wong state: " + line);
+            }
             if (line.isEmpty()) {
                 if (thread != null) {
-                    this.put(new ThreadDump.StackTrace(thread), list);
+                    this.put(new ThreadDump.StackTrace(thread, state), list);
                 }
                 list = new ArrayList<String>();
                 thread = null;
+                state = null;
                 continue;
             }
             if (line.charAt(0) == '"' && (p = line.indexOf("\" prio=")) > 0) {
@@ -173,7 +198,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         }
         // recognize last thread
         if (thread != null) {
-            this.put(new ThreadDump.StackTrace(thread), list);
+            this.put(new ThreadDump.StackTrace(thread, state), list);
         }
     }
     
@@ -230,8 +255,15 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                 final String threaddump = sb.toString();
                 List<String> threads = this.get(threaddump);
                 if (threads == null) threads = new ArrayList<String>();
+                Thread.State state = null;
+                for (String t: threads) {
+                    int p = t.indexOf(statestatement);
+                    if (p >= 0) {
+                        state = Thread.State.valueOf(t.substring(p + statestatement.length()).trim());
+                    }
+                }
                 threads.add(threadtitle);
-                this.put(new StackTrace(threaddump), threads);
+                this.put(new StackTrace(threaddump, state), threads);
             }
         }
     }
@@ -341,6 +373,20 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         buffer.append(plain ? "\n" : "<br />");
     }
     
+
+    public List<Map.Entry<StackTrace, List<String>>> freerun() {
+        final List<Map.Entry<StackTrace, List<String>>> runner = new ArrayList<Map.Entry<StackTrace, List<String>>>();
+        runf: for (final Map.Entry<StackTrace, List<String>> entry: this.entrySet()) {
+            // check if the thread is locked or holds a lock
+            if (entry.getKey().state != Thread.State.RUNNABLE) continue runf;
+            for (final String s: entry.getValue()) {
+                if (s.indexOf("locked <") > 0 || s.indexOf("waiting to lock") > 0) continue runf;
+            }
+            runner.add(entry);
+        }
+        return runner;
+    }
+    
     /**
      * find all locks in this dump
      * @return a map from lock ids to the name of the thread where the lock occurs
@@ -416,8 +462,9 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         //dump.print();
         assert dump != null;
         Map<StackTrace, Integer> locks = dump.countLocks();
+        List<Map.Entry<StackTrace, List<String>>> freerun = dump.freerun();
         assert locks != null;
-        System.out.println("*** Thread Dump Lock report; dump size = " + dump.size() + ", locks = " + locks.size());
+        System.out.println("*** Thread Dump Lock report; dump size = " + dump.size() + ", locks = " + locks.size() + ", freerunner = " + freerun.size());
         for (int i = 0; i < dump.size() + 10; i++) {
             for (Map.Entry<StackTrace, Integer> entry: locks.entrySet()) {
                 if (entry.getValue().intValue() == i) {
@@ -426,5 +473,12 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                 }
             }
         }
+        
+        System.out.println("*** Thread freerunner report; dump size = " + dump.size() + ", locks = " + locks.size() + ", freerunner = " + freerun.size());
+        for (Map.Entry<StackTrace, List<String>> entry: freerun) {
+            System.out.println("freerunner:");
+            dump.print(entry.getKey());
+        }
+            
     }
 }
