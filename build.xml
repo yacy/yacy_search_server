@@ -401,7 +401,10 @@
         <include name="clearall.sh"/>
         <include name="clearcache.sh"/>
         <include name="clearindex.sh"/>
+        <include name="deleteurl.sh"/>
+        <include name="deploy.sh"/>
         <include name="down.sh"/>
+        <include name="dumpcheck.sh"/>
         <include name="importmediawiki.sh"/>
         <include name="importOAIList.sh"/>
         <include name="importurllist.sh"/>
