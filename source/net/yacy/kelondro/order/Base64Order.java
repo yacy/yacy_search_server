@@ -520,20 +520,20 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
 
     private final int compares(final byte[] a, final byte[] b, final int length) {
-        assert (length <= a.length) : "a.length = " + a.length + ", alength = " + length;
-        assert (length <= b.length) : "b.length = " + b.length + ", blength = " + length;
-        assert (this.ahpla.length == 128);
+        //assert (length <= a.length) : "a.length = " + a.length + ", alength = " + length;
+        //assert (length <= b.length) : "b.length = " + b.length + ", blength = " + length;
+        //assert (this.ahpla.length == 128);
         short i = 0;
         byte ac, bc;
         while (i < length) {
-            assert (i < a.length) : "i = " + i + ", a.length = " + a.length + ", a = " + NaturalOrder.arrayList(a, 0, length);
-            assert (i < b.length) : "i = " + i + ", b.length = " + b.length + ", b = " + NaturalOrder.arrayList(b, 0, length);
+            //assert (i < a.length) : "i = " + i + ", a.length = " + a.length + ", a = " + NaturalOrder.arrayList(a, 0, length);
+            //assert (i < b.length) : "i = " + i + ", b.length = " + b.length + ", b = " + NaturalOrder.arrayList(b, 0, length);
             ac = a[i];
-            assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + NaturalOrder.arrayList(a, 0, length);
+            //assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + NaturalOrder.arrayList(a, 0, length);
             bc = b[i];
-            assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + NaturalOrder.arrayList(b, 0, length);
-            assert ac != 0;
-            assert bc != 0;
+            //assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + NaturalOrder.arrayList(b, 0, length);
+            //assert ac != 0;
+            //assert bc != 0;
             if (ac != bc) return this.ab[(ac << 7) | bc];
             i++;
         }

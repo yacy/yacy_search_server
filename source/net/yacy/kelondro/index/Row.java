@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
@@ -51,7 +50,7 @@ import net.yacy.kelondro.util.kelondroException;
 
 public final class Row {
 
-    private final static Pattern commaPattern = Pattern.compile(",");
+    //private final static Pattern commaPattern = Pattern.compile(",");
 
     protected final Column[]        row;
     public final int[]              colstart;
@@ -291,43 +290,46 @@ public final class Row {
         public Entry(String external, final boolean decimalCardinal) {
             // parse external form
             if (external.length() > 0 && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
-            final String[] elts = commaPattern.split(external);
+            //final String[] elts = commaPattern.split(external);
+            final StringTokenizer st = new StringTokenizer(external, ",");
             if (Row.this.nickref == null) genNickRef();
             String nick;
             int p;
             this.rowinstance = new byte[Row.this.objectsize];
             this.offset = 0;
-            for (int i = 0; i < elts.length; i++) {
-                p = elts[i].indexOf('=');
-                if (p < 0) p = elts[i].indexOf(':');
+            String token;
+            while (st.hasMoreTokens()) {
+                token = st.nextToken();
+                p = token.indexOf('=');
+                if (p < 0) p = token.indexOf(':');
                 if (p > 0) {
-                    nick = elts[i].substring(0, p).trim();
+                    nick = token.substring(0, p).trim();
                     if (nick.charAt(0) == '"' && nick.charAt(nick.length() - 1) == '"') nick = nick.substring(1, nick.length() - 1);
                     final Object[] ref = Row.this.nickref.get(nick);
                     final Column col = (Column) ref[0];
                     final int clstrt = ((Integer) ref[1]).intValue();
-                    if (p + 1 == elts[i].length()) {
+                    if (p + 1 == token.length()) {
                         setCol(clstrt, col.cellwidth, null);
                     } else {
                         if ((decimalCardinal) && (col.celltype == Column.celltype_cardinal)) {
                             try {
-                                setCol(col.encoder, this.offset + clstrt, col.cellwidth,  Long.parseLong(elts[i].substring(p + 1).trim()));
+                                setCol(col.encoder, this.offset + clstrt, col.cellwidth,  Long.parseLong(token.substring(p + 1).trim()));
                             } catch (final NumberFormatException e) {
-                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal; row = " + i + ", celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
+                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(col.encoder, this.offset + clstrt, col.cellwidth, 0);
                             }
                         } else if ((decimalCardinal) && (col.celltype == Column.celltype_binary)) {
                             assert col.cellwidth == 1;
                             try {
-                                setCol(clstrt, col.cellwidth, new byte[]{(byte) Integer.parseInt(elts[i].substring(p + 1).trim())});
+                                setCol(clstrt, col.cellwidth, new byte[]{(byte) Integer.parseInt(token.substring(p + 1).trim())});
                             } catch (final NumberFormatException e) {
-                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_binary; row = " + i + ", celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
+                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_binary, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(clstrt, col.cellwidth, new byte[]{0});
                             }
                         } else if ((decimalCardinal) && (col.celltype == Column.celltype_bitfield)) {
-                            setCol(clstrt, col.cellwidth, (new Bitfield(col.cellwidth, elts[i].substring(p + 1).trim())).bytes());
+                            setCol(clstrt, col.cellwidth, (new Bitfield(col.cellwidth, token.substring(p + 1).trim())).bytes());
                         } else {
-                            setCol(clstrt, col.cellwidth, UTF8.getBytes(elts[i].substring(p + 1).trim()));
+                            setCol(clstrt, col.cellwidth, UTF8.getBytes(token.substring(p + 1).trim()));
                         }
                     }
                 }

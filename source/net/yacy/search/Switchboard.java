@@ -189,7 +189,7 @@ public final class Switchboard extends serverSwitch {
     public  static int  xstackCrawlSlots     = 2000;
     public  static long lastPPMUpdate        = System.currentTimeMillis()- 30000;
     private static final int  dhtMaxContainerCount = 500;
-    private        int  dhtMaxReferenceCount = 1000;
+    private int  dhtMaxReferenceCount = 1000;
 
     // colored list management
     public static SortedSet<String> badwords       = new TreeSet<String>(NaturalOrder.naturalComparator);
