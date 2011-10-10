@@ -235,11 +235,11 @@ public class PeerSelection {
         
         private acceptRemoteIndexSeedEnum(SeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
             this.seedDB = seedDB;
-            this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
+            this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX, alsoMyOwn);
             this.remaining = max;
             this.doublecheck = new HandleSet(12, Base64Order.enhancedCoder, 0);
             this.nextSeed = nextInternal();
-            this.alsoMyOwn = alsoMyOwn && nextSeed != null && (Base64Order.enhancedCoder.compare(ASCII.getBytes(seedDB.mySeed().hash), ASCII.getBytes(nextSeed.hash)) > 0);
+            this.alsoMyOwn = alsoMyOwn;
         }
         
         public boolean hasNext() {
@@ -261,7 +261,9 @@ public class PeerSelection {
                         Log.logException(e);
                         break;
                     }
-                    if (s.getFlagAcceptRemoteIndex()) {
+                    if (s.getFlagAcceptRemoteIndex() ||
+                        (alsoMyOwn && s.hash.equals(seedDB.mySeed().hash)) // Accept own peer regardless of FlagAcceptRemoteIndex
+                       ) { 
                         this.remaining--;
                         return s;
                     }
@@ -276,15 +278,9 @@ public class PeerSelection {
         }
         
         public Seed next() {
-            if (alsoMyOwn && Base64Order.enhancedCoder.compare(ASCII.getBytes(seedDB.mySeed().hash), ASCII.getBytes(nextSeed.hash)) < 0) {
-                // take my own seed hash instead the enumeration result
-                alsoMyOwn = false;
-                return seedDB.mySeed();
-            } else {
-                final Seed next = nextSeed;
-                nextSeed = nextInternal();
-                return next;
-            }
+            final Seed next = nextSeed;
+            nextSeed = nextInternal();
+            return next;
         }
 
         public void remove() {
@@ -302,46 +298,71 @@ public class PeerSelection {
      */
     protected static Iterator<Seed> getDHTSeeds(final SeedDB seedDB, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
-        return new seedDHTEnum(seedDB, firstHash, minVersion);
+        return new seedDHTEnum(seedDB, firstHash, minVersion, false);
     }
 
+    protected static Iterator<Seed> getDHTSeeds(final SeedDB seedDB, final byte[] firstHash, final float minVersion, final boolean alsoMyOwn) {
+        // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
+        return new seedDHTEnum(seedDB, firstHash, minVersion, alsoMyOwn);
+    }
     private static class seedDHTEnum implements Iterator<Seed> {
 
-        private Iterator<Seed> e1, e2;
+        private Iterator<Seed> e;
         private int steps;
         private float minVersion;
         private SeedDB seedDB;
+        private boolean alsoMyOwn;
+        private int pass, insertOwnInPass;
+        private Seed nextSeed;
         
-        private seedDHTEnum(final SeedDB seedDB, final byte[] firstHash, final float minVersion) {
+        private seedDHTEnum(final SeedDB seedDB, final byte[] firstHash, final float minVersion, final boolean alsoMyOwn) {
             this.seedDB = seedDB;
-            this.steps = seedDB.sizeConnected();
+            this.steps = seedDB.sizeConnected() + ((alsoMyOwn) ? 1 : 0);
             this.minVersion = minVersion;
-            this.e1 = seedDB.seedsConnected(true, false, firstHash, minVersion);
-            this.e2 = null;
+            this.e = seedDB.seedsConnected(true, false, firstHash, minVersion);
+            this.pass = 1;
+            this.alsoMyOwn = alsoMyOwn;
+            if (alsoMyOwn) {
+                this.insertOwnInPass = (Base64Order.enhancedCoder.compare(ASCII.getBytes(seedDB.mySeed().hash), firstHash) > 0) ? 1 : 2;
+            } else {
+                this.insertOwnInPass = 0;
+            }
+            this.nextSeed = nextInternal();
         }
         
         public boolean hasNext() {
-            return (steps > 0) && ((e2 == null) || (e2.hasNext()));
+            return (nextSeed != null) || alsoMyOwn;
         }
 
-        public Seed next() {
+        public Seed nextInternal() {
             if (steps == 0) return null;
             steps--;
             
-            if (e1 == null || !e1.hasNext()) {
-                if (e2 == null) {
-                    e1 = null;
-                    e2 = seedDB.seedsConnected(true, false, null, minVersion);
-                }
-                return e2.next();
+            if (!e.hasNext() && pass == 1) {
+                e = seedDB.seedsConnected(true, false, null, minVersion);
+                pass = 2;
             }
-            
-            final Seed n = e1.next();
-            if (!(e1.hasNext())) {
-                e1 = null;
-                e2 = seedDB.seedsConnected(true, false, null, minVersion);
+            if (e.hasNext()) {
+                return e.next();
             }
-            return n;
+            steps = 0;
+            return null;
+        }
+
+        public Seed next() {
+            if (alsoMyOwn &&
+                ((pass > insertOwnInPass) ||
+                 (pass == insertOwnInPass && nextSeed == null) || // Own hash is last in line
+                 (pass == insertOwnInPass && nextSeed != null && (Base64Order.enhancedCoder.compare(ASCII.getBytes(seedDB.mySeed().hash), ASCII.getBytes(nextSeed.hash)) < 0)))
+               ) {
+                // take my own seed hash instead the enumeration result
+                alsoMyOwn = false;
+                return seedDB.mySeed();
+            } else {
+                final Seed next = nextSeed;
+                nextSeed = nextInternal();
+                return next;
+            }
         }
 
         public void remove() {
