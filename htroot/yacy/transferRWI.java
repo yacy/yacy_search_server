@@ -41,10 +41,10 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.Seed;
 import net.yacy.peers.EventChannel;
-import net.yacy.peers.Protocol;
 import net.yacy.peers.Network;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
 import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
@@ -153,13 +153,16 @@ public final class transferRWI {
             int blocked = 0;
             int receivedURL = 0;
             final IndexCell<WordReference> cell = sb.indexSegments.termIndex(Segments.Process.DHTIN);
+            int count = 0;
             while (it.hasNext()) {
                 serverCore.checkInterruption();
                 estring = it.next();
+                count++;
+                if (count > 1000) break; // protection against flooding
 
                 // check if RWI entry is well-formed
                 p = estring.indexOf('{');
-                if ((p < 0) || (estring.indexOf("x=") < 0) || !(estring.indexOf("[B@") < 0)) {
+                if (p < 0 || estring.indexOf("x=") < 0 || !(estring.indexOf("[B@") < 0)) {
                     blocked++;
                     continue;
                 }
