@@ -55,6 +55,7 @@ public class yacysearchtrailer {
             return prop;
         }
         final QueryParams theQuery = theSearch.getQuery();
+        final RequestHeader.FileType fileType = header.fileType();
 
         // compose search navigation
 
@@ -72,11 +73,11 @@ public class yacysearchtrailer {
             while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = namespaceNavigator.get(name);
-                prop.putJSON("nav-namespace_element_" + i + "_name", name);
+                prop.put(fileType, "nav-namespace_element_" + i + "_name", name);
                 prop.put("nav-namespace_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-namespace_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators).toString());
                 prop.put("nav-namespace_element_" + i + "_count", count);
-                prop.put("nav-namespace_element_" + i + "_modifier", "inurl:" + name);
+                prop.put(fileType, "nav-namespace_element_" + i + "_modifier", "inurl:" + name);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
                 i++;
             }
@@ -98,11 +99,11 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next();
                 count = hostNavigator.get(name);
                 dnav = "site:" + name;
-                prop.putJSON("nav-domains_element_" + i + "_name", name);
+                prop.put(fileType, "nav-domains_element_" + i + "_name", name);
                 prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + dnav, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + dnav, theQuery.urlMask.toString(), theQuery.navigators).toString());
                 prop.put("nav-domains_element_" + i + "_count", count);
-                prop.put("nav-domains_element_" + i + "_modifier", dnav);
+                prop.put(fileType, "nav-domains_element_" + i + "_modifier", dnav);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
                 i++;
             }
@@ -124,11 +125,11 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next().trim();
                 count = authorNavigator.get(name);
                 anav = (name.indexOf(' ') < 0) ? "author:" + name : "author:'" + name.replace(" ", "+") + "'";
-                prop.putJSON("nav-authors_element_" + i + "_name", name);
+                prop.put(fileType, "nav-authors_element_" + i + "_name", name);
                 prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-authors_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators).toString());
                 prop.put("nav-authors_element_" + i + "_count", count);
-                prop.put("nav-authors_element_" + i + "_modifier", anav);
+                prop.put(fileType, "nav-authors_element_" + i + "_modifier", anav);
                 prop.put("nav-authors_element_" + i + "_nl", 1);
                 i++;
             }
@@ -150,13 +151,13 @@ public class yacysearchtrailer {
                 count = topicNavigator.get(name);
                 if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
                 if (name != null) {
-                    prop.putJSON("nav-topics_element_" + i + "_name", name);
+                    prop.put(fileType, "nav-topics_element_" + i + "_name", name);
                     prop.put("nav-topics_element_" + i + "_url",
                             "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + name, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + "</a>");
                             //+"<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+-" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">-</a>")*/;
                     prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + name, theQuery.urlMask.toString(), theQuery.navigators).toString());
                     prop.put("nav-topics_element_" + i + "_count", count);
-                    prop.put("nav-topics_element_" + i + "_modifier", name);
+                    prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                     prop.put("nav-topics_element_" + i + "_nl", 1);
                     i++;
                 }
@@ -179,11 +180,11 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next().trim();
                 count = protocolNavigator.get(name);
                 pnav = "/" + name;
-                prop.putJSON("nav-protocols_element_" + i + "_name", name);
+                prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
                 prop.put("nav-protocols_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + pnav, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-protocols_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + pnav, theQuery.urlMask.toString(), theQuery.navigators).toString());
                 prop.put("nav-protocols_element_" + i + "_count", count);
-                prop.put("nav-protocols_element_" + i + "_modifier", pnav);
+                prop.put(fileType, "nav-protocols_element_" + i + "_modifier", pnav);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
             }
@@ -205,11 +206,11 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next().trim();
                 count = filetypeNavigator.get(name);
                 tnav = "filetype:" + name;
-                prop.putJSON("nav-filetypes_element_" + i + "_name", name);
+                prop.put(fileType, "nav-filetypes_element_" + i + "_name", name);
                 prop.put("nav-filetypes_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + tnav, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-filetypes_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + tnav, theQuery.urlMask.toString(), theQuery.navigators).toString());
                 prop.put("nav-filetypes_element_" + i + "_count", count);
-                prop.put("nav-filetypes_element_" + i + "_modifier", tnav);
+                prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", tnav);
                 prop.put("nav-filetypes_element_" + i + "_nl", 1);
                 i++;
             }
@@ -237,10 +238,10 @@ public class yacysearchtrailer {
             prop.put("cat-location", 0);
         } else {
             prop.put("cat-location", 1);
-            prop.put("cat-location_query", theQuery.queryString(true));
-            prop.put("cat-location_queryenc", theQuery.queryString(true).replace(' ', '+'));
+            prop.put(fileType, "cat-location_query", theQuery.queryString(true));
+            prop.put(fileType, "cat-location_queryenc", theQuery.queryString(true).replace(' ', '+'));
         }
-        
+
         final int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
         prop.put("num-results_totalcount", Formatter.number(indexcount, true));
 

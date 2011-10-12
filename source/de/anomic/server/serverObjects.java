@@ -1,4 +1,4 @@
-//serverObjects.java 
+//serverObjects.java
 //-----------------------
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
@@ -56,6 +56,8 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.Switchboard;
@@ -70,10 +72,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     private final static Pattern patternF = Pattern.compile("\f");
     private final static Pattern patternR = Pattern.compile("\r");
     private final static Pattern patternT = Pattern.compile("\t");
-    
+
     private static final long serialVersionUID = 1L;
-    private boolean localized = true; 
-    
+    private boolean localized = true;
+
     private final static char BOM = '\uFEFF'; // ByteOrderMark character that may appear at beginnings of Strings (Browser may append that)
 
     public serverObjects() {
@@ -87,7 +89,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public serverObjects(final Map<String, String> input) {
         super(input);
     }
-    
+
     private static final String removeByteOrderMark(final String s) {
         if (s == null || s.length() == 0) return s;
         if (s.charAt(0) == BOM) return s.substring(1);
@@ -100,7 +102,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @param value The value that should be mapped to the key.
      *              If value is <code>null</code>, then the element at <code>key</code>
      *              is removed from the map.
-     * @return The value that was added to the map. 
+     * @return The value that was added to the map.
      * @see java.util.Hashtable#insert(K, V)
      */
     @Override
@@ -148,21 +150,21 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public String put(final String key, final java.util.Date value) {
         return this.put(key, value.toString());
     }
-    
+
     public String put(final String key, final InetAddress value) {
         return this.put(key, value.toString());
     }
-    
+
     /**
      * Add a String to the map. The content of the String is escaped to be usable in JSON output.
      * @param key   key name as String.
      * @param value a String that will be reencoded for JSON output.
      * @return      the modified String that was added to the map.
      */
-    public String putJSON(final String key, String value) {
+    public String putJSON(final String key, final String value) {
         return put(key, toJSON(value));
     }
-    
+
     private static String toJSON(String value) {
         // value = value.replaceAll("\\", "\\\\");
         value = patternDoublequote.matcher(value).replaceAll("'");
@@ -174,11 +176,11 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         value = patternT.matcher(value).replaceAll("\\t");
         return value;
     }
-    
+
     public String putJSON(final String key, final byte[] value) {
         return putJSON(key, UTF8.String(value));
     }
-    
+
     /**
      * Add a String to the map. The content of the String is escaped to be usable in HTML output.
      * @param key   key name as String.
@@ -189,7 +191,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public String putHTML(final String key, final String value) {
         return put(key, CharacterCoding.unicode2html(value, true));
     }
-    
+
     public String putHTML(final String key, final byte[] value) {
         return putHTML(key, UTF8.String(value));
     }
@@ -205,10 +207,23 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     /**
+     * put the key/value pair with a special method according to the given file type
+     * @param fileType
+     * @param key
+     * @param value
+     * @return
+     */
+    public String put(final RequestHeader.FileType fileType, final String key, final String value) {
+        if (fileType == FileType.JSON) return putJSON(key, value);
+        if (fileType == FileType.XML) return putXML(key, value);
+        return putHTML(key, value);
+    }
+
+    /**
      * Add a byte/long/integer to the map. The number will be encoded into a String using
      * a localized format specified by {@link Formatter} and {@link #setLocalized(boolean)}.
      * @param key   key name as String.
-     * @param value integer type value to be added to the map in its formatted String 
+     * @param value integer type value to be added to the map in its formatted String
      *              representation.
      * @return the String value added to the map.
      */
@@ -232,12 +247,12 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         return this.put(key, value == null ? "" : Formatter.number(value));
     }
 
-    
-    public String putWiki(String hostport, final String key, final String wikiCode){
+
+    public String putWiki(final String hostport, final String key, final String wikiCode){
         return this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
     }
-    
-    public String putWiki(String hostport, final String key, final byte[] wikiCode) {
+
+    public String putWiki(final String hostport, final String key, final byte[] wikiCode) {
         try {
             return this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
         } catch (final UnsupportedEncodingException e) {
@@ -302,7 +317,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         s = s.toLowerCase();
         return s.equals("true") || s.equals("on") || s.equals("1");
     }
-    
+
     public boolean hasValue(final String key) {
         final String s = super.get(key);
         return (s != null && !s.isEmpty());
@@ -324,7 +339,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
 
     // put all elements of another hashtable into the own table
     public void putAll(final serverObjects add) {
-        for (Map.Entry<String, String> entry: add.entrySet()) {
+        for (final Map.Entry<String, String> entry: add.entrySet()) {
             put(entry.getKey(), entry.getValue());
         }
     }
@@ -359,7 +374,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * Currently it is used for numbers added with the putNum() methods only.
      * @param loc if <code>true</code> store numbers in a localized format, otherwise
      *            use a default english locale without grouping.
-     * @see Formatter#setLocale(String) 
+     * @see Formatter#setLocale(String)
      */
     public void setLocalized(final boolean loc) {
         this.localized = loc;
@@ -375,9 +390,9 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      */
     @Override
     public String toString() {
-        if (this.isEmpty()) return "";
-        final StringBuilder param = new StringBuilder(this.size() * 40);
-        for (final Map.Entry<String, String> entry: this.entrySet()) {
+        if (isEmpty()) return "";
+        final StringBuilder param = new StringBuilder(size() * 40);
+        for (final Map.Entry<String, String> entry: entrySet()) {
             param.append(MultiProtocolURI.escape(entry.getKey()));
             param.append('=');
             param.append(MultiProtocolURI.escape(entry.getValue()));
@@ -386,10 +401,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         param.setLength(param.length() - 1);
         return param.toString();
     }
-    
-    public static void main(String[] args) {
-        String v = "ein \"zitat\"";
+
+    public static void main(final String[] args) {
+        final String v = "ein \"zitat\"";
         System.out.println(toJSON(v));
     }
-    
+
 }

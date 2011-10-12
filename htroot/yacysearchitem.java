@@ -32,6 +32,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
@@ -71,9 +72,7 @@ public class yacysearchitem {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int item = post.getInt("item", -1);
         final boolean auth = (header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
-        final String path = header.get(HeaderFramework.CONNECTION_PROP_PATH);
-        final boolean isHtml = path.endsWith(".html");
-        final boolean isJson = path.endsWith(".json");
+        final RequestHeader.FileType fileType = header.fileType();
 
         // default settings for blank item
         prop.put("content", "0");
@@ -114,7 +113,7 @@ public class yacysearchitem {
             final DigestURI resultURL = result.url();
             final int port = resultURL.getPort();
             DigestURI faviconURL = null;
-            if ((isHtml || isJson) && !sb.isIntranetMode() && !resultURL.isLocal()) try {
+            if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode() && !resultURL.isLocal()) try {
                 faviconURL = new DigestURI(resultURL.getProtocol() + "://" + resultURL.getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico");
             } catch (final MalformedURLException e1) {
                 Log.logException(e1);
@@ -139,7 +138,7 @@ public class yacysearchitem {
             prop.putHTML("content_link", result.urlstring());
             prop.putHTML("content_showPictures_link", result.urlstring());
             prop.putHTML("content_target", target);
-            if (faviconURL != null && isHtml) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
+            if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
             prop.put("content_ranking", result.ranking);
