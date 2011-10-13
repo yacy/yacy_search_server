@@ -53,6 +53,7 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.peers.RemoteSearch;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 
 public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnippet> {
@@ -199,6 +200,18 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 }
             }
 
+            if (this.resultStatus == ResultClass.SOURCE_METADATA) {
+                // if we already know that there is a match then use the first lines from the text as snippet
+                final StringBuilder s = new StringBuilder(snippetMaxLength);
+                for (final StringBuilder t: sentences) {
+                    s.append(t).append(' ');
+                    if (s.length() >= snippetMaxLength / 4 * 3) break;
+                }
+                if (s.length() > snippetMaxLength) { s.setLength(snippetMaxLength); s.trimToSize(); }
+                init(url.hash(), s.length() > 0 ? s.toString() : this.line, ResultClass.SOURCE_METADATA, null);
+                return;
+            }
+
             try {
                 final SnippetExtractor tsr = new SnippetExtractor(sentences, queryhashes, snippetMaxLength);
                 textline = tsr.getSnippet();
@@ -248,30 +261,31 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
          * LOAD RESOURCE DATA
          * =========================================================================== */
         // if the snippet is not in the cache, we can try to get it from the htcache
-        final Response response;
+        Response response = null;
         try {
             // first try to get the snippet from metadata
             String loc;
+            final Request request = loader.request(url, true, reindexing);
+            final boolean inCache = de.anomic.http.client.Cache.has(comp.url());
             final boolean noCacheUsage = url.isFile() || url.isSMB() || cacheStrategy == null;
-            if (containsAllHashes(loc = comp.dc_title(), queryhashes)) {
-                // try to create the snippet from information given in the url itself
-                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
-                return null;
-            } else if (containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
-                // try to create the snippet from information given in the creator metadata
-                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
-                return null;
-            } else if (containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
-                // try to create the snippet from information given in the subject metadata
-                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
-                return null;
-            } else if (containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
+            if (containsAllHashes(loc = comp.dc_title(), queryhashes) ||
+                containsAllHashes(loc = comp.dc_creator(), queryhashes) ||
+                containsAllHashes(loc = comp.dc_subject(), queryhashes) ||
+                containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
                 // try to create the snippet from information given in the url
+                if (inCache) response = loader == null ? null : loader.load(request, CacheStrategy.CACHEONLY, true);
+                Document document = null;
+                if (response != null) {
+                    try {
+                        document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+                    } catch (final Parser.Failure e) {
+                    }
+                }
                 init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
-                return null;
+                return document;
             } else {
                 // try to load the resource from the cache
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), noCacheUsage ? CacheStrategy.NOCACHE : cacheStrategy, true);
+                response = loader == null ? null : loader.load(request, noCacheUsage ? CacheStrategy.NOCACHE : cacheStrategy, true);
                 if (response == null) {
                     // in case that we did not get any result we can still return a success when we are not allowed to go online
                     if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {
