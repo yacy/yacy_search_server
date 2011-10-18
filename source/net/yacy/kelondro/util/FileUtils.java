@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -512,30 +513,33 @@ public final class FileUtils {
     	return table(new StringsIterator(br));
 	}
 
+    private final static Pattern escaped_equal = Pattern.compile("\\=", Pattern.LITERAL);
+    private final static Pattern escaped_newline = Pattern.compile("\\n", Pattern.LITERAL);
+    private final static Pattern escaped_backslash = Pattern.compile("\\", Pattern.LITERAL);
+    //private final static Pattern escaped_backslashbackslash = Pattern.compile("\\\\", Pattern.LITERAL);
 
-    //private final static Pattern escaped_equal = Pattern.compile("\\=");
-    //private final static Pattern escaped_newline = Pattern.compile("\\n");
-    //private final static Pattern escaped_backslash = Pattern.compile("\\");
     public static ConcurrentHashMap<String, String> table(final Iterator<String> li) {
-    	String line;
-    	final ConcurrentHashMap<String, String> props = new ConcurrentHashMap<String, String>();
-    	while (li.hasNext()) {
-        	int pos = 0;
-    		line = li.next().trim();
-    		if (line.length() > 0 && line.charAt(0) == '#') continue; // exclude comments
-    		do {
-    			// search for unescaped =
-    			pos = line.indexOf('=', pos+1);
-    		} while ( pos > 0 && line.charAt(pos-1) == '\\');
-    		if (pos > 0) {
-    		    //String key = escaped_equal.matcher(line.substring(0, pos).trim()).replaceAll("=");
-    			final String key = line.substring(0, pos).trim().replace("\\=", "=").replace("\\n", "\n").replace("\\", "\\");
-    			final String value = line.substring(pos + 1).trim().replace("\\n", "\n").replace("\\\\", "\\");
-        		props.put(key, value);
-    		}
-    	}
-    	return props;
-	}
+        String line;
+        final ConcurrentHashMap<String, String> props = new ConcurrentHashMap<String, String>();
+        while (li.hasNext()) {
+            int pos = 0;
+            line = li.next().trim();
+            if (line.length() > 0 && line.charAt(0) == '#') continue; // exclude comments
+            do {
+                // search for unescaped =
+                pos = line.indexOf('=', pos + 1);
+            } while ( pos > 0 && line.charAt(pos - 1) == '\\');
+            if (pos > 0) {
+                String key = escaped_equal.matcher(line.substring(0, pos).trim()).replaceAll("=");
+                key = escaped_newline.matcher(key).replaceAll("\n");
+                key = escaped_backslash.matcher(key).replaceAll("\\");
+                String value = escaped_newline.matcher(line.substring(pos + 1).trim()).replaceAll("\n");
+                value = value.replace("\\\\", "\\"); // does not work: escaped_backslashbackslash.matcher(value).replaceAll("\\");
+                props.put(key, value);
+            }
+        }
+        return props;
+    }
 
     public static Map<String, String> table(final byte[] a) {
         return table(strings(a));

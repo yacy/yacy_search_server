@@ -211,7 +211,7 @@ public final class yacy {
             try {
                 sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), newconf);
             } catch (final RuntimeException e) {
-                Log.logSevere("STARTUP", "YaCy cannot start: " + e.getMessage());
+                Log.logSevere("STARTUP", "YaCy cannot start: " + e.getMessage(), e);
                 System.exit(-1);
             }
             //sbSync.V(); // signal that the sb reference was set
