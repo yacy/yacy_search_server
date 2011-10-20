@@ -728,7 +728,7 @@ public class yacysearch {
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
 
             // compose page navigation
-            final StringBuilder resnav = new StringBuilder();
+            final StringBuilder resnav = new StringBuilder(200);
             final int thispage = offset / theQuery.displayResults();
             if (thispage == 0) {
             	resnav.append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");

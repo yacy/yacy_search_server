@@ -63,7 +63,7 @@ public final class idx {
             for (final ReferenceContainer<HostReference> references: idx) {
                 prop.put("list_" + count + "_term", ASCII.String(references.getTermHash()));
                 final Iterator<HostReference> referenceIterator = references.entries();
-                final StringBuilder s = new StringBuilder();
+                final StringBuilder s = new StringBuilder(references.size() * 20); // pre-set of guessed size reduces expandCapacity() and increases performance
                 HostReference reference;
                 while (referenceIterator.hasNext()) {
                     reference = referenceIterator.next();

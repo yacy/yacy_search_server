@@ -96,7 +96,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     public static final int ERRORCASE_MESSAGE = 4;
     public static final int ERRORCASE_FILE = 5;
     private static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
-    private static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(5 * 1024 * 1024, TMPDIR);
+    private static final int SIZE_FILE_THRESHOLD = 20 * 1024 * 1024;
+    private static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
 
     private static AlternativeDomainNames alternativeResolver = null;
 
@@ -814,6 +815,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         if (!FileUploadBase.isMultipartContent(request)) {
             throw new IOException("the request is not a multipart-message!");
         }
+
+        // reject too large uploads
+        if (request.getContentLength() > SIZE_FILE_THRESHOLD) throw new IOException("FileUploadException: uploaded file too large = " + request.getContentLength());
 
         // check if we have enough memory
         if (!MemoryControl.request(request.getContentLength() * 3, false)) {
