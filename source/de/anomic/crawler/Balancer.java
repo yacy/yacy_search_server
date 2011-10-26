@@ -165,7 +165,7 @@ public class Balancer {
         // returns number of deletions
 
         // first find a list of url hashes that shall be deleted
-        final HandleSet urlHashes = Base64Order.enhancedCoder.getHandleSet(this.urlFileIndex.row().primaryKeyLength, 100);
+        final HandleSet urlHashes = new HandleSet(this.urlFileIndex.row().primaryKeyLength, Base64Order.enhancedCoder, 100);
         final long terminate = (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
         synchronized (this) {
             final Iterator<Row.Entry> i = this.urlFileIndex.rows();

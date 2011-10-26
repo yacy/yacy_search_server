@@ -100,25 +100,25 @@ public class PerformanceMemory_p {
         // write table for Table index sizes
         Iterator<String> i = Table.filenames();
         String filename;
-        Map<String, String> map;
+        Map<Table.StatKeys, String> mapx;
         int p, c = 0;
         long mem, totalmem = 0;
         while (i.hasNext()) {
             filename = i.next();
-            map = Table.memoryStats(filename);
+            mapx = Table.memoryStats(filename);
             prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
-            prop.putNum("EcoList_" + c + "_tableSize", map.get("tableSize"));
+            prop.putNum("EcoList_" + c + "_tableSize", mapx.get(Table.StatKeys.tableSize));
 
-            assert map.get("tableKeyMem") != null : map;
-            mem = Long.parseLong(map.get("tableKeyMem"));
+            assert mapx.get(Table.StatKeys.tableKeyMem) != null : mapx;
+            mem = Long.parseLong(mapx.get(Table.StatKeys.tableKeyMem));
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableKeyMem", Formatter.bytesToString(mem));
-            prop.put("EcoList_" + c + "_tableKeyChunkSize", map.get("tableKeyChunkSize"));
+            prop.put("EcoList_" + c + "_tableKeyChunkSize", mapx.get(Table.StatKeys.tableKeyChunkSize));
 
-            mem = Long.parseLong(map.get("tableValueMem"));
+            mem = Long.parseLong(mapx.get(Table.StatKeys.tableValueMem));
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableValueMem", Formatter.bytesToString(mem));
-            prop.put("EcoList_" + c + "_tableValueChunkSize", map.get("tableValueChunkSize"));
+            prop.put("EcoList_" + c + "_tableValueChunkSize", mapx.get(Table.StatKeys.tableValueChunkSize));
 
             c++;
         }
@@ -159,36 +159,37 @@ public class PerformanceMemory_p {
         c = 0;
         long missmem, totalmissmem = 0;
         totalhitmem = 0;
+        Map<Cache.StatKeys, String> mapy;
         while (i.hasNext()) {
             filename = i.next();
-            map = Cache.memoryStats(filename);
+            mapy = Cache.memoryStats(filename);
             prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
 
             // hit cache
-            hitmem = Long.parseLong(map.get("objectHitMem"));
+            hitmem = Long.parseLong(mapy.get(Cache.StatKeys.objectHitMem));
             totalhitmem += hitmem;
-            prop.put("ObjectList_" + c + "_objectHitChunkSize", map.get("objectHitChunkSize"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheCount", map.get("objectHitCacheCount"));
+            prop.put("ObjectList_" + c + "_objectHitChunkSize", mapy.get(Cache.StatKeys.objectHitChunkSize));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheCount", mapy.get(Cache.StatKeys.objectHitCacheCount));
             prop.put("ObjectList_" + c + "_objectHitCacheMem", Formatter.bytesToString(hitmem));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheReadHit", map.get("objectHitCacheReadHit"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheReadMiss", map.get("objectHitCacheReadMiss"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteUnique", map.get("objectHitCacheWriteUnique"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteDouble", map.get("objectHitCacheWriteDouble"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheDeletes", map.get("objectHitCacheDeletes"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheFlushes", map.get("objectHitCacheFlushes"));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheReadHit", mapy.get(Cache.StatKeys.objectHitCacheReadHit));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheReadMiss", mapy.get(Cache.StatKeys.objectHitCacheReadMiss));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteUnique", mapy.get(Cache.StatKeys.objectHitCacheWriteUnique));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteDouble", mapy.get(Cache.StatKeys.objectHitCacheWriteDouble));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheDeletes", mapy.get(Cache.StatKeys.objectHitCacheDeletes));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheFlushes", mapy.get(Cache.StatKeys.objectHitCacheFlushes));
 
             // miss cache
-            missmem = Long.parseLong(map.get("objectMissMem"));
+            missmem = Long.parseLong(mapy.get(Cache.StatKeys.objectMissMem));
             totalmissmem += missmem;
-            prop.put("ObjectList_" + c + "_objectMissChunkSize", map.get("objectMissChunkSize"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheCount", map.get("objectMissCacheCount"));
+            prop.put("ObjectList_" + c + "_objectMissChunkSize", mapy.get(Cache.StatKeys.objectMissChunkSize));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheCount", mapy.get(Cache.StatKeys.objectMissCacheCount));
             prop.putHTML("ObjectList_" + c + "_objectMissCacheMem", Formatter.bytesToString(missmem));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheReadHit", map.get("objectMissCacheReadHit"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheReadMiss", map.get("objectMissCacheReadMiss"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteUnique", map.get("objectMissCacheWriteUnique"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteDouble", map.get("objectMissCacheWriteDouble"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheDeletes", map.get("objectMissCacheDeletes"));
-            //prop.put("ObjectList_" + c + "_objectMissCacheFlushes", map.get("objectMissCacheFlushes"));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheReadHit", mapy.get(Cache.StatKeys.objectMissCacheReadHit));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheReadMiss", mapy.get(Cache.StatKeys.objectMissCacheReadMiss));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteUnique", mapy.get(Cache.StatKeys.objectMissCacheWriteUnique));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteDouble", mapy.get(Cache.StatKeys.objectMissCacheWriteDouble));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheDeletes", mapy.get(Cache.StatKeys.objectMissCacheDeletes));
+            //prop.put("ObjectList_" + c + "_objectMissCacheFlushes", mapy.get(Cache.StatKeys.objectMissCacheFlushes));
 
             c++;
         }

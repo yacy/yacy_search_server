@@ -1,4 +1,4 @@
-// NoticedURL.java 
+// NoticedURL.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -38,23 +38,22 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-
 import de.anomic.crawler.retrieval.Request;
 
 public class NoticedURL {
-    
+
     public enum StackType {
         NULL, CORE, LIMIT, OVERHANG, REMOTE, NOLOAD, IMAGE, MOVIE, MUSIC;
     }
 
     public static final long minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
     public static final long minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
-    
+
     private Balancer coreStack;      // links found by crawling to depth-1
     private Balancer limitStack;     // links found by crawling at target depth
     private Balancer remoteStack;    // links from remote crawl orders
     private Balancer noloadStack;    // links that are not passed to a loader; the index will be generated from the Request entry
-    
+
     public NoticedURL(
             final File cachePath,
             final Set<String> myAgentIDs,
@@ -71,98 +70,98 @@ public class NoticedURL {
     public long getMinimumLocalDelta() {
         return this.coreStack.getMinimumLocalDelta();
     }
-    
+
     public long getMinimumGlobalDelta() {
         return this.coreStack.getMinimumGlobalDelta();
     }
-    
+
     public void setMinimumDelta(final long minimumLocalDelta, final long minimumGlobalDelta) {
         this.coreStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
         this.limitStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
         this.remoteStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
         this.noloadStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
     }
-    
+
     public void clear() {
     	Log.logInfo("NoticedURL", "CLEARING ALL STACKS");
-        coreStack.clear();
-        limitStack.clear();
-        remoteStack.clear();
-        noloadStack.clear();
+        this.coreStack.clear();
+        this.limitStack.clear();
+        this.remoteStack.clear();
+        this.noloadStack.clear();
     }
-    
+
     public void close() {
         Log.logInfo("NoticedURL", "CLOSING ALL STACKS");
-        if (coreStack != null) {
-            coreStack.close();
-            coreStack = null;
+        if (this.coreStack != null) {
+            this.coreStack.close();
+            this.coreStack = null;
         }
-        if (limitStack != null) {
-            limitStack.close();
-            limitStack = null;
+        if (this.limitStack != null) {
+            this.limitStack.close();
+            this.limitStack = null;
         }
         //overhangStack.close();
-        if (remoteStack != null) {
-            remoteStack.close();
-            remoteStack = null;
+        if (this.remoteStack != null) {
+            this.remoteStack.close();
+            this.remoteStack = null;
         }
-        if (noloadStack != null) {
-            noloadStack.close();
-            noloadStack = null;
+        if (this.noloadStack != null) {
+            this.noloadStack.close();
+            this.noloadStack = null;
         }
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
-        if ((coreStack != null) || (limitStack != null) || (remoteStack != null)) {
+        if ((this.coreStack != null) || (this.limitStack != null) || (this.remoteStack != null)) {
             Log.logWarning("plasmaCrawlNURL", "NURL stack closed by finalizer");
             close();
         }
         super.finalize();
     }
-    
+
     public boolean notEmpty() {
-        return coreStack.notEmpty() || limitStack.notEmpty() || remoteStack.notEmpty() || noloadStack.notEmpty();
+        return this.coreStack.notEmpty() || this.limitStack.notEmpty() || this.remoteStack.notEmpty() || this.noloadStack.notEmpty();
     }
-    
+
     public boolean notEmptyLocal() {
-        return coreStack.notEmpty() || limitStack.notEmpty() || noloadStack.notEmpty();
+        return this.coreStack.notEmpty() || this.limitStack.notEmpty() || this.noloadStack.notEmpty();
     }
-    
+
     public int size() {
         // this does not count the overhang stack size
-        return ((coreStack == null) ? 0 : coreStack.size()) + ((limitStack == null) ? 0 : limitStack.size()) + ((remoteStack == null) ? 0 : remoteStack.size());
+        return ((this.coreStack == null) ? 0 : this.coreStack.size()) + ((this.limitStack == null) ? 0 : this.limitStack.size()) + ((this.remoteStack == null) ? 0 : this.remoteStack.size());
     }
 
     public boolean isEmpty() {
-        if (coreStack == null) return true;
-        if (!coreStack.isEmpty()) return false;
-        if (!limitStack.isEmpty()) return false;
-        if (!remoteStack.isEmpty()) return false;
-        if (!noloadStack.isEmpty()) return false;
+        if (this.coreStack == null) return true;
+        if (!this.coreStack.isEmpty()) return false;
+        if (!this.limitStack.isEmpty()) return false;
+        if (!this.remoteStack.isEmpty()) return false;
+        if (!this.noloadStack.isEmpty()) return false;
         return true;
     }
-    
+
     public int stackSize(final StackType stackType) {
         switch (stackType) {
-            case NOLOAD:    return (noloadStack == null) ? 0 : noloadStack.size();
-            case CORE:     return (coreStack == null) ? 0 : coreStack.size();
-            case LIMIT:    return (limitStack == null) ? 0 : limitStack.size();
+            case NOLOAD:    return (this.noloadStack == null) ? 0 : this.noloadStack.size();
+            case CORE:     return (this.coreStack == null) ? 0 : this.coreStack.size();
+            case LIMIT:    return (this.limitStack == null) ? 0 : this.limitStack.size();
             case OVERHANG: return 0;
-            case REMOTE:   return (remoteStack == null) ? 0 : remoteStack.size();
+            case REMOTE:   return (this.remoteStack == null) ? 0 : this.remoteStack.size();
             default: return -1;
         }
     }
 
     public boolean existsInStack(final byte[] urlhashb) {
         return
-            coreStack.has(urlhashb) ||
-            limitStack.has(urlhashb) ||
-            //overhangStack.has(urlhashb) || 
-            remoteStack.has(urlhashb) ||
-            noloadStack.has(urlhashb);
+            this.coreStack.has(urlhashb) ||
+            this.limitStack.has(urlhashb) ||
+            //overhangStack.has(urlhashb) ||
+            this.remoteStack.has(urlhashb) ||
+            this.noloadStack.has(urlhashb);
     }
-    
+
     /**
      * push a crawl request on one of the different crawl stacks
      * @param stackType
@@ -173,13 +172,13 @@ public class NoticedURL {
         try {
             switch (stackType) {
                 case CORE:
-                    return coreStack.push(entry);
+                    return this.coreStack.push(entry);
                 case LIMIT:
-                    return limitStack.push(entry);
+                    return this.limitStack.push(entry);
                 case REMOTE:
-                    return remoteStack.push(entry);
+                    return this.remoteStack.push(entry);
                 case NOLOAD:
-                    return noloadStack.push(entry);
+                    return this.noloadStack.push(entry);
                 default:
                     return "stack type unknown";
             }
@@ -191,13 +190,13 @@ public class NoticedURL {
 
     public Request get(final byte[] urlhash) {
         Request entry = null;
-        try {if ((entry = noloadStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
-        try {if ((entry = coreStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
-        try {if ((entry = limitStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
-        try {if ((entry = remoteStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
+        try {if ((entry = this.noloadStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
+        try {if ((entry = this.coreStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
+        try {if ((entry = this.limitStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
+        try {if ((entry = this.remoteStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
         return null;
     }
-    
+
     /**
      * remove a CrawlEntry by a given hash. Usage of this method is not encouraged,
      * because the underlying data structure (crawl stacks) cannot handle removals very good.
@@ -206,54 +205,54 @@ public class NoticedURL {
      */
     public boolean removeByURLHash(final byte[] urlhashBytes) {
         try {
-            final HandleSet urlHashes = Base64Order.enhancedCoder.getHandleSet(12, 1);
+            final HandleSet urlHashes = new HandleSet(12, Base64Order.enhancedCoder, 1);
             urlHashes.put(urlhashBytes);
             boolean ret = false;
-            try {ret |= noloadStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {ret |= coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {ret |= limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {ret |= remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {ret |= this.noloadStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {ret |= this.coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {ret |= this.limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {ret |= this.remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
             return ret;
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
             return false;
         }
     }
-    
+
     public int removeByProfileHandle(final String handle, final long timeout) throws RowSpaceExceededException {
         int removed = 0;
-        try {removed += noloadStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
-        try {removed += coreStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
-        try {removed += limitStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
-        try {removed += remoteStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
+        try {removed += this.noloadStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
+        try {removed += this.coreStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
+        try {removed += this.limitStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
+        try {removed += this.remoteStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
         return removed;
     }
-    
+
     public List<Request> top(final StackType stackType, final int count) {
         switch (stackType) {
-            case CORE:     return top(coreStack, count);
-            case LIMIT:    return top(limitStack, count);
-            case REMOTE:   return top(remoteStack, count);
-            case NOLOAD:   return top(noloadStack, count);
-            default: return null;
-        }
-    }
-    
-    public Request pop(final StackType stackType, final boolean delay, CrawlSwitchboard cs) throws IOException {
-        switch (stackType) {
-            case CORE:     return pop(coreStack, delay, cs);
-            case LIMIT:    return pop(limitStack, delay, cs);
-            case REMOTE:   return pop(remoteStack, delay, cs);
-            case NOLOAD:   return pop(noloadStack, false, cs);
+            case CORE:     return top(this.coreStack, count);
+            case LIMIT:    return top(this.limitStack, count);
+            case REMOTE:   return top(this.remoteStack, count);
+            case NOLOAD:   return top(this.noloadStack, count);
             default: return null;
         }
     }
 
-    public void shift(final StackType fromStack, final StackType toStack, CrawlSwitchboard cs) {
+    public Request pop(final StackType stackType, final boolean delay, final CrawlSwitchboard cs) throws IOException {
+        switch (stackType) {
+            case CORE:     return pop(this.coreStack, delay, cs);
+            case LIMIT:    return pop(this.limitStack, delay, cs);
+            case REMOTE:   return pop(this.remoteStack, delay, cs);
+            case NOLOAD:   return pop(this.noloadStack, false, cs);
+            default: return null;
+        }
+    }
+
+    public void shift(final StackType fromStack, final StackType toStack, final CrawlSwitchboard cs) {
         try {
             final Request entry = pop(fromStack, false, cs);
             if (entry != null) {
-                String warning = push(toStack, entry);
+                final String warning = push(toStack, entry);
                 if (warning != null) {
                     Log.logWarning("NoticedURL", "shift from " + fromStack + " to " + toStack + ": " + warning);
                 }
@@ -266,15 +265,15 @@ public class NoticedURL {
     public void clear(final StackType stackType) {
     	Log.logInfo("NoticedURL", "CLEARING STACK " + stackType);
         switch (stackType) {
-                case CORE:     coreStack.clear(); break;
-                case LIMIT:    limitStack.clear(); break;
-                case REMOTE:   remoteStack.clear(); break;
-                case NOLOAD:   noloadStack.clear(); break;
+                case CORE:     this.coreStack.clear(); break;
+                case LIMIT:    this.limitStack.clear(); break;
+                case REMOTE:   this.remoteStack.clear(); break;
+                case NOLOAD:   this.noloadStack.clear(); break;
                 default: return;
             }
     }
-    
-    private Request pop(final Balancer balancer, final boolean delay, CrawlSwitchboard cs) throws IOException {
+
+    private Request pop(final Balancer balancer, final boolean delay, final CrawlSwitchboard cs) throws IOException {
         // this is a filo - pop
         int s;
         Request entry;
@@ -295,24 +294,24 @@ public class NoticedURL {
         }
         return null;
     }
-    
+
     private List<Request> top(final Balancer balancer, int count) {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
         return balancer.top(count);
     }
-    
+
     public Iterator<Request> iterator(final StackType stackType) {
         // returns an iterator of plasmaCrawlBalancerEntry Objects
         try {switch (stackType) {
-            case CORE:     return coreStack.iterator();
-            case LIMIT:    return limitStack.iterator();
-            case REMOTE:   return remoteStack.iterator();
-            case NOLOAD:   return noloadStack.iterator();
+            case CORE:     return this.coreStack.iterator();
+            case LIMIT:    return this.limitStack.iterator();
+            case REMOTE:   return this.remoteStack.iterator();
+            case NOLOAD:   return this.noloadStack.iterator();
             default: return null;
         }} catch (final IOException e) {
             return new HashSet<Request>().iterator();
         }
     }
-    
+
 }

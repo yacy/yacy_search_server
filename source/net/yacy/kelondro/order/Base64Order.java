@@ -32,8 +32,6 @@ import java.util.Comparator;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.ranking.AbstractOrder;
 import net.yacy.cora.ranking.Order;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 
 
 public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
@@ -84,10 +82,6 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
                 this.ab[(ac << 7) | bc] = c;
             }
         }
-    }
-
-    public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException {
-        return new HandleSet(keylength, this, space);
     }
 
     public static byte[] zero(int length) {

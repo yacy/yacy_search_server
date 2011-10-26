@@ -132,7 +132,28 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return objectTracker.keySet().iterator();
     }
 
-    public static final Map<String, String> memoryStats(final String filename) {
+    public enum StatKeys {
+        objectHitChunkSize,
+        objectHitCacheCount,
+        objectHitMem,
+        objectHitCacheReadHit,
+        objectHitCacheReadMiss,
+        objectHitCacheWriteUnique,
+        objectHitCacheWriteDouble,
+        objectHitCacheDeletes,
+        objectHitCacheFlushes,
+        objectMissChunkSize,
+        objectMissCacheCount,
+        objectMissMem,
+        objectMissCacheReadHit,
+        objectMissCacheReadMiss,
+        objectMissCacheWriteUnique,
+        objectMissCacheWriteDouble,
+        objectMissCacheDeletes,
+        objectMissCacheFlushes;
+    }
+
+    public static final Map<StatKeys, String> memoryStats(final String filename) {
         // returns a map for each file in the tracker;
         // the map represents properties for each record oobjects,
         // i.e. for cache memory allocation
@@ -140,28 +161,28 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return theObjectsCache.memoryStats();
     }
 
-    private final Map<String, String> memoryStats() {
+    private final Map<StatKeys, String> memoryStats() {
         // returns statistical data about this object
-        final HashMap<String, String> map = new HashMap<String, String>(20);
-        map.put("objectHitChunkSize", (this.readHitCache == null) ? "0" : Integer.toString(this.readHitCache.rowdef.objectsize));
-        map.put("objectHitCacheCount", (this.readHitCache == null) ? "0" : Integer.toString(this.readHitCache.size()));
-        map.put("objectHitMem", (this.readHitCache == null) ? "0" : Long.toString(this.readHitCache.rowdef.objectsize * this.readHitCache.size()));
-        map.put("objectHitCacheReadHit", Integer.toString(this.readHit));
-        map.put("objectHitCacheReadMiss", Integer.toString(this.readMiss));
-        map.put("objectHitCacheWriteUnique", Integer.toString(this.writeUnique));
-        map.put("objectHitCacheWriteDouble", Integer.toString(this.writeDouble));
-        map.put("objectHitCacheDeletes", Integer.toString(this.cacheDelete));
-        map.put("objectHitCacheFlushes", Integer.toString(this.cacheFlush));
+        final HashMap<StatKeys, String> map = new HashMap<StatKeys, String>(20);
+        map.put(StatKeys.objectHitChunkSize, (this.readHitCache == null) ? "0" : Integer.toString(this.readHitCache.rowdef.objectsize));
+        map.put(StatKeys.objectHitCacheCount, (this.readHitCache == null) ? "0" : Integer.toString(this.readHitCache.size()));
+        map.put(StatKeys.objectHitMem, (this.readHitCache == null) ? "0" : Long.toString(this.readHitCache.rowdef.objectsize * this.readHitCache.size()));
+        map.put(StatKeys.objectHitCacheReadHit, Integer.toString(this.readHit));
+        map.put(StatKeys.objectHitCacheReadMiss, Integer.toString(this.readMiss));
+        map.put(StatKeys.objectHitCacheWriteUnique, Integer.toString(this.writeUnique));
+        map.put(StatKeys.objectHitCacheWriteDouble, Integer.toString(this.writeDouble));
+        map.put(StatKeys.objectHitCacheDeletes, Integer.toString(this.cacheDelete));
+        map.put(StatKeys.objectHitCacheFlushes, Integer.toString(this.cacheFlush));
 
-        map.put("objectMissChunkSize", (this.readMissCache == null) ? "0" : Integer.toString(this.readMissCache.rowdef.objectsize));
-        map.put("objectMissCacheCount", (this.readMissCache == null) ? "0" : Integer.toString(this.readMissCache.size()));
-        map.put("objectMissMem", (this.readMissCache == null) ? "0" : Long.toString(this.readMissCache.rowdef.objectsize * this.readMissCache.size()));
-        map.put("objectMissCacheReadHit", Integer.toString(this.hasnotHit));
-        map.put("objectMissCacheReadMiss", Integer.toString(this.hasnotMiss));
-        map.put("objectMissCacheWriteUnique", Integer.toString(this.hasnotUnique));
-        map.put("objectMissCacheWriteDouble", Integer.toString(this.hasnotDouble));
-        map.put("objectMissCacheDeletes", Integer.toString(this.hasnotDelete));
-        map.put("objectMissCacheFlushes", "0"); // a miss cache flush can only happen if we have a deletion cache (which we dont have)
+        map.put(StatKeys.objectMissChunkSize, (this.readMissCache == null) ? "0" : Integer.toString(this.readMissCache.rowdef.objectsize));
+        map.put(StatKeys.objectMissCacheCount, (this.readMissCache == null) ? "0" : Integer.toString(this.readMissCache.size()));
+        map.put(StatKeys.objectMissMem, (this.readMissCache == null) ? "0" : Long.toString(this.readMissCache.rowdef.objectsize * this.readMissCache.size()));
+        map.put(StatKeys.objectMissCacheReadHit, Integer.toString(this.hasnotHit));
+        map.put(StatKeys.objectMissCacheReadMiss, Integer.toString(this.hasnotMiss));
+        map.put(StatKeys.objectMissCacheWriteUnique, Integer.toString(this.hasnotUnique));
+        map.put(StatKeys.objectMissCacheWriteDouble, Integer.toString(this.hasnotDouble));
+        map.put(StatKeys.objectMissCacheDeletes, Integer.toString(this.hasnotDelete));
+        map.put(StatKeys.objectMissCacheFlushes, "0"); // a miss cache flush can only happen if we have a deletion cache (which we dont have)
 
         // future feature .. map.put("objectElderTimeRead", index.profile().)
         return map;

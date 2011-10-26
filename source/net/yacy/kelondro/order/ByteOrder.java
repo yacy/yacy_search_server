@@ -28,8 +28,6 @@
 package net.yacy.kelondro.order;
 
 import net.yacy.cora.ranking.Order;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 
 
 public interface ByteOrder extends Order<byte[]> {
@@ -49,8 +47,6 @@ public interface ByteOrder extends Order<byte[]> {
     public boolean equal(final byte[] a, int astart, final byte[] b, int bstart, int length);
 
     public long cardinal(final byte[] a, int off, int len);
-
-    public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException;
 
     public byte[] smallest(byte[] a, byte[] b);
 

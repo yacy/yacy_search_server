@@ -303,7 +303,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return tableTracker.keySet().iterator();
     }
 
-    public static final Map<String, String> memoryStats(final String filename) {
+    public static final Map<StatKeys, String> memoryStats(final String filename) {
         // returns a map for each file in the tracker;
         // the map represents properties for each record objects,
         // i.e. for cache memory allocation
@@ -311,18 +311,22 @@ public class Table implements Index, Iterable<Row.Entry> {
         return theTABLE.memoryStats();
     }
 
-    private final Map<String, String> memoryStats() {
+    public enum StatKeys {
+        tableSize, tableKeyChunkSize, tableKeyMem, tableValueChunkSize, tableValueMem
+    }
+
+    private final Map<StatKeys, String> memoryStats() {
         // returns statistical data about this object
         synchronized (this) {
             assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         }
-        final HashMap<String, String> map = new HashMap<String, String>(8);
+        final HashMap<StatKeys, String> map = new HashMap<StatKeys, String>(8);
         if (this.index == null) return map; // possibly closed or beeing closed
-        map.put("tableSize", Integer.toString(this.index.size()));
-        map.put("tableKeyChunkSize", Integer.toString(this.index.row().objectsize));
-        map.put("tableKeyMem", Integer.toString(this.index.row().objectsize * this.index.size()));
-        map.put("tableValueChunkSize", (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize));
-        map.put("tableValueMem", (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize * this.table.size()));
+        map.put(StatKeys.tableSize, Integer.toString(this.index.size()));
+        map.put(StatKeys.tableKeyChunkSize, Integer.toString(this.index.row().objectsize));
+        map.put(StatKeys.tableKeyMem, Integer.toString(this.index.row().objectsize * this.index.size()));
+        map.put(StatKeys.tableValueChunkSize, (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize));
+        map.put(StatKeys.tableValueMem, (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize * this.table.size()));
         return map;
     }
 
@@ -814,6 +818,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         this.file.close();
         this.file = null;
         FileUtils.deletedelete(f);
+        tableTracker.remove(f.getName());
 
         // make new file
         FileOutputStream fos = null;
