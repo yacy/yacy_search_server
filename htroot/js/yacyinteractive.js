@@ -99,7 +99,7 @@ function resultNavigation() {
   var html = "";
   if (searchresult.length > totalResults) totalResults = searchresult.length;
   if (totalResults > 0) {
-      html += "<div>" + searchresult.length + " results from a total of " + totalResults + " docs in index (not showing offline resources); search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds.&nbsp;";
+      html += "<div>" + searchresult.length + " results from a total of " + totalResults + " docs in index; search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds.&nbsp;";
       html += "<div id=\"downloadbutton\" style=\"inline\"></div></div>";
   } else {
       if (query == "") {
@@ -217,7 +217,7 @@ function resultLine(type, item, linenumber) {
     html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>";
     html += "<td align=\"left\"><a href=\"" + item.link + "\">" + path + "</a></td>";
     html += "<td align=\"left\"><a href=\"" + item.link + "\">" + title + "</a></td>";
-    html += "<td align=\"right\">" + item.sizename + "</td>";
+    if (item.sizename == "-1 bytes") html += "<td></td>"; else html += "<td align=\"right\">" + item.sizename + "</td>";
     //html += "<td>" + item.description + "</td>";
     html += "<td align=\"right\">" + pd + "</td>";
     html += "</tr>";
