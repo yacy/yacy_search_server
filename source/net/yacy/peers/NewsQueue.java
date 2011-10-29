@@ -59,8 +59,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
 
-
-public class NewsQueue {
+public class NewsQueue implements Iterable<NewsDB.Record> {
 
     private final File path;
     private Table queueStack;
@@ -173,6 +172,11 @@ public class NewsQueue {
         return b;
     }
 
+    @Override
+    public Iterator<NewsDB.Record> iterator() {
+        return records(true);
+    }
+    
     public Iterator<NewsDB.Record> records(final boolean up) {
         // iterates yacyNewsRecord-type objects
         if (this.queueStack == null) return new HashSet<NewsDB.Record>().iterator();

@@ -102,7 +102,7 @@ public class index {
         prop.put("searchoptions_count-10", (count == 10) ? "1" : "0");
         prop.put("searchoptions_count-50", (count == 50) ? "1" : "0");
         prop.put("searchoptions_count-100", (count == 100) ? "1" : "0");
-        prop.put("searchoptions_resource-select", sb.peers.sizeConnected() > 0 ? 1 : 0);
+        prop.put("searchoptions_resource-select", (sb.peers == null) ?  0 : sb.peers.sizeConnected() > 0 ? 1 : 0);
         prop.put("searchoptions_resource-select_global", global ? "1" : "0");
         prop.put("searchoptions_resource-select_global-disabled", (indexReceiveGranted && indexDistributeGranted) ? "0" : "1");
         prop.put("searchoptions_resource-select_global-disabled_reason", (indexReceiveGranted) ? "0" : (indexDistributeGranted ? "1" : "2"));
