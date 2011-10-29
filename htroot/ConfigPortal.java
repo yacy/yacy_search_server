@@ -68,6 +68,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, post.get(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, post.get(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET, post.get("target", "_self"));
+                sb.setConfig(SwitchboardConstants.SEARCH_ITEMS, post.getInt("maximumRecords", 10));
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
                 HTTPDFileHandler.indexForward = post.get(SwitchboardConstants.INDEX_FORWARD, "");
                 sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu", true));
@@ -153,6 +154,8 @@ public class ConfigPortal {
         } else {
             prop.put("popupStatus", 1);
         }
+
+        prop.put("maximumRecords", sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10));
         
         final String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
         prop.put("selected_blank", "_blank".equals(target) ? 1 : 0);
