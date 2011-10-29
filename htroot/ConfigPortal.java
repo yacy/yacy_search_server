@@ -161,7 +161,7 @@ public class ConfigPortal {
         prop.put("selected_top", "_top".equals(target) ? 1 : 0);
         prop.put("selected_searchresult", "searchresult".equals(target) ? 1 : 0);
                 
-        String myaddress = sb.peers.mySeed().getPublicAddress();
+        String myaddress = (sb.peers == null) ? null : sb.peers.mySeed() == null ? null : sb.peers.mySeed().getPublicAddress();
         if (myaddress == null) {
             myaddress = "localhost:" + sb.getConfig("port", "8090");
         }
