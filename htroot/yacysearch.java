@@ -183,11 +183,6 @@ public class yacysearch {
         int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 5000) : (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 1000), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
         int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
 
-        final int newcount;
-        if ( authenticated && (newcount = post.getInt("count", 0)) > 0 ) {
-            sb.setConfig(SwitchboardConstants.SEARCH_ITEMS, newcount);
-        } // set new default maximumRecords if search with "more options"
-
         boolean global = post.get("resource", "local").equals("global") && sb.peers.sizeConnected() > 0;
         final boolean indexof = (post != null && post.get("indexof","").equals("on"));
 
