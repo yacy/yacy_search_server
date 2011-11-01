@@ -134,7 +134,7 @@ public class Surftips {
                 row = surftips.get(urlhash);
                 if (row == null) continue;
 
-                url = row.getPrimaryKeyUTF8();
+                url = row.getPrimaryKeyUTF8().trim();
                 try{
                 	if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new DigestURI(url)))
                 		continue;

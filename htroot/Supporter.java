@@ -127,7 +127,7 @@ public class Supporter {
                 row = Supporter.get(urlhash);
                 if (row == null) continue;
 
-                url = row.getPrimaryKeyUTF8();
+                url = row.getPrimaryKeyUTF8().trim();
                 try {
                     if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, new DigestURI(url, urlhash.getBytes()))) continue;
                 } catch(final MalformedURLException e) {continue;}

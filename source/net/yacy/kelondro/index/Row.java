@@ -489,6 +489,13 @@ public final class Row {
             return c;
         }
 
+        /**
+         * get the utf-8 value of the primary key
+         * you will most likely want to call .trim() on that value if the key does not have a fixed length
+         * because the return value may have a fill-up with zero bytes at the end of the string
+         *
+         * @return
+         */
         public final String getPrimaryKeyUTF8() {
             if (this.rowinstance[this.offset] == 0) return null;
             if (Row.this.row.length == 1 && this.offset == 0 && this.rowinstance.length == Row.this.primaryKeyLength) {
