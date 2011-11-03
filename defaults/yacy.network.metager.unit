@@ -88,5 +88,5 @@ network.unit.update.location3 = https://latestyacy.f1ori.de/
 network.unit.protocol.control = uncontrolled
 
 # white/blacklists
-network.unit.access.whitelist = 10\..*,127\..*,172\.(1[6-9]|2[0-9]|3[0-1])\..*,169\.254\..*,192\.168\..*,213.183.195.83,130.75.2.35,localhost
+network.unit.access.whitelist = 10\..*,127\..*,172\.(1[6-9]|2[0-9]|3[0-1])\..*,169\.254\..*,192\.168\..*,213.183.195.83,130.75.2.35,85.31.186.137,localhost
 network.unit.access.blacklist =
