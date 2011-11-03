@@ -176,7 +176,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
     public Iterator<NewsDB.Record> iterator() {
         return records(true);
     }
-    
+
     public Iterator<NewsDB.Record> records(final boolean up) {
         // iterates yacyNewsRecord-type objects
         if (this.queueStack == null) return new HashSet<NewsDB.Record>().iterator();
@@ -203,10 +203,17 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
         public NewsDB.Record next() {
             if (this.stackNodeIterator == null) return null;
-            final Row.Entry row = this.stackNodeIterator.next();
+            Row.Entry row;
+            try {
+                row = this.stackNodeIterator.next();
+            } catch (final IndexOutOfBoundsException e) {
+                e.printStackTrace();
+                return null;
+            }
             try {
                 return b2r(row);
             } catch (final IOException e) {
+                e.printStackTrace();
                 return null;
             }
         }
