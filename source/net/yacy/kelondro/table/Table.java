@@ -485,7 +485,15 @@ public class Table implements Index, Iterable<Row.Entry> {
         final Row.Entry cacherow;
         if (this.table == null || (cacherow = this.table.get(i, false)) == null) {
             // read row from the file
-            this.file.get(i, b, 0);
+            try {
+                this.file.get(i, b, 0);
+            } catch (final IndexOutOfBoundsException e) {
+                // there must be a problem with the table index
+                Log.logSevere("Table", "IndexOutOfBoundsException: " + e.getMessage(), e);
+                this.index.remove(key);
+                if (this.table != null) this.table.remove(key);
+                return null;
+            }
         } else {
             // construct the row using the copy in RAM
             assert cacherow != null;
