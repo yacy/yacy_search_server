@@ -1,11 +1,11 @@
 {
-page: #[page]#,
-total: #[total]#,
-rows: [
+"page" : #[page]#,
+"total": #[total]#,
+"rows" : [
 #{json}#
-{id:"#[id]#",cell:[
+{"id":"#[id]#","cell":[
 "#[hash]#",
-#(public)#"<img src='/yacy/ui/img-2/world2.png' alt='public' title='public bookmark'/>"::"<img src='/yacy/ui/img-2/lock.png' alt='private' title='private bookmark'/>"#(/public)#,
+#(public)#"<img src='/yacy/ui/img-2/world2.png' alt='true' title='public bookmark'/>"::"<img src='/yacy/ui/img-2/lock.png' alt='false' title='private bookmark'/>"#(/public)#,
 "<h3 class='linktitle'>#[title]#</h3><p class='desc'>#[desc]#</p><p class='url'><a href='#[url]#'>#[url]#</a>",
 "<p class='tags'>#[tags]#</p>",
 "<p class='folders'><img src='/yacy/ui/img/treeview/folder-closed.gif' />#[folders]#</p>",

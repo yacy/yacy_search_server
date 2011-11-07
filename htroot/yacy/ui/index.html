@@ -267,7 +267,7 @@
         $.ajax({
 			type: "POST",
 			url: "/api/bookmarks/posts/add_p.xml",
-			data: "login=&url="+url+"&title="+title+"&description="+desc+"&tags="+tags+"&path="+path+"&public="+pub+"&add=create",						
+			data: "url="+url+"&title="+title+"&desc="+desc+"&tags="+tags+"&folders="+path+"&public="+pub,						
 			dataType: "xml",
 			success: function(xml) {
          		$('#bmaddform').resetForm();

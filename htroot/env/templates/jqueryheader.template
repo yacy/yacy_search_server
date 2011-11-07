@@ -1,0 +1,7 @@
+<!-- jQuery header /env/jqueryheader.template -->
+	<link media="screen" type="text/css" href="/jquery/themes/start/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+	<link media="screen" type="text/css" href="/jquery/css/jquery-ui-combobox.css" rel="stylesheet" />
+	<script src="/jquery/js/jquery-1.7.min.js" type="text/javascript"></script>    
+	<script src="/jquery/js/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
+	<script src="/jquery/js/jquery-ui-combobox.js" type="text/javascript"></script>
+  <!-- END jQuery header -->

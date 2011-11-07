@@ -36,12 +36,13 @@ public class import_ymark {
         
         Thread t;
         YMarkEntry bmk;
-        String root = YMarkEntry.FOLDERS_IMPORTED;
+        // String root = YMarkEntry.FOLDERS_IMPORTED;
+        String root = "";
         ByteArrayInputStream stream = null;
 		
         if(isAdmin || isAuthUser) {
         	String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);        	
-        	final ArrayBlockingQueue<String> autoTaggingQueue = new ArrayBlockingQueue<String>(2*queueSize);
+        	final ArrayBlockingQueue<String> autoTaggingQueue = new ArrayBlockingQueue<String>(10*queueSize);
             boolean autotag = false;
         	boolean merge = false; 
         	boolean empty = false;

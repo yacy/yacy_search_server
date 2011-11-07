@@ -15,8 +15,6 @@
   <!--[if lte IE 7.0]>
    <link rel="stylesheet" type="text/css" media="screen" href="/env/ie7.css" />
   <![endif]-->
-  <!-- these stylesheets are needed for the portalseach -->
-	<link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.base.css" rel="stylesheet" />
-	<link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" />
-	<link media="screen" type="text/css" href="/yacy/ui/css/yacyui-portalsearch.css" rel="stylesheet" />
+  #%env/templates/jqueryheader.template%#
+  #%env/templates/portalheader.template%#
 <!-- (C), Architecture and Realisation: Michael Peter Christen; Contact: mc <at> anomic.de -->

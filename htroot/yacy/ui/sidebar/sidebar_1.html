@@ -15,7 +15,7 @@
 			unique: false,
 			toggle: function() {
 				var $this = $(this);
-				if (!$this.attr("id") == "bmk_tags_folder") {
+
 					if ($this.hasClass("expandable")) {					
 						var select = "li:has(ul li[id="+$this.attr("id")+"])";
 						qtag = $(select).attr("id");
@@ -31,7 +31,7 @@
 							reloadBM();
 						} 		
 					}
-				}
+
 			}				
 		});
 						

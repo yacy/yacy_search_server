@@ -52,35 +52,39 @@ public class get_xbel {
         		root = "";
         	}
         	
-        	final int root_depth = root.split(YMarkUtil.FOLDERS_SEPARATOR).length;
-    		Iterator<String> fit = null;
+        	final int root_depth = root.split(YMarkUtil.FOLDERS_SEPARATOR).length - 1;
+    		// Log.logInfo(YMarkTables.BOOKMARKS_LOG, "root: "+root+" root_depth: "+root_depth);
+        	Iterator<String> fit = null;
         	Iterator<Tables.Row> bit = null;
         	int count = 0;    		
         	int n = root_depth;
         	
         	try {
-				// fit = sb.tables.bookmarks.folders.getFolders(bmk_user, root);
         		fit = sb.tables.bookmarks.getFolders(bmk_user, root).iterator();
 			} catch (IOException e) {
 				Log.logException(e);
 			}
 			
 			while (fit.hasNext()) {    		   		
-        		String folder = fit.next();
-        		foldername = folder.split(YMarkUtil.FOLDERS_SEPARATOR); 
-        		if (n != root_depth && foldername.length <= n) {
-					prop.put("xbel_"+count+"_elements", "</folder>");
-            		count++;
+        		final String folder = fit.next();
+        		foldername = folder.split(YMarkUtil.FOLDERS_SEPARATOR);
+        		final int len = foldername.length -1;
+        		if(n > root_depth) {
+        			for (; len <= n; n--) {
+                		// Log.logInfo(YMarkTables.BOOKMARKS_LOG, "</folder> n: "+n);
+            			prop.put("xbel_"+count+"_elements", "</folder>");
+            			count++;
+        			}
         		}
-        		if (foldername.length >= n) {
-        			n = foldername.length;
-        			if(n != root_depth) {
-                		prop.put("xbel_"+count+"_elements", "<folder id=\"f:"+UTF8.String(YMarkUtil.getKeyId(foldername[n-1]))+"\">");
+        		if (len >= n) {        			            		
+        			n = len;
+        			if(n > root_depth) {
+        				// Log.logInfo(YMarkTables.BOOKMARKS_LOG, "<folder>: "+folder+" n: "+n);
+        				prop.put("xbel_"+count+"_elements", "<folder id=\"f:"+UTF8.String(YMarkUtil.getKeyId(foldername[n]))+"\">");
                 		count++;
-                		prop.put("xbel_"+count+"_elements", "<title>" + CharacterCoding.unicode2xml(foldername[n-1], true) + "</title>");   		
+                		prop.put("xbel_"+count+"_elements", "<title>" + CharacterCoding.unicode2xml(foldername[n], true) + "</title>");   		
                 		count++;	
         			}
-            		// bit = sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, folder).iterator();
 					try {
 						bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, folder);
 					} catch (IOException e) {
@@ -91,7 +95,6 @@ public class get_xbel {
 					String urlHash;
 					final YMarkDate date = new YMarkDate();
 					while(bit.hasNext()){			
-						// urlHash = bit.next();
 						bmk_row = bit.next();
 						urlHash = new String(bmk_row.getPK());
 						
@@ -105,7 +108,6 @@ public class get_xbel {
 							count++;  	
 						} else {
 							alias.add(urlHash);
-							// bmk_row = sb.tables.select(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), urlHash.getBytes());
 					    	if(bmk_row != null) {
 					    		buffer.setLength(0);
 					    		
@@ -163,6 +165,7 @@ public class get_xbel {
         		}
         	}
 			while(n > root_depth) {
+				// Log.logInfo(YMarkTables.BOOKMARKS_LOG, "</folder> n: "+n);
 				prop.put("xbel_"+count+"_elements", YMarkXBELImporter.XBEL.FOLDER.endTag(false));
 	    		count++;
 	    		n--;

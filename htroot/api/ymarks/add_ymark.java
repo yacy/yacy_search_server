@@ -27,7 +27,10 @@ public class add_ymark {
             String url = post.get(YMarkEntry.BOOKMARK.URL.key(),YMarkEntry.BOOKMARK.URL.deflt());
 			boolean hasProtocol = false;
 			for (YMarkTables.PROTOCOLS p : YMarkTables.PROTOCOLS.values()) {
-				hasProtocol = url.toLowerCase().startsWith(p.protocol());
+				if(url.toLowerCase().startsWith(p.protocol())) {
+					hasProtocol = true;
+					break;
+				}
 			}
 			if (!hasProtocol) {
 			    url=YMarkTables.PROTOCOLS.HTTP.protocol(url);
@@ -48,6 +51,7 @@ public class add_ymark {
 				    Log.logException(e);
 				} catch (RowSpaceExceededException e) {
 			}
+            
             prop.put("result", "1");
         } else {
         	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);

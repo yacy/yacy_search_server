@@ -117,7 +117,7 @@ public class get_ymark {
                 prop.put("json_"+count+"_hash", UTF8.String(bmk_row.getPK()));
                 for (YMarkEntry.BOOKMARK bmk : YMarkEntry.BOOKMARK.values()) {
                     if(bmk == YMarkEntry.BOOKMARK.PUBLIC)
-                        prop.put("json_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()).equals("true") ? 0 : 1);
+                        prop.put("json_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()).equals("false") ? 1 : 0);
                     else if(bmk == YMarkEntry.BOOKMARK.TAGS)
                     	prop.putJSON("json_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()).replaceAll(YMarkUtil.TAGS_SEPARATOR, ", "));
                     else if(bmk == YMarkEntry.BOOKMARK.FOLDERS)
