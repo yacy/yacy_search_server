@@ -23,33 +23,33 @@
 }
 
 /* YaCy Bookmarks ---------------------------*/
-#ymarks_body .url {
+#ymarks_flexigrid .url {
 	padding-top: 1px;
 	font-size: 0.9em;
   	line-height: 1.2em;
   	margin-bottom:0.6em;
 }
-#ymarks_body h3.linktitle {
+#ymarks_flexigrid h3.linktitle {
 	margin-top:2px;	
 	margin-bottom: -0.5em;
     font-size: 1.0em;
     line-height: 1.2em;
 	color:#239AFF;
 }
-#ymarks_body h3.linktitle a {
+#ymarks_flexigrid h3.linktitle a {
 	color:#239AFF;
 	text-decoration:none;
 }
-#ymarks_body p.url a {
+#ymarks_flexigrid p.url a {
   	color:#20A020;
   	text-decoration:none;
 }
-#ymarks_body .tag {
+#ymarks_flexigrid .tag {
 	font-size: 1.1em;
   	line-height: 1.3em;
   	color:#20A020;
 }
-#ymarks_body .desc {
+#ymarks_flexigrid .desc {
   	font-style:italic;
 	font-size: 0.9em;
   	color: #808080;

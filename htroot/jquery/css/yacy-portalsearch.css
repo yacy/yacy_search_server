@@ -4,6 +4,12 @@
 .ui-dialog .ui-dialog-buttonpane button {
 	font-size: 14px;
 }
+.ui-autocomplete {
+		max-height: 350px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		font-size: 1.0em;
+}
 .ynav .ui-autocomplete-input {
 	font-size: 14px;
 	padding: 2px;
@@ -26,12 +32,6 @@
 	margin-left: 40px; 
 	text-align: left;
 	font-size: 10px;
-}
-.ui-autocomplete {
-		max-height: 350px;
-		overflow-y: auto;
-		overflow-x: hidden;
-		font-size: 1.0em;
 }
 
 #yacylivesearch form * { 

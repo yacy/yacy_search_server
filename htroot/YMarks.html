@@ -174,7 +174,7 @@
 								.html(HTMLenc(tag)+' ')						
 								.appendTo('#ymarks_tagcloud')
 								.bind('click', function() {
-									var qtag = $(this).text().replace(/\s+/g,"");								
+									var qtag = $(this).text().replace(/\s+$/g,"");								
 									$('#ymarks_flexigrid').flexOptions({
 										query: qtag,
 										qtype: "_tags",
@@ -322,8 +322,9 @@
 					    <input type="radio" name="importer" value="json" /> Firefox JSON<br />
 						<input type="radio" name="importer" value="xbel" /> XBEL<br />
 						<input type="radio" name="importer" value="surro" /> Surrogate XML<br />
+						<input type="radio" name="importer" value="dmoz" disabled="disabled" /> DMOZ XML<br />
 						<input type="radio" name="importer" value="list" disabled="disabled"/> YaCy White/Black List<br />
-						<input type="radio" name="importer" value="crawls" disabled="disabled"/> YaCy bookmarks.db<br />
+						<input type="radio" name="importer" value="bmks" disabled="disabled"/> YaCy bookmarks.db<br />
 						<input type="radio" name="importer" value="crawls" disabled="disabled"/> YaCy Crawl-Starts<br />
 					</p>
 					<p>

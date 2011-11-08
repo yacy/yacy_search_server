@@ -120,19 +120,19 @@ function yrun() {
 			$("#yquery").setValue('');		
 		},
 		drag: function(event, ui) {
-			var position = $(".ui-dialog").position();
-			var left = $(".ui-dialog").width()+5+position.left;
+			var position = $("#ypopup").parent(".ui-dialog").position();
+			var left = $("#ypopup").parent(".ui-dialog").width()+5+position.left;
 			$("#yside").dialog('option', 'position', [left,position.top+32]);
 		},
 		dragStop: function(event, ui) {
-			var position = $(".ui-dialog").position();
-			var left = $(".ui-dialog").width()+5+position.left;
+			var position = $("#ypopup").parent(".ui-dialog").position();
+			var left = $("#ypopup").parent(".ui-dialog").width()+5+position.left;
 			$("#yside").dialog('option', 'position', [left,position.top+32]);
 		},
 		resizeStop: function(event, ui) {
-			var position = $(".ui-dialog").position();
-			var height = $(".ui-dialog").height()-55;
-			var left = $(".ui-dialog").width()+5+position.left;
+			var position = $("#ypopup").parent(".ui-dialog").position();
+			var height = $("#ypopup").parent(".ui-dialog").height()-55;
+			var left = $("#ypopup").parent(".ui-dialog").width()+5+position.left;
 			$("#yside").dialog('option', 'height', height);
 			$("#yside").dialog('option', 'position', [left,position.top+32]);
         },
@@ -141,22 +141,22 @@ function yrun() {
 			$('#yside').remove();
 		},
 		open: function(event, ui) {
-			$('<div id="yside" style="padding:0px;"></div>').insertAfter(".ui-dialog-content");
-			var position = $(".ui-dialog").position();
+			$('<div id="yside" style="padding:0px;"></div>').insertAfter("#ypopup").parent(".ui-dialog-content");
+			var position = $("#ypopup").parent(".ui-dialog").position();
 			$("#yside").dialog({
 				title: 'Navigation',
 				autoOpen: false,
 				draggable: false,
 				resizable: false,
 				width: 220,
-				height: $(".ui-dialog").height()-55,
-				minHeight: $(".ui-dialog").height()-55,
+				height: $("#ypopup").parent(".ui-dialog").height()-55,
+				minHeight: $("#ypopup").parent(".ui-dialog").height()-55,
 				show: 'slide',
 				hide: 'slide',
-				position : [position.left+$(".ui-dialog").width()+5,position.top+32],
+				position : [position.left+$("#ypopup").parent(".ui-dialog").width()+5,position.top+32],
 				open: function(event, ui) {
 					$('div.ui-widget-shadow').remove();
-					$('ypopup').dialog( 'moveToTop' );
+					$('#ypopup').dialog( 'moveToTop' );
 				}
 			});
 			$('.ui-widget-shadow').remove();
