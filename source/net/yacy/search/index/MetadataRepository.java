@@ -45,6 +45,7 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.ranking.ConcurrentScoreMap;
 import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.cora.ranking.WeakPriorityBlockingQueue;
+import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -69,6 +70,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     private final File                location;
     private final String              tablename;
     private       ArrayList<HostStat> statsDump;
+    private       SolrConnector       solr;
 
     public MetadataRepository(
             final File path,
@@ -82,6 +84,15 @@ public final class MetadataRepository implements Iterable<byte[]> {
         this.urlIndexFile = backupIndex; //new Cache(backupIndex, 20000000, 20000000);
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
+        this.solr = null;
+    }
+
+    public void connectSolr(final SolrConnector solr) {
+        this.solr = solr;
+    }
+
+    public SolrConnector getSolr() {
+        return this.solr;
     }
 
     public void clearCache() {
@@ -110,6 +121,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             this.urlIndexFile.close();
             this.urlIndexFile = null;
         }
+        if (this.solr != null) this.solr.close();
     }
 
     public int writeCacheSize() {
@@ -191,6 +203,12 @@ public final class MetadataRepository implements Iterable<byte[]> {
     }
 
     public boolean exists(final byte[] urlHash) {
+        try {
+            if (this.solr != null && this.solr.exists(ASCII.String(urlHash))) {
+                return true;
+            }
+        } catch (final Throwable e) {
+        }
         if (this.urlIndexFile == null) return false; // case may happen during shutdown
         return this.urlIndexFile.has(urlHash);
     }

@@ -32,6 +32,8 @@ import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 
 public interface SolrConnector {
 
@@ -64,6 +66,14 @@ public interface SolrConnector {
     public void delete(final List<String> ids) throws IOException;
 
     /**
+     * check if a given id exists in solr
+     * @param id
+     * @return true if any entry in solr exists
+     * @throws IOException
+     */
+    public boolean exists(final String id) throws IOException;
+
+    /**
      * add a YaCy document. This calls the scheme processor to add the document as solr document
      * @param id the url hash of the entry
      * @param header the http response header
@@ -71,6 +81,14 @@ public interface SolrConnector {
      * @throws IOException
      */
     public void add(final String id, final ResponseHeader header, final Document doc) throws IOException;
+
+    /**
+     * add a solr input document
+     * @param solrdoc
+     * @throws IOException
+     * @throws SolrException
+     */
+    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException;
 
     /**
      * register an entry as error document

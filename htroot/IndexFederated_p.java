@@ -88,7 +88,7 @@ public class IndexFederated_p {
                 // switch on
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
                 try {
-                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrChardingConnector(solrurls, scheme, SolrChardingSelection.Method.MODULO_HOST_MD5) : null);
+                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrChardingConnector(solrurls, scheme, SolrChardingSelection.Method.MODULO_HOST_MD5, 10000) : null);
                 } catch (final IOException e) {
                     Log.logException(e);
                     sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);

@@ -715,6 +715,10 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.ref = null;
     }
 
+    /**
+     * the userInfo is the authentication part in front of the host; separated by '@'
+     * @return a string like '<user>:<password>' or just '<user>'
+     */
     public String getUserInfo() {
         return this.userInfo;
     }

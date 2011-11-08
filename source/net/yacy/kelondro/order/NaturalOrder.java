@@ -32,7 +32,6 @@ import java.util.Iterator;
 import net.yacy.cora.ranking.AbstractOrder;
 import net.yacy.cora.ranking.Order;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 
 public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
 
@@ -43,7 +42,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         this.zero = null;
     }
 
-    public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException {
+    public HandleSet getHandleSet(final int keylength, final int space) {
         return new HandleSet(keylength, this, space);
     }
 

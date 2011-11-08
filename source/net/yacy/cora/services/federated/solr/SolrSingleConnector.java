@@ -47,7 +47,6 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthPolicy;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -69,6 +68,12 @@ public class SolrSingleConnector implements SolrConnector {
     private final BlockingQueue<SolrInputDocument>[] transmissionQueue; // the queues quere documents are collected
     private int transmissionRoundRobinCounter; // a rount robin counter for the transmission queues
 
+    /**
+     * create a new solr connector
+     * @param url the solr url, like http://192.168.1.60:8983/solr/ or http://admin:pw@192.168.1.60:8983/solr/
+     * @param scheme
+     * @throws IOException
+     */
     @SuppressWarnings("unchecked")
     public SolrSingleConnector(final String url, final SolrScheme scheme) throws IOException {
         this.solrurl = url;
@@ -189,7 +194,7 @@ public class SolrSingleConnector implements SolrConnector {
         try {
             final SolrDocumentList list = get("*:*", 0, 1);
             return list.getNumFound();
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             Log.logException(e);
             return 0;
         }
@@ -203,7 +208,7 @@ public class SolrSingleConnector implements SolrConnector {
         try {
             this.server.deleteByQuery("*:*");
             this.server.commit();
-        } catch (final SolrServerException e) {
+        } catch (final Throwable e) {
             throw new IOException(e);
         }
     }
@@ -211,7 +216,7 @@ public class SolrSingleConnector implements SolrConnector {
     public void delete(final String id) throws IOException {
         try {
             this.server.deleteById(id);
-        } catch (final SolrServerException e) {
+        } catch (final Throwable e) {
             throw new IOException(e);
         }
     }
@@ -219,8 +224,18 @@ public class SolrSingleConnector implements SolrConnector {
     public void delete(final List<String> ids) throws IOException {
         try {
             this.server.deleteById(ids);
-        } catch (final SolrServerException e) {
+        } catch (final Throwable e) {
             throw new IOException(e);
+        }
+    }
+
+    public boolean exists(final String id) throws IOException {
+        try {
+            final SolrDocumentList list = get("id:" + id, 0, 1);
+            return list.getNumFound() > 0;
+        } catch (final Throwable e) {
+            Log.logException(e);
+            return false;
         }
     }
 
@@ -234,7 +249,7 @@ public class SolrSingleConnector implements SolrConnector {
         try {
             this.server.request(up);
             this.server.commit();
-        } catch (final SolrServerException e) {
+        } catch (final Throwable e) {
             throw new IOException(e);
         }
     }
@@ -243,7 +258,7 @@ public class SolrSingleConnector implements SolrConnector {
         add(this.scheme.yacy2solr(id, header, doc));
     }
 
-    protected void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
+    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         int thisrrc = this.transmissionRoundRobinCounter;
         int nextrrc = thisrrc++;
         if (nextrrc >= transmissionQueueCount) nextrrc = 0;
@@ -269,7 +284,7 @@ public class SolrSingleConnector implements SolrConnector {
                   req.add( docs );
                   UpdateResponse rsp = req.process( server );
              */
-        } catch (final SolrServerException e) {
+        } catch (final Throwable e) {
             throw new IOException(e);
         }
     }
@@ -335,7 +350,7 @@ public class SolrSingleConnector implements SolrConnector {
                 result.put(element)
             }
             */
-        } catch (final SolrServerException e) {
+        } catch (final Throwable e) {
             throw new IOException(e);
         }
 

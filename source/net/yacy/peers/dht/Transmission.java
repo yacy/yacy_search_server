@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,7 +26,9 @@ package net.yacy.peers.dht;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
@@ -46,9 +48,6 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;
 
-import java.util.List;
-import java.util.SortedMap;
-
 public class Transmission {
 
     // The number of RWIs we can be sure a remote peer will accept
@@ -60,13 +59,13 @@ public class Transmission {
     protected SeedDB seeds;
     protected boolean gzipBody4Transfer;
     protected int timeout4Transfer;
-    
+
     public Transmission(
-            Log log,
-            Segment segment, 
-            SeedDB seeds,
-            boolean gzipBody4Transfer,
-            int timeout4Transfer) {
+            final Log log,
+            final Segment segment,
+            final SeedDB seeds,
+            final boolean gzipBody4Transfer,
+            final int timeout4Transfer) {
         this.log = log;
         this.segment = segment;
         this.seeds = seeds;
@@ -74,7 +73,7 @@ public class Transmission {
         this.timeout4Transfer = timeout4Transfer;
     }
 
-    public Chunk newChunk(byte[] primaryTarget, final List<Seed> targets) {
+    public Chunk newChunk(final byte[] primaryTarget, final List<Seed> targets) {
         return new Chunk(primaryTarget, targets);
     }
 
@@ -95,15 +94,15 @@ public class Transmission {
         private final HandleSet                       badReferences;
         private final List<Seed>             targets;
         private int                             hit, miss;
-        
+
         /**
-         * generate a new dispatcher target. such a target is defined with a primary target and 
+         * generate a new dispatcher target. such a target is defined with a primary target and
          * a set of target peers that shall receive the entries of the containers
          * the payloadrow defines the structure of container entries
          * @param primaryTarget
          * @param targets
          */
-        public Chunk(byte[] primaryTarget, final List<Seed> targets) {
+        public Chunk(final byte[] primaryTarget, final List<Seed> targets) {
             super();
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
@@ -113,7 +112,7 @@ public class Transmission {
             this.hit = 0;
             this.miss = 0;
         }
-    
+
         /*
          * return a new container with at most max elements and put the rest back to the index
          * as this chunk might be transferred back to myself a random selection needs to be taken
@@ -122,12 +121,12 @@ public class Transmission {
          * @throws RowSpaceExceededException
          * @return
          */
-        private ReferenceContainer<WordReference> trimContainer(ReferenceContainer<WordReference> container, final int max) throws RowSpaceExceededException {
+        private ReferenceContainer<WordReference> trimContainer(final ReferenceContainer<WordReference> container, final int max) throws RowSpaceExceededException {
             final ReferenceContainer<WordReference> c = new ReferenceContainer<WordReference>(Segment.wordReferenceFactory, container.getTermHash(), max);
             final int part = container.size() / max + 1;
             final Random r = new Random();
             WordReference w;
-            List<byte[]> selected = new ArrayList<byte[]>();
+            final List<byte[]> selected = new ArrayList<byte[]>();
             final Iterator<WordReference>  i = container.entries();
             while ((i.hasNext()) && (c.size() < max)) {
                 w = i.next();
@@ -140,8 +139,8 @@ public class Transmission {
             for (final byte[] b : selected) container.removeReference(b);
             // put container back
             try {
-                segment.termIndex().add(container);
-            } catch (Exception e) {
+                Transmission.this.segment.termIndex().add(container);
+            } catch (final Exception e) {
                 Log.logException(e);
             }
             return c;
@@ -151,45 +150,45 @@ public class Transmission {
          * add a container to the Entry cache.
          * all entries in the container are checked and only such are stored which have a reference entry
          * @param container
-         * @throws RowSpaceExceededException 
+         * @throws RowSpaceExceededException
          */
-        public void add(ReferenceContainer<WordReference> container) throws RowSpaceExceededException {
+        public void add(final ReferenceContainer<WordReference> container) throws RowSpaceExceededException {
             int remaining = maxRWIsCount;
-            for (ReferenceContainer ic : this) remaining -= ic.size();
+            for (final ReferenceContainer<WordReference> ic : this) remaining -= ic.size();
             if (remaining <= 0) {
                 // No space left in this chunk
                 try {
-                    segment.termIndex().add(container);
-                } catch (Exception e) {
+                    Transmission.this.segment.termIndex().add(container);
+                } catch (final Exception e) {
                     Log.logException(e);
                 }
                 return;
             }
             final ReferenceContainer<WordReference> c = (remaining >= container.size()) ? container : trimContainer(container, remaining);
             // iterate through the entries in the container and check if the reference is in the repository
-            Iterator<WordReference>  i = c.entries();
-            List<byte[]> notFoundx = new ArrayList<byte[]>();
+            final Iterator<WordReference>  i = c.entries();
+            final List<byte[]> notFoundx = new ArrayList<byte[]>();
             while (i.hasNext()) {
-                WordReference e = i.next();
-                if (references.containsKey(e.urlhash())) continue;
-                if (badReferences.has(e.urlhash())) {
+                final WordReference e = i.next();
+                if (this.references.containsKey(e.urlhash())) continue;
+                if (this.badReferences.has(e.urlhash())) {
                     notFoundx.add(e.urlhash());
                     continue;
                 }
-                URIMetadataRow r = segment.urlMetadata().load(e.urlhash());
+                final URIMetadataRow r = Transmission.this.segment.urlMetadata().load(e.urlhash());
                 if (r == null) {
                     notFoundx.add(e.urlhash());
-                    badReferences.put(e.urlhash());
+                    this.badReferences.put(e.urlhash());
                 } else {
-                    references.put(e.urlhash(), r);
+                    this.references.put(e.urlhash(), r);
                 }
             }
             // now delete all references that were not found
             for (final byte[] b : notFoundx) c.removeReference(b);
             // finally add the remaining container to the cache
-            containers.add(c);
+            this.containers.add(c);
         }
-        
+
         /**
          * get all containers from the entry. This method may be used to flush remaining entries
          * if they had been finished transmission without success (not enough peers arrived)
@@ -197,15 +196,15 @@ public class Transmission {
         public Iterator<ReferenceContainer<WordReference>> iterator() {
             return this.containers.iterator();
         }
-        
+
         public int containersSize() {
             return this.containers.size();
         }
-        
+
         public byte[] primaryTarget() {
             return this.primaryTarget;
         }
-        
+
         /**
          * return the number of successful transmissions
          * @return
@@ -213,7 +212,7 @@ public class Transmission {
         public int hit() {
             return this.hit;
         }
-        
+
         /**
          * return the number of unsuccessful transmissions
          * @return
@@ -221,7 +220,7 @@ public class Transmission {
         public int miss() {
             return this.miss;
         }
-        
+
         /**
          * return the number of targets that are left in the target cache
          * if this is empty, there may be no more use of this object and it should be flushed
@@ -231,51 +230,51 @@ public class Transmission {
         public int targets() {
             return this.targets.size();
         }
-        
+
         public boolean transmit() {
             if (this.targets.isEmpty()) return false;
-            Seed target = this.targets.remove(0);
+            final Seed target = this.targets.remove(0);
             // transferring selected words to remote peer
-            if (target == seeds.mySeed() || target.hash.equals(seeds.mySeed().hash)) {
+            if (target == Transmission.this.seeds.mySeed() || target.hash.equals(Transmission.this.seeds.mySeed().hash)) {
             	// target is my own peer. This is easy. Just restore the indexContainer
             	restore();
             	this.hit++;
-            	log.logInfo("Transfer of chunk to myself-target");
+            	Transmission.this.log.logInfo("Transfer of chunk to myself-target");
             	return true;
             }
-            log.logInfo("starting new index transmission request to " + ASCII.String(this.primaryTarget));
-            long start = System.currentTimeMillis();
-            final String error = Protocol.transferIndex(target, this.containers, this.references, gzipBody4Transfer, timeout4Transfer);
+            Transmission.this.log.logInfo("starting new index transmission request to " + ASCII.String(this.primaryTarget));
+            final long start = System.currentTimeMillis();
+            final String error = Protocol.transferIndex(target, this.containers, this.references, Transmission.this.gzipBody4Transfer, Transmission.this.timeout4Transfer);
             if (error == null) {
                 // words successfully transfered
-                long transferTime = System.currentTimeMillis() - start;
-                Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
-                ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
-                log.logInfo("Index transfer of " + this.containers.size() + 
-                                 " words [" + ((firstContainer == null) ? null : ASCII.String(firstContainer.getTermHash())) + " .. " + ASCII.String(this.primaryTarget) + "]" + 
+                final long transferTime = System.currentTimeMillis() - start;
+                final Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
+                final ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
+                Transmission.this.log.logInfo("Index transfer of " + this.containers.size() +
+                                 " words [" + ((firstContainer == null) ? null : ASCII.String(firstContainer.getTermHash())) + " .. " + ASCII.String(this.primaryTarget) + "]" +
                                  " and " + this.references.size() + " URLs" +
-                                 " to peer " + target.getName() + ":" + target.hash + 
-                                 " in " + (transferTime / 1000) + 
-                                 " seconds successful ("  + (1000 * this.containers.size() / (transferTime + 1)) + 
+                                 " to peer " + target.getName() + ":" + target.hash +
+                                 " in " + (transferTime / 1000) +
+                                 " seconds successful ("  + (1000 * this.containers.size() / (transferTime + 1)) +
                                  " words/s)");
-                seeds.mySeed().incSI(this.containers.size());
-                seeds.mySeed().incSU(this.references.size());
+                Transmission.this.seeds.mySeed().incSI(this.containers.size());
+                Transmission.this.seeds.mySeed().incSU(this.references.size());
                 // if the peer has set a pause time and we are in flush mode (index transfer)
                 // then we pause for a while now
-                log.logInfo("Transfer finished of chunk to target " + target.hash + "/" + target.getName());
+                Transmission.this.log.logInfo("Transfer finished of chunk to target " + target.hash + "/" + target.getName());
                 this.hit++;
                 return true;
             }
             this.miss++;
             // write information that peer does not receive index transmissions
-            log.logInfo("Transfer failed of chunk to target " + target.hash + "/" + target.getName() + ": " + error);
+            Transmission.this.log.logInfo("Transfer failed of chunk to target " + target.hash + "/" + target.getName() + ": " + error);
             // get possibly newer target Info
-            Seed newTarget = seeds.get(target.hash);
+            final Seed newTarget = Transmission.this.seeds.get(target.hash);
             if (newTarget != null) {
-                String oldAddress = target.getPublicAddress();
+                final String oldAddress = target.getPublicAddress();
                 if ((oldAddress != null) && (oldAddress.equals(newTarget.getPublicAddress()))) {
                     newTarget.setFlagAcceptRemoteIndex(false);
-                    seeds.update(newTarget.hash, newTarget);
+                    Transmission.this.seeds.update(newTarget.hash, newTarget);
                 } else {
                     // we tried an old Address. Don't change anything
                 }
@@ -284,25 +283,25 @@ public class Transmission {
             }
             return false;
         }
-        
+
         public boolean isFinished() {
         	//System.out.println("canFinish: hit = " + this.hit + ", redundancy = " + seeds.redundancy() + ", targets.size() = " + targets.size());
-            return this.hit >= seeds.redundancy();
+            return this.hit >= Transmission.this.seeds.redundancy();
         }
-        
+
         public boolean canFinish() {
         	//System.out.println("canFinish: hit = " + this.hit + ", redundancy = " + seeds.redundancy() + ", targets.size() = " + targets.size());
-            return this.targets.size() >= seeds.redundancy() - this.hit;
+            return this.targets.size() >= Transmission.this.seeds.redundancy() - this.hit;
         }
 
         public void restore() {
-            for (ReferenceContainer<WordReference> ic : this) try {
-                segment.termIndex().add(ic);
-            } catch (Exception e) {
+            for (final ReferenceContainer<WordReference> ic : this) try {
+                Transmission.this.segment.termIndex().add(ic);
+            } catch (final Exception e) {
                 Log.logException(e);
             }
         }
 
     }
-    
+
 }

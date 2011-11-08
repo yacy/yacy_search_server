@@ -42,17 +42,17 @@ import org.apache.solr.common.SolrInputDocument;
 
 public class SolrChardingConnector implements SolrConnector {
 
-    private final List<SolrSingleConnector> connectors;
+    private final List<SolrConnector> connectors;
     private final SolrScheme scheme;
     private final SolrChardingSelection charding;
     private final String[] urls;
 
-    public SolrChardingConnector(final String urlList, final SolrScheme scheme, final SolrChardingSelection.Method method) throws IOException {
+    public SolrChardingConnector(final String urlList, final SolrScheme scheme, final SolrChardingSelection.Method method, final long timeout) throws IOException {
         urlList.replace(' ', ',');
         this.urls = urlList.split(",");
-        this.connectors = new ArrayList<SolrSingleConnector>();
+        this.connectors = new ArrayList<SolrConnector>();
         for (final String u: this.urls) {
-            this.connectors.add(new SolrSingleConnector(u.trim(), scheme));
+            this.connectors.add(new SolrRetryConnector(new SolrSingleConnector(u.trim(), scheme), timeout));
         }
         this.charding = new SolrChardingSelection(method, this.urls.length);
         this.scheme = scheme;
@@ -63,7 +63,7 @@ public class SolrChardingConnector implements SolrConnector {
     }
 
     public void close() {
-        for (final SolrSingleConnector connector: this.connectors) connector.close();
+        for (final SolrConnector connector: this.connectors) connector.close();
     }
 
     /**
@@ -71,7 +71,7 @@ public class SolrChardingConnector implements SolrConnector {
      * @throws IOException
      */
     public void clear() throws IOException {
-        for (final SolrSingleConnector connector: this.connectors) connector.clear();
+        for (final SolrConnector connector: this.connectors) connector.clear();
     }
 
     /**
@@ -80,7 +80,7 @@ public class SolrChardingConnector implements SolrConnector {
      * @throws IOException
      */
     public void delete(final String id) throws IOException {
-        for (final SolrSingleConnector connector: this.connectors) connector.delete(id);
+        for (final SolrConnector connector: this.connectors) connector.delete(id);
     }
 
     /**
@@ -89,7 +89,20 @@ public class SolrChardingConnector implements SolrConnector {
      * @throws IOException
      */
     public void delete(final List<String> ids) throws IOException {
-        for (final SolrSingleConnector connector: this.connectors) connector.delete(ids);
+        for (final SolrConnector connector: this.connectors) connector.delete(ids);
+    }
+
+    /**
+     * check if a given id exists in solr
+     * @param id
+     * @return true if any entry in solr exists
+     * @throws IOException
+     */
+    public boolean exists(final String id) throws IOException {
+        for (final SolrConnector connector: this.connectors) {
+            if (connector.exists(id)) return true;
+        }
+        return false;
     }
 
     /**
@@ -108,7 +121,7 @@ public class SolrChardingConnector implements SolrConnector {
      * @param solrdoc
      * @throws IOException
      */
-    private void add(final SolrInputDocument solrdoc) throws IOException {
+    public void add(final SolrInputDocument solrdoc) throws IOException {
         this.connectors.get(this.charding.select(solrdoc)).add(solrdoc);
     }
 
@@ -141,7 +154,7 @@ public class SolrChardingConnector implements SolrConnector {
      */
     public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException {
         final SolrDocumentList list = new SolrDocumentList();
-        for (final SolrSingleConnector connector: this.connectors) {
+        for (final SolrConnector connector: this.connectors) {
             final SolrDocumentList l = connector.get(querystring, offset, count);
             for (final SolrDocument d: l) {
                 list.add(d);
@@ -153,7 +166,7 @@ public class SolrChardingConnector implements SolrConnector {
     public SolrDocumentList[] getList(final String querystring, final int offset, final int count) throws IOException {
         final SolrDocumentList[] list = new SolrDocumentList[this.connectors.size()];
         int i = 0;
-        for (final SolrSingleConnector connector: this.connectors) {
+        for (final SolrConnector connector: this.connectors) {
             list[i++] = connector.get(querystring, offset, count);
         }
         return list;
@@ -162,7 +175,7 @@ public class SolrChardingConnector implements SolrConnector {
     public long[] getSizeList() {
         final long[] size = new long[this.connectors.size()];
         int i = 0;
-        for (final SolrSingleConnector connector: this.connectors) {
+        for (final SolrConnector connector: this.connectors) {
             size[i++] = connector.getSize();
         }
         return size;
@@ -187,4 +200,5 @@ public class SolrChardingConnector implements SolrConnector {
         }
         return urlAdmin;
     }
+
 }

@@ -850,6 +850,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     public int size() {
+        if (this.index == null) return 0;
         return this.index.size();
     }
 

@@ -225,7 +225,7 @@ public final class Switchboard extends serverSwitch {
     public  RobotsTxt                      robots;
     public  Map<String, Object[]>          outgoingCookies, incomingCookies;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
-    public  Network                       yc;
+    public  Network                        yc;
     public  ResourceObserver               observer;
     public  UserDB                         userDB;
     public  BookmarksDB                    bookmarksDB;
@@ -599,7 +599,7 @@ public final class Switchboard extends serverSwitch {
         final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
         try {
-            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrChardingConnector(solrurls, workingScheme, SolrChardingSelection.Method.MODULO_HOST_MD5) : null);
+            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrChardingConnector(solrurls, workingScheme, SolrChardingSelection.Method.MODULO_HOST_MD5, 10000) : null);
         } catch (final IOException e) {
             Log.logException(e);
             this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);

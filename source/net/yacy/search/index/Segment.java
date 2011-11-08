@@ -85,7 +85,6 @@ public class Segment {
     protected final IndexCell<WordReference>       termIndex;
     //private   final IndexCell<NavigationReference> authorNavIndex;
     protected final MetadataRepository             urlMetadata;
-    private         SolrConnector                  solr;
     private   final File                           segmentPath;
 
     public Segment(
@@ -103,7 +102,6 @@ public class Segment {
 
         this.log = log;
         this.segmentPath = segmentPath;
-        this.solr = null;
 
         this.termIndex = new IndexCell<WordReference>(
                 segmentPath,
@@ -133,11 +131,11 @@ public class Segment {
     }
 
     public void connectSolr(final SolrConnector solr) {
-        this.solr = solr;
+        this.urlMetadata.connectSolr(solr);
     }
 
     public SolrConnector getSolr() {
-        return this.solr;
+        return this.urlMetadata.getSolr();
     }
 
     public static void migrateTextIndex(final File oldSegmentPath, final File newSegmentPath) {
@@ -173,8 +171,8 @@ public class Segment {
     public IndexCell<WordReference> termIndex() {
         return this.termIndex;
     }
-    
-    public boolean exists(byte[] urlhash) {
+
+    public boolean exists(final byte[] urlhash) {
         return this.urlMetadata.exists(urlhash);
     }
 
@@ -272,7 +270,6 @@ public class Segment {
     public void close() {
         this.termIndex.close();
         this.urlMetadata.close();
-        if (this.solr != null) this.solr.close();
     }
 
     public URIMetadataRow storeDocument(
