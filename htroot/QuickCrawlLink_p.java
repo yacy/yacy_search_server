@@ -29,16 +29,14 @@
 //if the shell's current path is HTROOT
 
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URLDecoder;
 import java.util.Date;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
@@ -98,11 +96,7 @@ public class QuickCrawlLink_p {
 
         // get the URL
         String crawlingStart = post.get("url",null);
-        try {
-            crawlingStart = URLDecoder.decode(crawlingStart, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            Log.logException(e);
-        }
+        crawlingStart = UTF8.decodeURL(crawlingStart);
 
         // get the browser title
         final String title = post.get("title",null);

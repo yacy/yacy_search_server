@@ -127,6 +127,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         // identify protocol
         assert (url != null);
         url = url.trim();
+        url = UTF8.decodeURL(url); // normalization here
         //url = patternSpace.matcher(url).replaceAll(" ");
         if (url.startsWith("\\\\")) {
             url = "smb://" + patternBackSlash.matcher(url.substring(2)).replaceAll("/");

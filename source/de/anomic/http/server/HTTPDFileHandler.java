@@ -69,13 +69,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -266,13 +264,7 @@ public final class HTTPDFileHandler {
                 return;
             }
 
-            // url decoding of path
-            try {
-                path = URLDecoder.decode(path, "UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                // This should never occur
-                assert(false) : "UnsupportedEncodingException: " + e.getMessage();
-            }
+            path = UTF8.decodeURL(path);
 
             // check against hack attacks in path
             if (path.indexOf("..") >= 0) {
@@ -538,8 +530,8 @@ public final class HTTPDFileHandler {
             // implement proxy via url (not in servlet, because we need binary access on ouputStream)
             if (path.equals("/proxy.html")) {
             	final List<Pattern> urlProxyAccess = Domains.makePatterns(sb.getConfig("proxyURL.access", "127.0.0.1"));
-                UserDB.Entry user = sb.userDB.getUser(requestHeader);
-                boolean user_may_see_proxyurl = Domains.matchesList(clientIP, urlProxyAccess) || (user!=null && user.hasRight(UserDB.AccessRight.PROXY_RIGHT));
+                final UserDB.Entry user = sb.userDB.getUser(requestHeader);
+                final boolean user_may_see_proxyurl = Domains.matchesList(clientIP, urlProxyAccess) || (user!=null && user.hasRight(UserDB.AccessRight.PROXY_RIGHT));
             	if (sb.getConfigBool("proxyURL", false) && user_may_see_proxyurl) {
             		doURLProxy(args, conProp, requestHeader, out);
             		return;
@@ -1308,7 +1300,7 @@ public final class HTTPDFileHandler {
      * not in separete servlet, because we need access to binary outstream
      * @throws IOException
      */
-    private static void doURLProxy(final serverObjects args, final HashMap<String, Object> conProp, final RequestHeader requestHeader, OutputStream out) throws IOException {
+    private static void doURLProxy(final serverObjects args, final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream out) throws IOException {
         final String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
 		URL proxyurl = null;
 
@@ -1325,7 +1317,7 @@ public final class HTTPDFileHandler {
 		}
 		String host = proxyurl.getHost();
 		if (proxyurl.getPort() != -1) {
-			host += ":" + proxyurl.getPort(); 
+			host += ":" + proxyurl.getPort();
 		}
 
 		// set properties for proxy connection
@@ -1430,7 +1422,7 @@ public final class HTTPDFileHandler {
 
 				} else if (url.startsWith("//")) {
 					// absoulte url but same protocol of form href="//domain.com/path"
-					String complete_url = proxyurl.getProtocol() + ":" +  url;
+					final String complete_url = proxyurl.getProtocol() + ":" +  url;
 					if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
 						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI(complete_url)) != null) {
 							continue;
@@ -1455,7 +1447,7 @@ public final class HTTPDFileHandler {
 						newurl = newurl.replaceAll("\\$","\\\\\\$");
 						m.appendReplacement(result, newurl);
 					}
-					catch (MalformedURLException e) {}
+					catch (final MalformedURLException e) {}
 
 				}
 			}
@@ -1466,7 +1458,7 @@ public final class HTTPDFileHandler {
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
 
-				ChunkedOutputStream cos = new ChunkedOutputStream(out);
+				final ChunkedOutputStream cos = new ChunkedOutputStream(out);
 
 				cos.write(sbb);
 				cos.finish();

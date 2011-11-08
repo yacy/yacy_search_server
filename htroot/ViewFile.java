@@ -29,9 +29,7 @@
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -358,14 +356,12 @@ public class ViewFile {
         if (words.length() > 1 && words.charAt(0) == '[' && words.charAt(words.length() - 1) == ']') {
             words = words.substring(1, words.length() - 1);
         }
-        try {
-            words = URLDecoder.decode(words, "UTF-8");
-            if (words.indexOf(' ') >= 0) return words.split(" ");
-            if (words.indexOf(',') >= 0) return words.split(",");
-            if (words.indexOf('+') >= 0) return words.split("\\+");
-            w = new String[1];
-            w[0] = words;
-        } catch (final UnsupportedEncodingException e) {}
+        words = UTF8.decodeURL(words);
+        if (words.indexOf(' ') >= 0) return words.split(" ");
+        if (words.indexOf(',') >= 0) return words.split(",");
+        if (words.indexOf('+') >= 0) return words.split("\\+");
+        w = new String[1];
+        w[0] = words;
         return w;
     }
 
