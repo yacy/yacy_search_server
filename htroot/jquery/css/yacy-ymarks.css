@@ -75,7 +75,7 @@
 #ymarks_body .input {
   width: 190px;  
   margin-bottom: .5em;
-  padding: 2px 0px 2px 0px /* top right bottom left */
+  padding: 2px 0px 2px 0px; /* top right bottom left */
   border: 1px solid #CCCCCC;
   font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
   font-size: 12px;
@@ -86,13 +86,10 @@ img.help {
   padding-bottom:5px;
   padding-left: 8px;
 }
-.hidden {
-	display:hidden;
-}
 
 /* Bookmark Dialogs */
 .bm_input, .bm_select { 
-  padding: 2px 0px 2px 0px /* top right bottom left */
+  padding: 2px 0px 2px 0px; /* top right bottom left */
   border: 1px solid #CCCCCC;
   margin: 0px 0px 2px 5px;
 }
@@ -195,7 +192,7 @@ img.help {
 #ymarks_sidebar .ui-tabs-nav li.ui-tabs-selected a:link,
 #ymarks_sidebar .ui-tabs-nav li.ui-tabs-selected a:visited,
 #ymarks_sidebar .ui-tabs-nav li.ui-tabs-selected a:hover,
-#ymarks_sidebar .ui-tabs-nav li.ui-tabs-selected a:active { font-size: 12px; font-style: bold; padding-left: 5px;}
+#ymarks_sidebar .ui-tabs-nav li.ui-tabs-selected a:active { font-size: 12px; padding-left: 5px;}
 
 
 /* overrides for treeview styles

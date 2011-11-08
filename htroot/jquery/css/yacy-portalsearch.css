@@ -10,6 +10,12 @@
 		overflow-x: hidden;
 		font-size: 1.0em;
 }
+.ynav-cancel {
+	vertical-align: middle;
+	margin-left: 5px;
+	cursor: pointer;
+}
+
 .ynav .ui-autocomplete-input {
 	font-size: 14px;
 	padding: 2px;
@@ -29,9 +35,9 @@
 .yradio {
 	margin-top: 5px; 
 	margin-bottom: 10px;
-	margin-left: 40px; 
+	margin-left: 5px; 
 	text-align: left;
-	font-size: 10px;
+	font-size: 11px;
 }
 
 #yacylivesearch form * { 
@@ -52,7 +58,6 @@
 }
 
 #ypopup * {
-	inherit: none;
 	margin: 0;
     padding: 0;
 	font-size: 12px;	
@@ -127,7 +132,7 @@
 
 .ynav {
 	margin-left: 8px; 
-	margin-roght: 5px;
+	margin-right: 5px;
 }
 #ypopup .yloading {
 	margin-top: 150px;

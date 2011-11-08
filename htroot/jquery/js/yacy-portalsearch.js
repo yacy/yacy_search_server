@@ -82,7 +82,7 @@ $(document).ready(function() {
 		var script1 = yconf.url + '/jquery/js/jquery-query-2.1.7.js';
 		var script2 = yconf.url + '/jquery/js/jquery.form-2.73.js';
 		var script3 = yconf.url + '/jquery/js/jquery.field-0.9.2.min.js';
-		var script4 = yconf.url + '/jquery/js/jquery-ui-1.8.13.custom.min.js';
+		var script4 = yconf.url + '/jquery/js/jquery-ui-1.8.16.custom.min.js';
 		var script5 = yconf.url + '/jquery/js/jquery-ui-combobox.js';
 		
 		$.getScript(script1, function(){ load_status++; });
@@ -94,6 +94,7 @@ $(document).ready(function() {
     	yrun();
     }
 });
+
 function yrun() {
 	
 	$.extend($.ui.accordion.defaults, {
@@ -248,25 +249,36 @@ function yacysearch(global, clear) {
 		param[i] = item;
 	});
 	param[param.length] = { name : 'startRecord', value : startRecord };
+	
 	$.ajaxSetup({ 
         timeout: 10000,
-        error: function() {if (clear) $('#ypopup').empty();}
+        error: function() {
+        			if (clear) $('#ypopup').empty();
+        		}
     }); 
+	
 	$.getJSON(url, param,
         function(json, status) {	
+
 			if (json[0]) data = json[0];
-			else data = json;
-			var searchTerms = data.channels[0].searchTerms.replace(/\+/g," ");			
-			if(ycurr != searchTerms)
+			else data = json;			
+			
+			var searchTerms = data.channels[0].searchTerms;			
+			
+			if(ycurr.replace(/ /g,"+") != searchTerms) {
 				return false;
-			if(clear)	
-				$('#ypopup').empty();			
-			var total = data.channels[0].totalResults.replace(/[,.]/,"");
+			}
+			if(clear) {	
+				$('#ypopup').empty();
+			}
+			
+			var total = data.channels[0].totalResults;
+			
 			if(global) var result = 'global';
 			else var result = 'local';
-
-			var count = 0;
-		   	$.each (
+			
+			var count = 0;		   	
+			$.each (
 				data.channels[0].items,
 				function(i,item) {
 					if (item) {
@@ -344,9 +356,9 @@ function yacysearch(global, clear) {
 					}
 				);
 				$('<hr />').appendTo("#yside");				
-				$('<span class="ynav">Get results: </span><div class="yradio" id="yglobal"><input type="radio" id="local" name="yglobal"" '+sel_local+' /><label for="local">local</label><input type="radio" id="global" name="yglobal" '+sel_global+' /><label for="global">global</label></div>').appendTo('#yside');
-				$('<span class="ynav">Sort by: </span><div class="yradio" id="yrecent"><input type="radio" id="relevance" name="yrecent" '+sel_relev+' /><label for="relevance">relevance</label><input type="radio" id="date" name="yrecent" '+sel_date+' /><label for="date">date</label></div>').appendTo('#yside');
-				$('#yrecent, #yglobal').buttonset();
+				var radio1 = '<table><tr><td><span class="ynav">Get results: </span><div class="yradio" id="yglobal"><input type="radio" id="local" name="yglobal"" '+sel_local+' /><label for="local">local</label><br><input type="radio" id="global" name="yglobal" '+sel_global+' /><label for="global">global</label></div></td>';
+				var radio2 = '<td><span class="ynav">Sort by: </span><div class="yradio" id="yrecent"><input type="radio" id="relevance" name="yrecent" '+sel_relev+' /><label for="relevance">relevance</label><br><input type="radio" id="date" name="yrecent" '+sel_date+' /><label for="date">date</label></div></td></tr></table>';
+				$(radio1 + radio2).appendTo('#yside');
 			
 				$('#local, #global, #date, #relevance').change(function() {
 					var query = unescape($("#yquery").getValue());
@@ -365,8 +377,7 @@ function yacysearch(global, clear) {
 				$('<hr />').appendTo("#yside");	
 				var arLen=ynavigators.length;
 				for ( var i=0, len=arLen; i<len; ++i ){
-					$('<p><button class="cancel">X</button> '+ynavigators[i]+'</p>').appendTo("#yside");
-					$('.cancel').button();
+					$('<p><img src="/yacy/ui/img-2/cancel_round.png" class="ynav-cancel" /><span class="ytxt"> '+ynavigators[i]+'</span></p>').appendTo("#yside");
 				}
 				if(count>0) {
 					autoOpenSidebar();
@@ -376,6 +387,15 @@ function yacysearch(global, clear) {
 							yacysearch(submit, false);						
 						}
 					}
+					$(".ynav-cancel").bind("click", function(event) {
+						var str = $(event.target).next().text().replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, "");
+						var idx = ynavigators.indexOf(str);
+						if(idx!=-1) ynavigators.splice(idx, 1);
+						var regexp = new RegExp(str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));
+						$("#yquery").setValue(query.replace(regexp,"").replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, ""));
+						startRecord = 0;
+						yacysearch(submit, true);
+					});
 				} 
 			 }
         }
