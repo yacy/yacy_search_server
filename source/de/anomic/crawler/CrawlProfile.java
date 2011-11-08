@@ -25,6 +25,7 @@
 
 package de.anomic.crawler;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -71,6 +72,25 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String FILTER_COUNTRY_MUSTMATCH = "crawlingCountryMustMatch";
 
     private Pattern urlmustmatch = null, urlmustnotmatch = null, ipmustmatch = null, ipmustnotmatch = null;
+
+    public final static class DomProfile {
+
+        public String referrer;
+        public int depth, count;
+
+        public DomProfile(final String ref, final int d) {
+            this.referrer = ref;
+            this.depth = d;
+            this.count = 1;
+        }
+
+        public void inc() {
+            this.count++;
+        }
+
+    }
+
+    private final Map<String, DomProfile> doms;
 
     /**
      * Constructor which creates CrawlPofile from parameters.
@@ -121,6 +141,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (name == null || name.isEmpty()) {
             throw new NullPointerException("name must not be null or empty");
         }
+        this.doms = new ConcurrentHashMap<String, DomProfile>();
+
         final String handle = (startURL == null)
                 ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength)
                 : ASCII.String(startURL.hash());
@@ -154,6 +176,45 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public CrawlProfile(final Map<String, String> ext) {
         super(ext == null ? 1 : ext.size());
         if (ext != null) putAll(ext);
+        this.doms = new ConcurrentHashMap<String, DomProfile>();
+    }
+
+
+    public void domInc(final String domain, final String referrer, final int depth) {
+        final DomProfile dp = this.doms.get(domain);
+        if (dp == null) {
+            // new domain
+            this.doms.put(domain, new DomProfile(referrer, depth));
+        } else {
+            // increase counter
+            dp.inc();
+        }
+    }
+
+    public String domName(final boolean attr, final int index){
+        final Iterator<Map.Entry<String, DomProfile>> domnamesi = this.doms.entrySet().iterator();
+        String domname="";
+        Map.Entry<String, DomProfile> ey;
+        DomProfile dp;
+        int i = 0;
+        while ((domnamesi.hasNext()) && (i < index)) {
+            ey = domnamesi.next();
+            i++;
+        }
+        if (domnamesi.hasNext()) {
+            ey = domnamesi.next();
+            dp = ey.getValue();
+            domname = ey.getKey() + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
+        }
+        return domname;
+    }
+
+    public void clearDoms() {
+        this.doms.clear();
+    }
+
+    public DomProfile getDom(final String domain) {
+        return this.doms.get(domain);
     }
 
     /**

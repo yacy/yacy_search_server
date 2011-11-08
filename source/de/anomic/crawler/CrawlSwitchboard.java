@@ -28,14 +28,18 @@ package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
@@ -53,7 +57,6 @@ public final class CrawlSwitchboard {
 
     public static final String DBFILE_ACTIVE_CRAWL_PROFILES        = "crawlProfilesActive.heap";
     public static final String DBFILE_PASSIVE_CRAWL_PROFILES       = "crawlProfilesPassive.heap";
-    public static final String DBFILE_INVALID_CRAWL_PROFILES       = "crawlProfilesInvalid.heap";
 
     public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L;
     public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
@@ -63,8 +66,9 @@ public final class CrawlSwitchboard {
     public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
 
     private final Log       log;
-    private Map<byte[], Map<String, String>> profilesActiveCrawls;
-    private final Map<byte[], Map<String, String>> profilesPassiveCrawls, profilesInvalidCrawls;
+    private MapHeap         profilesActiveCrawls;
+    private final MapHeap profilesPassiveCrawls;
+    private final Map<byte[], CrawlProfile> profilesActiveCrawlsCache; //TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
     public  CrawlProfile    defaultProxyProfile;
     public  CrawlProfile    defaultRemoteProfile;
     public  CrawlProfile    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
@@ -84,28 +88,31 @@ public final class CrawlSwitchboard {
             System.exit(0);
         }
         this.log = log;
+        this.profilesActiveCrawlsCache = Collections.synchronizedMap(new TreeMap<byte[], CrawlProfile>(Base64Order.enhancedCoder));
 
         // make crawl profiles database and default profiles
         this.queuesRoot = queuesRoot;
         this.queuesRoot.mkdirs();
         this.log.logConfig("Initializing Crawl Profiles");
 
-        final File profilesInvalidFile = new File(queuesRoot, DBFILE_INVALID_CRAWL_PROFILES);
-        this.profilesInvalidCrawls = loadFromDB(profilesInvalidFile);
-
         final File profilesActiveFile = new File(queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         this.profilesActiveCrawls = loadFromDB(profilesActiveFile);
         for (final byte[] handle : this.profilesActiveCrawls.keySet()) {
-            final CrawlProfile p;
-            p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
+            CrawlProfile p;
+            try {
+                p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
+            } catch (final IOException e) {
+                p = null;
+            } catch (final RowSpaceExceededException e) {
+                p = null;
+            }
+            if (p == null) continue;
             if (!RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_URL_MUSTMATCH))) {
                 removeActive(handle);
-                putInvalid(handle, p);
                 Log.logWarning("CrawlProfiles", "removed Profile " + p.handle() + ": " + p.name()
                         + " from active crawls since " + CrawlProfile.FILTER_URL_MUSTMATCH
                         + " is no valid regular expression: " + p.get(CrawlProfile.FILTER_URL_MUSTMATCH));
             } else if (!RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_URL_MUSTNOTMATCH))) {
-                putInvalid(handle, p);
                 removeActive(handle);
                 Log.logWarning("CrawlProfiles", "removed Profile " + p.handle() + ": " + p.name()
                         + " from active crawls since " + CrawlProfile.FILTER_URL_MUSTNOTMATCH
@@ -121,8 +128,15 @@ public final class CrawlSwitchboard {
         final File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
         this.profilesPassiveCrawls = loadFromDB(profilesPassiveFile);
         for (final byte[] handle : this.profilesPassiveCrawls.keySet()) {
-            final CrawlProfile p = new CrawlProfile(this.profilesPassiveCrawls.get(handle));
-            Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
+            CrawlProfile p;
+            try {
+                p = new CrawlProfile(this.profilesPassiveCrawls.get(handle));
+                Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
+            } catch (final IOException e) {
+                continue;
+            } catch (final RowSpaceExceededException e) {
+                continue;
+            }
         }
         log.logInfo("Loaded passive crawl profiles from file " + profilesPassiveFile.getName() +
                 ", " + this.profilesPassiveCrawls.size() + " entries" +
@@ -131,21 +145,35 @@ public final class CrawlSwitchboard {
 
     public CrawlProfile getActive(final byte[] profileKey) {
         if (profileKey == null) return null;
-        final Map<String, String> m = this.profilesActiveCrawls.get(profileKey);
-        if (m == null) return null;
-        return new CrawlProfile(m);
-    }
+        // get from cache
+        CrawlProfile p = this.profilesActiveCrawlsCache.get(profileKey);
+        if (p != null) return p;
 
-    public CrawlProfile getInvalid(final byte[] profileKey) {
-        if (profileKey == null) return null;
-        final Map<String, String> m = this.profilesInvalidCrawls.get(profileKey);
+        // get from db
+        Map<String, String> m;
+        try {
+            m = this.profilesActiveCrawls.get(profileKey);
+        } catch (final IOException e) {
+            m = null;
+        } catch (final RowSpaceExceededException e) {
+            m = null;
+        }
         if (m == null) return null;
-        return new CrawlProfile(m);
+        p = new CrawlProfile(m);
+        this.profilesActiveCrawlsCache.put(profileKey, p);
+        return p;
     }
 
     public CrawlProfile getPassive(final byte[] profileKey) {
         if (profileKey == null) return null;
-        final Map<String, String> m = this.profilesPassiveCrawls.get(profileKey);
+        Map<String, String> m;
+        try {
+            m = this.profilesPassiveCrawls.get(profileKey);
+        } catch (final IOException e) {
+            m = null;
+        } catch (final RowSpaceExceededException e) {
+            m = null;
+        }
         if (m == null) return null;
         return new CrawlProfile(m);
     }
@@ -154,22 +182,14 @@ public final class CrawlSwitchboard {
         return this.profilesActiveCrawls.keySet();
     }
 
-    public Set<byte[]> getInvalid() {
-        return this.profilesInvalidCrawls.keySet();
-    }
-
     public Set<byte[]> getPassive() {
         return this.profilesPassiveCrawls.keySet();
     }
 
     public void removeActive(final byte[] profileKey) {
         if (profileKey == null) return;
+        this.profilesActiveCrawlsCache.remove(profileKey);
         this.profilesActiveCrawls.remove(profileKey);
-    }
-
-    public void removeInvalid(final byte[] profileKey) {
-        if (profileKey == null) return;
-        this.profilesInvalidCrawls.remove(profileKey);
     }
 
     public void removePassive(final byte[] profileKey) {
@@ -179,17 +199,11 @@ public final class CrawlSwitchboard {
 
     public void putActive(final byte[] profileKey, final CrawlProfile profile) {
         this.profilesActiveCrawls.put(profileKey, profile);
-    }
-
-    public void putInvalid(final byte[] profileKey, final CrawlProfile profile) {
-        this.profilesInvalidCrawls.put(profileKey, profile);
+        this.profilesActiveCrawlsCache.put(profileKey, profile);
     }
 
     public void putPassive(final byte[] profileKey, final CrawlProfile profile) {
         this.profilesPassiveCrawls.put(profileKey, profile);
-    }
-
-    public void clear() {
     }
 
     private void initActiveCrawlProfiles() {
@@ -282,6 +296,7 @@ public final class CrawlSwitchboard {
     }
 
     private void resetProfiles() {
+        this.profilesActiveCrawlsCache.clear();
         final File pdb = new File(this.queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         if (pdb.exists()) FileUtils.deletedelete(pdb);
         try {
@@ -293,7 +308,8 @@ public final class CrawlSwitchboard {
         initActiveCrawlProfiles();
     }
 
-    public boolean cleanProfiles() throws InterruptedException {
+    public boolean clear() throws InterruptedException {
+        this.profilesActiveCrawlsCache.clear();
         CrawlProfile entry;
         boolean hasDoneSomething = false;
         try {
@@ -302,7 +318,13 @@ public final class CrawlSwitchboard {
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
 
                 // getting next profile
-                entry = new CrawlProfile(this.profilesActiveCrawls.get(handle));
+                try {
+                    entry = new CrawlProfile(this.profilesActiveCrawls.get(handle));
+                } catch (final IOException e) {
+                    continue;
+                } catch (final RowSpaceExceededException e) {
+                    continue;
+                }
                 if (!((entry.name().equals(CRAWL_PROFILE_PROXY))  ||
                       (entry.name().equals(CRAWL_PROFILE_REMOTE)) ||
                       (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))  ||
@@ -325,9 +347,9 @@ public final class CrawlSwitchboard {
 
 
     public void close() {
-        ((MapHeap) this.profilesActiveCrawls).close();
-        ((MapHeap) this.profilesInvalidCrawls).close();
-        ((MapHeap) this.profilesPassiveCrawls).close();
+        this.profilesActiveCrawlsCache.clear();
+        this.profilesActiveCrawls.close();
+        this.profilesPassiveCrawls.close();
     }
 
 
@@ -336,8 +358,8 @@ public final class CrawlSwitchboard {
      * @param file DB file
      * @return crawl profile data
      */
-    private Map<byte[], Map<String, String>> loadFromDB(final File file) {
-        Map<byte[], Map<String, String>> ret;
+    private MapHeap loadFromDB(final File file) {
+        MapHeap ret;
         try {
             ret = new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
         } catch (final IOException e) {

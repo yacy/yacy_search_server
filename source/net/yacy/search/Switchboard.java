@@ -1283,7 +1283,7 @@ public final class Switchboard extends serverSwitch {
             (this.crawlStacker != null && !this.crawlStacker.isEmpty()) ||
             this.crawlQueues.noticeURL.notEmpty())
             return false;
-        return this.crawler.cleanProfiles();
+        return this.crawler.clear();
     }
 
     public void close() {

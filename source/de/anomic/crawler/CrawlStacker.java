@@ -33,12 +33,10 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -55,6 +53,7 @@ import net.yacy.repository.Blacklist;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
+import de.anomic.crawler.CrawlProfile.DomProfile;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.FTPLoader;
@@ -71,28 +70,9 @@ public final class CrawlStacker {
     private final CrawlQueues       nextQueue;
     private final CrawlSwitchboard  crawler;
     private final Segment           indexSegment;
-    private final SeedDB        peers;
+    private final SeedDB            peers;
     private final boolean           acceptLocalURLs, acceptGlobalURLs;
     private final FilterEngine      domainList;
-
-    public final static class DomProfile {
-
-        public String referrer;
-        public int depth, count;
-
-        public DomProfile(final String ref, final int d) {
-            this.referrer = ref;
-            this.depth = d;
-            this.count = 1;
-        }
-
-        public void inc() {
-            this.count++;
-        }
-
-    }
-
-    private final Map<String, DomProfile> doms;
 
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
 
@@ -116,37 +96,9 @@ public final class CrawlStacker {
 
         this.fastQueue = new WorkflowProcessor<Request>("CrawlStackerFast", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, 2);
         this.slowQueue = new WorkflowProcessor<Request>("CrawlStackerSlow", "This is like CrawlStackerFast, but does additionaly a DNS lookup. The CrawlStackerFast does not need this because it can use the DNS cache.", new String[]{"Balancer"}, this, "job",  1000, null, 5);
-        this.doms = new ConcurrentHashMap<String, DomProfile>();
         this.log.logInfo("STACKCRAWL thread initialized.");
     }
 
-    private void domInc(final String domain, final String referrer, final int depth) {
-        final DomProfile dp = this.doms.get(domain);
-        if (dp == null) {
-            // new domain
-            this.doms.put(domain, new DomProfile(referrer, depth));
-        } else {
-            // increase counter
-            dp.inc();
-        }
-    }
-    public String domName(final boolean attr, final int index){
-        final Iterator<Map.Entry<String, DomProfile>> domnamesi = this.doms.entrySet().iterator();
-        String domname="";
-        Map.Entry<String, DomProfile> ey;
-        DomProfile dp;
-        int i = 0;
-        while ((domnamesi.hasNext()) && (i < index)) {
-            ey = domnamesi.next();
-            i++;
-        }
-        if (domnamesi.hasNext()) {
-            ey = domnamesi.next();
-            dp = ey.getValue();
-            domname = ey.getKey() + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
-        }
-        return domname;
-    }
 
     public int size() {
         return this.fastQueue.queueSize() + this.slowQueue.queueSize();
@@ -160,7 +112,6 @@ public final class CrawlStacker {
     public void clear() {
         this.fastQueue.clear();
         this.slowQueue.clear();
-        this.doms.clear();
     }
 
     public void announceClose() {
@@ -412,7 +363,7 @@ public final class CrawlStacker {
 
         // add domain to profile domain list
         if (profile.domMaxPages() != Integer.MAX_VALUE) {
-            domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
+            profile.domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
         }
 
         if (global) {
@@ -520,7 +471,7 @@ public final class CrawlStacker {
         // deny urls that exceed allowed number of occurrences
         final int maxAllowedPagesPerDomain = profile.domMaxPages();
         if (maxAllowedPagesPerDomain < Integer.MAX_VALUE) {
-            final DomProfile dp = this.doms.get(url.getHost());
+            final DomProfile dp = profile.getDom(url.getHost());
             if (dp != null && dp.count >= maxAllowedPagesPerDomain) {
                 if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + profile.domMaxPages() + " is allowed.");
                 return "crawl stack domain counter exceeded";

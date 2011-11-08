@@ -261,7 +261,7 @@ public class CrawlProfileEditor_p {
         if (active && profile.domMaxPages() > 0
                 && profile.domMaxPages() != Integer.MAX_VALUE) {
         String item;
-        while (i <= domlistlength && !(item = crawlStacker.domName(true, i)).isEmpty()){
+        while (i <= domlistlength && !(item = profile.domName(true, i)).isEmpty()){
             if (i == domlistlength) {
                 item += " ...";
             }
