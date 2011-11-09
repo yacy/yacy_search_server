@@ -31,7 +31,6 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
-
 import de.anomic.data.DidYouMean;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -43,7 +42,7 @@ import de.anomic.server.servletProperties;
  * http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions/1.1
  * or
  * https://wiki.mozilla.org/Search_Service/Suggestions
- * 
+ *
  * for xml format:
  * see Microsoft Search Suggestion Format
  * http://msdn.microsoft.com/en-us/library/cc848863%28VS.85%29.aspx
@@ -51,9 +50,9 @@ import de.anomic.server.servletProperties;
  * http://msdn.microsoft.com/en-us/library/cc848862%28v=VS.85%29.aspx
  */
 public class suggest {
-    
+
     private static final int meanMax = 30;
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final servletProperties prop = new servletProperties();
@@ -62,17 +61,17 @@ public class suggest {
         final boolean json = ext.equals("json");
         final boolean xml = ext.equals("xml");
         final boolean more = post != null && post.containsKey("more");
-        
+
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();
         final String querystring =  originalquerystring.replace('+', ' ');
         final int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
         final int count = (post == null) ? 20 : post.getInt("count", 20);
-        
+
         // get segment
         final Segment indexSegment;
         if (post != null && post.containsKey("segment")) {
-            String segmentName = post.get("segment");
+            final String segmentName = post.get("segment");
             if (sb.indexSegments.segmentExist(segmentName)) {
                 indexSegment = sb.indexSegments.segment(segmentName);
             } else {
@@ -83,18 +82,18 @@ public class suggest {
             // take default segment
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
-        
+
         int c = 0;
         if (more ||
                 (indexSegment != null &&
                 !indexSegment.termIndex().has(Word.word2hash(querystring))))
         {
-            final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
-            final Iterator<String> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
+            final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), new StringBuilder(querystring));
+            final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
             String suggestion;
             //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
             while (c < meanMax && meanIt.hasNext()) {
-                suggestion = meanIt.next();
+                suggestion = meanIt.next().toString();
                 if (json) {
                     prop.putJSON("suggestions_" + c + "_text", suggestion);
                 } else if (xml) {
@@ -106,7 +105,7 @@ public class suggest {
                 c++;
             }
         }
-        
+
         if (c > 0) {
             prop.put("suggestions_" + (c - 1) + "_eol", 1);
         }
@@ -125,9 +124,9 @@ public class suggest {
             outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
             prop.setOutgoingHeader(outgoingHeader);
         }
-        
+
         // return rewrite properties
         return prop;
     }
-    
+
 }

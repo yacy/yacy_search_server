@@ -37,7 +37,7 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
 
 
-public class WordTokenizer implements Enumeration<String> {
+public class WordTokenizer implements Enumeration<StringBuilder> {
  // this enumeration removes all words that contain either wrong characters or are too short
 
     private StringBuilder buffer = null;
@@ -72,8 +72,8 @@ public class WordTokenizer implements Enumeration<String> {
         return this.buffer != null;
     }
 
-    public String nextElement() {
-        final String r = (this.buffer == null) ? null : this.buffer.toString();
+    public StringBuilder nextElement() {
+        final StringBuilder r = (this.buffer == null) ? null : this.buffer;
         this.buffer = nextElement0();
         // put word to words statistics cache
         if (this.meaningLib != null) WordCache.learn(r);
@@ -172,14 +172,14 @@ public class WordTokenizer implements Enumeration<String> {
      */
     public static SortedMap<byte[], Integer> hashSentence(final String sentence, final WordCache meaningLib) {
         final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-        final Enumeration<String> words = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), meaningLib);
+        final Enumeration<StringBuilder> words = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), meaningLib);
         int pos = 0;
-        String word;
+        StringBuilder word;
         byte[] hash;
         Integer oldpos;
         while (words.hasMoreElements()) {
             word = words.nextElement();
-            hash = Word.word2hash(word.toString());
+            hash = Word.word2hash(word);
 
             // don't overwrite old values, that leads to too far word distances
             oldpos = map.put(hash, LargeNumberCache.valueOf(pos));

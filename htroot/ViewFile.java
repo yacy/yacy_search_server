@@ -282,13 +282,14 @@ public class ViewFile {
 
                 boolean dark = true;
                 int i = 0;
-                String sentence, token;
+                String sentence;
+                StringBuilder token;
                 if (sentences != null) {
 
                     // Search word highlighting
                     for (final StringBuilder s: sentences) {
                         sentence = s.toString();
-                        Enumeration<String> tokens = null;
+                        Enumeration<StringBuilder> tokens = null;
                         tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), LibraryProvider.dymLib);
                         while (tokens.hasMoreElements()) {
                             token = tokens.nextElement();

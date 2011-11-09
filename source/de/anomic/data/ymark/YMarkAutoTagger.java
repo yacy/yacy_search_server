@@ -87,7 +87,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		final TreeSet<YMarkTag> topwords = new TreeSet<YMarkTag>();
 		// final TreeMap<String, YMarkTag> pairs = new TreeMap<String, YMarkTag>();
 
-		String token;
+		StringBuilder token;
 		// StringBuilder pair = new StringBuilder(64);
 
 		if(document != null) {
@@ -100,7 +100,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			buffer.append(document.dc_title());
 			buffer.append(document.dc_description());
 			buffer.append(document.dc_subject(' '));
-			final Enumeration<String> tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(buffer.toString())), LibraryProvider.dymLib);
+			final Enumeration<StringBuilder> tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(buffer.toString())), LibraryProvider.dymLib);
 
 			int count = 0;
 
@@ -133,7 +133,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 					if (token.length()>3) {
 						count = word.occurrences() * 100;
 					}
-					topwords.add(new YMarkTag(token, count));
+					topwords.add(new YMarkTag(token.toString(), count));
 				}
 			}
 			count = 0;

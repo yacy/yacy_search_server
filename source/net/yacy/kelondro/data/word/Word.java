@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
+
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.document.LargeNumberCache;
@@ -59,7 +60,7 @@ public class Word {
     static {
         try {
             hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()));
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             hashCache = new ConcurrentARC<String, byte[]>(1000, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
         }
     }
@@ -69,7 +70,7 @@ public class Word {
         hashCache = new ConcurrentHashMap<String, byte[]>();
     }
     */
-    
+
     // object carries statistics for words and sentences
     public  int      count;       // number of occurrences
     public  int      posInText;   // unique handle, is initialized with word position (excluding double occurring words)
@@ -88,29 +89,28 @@ public class Word {
     }
 
     public void inc() {
-        count++;
+        this.count++;
     }
-    
+
     public int occurrences() {
-        return count;
+        return this.count;
     }
 
     public void check(final int i) {
-        phrases.add(LargeNumberCache.valueOf(i));
+        this.phrases.add(LargeNumberCache.valueOf(i));
     }
 
     public Iterator<Integer> phrases() {
         // returns an iterator to handles of all phrases where the word appears
-        return phrases.iterator();
+        return this.phrases.iterator();
     }
-    
+
     @Override
     public String toString() {
         // this is here for debugging
-        return "{count=" + count + ", posInText=" + posInText + ", posInPhrase=" + posInPhrase + ", numOfPhrase=" + numOfPhrase + "}";
+        return "{count=" + this.count + ", posInText=" + this.posInText + ", posInPhrase=" + this.posInPhrase + ", numOfPhrase=" + this.numOfPhrase + "}";
     }
-    
-    
+
     // static methods
     public static byte[] word2hash(final StringBuilder word) {
         return word2hash(word.toString());
@@ -118,7 +118,7 @@ public class Word {
 
     // create a word hash
     public static final byte[] word2hash(final String word) {
-    	String wordlc = word.toLowerCase(Locale.ENGLISH);
+    	final String wordlc = word.toLowerCase(Locale.ENGLISH);
     	byte[] h = hashCache.get(wordlc);
         if (h != null) return h;
         // calculate the hash
@@ -132,25 +132,25 @@ public class Word {
         }
         return h;
     }
-    
+
     public static final HandleSet words2hashesHandles(final Set<String> words) {
         final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.size());
         for (final String word: words)
             try {
                 hashes.put(word2hash(word));
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
                 return hashes;
             }
         return hashes;
     }
-    
+
     public static final HandleSet words2hashesHandles(final String[] words) {
         final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.length);
         for (final String word: words)
             try {
                 hashes.put(word2hash(word));
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
                 return hashes;
             }

@@ -59,7 +59,11 @@ public class AccessTracker {
 
     private static void add(final LinkedList<QueryParams> list, final QueryParams query) {
         // learn that this word can be a word completion for the DidYouMeanLibrary
-        if (query.resultcount > 10 && query.queryString != null && query.queryString.length() > 0) WordCache.learn(query.queryString);
+        if (query.resultcount > 10 && query.queryString != null && query.queryString.length() > 0) {
+            final StringBuilder sb = new StringBuilder(query.queryString);
+            sb.append(query.queryString);
+            WordCache.learn(sb);
+        }
 
         // add query to statistics list
         list.add(query);

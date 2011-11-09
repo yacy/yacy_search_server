@@ -255,8 +255,8 @@ public class LibraryProvider {
         final File here = new File("dummy").getParentFile();
         initialize(new File(here, "DATA/DICTIONARIES"));
         System.out.println("dymDict-size = " + dymLib.size());
-        final Set<String> r = dymLib.recommend("da");
-        for (final String s: r) {
+        final Set<StringBuilder> r = dymLib.recommend(new StringBuilder("da"));
+        for (final StringBuilder s: r) {
             System.out.println("$ " + s);
         }
         System.out.println("recommendations: " + r.size());

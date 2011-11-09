@@ -656,12 +656,12 @@ public class yacysearch {
 
             prop.put("meanCount", meanMax);
             if (meanMax > 0 && !json && !rss) {
-                final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
-            	final Iterator<String> meanIt = didYouMean.getSuggestions(100, 5).iterator();
+                final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), new StringBuilder(querystring));
+            	final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(100, 5).iterator();
                 int meanCount = 0;
                 String suggestion;
                 while( meanCount<meanMax && meanIt.hasNext()) {
-                    suggestion = meanIt.next();
+                    suggestion = meanIt.next().toString();
                     prop.put("didYouMean_suggestions_"+meanCount+"_word", suggestion);
                     prop.put("didYouMean_suggestions_"+meanCount+"_url",
                             QueryParams.navurl("html", 0, theQuery, suggestion, originalUrlMask.toString(), theQuery.navigators).toString()

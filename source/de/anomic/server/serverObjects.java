@@ -119,6 +119,27 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     /**
+     * Add a key-value pair of Objects to the map.
+     * @param key   This method will do nothing if the key is <code>null</code>.
+     * @param value The value that should be mapped to the key.
+     *              If value is <code>null</code>, then the element at <code>key</code>
+     *              is removed from the map.
+     * @return The value that was added to the map.
+     * @see java.util.Hashtable#insert(K, V)
+     */
+    public void put(final String key, final StringBuilder value) {
+        if (key == null) {
+            // this does nothing
+            return;
+        } else if (value == null) {
+            // assigning the null value creates the same effect like removing the element
+            super.remove(key);
+        } else {
+            super.put(key, value.toString());
+        }
+    }
+
+    /**
      * Add byte array to the map, value is kept as it is.
      * @param key   key name as String.
      * @param value mapped value as a byte array.
@@ -163,6 +184,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      */
     public String putJSON(final String key, final String value) {
         return put(key, toJSON(value));
+    }
+
+    public String putJSON(final String key, final StringBuilder value) {
+        return put(key, toJSON(value.toString()));
     }
 
     private static String toJSON(String value) {

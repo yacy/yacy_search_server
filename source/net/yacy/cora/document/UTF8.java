@@ -154,6 +154,11 @@ public class UTF8 {
         return s.getBytes(charset);
     }
 
+    public final static byte[] getBytes(final StringBuilder s) {
+        if (s == null) return null;
+        return s.toString().getBytes(charset);
+    }
+
     /**
      * Decodes a <code>application/x-www-form-urlencoded</code> string using a specific
      * encoding scheme.
@@ -179,15 +184,22 @@ public class UTF8 {
                     int pos = 0;
                     while (((i+2) < numChars) && (c=='%')) {
                         final int v = Integer.parseInt(s.substring(i+1,i+3),16);
-                        if (v < 0) throw new IllegalArgumentException("URLDecoder: Illegal hex characters in escape (%) pattern - negative value");
+                        if (v < 0) {
+                            return s;
+                            //throw new IllegalArgumentException("URLDecoder: Illegal hex characters in escape (%) pattern - negative value");
+                        }
                         bytes[pos++] = (byte) v;
                         i+= 3;
                         if (i < numChars) c = s.charAt(i);
                     }
-                    if ((i < numChars) && (c=='%')) throw new IllegalArgumentException("URLDecoder: Incomplete trailing escape (%) pattern");
+                    if ((i < numChars) && (c=='%')) {
+                        return s;
+                        //throw new IllegalArgumentException("URLDecoder: Incomplete trailing escape (%) pattern");
+                    }
                     sb.append(new String(bytes, 0, pos, charset));
                 } catch (final NumberFormatException e) {
-                    throw new IllegalArgumentException("URLDecoder: Illegal hex characters in escape (%) pattern - " + e.getMessage());
+                    return s;
+                    //throw new IllegalArgumentException("URLDecoder: Illegal hex characters in escape (%) pattern - " + e.getMessage());
                 }
                 needToChange = true;
                 break;

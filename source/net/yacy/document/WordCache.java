@@ -49,12 +49,12 @@ public class WordCache {
     // common word cache
     private static final int commonWordsMaxSize = 100000; // maximum size of common word cache
     private static final int commonWordsMinLength = 5;    // words must have that length at minimum
-    private static OrderedScoreMap<String> commonWords = new OrderedScoreMap<String>(String.CASE_INSENSITIVE_ORDER);
+    private static OrderedScoreMap<StringBuilder> commonWords = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
 
     // dictionaries
     private final File dictionaryPath;
-    private TreeSet<String> dict; // the word dictionary
-    private TreeSet<String> tcid; // the dictionary of reverse words
+    private TreeSet<StringBuilder> dict; // the word dictionary
+    private TreeSet<StringBuilder> tcid; // the dictionary of reverse words
 
     /**
      * create a new dictionary
@@ -72,7 +72,7 @@ public class WordCache {
      * add a word to the generic dictionary
      * @param word
      */
-    public static void learn(final String word) {
+    public static void learn(final StringBuilder word) {
         if (word == null) return;
         if (word.length() < commonWordsMinLength) return;
         if (MemoryControl.shortStatus()) commonWords.clear();
@@ -86,8 +86,8 @@ public class WordCache {
      * scan the input directory and load all dictionaries (again)
      */
     public void reload() {
-        this.dict = new TreeSet<String>();
-        this.tcid = new TreeSet<String>();
+        this.dict = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+        this.tcid = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
         if (this.dictionaryPath == null || !this.dictionaryPath.exists()) return;
         final String[] files = this.dictionaryPath.list();
         for (final String f: files) {
@@ -106,25 +106,27 @@ public class WordCache {
         }
         final BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         String l;
+        StringBuilder sb;
         try {
             while ((l = reader.readLine()) != null) {
                 if (l.length() == 0 || l.charAt(0) == '#') continue;
                 l = l.trim().toLowerCase();
                 if (l.length() < 4) continue;
-                this.dict.add(l);
-                this.tcid.add(reverse(l));
+                sb = new StringBuilder(l);
+                this.dict.add(sb);
+                this.tcid.add(reverse(sb));
             }
         } catch (final IOException e) {
             // finish
         }
     }
 
-    private static String reverse(final String s) {
+    private static StringBuilder reverse(final StringBuilder s) {
         final StringBuilder sb = new StringBuilder(s.length());
         for (int i = s.length() - 1; i >= 0; i--) {
             sb.append(s.charAt(i));
         }
-        return sb.toString();
+        return sb;
     }
 
     /**
@@ -132,25 +134,24 @@ public class WordCache {
      * @param s input value that is used to match recommendations
      * @return set that contains all words that start or end with the input value
      */
-    public Set<String> recommend(final String s) {
-        final Set<String> ret = new HashSet<String>();
-        String string = s.trim().toLowerCase();
-        SortedSet<String> t = this.dict.tailSet(string);
-        for (final String r: t) {
-            if (r.startsWith(string) && r.length() > string.length()) ret.add(r); else break;
+    public Set<StringBuilder> recommend(StringBuilder string) {
+        final Set<StringBuilder> ret = new HashSet<StringBuilder>();
+        SortedSet<StringBuilder> t = this.dict.tailSet(string);
+        for (final StringBuilder r: t) {
+            if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, string) && r.length() > string.length()) ret.add(r); else break;
         }
-        final SortedMap<String, AtomicInteger> u = commonWords.tailMap(string);
-        String vv;
+        final SortedMap<StringBuilder, AtomicInteger> u = commonWords.tailMap(string);
+        StringBuilder vv;
         try {
-            for (final Map.Entry<String, AtomicInteger> v: u.entrySet()) {
+            for (final Map.Entry<StringBuilder, AtomicInteger> v: u.entrySet()) {
                 vv = v.getKey();
-                if (vv.startsWith(string) && vv.length() > string.length()) ret.add(vv); else break;
+                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(vv, string) && vv.length() > string.length()) ret.add(vv); else break;
             }
         } catch (final ConcurrentModificationException e) {}
         string = reverse(string);
         t = this.tcid.tailSet(string);
-        for (final String r: t) {
-            if (r.startsWith(string) && r.length() > string.length()) ret.add(reverse(r)); else break;
+        for (final StringBuilder r: t) {
+            if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, string) && r.length() > string.length()) ret.add(reverse(r)); else break;
         }
         return ret;
     }
@@ -160,8 +161,8 @@ public class WordCache {
      * @param s the given word
      * @return true if the library contains the word
      */
-    public boolean contains(final String s) {
-        return this.dict.contains(s.trim().toLowerCase());
+    public boolean contains(final StringBuilder s) {
+        return this.dict.contains(s);
         // if the above case is true then it is also true for this.tcid and vice versa
         // that means it does not need to be tested as well
     }
@@ -173,16 +174,15 @@ public class WordCache {
      * @param s the given word
      * @return true if the library supports the word
      */
-    public boolean supports(final String s) {
-        String string = s.trim().toLowerCase();
-        SortedSet<String> t = this.dict.tailSet(string);
-        for (final String r: t) {
-            if (string.startsWith(r)) return true; else break;
+    public boolean supports(StringBuilder string) {
+        SortedSet<StringBuilder> t = this.dict.tailSet(string);
+        for (final StringBuilder r: t) {
+            if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) return true; else break;
         }
         string = reverse(string);
         t = this.tcid.tailSet(string);
-        for (final String r: t) {
-            if (string.startsWith(r)) return true; else break;
+        for (final StringBuilder r: t) {
+            if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) return true; else break;
         }
         return false;
     }
