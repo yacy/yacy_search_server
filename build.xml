@@ -58,7 +58,13 @@
   <property name="release_mac" location="${release}/MAC"/>
   <property name="svnEntriesFile" location=".svn/entries"/>
   <property name="defaults" location="defaults"/>
-  <!-- variables for installonlinux target-->
+  
+  <!-- defining all needed directory names for packing search widget-->
+  <property name="jquery" location="htroot/jquery/"/>
+  <property name="portalsearch" location="htroot/portalsearch/"/>
+  <property name="img-2" location="htroot/yacy/ui/img-2"/>
+	
+	<!-- variables for installonlinux target-->
   <property name="DESTDIR" value="DESTDIR"/>
   <property name="PKGMANAGER" value="false"/>
   <property name="RESTARTCMD" value="/etc/init.d/yacy restart"/>
@@ -270,7 +276,7 @@
   <target name="all" depends="compile">
   </target>
 
-  <target name="copyMain4Dist" depends="compile">
+  <target name="copyMain4Dist" depends="compile">  	
   	<!-- copy all libs -->
   	    <copy todir="${release_main}/lib">
   	      <fileset dir="${lib}" 
@@ -475,6 +481,22 @@
     <delete dir="${release_main}"/>
     <delete dir="${release_windows}" failonerror="false" />
     <delete dir="${release}/SPECS" failonerror="false" />
+  </target>
+	
+  <!-- packing YaCy search widget for static hosting -->
+  <target name="portalsearch" description="pack YaCy search widget for static hosting">
+  	<tar destfile="${release}/yacy-portalsearch.tar.gz" compression="gzip" defaultexcludes="yes" longfile="fail">
+  	  <tarfileset dir="${portalsearch}" prefix="yacy/portalsearch/">
+    	<include name="*.*"/>
+      </tarfileset>
+      <tarfileset dir="${jquery}" prefix="yacy/jquery/">
+      	<include name="**/*"/>
+      </tarfileset>
+      <tarfileset dir="${img-2}" prefix="yacy/ui/img-2/">
+      	<include name="magnify.png"/>
+      	<include name="cancel_round.png"/>      	
+      </tarfileset>
+  	</tar>
   </target>
 
   <!-- make clean -->

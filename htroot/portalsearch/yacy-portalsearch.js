@@ -39,10 +39,10 @@ $(document).ready(function() {
 	maximumRecords = 10;	
 	submit = false;	
 	yconf = $.extend({
-		url      : 'is a mandatory property - no default',
+		url      : '',
 		'global' : false,		
 		theme    : 'start',
-		title    : 'YaCy P2P Web Search',
+		title    : 'YaCy Search Widget',
 		logo     : yconf.url + '/yacy/ui/img/yacy-logo.png',
 		link     : 'http://yacy.net',
 		width    : 640,
@@ -59,7 +59,7 @@ $(document).ready(function() {
 	$('<div id="ypopup" class="classic"></div>').appendTo("#yacylivesearch");
 	
 	if(yconf.load_css) {	
-		var style1 = yconf.url + '/jquery/css/yacy-portalsearch.css';
+		var style1 = yconf.url + '/portalsearch/yacy-portalsearch.css';
 		var style2 = yconf.url + '/jquery/themes/'+yconf.theme+'/ui.all.css';
 		var style3 = yconf.url + '/jquery/css/jquery-ui-combobox.css';
 	
