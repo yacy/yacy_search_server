@@ -187,7 +187,7 @@ public class Crawler_p {
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
 
-                final boolean directDocByURL = "on".equals(post.get("directDocByURL", "on"));
+                final boolean directDocByURL = "on".equals(post.get("directDocByURL", "off"));
                 env.setConfig("crawlingDirectDocByURL", directDocByURL);
 
                 // recrawl
