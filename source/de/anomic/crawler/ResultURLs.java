@@ -53,7 +53,7 @@ public final class ResultURLs {
         // 4) proxy-load (initiator is "------------")
         // 5) local prefetch/crawling (initiator is own seedHash)
         // 6) local fetching for global crawling (other known or unknown initiator)
-        
+
         UNKNOWN(0),
         REMOTE_RECEIPTS(1),
         QUERIES(2),
@@ -62,31 +62,31 @@ public final class ResultURLs {
         LOCAL_CRAWLING(5),
         GLOBAL_CRAWLING(6),
         SURROGATES(7);
-        
+
         protected int code;
         private static final EventOrigin[] list = {
             UNKNOWN, REMOTE_RECEIPTS, QUERIES, DHT_TRANSFER, PROXY_LOAD, LOCAL_CRAWLING, GLOBAL_CRAWLING, SURROGATES};
-        private EventOrigin(int code) {
+        private EventOrigin(final int code) {
             this.code = code;
         }
         public int getCode() {
             return this.code;
         }
-        public static final EventOrigin getEvent(int key) {
+        public static final EventOrigin getEvent(final int key) {
             return list[key];
         }
     }
-    
+
     private final static Map<EventOrigin, Map<String, InitExecEntry>> resultStacks = new ConcurrentHashMap<EventOrigin, Map<String, InitExecEntry>>(); // a mapping from urlHash to Entries
     private final static Map<EventOrigin, ScoreMap<String>> resultDomains = new ConcurrentHashMap<EventOrigin, ScoreMap<String>>();
 
     static {
-        for (EventOrigin origin: EventOrigin.values()) {
+        for (final EventOrigin origin: EventOrigin.values()) {
             resultStacks.put(origin, new LinkedHashMap<String, InitExecEntry>());
             resultDomains.put(origin, new ClusteredScoreMap<String>());
         }
     }
-    
+
     public static class InitExecEntry {
         public byte[] initiatorHash, executorHash;
         public InitExecEntry(final byte[] initiatorHash, final byte[] executorHash) {
@@ -122,19 +122,19 @@ public final class ResultURLs {
             return;
         }
     }
-    
+
     public static int getStackSize(final EventOrigin stack) {
         final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack == null) return 0;
         return resultStack.size();
     }
-    
+
     public static int getDomainListSize(final EventOrigin stack) {
         final ScoreMap<String> domains = getDomains(stack);
         if (domains == null) return 0;
         return domains.size();
     }
-    
+
     public static Iterator<Map.Entry<String, InitExecEntry>> results(final EventOrigin stack) {
         final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack == null) return new LinkedHashMap<String, InitExecEntry>().entrySet().iterator();
@@ -149,8 +149,8 @@ public final class ResultURLs {
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).keys(false);
     }
-    
-    public static int deleteDomain(final EventOrigin stack, String host, String hosthash) {
+
+    public static int deleteDomain(final EventOrigin stack, final String host, final String hosthash) {
         assert host != null : "host = null";
         assert hosthash.length() == 6;
         final Iterator<Map.Entry<String, InitExecEntry>> i = results(stack);
@@ -164,22 +164,22 @@ public final class ResultURLs {
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).delete(host);
     }
-    
+
     /**
      * return the count of the domain
      * @param stack type
      * @param domain name
      * @return the number of occurrences of the domain in the stack statistics
      */
-    public static int domainCount(final EventOrigin stack, String domain) {
+    public static int domainCount(final EventOrigin stack, final String domain) {
         assert domain != null : "domain = null";
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).get(domain);
     }
-    
+
     /**
      * returns the stack identified by the id <em>stack</em>
-     * 
+     *
      * @param stack id of resultStack
      * @return null if stack does not exist (id is unknown or stack is null (which should not occur and an error is logged))
      */
@@ -191,9 +191,9 @@ public final class ResultURLs {
     }
 
     public static void clearStacks() {
-        for (EventOrigin origin: EventOrigin.values()) clearStack(origin);
+        for (final EventOrigin origin: EventOrigin.values()) clearStack(origin);
     }
-    
+
     public static void clearStack(final EventOrigin stack) {
         final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack != null) resultStack.clear();
@@ -208,13 +208,13 @@ public final class ResultURLs {
     public static boolean remove(final String urlHash) {
         if (urlHash == null) return false;
         Map<String, InitExecEntry> resultStack;
-        for (EventOrigin origin: EventOrigin.values()) {
+        for (final EventOrigin origin: EventOrigin.values()) {
             resultStack = getStack(origin);
             if (resultStack != null) resultStack.remove(urlHash);
         }
         return true;
     }
-    
+
     /**
      * test and benchmark
      * @param args
@@ -223,7 +223,7 @@ public final class ResultURLs {
         try {
             final DigestURI url = new DigestURI("http", "www.yacy.net", 80, "/");
             final URIMetadataRow urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", 0.0f, 0.0f, new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), UTF8.getBytes("de"), 0, 0, 0, 0, 0, 0);
-            EventOrigin stackNo = EventOrigin.LOCAL_CRAWLING;
+            final EventOrigin stackNo = EventOrigin.LOCAL_CRAWLING;
             System.out.println("valid test:\n=======");
             // add
             stack(urlRef, urlRef.hash(), url.hash(), stackNo);

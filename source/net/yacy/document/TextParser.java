@@ -456,23 +456,23 @@ public final class TextParser {
         final ArrayList<Document> docs = new ArrayList<Document>();
         docs.add(document);
         for (final Map.Entry<MultiProtocolURI, String> link: document.getApplinks().entrySet()) {
-            docs.add(genLinkDocs(docs, "application", link.getKey(), link.getValue(), document.getContentLanguages()));
+            docs.add(genLinkDocs("application", link.getKey(), link.getValue(), document.getContentLanguages()));
         }
         for (final Map.Entry<MultiProtocolURI, String> link: document.getAudiolinks().entrySet()) {
-            docs.add(genLinkDocs(docs, "audio", link.getKey(), link.getValue(), document.getContentLanguages()));
+            docs.add(genLinkDocs("audio", link.getKey(), link.getValue(), document.getContentLanguages()));
         }
         for (final Map.Entry<MultiProtocolURI, String> link: document.getVideolinks().entrySet()) {
-            docs.add(genLinkDocs(docs, "video", link.getKey(), link.getValue(), document.getContentLanguages()));
+            docs.add(genLinkDocs("video", link.getKey(), link.getValue(), document.getContentLanguages()));
         }
         for (final Entry<MultiProtocolURI, ImageEntry> link: document.getImages().entrySet()) {
-            docs.add(genImageDocs(docs, link.getValue()));
+            docs.add(genImageDocs(link.getValue()));
         }
 
         // finally return the list of documents
         return docs.toArray(new Document[docs.size()]);
     }
 
-    private final static Document genLinkDocs(final ArrayList<Document> docs, final String type, final MultiProtocolURI uri, final String descr, final Set<String> contentLanguages) {
+    private final static Document genLinkDocs(final String type, final MultiProtocolURI uri, final String descr, final Set<String> contentLanguages) {
         //System.out.println("HTMLPARSER-LINK " + type + ": " + uri.toNormalform(true, false) + " / " + descr);
         return new Document(
                 uri,
@@ -494,7 +494,7 @@ public final class TextParser {
                 false);
     }
 
-    private final static Document genImageDocs(final ArrayList<Document> docs, final ImageEntry img) {
+    private final static Document genImageDocs(final ImageEntry img) {
         //System.out.println("HTMLPARSER-LINK image: " + img.url().toNormalform(true, false) + " / " + img.alt());
         return new Document(
                 img.url(),

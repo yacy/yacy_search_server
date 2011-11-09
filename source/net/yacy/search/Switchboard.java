@@ -2087,8 +2087,11 @@ public final class Switchboard extends serverSwitch {
 
     private void storeDocumentIndex(final Segments.Process process, final Response queueEntry, final Document document, final Condenser condenser, final SearchEvent searchEvent, final String sourceName) {
 
+        //TODO: document must carry referer, size and last modified
+
         // CREATE INDEX
         final String dc_title = document.dc_title();
+        final DigestURI url = new DigestURI(document.dc_source());
         final DigestURI referrerURL = queueEntry.referrerURL();
         EventOrigin processCase = queueEntry.processCase(this.peers.mySeed().hash);
         if (process == Segments.Process.SURROGATES) {
@@ -2097,24 +2100,24 @@ public final class Switchboard extends serverSwitch {
 
         if (condenser == null || document.indexingDenied()) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_PROCESS_CONTEXT, "denied by rule in document, process case=" + processCase);
+            addURLtoErrorDB(url, (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_PROCESS_CONTEXT, "denied by rule in document, process case=" + processCase);
             return;
         }
 
         if (!queueEntry.profile().indexText() && !queueEntry.profile().indexMedia()) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_LOAD_CONTEXT, "denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
+            addURLtoErrorDB(url, (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_LOAD_CONTEXT, "denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             return;
         }
 
         // remove stopwords
-        this.log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
+        this.log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + url);
 
         // STORE WORD INDEX
         URIMetadataRow newEntry = null;
         try {
             newEntry = this.indexSegments.segment(process).storeDocument(
-                    queueEntry.url(),
+                    url,
                     referrerURL,
                     queueEntry.lastModified(),
                     new Date(),
@@ -2127,14 +2130,14 @@ public final class Switchboard extends serverSwitch {
             feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_LOAD_CONTEXT, "error storing url: " + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase + ", error = " + e.getMessage());
+            addURLtoErrorDB(url, (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_LOAD_CONTEXT, "error storing url: " + url.toNormalform(false, true) + "': process case=" + processCase + ", error = " + e.getMessage());
             return;
         }
 
         // store rss feeds in document into rss table
         for (final Map.Entry<MultiProtocolURI, String> rssEntry : document.getRSS().entrySet()) {
             final Tables.Data rssRow = new Tables.Data();
-            rssRow.put("referrer", queueEntry.url().hash());
+            rssRow.put("referrer", url.hash());
             rssRow.put("url", UTF8.getBytes(rssEntry.getKey().toNormalform(true, false)));
             rssRow.put("title", UTF8.getBytes(rssEntry.getValue()));
             rssRow.put("recording_date", new Date());
@@ -2163,7 +2166,7 @@ public final class Switchboard extends serverSwitch {
             EventTracker.update(EventTracker.EClass.PPM, Long.valueOf(currentPPM()), true);
             lastPPMUpdate = System.currentTimeMillis();
         }
-        EventTracker.update(EventTracker.EClass.INDEX, queueEntry.url().toNormalform(true, false), false);
+        EventTracker.update(EventTracker.EClass.INDEX, url.toNormalform(true, false), false);
 
         // if this was performed for a remote crawl request, notify requester
         if ((processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
