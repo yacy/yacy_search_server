@@ -1,7 +1,3 @@
-body, table, textarea {
-    font-size: 12px;
-}
-
 .ui-dialog .ui-dialog-title {
 	font-size: 14px;
 }
@@ -21,6 +17,11 @@ body, table, textarea {
 	width: 150px;
 	margin-bottom: 10px;
 }
+
+.ui-autocomplete {
+	font-size: 12px;
+}
+
 .ynav {
 	font-size: 12px;
 }
@@ -102,6 +103,7 @@ body, table, textarea {
   height: 16px;
   vertical-align: middle;  
   margin-left: -24px;
+  float: left;
 }
 .classic {
 	font-size: 12px;	
@@ -115,6 +117,7 @@ body, table, textarea {
 	margin-bottom: 20px;
 	margin-left: -20px;
 	color:#239AFF;
+	font-size: 12px;
 }
 .ymsg img {
 	width: 50px;

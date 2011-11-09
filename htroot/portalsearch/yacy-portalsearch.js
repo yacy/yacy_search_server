@@ -117,9 +117,6 @@ function yrun() {
 	  	title: yconf.title,
 	  	show: yconf.show,
 	  	hide: yconf.hide,
-		close: function(event, ui) { 
-			$("#yquery").setValue('');		
-		},
 		drag: function(event, ui) {
 			var position = $("#ypopup").parent(".ui-dialog").position();
 			var left = $("#ypopup").parent(".ui-dialog").width()+5+position.left;
@@ -138,6 +135,7 @@ function yrun() {
 			$("#yside").dialog('option', 'position', [left,position.top+32]);
         },
 		close: function(event, ui) {
+			$("#yquery").setValue('');	
 			$("#yside").dialog('destroy');
 			$('#yside').remove();
 		},
@@ -243,7 +241,7 @@ function yacysearch(global, clear) {
 			if(global) item.value = 'global';
 		}
 		if(item.name == 'query' || item.name == 'search') {
-			if(item.value != ycurr)				
+			if(item.value != ycurr)								
 				ycurr = item.value;
 		}
 		param[i] = item;
@@ -254,6 +252,11 @@ function yacysearch(global, clear) {
         timeout: 10000,
         error: function() {
         			if (clear) $('#ypopup').empty();
+    				var favicon = "<img src='"+yconf.url+"/yacy/ui/img-2/stop.png' class='favicon'/>";
+    				var title = "<h3 class='linktitle'>"+favicon+"Ajax Error!</h3>";						
+    				var url = "<p class='url'><a href=''>Current search terms: "+searchTerms+"</a></p>"
+    				var desc = "<p class='desc'>Sorry, this should not have happened - please try again!</p>";
+    				$(title+desc+url).appendTo("#ypopup");
         		}
     }); 
 	
@@ -266,7 +269,7 @@ function yacysearch(global, clear) {
 			var searchTerms = data.channels[0].searchTerms;			
 			
 			if(ycurr.replace(/ /g,"+") != searchTerms) {
-				return false;
+				return false;				
 			}
 			if(clear) {	
 				$('#ypopup').empty();
@@ -293,6 +296,16 @@ function yacysearch(global, clear) {
 					count++;								
 				}
 			);
+			
+			if(count == 0) {
+    			if (clear) $('#ypopup').empty();
+				var favicon = "<img src='"+yconf.url+"/yacy/ui/img-2/stop.png' class='favicon'/>";
+				var title = "<h3 class='linktitle'>"+favicon+"No search results!</h3>";						
+				var url = "<p class='url'><a href=''>Current search terms: "+searchTerms+"</a></p>"
+				var desc = "<p class='desc'>You could restate your search or release some navigators...</p>";
+				$(title+desc+url).appendTo("#ypopup");
+			}
+			
 			if(clear) {		
 				$('#yside').empty();
 				var query = unescape($("#yquery").getValue());
@@ -326,7 +339,8 @@ function yacysearch(global, clear) {
 					selected: function(event, ui) { 
 						var query = unescape($("#yquery").getValue() + " /language/" +ui.item.value);
 						$("#yquery").setValue(query);
-						$("#yquery").trigger('keyup');	
+						ynavigators.push("/language/"+ui.item.value);
+						$("#yquery").trigger('keyup');
 					}
 				});	
 				$.each (
@@ -348,8 +362,8 @@ function yacysearch(global, clear) {
 								selected: function(event, ui) { 
 									var query = unescape($("#yquery").getValue() + " " +ui.item.value);
 									$("#yquery").setValue(query);
-									$("#yquery").trigger('keyup');
 									ynavigators.push(ui.item.value);
+									$("#yquery").trigger('keyup');								
 								}
 							});							
 						}								
@@ -371,31 +385,20 @@ function yacysearch(global, clear) {
 					} else if (this.id == "local") {
 						global = false;
 					}
-					yacysearch(global, true);
+					$("#yquery").trigger('keyup');
 				});
 				
 				$('<hr />').appendTo("#yside");	
-				var arLen=ynavigators.length;
-				for ( var i=0, len=arLen; i<len; ++i ){
-					$('<p><img src="/yacy/ui/img-2/cancel_round.png" class="ynav-cancel" /><span class="ytxt"> '+ynavigators[i]+'</span></p>').appendTo("#yside");
-				}
-				if(count>0) {
+				cancelNavigators(ynavigators, "#yside");
+				
+				if(true) {
 					autoOpenSidebar();
 					if ($("#ypopup").dialog('isOpen')) {					
-						if($("#ypopup h3 :last").position().top < $("#ypopup").dialog( "option", "height" )) {
+						if($("#ypopup h3 :last").position().top < $("#ypopup").dialog( "option", "height" ) && count == maximumRecords) {							
 							startRecord = startRecord + maximumRecords;
 							yacysearch(submit, false);						
 						}
 					}
-					$(".ynav-cancel").bind("click", function(event) {
-						var str = $(event.target).next().text().replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, "");
-						var idx = ynavigators.indexOf(str);
-						if(idx!=-1) ynavigators.splice(idx, 1);
-						var regexp = new RegExp(str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));
-						$("#yquery").setValue(query.replace(regexp,"").replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, ""));
-						startRecord = 0;
-						yacysearch(submit, true);
-					});
 				} 
 			 }
         }
@@ -406,6 +409,22 @@ function yacysearch(global, clear) {
 				$("#yside").dialog('open');
 				$("#yquery").focus();			
 			}	
-		} , 1500);	
+		} , 1200);	
+	}
+	function cancelNavigators(ynavigators, appendTo) {
+		var arLen=ynavigators.length;
+		for ( var i=0, len=arLen; i<len; ++i ){
+			$('<p><img src="/yacy/ui/img-2/cancel_round.png" class="ynav-cancel" /><span class="ytxt"> '+ynavigators[i]+'</span></p>').appendTo(appendTo);
+		}
+		$(".ynav-cancel").bind("click", function(event) {
+			var query = $("#yquery").getValue();
+			var str = $(event.target).next().text().replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, "");
+			var idx = ynavigators.indexOf(str);
+			if(idx!=-1) ynavigators.splice(idx, 1);
+			var regexp = new RegExp(str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));
+			$("#yquery").setValue(query.replace(regexp,"").replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, ""));
+			startRecord = 0;
+			$("#yquery").trigger('keyup');
+		});
 	}
 }
