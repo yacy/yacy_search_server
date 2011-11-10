@@ -19,7 +19,7 @@
  */
 
 function statuscheck() {
-	if(load_status < 4) {
+	if(load_status < 5) {
 		return;
 	} else {
 		window.clearInterval(loading);
@@ -60,7 +60,7 @@ $(document).ready(function() {
 	
 	if(yconf.load_css) {	
 		var style1 = yconf.url + '/portalsearch/yacy-portalsearch.css';
-		var style2 = yconf.url + '/jquery/themes/'+yconf.theme+'/ui.all.css';
+		var style2 = yconf.url + '/jquery/themes/'+yconf.theme+'/jquery-ui-1.8.16.custom.css';
 		var style3 = yconf.url + '/jquery/css/jquery-ui-combobox.css';
 	
 		var head = document.getElementsByTagName('head')[0];
@@ -79,7 +79,7 @@ $(document).ready(function() {
 	load_status = 0;
 	loading = window.setInterval("statuscheck()", 200);    
     if(yconf.load_js) {
-		var script1 = yconf.url + '/jquery/js/jquery-query-2.1.7.js';
+		var script1 = yconf.url + '/jquery/js/jquery.query-2.1.7.js';
 		var script2 = yconf.url + '/jquery/js/jquery.form-2.73.js';
 		var script3 = yconf.url + '/jquery/js/jquery.field-0.9.2.min.js';
 		var script4 = yconf.url + '/jquery/js/jquery-ui-1.8.16.custom.min.js';
