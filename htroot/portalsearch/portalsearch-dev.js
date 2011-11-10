@@ -1,20 +1,14 @@
 /*
  * YaCy Portalsearch
  * 
- * @author Stefan Förster (apfelmaennchen)
- * @version 1.1 
- * 
- * @requires jquery-1.6.1
- * @requires jquery-ui-1.8.13
- * @requires jquery-query-2.1.7
- * @requires jquery.form-2.73
- * @requires jquery.field-0.9.2.min
+ * @author Stefan Förster (apfelmaennchen) <sof@gmx.de>
+ * @version 1.2 
  *
  * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
  *
- * Date: 19-MAY-2011
+ * Date: 10-Nov-2011
  * 
  */
 
@@ -219,7 +213,6 @@ function yacysearch(global, clear) {
 
 	if(clear) {
 		$('#ypopup').empty();
-
 		var loading = "<div class='yloading'><h3 class='linktitle'><em>Loading: "+yconf.url+"</em><br/>";
 		var loadimg = "<img src='"+yconf.url+"/yacy/ui/img/loading2.gif' align='absmiddle'/></h3></div>";
 		$('#ypopup').append(loading+loadimg);
@@ -241,8 +234,9 @@ function yacysearch(global, clear) {
 			if(global) item.value = 'global';
 		}
 		if(item.name == 'query' || item.name == 'search') {
+			item.value = $.trim(item.value);
 			if(item.value != ycurr)								
-				ycurr = item.value;
+				ycurr = item.value;			
 		}
 		param[i] = item;
 	});
@@ -250,14 +244,26 @@ function yacysearch(global, clear) {
 	
 	$.ajaxSetup({ 
         timeout: 10000,
-        error: function() {
-        			if (clear) $('#ypopup').empty();
-    				var favicon = "<img src='"+yconf.url+"/yacy/ui/img-2/stop.png' class='favicon'/>";
-    				var title = "<h3 class='linktitle'>"+favicon+"Ajax Error!</h3>";						
-    				var url = "<p class='url'><a href=''>Current search terms: "+searchTerms+"</a></p>"
-    				var desc = "<p class='desc'>Sorry, this should not have happened - please try again!</p>";
-    				$(title+desc+url).appendTo("#ypopup");
-        		}
+        error: function(x,e) {
+			var err = 'Unknow Error: '+x.responseText;
+        	if(x.status==0) {
+				err = 'Unknown Network Error! I try to reload...';
+				yacysearch(global, true);
+			} else if(x.status==404) {
+					err = x.status + ' - Requested URL not found.';
+			} else if(x.status==500) {
+					err = x.status + ' - Internel Server Error.';
+			} else if(e=='parsererror') {
+					err = 'Parsing JSON Request failed.';
+			} else if(e=='timeout') {
+					err = 'Request Time out.';
+			};
+			if (clear) $('#ypopup').empty();
+			var favicon = "<img src='"+yconf.url+"/yacy/ui/img-2/stop.png' class='favicon'/>";
+			var title = "<h3 class='linktitle'>"+favicon+" "+err+"</h3>";						
+			var url = "<p class='url'><a href=''>Current search terms: "+ycurr+"</a></p>"
+			$(title+url).appendTo("#ypopup");
+		}
     }); 
 	
 	$.getJSON(url, param,
@@ -266,9 +272,10 @@ function yacysearch(global, clear) {
 			if (json[0]) data = json[0];
 			else data = json;			
 			
-			var searchTerms = data.channels[0].searchTerms;			
-			
-			if(ycurr.replace(/ /g,"+") != searchTerms) {
+			var searchTerms = "";
+			searchTerms = data.channels[0].searchTerms;			
+						
+			if($.trim(ycurr.replace(/ /g,"+")) != searchTerms) {
 				return false;				
 			}
 			if(clear) {	
@@ -302,7 +309,7 @@ function yacysearch(global, clear) {
 				var favicon = "<img src='"+yconf.url+"/yacy/ui/img-2/stop.png' class='favicon'/>";
 				var title = "<h3 class='linktitle'>"+favicon+"No search results!</h3>";						
 				var url = "<p class='url'><a href=''>Current search terms: "+searchTerms+"</a></p>"
-				var desc = "<p class='desc'>You could restate your search or release some navigators...</p>";
+				var desc = "<p class='desc'>You could restate your search, release some navigators or switch to global search...</p>";
 				$(title+desc+url).appendTo("#ypopup");
 			}
 			
@@ -330,7 +337,57 @@ function yacysearch(global, clear) {
 				var ymsg= "Total "+yglobal+" results: "+total;
 				$("<div class='ymsg'><table><tr><td width='55px'>"+ylogo+"</td><td id='yresult'>"+ymsg+"</td></tr></div").appendTo('#yside');
 				$('<hr />').appendTo("#yside");
+					
+				var selected = 'selected="selected">';
+				var select1 = '<select class="selector" id="yglobal"><option value="local"';
+				var select2 = 'local</option><option value="global"';
+				var select3 = 'global</option></select>';
+				
+				if(global) {
+					select = select1 + '>' + select2 + selected + select3;
+				} else {
+					select = select1 + selected + select2 + '>' + select3;					
+				}
+				
+				$('<div class="ui-widget ynav"><label for="yglobal">Get local/global results:</label><br />'+select+'</div>').appendTo('#yside');
+				$("#yglobal").combobox({									
+					selected: function(event, ui) { 						
+						if(ui.item.value == "global") {
+							global = true;
+						} else {
+							global = false;
+						}
+						yacysearch(global, true);
+					}
+				});				
+				
+				select1 = '<select class="selector" id="yrecent"><option value="relevance"';
+				select2 = 'Relevance</option><option value="date"';
+				select3 = 'Date</option></select>';
+				
+				var query = unescape($("#yquery").getValue());	
+				if(query.indexOf("/date") != -1) {
+					select = select1 + '>' + select2 + selected + select3;
+				} else {
+					select = select1 + selected + select2 + '>' + select3;					
+				}
+				$('<div class="ui-widget ynav"><label for="yrecent">Sort result by:</label><br />'+select+'</div>').appendTo('#yside');
+				$("#yrecent").combobox({									
+					selected: function(event, ui) { 						
+						if(ui.item.value == "date") {
+							query = query + " /date";
+						} else {
+							query = query.replace(/\s\/date/g,"");
+						}
+						$("#yquery").setValue($.trim(query));
+						$("#yquery").trigger('keyup');
+					}
+				});
+								
 
+								
+				
+				$('<hr />').appendTo("#yside");				
 				$("<p class='ytxt'>You can narrow down your search by selecting one of the below navigators:</p>").appendTo('#yside');
 				
 				/*
@@ -345,7 +402,8 @@ function yacysearch(global, clear) {
 						$("#yquery").trigger('keyup');
 					}
 				});
-				*/	
+				*/
+				
 				$.each (
 					data.channels[0].navigation,
 					function(i,facet) {
@@ -372,29 +430,25 @@ function yacysearch(global, clear) {
 						}								
 					}
 				);
-				$('<hr />').appendTo("#yside");				
-				var radio1 = '<table><tr><td><span class="ynav">Get results: </span><div class="yradio" id="yglobal"><input type="radio" id="local" name="yglobal"" '+sel_local+' /><label for="local">local</label><br><input type="radio" id="global" name="yglobal" '+sel_global+' /><label for="global">global</label></div></td>';
-				var radio2 = '<td><span class="ynav">Sort by: </span><div class="yradio" id="yrecent"><input type="radio" id="relevance" name="yrecent" '+sel_relev+' /><label for="relevance">relevance</label><br><input type="radio" id="date" name="yrecent" '+sel_date+' /><label for="date">date</label></div></td></tr></table>';
-				$(radio1 + radio2).appendTo('#yside');
-			
-				$('#local, #global, #date, #relevance').change(function() {
-					var query = unescape($("#yquery").getValue());
-					if (this.id == "date") {
-						$("#yquery").setValue(query + " /date");
-					} else if (this.id == "relevance") {
-						$("#yquery").setValue(query.replace(/ \/date/g,""));
-					} else if (this.id == "global") {
-						global = true;
-					} else if (this.id == "local") {
-						global = false;
-					}
-					$("#yquery").trigger('keyup');
-				});
 				
 				$('<hr />').appendTo("#yside");	
+				if(ynavigators.length > 0) {
+					$("<p class='ytxt'>Uncheck to release navigators:</p>").appendTo('#yside');	
+				}
+							
 				cancelNavigators(ynavigators, "#yside");
-				
-				if(true) {
+
+				if($("#ypopup .yloading").length == 0) {
+					$(".ynav-cancel").bind("change", function(event) {
+						var query = $("#yquery").getValue();
+						var str = $(event.target).val();
+						var idx = ynavigators.indexOf($.trim(str));
+						if(idx!=-1) ynavigators.splice(idx, 1);
+						var regexp = new RegExp(' '+str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));
+						$("#yquery").setValue($.trim(query.replace(regexp,"")));
+						startRecord = 0;
+						$("#yquery").trigger('keyup');
+					});
 					autoOpenSidebar();
 					if ($("#ypopup").dialog('isOpen')) {					
 						if($("#ypopup h3 :last").position().top < $("#ypopup").dialog( "option", "height" ) && count == maximumRecords) {							
@@ -416,18 +470,8 @@ function yacysearch(global, clear) {
 	}
 	function cancelNavigators(ynavigators, appendTo) {
 		var arLen=ynavigators.length;
-		for ( var i=0, len=arLen; i<len; ++i ){
-			$('<p><img src="/yacy/ui/img-2/cancel_round.png" class="ynav-cancel" /><span class="ytxt"> '+ynavigators[i]+'</span></p>').appendTo(appendTo);
+		for ( var i=0, len=arLen; i<len; ++i ){	
+			$(' <input type="checkbox" checked="checked" class="ynav-cancel" name="ynav'+i+'" value="'+ynavigators[i]+'"> '+ynavigators[i]+'<br>').appendTo(appendTo);			
 		}
-		$(".ynav-cancel").bind("click", function(event) {
-			var query = $("#yquery").getValue();
-			var str = $(event.target).next().text().replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, "");
-			var idx = ynavigators.indexOf(str);
-			if(idx!=-1) ynavigators.splice(idx, 1);
-			var regexp = new RegExp(str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));
-			$("#yquery").setValue(query.replace(regexp,"").replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, ""));
-			startRecord = 0;
-			$("#yquery").trigger('keyup');
-		});
 	}
 }
