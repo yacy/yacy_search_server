@@ -31,10 +31,10 @@ import java.util.Iterator;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.solr.SolrChardingConnector;
-import net.yacy.cora.services.federated.solr.SolrChardingSelection;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrScheme;
+import net.yacy.cora.services.federated.solr.SolrShardingConnector;
+import net.yacy.cora.services.federated.solr.SolrShardingSelection;
 import net.yacy.cora.services.federated.solr.SolrSingleConnector;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
@@ -72,7 +72,7 @@ public class IndexFederated_p {
             if (s.length() > 0) s.setLength(s.length() - 1);
             solrurls = s.toString().trim();
             env.setConfig("federated.service.solr.indexing.url", solrurls);
-            env.setConfig("federated.service.solr.indexing.charding", post.get("solr.indexing.charding", env.getConfig("federated.service.solr.indexing.charding", "modulo-host-md5")));
+            env.setConfig("federated.service.solr.indexing.sharding", post.get("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5")));
             final String schemename = post.get("solr.indexing.schemefile", env.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list"));
             env.setConfig("federated.service.solr.indexing.schemefile", schemename);
 
@@ -88,7 +88,7 @@ public class IndexFederated_p {
                 // switch on
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
                 try {
-                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrChardingConnector(solrurls, scheme, SolrChardingSelection.Method.MODULO_HOST_MD5, 10000) : null);
+                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrShardingConnector(solrurls, scheme, SolrShardingSelection.Method.MODULO_HOST_MD5, 10000) : null);
                 } catch (final IOException e) {
                     Log.logException(e);
                     sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
@@ -118,8 +118,8 @@ public class IndexFederated_p {
         } else {
             prop.put("table", 1);
             final SolrConnector solr = sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr();
-            final long[] size = (solr instanceof SolrChardingConnector) ? ((SolrChardingConnector) solr).getSizeList() : new long[]{((SolrSingleConnector) solr).getSize()};
-            final String[] urls = (solr instanceof SolrChardingConnector) ? ((SolrChardingConnector) solr).getAdminInterfaceList() : new String[]{((SolrSingleConnector) solr).getAdminInterface()};
+            final long[] size = (solr instanceof SolrShardingConnector) ? ((SolrShardingConnector) solr).getSizeList() : new long[]{((SolrSingleConnector) solr).getSize()};
+            final String[] urls = (solr instanceof SolrShardingConnector) ? ((SolrShardingConnector) solr).getAdminInterfaceList() : new String[]{((SolrSingleConnector) solr).getAdminInterface()};
             boolean dark = false;
             for (int i = 0; i < size.length; i++) {
                 prop.put("table_list_" + i + "_dark", dark ? 1 : 0); dark = !dark;
@@ -153,7 +153,7 @@ public class IndexFederated_p {
         prop.put("yacy.indexing.enabled.checked", env.getConfigBool("federated.service.yacy.indexing.enabled", true) ? 1 : 0);
         prop.put("solr.indexing.enabled.checked", env.getConfigBool("federated.service.solr.indexing.enabled", false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr").replace(",", "\n"));
-        prop.put("solr.indexing.charding", env.getConfig("federated.service.solr.indexing.charding", "modulo-host-md5"));
+        prop.put("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5"));
         prop.put("solr.indexing.schemefile", schemename);
 
         // return rewrite properties

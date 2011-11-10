@@ -40,21 +40,21 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
 
-public class SolrChardingConnector implements SolrConnector {
+public class SolrShardingConnector implements SolrConnector {
 
     private final List<SolrConnector> connectors;
     private final SolrScheme scheme;
-    private final SolrChardingSelection charding;
+    private final SolrShardingSelection sharding;
     private final String[] urls;
 
-    public SolrChardingConnector(final String urlList, final SolrScheme scheme, final SolrChardingSelection.Method method, final long timeout) throws IOException {
+    public SolrShardingConnector(final String urlList, final SolrScheme scheme, final SolrShardingSelection.Method method, final long timeout) throws IOException {
         urlList.replace(' ', ',');
         this.urls = urlList.split(",");
         this.connectors = new ArrayList<SolrConnector>();
         for (final String u: this.urls) {
             this.connectors.add(new SolrRetryConnector(new SolrSingleConnector(u.trim(), scheme), timeout));
         }
-        this.charding = new SolrChardingSelection(method, this.urls.length);
+        this.sharding = new SolrShardingSelection(method, this.urls.length);
         this.scheme = scheme;
     }
 
@@ -122,7 +122,7 @@ public class SolrChardingConnector implements SolrConnector {
      * @throws IOException
      */
     public void add(final SolrInputDocument solrdoc) throws IOException {
-        this.connectors.get(this.charding.select(solrdoc)).add(solrdoc);
+        this.connectors.get(this.sharding.select(solrdoc)).add(solrdoc);
     }
 
     /**
@@ -142,7 +142,7 @@ public class SolrChardingConnector implements SolrConnector {
      * @throws IOException
      */
     public void err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
-        this.connectors.get(this.charding.selectURL(digestURI.toNormalform(true, false))).err(digestURI, failReason, httpstatus);
+        this.connectors.get(this.sharding.selectURL(digestURI.toNormalform(true, false))).err(digestURI, failReason, httpstatus);
     }
 
 

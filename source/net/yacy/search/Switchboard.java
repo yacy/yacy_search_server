@@ -91,8 +91,8 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
-import net.yacy.cora.services.federated.solr.SolrChardingConnector;
-import net.yacy.cora.services.federated.solr.SolrChardingSelection;
+import net.yacy.cora.services.federated.solr.SolrShardingConnector;
+import net.yacy.cora.services.federated.solr.SolrShardingSelection;
 import net.yacy.cora.services.federated.solr.SolrScheme;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
@@ -599,7 +599,7 @@ public final class Switchboard extends serverSwitch {
         final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
         try {
-            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrChardingConnector(solrurls, workingScheme, SolrChardingSelection.Method.MODULO_HOST_MD5, 10000) : null);
+            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrShardingConnector(solrurls, workingScheme, SolrShardingSelection.Method.MODULO_HOST_MD5, 10000) : null);
         } catch (final IOException e) {
             Log.logException(e);
             this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);

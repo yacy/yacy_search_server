@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.services.federated.solr.SolrChardingConnector;
+import net.yacy.cora.services.federated.solr.SolrShardingConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
@@ -108,7 +108,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         this.stack = new ConcurrentLinkedQueue<byte[]>();
     }
 
-    public ZURL(final SolrChardingConnector solrConnector) {
+    public ZURL(final SolrShardingConnector solrConnector) {
         this.solrConnector = solrConnector;
         // creates a new ZUR in RAM
         this.urlIndex = new RowSet(rowdef);

@@ -1043,5 +1043,5 @@ color_searchurlhover = #008000
 federated.service.yacy.indexing.enabled = true
 federated.service.solr.indexing.enabled = false
 federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
-federated.service.solr.indexing.charding = MODULO_HOST_MD5
+federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.schemefile = solr.keys.default.list
