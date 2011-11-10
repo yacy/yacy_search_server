@@ -494,7 +494,8 @@
       </tarfileset>
       <tarfileset dir="${img-2}" prefix="yacy/ui/img-2/">
       	<include name="magnify.png"/>
-      	<include name="cancel_round.png"/>      	
+      	<include name="cancel_round.png"/>
+      	<include name="stop.png"/>  
       </tarfileset>
   	</tar>
   </target>
