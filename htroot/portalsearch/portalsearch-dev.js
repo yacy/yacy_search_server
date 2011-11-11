@@ -90,15 +90,8 @@ $(document).ready(function() {
 });
 
 function yrun() {
-	
-	$.extend($.ui.accordion.defaults, {
-		autoHeight: false,
-		clearStyle: true,
-		collapsible: true,
-		header: "h3"
-	});	
-	
 	maximumRecords = parseInt($("#ysearch input[name='maximumRecords']").getValue());
+	global = yconf.global;
 	
 	$("#ypopup").dialog({			
 		autoOpen: false,
@@ -159,7 +152,7 @@ function yrun() {
 				p1 = $("#ypopup h3 :last").position().top;
 				if(p1-$("#ypopup").dialog( "option", "height" ) < 0) {
 					startRecord = startRecord + maximumRecords;
-					yacysearch(submit, false);
+					yacysearch(false);
 				}
 			});
 
@@ -167,32 +160,36 @@ function yrun() {
 		}  
 	});
 	
-	$('#ysearch').keyup(function(e) {		
+	$('#ysearch').keyup(function(e) {		    // React to keyboard input
 
-		if(e.which == 27) {						// ESC
+		if(e.which == 27) {						// Close popup on ESC
 			$("#ypopup").dialog('close');
 			$("#yquery").setValue("");
-		} else if(e.which == 39) {				// Right
-			startRecord = startRecord + maximumRecords;
-			yacysearch(submit, false);					
 		}
-		if(ycurr == $("#yquery").getValue()) {		
+		
+		if(e.which == 18) {						// Global search on ALT
+			global = true;			
+			ycurr = $("#yquery").getValue();			
+			yacysearch(true);
+		}
+		
+		if(ycurr == $("#yquery").getValue()) {  // Do nothing if search term hasn't changed		
 			return false;
-		} 
+		}
 
-		if ($("#yquery").getValue() == '') {
+		global = yconf.global;					// As this is a new search, revert to default resource 
+
+		if ($("#yquery").getValue() == '') {    // If search term is empty reset to default resource and close popup 
 			if($("#ypopup").dialog('isOpen'))
 				$("#ypopup").dialog('close');
-		} else {
-			ycurr = $("#yquery").getValue();
-			if(!submit) yacysearch(false, true);
-			else submit = false;
+		} else {                                // Else fire up a search request and remeber the current search term
+			ycurr = $("#yquery").getValue();			
+			yacysearch(true);
 		}		
 		return false;		
 	});
 	
-	$('#ysearch').submit(function() {
-		submit = true;
+	$('#ysearch').submit(function() {           // Submit a search request
 		ycurr = $("#yquery").getValue();
 
 		if (!$("#ypopup").dialog('isOpen'))			
@@ -202,14 +199,14 @@ function yrun() {
 				$("#yside").dialog('close');					
 	
 		$("#yquery").focus();	
-		
-		yacysearch(yconf.global, true);		
+
+		yacysearch(true);		
 		return false;
 	});	
 }
 
-function yacysearch(global, clear) {	
-	var url = yconf.url + '/yacysearch.json?callback=?'
+function yacysearch(clear) {	
+	var url = yconf.url + '/yacysearch.json?callback=?'    // JSONP (cross domain) request URL
 
 	if(clear) {
 		$('#ypopup').empty();
@@ -226,16 +223,19 @@ function yacysearch(global, clear) {
 		$("#yquery").focus();
 	}
 	
-	var param = [];		
+	var param = [];		                                   // Generate search request parameters from HTML form
 	$("#ysearch input").each(function(i){
 		var item = { name : $(this).attr('name'), value : $(this).attr('value') };		
-		if(item.name == 'resource') {
-			if(item.value == 'global') global = true;
-			if(global) item.value = 'global';
+		if(item.name == 'resource') {					   // Set parameter for resource according to global
+			if(global) 
+				item.value = 'global';
+			else {
+				item.value = 'local'
+			}
 		}
 		if(item.name == 'query' || item.name == 'search') {
-			item.value = $.trim(item.value);
-			if(item.value != ycurr)								
+			item.value = $.trim(item.value);               // remove heading and trailing white spaces from querey
+			if(item.value != ycurr)						   // in case of fast typing ycurr needs to be updated	
 				ycurr = item.value;			
 		}
 		param[i] = item;
@@ -248,7 +248,7 @@ function yacysearch(global, clear) {
 			var err = 'Unknow Error: '+x.responseText;
         	if(x.status==0) {
 				err = 'Unknown Network Error! I try to reload...';
-				yacysearch(global, true);
+				yacysearch(true);
 			} else if(x.status==404) {
 					err = x.status + ' - Requested URL not found.';
 			} else if(x.status==500) {
@@ -315,26 +315,9 @@ function yacysearch(global, clear) {
 			
 			if(clear) {		
 				$('#yside').empty();
-				var query = unescape($("#yquery").getValue());
-				var yglobal = "local";		
-				var sel_date = "";
-				var sel_relev = "";
-				var sel_local = "";
-				var sel_global = "";				
-				if(query.indexOf("/date") != -1) 
-					sel_date = 'checked="checked"';
-				else 
-					sel_relev = 'checked="checked"';
-				
-				if(global) {
-					sel_global = 'checked="checked"';
-					yglobal = "global";	
-				}
-				else 
-					sel_local = 'checked="checked"';
 								
 				var ylogo = "<a href='"+yconf.link+"' target='_blank'><img style='padding-left: 24px;' src='"+yconf.logo+"' alt='"+yconf.logo+"' title='"+yconf.logo+"' /></a>";
-				var ymsg= "Total "+yglobal+" results: "+total;
+				var ymsg= "Total "+result+" results: "+total;
 				$("<div class='ymsg'><table><tr><td width='55px'>"+ylogo+"</td><td id='yresult'>"+ymsg+"</td></tr></div").appendTo('#yside');
 				$('<hr />').appendTo("#yside");
 					
@@ -357,7 +340,7 @@ function yacysearch(global, clear) {
 						} else {
 							global = false;
 						}
-						yacysearch(global, true);
+						yacysearch(true);
 					}
 				});				
 				
@@ -383,9 +366,6 @@ function yacysearch(global, clear) {
 						$("#yquery").trigger('keyup');
 					}
 				});
-								
-
-								
 				
 				$('<hr />').appendTo("#yside");				
 				$("<p class='ytxt'>You can narrow down your search by selecting one of the below navigators:</p>").appendTo('#yside');
@@ -404,7 +384,7 @@ function yacysearch(global, clear) {
 				});
 				*/
 				
-				$.each (
+				$.each (    // Loop through all available navigators and include comboboxes in sidebar
 					data.channels[0].navigation,
 					function(i,facet) {
 						if (facet) {
@@ -444,34 +424,39 @@ function yacysearch(global, clear) {
 						var str = $(event.target).val();
 						var idx = ynavigators.indexOf($.trim(str));
 						if(idx!=-1) ynavigators.splice(idx, 1);
-						var regexp = new RegExp(' '+str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));
+						var regexp = new RegExp(' '+str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));   // properly escape string for regexp
 						$("#yquery").setValue($.trim(query.replace(regexp,"")));
 						startRecord = 0;
 						$("#yquery").trigger('keyup');
 					});
 					autoOpenSidebar();
 					if ($("#ypopup").dialog('isOpen')) {					
-						if($("#ypopup h3 :last").position().top < $("#ypopup").dialog( "option", "height" ) && count == maximumRecords) {							
+						// If you got maximumRecords results, but still have display space, load more results
+						if($("#ypopup h3 :last").position().top < $("#ypopup").dialog( "option", "height" ) && count == maximumRecords) {						
 							startRecord = startRecord + maximumRecords;
-							yacysearch(submit, false);						
+							yacysearch(false);						
 						}
 					}
 				} 
 			 }
         }
     );
-	function autoOpenSidebar() {			
-		window.setTimeout(function() {
-			if(	$("#yquery").getValue() == ycurr) {													
+	function autoOpenSidebar() {	              	
+		window.setTimeout(function() {                  // The delay prevents the sidebar to open on every intermediate search results
+			if(	$("#yquery").getValue() == ycurr) {		// Open side bar only if result matches current search term												
 				$("#yside").dialog('open');
 				$("#yquery").focus();			
 			}	
 		} , 1000);	
 	}
-	function cancelNavigators(ynavigators, appendTo) {
+	function cancelNavigators(ynavigators, appendTo) {   // Include checkboxes to release navigators
 		var arLen=ynavigators.length;
+		var query = $("#yquery").getValue();
 		for ( var i=0, len=arLen; i<len; ++i ){	
-			$(' <input type="checkbox" checked="checked" class="ynav-cancel" name="ynav'+i+'" value="'+ynavigators[i]+'"> '+ynavigators[i]+'<br>').appendTo(appendTo);			
+			if(query.indexOf(ynavigators[i]) != -1)      // Check wether search term still contains the navigator
+				$(' <input type="checkbox" checked="checked" class="ynav-cancel" name="ynav'+i+'" value="'+ynavigators[i]+'"> '+ynavigators[i]+'<br>').appendTo(appendTo);			
+			else
+				ynavigators.splice(i, 1);                // Remove navigator from array as it has been removed manually from search term 
 		}
 	}
 }
