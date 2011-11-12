@@ -4,3 +4,4 @@ libbuild/svnRevNr.jar
 gen/**
 DATA/
 classes/
+RELEASE/
