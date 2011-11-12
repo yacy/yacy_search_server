@@ -404,7 +404,7 @@ function yacysearch(clear) {
 									var query = unescape($("#yquery").getValue() + " " +ui.item.value);
 									$("#yquery").setValue(query);
 									ynavigators.push(ui.item.value);
-									$("#yquery").trigger('keyup');								
+									$("#yquery").trigger('submit');								
 								}
 							});							
 						}								
@@ -427,7 +427,7 @@ function yacysearch(clear) {
 						var regexp = new RegExp(' '+str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));   // properly escape string for regexp
 						$("#yquery").setValue($.trim(query.replace(regexp,"")));
 						startRecord = 0;
-						$("#yquery").trigger('keyup');
+						$("#yquery").trigger('submit');
 					});
 					autoOpenSidebar();
 					if ($("#ypopup").dialog('isOpen')) {					
