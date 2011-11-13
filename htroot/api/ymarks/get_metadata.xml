@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding="UTF-8" standalone='yes'?>
+<info>
+	<title>#[title]#</title>
+	<desc>#[desc]#</desc>
+	<keywords>
+		#{keywords}#<tag name="#[tag]#" />
+		#{/keywords}#
+	</keywords>
+	<autotags>	
+		#{autotags}#<tag name="#[tag]#" />
+		#{/autotags}#
+	</autotags>
+</info>
