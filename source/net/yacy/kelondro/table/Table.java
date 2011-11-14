@@ -197,10 +197,11 @@ public class Table implements Index, Iterable<Row.Entry> {
             int errorcc = 0;
             int idx;
             for (final Entry entry: errors) {
-                key = entry.getPrimaryKeyBytes();
                 idx = (int) entry.getColLong(1);
-                Log.logWarning("Table", "removing not well-formed entry " + idx + " with key: " + NaturalOrder.arrayList(key, 0, key.length) + ", " + errorcc++ + "/" + errorc);
                 removeInFile(idx);
+                key = entry.getPrimaryKeyBytes();
+                if (key == null) continue;
+                Log.logWarning("Table", "removing not well-formed entry " + idx + " with key: " + NaturalOrder.arrayList(key, 0, key.length) + ", " + errorcc++ + "/" + errorc);
             }
             errors.close();
             assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
