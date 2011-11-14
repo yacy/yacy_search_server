@@ -33,7 +33,7 @@ public class MemoryTracker extends Thread {
     private static MemoryTracker systemProfiler = null;
     
     public static void startSystemProfiling() {
-    	systemProfiler = new MemoryTracker(1500);
+    	systemProfiler = new MemoryTracker(3000);
     	systemProfiler.start();
     }
     
@@ -52,7 +52,7 @@ public class MemoryTracker extends Thread {
     public void run() {
         try {
         	while (running) {
-        		EventTracker.update(EventTracker.EClass.MEMORY, Long.valueOf(MemoryControl.used()), true);
+        		EventTracker.update(EventTracker.EClass.MEMORY, Long.valueOf(MemoryControl.available()), true);
         		try {
     				Thread.sleep(this.delaytime);
     			} catch (final InterruptedException e) {
