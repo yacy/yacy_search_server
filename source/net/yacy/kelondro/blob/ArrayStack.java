@@ -82,6 +82,7 @@ public class ArrayStack implements BLOB {
 
     public static final long maxFileSize = Integer.MAX_VALUE;
     public static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
+    private static final long oneWeek	 = 1000L * 60L * 60L * 24L * 7L;
 
     protected     int            keylength;
     protected     ByteOrder      ordering;
@@ -114,7 +115,7 @@ public class ArrayStack implements BLOB {
         this.ordering = ordering;
         this.buffersize = buffersize;
         this.heapLocation = heapLocation;
-        this.fileAgeLimit = oneMonth;
+        this.fileAgeLimit = oneWeek;
         this.fileSizeLimit = maxFileSize;
         this.repositoryAgeMax = Long.MAX_VALUE;
         this.repositorySizeMax = Long.MAX_VALUE;
@@ -380,7 +381,7 @@ public class ArrayStack implements BLOB {
 
     public void setMaxAge(final long maxAge) {
         this.repositoryAgeMax = maxAge;
-        this.fileAgeLimit = Math.min(oneMonth, maxAge / 10);
+        this.fileAgeLimit = Math.min(oneWeek, maxAge / 10);
     }
 
     public void setMaxSize(final long maxSize) {
