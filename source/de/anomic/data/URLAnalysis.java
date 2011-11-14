@@ -59,6 +59,7 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.rwi.ReferenceContainerArray;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.index.MetadataRepository;
@@ -143,7 +144,7 @@ public class URLAnalysis {
                 i.remove();
             }
     	}
-    	Runtime.getRuntime().gc();
+    	// Runtime.getRuntime().gc();
     }
 
     public static void genstat(final String urlfile) {
@@ -384,7 +385,7 @@ public class URLAnalysis {
                     writeSet(trunk + "." + filecount, gz, urls);
                     filecount++;
                     urls.clear();
-                    Runtime.getRuntime().gc();
+                    // Runtime.getRuntime().gc();
                 }
             }
             reader.close();
@@ -471,6 +472,40 @@ public class URLAnalysis {
         System.out.println("URL DELETE finished deletions, " + mr.size() + " entries left in URL database");
     }
 
+    public static void cleanCopy(final String metadataPath, final String diffFile) throws IOException, RowSpaceExceededException {
+        System.out.println("URL COPY startup");
+        final HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile));
+        if (hs.size() < 1000){
+        	System.out.println("to few Items to delete\n");
+        	return;
+        }
+        final MetadataRepository mrold = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
+        final MetadataRepository mrnew = new MetadataRepository(new File(metadataPath), "urlmd", false, false);
+        final CloneableIterator<URIMetadataRow> mIter = mrold.entries();
+        
+        System.out.println("\n\nURL COPY loaded dump, starting clean copy from " + mrold.size() + "\n");
+        URIMetadataRow row;
+        while (mIter.hasNext()) {
+        	row = mIter.next();
+        	if(!hs.has(row.hash()) && !DigestURI.isLocal(row.hash())) mrnew.store(row);
+        }
+        System.out.println("URL COPY finished copy of " + mrnew.size() + " entries in new URL database");
+        mrold.close();
+        mrnew.close();
+        final String[] tablefile = new File(metadataPath).list();
+        File f;
+        for (int i = 0; i < tablefile.length; i++) {
+        	if (tablefile[i].startsWith("text.urlmd")) {
+        		f = new File(metadataPath, tablefile[i]);
+        		f.renameTo(new File(metadataPath, "old." + tablefile[i]));
+        	}
+        	if (tablefile[i].startsWith("urlmd")) {
+        		f = new File(metadataPath, tablefile[i]);
+        		f.renameTo(new File(metadataPath, "text." + tablefile[i]));
+        	}
+        }
+    }
+    
     public static void main(final String[] args) {
         if (args[0].equals("-stat") && args.length >= 2) {
             // generate a statistics about common words in file, store to <file>.stat
@@ -518,6 +553,15 @@ public class URLAnalysis {
             } catch (final Exception e) {
                 Log.logException(e);
             }
+        } else if (args[0].equals("-copy") && args.length >= 3) {
+        	// copy from URLS as given by urlreference diff dump
+            // example:
+        	// java -Xmx1024m -cp lib/yacycore.jar de.anomic.data.URLAnalysis -copy DATA/INDEX/freeworld/TEXT/METADATA diffurlcol.dump
+            try {
+            	cleanCopy(args[1], args[2]);
+            } catch (final Exception e) {
+                Log.logException(e);
+            }
         } else {
     		System.out.println("usage:");
     		System.out.println();
@@ -542,12 +586,15 @@ public class URLAnalysis {
             System.out.println("-delete <path-to-URL-DB> <diff-dump>");
             System.out.println(" delete all urls that are listed in the diff-dump from the url-db");
             System.out.println();
+            System.out.println("-copy <path-to-URL-DB> <diff-dump>");
+            System.out.println(" copy all urls that are listed in the diff-dump from the url-db");
+            System.out.println();
             System.out.println("to do a complete clean-up of the url database, start the following:");
             System.out.println();
-            System.out.println("java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -incollection DATA/INDEX/freeworld/TEXT/RICOLLECTION used.dump");
-            System.out.println("java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -diffurlcol DATA/INDEX/freeworld/TEXT used.dump diffurlcol.dump");
-            System.out.println("java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -export DATA/INDEX/freeworld/TEXT xml urls.xml diffurlcol.dump");
-            System.out.println("java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -delete DATA/INDEX/freeworld/TEXT diffurlcol.dump");
+            System.out.println("java -Xmx1000m -cp lib/yacycore.jar de.anomic.data.URLAnalysis -incollection DATA/INDEX/freeworld/SEGMENTS/default used.dump");
+            System.out.println("java -Xmx1000m -cp lib/yacycore.jar de.anomic.data.URLAnalysis -diffurlcol DATA/INDEX/freeworld/SEGMENTS/default used.dump diffurlcol.dump");
+            System.out.println("java -Xmx1000m -cp lib/yacycore.jar de.anomic.data.URLAnalysis -export DATA/INDEX/freeworld/SEGMENTS/default xml urls.xml diffurlcol.dump");
+            System.out.println("java -Xmx1000m -cp lib/yacycore.jar de.anomic.data.URLAnalysis -delete DATA/INDEX/freeworld/SEGMENTS/default diffurlcol.dump");
             System.out.println();
     	}
         System.exit(0); // kill remaining threads
