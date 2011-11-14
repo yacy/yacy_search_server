@@ -29,7 +29,8 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 
 	public final static String SPACE = " ";
 	public final static String POISON = "";
-	public final static HashSet<String> stopwords = new HashSet<String>(Arrays.asList(".", "!", "?", "nbsp", "uuml", "ouml", "auml", "amp", "quot", "laquo", "raquo"));
+	public final static HashSet<String> stopwords = new HashSet<String>(Arrays.asList(".", "!", "?", "nbsp", "uuml", "ouml", "auml", "amp", "quot", "laquo", "raquo", 
+			"and", "with", "the", "gt", "lt"));
 
 
 	private final ArrayBlockingQueue<String> bmkQueue;
@@ -90,35 +91,40 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			// generate potential tags from document title, description and subject
 			final int bufferSize = document.dc_title().length() + document.dc_description().length() + document.dc_subject(' ').length() + 32;
 			final StringBuilder buffer = new StringBuilder(bufferSize);
+			final StringBuilder pwords = new StringBuilder(1000);
 			buffer.append(document.dc_title().toLowerCase());
 			buffer.append(document.dc_description().toLowerCase());
 			buffer.append(document.dc_subject(' ').toLowerCase());
 			final Enumeration<StringBuilder> tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(buffer.toString())), LibraryProvider.dymLib);
-			int count = 0;
+			int score = 0;
 			
 			// get phrases
 			final TreeMap<String, YMarkTag> phrases = getPhrases(document, 2);
 			phrases.putAll(getPhrases(document, 3));
-			phrases.putAll(getPhrases(document, 4));
 			final Iterator<String> iter = phrases.keySet().iterator();
 			while(iter.hasNext()) {
-				count = 10;
+				score = 10;
 				final String phrase = iter.next();							
 				if(phrases.get(phrase).size() > 3 && phrases.get(phrase).size() < 10) {
-					count = phrases.get(phrase).size() * phrase.split(" ").length * 35;
+					score = phrases.get(phrase).size() * phrase.split(" ").length * 20;
 				}
 				if(isDigitSpace(phrase)) {
-					count = 10;
+					score = 10;
 				}
 				if(phrases.get(phrase).size() > 2 && buffer.indexOf(phrase) > 1) {					
-					count = count * 10;
-				}	
-				topwords.add(new YMarkTag(phrase, count));
+					score = score * 10;
+				}
+				if (tags.containsKey(phrase)) {
+					score = score * 20;
+				}
+				topwords.add(new YMarkTag(phrase, score));
+				pwords.append(phrase);
+				pwords.append(' ');
 			}
-						
+			
 			// loop through potential tag and rank them
 			while(tokens.hasMoreElements()) {				
-				count = 0;
+				score = 0;
 				token = tokens.nextElement();
 				
 				// check if the token appears in the text
@@ -126,23 +132,27 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 					final Word word = words.get(token.toString());
 					// token appears in text and matches an existing bookmark tag
 					if (tags.containsKey(token.toString())) {
-						count = word.occurrences() * tags.get(token.toString()).size() * 200;
+						score = word.occurrences() * tags.get(token.toString()).size() * 200;
 					}
 					// token appears in text and has more than 3 characters
 					else if (token.length()>3) {
-						count = word.occurrences() * 100;
+						score = word.occurrences() * 100;
 					}
-					topwords.add(new YMarkTag(token.toString(), count));
+					// if token is already part of a phrase, reduce score
+					if(pwords.toString().indexOf(token.toString())>1) {
+						score = score / 3;
+					}
+					topwords.add(new YMarkTag(token.toString(), score));
 				}
 			}
-			count = 0;
+			score = 0;
 			buffer.setLength(0);
 			for(final YMarkTag tag : topwords) {
-				if(count < max) {
+				if(score < max) {
 					if(tag.size() > 100) {
 						buffer.append(tag.name());
 						buffer.append(YMarkUtil.TAGS_SEPARATOR);
-						count++;
+						score++;
 					}
 				} else {
 					break;
@@ -165,7 +175,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		while(tokens.hasMoreElements()) {				
 
 			token = tokens.nextElement();			
-			if(stopwords.contains(token.toString()))
+			if(stopwords.contains(token.toString()) || isDigitSpace(token.toString()))
 				continue;			
 			
 			// if we have a full phrase, delete the first token

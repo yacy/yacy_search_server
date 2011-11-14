@@ -6,9 +6,14 @@ import net.yacy.kelondro.blob.Tables;
 
 public class TablesRowComparator implements Comparator<Tables.Row> {
     private String sortname;
+    private boolean desc;
     
-    public TablesRowComparator(final String sortname) {
+    public TablesRowComparator(final String sortname, final String sortorder) {
         setSortName(sortname);
+        if(sortorder.equals("desc"))
+        	this.desc = true;
+    	else
+    		this.desc = false;
     }
     
     public void setSortName(final String sortname) {
@@ -20,7 +25,10 @@ public class TablesRowComparator implements Comparator<Tables.Row> {
             if(row0.containsKey(this.sortname) && row1.containsKey(this.sortname)) {
                String name1 = UTF8.String(row0.get(this.sortname)).toLowerCase();
                String name2 = UTF8.String(row1.get(this.sortname)).toLowerCase();
-               return name1.compareTo(name2);
+               if(desc)
+            	   return name2.compareTo(name1);
+               else
+            	   return name1.compareTo(name2);
             }
         }
         return 0;
