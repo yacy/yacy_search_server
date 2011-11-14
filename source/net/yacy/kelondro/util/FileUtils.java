@@ -535,6 +535,7 @@ public final class FileUtils {
                 key = escaped_backslash.matcher(key).replaceAll("\\");
                 String value = escaped_newline.matcher(line.substring(pos + 1).trim()).replaceAll("\n");
                 value = value.replace("\\\\", "\\"); // does not work: escaped_backslashbackslash.matcher(value).replaceAll("\\");
+                //System.out.println("key = " + key + ", value = " + value);
                 props.put(key, value);
             }
         }
