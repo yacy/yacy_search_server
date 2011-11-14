@@ -6,7 +6,10 @@ PIDFILE="yacy.pid"
 OS="`uname`"
 
 #get javastart args
-JAVA_ARGS="-server -Xss256k -XX:MaxPermSize=256m -XX:ReservedCodeCacheSize=1024m -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8";
+JAVA_ARGS="-server -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8";
+#CMS: JAVA_ARGS="-server -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:NewRatio=2 -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8";
+#G1: JAVA_ARGS="-server -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8";
+#org: JAVA_ARGS="-server -Xss256k -XX:MaxPermSize=256m -XX:ReservedCodeCacheSize=1024m -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8";
 #JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
 
 #check if OS is Sun Solaris or one of the OpenSolaris distributions and use different version of id if necessary
