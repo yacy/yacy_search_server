@@ -91,9 +91,9 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
+import net.yacy.cora.services.federated.solr.SolrScheme;
 import net.yacy.cora.services.federated.solr.SolrShardingConnector;
 import net.yacy.cora.services.federated.solr.SolrShardingSelection;
-import net.yacy.cora.services.federated.solr.SolrScheme;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -105,6 +105,7 @@ import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Tray;
+import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -512,7 +513,14 @@ public final class Switchboard extends serverSwitch {
 
         // load the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
-        this.robots = new RobotsTxt(this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME));
+        try {
+            final BEncodedHeap robotsHeap = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
+            this.robots = new RobotsTxt(robotsHeap);
+        } catch (final IOException e) {
+            this.tables.clear(WorkTables.TABLE_ROBOTS_NAME);
+            final BEncodedHeap robotsHeap = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
+            this.robots = new RobotsTxt(robotsHeap);
+        }
         this.log.logConfig("Loaded robots.txt DB: " +  this.robots.size() + " entries");
 
         // start a cache manager
