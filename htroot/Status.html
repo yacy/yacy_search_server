@@ -15,7 +15,7 @@
         }
       }
       function reloadGraph() {
-	    document.images["graph"].src="PerformanceGraph.png?nomem=&time="+(new Date()).getTime();
+	    document.images["graph"].src="PerformanceGraph.png?time="+(new Date()).getTime();
 	    window.status="";
 	  }
       function init() {
@@ -47,7 +47,7 @@
       <h2><img src="/env/grafics/kaskelix.png" width="128" height="64" alt="YaCy Websearch" style="margin-right:5px; vertical-align:middle;" />Welcome to YaCy!</h2>
       <iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,DHTRECEIVE,DHTSEND,PROXY&amp;width=600px&amp;height=180px&amp;maxlines=20&amp;maxwidth=120"
               style="width:600px;height:180px;margin:0px;border:1px solid black;" scrolling="no" name="newsframe"></iframe><br />
-      <img src="PerformanceGraph.png?nomem=" id="graph" alt="PerformanceGraph" width="660" height="240"/><br />
+      <img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph" width="660" height="240"/><br />
       <img src="Banner.png?textcolor=000000&amp;bgcolor=e7effc&amp;bordercolor=5090d0" alt="banner" width="468" height="60"/>
     </div>
 
@@ -98,7 +98,7 @@
     
     #(warningMemoryLow)#::
     <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
-    <dd class="hint">Free memory is lower than #[minSpace]#. DHT has been disabled. Please fix
+    <dd class="hint">Low memory was detected. DHT has been disabled. Please fix
     it as soon as possible and restart YaCy.
     </dd>
     #(/warningMemoryLow)#
