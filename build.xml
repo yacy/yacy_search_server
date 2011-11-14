@@ -310,6 +310,8 @@
   	<!-- copy Unix wrappers -->
     <copy todir="${release_main}">
       <fileset dir=".">
+		<include name="yacy.blue"/>
+		<include name="cleanUp.sh"/>
         <include name="startYACY.sh"/>
         <include name="stopYACY.sh"/>
         <include name="killYACY.sh"/>
