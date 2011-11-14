@@ -63,7 +63,7 @@ public class zipParser extends AbstractParser implements Parser {
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
         // check memory for parser
-        if (!MemoryControl.request(200 * 1024 * 1024, true))
+        if (!MemoryControl.request(200 * 1024 * 1024, false))
             throw new Parser.Failure("Not enough Memory available for zip parser: " + MemoryControl.available(), url);
 
          Document[] docs = null;
