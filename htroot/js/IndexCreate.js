@@ -76,4 +76,6 @@ function loadInfos() {
 	url=document.getElementById("crawlingURL").value;
 	if (url.indexOf("ftp") == 0 || url.indexOf("smb") == 0) document.getElementById("crawlingQ").disabled=true; else document.getElementById("crawlingQ").disabled=false;
 	sndReq('/api/util/getpageinfo_p.xml?actions=title,robots&url='+url);
+	document.getElementById("api").innerHTML = "<a href='http://localhost:8090/api/util/getpageinfo_p.xml?actions=title,robots&url=" + url + "' id='apilink'><img src='/env/grafics/api.png' width='60' height='40' alt='API'/></a><span>See the page info about the start url.</span>";
+	
 }
