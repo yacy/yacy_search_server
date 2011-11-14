@@ -49,8 +49,9 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.HeaderFramework;
 
-import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
@@ -64,9 +65,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -77,10 +80,10 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -188,10 +191,12 @@ public class HTTPClient {
 		httpClient = new DefaultHttpClient(clientConnectionManager, httpParams);
 		// disable the cookiestore, cause this may cause segfaults and is not needed
 		((DefaultHttpClient) httpClient).setCookieStore(null);
+		// add cutom keep alive strategy
+		addCustomKeepAliveStrategy((DefaultHttpClient) httpClient);
 		// ask for gzip
-		((AbstractHttpClient) httpClient).addRequestInterceptor(new GzipRequestInterceptor());
+		((DefaultHttpClient) httpClient).addRequestInterceptor(new GzipRequestInterceptor());
 		// uncompress gzip
-		((AbstractHttpClient) httpClient).addResponseInterceptor(new GzipResponseInterceptor());
+		((DefaultHttpClient) httpClient).addResponseInterceptor(new GzipResponseInterceptor());
 
 		if (idledConnectionEvictor == null) {
 		    idledConnectionEvictor = new IdledConnectionEvictor(clientConnectionManager);
@@ -655,7 +660,7 @@ public class HTTPClient {
     	if (ProxySettings.use)
     		ConnRouteParams.setDefaultProxy(httpParams, ProxySettings.getProxyHost());
     	// TODO find a better way for this
-    	ProxySettings.setProxyCreds((AbstractHttpClient) httpClient);
+    	ProxySettings.setProxyCreds((DefaultHttpClient) httpClient);
     }
 
     private void storeConnectionInfo(final HttpUriRequest httpUriRequest) {
@@ -699,6 +704,38 @@ public class HTTPClient {
 
         final SSLSocketFactory sslSF = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
     	return sslSF;
+    }
+    
+    /**
+     * If the Keep-Alive header is not present in the response,
+     * HttpClient assumes the connection can be kept alive indefinitely.
+     * Here we limit this to 5 seconds. 
+     * 
+     * @param defaultHttpClient
+     */
+    private static void addCustomKeepAliveStrategy(final DefaultHttpClient defaultHttpClient) {
+    	defaultHttpClient.setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
+			public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
+		        // Honor 'keep-alive' header
+				String param, value;
+				HeaderElement element;
+		        HeaderElementIterator it = new BasicHeaderElementIterator(
+		                response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+		        while (it.hasNext()) {
+		            element = it.nextElement();
+		            param = element.getName(); 
+		            value = element.getValue();
+		            if (value != null && param.equalsIgnoreCase("timeout")) {
+		                try {
+		                    return Long.parseLong(value) * 1000;
+		                } catch(final NumberFormatException e) {
+		                }
+		            }
+		        }
+		        // Keep alive for 5 seconds only
+		        return 5 * 1000;
+			}
+    	});
     }
 
     /**
