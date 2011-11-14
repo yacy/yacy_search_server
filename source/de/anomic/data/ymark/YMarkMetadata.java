@@ -93,12 +93,13 @@ public class YMarkMetadata {
 		this.indexSegment = null;
 	}
 
-	public void loadDocument(final LoaderDispatcher loader) throws IOException, Failure {
+	public Document loadDocument(final LoaderDispatcher loader) throws IOException, Failure {
 		if(this.document == null) {
 			Response response = null;
 			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, true);
 			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		}
+		return this.document;
 	}
 
 	public EnumMap<METADATA, String> getMetadata() {
@@ -140,7 +141,7 @@ public class YMarkMetadata {
 		}
 		return metadata;
 	}
-
+	
 	public TreeMap<String,Word> getWordCounts() {
 		if (this.document != null) {
             return sortWordCounts(new Condenser(this.document, true, true, LibraryProvider.dymLib).words());

@@ -442,11 +442,13 @@ function yacysearch(clear) {
         }
     );
 	function autoOpenSidebar() {	              	
-		window.setTimeout(function() {                  // The delay prevents the sidebar to open on every intermediate search results
-			if(	$("#yquery").getValue() == ycurr) {		// Open side bar only if result matches current search term												
-				$("#yside").dialog('open');
-				$("#yquery").focus();			
-			}	
+		window.setTimeout(function() {                      // The delay prevents the sidebar to open on every intermediate search results
+			if($("#ypopup .yloading").length == 0) {        // Check again wether a search result is still loading
+				if(	$("#yquery").getValue() == ycurr) {		// Open side bar only if result matches current search term												
+					$("#yside").dialog('open');
+					$("#yquery").focus();			
+				}
+			}
 		} , 1000);	
 	}
 	function cancelNavigators(ynavigators, appendTo) {   // Include checkboxes to release navigators
@@ -454,7 +456,7 @@ function yacysearch(clear) {
 		var query = $("#yquery").getValue();
 		for ( var i=0, len=arLen; i<len; ++i ){	
 			if(query.indexOf(ynavigators[i]) != -1)      // Check wether search term still contains the navigator
-				$(' <input type="checkbox" checked="checked" class="ynav-cancel" name="ynav'+i+'" value="'+ynavigators[i]+'"> '+ynavigators[i]+'<br>').appendTo(appendTo);			
+				$(' <input type="checkbox" checked="checked" class="ynav-cancel" name="ynav'+i+'" value="'+ynavigators[i]+'"><span class="ytxt">'+ynavigators[i]+'</span><br>').appendTo(appendTo);			
 			else
 				ynavigators.splice(i, 1);                // Remove navigator from array as it has been removed manually from search term 
 		}

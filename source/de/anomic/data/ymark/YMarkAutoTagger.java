@@ -3,13 +3,14 @@ package de.anomic.data.ymark;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
-
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
@@ -28,6 +29,8 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 
 	public final static String SPACE = " ";
 	public final static String POISON = "";
+	public final static HashSet<String> stopwords = new HashSet<String>(Arrays.asList(".", "!", "?", "nbsp", "uuml", "ouml", "auml", "amp", "quot", "laquo", "raquo"));
+
 
 	private final ArrayBlockingQueue<String> bmkQueue;
 	private final YMarkTables ymarks;
@@ -52,7 +55,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		this.merge = true;
 	}
 
-	private Document loadDocument(final String url) {
+	private static Document loadDocument(final String url, final LoaderDispatcher loader) {
 		DigestURI uri;
 		Response response;
 		try {
@@ -62,16 +65,9 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			return null;
 		}
 		try {
-			response = this.loader.load(this.loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, true);
+			response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, true);
 		} catch (final IOException e) {
 			Log.logWarning(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to IOException for url: "+url);
-			try {
-				this.ymarks.addFolder(this.bmk_user, url, "/IOExceptions");
-			} catch (final IOException e1) {
-				Log.logException(e1);
-			} catch (final RowSpaceExceededException e1) {
-				Log.logException(e1);
-			}
 			return null;
 		}
 		try {
@@ -81,56 +77,59 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			return null;
 		}
 	}
-
-	public String autoTag(final String url, final int max, final TreeMap<String, YMarkTag> tags) {
-		final Document document = loadDocument(url);
+	
+	public static String autoTag(final Document document, final int max, final TreeMap<String, YMarkTag> tags) {
 		final TreeSet<YMarkTag> topwords = new TreeSet<YMarkTag>();
-		// final TreeMap<String, YMarkTag> pairs = new TreeMap<String, YMarkTag>();
-
-		StringBuilder token;
-		// StringBuilder pair = new StringBuilder(64);
+		StringBuilder token; 
 
 		if(document != null) {
+
 			//get words from document
 			final Map<String, Word> words = new Condenser(document, true, true, LibraryProvider.dymLib).words();
-
+			
 			// generate potential tags from document title, description and subject
 			final int bufferSize = document.dc_title().length() + document.dc_description().length() + document.dc_subject(' ').length() + 32;
 			final StringBuilder buffer = new StringBuilder(bufferSize);
-			buffer.append(document.dc_title());
-			buffer.append(document.dc_description());
-			buffer.append(document.dc_subject(' '));
+			buffer.append(document.dc_title().toLowerCase());
+			buffer.append(document.dc_description().toLowerCase());
+			buffer.append(document.dc_subject(' ').toLowerCase());
 			final Enumeration<StringBuilder> tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(buffer.toString())), LibraryProvider.dymLib);
-
 			int count = 0;
-
+			
+			// get phrases
+			final TreeMap<String, YMarkTag> phrases = getPhrases(document, 2);
+			phrases.putAll(getPhrases(document, 3));
+			phrases.putAll(getPhrases(document, 4));
+			final Iterator<String> iter = phrases.keySet().iterator();
+			while(iter.hasNext()) {
+				count = 10;
+				final String phrase = iter.next();							
+				if(phrases.get(phrase).size() > 3 && phrases.get(phrase).size() < 10) {
+					count = phrases.get(phrase).size() * phrase.split(" ").length * 35;
+				}
+				if(isDigitSpace(phrase)) {
+					count = 10;
+				}
+				if(phrases.get(phrase).size() > 2 && buffer.indexOf(phrase) > 1) {					
+					count = count * 10;
+				}	
+				topwords.add(new YMarkTag(phrase, count));
+			}
+						
 			// loop through potential tag and rank them
-			while(tokens.hasMoreElements()) {
+			while(tokens.hasMoreElements()) {				
 				count = 0;
 				token = tokens.nextElement();
-
-				/*
-				pair.delete(0, pair.indexOf(SPACE)+1);
-				if(pair.length() > 1)
-					pair.append(SPACE);
-				pair.append(token);
-
-				if(pair.indexOf(SPACE) > 1 && pairs.containsKey(pair.toString())) {
-					pairs.get(pair.toString()).inc();
-				} else {
-					pairs.put(pair.toString(), new YMarkTag(pair.toString()));
-				}
-				*/
-
+				
 				// check if the token appears in the text
-				if (words.containsKey(token)) {
-					final Word word = words.get(token);
+				if (words.containsKey(token.toString())) {					
+					final Word word = words.get(token.toString());
 					// token appears in text and matches an existing bookmark tag
-					if (tags.containsKey(token)) {
-						count = word.occurrences() * tags.get(token).size() * 100;
+					if (tags.containsKey(token.toString())) {
+						count = word.occurrences() * tags.get(token.toString()).size() * 200;
 					}
 					// token appears in text and has more than 3 characters
-					if (token.length()>3) {
+					else if (token.length()>3) {
 						count = word.occurrences() * 100;
 					}
 					topwords.add(new YMarkTag(token.toString(), count));
@@ -152,7 +151,64 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			final String clean =  YMarkUtil.cleanTagsString(buffer.toString());
 			return clean;
 		}
-		return new String();
+		return new String();		
+	}	
+	
+	private static TreeMap<String, YMarkTag> getPhrases(final Document document, final int size) {
+		final TreeMap<String, YMarkTag> phrases = new TreeMap<String, YMarkTag>();
+		final StringBuilder phrase = new StringBuilder(128);
+		final Enumeration<StringBuilder> tokens = new WordTokenizer(document.getText(), LibraryProvider.dymLib);
+		StringBuilder token;
+		int count = 0;
+		
+		// loop through text
+		while(tokens.hasMoreElements()) {				
+
+			token = tokens.nextElement();			
+			if(stopwords.contains(token.toString()))
+				continue;			
+			
+			// if we have a full phrase, delete the first token
+			count++;
+			if(count > size)
+				phrase.delete(0, phrase.indexOf(SPACE)+1);
+			
+			// append new token
+			if(phrase.length() > 1)
+				phrase.append(SPACE);						
+			phrase.append(token);
+
+			if(count >= size) {	// make sure we really have a phrase
+				if(phrases.containsKey(phrase.toString())) {
+					phrases.get(phrase.toString()).inc();
+				} else {
+					phrases.put(phrase.toString(), new YMarkTag(phrase.toString()));
+				}
+			}		
+		}
+		
+		return phrases;
+	}
+
+	public static String autoTag(final String url, final LoaderDispatcher loader, final int max, final TreeMap<String, YMarkTag> tags) {
+		final Document document = loadDocument(url, loader);
+		if (document != null)
+			return autoTag(document, max, tags);
+		else
+			return "/IOExceptions";
+	}
+	
+	public static boolean isDigitSpace(String str) {
+		if (str == null) {
+			return false;
+	    }
+	    int sz = str.length();
+	    for (int i = 0; i < sz; i++) {
+	    	if ((Character.isDigit(str.charAt(i)) == false) && (str.charAt(i) != ' ')) {
+	    		return false;
+	    	}
+	    }
+	    return true;
 	}
 
 	public void run() {
@@ -165,8 +221,11 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			final TreeMap<String, YMarkTag> tags = this.ymarks.getTags(this.bmk_user);
 			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "autoTagger queue size: "+this.bmkQueue.size());
 			while((url = this.bmkQueue.take()) != POISON) {
-				tagString = autoTag(url, 5, tags);
-
+				tagString = autoTag(url, this.loader, 5, tags);
+				if (tagString.equals("/IOExceptions")) {
+					this.ymarks.addFolder(bmk_user, url, tagString);
+					tagString = "";
+				}				
 				// update tags
 				this.ymarks.addTags(this.bmk_user, url, tagString, this.merge);
 
