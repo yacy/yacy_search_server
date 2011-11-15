@@ -27,29 +27,83 @@
 package de.anomic.data.ymark;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.Tables;
 import de.anomic.data.WorkTables;
 
 public class YMarkCrawlStart extends HashMap<String,String>{
-
+	
 	private static final long serialVersionUID = 1L;
 	private final WorkTables worktables;
-
+	private Date date_last_exec;
+	private Date date_next_exec;
+	private Date date_recording;
+	private String apicall_pk;
+	private String url;
+	
+	
 	public YMarkCrawlStart(final WorkTables worktables) {
+		super();
+		this.date_recording = new Date(0);
 		this.worktables = worktables;
 	}
 
 	public YMarkCrawlStart(final WorkTables worktables, final String url) {
+		super();
 		this.worktables = worktables;
-		clear();
-		load(url);
+		this.url = url;
+		this.date_recording = new Date(0);
+		this.clear();
+		this.load();
+	}
+	
+	public String getPK() {
+		if(this.isEmpty())
+			return "";
+		return this.apicall_pk;
+	}
+	
+	public Date date_last_exec() {
+		if(this.isEmpty())
+			return new Date(0);
+		return this.date_last_exec;
+	}
+	
+	public Date date_next_exec() {
+		if(this.isEmpty())
+			return new Date(0);
+		return this.date_next_exec;
+	}
+	
+	public boolean hasSchedule() {		
+		if(!this.isEmpty() && this.date_next_exec.after(new Date()))
+			return true;
+		else
+			return false;
+	}
+	
+	public Date date_recording() {
+		return this.date_recording;
 	}
 
-	public void load(final String url) {
+	public void set_url(final String url) {
+		if(!this.url.equals(url)) {
+			this.url = url;
+			this.clear();
+			this.load();
+		}
+	}
+	
+	public int exec(final String host, final int port, final String realm) {
+		return this.worktables.execAPICall(this.apicall_pk, host, port, realm);
+	}
+	
+	private void load() {
 		try {
 			final StringBuilder buffer = new StringBuilder(500);
 			//buffer.append("^.*crawlingURL=\\Q");
@@ -63,25 +117,32 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 			while(APIcalls.hasNext()) {
 				row = APIcalls.next();
 				if(row.get(WorkTables.TABLE_API_COL_TYPE, "").equals("crawler")) {
-					buffer.setLength(0);
-					buffer.append(row.get(WorkTables.TABLE_API_COL_URL, ""));
-					buffer.delete(0, buffer.indexOf("?")+1);
-					int start = 0;
-					int end = 0;
-					String key;
-					String value;
-					while(start < buffer.length()) {
-						end = buffer.indexOf("=", start);
-						key = buffer.substring(start, end);
-						start = end+1;
-						end = buffer.indexOf("&", start);
-						if(end < 0 || end > buffer.length())
-							end = buffer.length()-1;
-						value = buffer.substring(start, end);
-						start = end+1;
-						put(key, value);
+					Date date = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, row.get(WorkTables.TABLE_API_COL_DATE, new Date()));					
+					if(date.after(this.date_recording)) {
+						this.clear();
+						this.apicall_pk = UTF8.String(row.getPK());
+						this.date_recording = date;
+						this.date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(0));
+						this.date_last_exec = row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, new Date(0));
+						buffer.setLength(0);
+						buffer.append(row.get(WorkTables.TABLE_API_COL_URL, ""));
+						buffer.delete(0, buffer.indexOf("?")+1);
+						int start = 0;
+						int end = 0;
+						String key;
+						String value;
+						while(start < buffer.length()) {
+							end = buffer.indexOf("=", start);
+							key = buffer.substring(start, end);
+							start = end+1;
+							end = buffer.indexOf("&", start);
+							if(end < 0 || end > buffer.length())
+								end = buffer.length()-1;
+							value = buffer.substring(start, end);
+							start = end+1;
+							put(key, value);
+						}
 					}
-					break;
 				}
 			}
 		} catch (final IOException e) {

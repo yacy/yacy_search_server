@@ -10,6 +10,7 @@ import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkCrawlStart;
 import de.anomic.data.ymark.YMarkDate;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
@@ -127,6 +128,21 @@ public class get_ymark {
                     else
                         prop.putJSON("json_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()));
                 }
+                
+                final YMarkCrawlStart crawlstart = new YMarkCrawlStart(sb.tables, bmk_row.get(YMarkEntry.BOOKMARK.URL.key(),YMarkEntry.BOOKMARK.URL.deflt()));
+                int crawl = 0;
+                if (!crawlstart.isEmpty())
+                	crawl = 1;
+                if (crawlstart.hasSchedule()) {
+                	crawl = 2;
+                }
+                prop.put("json_"+count+"_crawlstart", crawl);
+                
+                prop.put("json_"+count+"_apicall_pk", crawlstart.getPK());
+                prop.put("json_"+count+"_date_recording", YMarkDate.ISO8601(crawlstart.date_recording()).replaceAll("T", "<br />"));
+                prop.put("json_"+count+"_date_next_exec", YMarkDate.ISO8601(crawlstart.date_next_exec()).replaceAll("T", "<br />"));
+                prop.put("json_"+count+"_date_last_exec", YMarkDate.ISO8601(crawlstart.date_last_exec()).replaceAll("T", "<br />"));                
+                
                 prop.put("json_"+count+"_comma", ",");
                 
                 // put XML
