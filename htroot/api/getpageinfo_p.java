@@ -14,6 +14,15 @@ import de.anomic.crawler.RobotsTxtEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 public class getpageinfo_p {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -30,6 +39,7 @@ public class getpageinfo_p {
         prop.put("favicon","");
         prop.put("sitelist", "");
         prop.put("filter", ".*");
+        prop.put("oai", 0);
 
         // default actions
         String actions = "title,robots";
@@ -125,10 +135,76 @@ public class getpageinfo_p {
                     Log.logException(e);
                 }
             }
+            if (actions.indexOf("oai") >= 0) {
+				try {
+					final DigestURI theURL = new DigestURI(url
+							+ "?verb=Identify");
+
+					String oairesult = checkOAI(theURL.toString());
+
+					prop.put("oai", oairesult == "" ? 0 : 1);
+
+					if (oairesult != "") {
+						prop.putXML("title", oairesult);
+					}
+
+				} catch (final MalformedURLException e) {
+				}
+			}
 
         }
         // return rewrite properties
         return prop;
     }
+    
+    private static String checkOAI(final String url) {
+		final DocumentBuilderFactory factory = DocumentBuilderFactory
+				.newInstance();
+		try {
+			final DocumentBuilder builder = factory.newDocumentBuilder();
+			return parseXML(builder.parse(url));
+		} catch (final ParserConfigurationException ex) {
+			Log.logException(ex);
+		} catch (final SAXException ex) {
+			Log.logException(ex);
+		} catch (final IOException ex) {
+			Log.logException(ex);
+		}
+
+		return "";
+	}
+    
+	private static String parseXML(final Document doc) {
+
+		String repositoryName = null;
+
+		final NodeList items = doc.getDocumentElement().getElementsByTagName(
+				"Identify");
+		if (items.getLength() == 0) {
+			return "";
+		}
+
+		for (int i = 0, n = items.getLength(); i < n; ++i) {
+
+			if (!"Identify".equals(items.item(i).getNodeName()))
+				continue;
+
+			final NodeList currentNodeChildren = items.item(i).getChildNodes();
+
+			for (int j = 0, m = currentNodeChildren.getLength(); j < m; ++j) {
+				final Node currentNode = currentNodeChildren.item(j);
+				if ("repositoryName".equals(currentNode.getNodeName())) {
+					repositoryName = currentNode.getFirstChild().getNodeValue();
+				}
+			}
+
+			if (repositoryName == null) {
+				return "";
+			}
+
+		}
+		return repositoryName;
+	}
+    
 
 }
