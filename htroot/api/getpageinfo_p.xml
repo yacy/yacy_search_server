@@ -19,4 +19,5 @@
     <link name="#[link]#" />
     #{/links}#
   </links>
+  <oai>#[oai]#</oai>
 </pageinfo>
