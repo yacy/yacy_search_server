@@ -25,6 +25,7 @@ public class getpageinfo_p {
         prop.put("desc", "");
         prop.put("lang", "");
         prop.put("robots-allowed", "3"); //unknown
+        prop.put("robotsInfo", ""); //unknown
         prop.put("sitemap", "");
         prop.put("favicon","");
         prop.put("sitelist", "");
@@ -39,6 +40,7 @@ public class getpageinfo_p {
             String url=post.get("url");
 			if (url.toLowerCase().startsWith("ftp://")) {
 				prop.put("robots-allowed", "1");
+		        prop.put("robotsInfo", "ftp does not follow robots.txt");
 				prop.putXML("title", "FTP: " + url);
                 return prop;
 			} else if (!url.startsWith("http://") &&
@@ -114,6 +116,7 @@ public class getpageinfo_p {
                         Log.logException(e);
                     }
                 	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
+                    prop.putHTML("robotsInfo", robotsEntry.getInfo());
 
                     // get the sitemap URL of the domain
                     final MultiProtocolURI sitemapURL = robotsEntry == null ? null : robotsEntry.getSitemap();
