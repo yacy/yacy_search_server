@@ -162,7 +162,7 @@
 	function getTags(url, i) {
 		$.ajax({
 			type: "GET",
-			url: "/api/util/getpageinfo_p.xml?url="+url,			
+			url: "/api/getpageinfo_p.xml?url="+url,			
 			dataType: "xml",
 			success: function(xml) {					
 				tags = "";

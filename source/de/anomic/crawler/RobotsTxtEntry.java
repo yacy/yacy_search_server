@@ -1,4 +1,4 @@
-//RobotsEntry.java 
+//RobotsEntry.java
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -43,7 +43,7 @@ import net.yacy.kelondro.util.ByteArray;
 
 
 public class RobotsTxtEntry {
-    
+
     private static final String HOST_NAME          = "hostname";
     private static final String ALLOW_PATH_LIST    = "allow";
     private static final String DISALLOW_PATH_LIST = "disallow";
@@ -54,16 +54,18 @@ public class RobotsTxtEntry {
     private static final String CRAWL_DELAY        = "crawlDelay";
     private static final String CRAWL_DELAY_MILLIS = "crawlDelayMillis";
     private static final String AGENT_NAME         = "agentname";
-    
+
     // this is a simple record structure that holds all properties of a single crawl start
     private final Map<String, byte[]> mem;
     private final List<String> allowPathList, denyPathList;
     private final String hostName, agentName;
-    
+    private String info; // this is filled if robots disallowed access; then the reason is noted there;
+
     protected RobotsTxtEntry(final String hostName, final Map<String, byte[]> mem) {
         this.hostName = hostName.toLowerCase();
-        this.mem = mem; 
-        
+        this.mem = mem;
+        this.info = "";
+
         if (this.mem.containsKey(DISALLOW_PATH_LIST)) {
             this.denyPathList = new LinkedList<String>();
             final String csPl = UTF8.String(this.mem.get(DISALLOW_PATH_LIST));
@@ -89,12 +91,12 @@ public class RobotsTxtEntry {
             this.allowPathList = new LinkedList<String>();
         }
         this.agentName = this.mem.containsKey(AGENT_NAME) ? UTF8.String(this.mem.get(AGENT_NAME)) : null;
-    }  
-    
+    }
+
     protected RobotsTxtEntry(
-            final MultiProtocolURI theURL, 
-            final List<String> allowPathList, 
-            final List<String> disallowPathList, 
+            final MultiProtocolURI theURL,
+            final List<String> allowPathList,
+            final List<String> disallowPathList,
             final Date loadedDate,
             final Date modDate,
             final String eTag,
@@ -103,12 +105,12 @@ public class RobotsTxtEntry {
             final String agentName
     ) {
         if (theURL == null) throw new IllegalArgumentException("The url is missing");
-        
+
         this.hostName = RobotsTxt.getHostPort(theURL).toLowerCase();
         this.allowPathList = new LinkedList<String>();
         this.denyPathList = new LinkedList<String>();
         this.agentName = agentName;
-        
+
         this.mem = new LinkedHashMap<String, byte[]>(10);
         this.mem.put(HOST_NAME, UTF8.getBytes(this.hostName));
         if (loadedDate != null) this.mem.put(LOADED_DATE, UTF8.getBytes(Long.toString(loadedDate.getTime())));
@@ -117,92 +119,92 @@ public class RobotsTxtEntry {
         if (sitemap != null) this.mem.put(SITEMAP, UTF8.getBytes(sitemap));
         if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, UTF8.getBytes(Long.toString(crawlDelayMillis)));
         if (agentName != null) this.mem.put(AGENT_NAME, UTF8.getBytes(agentName));
-        
+
         if (allowPathList != null && !allowPathList.isEmpty()) {
             this.allowPathList.addAll(allowPathList);
-            
+
             final StringBuilder pathListStr = new StringBuilder(allowPathList.size() * 30);
-            for (String element : allowPathList) {
+            for (final String element : allowPathList) {
                 pathListStr.append(element)
                            .append(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
             }
             this.mem.put(ALLOW_PATH_LIST, UTF8.getBytes(pathListStr.substring(0,pathListStr.length()-1)));
         }
-        
+
         if (disallowPathList != null && !disallowPathList.isEmpty()) {
             this.denyPathList.addAll(disallowPathList);
-            
+
             final StringBuilder pathListStr = new StringBuilder(disallowPathList.size() * 30);
-            for (String element : disallowPathList) {
+            for (final String element : disallowPathList) {
                 pathListStr.append(element)
                            .append(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
             }
             this.mem.put(DISALLOW_PATH_LIST, UTF8.getBytes(pathListStr.substring(0, pathListStr.length()-1)));
         }
     }
-    
+
     protected String getHostName() {
         return this.hostName;
     }
-    
+
     protected String getAgentName() {
         return this.agentName;
     }
-    
+
     protected Map<String, byte[]> getMem() {
         if (!this.mem.containsKey(HOST_NAME)) this.mem.put(HOST_NAME, UTF8.getBytes(this.hostName));
         return this.mem;
     }
-    
+
     @Override
     public String toString() {
         final StringBuilder str = new StringBuilder(6000);
         str.append((this.hostName == null) ? "null" : this.hostName).append(": ");
         if (this.mem != null) str.append(this.mem.toString());
         return str.toString();
-    }    
-    
+    }
+
     /**
      * get the sitemap url
      * @return the sitemap url or null if no sitemap url is given
      */
     public MultiProtocolURI getSitemap() {
-        String url = this.mem.containsKey(SITEMAP)? UTF8.String(this.mem.get(SITEMAP)): null;
+        final String url = this.mem.containsKey(SITEMAP)? UTF8.String(this.mem.get(SITEMAP)): null;
         if (url == null) return null;
         try {
             return new MultiProtocolURI(url);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             return null;
         }
     }
-    
+
     protected Date getLoadedDate() {
         if (this.mem.containsKey(LOADED_DATE)) {
             return new Date(ByteArray.parseDecimal(this.mem.get(LOADED_DATE)));
         }
         return null;
     }
-    
+
     protected void setLoadedDate(final Date newLoadedDate) {
         if (newLoadedDate != null) {
             this.mem.put(LOADED_DATE, UTF8.getBytes(Long.toString(newLoadedDate.getTime())));
         }
     }
-    
+
     protected Date getModDate() {
         if (this.mem.containsKey(MOD_DATE)) {
             return new Date(ByteArray.parseDecimal(this.mem.get(MOD_DATE)));
         }
         return null;
-    }        
-    
+    }
+
     protected String getETag() {
         if (this.mem.containsKey(ETAG)) {
             return ASCII.String(this.mem.get(ETAG));
         }
         return null;
-    }          
-    
+    }
+
     protected long getCrawlDelayMillis() {
         if (this.mem.containsKey(CRAWL_DELAY_MILLIS)) try {
             return ByteArray.parseDecimal(this.mem.get(CRAWL_DELAY_MILLIS));
@@ -214,26 +216,38 @@ public class RobotsTxtEntry {
         } catch (final NumberFormatException e) {
             return 0;
         }
-        return 0;           
+        return 0;
     }
-    
-    public boolean isDisallowed(MultiProtocolURI subpathURL) {
+
+    public boolean isDisallowed(final MultiProtocolURI subpathURL) {
         String path = subpathURL.getFile();
-        if ((this.mem == null) || (this.denyPathList.isEmpty())) return false;   
-        
+        if (this.mem == null) {
+            this.info = "no robots file available";
+            return false;
+        }
+        if (this.denyPathList.isEmpty()) {
+            this.info = "no entry in robots.txt";
+            return false;
+        }
+
         // if the path is null or empty we set it to /
-        if ((path == null) || (path.length() == 0)) path = "/";            
+        if (path == null || path.length() == 0) path = "/";
         // escaping all occurences of ; because this char is used as special char in the Robots DB
         else  path = RobotsTxt.ROBOTS_DB_PATH_SEPARATOR_MATCHER.matcher(path).replaceAll("%3B");
-        
-        for (String element : this.denyPathList) {
-                
+
+        for (final String element : this.denyPathList) {
+
             // disallow rule
             if (path.startsWith(element)) {
+                this.info = "path '" + path + "' starts with '" + element + "' from deny path list";
                 return true;
             }
         }
+        this.info = "path '" + path + "' does not start with any element from deny path list";
         return false;
     }
 
+    public String getInfo() {
+        return this.info;
+    }
 }

@@ -27,9 +27,11 @@
 package de.anomic.data.ymark;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.SortedSet;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -214,17 +216,16 @@ public class YMarkTables {
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
     }
 
-    public SortedSet<Row> orderBookmarksBy(final Iterator<Row> rowIterator, final String sortname, final String sortorder) {
-        final TreeSet<Row> sortTree = new TreeSet<Tables.Row>(new TablesRowComparator(sortname));
+    public List<Row> orderBookmarksBy(final Iterator<Row> rowIterator, final String sortname, final String sortorder) {
+        final List<Row> sortList = new ArrayList<Row>();
         Row row;
         while (rowIterator.hasNext()) {
             row = rowIterator.next();
             if(row != null)
-                sortTree.add(row);
+                sortList.add(row);
         }
-        if(sortorder.equals("desc"))
-            return sortTree.descendingSet();
-        return sortTree;
+        Collections.sort(sortList, new TablesRowComparator(sortname, sortorder)); 
+        return sortList;
     }
 
     public void addTags(final String bmk_user, final String url, final String tagString, final boolean merge) throws IOException, RowSpaceExceededException {

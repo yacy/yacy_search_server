@@ -52,11 +52,13 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 	public void load(final String url) {
 		try {
 			final StringBuilder buffer = new StringBuilder(500);
-			buffer.append("^.*crawlingURL=\\Q");
+			//buffer.append("^.*crawlingURL=\\Q");
+			buffer.append("^crawl start for \\Q");
 			buffer.append(url);
 			buffer.append("\\E?.*");
 			final Pattern pattern = Pattern.compile(buffer.toString());
-			final Iterator<Tables.Row> APIcalls = this.worktables.iterator(WorkTables.TABLE_API_NAME, WorkTables.TABLE_API_COL_URL, pattern);
+			//final Iterator<Tables.Row> APIcalls = this.worktables.iterator(WorkTables.TABLE_API_NAME, WorkTables.TABLE_API_COL_URL, pattern);
+			final Iterator<Tables.Row> APIcalls = this.worktables.iterator(WorkTables.TABLE_API_NAME, WorkTables.TABLE_API_COL_COMMENT, pattern);
 			Tables.Row row = null;
 			while(APIcalls.hasNext()) {
 				row = APIcalls.next();

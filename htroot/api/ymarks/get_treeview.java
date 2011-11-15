@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Iterator;
@@ -9,18 +8,20 @@ import java.util.TreeMap;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkAutoTagger;
 import de.anomic.data.ymark.YMarkCrawlStart;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkMetadata;
 import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkTag;
 import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -50,7 +51,7 @@ public class get_treeview {
         	boolean isMetadata = false;
         	boolean isURLdb = false;
         	boolean isCrawlStart = false;
-        	boolean isWordCount = false;
+        	boolean isAutoTagger = false;
         	boolean displayBmk = false;
 
         	if (post != null){
@@ -73,7 +74,7 @@ public class get_treeview {
             			isURLdb = true;
             			isFolder = false;
             		} else if (post.get(ROOT).startsWith("w:")) {
-            			isWordCount = true;
+            			isAutoTagger = true;
             			isFolder = false;
             		} else if (post.get(ROOT).startsWith("c:")) {
             			isCrawlStart = true;
@@ -192,7 +193,7 @@ public class get_treeview {
 			            prop.put("folders_"+count+"_hash", "c:"+url);
 			    		prop.put("folders_"+count+"_hasChildren", "true");
 			            count++;
-			            prop.put("folders_"+count+"_foldername","<small><b>WordCounts</b></small>");
+			            prop.put("folders_"+count+"_foldername","<small><b>AutoTagger</b></small>");
 			            putProp(count, "meta");
 			            prop.put("folders_"+count+"_hash", "w:"+url);
 			    		prop.put("folders_"+count+"_hasChildren", "true");
@@ -205,23 +206,21 @@ public class get_treeview {
 				} catch (RowSpaceExceededException e) {
 					Log.logException(e);
 				}
-	        } else if (isWordCount || isMetadata || isURLdb || isCrawlStart) {
+	        } else if (isAutoTagger || isMetadata || isURLdb || isCrawlStart) {
 	        	try {
 	                final YMarkMetadata meta = new YMarkMetadata(new DigestURI(post.get(ROOT).substring(2)), sb.indexSegments);
-        			meta.loadDocument(sb.loader);
-	        		if(isWordCount)  {
-        				final TreeMap<String,Word> words = meta.getWordCounts();
-    					final ArrayList<String> topwords = new ArrayList<String>(words.descendingKeySet());
-    					for(int i = 0; i < 20 && i < topwords.size(); i++) {
-    						String word = topwords.get(i);
-    						int occur = words.get(word).occurrences();
-    						prop.put("folders_"+count+"_foldername","<small><b>"+word+":</b> [" + occur + "]</small>");
-        					putProp(count, "meta");
-        					count++;
-    					}
-    					count--;
-    					prop.put("folders_"+count+"_comma", "");
+        			final Document document = meta.loadDocument(sb.loader);
+        			final TreeMap<String, YMarkTag> tags = sb.tables.bookmarks.getTags(bmk_user);
+        			if(isAutoTagger)  {
+        				prop.put("folders_"+count+"_foldername","<small><b>meta-"+YMarkMetadata.METADATA.KEYWORDS.name().toLowerCase()+":</b> " + meta.loadMetadata().get(YMarkMetadata.METADATA.KEYWORDS) + "</small>");
+        				putProp(count, "meta");
+        				count++;
+						prop.put("folders_"+count+"_foldername","<small><b>with preference: </b>"+YMarkAutoTagger.autoTag(document, 4, tags)+"</small>");
+    					putProp(count, "meta");
     					count++;
+						prop.put("folders_"+count+"_foldername","<small><b>without preference: </b>"+YMarkAutoTagger.autoTag(document, 4, new  TreeMap<String, YMarkTag>())+"</small>");
+    					putProp(count, "meta");
+    					count++;        			
     	        		prop.put("folders", count);
 	        		} else if(isMetadata) {
 	        			count = putMeta(count, meta.loadMetadata());

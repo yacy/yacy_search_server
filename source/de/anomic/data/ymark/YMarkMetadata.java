@@ -29,19 +29,14 @@ package de.anomic.data.ymark;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.EnumMap;
-import java.util.Map;
-import java.util.TreeMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
-import net.yacy.document.Condenser;
 import net.yacy.document.Document;
-import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segments;
 import de.anomic.crawler.retrieval.Response;
@@ -141,18 +136,4 @@ public class YMarkMetadata {
 		}
 		return metadata;
 	}
-	
-	public TreeMap<String,Word> getWordCounts() {
-		if (this.document != null) {
-            return sortWordCounts(new Condenser(this.document, true, true, LibraryProvider.dymLib).words());
-        }
-		return new TreeMap<String, Word>();
-	}
-
-	public static TreeMap<String,Word> sortWordCounts(final Map<String, Word> unsorted_words) {
-        final TreeMap<String, Word> sorted_words = new TreeMap<String, Word>(new YMarkWordCountComparator(unsorted_words));
-        sorted_words.putAll(unsorted_words);
-        return sorted_words;
-    }
-
 }
