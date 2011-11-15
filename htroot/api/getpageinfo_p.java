@@ -8,6 +8,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.RobotsTxtEntry;
 import de.anomic.server.serverObjects;
@@ -30,15 +31,15 @@ public class getpageinfo_p {
         prop.put("filter", ".*");
 
         // default actions
-        String actions="title,robots";
+        String actions = "title,robots";
 
         if (post != null && post.containsKey("url")) {
-            if(post.containsKey("actions"))
+            if (post.containsKey("actions"))
                 actions=post.get("actions");
             String url=post.get("url");
-			if(url.toLowerCase().startsWith("ftp://")){
+			if (url.toLowerCase().startsWith("ftp://")) {
 				prop.put("robots-allowed", "1");
-				prop.putXML("title", "FTP: "+url);
+				prop.putXML("title", "FTP: " + url);
                 return prop;
 			} else if (!url.startsWith("http://") &&
 		               !url.startsWith("https://") &&
@@ -47,18 +48,18 @@ public class getpageinfo_p {
 		              !url.startsWith("file://")) {
                 url = "http://" + url;
             }
-            if (actions.indexOf("title")>=0) {
+            if (actions.indexOf("title") >= 0) {
                 DigestURI u = null;
                 try {
                     u = new DigestURI(url);
                 } catch (final MalformedURLException e) {
-                    // fail, do nothing
+                    Log.logException(e);
                 }
                 ContentScraper scraper = null;
                 if (u != null) try {
                     scraper = sb.loader.parseResource(u, CacheStrategy.IFEXIST);
                 } catch (final IOException e) {
-                    // now thats a fail, do nothing
+                    Log.logException(e);
                 }
                 if (scraper != null) {
                     // put the document title
@@ -68,9 +69,9 @@ public class getpageinfo_p {
                     prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
 
                     // put keywords
-                    final String list[]=scraper.getKeywords();
+                    final String list[] = scraper.getKeywords();
                     int count = 0;
-                    for (final String element : list) {
+                    for (final String element: list) {
                         final String tag = element;
                         if (!tag.equals("")) {
                             prop.putXML("tags_"+count+"_tag", tag);
@@ -100,7 +101,7 @@ public class getpageinfo_p {
                     prop.putXML("filter", filter.length() > 0 ? filter.substring(1) : ".*");
                 }
             }
-            if (actions.indexOf("robots")>=0) {
+            if (actions.indexOf("robots") >= 0) {
                 try {
                     final DigestURI theURL = new DigestURI(url);
 
@@ -110,13 +111,16 @@ public class getpageinfo_p {
                         robotsEntry = sb.robots.getEntry(theURL, sb.peers.myBotIDs());
                     } catch (final IOException e) {
                         robotsEntry = null;
+                        Log.logException(e);
                     }
                 	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
 
                     // get the sitemap URL of the domain
                     final MultiProtocolURI sitemapURL = robotsEntry == null ? null : robotsEntry.getSitemap();
                     prop.putXML("sitemap", sitemapURL == null ? "" : sitemapURL.toString());
-                } catch (final MalformedURLException e) {}
+                } catch (final MalformedURLException e) {
+                    Log.logException(e);
+                }
             }
 
         }
