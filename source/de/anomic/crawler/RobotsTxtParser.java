@@ -78,13 +78,17 @@ public final class RobotsTxtParser {
     private final Set<String> myNames; // a list of own name lists
     private       String agentName; // the name of the agent that was used to return the result
 
-    protected RobotsTxtParser(final byte[] robotsTxt, final Set<String> myNames) {
+    protected RobotsTxtParser(final Set<String> myNames) {
         this.allowList = new ArrayList<String>(0);
         this.denyList = new ArrayList<String>(0);
         this.sitemap = "";
         this.crawlDelayMillis = 0;
         this.myNames = myNames;
         this.agentName = null;
+    }
+
+    protected RobotsTxtParser(final Set<String> myNames, final byte[] robotsTxt) {
+        this(myNames);
         if (robotsTxt != null && robotsTxt.length != 0) {
             final ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
             final BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
