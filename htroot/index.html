@@ -84,13 +84,17 @@
         #(/searchdomswitches)#
         <input type="hidden" name="nav" value="#[search.navigation]#" />
         <input type="hidden" name="startRecord" value="0" />
-        <input type="hidden" name="resource" value="global" />
-        <input type="hidden" name="urlmaskfilter" value=".*" />
-        <input type="hidden" name="prefermaskfilter" value="" />
         <input type="hidden" name="indexof" value="off" />
         <input type="hidden" name="meanCount" value="5" />
         <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
-      #(searchoptions)#::
+      #(searchoptions)#
+        <input type="hidden" name="resource" value="global" />
+        <input type="hidden" name="urlmaskfilter" value=".*" />
+        <input type="hidden" name="prefermaskfilter" value="" />
+      ::
+        <input type="hidden" name="resource" value="global" />
+        <input type="hidden" name="urlmaskfilter" value=".*" />
+        <input type="hidden" name="prefermaskfilter" value="" />
       </fieldset>
       <p><a href="/index.html?searchoptions=2" onclick="this.href='/index.html?searchoptions=2&amp;former='+document.getElementById('searchform').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom)">more options...</a></p>
       ::
