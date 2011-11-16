@@ -50,7 +50,7 @@ public final class HTTPLoader {
     private static final String DEFAULT_ENCODING = "gzip,deflate";
     private static final String DEFAULT_LANGUAGE = "en-us,en;q=0.5";
     private static final String DEFAULT_CHARSET = "ISO-8859-1,utf-8;q=0.7,*;q=0.7";
-    private static final String DEFAULT_ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+    public  static final String DEFAULT_ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
     public  static final int    DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
     public  static final int    DEFAULT_CRAWLING_RETRY_COUNT = 5;
 
