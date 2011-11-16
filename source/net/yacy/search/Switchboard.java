@@ -923,7 +923,10 @@ public final class Switchboard extends serverSwitch {
         */
         // write the YaCy network identification inside the yacybot client user agent to distinguish networks
         String newagent = ClientIdentification.generateYaCyBot(getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global"));
-        if (!getConfigBool("network.unit.dht", false) && getConfig("network.unit.tenant.agent", "").length() > 0) newagent = getConfig("network.unit.tenant.agent", "");
+        if (!getConfigBool("network.unit.dht", false) && getConfig("network.unit.tenant.agent", "").length() > 0) {
+            newagent = getConfig("network.unit.tenant.agent", "").trim();
+            this.log.logInfo("new user agent: '" + newagent + "'");
+        }
         ClientIdentification.setUserAgent(newagent);
     }
 

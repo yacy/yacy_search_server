@@ -378,7 +378,7 @@ public class RobotsTxt {
                 }
             } else if (code == 401 || code == 403) {
                 accessCompletelyRestricted = true;
-                log.info("Access to Robots.txt not allowed on URL '" + robotsURL + "'., redirectionCount = " + redirectionCount); // since this is a strange case we log it all the time
+                log.info("Access to Robots.txt not allowed on URL '" + robotsURL + "', redirectionCount = " + redirectionCount); // since this is a strange case we log it all the time
             } else {
             	if (log.isDebugEnabled())
             		log.debug("robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + client.getHttpResponse().getStatusLine() + "].");
