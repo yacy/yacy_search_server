@@ -239,7 +239,7 @@ public class RobotsTxtEntry {
 
             // disallow rule
             if (path.startsWith(element)) {
-                this.info = "path '" + path + "' starts with '" + element + "' from deny path list";
+                this.info = "path '" + path + "' starts with '" + element + "' from deny path list = " + this.denyPathList.toString();
                 return true;
             }
         }

@@ -3,6 +3,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Set;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
@@ -10,18 +14,15 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.RobotsTxtEntry;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import de.anomic.crawler.RobotsTxtEntry;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class getpageinfo_p {
 
@@ -49,7 +50,7 @@ public class getpageinfo_p {
                 actions=post.get("actions");
             String url=post.get("url");
 			if (url.toLowerCase().startsWith("ftp://")) {
-				prop.put("robots-allowed", "1");
+				prop.put("robots-allowed", "1"); // ok to crawl
 		        prop.put("robotsInfo", "ftp does not follow robots.txt");
 				prop.putXML("title", "FTP: " + url);
                 return prop;
@@ -72,6 +73,8 @@ public class getpageinfo_p {
                     scraper = sb.loader.parseResource(u, CacheStrategy.IFEXIST);
                 } catch (final IOException e) {
                     Log.logException(e);
+                    // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"
+                    // that should not affect the robots.txt validity
                 }
                 if (scraper != null) {
                     // put the document title
@@ -140,7 +143,7 @@ public class getpageinfo_p {
 					final DigestURI theURL = new DigestURI(url
 							+ "?verb=Identify");
 
-					String oairesult = checkOAI(theURL.toString());
+					final String oairesult = checkOAI(theURL.toString());
 
 					prop.put("oai", oairesult == "" ? 0 : 1);
 
@@ -156,7 +159,7 @@ public class getpageinfo_p {
         // return rewrite properties
         return prop;
     }
-    
+
     private static String checkOAI(final String url) {
 		final DocumentBuilderFactory factory = DocumentBuilderFactory
 				.newInstance();
@@ -173,7 +176,7 @@ public class getpageinfo_p {
 
 		return "";
 	}
-    
+
 	private static String parseXML(final Document doc) {
 
 		String repositoryName = null;
@@ -205,6 +208,6 @@ public class getpageinfo_p {
 		}
 		return repositoryName;
 	}
-    
+
 
 }
