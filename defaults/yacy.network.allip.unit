@@ -24,3 +24,6 @@ network.unit.protocol.control = uncontrolled
 # white/blacklists
 network.unit.access.whitelist = 10\..*,127\..*,172\.(1[6-9]|2[0-9]|3[0-1])\..*,169\.254\..*,192\.168\..*,localhost
 network.unit.access.blacklist =
+
+# optional user agent to keep activities from out of a intranet environment secret
+#network.unit.tenant.agent=Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)

@@ -49,6 +49,7 @@ import net.yacy.kelondro.logging.Log;
 
 import org.apache.log4j.Logger;
 
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.data.WorkTables;
 
 public class RobotsTxt {
@@ -308,7 +309,7 @@ public class RobotsTxt {
 
         // adding referer
         reqHeaders.put(RequestHeader.REFERER, (MultiProtocolURI.newURL(robotsURL,"/")).toNormalform(true, true));
-
+        reqHeaders.put(RequestHeader.ACCEPT, HTTPLoader.DEFAULT_ACCEPT);
         if (entry != null) {
             oldEtag = entry.getETag();
             reqHeaders = new RequestHeader();
