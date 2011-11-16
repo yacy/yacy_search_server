@@ -378,7 +378,7 @@ public class RobotsTxt {
                 }
             } else if (code == 401 || code == 403) {
                 accessCompletelyRestricted = true;
-                if (log.isDebugEnabled()) log.debug("Access to Robots.txt not allowed on URL '" + robotsURL + "'.");
+                log.info("Access to Robots.txt not allowed on URL '" + robotsURL + "'., redirectionCount = " + redirectionCount); // since this is a strange case we log it all the time
             } else {
             	if (log.isDebugEnabled())
             		log.debug("robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + client.getHttpResponse().getStatusLine() + "].");
@@ -389,4 +389,29 @@ public class RobotsTxt {
         }
         return new Object[]{Boolean.valueOf(accessCompletelyRestricted),robotsTxt,eTag,lastMod};
     }
+
+    public final static void main(final String[] args) throws Exception {
+
+        final String url = "http://www.badelatschen.net/robots.txt";
+        final Object[] o = downloadRobotsTxt(new MultiProtocolURI(url), 0, null);
+        if (o == null) {
+            System.out.println("result: null");
+        } else {
+            System.out.println("not allowed = " + ((Boolean) o[0]).toString());
+            System.out.println("robots = " + ((o[1] == null) ? "null" : UTF8.String((byte[]) o[1])));
+        }
+        System.exit(0);
+/*
+        final HttpClient httpclient = new DefaultHttpClient();
+        try {
+            final HttpGet httpget = new HttpGet(url);
+            final ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            final String responseBody = httpclient.execute(httpget, responseHandler);
+            System.out.println(responseBody);
+        } finally {
+            httpclient.getConnectionManager().shutdown();
+        }
+        */
+    }
+
 }
