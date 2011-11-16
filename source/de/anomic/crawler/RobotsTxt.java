@@ -196,12 +196,17 @@ public class RobotsTxt {
                     }
                 } else {
                     final byte[] robotsTxt = (byte[]) result[DOWNLOAD_ROBOTS_TXT];
-                    Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + UTF8.String(robotsTxt)); // debug TODO remove
-                    final RobotsTxtParser parserResult = new RobotsTxtParser(robotsTxt, thisAgents);
-                    ArrayList<String> denyPath = parserResult.denyList();
+                    Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + ((robotsTxt == null) ? "null" : UTF8.String(robotsTxt))); // debug TODO remove
+                    RobotsTxtParser parserResult;
+                    ArrayList<String> denyPath;
                     if (((Boolean) result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue()) {
+                        parserResult = new RobotsTxtParser(thisAgents);
+                        // create virtual deny path
                         denyPath = new ArrayList<String>();
                         denyPath.add("/");
+                    } else {
+                        parserResult = new RobotsTxtParser(thisAgents, robotsTxt);
+                        denyPath = parserResult.denyList();
                     }
 
                     // store the data into the robots DB
