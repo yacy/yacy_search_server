@@ -14,13 +14,19 @@ $(document).ready(function() {
 		dataType: 'json',
  		method: 'GET',
  		colModel: [	
-			{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
-			{display: 'Public', name : 'public', width : 25, sortable : true, align: 'center'},
+			{display: 'Hash', name : 'hash', width : 85, sortable : false, align: 'left', hide: true},
+			{display: 'Public', name : 'public', width : 20, sortable : true, align: 'center'},
+			{display: 'Crawl start', name : 'crawl_start', width : 20, sortable : true, align: 'center'},
 			{display: 'Title', name : 'title', width : 400, sortable : true, align: 'left'},
 			{display: 'Tags', name : 'tags', width : 160, sortable : false, align: 'left'},
 			{display: 'Folders', name : 'folders', width : 160, sortable : true, align: 'left', hide: true},
-			{display: 'Date added', name : 'date_added', width : 100, sortable : true, align: 'left'},
-			{display: 'Date visited', name : 'date_visited', width : 100, sortable : true, align: 'left'}
+			{display: 'Date added', name : 'date_added', width : 100, sortable : true, align: 'left', hide: true},
+			{display: 'Date modified', name : 'date_modified', width : 100, sortable : true, align: 'left'},
+			{display: 'Date visited', name : 'date_visited', width : 100, sortable : true, align: 'left', hide: true},			
+			{display: 'API PK', name : 'apicall_pk', width : 85, sortable : true, align: 'left', hide: true},
+			{display: 'Date recording', name : 'date_recording', width : 100, sortable : true, align: 'left', hide: true},
+			{display: 'Date next exec', name : 'date_next_exec', width : 100, sortable : true, align: 'left', hide: true},
+			{display: 'Date last exec', name : 'date_last_exec', width : 100, sortable : true, align: 'left', hide: true}
 		],
 		buttons: [				
 			{name: '...', bclass: 'burst', onpress: function() {

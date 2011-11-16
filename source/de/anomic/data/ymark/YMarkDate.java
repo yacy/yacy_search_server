@@ -45,6 +45,10 @@ public class YMarkDate {
 		this.set(date);
 	}
 	
+	public YMarkDate(final Date date) {
+		this.date = date.getTime();
+	}
+	
 	public long parseISO8601(final String s) throws ParseException {
     	if(s == null || s.length() < 1) {
     		throw new ParseException("parseISO8601 - empty string, nothing to parse", 0);
@@ -70,8 +74,12 @@ public class YMarkDate {
     	if(this.date == 0) {
     	    return YMarkEntry.BOOKMARK.DATE_MODIFIED.deflt();
     	} else {
-    	    return ISO8601Formatter.FORMATTER.format(new Date(this.date));   
+    	    return ISO8601(new Date(this.date));   
     	}	
+    }
+    
+    public static String ISO8601(final Date date) {
+    	return ISO8601Formatter.FORMATTER.format(date); 
     }
     
     public byte[] toBytes() {

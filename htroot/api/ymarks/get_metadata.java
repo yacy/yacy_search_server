@@ -57,14 +57,16 @@ public class get_metadata {
 				prop.put("autotags", putTags(YMarkAutoTagger.autoTag(document, 5, sb.tables.bookmarks.getTags(bmk_user)), "autotags"));
     			
 				final YMarkCrawlStart crawlStart = new YMarkCrawlStart(sb.tables, url);
-    			final Iterator<String> iter = crawlStart.keySet().iterator();
     			int count = 0;
-    			String key;
-    			while(iter.hasNext()) {
-    				key = iter.next();
-    				prop.putXML("crawlstart_"+count+"_key",key.toLowerCase());
-    				prop.putXML("crawlstart_"+count+"_value",crawlStart.get(key));
-    				count++;
+				if(!crawlStart.isEmpty()) {
+					final Iterator<String> iter = crawlStart.keySet().iterator();
+	    			String key;
+	    			while(iter.hasNext()) {
+	    				key = iter.next();
+	    				prop.putXML("crawlstart_"+count+"_key",key.toLowerCase());
+	    				prop.putXML("crawlstart_"+count+"_value",crawlStart.get(key));
+	    				count++;
+	    			}
     			}
     			prop.put("crawlstart", count);
 
