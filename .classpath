@@ -9,7 +9,6 @@
 	<classpathentry excluding="bookmarks/posts/|bookmarks/|util/|bookmarks/xbel/|bookmarks/tags/|ymarks/" kind="src" path="htroot/api"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
 	<classpathentry excluding="posts/|xbel/|tags/" kind="src" path="htroot/api/bookmarks"/>
-	<classpathentry kind="src" path="htroot/api/util"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/xbel"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
 	<classpathentry kind="src" path="htroot/api/ymarks"/>
