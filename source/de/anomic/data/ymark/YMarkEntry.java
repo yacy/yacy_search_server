@@ -139,7 +139,7 @@ public class YMarkEntry extends TreeMap<String, String> {
         }        
     }
     
-    private void setDefaults() {
+    public void setDefaults() {
         for (BOOKMARK b : BOOKMARK.values()) {
             if(!b.deflt().isEmpty() && !this.containsKey(b.key())) {
                 this.put(b.key(), b.deflt());

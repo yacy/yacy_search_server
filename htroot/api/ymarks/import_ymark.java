@@ -2,23 +2,35 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.document.Document;
+import net.yacy.document.Parser.Failure;
 import net.yacy.document.content.SurrogateReader;
+import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
 import org.xml.sax.SAXException;
 
+import de.anomic.data.BookmarksDB;
 import de.anomic.data.UserDB;
+import de.anomic.data.WorkTables;
 import de.anomic.data.ymark.YMarkAutoTagger;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkHTMLImporter;
 import de.anomic.data.ymark.YMarkJSONImporter;
+import de.anomic.data.ymark.YMarkMetadata;
 import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.data.ymark.YMarkXBELImporter;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -69,7 +81,7 @@ public class import_ymark {
             if(post.containsKey("root") && post.get("root").length() > 0) {
                 root = post.get("root");
             }
-        	if(post.containsKey("bmkfile") && post.containsKey("importer")){
+        	if(post.containsKey("bmkfile") && !post.get("bmkfile").isEmpty() && post.containsKey("importer")){
         		stream = new ByteArrayInputStream(UTF8.getBytes(post.get("bmkfile$file")));
         		if(post.get("importer").equals("surro") && stream != null) {
                     SurrogateReader surrogateReader;
@@ -133,7 +145,73 @@ public class import_ymark {
                         prop.put("result", "1");
                     }
                 }        		
-        	}
+        	} else if(post.containsKey("importer") && post.get("importer").equals("crawls")) {
+        		try {
+	    			final Pattern pattern = Pattern.compile("^crawl start for.*");
+					final Iterator<Tables.Row> APIcalls = sb.tables.iterator(WorkTables.TABLE_API_NAME, WorkTables.TABLE_API_COL_COMMENT, pattern);
+	    			Tables.Row row = null;
+	    			while(APIcalls.hasNext()) {
+	    				row = APIcalls.next();
+	    				if(row.get(WorkTables.TABLE_API_COL_TYPE, "").equals("crawler")) {
+	    					final String url = row.get(WorkTables.TABLE_API_COL_COMMENT, "").substring(16);
+	    					final YMarkMetadata meta = new YMarkMetadata(new DigestURI(url), sb.indexSegments);
+	    					final Document document = meta.loadDocument(sb.loader);
+	    					final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();	    					
+	    					final YMarkEntry bmk_entry = new YMarkEntry(false);	
+	    					bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), url);	    					
+	    					if(!sb.tables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(url))) {
+	    						bmk_entry.put(YMarkEntry.BOOKMARK.PUBLIC.key(), "false");
+		    					bmk_entry.put(YMarkEntry.BOOKMARK.TITLE.key(), metadata.get(YMarkMetadata.METADATA.TITLE));
+		    					bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), metadata.get(YMarkMetadata.METADATA.DESCRIPTION));		    					
+	    					}
+	    					bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), root);	
+	    					if(autotag) {
+	    						bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkAutoTagger.autoTag(document, 3, sb.tables.bookmarks.getTags(bmk_user)));
+	    					}	    					
+	    					sb.tables.bookmarks.addBookmark(bmk_user, bmk_entry, merge, true);
+	    				}
+	    			}				
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (RowSpaceExceededException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Failure e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	} else if(post.containsKey("importer") && post.get("importer").equals("bmks")) {
+        		final Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(isAdmin);
+            	BookmarksDB.Bookmark bookmark;
+            	while(bit.hasNext()){    			
+        			bookmark=sb.bookmarksDB.getBookmark(bit.next());
+        			final YMarkEntry bmk_entry = new YMarkEntry(false);
+        			bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), bookmark.getUrl());
+        			try {
+						if(!sb.tables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(bookmark.getUrl()))) {
+    						bmk_entry.put(YMarkEntry.BOOKMARK.PUBLIC.key(), bookmark.getPublic() ? "true" : "false");
+	    					bmk_entry.put(YMarkEntry.BOOKMARK.TITLE.key(), bookmark.getTitle());
+	    					bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), bookmark.getDescription());
+	    					bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), bookmark.getTagsString());
+	    					bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), root+bookmark.getFoldersString().replaceAll(".*"+YMarkUtil.TAGS_SEPARATOR+YMarkUtil.FOLDERS_SEPARATOR, root+YMarkUtil.FOLDERS_SEPARATOR));
+						}
+						if(autotag) {
+							bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkAutoTagger.autoTag(bookmark.getUrl(), sb.loader, 3, sb.tables.bookmarks.getTags(bmk_user)));
+						}
+						sb.tables.bookmarks.addBookmark(bmk_user, bmk_entry, merge, true);
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (RowSpaceExceededException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+            	}  
+            }
         	if(post.containsKey("autotag") && !post.get("autotag", "off").equals("off")) {
             	try {
     				autoTaggingQueue.put(YMarkAutoTagger.POISON);
