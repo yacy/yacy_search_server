@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -44,8 +45,11 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.ByteCount;
+import net.yacy.kelondro.logging.Log;
 
 import org.apache.log4j.Logger;
+
+import de.anomic.data.WorkTables;
 
 public class RobotsTxt {
 
@@ -54,28 +58,35 @@ public class RobotsTxt {
     protected static final String ROBOTS_DB_PATH_SEPARATOR = ";";
     protected static final Pattern ROBOTS_DB_PATH_SEPARATOR_MATCHER = Pattern.compile(ROBOTS_DB_PATH_SEPARATOR);
 
-    private final BEncodedHeap robotsTable;
     private final ConcurrentHashMap<String, DomSync> syncObjects;
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
+    private final WorkTables tables;
 
     private static class DomSync {
     	private DomSync() {}
     }
 
-    public RobotsTxt(final BEncodedHeap robotsTable) {
-        this.robotsTable = robotsTable;
+    public RobotsTxt(final WorkTables worktables) {
         this.syncObjects = new ConcurrentHashMap<String, DomSync>();
-        log.info("initiated robots table: " + robotsTable.getFile());
+        this.tables = worktables;
+        try {
+            log.info("initiated robots table: " + this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).getFile());
+        } catch (final IOException e) {
+            try {
+                this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).clear();
+            } catch (final IOException e1) {
+            }
+        }
     }
 
-    public void clear() {
+    public void clear() throws IOException {
         log.info("clearing robots table");
-        this.robotsTable.clear();
+        this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).clear();
         this.syncObjects.clear();
     }
 
-    public int size() {
-        return this.robotsTable.size();
+    public int size() throws IOException {
+        return this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).size();
     }
 
     public RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents) throws IOException {
@@ -89,8 +100,9 @@ public class RobotsTxt {
         final String urlHostPort = getHostPort(theURL);
         RobotsTxtEntry robotsTxt4Host = null;
         Map<String, byte[]> record;
+        final BEncodedHeap robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
         try {
-            record = this.robotsTable.get(this.robotsTable.encodedKey(urlHostPort));
+            record = robotsTable.get(robotsTable.encodedKey(urlHostPort));
         } catch (final RowSpaceExceededException e) {
             log.warn("memory exhausted", e);
             record = null;
@@ -118,7 +130,7 @@ public class RobotsTxt {
                 // check the robots table again for all threads that come here because they waited for another one
                 // to complete a download
                 try {
-                    record = this.robotsTable.get(this.robotsTable.encodedKey(urlHostPort));
+                    record = robotsTable.get(robotsTable.encodedKey(urlHostPort));
                 } catch (final RowSpaceExceededException e) {
                     log.warn("memory exhausted", e);
                     record = null;
@@ -175,15 +187,17 @@ public class RobotsTxt {
                     }
 
                     // store the data into the robots DB
-                    final int sz = this.robotsTable.size();
+                    final int sz = robotsTable.size();
                     addEntry(robotsTxt4Host);
-                    if (this.robotsTable.size() <= sz) {
+                    if (robotsTable.size() <= sz) {
                     	log.fatal("new entry in robots.txt table failed, resetting database");
                     	clear();
                     	addEntry(robotsTxt4Host);
                     }
                 } else {
-                    final RobotsTxtParser parserResult = new RobotsTxtParser((byte[]) result[DOWNLOAD_ROBOTS_TXT], thisAgents);
+                    final byte[] robotsTxt = (byte[]) result[DOWNLOAD_ROBOTS_TXT];
+                    Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + UTF8.String(robotsTxt)); // debug TODO remove
+                    final RobotsTxtParser parserResult = new RobotsTxtParser(robotsTxt, thisAgents);
                     ArrayList<String> denyPath = parserResult.denyList();
                     if (((Boolean) result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue()) {
                         denyPath = new ArrayList<String>();
@@ -230,7 +244,8 @@ public class RobotsTxt {
     private String addEntry(final RobotsTxtEntry entry) {
         // writes a new page and returns key
         try {
-            this.robotsTable.insert(this.robotsTable.encodedKey(entry.getHostName()), entry.getMem());
+            final BEncodedHeap robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
+            robotsTable.insert(robotsTable.encodedKey(entry.getHostName()), entry.getMem());
             return entry.getHostName();
         } catch (final Exception e) {
             log.warn("cannot write robots.txt entry", e);

@@ -105,7 +105,6 @@ import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Tray;
-import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -513,14 +512,7 @@ public final class Switchboard extends serverSwitch {
 
         // load the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
-        try {
-            final BEncodedHeap robotsHeap = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
-            this.robots = new RobotsTxt(robotsHeap);
-        } catch (final IOException e) {
-            this.tables.clear(WorkTables.TABLE_ROBOTS_NAME);
-            final BEncodedHeap robotsHeap = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
-            this.robots = new RobotsTxt(robotsHeap);
-        }
+        this.robots = new RobotsTxt(this.tables);
         this.log.logConfig("Loaded robots.txt DB: " +  this.robots.size() + " entries");
 
         // start a cache manager
