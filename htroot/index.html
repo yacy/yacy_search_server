@@ -80,23 +80,19 @@
 	        #(searchaudio)#::<input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# /><label for="audio">Audio</label>&nbsp;&nbsp;#(/searchaudio)#
 	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# /><label for="video">Video</label>&nbsp;&nbsp;#(/searchvideo)#
 	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# /><label for="app">Applications</label>#(/searchapp)#
+	        #(searchoptions)#&nbsp;&nbsp;<a href="/index.html?searchoptions=1" onclick="this.href='/index.html?searchoptions=1&amp;former='+document.getElementById('searchform').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom)">more options...</a>::#(/searchoptions)#
         </div>
         #(/searchdomswitches)#
         <input type="hidden" name="nav" value="#[search.navigation]#" />
         <input type="hidden" name="startRecord" value="0" />
         <input type="hidden" name="indexof" value="off" />
         <input type="hidden" name="meanCount" value="5" />
-        <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
       #(searchoptions)#
         <input type="hidden" name="resource" value="global" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
-      ::
-        <input type="hidden" name="resource" value="global" />
-        <input type="hidden" name="urlmaskfilter" value=".*" />
-        <input type="hidden" name="prefermaskfilter" value="" />
+        <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
       </fieldset>
-      <p><a href="/index.html?searchoptions=2" onclick="this.href='/index.html?searchoptions=2&amp;former='+document.getElementById('searchform').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom)">more options...</a></p>
       ::
       </fieldset>
        
@@ -104,28 +100,17 @@
         <tr>
           <td><label for="count">Max. number of results</label>:</td>
           <td>
-            <select id="count" name="count">
-              <option #(count-10)#::selected="selected"#(/count-10)#>10</option>
-              <option #(count-50)#::selected="selected"#(/count-50)#>50</option>
-              <option #(count-100)#::selected="selected"#(/count-100)#>100</option>
-            </select>
+            <input type="radio" name="maximumRecords" value="10" #(count-10)#::checked="checked"#(/count-10)#/>10
+            <input type="radio" name="maximumRecords" value="50" #(count-50)#::checked="checked"#(/count-50)#/>50
+            <input type="radio" name="maximumRecords" value="100" #(count-100)#::checked="checked"#(/count-100)#/>100
           </td>
         </tr>
         <tr>
           #(resource-select)#::
           <td><label for="resource">Resource</label>:</td>
           <td>
-            <select id="resource" name="resource">
-              <option value="global" #(global)#::selected="selected"#(/global)#
-                      #(global-disabled)#::disabled="disabled"#(/global-disabled)#>global</option>
-              <option value="local" #(local)#::selected="selected"#(/local)#>local</option>
-            </select>
-            #(global-disabled)#::
-            Global search is disabled because<br />#(reason)# 
-              <a class="lock" href="ConfigNetwork_p.html">DHT Distribution</a> is::
-              <a class="lock" href="ConfigNetwork_p.html">Index Receive</a> is::
-              <a class="lock" href="ConfigNetwork_p.html">DHT Distribution and Index Receive</a> are#(/reason)# 
-            disabled.#(/global-disabled)#
+            <input type="radio" name="resource" value="global" #(global)#::checked="checked"#(/global)# #(global-disabled)#::disabled="disabled"#(/global-disabled)#/>global
+            <input type="radio" name="resource" value="local" #(local)#::checked="checked"#(/local)#/>local
           </td>
           #(/resource-select)#
         </tr>
@@ -163,7 +148,7 @@
         <tr><td></td><td></td></tr>
         <tr>
           <td>
-          <a href="http://www.yacy-websuche.de/wiki/index.php/En:SearchParameters">advanced parameters</a>
+          <a href="http://www.yacy-websuche.de/wiki/index.php/En:SearchParameters">help: advanced parameters</a>
           </td>
           <td>
           </td>

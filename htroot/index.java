@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -41,15 +41,15 @@ public class index {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
-        String forwardTarget = sb.getConfig(SwitchboardConstants.INDEX_FORWARD, "");
+
+        final String forwardTarget = sb.getConfig(SwitchboardConstants.INDEX_FORWARD, "");
         if (forwardTarget.length() > 0) {
             // forward the page
             prop.put("forward", 1);
             prop.put("forward_target", forwardTarget);
             return prop;
         }
-        
+
         // access control
         final boolean authorizedAccess = sb.verifyAuthentication(header, false);
         if ((post != null) && (post.containsKey("publicPage"))) {
@@ -58,10 +58,10 @@ public class index {
                 return prop;
             }
         }
-        
-        final boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
 
-        int searchoptions = (post == null) ? 1 : post.getInt("searchoptions", 1);
+        boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
+
+        int searchoptions = (post == null) ? 0 : Math.min(1, post.getInt("searchoptions", 0));
         if (!sb.getConfigBool("search.options", true)) searchoptions = 0;
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
@@ -71,12 +71,12 @@ public class index {
         final String constraint = (post == null) ? "" : post.get("constraint", "");
         final String cat = (post == null) ? "href" : post.get("cat", "href");
         final int type = (post == null) ? 0 : post.getInt("type", 0);
-        
-        final boolean indexDistributeGranted = sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, true);
+
+        //final boolean indexDistributeGranted = sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, true);
         final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true) ||
         									sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
-        //global = global && indexDistributeGranted && indexReceiveGranted;
-        
+        global = global && indexReceiveGranted;
+
         // search domain
         ContentDomain contentdom = ContentDomain.TEXT;
         final String cds = (post == null) ? "text" : post.get("contentdom", "text");
@@ -85,7 +85,7 @@ public class index {
         if (cds.equals("video")) contentdom = ContentDomain.VIDEO;
         if (cds.equals("image")) contentdom = ContentDomain.IMAGE;
         if (cds.equals("app")) contentdom = ContentDomain.APP;
-        
+
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
@@ -102,10 +102,9 @@ public class index {
         prop.put("searchoptions_count-10", (count == 10) ? "1" : "0");
         prop.put("searchoptions_count-50", (count == 50) ? "1" : "0");
         prop.put("searchoptions_count-100", (count == 100) ? "1" : "0");
-        prop.put("searchoptions_resource-select", (sb.peers == null) ?  0 : sb.peers.sizeConnected() > 0 ? 1 : 0);
+        prop.put("searchoptions_resource-select", (sb.peers == null || sb.peers.sizeConnected() == 0 || !global) ?  0 : 1);
         prop.put("searchoptions_resource-select_global", global ? "1" : "0");
-        prop.put("searchoptions_resource-select_global-disabled", (indexReceiveGranted && indexDistributeGranted) ? "0" : "1");
-        prop.put("searchoptions_resource-select_global-disabled_reason", (indexReceiveGranted) ? "0" : (indexDistributeGranted ? "1" : "2"));
+        prop.put("searchoptions_resource-select_global-disabled", indexReceiveGranted ? "0" : "1");
         prop.put("searchoptions_resource-select_local", global ? "0" : "1");
         prop.put("searchoptions_urlmaskoptions", "0");
         prop.putHTML("searchoptions_urlmaskoptions_urlmaskfilter", urlmaskfilter);
@@ -120,6 +119,7 @@ public class index {
         prop.put("pi", sb.getConfigBool("publicAdministratorPi", false) ? 1 : 0);
         prop.putHTML("constraint", constraint);
         prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchoptions", searchoptions);
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
         prop.put("searchdomswitches_searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
         prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
@@ -134,7 +134,7 @@ public class index {
         prop.put("search.verify", sb.getConfig("search.verify", "iffresh") );
         // online caution timing
         sb.localSearchLastAccess = System.currentTimeMillis();
-        
+
         return prop;
     }
 }
