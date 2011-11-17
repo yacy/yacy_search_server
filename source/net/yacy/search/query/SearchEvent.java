@@ -103,7 +103,7 @@ public final class SearchEvent {
         this.peers = peers;
         this.workTables = workTables;
         this.query = query;
-        this.secondarySearchSuperviser = (query.queryHashes.size() > 1) ? new SecondarySearchSuperviser() : null; // generate abstracts only for combined searches
+        this.secondarySearchSuperviser = (this.query.queryHashes.size() > 1) ? new SecondarySearchSuperviser() : null; // generate abstracts only for combined searches
         if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
@@ -114,9 +114,8 @@ public final class SearchEvent {
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.localSearchThread = null;
-        this.order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
-        boolean remote = (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) || (query.domType == QueryParams.SEARCHDOM_CLUSTERALL);
-        if (remote && peers.sizeConnected() == 0) remote = false;
+        this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
+        final boolean remote = (this.query.domType == QueryParams.Searchdom.GLOBAL || this.query.domType == QueryParams.Searchdom.CLUSTER) && peers.sizeConnected() > 0 && peers.mySeed().getFlagAcceptRemoteIndex();
         final long start = System.currentTimeMillis();
         if (remote) {
         	// initialize a ranking process that is the target for data
@@ -128,32 +127,32 @@ public final class SearchEvent {
 
             // start global searches
             final long timer = System.currentTimeMillis();
-            this.primarySearchThreads = (query.queryHashes.isEmpty()) ? null : RemoteSearch.primaryRemoteSearches(
-                    QueryParams.hashSet2hashString(query.queryHashes),
-                    QueryParams.hashSet2hashString(query.excludeHashes),
-                    query.prefer,
-                    query.urlMask,
-                    query.snippetMatcher,
-                    query.targetlang == null ? "" : query.targetlang,
-                    query.sitehash == null ? "" : query.sitehash,
-                    query.authorhash == null ? "" : query.authorhash,
+            this.primarySearchThreads = (this.query.queryHashes.isEmpty()) ? null : RemoteSearch.primaryRemoteSearches(
+                    QueryParams.hashSet2hashString(this.query.queryHashes),
+                    QueryParams.hashSet2hashString(this.query.excludeHashes),
+                    this.query.prefer,
+                    this.query.urlMask,
+                    this.query.snippetMatcher,
+                    this.query.targetlang == null ? "" : this.query.targetlang,
+                    this.query.sitehash == null ? "" : this.query.sitehash,
+                    this.query.authorhash == null ? "" : this.query.authorhash,
                     remote_maxcount,
                     remote_maxtime,
-                    query.maxDistance,
-                    query.getSegment(),
+                    this.query.maxDistance,
+                    this.query.getSegment(),
                     peers,
                     this.rankingProcess,
                     this.secondarySearchSuperviser,
                     Switchboard.urlBlacklist,
-                    query.ranking,
-                    query.constraint,
-                    (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes,
+                    this.query.ranking,
+                    this.query.constraint,
+                    (this.query.domType == QueryParams.Searchdom.GLOBAL) ? null : preselectedPeerHashes,
                     burstRobinsonPercent,
                     burstMultiwordPercent);
             if (this.primarySearchThreads != null) {
                 Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + remote_maxcount + " URLs");
                 this.rankingProcess.moreFeeders(this.primarySearchThreads.length);
-                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
+                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
                 // finished searching
                 Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + this.primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
             } else {
@@ -162,7 +161,7 @@ public final class SearchEvent {
             }
 
             // start worker threads to fetch urls and snippets
-            this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, query, this.peers, this.workTables, 3000, deleteIfSnippetFail);
+            this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, this.query, this.peers, this.workTables, 3000, deleteIfSnippetFail);
         } else {
             // do a local search
             this.rankingProcess = new RWIProcess(this.query, this.order, max_results_preparation);
@@ -192,7 +191,7 @@ public final class SearchEvent {
                     this.IACount.put(wordhash, LargeNumberCache.valueOf(container.size()));
                     this.IAResults.put(wordhash, WordReferenceFactory.compressIndex(container, null, 1000).toString());
                 }
-                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), Type.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
+                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), Type.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             } else {
                 this.rankingProcess.start(); // start concurrently
                 // but give process time to accumulate a certain amount of data
@@ -206,16 +205,16 @@ public final class SearchEvent {
             }
 
             // start worker threads to fetch urls and snippets
-            this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, query, this.peers, this.workTables, 500, deleteIfSnippetFail);
+            this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, this.query, this.peers, this.workTables, 500, deleteIfSnippetFail);
         }
 
         // clean up events
         SearchEventCache.cleanupEvents(false);
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), Type.CLEANUP, "", 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), Type.CLEANUP, "", 0, 0), false);
 
         // store this search to a cache so it can be re-used
         if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);
-        SearchEventCache.put(query.id(false), this);
+        SearchEventCache.put(this.query.id(false), this);
    }
 
 
@@ -372,8 +371,8 @@ public final class SearchEvent {
     }
 
     public ResultEntry oneResult(final int item, final long timeout) {
-        if ((this.query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ||
-             (this.query.domType == QueryParams.SEARCHDOM_CLUSTERALL)) {
+        if ((this.query.domType == QueryParams.Searchdom.GLOBAL) ||
+             (this.query.domType == QueryParams.Searchdom.CLUSTER)) {
             // this is a search using remote search threads. Also the local
             // search thread is started as background process
             if ((this.localSearchThread != null) && (this.localSearchThread.isAlive())) {

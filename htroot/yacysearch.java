@@ -584,8 +584,8 @@ public class yacysearch {
                     itemsPerPage,
                     offset,
                     urlmask,
-                    (clustersearch && globalsearch) ? QueryParams.SEARCHDOM_CLUSTERALL :
-                    ((globalsearch) ? QueryParams.SEARCHDOM_GLOBALDHT : QueryParams.SEARCHDOM_LOCAL),
+                    (clustersearch && globalsearch) ? QueryParams.Searchdom.CLUSTER :
+                    ((globalsearch) ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
                     20,
                     constraint,
                     true,
