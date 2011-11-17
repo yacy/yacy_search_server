@@ -61,11 +61,9 @@ import net.yacy.search.snippet.ContentDomain;
 
 public final class QueryParams {
 
-    public static final int SEARCHDOM_LOCAL = 0;
-    public static final int SEARCHDOM_CLUSTERDHT = 1;
-    public static final int SEARCHDOM_CLUSTERALL = 2;
-    public static final int SEARCHDOM_GLOBALDHT = 3;
-    public static final int SEARCHDOM_GLOBALALL = 4;
+    public enum Searchdom {
+        LOCAL, CLUSTER, GLOBAL;
+    }
 
     private static final String ampersand = "&amp;";
 
@@ -89,7 +87,7 @@ public final class QueryParams {
     public final ContentDomain contentdom;
     public final String targetlang;
     public final String navigators;
-    public final int domType;
+    public final Searchdom domType;
     public final int zonecode;
     public final int domMaxTargets;
     public final int maxDistance;
@@ -148,7 +146,7 @@ public final class QueryParams {
         this.itemsPerPage = itemsPerPage;
         this.offset = 0;
         this.targetlang = "en";
-        this.domType = SEARCHDOM_LOCAL;
+        this.domType = Searchdom.LOCAL;
         this.zonecode = DigestURI.TLD_any_zone_filter;
         this.domMaxTargets = 0;
         this.constraint = constraint;
@@ -178,7 +176,7 @@ public final class QueryParams {
         final String navigators,
         final CacheStrategy snippetCacheStrategy,
         final int itemsPerPage, final int offset, final String urlMask,
-        final int domType, final int domMaxTargets,
+        final Searchdom domType, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
         final String site,
         final String authorhash,
@@ -257,7 +255,7 @@ public final class QueryParams {
     }
 
     public boolean isLocal() {
-        return this.domType == SEARCHDOM_LOCAL;
+        return this.domType == Searchdom.LOCAL;
     }
 
     public static HandleSet hashes2Set(final String query) {
@@ -471,7 +469,7 @@ public final class QueryParams {
         context.append(asterisk);
         context.append(this.maxDistance);
         context.append(asterisk);
-        context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());        
+        context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
         if (anonymized) {
             this.idCacheAnon = context.toString();
         } else {

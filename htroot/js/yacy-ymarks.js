@@ -20,7 +20,7 @@ $(document).ready(function() {
 			{display: 'Title', name : 'title', width : 400, sortable : true, align: 'left'},
 			{display: 'Tags', name : 'tags', width : 160, sortable : false, align: 'left'},
 			{display: 'Folders', name : 'folders', width : 160, sortable : true, align: 'left', hide: true},
-			{display: 'Date added', name : 'date_added', width : 100, sortable : true, align: 'left', hide: true},
+			{display: 'Date added', name : 'date_added', width : 100, sortable : true, align: 'left'},
 			{display: 'Date modified', name : 'date_modified', width : 100, sortable : true, align: 'left'},
 			{display: 'Date visited', name : 'date_visited', width : 100, sortable : true, align: 'left', hide: true},			
 			{display: 'API PK', name : 'apicall_pk', width : 85, sortable : true, align: 'left', hide: true},
@@ -98,17 +98,34 @@ $(document).ready(function() {
 	});						
 
 	$("#ymarks_treeview").bind("click", function(event) {
-			if ($(event.target).is("li") || $(event.target).parents("li").length) {
-				var folder = $(event.target).parents("li").filter(":first").attr("id");
-				$('#ymarks_flexigrid').flexOptions({
-					query: folder,
-					qtype: "_folder",
-					newp: 1
-				});
-				$('#ymarks_flexigrid').flexReload();
-				return false;
-			}	
+		if ($(event.target).is("li") || $(event.target).parents("li").length) {
+			var folder = $(event.target).parents("li").filter(":first").attr("id");
+			$('#ymarks_flexigrid').flexOptions({
+				query: folder,
+				qtype: "_folder",
+				newp: 1
+			});
+			$('#ymarks_flexigrid').flexReload();
+			return false;
+		}	
 	});
+	
+	$('input[name=importer]').change(function() {
+	     if ($("input[name=importer]:checked").val() == 'crawls') {             
+	    	$("input[name='bmkfile']").attr("disabled","disabled");
+	        $("input[name='root']").setValue("/Crawl Start");
+	     }
+	     else {
+	    	 $("input[name='bmkfile']").removeAttr("disabled");
+	     	 $("input[name='root']").setValue("/Imported Bookmarks");
+	     }
+	     if ($("input[name=importer]:checked").val() == 'bmks') {             
+		    	$("input[name='bmkfile']").attr("disabled","disabled");
+		     }
+	     else {
+	    	 $("input[name='bmkfile']").removeAttr("disabled");
+	     }
+	  });
 
    $("#example").multiselect();
 

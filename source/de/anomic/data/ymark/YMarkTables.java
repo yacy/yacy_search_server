@@ -267,7 +267,11 @@ public class YMarkTables {
 			bmk_row = this.worktables.select(bmk_table, urlHash);
 	        if (bmk_row == null) {
 	        	// create and insert new entry
-            	 this.worktables.insert(bmk_table, urlHash, bmk.getData());
+				if(!bmk.containsKey(YMarkEntry.BOOKMARK.DATE_ADDED.key())) {
+					bmk.put(YMarkEntry.BOOKMARK.DATE_ADDED.key(), date);
+					bmk.put(YMarkEntry.BOOKMARK.DATE_MODIFIED.key(), date);
+				}
+	        	this.worktables.insert(bmk_table, urlHash, bmk.getData());
 	        } else {
 	        	// modify and update existing entry
                 HashSet<String> oldSet;

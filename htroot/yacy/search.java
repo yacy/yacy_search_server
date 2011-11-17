@@ -56,10 +56,10 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.peers.Seed;
 import net.yacy.peers.EventChannel;
-import net.yacy.peers.Protocol;
 import net.yacy.peers.Network;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -230,7 +230,7 @@ public final class search {
                     count,
                     0,
                     filter,
-                    QueryParams.SEARCHDOM_LOCAL,
+                    QueryParams.Searchdom.LOCAL,
                     -1,
                     null,
                     false,
@@ -290,7 +290,7 @@ public final class search {
                     count,
                     0,
                     filter,
-                    QueryParams.SEARCHDOM_LOCAL,
+                    QueryParams.Searchdom.LOCAL,
                     -1,
                     constraint,
                     false,

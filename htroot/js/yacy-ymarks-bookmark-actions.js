@@ -18,6 +18,7 @@ function bm_action(com,grid) {
 	}
 	else if (com=='Add') {			
 		$('#bmaddform').resetForm();
+		$("input[name='bm_url']").removeAttr("disabled");
 		$("#bm_url").blur(function() { 
 			var url = $("input[name='bm_url']").getValue();
 			$.ajax({
@@ -47,6 +48,7 @@ function bm_action(com,grid) {
 			alert("Editing of more than one selected bookmark is currently not supportet!");
 			return false;
 		}
+		$("input[name='bm_url']").attr("disabled","disabled"); 
 		$("input[name='bm_url']").setValue($('.trSelected',grid).find('.url').text());
         $("input[name='bm_title']").setValue($('.trSelected',grid).find('h3.linktitle').text().trim());
         $("textarea[name='bm_desc']").setValue($('.trSelected',grid).find('p.desc').text().trim());            		
