@@ -136,14 +136,6 @@ public class SettingsAck_p {
                 prop.put("info", "1");//error with submitted information
                 return prop;
             }
-            /*if (user.length() == 0) {
-                prop.put("info", 2);//username must be given
-                return prop;
-            }*/
-            /*if (!(pw1.equals(pw2))) {
-                prop.put("info", 3);//pw check failed
-                return prop;
-            }*/
 
             if (filter.length() == 0) filter = "*";
             else if (!filter.equals("*")){
