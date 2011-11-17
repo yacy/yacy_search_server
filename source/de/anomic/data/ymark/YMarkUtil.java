@@ -105,6 +105,8 @@ public class YMarkUtil {
     }
     
     public final static String cleanFoldersString(final String foldersString) {        
+    	if(foldersString.isEmpty())
+    		return YMarkEntry.BOOKMARK.FOLDERS.deflt();
     	StringBuilder fs = new StringBuilder(cleanTagsString(foldersString));    	
     	if(fs.length() == 0)
     		return YMarkEntry.BOOKMARK.FOLDERS.deflt();

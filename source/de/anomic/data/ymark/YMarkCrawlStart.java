@@ -34,6 +34,8 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.Tables;
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.data.WorkTables;
 
 public class YMarkCrawlStart extends HashMap<String,String>{
@@ -45,8 +47,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 	private Date date_recording;
 	private String apicall_pk;
 	private String url;
-	
-	
+		
 	public YMarkCrawlStart(final WorkTables worktables) {
 		super();
 		this.date_recording = new Date(0);
@@ -85,6 +86,18 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 			return true;
 		else
 			return false;
+	}
+	
+	public boolean isRunning(final CrawlSwitchboard crawler) {
+		final Iterator<byte[]> iter = crawler.getActive().iterator();
+		while(iter.hasNext()) {
+			final byte[] key = iter.next();
+			final CrawlProfile crawl = crawler.getActive(key);
+			if (crawl.startURL().equals(this.url)) {
+				return true;				
+			}
+		}
+		return false;
 	}
 	
 	public Date date_recording() {

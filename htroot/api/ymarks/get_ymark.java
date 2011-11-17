@@ -131,10 +131,17 @@ public class get_ymark {
                 
                 final YMarkCrawlStart crawlstart = new YMarkCrawlStart(sb.tables, bmk_row.get(YMarkEntry.BOOKMARK.URL.key(),YMarkEntry.BOOKMARK.URL.deflt()));
                 int crawl = 0;
-                if (!crawlstart.isEmpty())
+                if (!crawlstart.isEmpty()) {
                 	crawl = 1;
+                	prop.put("json_"+count+"_crawlstart_info", "crawl start");
+                }
                 if (crawlstart.hasSchedule()) {
                 	crawl = 2;
+                	prop.put("json_"+count+"_crawlstart_info", "scheduled crawl: "+YMarkDate.ISO8601(crawlstart.date_next_exec()));
+                }
+                if (crawlstart.isRunning(sb.crawler)) {
+                	crawl = 3;
+                	prop.put("json_"+count+"_crawlstart_info", "crawl is running");
                 }
                 prop.put("json_"+count+"_crawlstart", crawl);
                 

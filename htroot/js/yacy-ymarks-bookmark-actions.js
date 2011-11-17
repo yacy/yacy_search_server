@@ -11,6 +11,7 @@ function bm_action(com,grid) {
 					dataType: 'xml',
 					success: function(xml) {
 						$('#ymarks_flexigrid').flexReload();
+						loadTreeView();
 					}
 				}); // close $.ajax(					
 			}); //close each(						
@@ -36,14 +37,12 @@ function bm_action(com,grid) {
 					$(autotags).find('tag').each(function(){
 						tags = tags + "," + $(this).attr('name');
 					});
-					$("input[name='bm_tags']").setValue(tags);									
+					$("input[name='bm_tags']").setValue(tags);
 				}					
 			});
-			
 		});						
 		$("#ymarks_add_dialog").dialog('open');
-	} 
-	else if (com=='Edit') {
+	} else if (com=='Edit') {
 		if ($('.trSelected',grid).length > 1) {
 			alert("Editing of more than one selected bookmark is currently not supportet!");
 			return false;
@@ -55,9 +54,40 @@ function bm_action(com,grid) {
         $("input[name='bm_tags']").setValue($('.trSelected',grid).find('p.tags').text().trim().replace(/,\s/g,","));            
         $("input[name='bm_path']").setValue($('.trSelected',grid).find('p.folders').text().replace(/,\s/g,","));
         $("select[name='bm_public']").setValue($('.trSelected',grid).find('img').attr('alt'));
-        $("#ymarks_add_dialog").dialog('open'); 
-	}	
-	else {
+        $("#ymarks_add_dialog").dialog('open');
+	} else if (com=='Crawl') {
+		var param = [];
+		var count = 0;
+		var i = 0;
+		var err = "";
+		var succ = "";
+		var msg = "";
+		$('.trSelected',grid).each(function() {
+			var pk = $(this).find('.apicall_pk').text();			
+			if (pk == "") {
+				count++;
+				err = err + "\n" + $(this).find('.url').text();
+			}
+			succ = succ  + "\n" + $(this).find('.url').text();
+			var item = {name : 'item_'+count, value : "mark_"+pk};	
+			param[i] = item;
+			i++;
+		});
+		if(i-count > 0)
+			msg = msg + "Success:"+succ;
+		if(count > 0)
+			msg = msg + "\n\nError: No entry in API Table found:"+err;
+		alert(msg);
+		param[param.length] = { name : 'execrows', value : 'true' };
+		$.ajax({
+			type: "POST",
+			data: param,
+			url: "Table_API_p.html",			
+			dataType: "html",
+			success: function() {					
+			}					
+		});		
+	} else {
 		alert("Sorry, the function you have requested is not yet available!");
 		return false;
 	}
@@ -90,6 +120,7 @@ function bm_dialog() {
     	         		$("#bm_url").unbind('blur');
     	         		$("#ymarks_add_dialog").dialog("close");
 						$('#ymarks_flexigrid').flexReload();
+						loadTreeView();
 						return false;
     	   			}
     	   		});	
