@@ -133,10 +133,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         if (UTCOffset == null || UTCOffset.length() == 0) { return new Date(); }
         try {
             return new Date(this.dateFormat.parse(timeString).getTime() - UTCDiff() + UTCDiff(UTCOffset));
-        } catch (final java.text.ParseException e) {
-            //serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
-            return new Date();
-        } catch (final java.lang.NumberFormatException e) {
+        } catch (final Throwable e) {
             //serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
             return new Date();
         }

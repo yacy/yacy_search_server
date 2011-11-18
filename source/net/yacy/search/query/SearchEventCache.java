@@ -37,6 +37,7 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.SeedDB;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.ContentDomain;
@@ -178,7 +179,7 @@ public class SearchEventCache {
             Log.logInfo("SearchEventCache", "getEvent: " + SearchEventCache.lastEvents.size() + " in cache; " + countAliveThreads() + " alive");
 
             // start a new event
-            final boolean delete = Switchboard.getSwitchboard() == null | Switchboard.getSwitchboard().getConfigBool("search.verify.delete", true);
+            final boolean delete = Switchboard.getSwitchboard() == null || Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true);
             event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, remote_maxcount, remote_maxtime, burstRobinsonPercent, burstMultiwordPercent, delete);
             MemoryControl.request(100 * 1024 * 1024, false); // this may trigger a short memory status which causes a reducing of cache space of other threads
         }

@@ -35,6 +35,7 @@ import java.util.SortedMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
@@ -79,7 +80,7 @@ public final class RWIProcess extends Thread {
     private int remote_resourceSize, remote_indexCount, remote_peerCount;
     private int local_indexCount;
     private final WeakPriorityBlockingQueue<WordReferenceVars> stack;
-    private int feeders;
+    private final AtomicInteger feeders;
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
 
@@ -123,7 +124,7 @@ public final class RWIProcess extends Thread {
         this.protocolNavigator = new ConcurrentScoreMap<String>();
         this.filetypeNavigator = new ConcurrentScoreMap<String>();
         this.ref = new ConcurrentScoreMap<String>();
-        this.feeders = 1;
+        this.feeders = new AtomicInteger(1);
         this.startTime = System.currentTimeMillis();
     }
 
@@ -288,16 +289,16 @@ public final class RWIProcess extends Thread {
      * method to signal the incoming stack that one feeder has terminated
      */
     public void oneFeederTerminated() {
-    	this.feeders--;
-    	assert this.feeders >= 0 : "feeders = " + this.feeders;
+    	final int c = this.feeders.decrementAndGet();
+    	assert c >= 0 : "feeders = " + c;
     }
 
     public void moreFeeders(final int countMoreFeeders) {
-    	this.feeders += countMoreFeeders;
+    	this.feeders.addAndGet(countMoreFeeders);
     }
 
     public boolean feedingIsFinished() {
-    	return System.currentTimeMillis() - this.startTime > 50 && this.feeders == 0;
+    	return this.feeders.get() == 0;
     }
 
     private boolean testFlags(final WordReference ientry) {
