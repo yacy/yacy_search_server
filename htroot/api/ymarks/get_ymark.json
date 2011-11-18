@@ -12,9 +12,11 @@
 #(crawlstart)#
 ""
 ::
-"<img src='/yacy/ui/img/crawl.png' alt='crawl start' title='crawl start'/>"
+"<img src='/yacy/ui/img/crawl.png' alt='#[info]#' title='#[info]#'/>"
 ::
-"<img src='/yacy/ui/img-2/clock.png' alt='scheduled crawl' title='scheduled crawl'/>"
+"<img src='/yacy/ui/img-2/calendar.png' alt='#[info]#' title='#[info]#'/>"
+::
+"<img src='/yacy/ui/img-2/arrow_right_blue_round.png' alt='#[info]#' title='#[info]#'/>"
 #(/crawlstart)#,
 "<h3 class='linktitle'>#[title]#</h3><p class='desc'>#[desc]#</p><p class='url'><a href='#[url]#'>#[url]#</a>",
 "<p class='tags'>#[tags]#</p>",
@@ -22,7 +24,7 @@
 "<p class='date'>#[date_added]#</p>",
 "<p class='date'>#[date_modified]#</p>",
 "<p class='date'>#[date_visited]#</p>",
-"#[apicall_pk]#",
+"<p class='apicall_pk'>#[apicall_pk]#</p>",
 "<p class='date'>#[date_recording]#</p>",
 "<p class='date'>#[date_next_exec]#</p>",
 "<p class='date'>#[date_last_exec]#</p>"

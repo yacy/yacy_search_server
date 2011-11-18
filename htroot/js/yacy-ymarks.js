@@ -16,7 +16,7 @@ $(document).ready(function() {
  		colModel: [	
 			{display: 'Hash', name : 'hash', width : 85, sortable : false, align: 'left', hide: true},
 			{display: 'Public', name : 'public', width : 20, sortable : true, align: 'center'},
-			{display: 'Crawl start', name : 'crawl_start', width : 20, sortable : true, align: 'center'},
+			{display: 'Crawl start', name : 'crawl_start', width : 20, sortable : false, align: 'center'},
 			{display: 'Title', name : 'title', width : 400, sortable : true, align: 'left'},
 			{display: 'Tags', name : 'tags', width : 160, sortable : false, align: 'left'},
 			{display: 'Folders', name : 'folders', width : 160, sortable : true, align: 'left', hide: true},
@@ -24,12 +24,12 @@ $(document).ready(function() {
 			{display: 'Date modified', name : 'date_modified', width : 100, sortable : true, align: 'left'},
 			{display: 'Date visited', name : 'date_visited', width : 100, sortable : true, align: 'left', hide: true},			
 			{display: 'API PK', name : 'apicall_pk', width : 85, sortable : true, align: 'left', hide: true},
-			{display: 'Date recording', name : 'date_recording', width : 100, sortable : true, align: 'left', hide: true},
-			{display: 'Date next exec', name : 'date_next_exec', width : 100, sortable : true, align: 'left', hide: true},
-			{display: 'Date last exec', name : 'date_last_exec', width : 100, sortable : true, align: 'left', hide: true}
+			{display: 'Date recording', name : 'date_recording', width : 100, sortable : false, align: 'left', hide: true},
+			{display: 'Date next exec', name : 'date_next_exec', width : 100, sortable : false, align: 'left', hide: true},
+			{display: 'Date last exec', name : 'date_last_exec', width : 100, sortable : false, align: 'left', hide: true}
 		],
 		buttons: [				
-			{name: '...', bclass: 'burst', onpress: function() {
+			{name: '...', bclass: 'refresh', onpress: function() {
 				$('#ymarks_flexigrid').flexOptions({
 					sortname: "title",
 					sortorder: "asc",	
@@ -37,6 +37,8 @@ $(document).ready(function() {
 				 	qtype: "title"								
 				});
 				$('#ymarks_flexigrid').flexReload();
+				loadTreeView();
+				
 			}},
 			{separator: true},
 			{name: 'Add', bclass: 'bookmark', onpress: bm_action},
@@ -44,6 +46,7 @@ $(document).ready(function() {
 			{name: 'Delete', bclass: 'delete', onpress: bm_action},
 			{separator: true},
 			{name: 'Crawl', bclass: 'crawl', onpress: bm_action},
+			{name: 'Schedule', bclass: 'calendar', onpress: bm_action},
 			{separator: true},
 			{name: 'Add', bclass: 'addTag', onpress: tag_action},
 			{name: 'Rename', bclass: 'editTag', onpress: tag_action},
@@ -91,24 +94,7 @@ $(document).ready(function() {
 		return true;
 	});
 
-	$("#ymarks_treeview").treeview({
-		url: "/api/ymarks/get_treeview.json?bmtype=href",
-		unique: true,
-		persist: "location"
-	});						
-
-	$("#ymarks_treeview").bind("click", function(event) {
-		if ($(event.target).is("li") || $(event.target).parents("li").length) {
-			var folder = $(event.target).parents("li").filter(":first").attr("id");
-			$('#ymarks_flexigrid').flexOptions({
-				query: folder,
-				qtype: "_folder",
-				newp: 1
-			});
-			$('#ymarks_flexigrid').flexReload();
-			return false;
-		}	
-	});
+	loadTreeView();
 	
 	$('input[name=importer]').change(function() {
 	     if ($("input[name=importer]:checked").val() == 'crawls') {             
@@ -160,3 +146,25 @@ function loadTagCloud() {
 		}
 	}); //close $.ajax(
 };
+
+function loadTreeView() {
+	$("#ymarks_treeview").empty();
+	$("#ymarks_treeview").treeview({
+		url: "/api/ymarks/get_treeview.json?bmtype=href",
+		unique: true,
+		persist: "location"
+	});						
+
+	$("#ymarks_treeview").bind("click", function(event) {
+		if ($(event.target).is("li") || $(event.target).parents("li").length) {
+			var folder = $(event.target).parents("li").filter(":first").attr("id");
+			$('#ymarks_flexigrid').flexOptions({
+				query: folder,
+				qtype: "_folder",
+				newp: 1
+			});
+			$('#ymarks_flexigrid').flexReload();
+			return false;
+		}	
+	});
+}

@@ -179,6 +179,15 @@ img.help {
 .flexigrid div.fbutton .log-new {
 	background: url(../../yacy/ui/img-2/new.png) no-repeat center left;
 }
+.flexigrid div.fbutton .clock {
+	background: url(../../yacy/ui/img-2/clock.png) no-repeat center left;
+}
+.flexigrid div.fbutton .calendar {
+	background: url(../../yacy/ui/img-2/calendar.png) no-repeat center left;
+}
+.flexigrid div.fbutton .refresh {
+	background: url(../../yacy/ui/img/flexigrid/load.png) no-repeat center left;
+}
 .flexigrid div.fbutton .log-more {
 	/* background: url(../img/flexigrid/uup.png) no-repeat center left; */
 	margin-left: -20px;
