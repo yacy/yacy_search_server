@@ -147,7 +147,8 @@ public class SnippetProcess {
         final long waittimeout = System.currentTimeMillis() + 300;
         while (
           item == 0 &&
-          this.result.sizeAvailable() < this.query.neededResults() + this.query.itemsPerPage &&
+          (!this.rankingProcess.feedingIsFinished() || this.rankingProcess.sizeQueue() > 0) &&
+          this.result.sizeAvailable() < this.query.neededResults() /* + this.query.itemsPerPage */ &&
           System.currentTimeMillis() < waittimeout &&
           anyWorkerAlive()
           ) {
@@ -324,7 +325,7 @@ public class SnippetProcess {
     }
 
    private boolean anyWorkerAlive() {
-        if (this.workerThreads == null) return false;
+        if (this.workerThreads == null || this.workerThreads.length == 0) return false;
         synchronized(this.workerThreads) {
             for (final Worker workerThread : this.workerThreads) {
                if ((workerThread != null) &&
@@ -377,7 +378,7 @@ public class SnippetProcess {
 
                     // check if we have enough
                     if (SnippetProcess.this.result.sizeAvailable() >= this.neededResults) {
-                        //Log.logWarning("ResultFetcher", ResultFetcher.this.result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
+                        //Log.logWarning("ResultFetcher", SnippetProcess.this.result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
                         break;
                     }
 
@@ -391,7 +392,7 @@ public class SnippetProcess {
                     page = SnippetProcess.this.rankingProcess.takeURL(true, Math.min(100, this.timeout - System.currentTimeMillis()));
                     //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
                     if (page == null) {
-                        //System.out.println("page == null");
+                        //Log.logWarning("ResultFetcher", "page == null");
                         break; // no more available
                     }
                     if (SnippetProcess.this.query.filterfailurls && SnippetProcess.this.workTables.failURLsContains(page.hash())) continue;
@@ -404,7 +405,6 @@ public class SnippetProcess {
                         if (sdl.size() > 0) sd = sdl.get(0);
                         if (sd != null) solrContent = this.solr.getScheme().solrGetText(sd);
                     }
-
 
                     loops++;
                     resultEntry = fetchSnippet(page, solrContent, this.cacheStrategy); // does not fetch snippets if snippetMode == 0

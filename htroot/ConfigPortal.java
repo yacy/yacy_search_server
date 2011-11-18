@@ -1,4 +1,4 @@
-// ConfigPortal.java 
+// ConfigPortal.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -10,7 +10,7 @@
 //$LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -38,14 +38,14 @@ public class ConfigPortal {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        
+
         if (post != null) {
             // AUTHENTICATE
             if (!header.containsKey(RequestHeader.AUTHORIZATION)) {
                 prop.putHTML("AUTHENTICATE","log-in");
                 return prop;
             }
-            
+
             if (post.containsKey("popup")) {
                 final String popup = post.get("popup", "status");
                 if ("front".equals(popup)) {
@@ -62,7 +62,7 @@ public class ConfigPortal {
                 final String newGreeting = post.get(SwitchboardConstants.GREETING, "");
                 // store this call as api call
                 sb.tables.recordAPICall(post, "ConfigPortal.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "new portal design. greeting: " + newGreeting);
-                
+
                 sb.setConfig(SwitchboardConstants.GREETING, newGreeting);
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, post.get(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, post.get(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
@@ -80,7 +80,7 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
                 sb.setConfig("search.verify", post.get("search.verify", "ifexist"));
-                sb.setConfig("search.verify.delete", post.getBoolean("search.verify.delete", false));
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete", false));
                 // construct navigation String
                 String nav = "";
                 if (post.getBoolean("search.navigation.hosts", false)) nav += "hosts,";
@@ -109,8 +109,8 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.parser", true);
                 sb.setConfig("search.result.show.pictures", true);
                 sb.setConfig("search.verify", "iffresh");
-                sb.setConfig("search.verify.delete", "true");
-            }            
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
+            }
         }
 
         prop.putHTML(SwitchboardConstants.GREETING, sb.getConfig(SwitchboardConstants.GREETING, ""));
@@ -121,7 +121,7 @@ public class ConfigPortal {
         prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
         prop.put("publicSearchpage", sb.getConfigBool("publicSearchpage", false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
-        
+
         prop.put("search.result.show.date", sb.getConfigBool("search.result.show.date", false) ? 1 : 0);
         prop.put("search.result.show.size", sb.getConfigBool("search.result.show.size", false) ? 1 : 0);
         prop.put("search.result.show.metadata", sb.getConfigBool("search.result.show.metadata", false) ? 1 : 0);
@@ -138,7 +138,7 @@ public class ConfigPortal {
         prop.put("search.verify.ifexist", sb.getConfig("search.verify", "").equals("ifexist") ? 1 : 0);
         prop.put("search.verify.cacheonly", sb.getConfig("search.verify", "").equals("cacheonly") ? 1 : 0);
         prop.put("search.verify.false", sb.getConfig("search.verify", "").equals("false") ? 1 : 0);
-        prop.put("search.verify.delete", sb.getConfigBool("search.verify.delete", true) ? 1 : 0);
+        prop.put("search.verify.delete", sb.getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true) ? 1 : 0);
 
         final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
         prop.put("popupFront", 0);
@@ -156,14 +156,14 @@ public class ConfigPortal {
         }
 
         prop.put("maximumRecords", sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10));
-        
+
         final String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
         prop.put("selected_blank", "_blank".equals(target) ? 1 : 0);
         prop.put("selected_self", "_self".equals(target) ? 1 : 0);
         prop.put("selected_parent", "_parent".equals(target) ? 1 : 0);
         prop.put("selected_top", "_top".equals(target) ? 1 : 0);
         prop.put("selected_searchresult", "searchresult".equals(target) ? 1 : 0);
-                
+
         String myaddress = (sb.peers == null) ? null : sb.peers.mySeed() == null ? null : sb.peers.mySeed().getPublicAddress();
         if (myaddress == null) {
             myaddress = "localhost:" + sb.getConfig("port", "8090");

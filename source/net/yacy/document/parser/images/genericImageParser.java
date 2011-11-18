@@ -28,7 +28,6 @@ package net.yacy.document.parser.images;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -227,14 +226,8 @@ public class genericImageParser extends AbstractParser implements Parser {
         try {
             ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
             image = ImageIO.read(sourceStream);
-        } catch (final EOFException e) {
-            Log.logException(e);
-            throw new Parser.Failure(e.getMessage(), location);
-        } catch (final IOException e) {
-            Log.logException(e);
-            throw new Parser.Failure(e.getMessage(), location);
-        } catch (final Throwable e) { // may appear in case of an OutOfMemoryError
-            Log.logException(e);
+        } catch (final Throwable e) {
+            //Log.logException(e);
             throw new Parser.Failure(e.getMessage(), location);
         }
         if (image == null) throw new Parser.Failure("ImageIO returned NULL", location);
