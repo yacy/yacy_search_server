@@ -3,22 +3,21 @@
 	<head>
 		<title>YaCy Bookmarks</title>
 		#%env/templates/metas.template%#
-				
 		<link media="screen" type="text/css" href="/jquery/flexigrid/css/flexigrid.pack.css" rel="stylesheet" />
-		
-		<link media="screen" type="text/css" href="/yacy/ui/css/jquery.treeview.css" rel="stylesheet" />
-		<link media="screen" type="text/css" href="/yacy/ui/css/jquery.multiselect.css" rel="stylesheet" />
-		<link media="screen" type="text/css" href="/env/yacy-ymarks.css" rel="stylesheet" />		
-		
 		<script src="/jquery/flexigrid/js/flexigrid.pack.js" type="text/javascript"></script>
 		
+		<link media="screen" type="text/css" href="/jquery/css/jquery.multiselect.css" rel="stylesheet" />
+		<script src="/jquery/js/jquery.multiselect.min.js" type="text/javascript"></script>
+		
+		<link media="screen" type="text/css" href="/yacy/ui/css/jquery.treeview.css" rel="stylesheet" />
 		<script src="/yacy/ui/js/jquery.treeview.min.js" type="text/javascript"></script>
-  		<script src="/yacy/ui/js/jquery.treeview.async.js" type="text/javascript"></script>
-  		<script src="/yacy/ui/js/jquery.multiselect.min.js" type="text/javascript"></script>  		
-  		
-  		<script src="/js/yacy-ymarks.js" type="text/javascript"></script>
+  		<script src="/yacy/ui/js/jquery.treeview.async.js" type="text/javascript"></script>  			
+
+		<link media="screen" type="text/css" href="/env/yacy-ymarks.css" rel="stylesheet" />
+		<script src="/js/yacy-ymarks.js" type="text/javascript"></script>
   		<script src="/js/yacy-ymarks-bookmark-actions.js" type="text/javascript"></script>
   		<script src="/js/yacy-ymarks-tag-actions.js" type="text/javascript"></script>
+
 	</head>
 	<body id="ymarks_body">
 		#%env/templates/header.template%#
@@ -68,16 +67,17 @@
 					<img src="/yacy/ui/img-2/question_blue.png" alt="Help" style="padding-right:4px; padding-left:25px;"/>Help					
 				</div>
 				-->
-				<select id="example" name="example" multiple="multiple">
-					<option value="1">Option 1</option>
-					<option value="2">Option 2</option>
-					<option value="3">Option 3</option>
-					<option value="4">Option 4</option>
-					<option value="5">Option 5</option>
-				</select>
+				<div>
+					<h3>Tag Filter:</h3>
+					<p>
+						<select id="tag_include" name="tag_include" multiple="multiple"></select>
+					</p>
+				</div>
+				<hr />
 				<div>
 					<p id="ymarks_tagcloud"></p>	
 				</div>
+
 			</div>
 			<div id="ymarks_import_tab">
 				<form action="/api/ymarks/import_ymark.html" method="post"  enctype="multipart/form-data" accept-charset="UTF-8">

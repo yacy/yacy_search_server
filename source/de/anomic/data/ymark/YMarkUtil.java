@@ -36,7 +36,8 @@ import net.yacy.kelondro.data.word.Word;
 public class YMarkUtil {
     public final static String TAGS_SEPARATOR = ",";
     public final static String FOLDERS_SEPARATOR = "/";
-    
+    public final static String EMPTY_STRING = "";
+        
     /**
      * conveniance function to generate url hashes for YMark bookmarks
      * @param url a string representation of a valid url

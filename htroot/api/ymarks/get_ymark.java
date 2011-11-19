@@ -49,7 +49,7 @@ public class get_ymark {
             query = ".*";
             qtype = YMarkEntry.BOOKMARK.TITLE.key();
             page = 1;
-            rp = 10;
+            rp = 100;
             total = 0;
             sortname = YMarkEntry.BOOKMARK.TITLE.key();
             sortorder = "asc";

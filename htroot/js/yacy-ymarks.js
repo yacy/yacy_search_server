@@ -4,6 +4,7 @@ HTMLenc = function(s) {
 $(document).ready(function() {							
 
 	var height=document.documentElement.clientHeight - 200;    			
+	qtag = "";
 	
 	/* Initialize Bookmark Dialog */
 	bm_dialog();	
@@ -113,14 +114,54 @@ $(document).ready(function() {
 	     }
 	  });
 
-   $("#example").multiselect();
+	loadTags();
 
 });
+
+function loadTags() {
+	$("#tag_include").empty();	
+	$.ajax({
+		type: "GET",
+		url: "/api/ymarks/get_tags.xml?sort=alpha",			
+		dataType: "xml",
+		cache: false,
+		success: function(xml) {			
+			$(xml).find('tag').each(function(){					
+				var count = $(this).attr('count');
+				var tag = $(this).attr('tag');									
+				$('<option value="'+tag+'">'+tag+' ['+count+']</option>').appendTo('#tag_include');	
+			}); //close each(	
+			$("#tag_include").multiselect({
+				noneSelectedText: "Select tags ...",
+				height: "400",
+				click: function(event, ui) {
+					if(ui.checked) {						
+						qtag = qtag + "," + ui.value;
+					}	
+				},
+				close: function() {
+					$('#ymarks_flexigrid').flexOptions({
+						query: qtag,
+						qtype: "_tags",
+						newp: 1
+					});
+					$('#ymarks_flexigrid').flexReload();
+				},
+				beforeopen: function() {
+					$(this).multiselect("uncheckAll");
+				},
+				open: function() {
+					qtag = "";
+				}
+			});
+		}
+	}); //close $.ajax(
+}
 
 function loadTagCloud() {		
 	$("#ymarks_tagcloud *").remove();
 	$.ajax({
-		type: "POST",
+		type: "GET",
 		url: "/api/ymarks/get_tags.xml?top=25&sort=alpha",			
 		dataType: "xml",
 		cache: false,
