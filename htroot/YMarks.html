@@ -9,6 +9,9 @@
 		<link media="screen" type="text/css" href="/jquery/css/jquery.multiselect.css" rel="stylesheet" />
 		<script src="/jquery/js/jquery.multiselect.min.js" type="text/javascript"></script>
 		
+		<link media="screen" type="text/css" href="/jquery/css/jquery.multiselect.filter.css" rel="stylesheet" />
+		<script src="/jquery/js/jquery.multiselect.filter.min.js" type="text/javascript"></script>		
+				
 		<link media="screen" type="text/css" href="/yacy/ui/css/jquery.treeview.css" rel="stylesheet" />
 		<script src="/yacy/ui/js/jquery.treeview.min.js" type="text/javascript"></script>
   		<script src="/yacy/ui/js/jquery.treeview.async.js" type="text/javascript"></script>  			
@@ -36,12 +39,12 @@
 		</div>
 		<div id="ymarks_sidebar" class="sidebar">
 			<ul>
-				<li><a href="#ymarks_folders_tab" title="folders"><span>Folders</span></a></li>
-				<li><a href="#ymarks_tags_tab" title="tags"><span>Tags</span></a></li>
+				<li><a href="#ymarks_nav_tab" title="navigation"><span>Explorer</span></a></li>
+				<li><a href="#ymarks_tags_tab" title="tags"><span>Tag Manager</span></a></li>
 				<li><a href="#ymarks_import_tab" title="import"><span>Import</span></a></li>
-				<li><a href="#ymarks_export_tab" title="export"><span>Export</span></a></li>										
+				<!--  <li><a href="#ymarks_export_tab" title="export"><span>Export</span></a></li>	 -->									
 			</ul>	
-			<div id="ymarks_folders_tab">
+			<div id="ymarks_nav_tab">
 				<!-- 
 				<div style="margin-top:2px; background:url('/yacy/ui/img/flexigrid/bg.gif') repeat-x scroll center top #FAFAFA;
 				border-color:#CCCCCC #CCCCCC -moz-use-text-color; border-style:solid solid none; border-width:1px 1px 0; padding:5px; 
@@ -52,6 +55,11 @@
 					<img src="/yacy/ui/img-2/question_blue.png" alt="Help" style="padding-right:4px; padding-left:25px;"/>Help					
 				</div>
 				-->
+				<div class="tagSelect">
+					<p>
+						<select id="tag_include" name="tag_include" multiple="multiple"></select>
+					</p>
+				</div>
 				<div>
 					<ul id="ymarks_treeview" class="filetree"></ul>
 				</div>
@@ -68,16 +76,54 @@
 				</div>
 				-->
 				<div>
-					<h3>Tag Filter:</h3>
-					<p>
-						<select id="tag_include" name="tag_include" multiple="multiple"></select>
-					</p>
-				</div>
-				<hr />
-				<div>
 					<p id="ymarks_tagcloud"></p>	
 				</div>
-
+				<hr />
+				<div class="tagSelect">
+					<form id="ymarks_tagmanager" action="YMarks.html" method="POST"  enctype="multipart/form-data" accept-charset="UTF-8">
+						<h4>Tag Manager<img title="help" alt="help" class="help" src="/yacy/ui/img-2/question_blue.png"></h4>
+						All tag actions are applied to the sub-set of bookmarks defined by this query.			
+						<p>
+							<small>Query</small>
+							<input class="input" type="text" name="query" id="query" /><br />
+					    	<br />
+					    	<input type="radio" name="qtype" value="_tags" checked="checked"/> Tags (comma seperated)
+					    	<br />
+					    	<input type="radio" name="qtype" value="tags" /> Tags (regexp)
+					    	<br />
+					    	<input type="radio" name="qtype" value="_folders" /> Folders (comma seperated)
+					    	<br />
+					    	<input type="radio" name="qtype" value="folders" /> Folders (regexp)
+					    	
+						</p>
+						<hr />
+						<h5>Replace Tags</h5>
+						<p>
+							<select id="tag_select" name="tags" multiple="multiple"></select><br />
+						</p>
+						<p>
+							<small>Replace with (comma separated tags)</small>
+							<input class="input" type="text" name="replace" id="source" value="" />
+						</p>
+						<p style="text-align: right">
+							<input type="submit" name="action" value="Replace" />
+						</p>
+						<!--  
+						<hr />
+						<h5>Automatic tagging</h5>
+						<p>
+					    	<input type="radio" name="autotag" value="empty" checked="checked"/> Only for empty/unsorted tags
+					    	<br />
+					    	<input type="radio" name="autotag" value="overwrite" /> Overwriting existing tags
+					    	<br />
+					    	<input type="radio" name="autotag" value="merge" /> Merging with existing tags
+						</p>
+						<p style="text-align: right">
+							<input type="submit" name="tagmanager" value="Run" />
+						</p>
+						-->
+					</form>
+				</div>
 			</div>
 			<div id="ymarks_import_tab">
 				<form action="/api/ymarks/import_ymark.html" method="post"  enctype="multipart/form-data" accept-charset="UTF-8">
@@ -124,9 +170,10 @@
 					</p>
 				</form>
 			</div>
+			<!--  
 			<div id="ymarks_export_tab">
-				
 			</div>
+			-->
 		</div>
 		<!-- Display Bookmarks Table -->
 		<div class ="main">

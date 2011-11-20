@@ -12,11 +12,11 @@
 #(crawlstart)#
 ""
 ::
-"<img src='/yacy/ui/img/crawl.png' alt='#[info]#' title='#[info]#'/>"
+"<img src='/yacy/ui/img-2/accept.png' alt='#[info]#' title='#[info]#'/>"
 ::
 "<img src='/yacy/ui/img-2/calendar.png' alt='#[info]#' title='#[info]#'/>"
 ::
-"<img src='/yacy/ui/img-2/arrow_right_blue_round.png' alt='#[info]#' title='#[info]#'/>"
+"<img src='/yacy/ui/img/crawl.png' alt='#[info]#' title='#[info]#'/>"
 #(/crawlstart)#,
 "<h3 class='linktitle'>#[title]#</h3><p class='desc'>#[desc]#</p><p class='url'><a href='#[url]#'>#[url]#</a>",
 "<p class='tags'>#[tags]#</p>",

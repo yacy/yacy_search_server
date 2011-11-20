@@ -133,15 +133,15 @@ public class get_ymark {
                 int crawl = 0;
                 if (!crawlstart.isEmpty()) {
                 	crawl = 1;
-                	prop.put("json_"+count+"_crawlstart_info", "crawl start");
+                	prop.put("json_"+count+"_crawlstart_info", "Crawl start in API Table");
                 }
                 if (crawlstart.hasSchedule()) {
                 	crawl = 2;
-                	prop.put("json_"+count+"_crawlstart_info", "scheduled crawl: "+YMarkDate.ISO8601(crawlstart.date_next_exec()));
+                	prop.put("json_"+count+"_crawlstart_info", "Scheduled Crawl: "+YMarkDate.ISO8601(crawlstart.date_next_exec()));
                 }
                 if (crawlstart.isRunning(sb.crawler)) {
                 	crawl = 3;
-                	prop.put("json_"+count+"_crawlstart_info", "crawl is running");
+                	prop.put("json_"+count+"_crawlstart_info", "Crawl is running ...");
                 }
                 prop.put("json_"+count+"_crawlstart", crawl);
                 

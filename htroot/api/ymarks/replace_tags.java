@@ -39,7 +39,7 @@ public class replace_tags {
             if(post != null) {
             	query = post.get("query", post.get("tags", YMarkUtil.EMPTY_STRING));
                 qtype = post.get("qtype", "_tags");
-                tags = post.get("tags", YMarkUtil.EMPTY_STRING);
+                tags = YMarkUtil.cleanTagsString(post.get("tags", YMarkUtil.EMPTY_STRING));
                 replace = post.get("replace", YMarkUtil.EMPTY_STRING);
                 
             } else {
@@ -55,6 +55,8 @@ public class replace_tags {
                 if(!query.isEmpty()) {
                     if(!qtype.isEmpty()) {
                         if(qtype.equals("_tags")) {
+                        	if(query.isEmpty())
+                        		query = tags;
                         	final String[] tagArray = YMarkUtil.cleanTagsString(query).split(YMarkUtil.TAGS_SEPARATOR);
                         	row_iter = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
                         } else if(qtype.equals("_folder")) {
@@ -66,7 +68,9 @@ public class replace_tags {
                     	row_iter = sb.tables.iterator(bmk_table, Pattern.compile(query));
                     }
                 } else {
-                	row_iter = sb.tables.iterator(bmk_table);
+                	final String[] tagArray = YMarkUtil.cleanTagsString(tags).split(YMarkUtil.TAGS_SEPARATOR);
+                	row_iter = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
+                	// row_iter = sb.tables.iterator(bmk_table);
                 }
                 sb.tables.bookmarks.replaceTags(row_iter, bmk_user, tags, replace);
                 prop.put("status", 1);

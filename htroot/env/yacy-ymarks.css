@@ -188,6 +188,9 @@ img.help {
 .flexigrid div.fbutton .refresh {
 	background: url(../../yacy/ui/img/flexigrid/load.png) no-repeat center left;
 }
+.flexigrid div.fbutton .accept {
+	background: url(../../yacy/ui/img-2/accept.png) no-repeat center left;
+}
 .flexigrid div.fbutton .log-more {
 	/* background: url(../img/flexigrid/uup.png) no-repeat center left; */
 	margin-left: -20px;
@@ -218,4 +221,8 @@ img.help {
 }
 .filetree ul, .filetree li {
 	background-color: transparent;
+}
+
+.tagSelect {
+	width: 220px;
 }

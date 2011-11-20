@@ -100,7 +100,7 @@ public class YMarkUtil {
 		// get rid of heading and trailing comma
 		if (ts.charAt(0) == TAGS_SEPARATOR.charAt(0))
 			ts.deleteCharAt(0);
-		if (ts.charAt(ts.length()-1) == TAGS_SEPARATOR.charAt(0))
+		if (ts.length()>0 && ts.charAt(ts.length()-1) == TAGS_SEPARATOR.charAt(0))
 			ts.deleteCharAt(ts.length()-1);
     	return ts.toString();
     }
