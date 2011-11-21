@@ -303,6 +303,7 @@ public class Crawler_p {
                         prop.putHTML("info_crawlingStart", crawlingStart);
                     } else try {
 
+
                         // check if the crawl filter works correctly
                         Pattern.compile(newcrawlingMustMatch);
 
@@ -313,6 +314,11 @@ public class Crawler_p {
                         indexSegment.urlMetadata().remove(urlhash);
                         sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                         sb.crawlQueues.errorURL.remove(urlhash);
+
+                        // get a scraper to get the title
+                        final ContentScraper scraper = sb.loader.parseResource(url, CacheStrategy.IFFRESH);
+                        final String title = scraper == null ? url.toNormalform(true, true) : scraper.getTitle();
+                        //final String description = scraper.getDescription();
 
                         // stack url
                         sb.crawler.removePassive(crawlingStartURL.hash()); // if there is an old entry, delete it
@@ -352,21 +358,30 @@ public class Crawler_p {
 
                         if (reasonString == null) {
                             // create a bookmark from crawl start url
-                            final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
+                            //final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
+                            final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString("/crawlStart"));
                             tags.add("crawlStart");
-                            if ("on".equals(post.get("createBookmark","off"))) {
+                            final String[] keywords = scraper.getKeywords();
+                            if (keywords != null) {
+                                for (final String k: keywords) {
+                                    final String kk = BookmarkHelper.cleanTagsString(k);
+                                    if (kk.length() > 0) tags.add(kk);
+                                }
+                            }
+                            //if ("on".equals(post.get("createBookmark","off"))) {
+                            // we will create always a bookmark to use this to track crawled hosts
                             final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
                                 if (bookmark != null) {
-                                    bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, post.get("bookmarkTitle", crawlingStart));
+                                    bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title /*post.get("bookmarkTitle", crawlingStart)*/);
                                     bookmark.setOwner("admin");
                                     bookmark.setPublic(false);
                                     bookmark.setTags(tags, true);
                                     sb.bookmarksDB.saveBookmark(bookmark);
                                 }
-                            }
+                            //}
                             // liftoff!
                             prop.put("info", "8");//start msg
-                            prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
+                            prop.putHTML("info_crawlingURL", post.get("crawlingURL"));
 
                             // generate a YaCyNews if the global flag was set
                             if (!sb.isRobinsonMode() && crawlOrder) {

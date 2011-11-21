@@ -45,7 +45,6 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.ByteCount;
-import net.yacy.kelondro.logging.Log;
 
 import org.apache.log4j.Logger;
 
@@ -197,7 +196,7 @@ public class RobotsTxt {
                     }
                 } else {
                     final byte[] robotsTxt = (byte[]) result[DOWNLOAD_ROBOTS_TXT];
-                    Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + ((robotsTxt == null) ? "null" : UTF8.String(robotsTxt))); // debug TODO remove
+                    //Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + ((robotsTxt == null) ? "null" : UTF8.String(robotsTxt))); // debug TODO remove
                     RobotsTxtParser parserResult;
                     ArrayList<String> denyPath;
                     if (((Boolean) result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue()) {

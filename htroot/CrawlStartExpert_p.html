@@ -39,12 +39,19 @@
         <tr valign="top" class="TableCellSummary">
           <td>Starting Point:</td>
           <td>
-            <table cellpadding="0" cellspacing="0">            
+            <table cellpadding="0" cellspacing="0">
               <tr>
                 <td><label for="url"><span class="nobr">From URL</span></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" /></td>
                 <td>
-                  <input name="crawlingURL" id="crawlingURL" type="text" size="41" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" />                                    
+                  <input name="crawlingURL" id="crawlingURL" type="text" size="41" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" />
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td>
+                  <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
                 </td>
               </tr>
               <tr>
@@ -307,23 +314,6 @@
           </td>
         </tr>
         -->
-        <tr valign="top" class="TableCellLight">
-          <td>Create Bookmark</td>
-          <td>
-	          <label for="createBookmark">Use</label>:
-	          <input type="checkbox" name="createBookmark" id="createBookmark" />
-	          &nbsp;&nbsp;&nbsp;(works with "Starting Point: From URL" only)
-	          <br /><br />
-			  <label for="bookmarkTitle"> Title</label>:&nbsp;&nbsp;&nbsp; 
-			  <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="100" /><br /><br />
-			  <label for="bookmarkFolder"> Folder</label>:
-			  <input name="bookmarkFolder" id="bookmarkFolder" type="text" size="50" maxlength="100" value="/crawlStart" />
-			  <br />&nbsp;          	  
-          </td>
-          <td>
-            This option lets you create a bookmark from your crawl start URL.
-          </td>
-        </tr>
         <tr valign="top" class="TableCellLight">
           <td colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl" /></td>
         </tr>
