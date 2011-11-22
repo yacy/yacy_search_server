@@ -170,14 +170,16 @@ public class Crawler_p {
                 // special cases:
                 if (crawlingStartURL!= null && fullDomain) {
                     if (crawlingStartURL.isFile()) {
-                        newcrawlingMustMatch = "file://" + crawlingStartURL.getPath() + ".*";
+                        newcrawlingMustMatch = "file://" + crawlingStartURL.getPath();
                     } else if (crawlingStartURL.isSMB()) {
-                        newcrawlingMustMatch = "smb://.*" + crawlingStartURL.getHost() + ".*" + crawlingStartURL.getPath() + ".*";
+                        newcrawlingMustMatch = "smb://" + crawlingStartURL.getHost();
                     } else if (crawlingStartURL.isFTP()) {
-                        newcrawlingMustMatch = "ftp://.*" + crawlingStartURL.getHost() + ".*" + crawlingStartURL.getPath() + ".*";
+                        newcrawlingMustMatch = "ftp://" + crawlingStartURL.getHost();
                     } else {
-                        newcrawlingMustMatch = ".*" + crawlingStartURL.getHost() + ".*";
+                        newcrawlingMustMatch = "https?://" + crawlingStartURL.getHost();
                     }
+                    if (subPath) newcrawlingMustMatch += crawlingStartURL.getPath();
+                    newcrawlingMustMatch += ".*";
                 }
                 if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf('/')) > 0) {
                     newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
