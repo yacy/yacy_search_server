@@ -1,8 +1,11 @@
 import java.io.IOException;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.document.Parser.Failure;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
@@ -24,35 +27,62 @@ public class add_ymark {
         if(isAdmin || isAuthUser) {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
 
-            String url = post.get(YMarkEntry.BOOKMARK.URL.key(),YMarkEntry.BOOKMARK.URL.deflt());
-			boolean hasProtocol = false;
-			for (YMarkTables.PROTOCOLS p : YMarkTables.PROTOCOLS.values()) {
-				if(url.toLowerCase().startsWith(p.protocol())) {
-					hasProtocol = true;
-					break;
-				}
-			}
-			if (!hasProtocol) {
-			    url=YMarkTables.PROTOCOLS.HTTP.protocol(url);
-			}
-    		
-        	final YMarkEntry bmk = new YMarkEntry();        
-            
-        	bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);
-        	bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), post.get(YMarkEntry.BOOKMARK.TITLE.key(),YMarkEntry.BOOKMARK.TITLE.deflt()));
-        	bmk.put(YMarkEntry.BOOKMARK.DESC.key(), post.get(YMarkEntry.BOOKMARK.DESC.key(),YMarkEntry.BOOKMARK.DESC.deflt()));
-        	bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), post.get(YMarkEntry.BOOKMARK.PUBLIC.key(),YMarkEntry.BOOKMARK.PUBLIC.deflt()));
-        	bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkEntry.BOOKMARK.TAGS.deflt())));
-        	bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.FOLDERS_UNSORTED)));
-            
-            try {
-				sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
+            if(post.containsKey("redirect") && post.get("redirect").length() > 0) {
+                prop.put("redirect_url", post.get("redirect"));
+                prop.put("redirect", "1");
+            }
+        	
+            if(post.containsKey("urlHash")) {
+            	final String urlHash = post.get("urlHash",YMarkUtil.EMPTY_STRING);
+            	final DigestURI url = sb.indexSegments.segment(Segments.Process.PUBLIC).urlMetadata().load(urlHash.getBytes()).metadata().url();            	
+            	final String folders = post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.FOLDERS_UNSORTED);
+            	final String tags = post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.EMPTY_STRING);
+            	try {
+					sb.tables.bookmarks.createBookmark(sb.loader, url, bmk_user, true, tags, folders);
+					prop.put("status", "1");
 				} catch (IOException e) {
-				    Log.logException(e);
+					// TODO Auto-generated catch block
+					Log.logException(e);
+				} catch (Failure e) {
+					// TODO Auto-generated catch block
+					Log.logException(e);
 				} catch (RowSpaceExceededException e) {
-			}
-            
-            prop.put("result", "1");
+					// TODO Auto-generated catch block
+					Log.logException(e);
+				}
+            	
+            } else if(post.containsKey(YMarkEntry.BOOKMARK.URL.key())) {
+	        	String url = post.get(YMarkEntry.BOOKMARK.URL.key(),YMarkEntry.BOOKMARK.URL.deflt());
+				boolean hasProtocol = false;
+				for (YMarkTables.PROTOCOLS p : YMarkTables.PROTOCOLS.values()) {
+					if(url.toLowerCase().startsWith(p.protocol())) {
+						hasProtocol = true;
+						break;
+					}
+				}
+				if (!hasProtocol) {
+				    url=YMarkTables.PROTOCOLS.HTTP.protocol(url);
+				}
+	    		
+	        	final YMarkEntry bmk = new YMarkEntry();        
+	            
+	        	bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);
+	        	bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), post.get(YMarkEntry.BOOKMARK.TITLE.key(),YMarkEntry.BOOKMARK.TITLE.deflt()));
+	        	bmk.put(YMarkEntry.BOOKMARK.DESC.key(), post.get(YMarkEntry.BOOKMARK.DESC.key(),YMarkEntry.BOOKMARK.DESC.deflt()));
+	        	bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), post.get(YMarkEntry.BOOKMARK.PUBLIC.key(),YMarkEntry.BOOKMARK.PUBLIC.deflt()));
+	        	bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkEntry.BOOKMARK.TAGS.deflt())));
+	        	bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.FOLDERS_UNSORTED)));
+	            
+	            try {
+					sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
+					} catch (IOException e) {
+					    Log.logException(e);
+					} catch (RowSpaceExceededException e) {
+				}            
+	            prop.put("status", "1");
+            } else {
+            	prop.put("status", "0");
+            }
         } else {
         	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
         }

@@ -15,7 +15,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 
-public class replace_tags {
+public class manage_tags {
 	
 	private static Switchboard sb = null;
 	private static serverObjects prop = null;

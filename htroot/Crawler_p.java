@@ -27,7 +27,6 @@
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -46,7 +45,6 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
@@ -62,7 +60,7 @@ import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.ListManager;
 import de.anomic.data.WorkTables;
-import de.anomic.data.ymark.YMarkEntry;
+import de.anomic.data.ymark.YMarkTables;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -376,31 +374,21 @@ public class Crawler_p {
                             String tagStr = tags.toString();
                             if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
 
-                            // we will create always a bookmark to use this to track crawled hosts
-                            final YMarkEntry bmk = new YMarkEntry();
-                            bmk.put(YMarkEntry.BOOKMARK.URL.key(), url.toNormalform(true, false));
-                            bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), title);
-                            bmk.put(YMarkEntry.BOOKMARK.DESC.key(), description);
-                            bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), "false");
-                            bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), tagStr);
-                            bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), "/crawlStart");
-
-                            try {
-                                sb.tables.bookmarks.addBookmark("admin", bmk, false, false);
-                                } catch (final IOException e) {
-                                    Log.logException(e);
-                                } catch (final RowSpaceExceededException e) {
-                            }
-
+                            // we will create always a bookmark to use this to track crawled hosts                            
                             final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
                             if (bookmark != null) {
                                 bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
+                                bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
                                 bookmark.setOwner("admin");
                                 bookmark.setPublic(false);
                                 bookmark.setTags(tags, true);
                                 sb.bookmarksDB.saveBookmark(bookmark);
                             }
-
+                            
+                            // do the same for ymarks
+                            // TODO: could a non admin user add crawls?
+                            sb.tables.bookmarks.createBookmark(sb.loader, url, YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
+                            
                             // liftoff!
                             prop.put("info", "8");//start msg
                             prop.putHTML("info_crawlingURL", post.get("crawlingURL"));

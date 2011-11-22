@@ -29,6 +29,7 @@ package de.anomic.data.ymark;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -36,9 +37,13 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.document.Document;
+import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.repository.LoaderDispatcher;
 import de.anomic.data.WorkTables;
 
 public class YMarkTables {
@@ -301,8 +306,37 @@ public class YMarkTables {
     	bmk.put(YMarkEntry.BOOKMARK.DATE_VISITED.key(), (new YMarkDate()).toString());
     	addBookmark(bmk_user, bmk, true, true);
     }
-
-
+    
+    public void createBookmark(final LoaderDispatcher loader, final String url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure, RowSpaceExceededException {
+    	createBookmark(loader, new DigestURI(url), bmk_user, autotag, tagsString, foldersString);
+    }
+    
+    public void createBookmark(final LoaderDispatcher loader, final DigestURI url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure, RowSpaceExceededException {
+        
+    	final YMarkEntry bmk_entry = new YMarkEntry(false);                            
+        final YMarkMetadata meta = new YMarkMetadata(url);
+		final Document document = meta.loadDocument(loader);
+		final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();	    					
+		bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), url.toNormalform(true, false));	    					
+		if(!this.worktables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(url.toNormalform(true, false)))) {
+			bmk_entry.put(YMarkEntry.BOOKMARK.PUBLIC.key(), "false");
+			bmk_entry.put(YMarkEntry.BOOKMARK.TITLE.key(), metadata.get(YMarkMetadata.METADATA.TITLE));
+			bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), metadata.get(YMarkMetadata.METADATA.DESCRIPTION));		    					
+		}
+		bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(foldersString));
+		final StringBuilder strb = new StringBuilder();
+		if(autotag) {			
+			final String autotags = YMarkAutoTagger.autoTag(document, 3, this.worktables.bookmarks.getTags(bmk_user));
+			strb.append(autotags);
+		}
+		if(!tagsString.isEmpty()) {
+			strb.append(YMarkUtil.TAGS_SEPARATOR);
+			strb.append(tagsString);
+		}
+		bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.cleanTagsString(strb.toString()));		
+		this.worktables.bookmarks.addBookmark(bmk_user, bmk_entry, true, true);
+    }
+    
 	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean mergeTags, final boolean mergeFolders) throws IOException, RowSpaceExceededException {
 		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final String date = String.valueOf(System.currentTimeMillis());
