@@ -51,7 +51,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
 
 
-public class Tables {
+public class Tables implements Iterable<String> {
 
     private static final String suffix = ".bheap";
     private static final String system_table_pkcounter = "pkcounter";
@@ -88,7 +88,8 @@ public class Tables {
         }
     }
 
-    public Iterator<String> tables() {
+    @Override
+    public Iterator<String> iterator() {
         return this.tables.keySet().iterator();
     }
 
@@ -104,17 +105,20 @@ public class Tables {
     }
 
     public void clear(final String tablename) {
-        BEncodedHeap heap = null;
         try {
-            heap = getHeap(tablename);
-            if (heap != null) heap.clear();
-            heap.close();
+            BEncodedHeap heap = getHeap(tablename);
+            if (heap != null) {
+                final File f = heap.getFile();
+                heap.clear();
+                heap.close();
+                FileUtils.deletedelete(f);
+                heap = null;
+            }
         } catch (final IOException e) {
+            Log.logException(e);
+        } finally {
+            this.tables.remove(tablename);
         }
-        heap = null;
-        final File f = new File(this.location, tablename + suffix);
-        this.tables.remove(tablename);
-        FileUtils.deletedelete(f);
     }
 
     public boolean hasHeap(final String tablename) {
@@ -135,6 +139,14 @@ public class Tables {
         heap = new BEncodedHeap(heapf, this.keymaxlen);
         this.tables.put(tablename, heap);
         return heap;
+    }
+
+    /**
+     * get the total number of known tables
+     * @return
+     */
+    public int size() {
+        return this.tables.size();
     }
 
     public int size(final String table) throws IOException {
@@ -344,7 +356,7 @@ public class Tables {
         public RowIterator(final String table, final String whereColumn, final Pattern wherePattern) throws IOException {
             this.whereColumn = whereColumn;
             this.whereValue = null;
-            this.wherePattern = wherePattern;
+            this.wherePattern = wherePattern == null || wherePattern.toString().length() == 0 ? null : wherePattern;
             final BEncodedHeap heap = getHeap(table);
             this.i = heap.iterator();
         }
@@ -359,7 +371,7 @@ public class Tables {
         public RowIterator(final String table, final Pattern pattern) throws IOException {
             this.whereColumn = null;
             this.whereValue = null;
-            this.wherePattern = pattern;
+            this.wherePattern = pattern == null || pattern.toString().length() == 0 ? null : pattern;
             final BEncodedHeap heap = getHeap(table);
             this.i = heap.iterator();
         }
@@ -541,4 +553,5 @@ public class Tables {
             Log.logException(e);
         }
     }
+
 }

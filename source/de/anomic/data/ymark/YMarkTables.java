@@ -89,7 +89,7 @@ public class YMarkTables {
     public final static String p3 = "\\E";
     public final static String p4 = "(?:,.*|$)";
     public final static String p5 = "((?:";
-    public final static String p6 = "),.*){";
+    public final static String p6 = ")(?:,.*|$)){";
     public final static String p7 = "/.*)";
     public final static String p8 = "(?:,|$)";
 
@@ -195,7 +195,7 @@ public class YMarkTables {
     	final Pattern p = Pattern.compile(patternBuilder.toString());
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), p);
     }
-
+    
     public Iterator<Tables.Row> getBookmarksByTag(final String bmk_user, final String[] tagArray) throws IOException {
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final StringBuilder patternBuilder = new StringBuilder(BUFFER_LENGTH);
@@ -208,14 +208,15 @@ public class YMarkTables {
     		patternBuilder.append(p3);
         	patternBuilder.append('|');
 		}
-    	patternBuilder.deleteCharAt(patternBuilder.length()-1);
+    	patternBuilder.deleteCharAt(patternBuilder.length()-1);    	
     	patternBuilder.append(p6);
+    	
     	patternBuilder.append(tagArray.length);
     	patternBuilder.append('}');
-    	final Pattern p = Pattern.compile(patternBuilder.toString());
+    	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
     }
-
+      
     public List<Row> orderBookmarksBy(final Iterator<Row> rowIterator, final String sortname, final String sortorder) {
         final List<Row> sortList = new ArrayList<Row>();
         Row row;
@@ -236,6 +237,51 @@ public class YMarkTables {
         	bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(tagString));
         	addBookmark(bmk_user, bmk, merge, true);
     	}
+    }
+    
+    public void replaceTags(final Iterator<Row> rowIterator, final String bmk_user, final String tagString, final String replaceString) throws IOException, RowSpaceExceededException {
+        final String[] tagArray = YMarkUtil.cleanTagsString(tagString).split(YMarkUtil.TAGS_SEPARATOR);
+        final StringBuilder tagStringBuilder = new StringBuilder(BUFFER_LENGTH);
+        Row row;
+        while (rowIterator.hasNext()) {
+            row = rowIterator.next();
+            if(row != null) {
+            	for(int i=0; i<tagArray.length; i++) {
+            		tagStringBuilder.setLength(0);
+            		tagStringBuilder.append(row.get(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.deflt()));
+            		int start = tagStringBuilder.indexOf(tagArray[i]);
+            		int end = start;
+            		while (end<=tagStringBuilder.length() && end != -1) {
+          				if (end == (tagStringBuilder.length())) {
+          					if (end-start == tagArray[i].length()) {
+              					if (start > 0)
+                					start--; // also replace the tag separator 
+        						tagStringBuilder.replace(start, end, YMarkUtil.EMPTY_STRING);
+          					}
+            				break;
+            			} else if (tagStringBuilder.charAt(end) == ',') {          					
+            				if (end-start == tagArray[i].length()) {
+              					if (start > 0)
+                					start--; // also replace the tag separator 
+        						tagStringBuilder.replace(start, end, YMarkUtil.EMPTY_STRING);
+        					} else {
+        						start = tagStringBuilder.indexOf(tagArray[i], end+1);
+        						end = start;
+        					}
+            			} else if (tagStringBuilder.charAt(end) == ' ') {
+            				start = tagStringBuilder.indexOf(tagArray[i], end);
+            				end = start;
+            			} else {
+            				end++;
+            			}
+            		}            		
+            		tagStringBuilder.append(YMarkUtil.TAGS_SEPARATOR);
+            		tagStringBuilder.append(replaceString);
+            		row.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(tagStringBuilder.toString()));
+            		this.worktables.update(TABLES.BOOKMARKS.tablename(bmk_user), row);
+            	}
+            }                
+        }
     }
 
     public void addFolder(final String bmk_user, final String url, final String folder) throws IOException, RowSpaceExceededException {

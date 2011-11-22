@@ -3,7 +3,8 @@ HTMLenc = function(s) {
 }
 $(document).ready(function() {							
 
-	var height=document.documentElement.clientHeight - 200;    			
+	height=document.documentElement.clientHeight - 200;    			
+	qtag = "";
 	
 	/* Initialize Bookmark Dialog */
 	bm_dialog();	
@@ -48,8 +49,7 @@ $(document).ready(function() {
 			{name: 'Crawl', bclass: 'crawl', onpress: bm_action},
 			{name: 'Schedule', bclass: 'calendar', onpress: bm_action},
 			{separator: true},
-			{name: 'Add', bclass: 'addTag', onpress: tag_action},
-			{name: 'Rename', bclass: 'editTag', onpress: tag_action},
+			{name: 'XBEL', bclass: 'xml', onpress: bm_action},
 			{separator: true},
 			{name: 'Help', bclass: 'help', onpress: bm_action}
 		],
@@ -97,30 +97,119 @@ $(document).ready(function() {
 	loadTreeView();
 	
 	$('input[name=importer]').change(function() {
-	     if ($("input[name=importer]:checked").val() == 'crawls') {             
+	     if ($("input[name=importer]:checked").val() == 'crawls') {
+		    $("input[name='root']").setValue("/Crawl Start");
 	    	$("input[name='bmkfile']").attr("disabled","disabled");
-	        $("input[name='root']").setValue("/Crawl Start");
-	     }
-	     else {
+	     } else if ($("input[name=importer]:checked").val() == 'bmks') {             
+		    	$("input[name='bmkfile']").attr("disabled","disabled");
+	     } else {
 	    	 $("input[name='bmkfile']").removeAttr("disabled");
 	     	 $("input[name='root']").setValue("/Imported Bookmarks");
 	     }
-	     if ($("input[name=importer]:checked").val() == 'bmks') {             
-		    	$("input[name='bmkfile']").attr("disabled","disabled");
-		     }
-	     else {
-	    	 $("input[name='bmkfile']").removeAttr("disabled");
-	     }
 	  });
 
-   $("#example").multiselect();
+	loadTags("#tag_include", "alpha", "");
+	$("#tag_include").multiselect({
+		noneSelectedText: "Select (multiple) tags ...",
+		height: height-50,
+		selectedList: 4,
+		header: "",
+		click: function(event, ui) {
+			if(ui.checked) {						
+				qtag = qtag + "," + ui.value;
+			}
+		},
+		close: function() {
+			$('#ymarks_flexigrid').flexOptions({
+				query: qtag,
+				qtype: "_tags",
+				newp: 1
+			});
+			$('#ymarks_flexigrid').flexReload();
+		},
+		beforeopen: function() {
+			// $(this).multiselect("uncheckAll");
+		},
+		open: function() {
+			qtag = "";
+		}
+	}).multiselectfilter();	
+	
+	loadTags("#tag_select", "alpha", "");
+	$("#tag_select").multiselect({
+		noneSelectedText: "Select tags to replace ...",
+		header: "",
+		selectedList: 4,
+		height: height - 540
+	}).multiselectfilter();
 
+	$('#ymarks_tagmanager').submit(function() {
+		var param = [];
+		$('#ymarks_tagmanager input[type="text"],#ymarks_tagmanager input[type="radio"]:checked').each(function(i){
+			param[i] = { name : $(this).attr('name'), value : $(this).attr('value') };
+		});		
+		var tags = "";
+		var ta = $("#tag_select").val();
+		var i = 0;
+		while (i<ta.length) {
+			tags = tags + ta[i] + ",";
+			i++;
+		};
+		param[param.length] = { name : 'tags', value : tags };
+		$.ajax({
+			type: "GET",
+			url: "/api/ymarks/replace_tags.xml",
+			data: param,
+			dataType: "xml",
+			cache: false,
+			success: function(xml) {			
+				/*
+				$(xml).find('status').each(function(){					
+					var code = $(this).attr('code');								
+					alert("Request returned status: "+code);
+				}); //close each(
+				*/
+				loadTagCloud()
+				loadTags("#tag_select", "alpha", "");
+				loadTags("#tag_include", "alpha", "");
+				/*
+				$('#ymarks_flexigrid').flexOptions({
+					sortname: "title",
+					sortorder: "asc",	
+					query: query,
+				 	qtype: "title"								
+				});
+				*/
+				$('#ymarks_flexigrid').flexReload();
+			}
+		}); //close $.ajax(			
+		return false;
+	});
+	
 });
+
+function loadTags(select, sortorder, tags) {
+	$(select).empty();	
+	$.ajax({
+		type: "GET",
+		url: "/api/ymarks/get_tags.xml?sort="+sortorder+"&tag="+tags,			
+		dataType: "xml",
+		cache: false,
+		success: function(xml) {			
+			$(xml).find('tag').each(function(){					
+				var count = $(this).attr('count');
+				var tag = $(this).attr('tag');									
+				$('<option value="'+tag+'">'+tag+' ['+count+']</option>').appendTo(select);
+			}); //close each(
+			$(select).multiselect('refresh');
+		}
+	}); //close $.ajax(
+}
 
 function loadTagCloud() {		
 	$("#ymarks_tagcloud *").remove();
 	$.ajax({
-		type: "POST",
+		type: "GET",
 		url: "/api/ymarks/get_tags.xml?top=25&sort=alpha",			
 		dataType: "xml",
 		cache: false,
@@ -128,7 +217,7 @@ function loadTagCloud() {
 			$(xml).find('tag').each(function(){					
 				var count = $(this).attr('count');
 				var tag = $(this).attr('tag');										
-				var size = ((count/20)+0.3);
+				var size = ((count/20)+0.15);
 				if (size < 1) {size = 1;}					
 				$('<a style="font-size:'+size+'em"></a>')
 					.html(HTMLenc(tag)+' ')						

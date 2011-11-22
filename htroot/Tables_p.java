@@ -49,7 +49,7 @@ public class Tables_p {
 
         // show table selection
         int count = 0;
-        final Iterator<String> ti = sb.tables.tables();
+        final Iterator<String> ti = sb.tables.iterator();
         String tablename;
         prop.put("showselection", 1);
         while (ti.hasNext()) {
@@ -69,21 +69,13 @@ public class Tables_p {
         final Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
         prop.put("pattern", pattern);
 
-        List<String> columns = null;
-        if (table != null) try {
-            columns = sb.tables.columns(table);
-        } catch (final IOException e) {
-            Log.logException(e);
-            columns = new ArrayList<String>();
-        }
-
         // apply deletion requests
         if (post.get("deletetable", "").length() > 0)
             sb.tables.clear(table);
 
         if (post.get("deleterows", "").length() > 0) {
             for (final Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getValue().startsWith("mark_")) try {
+                if (entry.getValue().startsWith("pk_")) try {
                     sb.tables.delete(table, entry.getValue().substring(5).getBytes());
                 } catch (final IOException e) {
                     Log.logException(e);
@@ -110,7 +102,16 @@ public class Tables_p {
         prop.put("showtable", 0);
         prop.put("showedit", 0);
 
+
         if (table != null) {
+
+            List<String> columns = null;
+            try {
+                columns = sb.tables.columns(table);
+            } catch (final IOException e) {
+                Log.logException(e);
+                columns = new ArrayList<String>();
+            }
 
             if (post.containsKey("editrow")) {
                 // check if we can find a key

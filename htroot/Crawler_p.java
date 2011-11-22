@@ -27,6 +27,7 @@
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -45,6 +46,7 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
@@ -60,6 +62,7 @@ import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.ListManager;
 import de.anomic.data.WorkTables;
+import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -167,14 +170,16 @@ public class Crawler_p {
                 // special cases:
                 if (crawlingStartURL!= null && fullDomain) {
                     if (crawlingStartURL.isFile()) {
-                        newcrawlingMustMatch = "file://" + crawlingStartURL.getPath() + ".*";
+                        newcrawlingMustMatch = "file://" + crawlingStartURL.getPath();
                     } else if (crawlingStartURL.isSMB()) {
-                        newcrawlingMustMatch = "smb://.*" + crawlingStartURL.getHost() + ".*" + crawlingStartURL.getPath() + ".*";
+                        newcrawlingMustMatch = "smb://" + crawlingStartURL.getHost();
                     } else if (crawlingStartURL.isFTP()) {
-                        newcrawlingMustMatch = "ftp://.*" + crawlingStartURL.getHost() + ".*" + crawlingStartURL.getPath() + ".*";
+                        newcrawlingMustMatch = "ftp://" + crawlingStartURL.getHost();
                     } else {
-                        newcrawlingMustMatch = ".*" + crawlingStartURL.getHost() + ".*";
+                        newcrawlingMustMatch = "https?://" + crawlingStartURL.getHost();
                     }
+                    if (subPath) newcrawlingMustMatch += crawlingStartURL.getPath();
+                    newcrawlingMustMatch += ".*";
                 }
                 if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf('/')) > 0) {
                     newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
@@ -303,6 +308,7 @@ public class Crawler_p {
                         prop.putHTML("info_crawlingStart", crawlingStart);
                     } else try {
 
+
                         // check if the crawl filter works correctly
                         Pattern.compile(newcrawlingMustMatch);
 
@@ -313,6 +319,11 @@ public class Crawler_p {
                         indexSegment.urlMetadata().remove(urlhash);
                         sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                         sb.crawlQueues.errorURL.remove(urlhash);
+
+                        // get a scraper to get the title
+                        final ContentScraper scraper = sb.loader.parseResource(url, CacheStrategy.IFFRESH);
+                        final String title = scraper == null ? url.toNormalform(true, true) : scraper.getTitle();
+                        final String description = scraper.getDescription();
 
                         // stack url
                         sb.crawler.removePassive(crawlingStartURL.hash()); // if there is an old entry, delete it
@@ -352,21 +363,47 @@ public class Crawler_p {
 
                         if (reasonString == null) {
                             // create a bookmark from crawl start url
-                            final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
+                            //final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
+                            final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString("/crawlStart"));
                             tags.add("crawlStart");
-                            if ("on".equals(post.get("createBookmark","off"))) {
-                            final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
-                                if (bookmark != null) {
-                                    bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, post.get("bookmarkTitle", crawlingStart));
-                                    bookmark.setOwner("admin");
-                                    bookmark.setPublic(false);
-                                    bookmark.setTags(tags, true);
-                                    sb.bookmarksDB.saveBookmark(bookmark);
+                            final String[] keywords = scraper.getKeywords();
+                            if (keywords != null) {
+                                for (final String k: keywords) {
+                                    final String kk = BookmarkHelper.cleanTagsString(k);
+                                    if (kk.length() > 0) tags.add(kk);
                                 }
                             }
+                            String tagStr = tags.toString();
+                            if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
+
+                            // we will create always a bookmark to use this to track crawled hosts
+                            final YMarkEntry bmk = new YMarkEntry();
+                            bmk.put(YMarkEntry.BOOKMARK.URL.key(), url.toNormalform(true, false));
+                            bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), title);
+                            bmk.put(YMarkEntry.BOOKMARK.DESC.key(), description);
+                            bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), "false");
+                            bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), tagStr);
+                            bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), "/crawlStart");
+
+                            try {
+                                sb.tables.bookmarks.addBookmark("admin", bmk, false, false);
+                                } catch (final IOException e) {
+                                    Log.logException(e);
+                                } catch (final RowSpaceExceededException e) {
+                            }
+
+                            final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
+                            if (bookmark != null) {
+                                bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
+                                bookmark.setOwner("admin");
+                                bookmark.setPublic(false);
+                                bookmark.setTags(tags, true);
+                                sb.bookmarksDB.saveBookmark(bookmark);
+                            }
+
                             // liftoff!
                             prop.put("info", "8");//start msg
-                            prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
+                            prop.putHTML("info_crawlingURL", post.get("crawlingURL"));
 
                             // generate a YaCyNews if the global flag was set
                             if (!sb.isRobinsonMode() && crawlOrder) {

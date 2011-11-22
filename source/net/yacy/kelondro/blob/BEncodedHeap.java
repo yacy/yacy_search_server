@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -45,9 +45,9 @@ import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.BDecoder;
+import net.yacy.kelondro.util.BDecoder.BObject;
 import net.yacy.kelondro.util.BEncoder;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.BDecoder.BObject;
 
 /**
  * store a table of properties (instead of fixed-field entries)
@@ -56,8 +56,8 @@ import net.yacy.kelondro.util.BDecoder.BObject;
 public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<Map.Entry<byte[], Map<String, byte[]>>> {
 
     private Heap table;
-    private LinkedHashSet<String> columnames;
-    
+    private final LinkedHashSet<String> columnames;
+
     /**
      * produce or open a properties table
      * @param location the file
@@ -70,11 +70,11 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
             final File location,
             final int keylength,
             final ByteOrder ordering,
-            int buffermax) throws IOException {
+            final int buffermax) throws IOException {
         this.table = new Heap(location, keylength, ordering, buffermax);
         this.columnames = new LinkedHashSet<String>();
     }
-    
+
     /**
      * convenience method to open a properies table
      * @param location the file
@@ -86,72 +86,72 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
         this.table = new Heap(location, keylength, NaturalOrder.naturalOrder, 100);
         this.columnames = new LinkedHashSet<String>();
     }
-    
-    public byte[] encodedKey(String key) {
+
+    public byte[] encodedKey(final String key) {
         return Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(key), this.table.keylength);
     }
-    
+
     private static class EntryIter implements Iterator<Map.Entry<byte[], Map<String, byte[]>>> {
         HeapReader.entries iter;
-        public EntryIter(File location, int keylen) throws IOException {
-            iter = new HeapReader.entries(location, keylen);
+        public EntryIter(final File location, final int keylen) throws IOException {
+            this.iter = new HeapReader.entries(location, keylen);
         }
-        
+
         public boolean hasNext() {
-            return iter.hasNext();
+            return this.iter.hasNext();
         }
 
         public Entry<byte[], Map<String, byte[]>> next() {
-            Map.Entry<byte[], byte[]> entry = iter.next();
-            Map<String, byte[]> map = b2m(entry.getValue());
+            final Map.Entry<byte[], byte[]> entry = this.iter.next();
+            final Map<String, byte[]> map = b2m(entry.getValue());
             return new b2mEntry(entry.getKey(), map);
         }
 
         public void remove() {
             throw new UnsupportedOperationException();
         }
-        
+
     }
-    
+
     public static class b2mEntry implements Map.Entry<byte[], Map<String, byte[]>> {
         private final byte[] s;
         private Map<String,byte[]> b;
-        
+
         public b2mEntry(final byte[] s, final Map<String, byte[]> b) {
             this.s = s;
             this.b = b;
         }
-    
+
         public byte[] getKey() {
-            return s;
+            return this.s;
         }
 
         public Map<String, byte[]> getValue() {
-            return b;
+            return this.b;
         }
 
-        public Map<String, byte[]> setValue(Map<String, byte[]> value) {
-            Map<String, byte[]> b1 = b;
-            b = value;
+        public Map<String, byte[]> setValue(final Map<String, byte[]> value) {
+            final Map<String, byte[]> b1 = this.b;
+            this.b = value;
             return b1;
         }
     }
-    
-    private static Map<String, byte[]> b2m(byte[] b) {
+
+    private static Map<String, byte[]> b2m(final byte[] b) {
         if (b == null) return null;
         //System.out.println("b = " + UTF8.String(b));
-        BDecoder decoder = new BDecoder(b);
-        BObject bobj = decoder.parse();
+        final BDecoder decoder = new BDecoder(b);
+        final BObject bobj = decoder.parse();
         if (bobj.getType() != BDecoder.BType.dictionary) return null;
-        Map<String, BDecoder.BObject> map = bobj.getMap();
-        Map<String, byte[]> m = new HashMap<String, byte[]>();
+        final Map<String, BDecoder.BObject> map = bobj.getMap();
+        final Map<String, byte[]> m = new HashMap<String, byte[]>();
         for (final Map.Entry<String, BDecoder.BObject> entry: map.entrySet()) {
             if (entry.getValue().getType() != BDecoder.BType.string) continue;
             m.put(entry.getKey(), entry.getValue().getString());
         }
         return m;
     }
-    
+
     /**
      * the map is stored inside a file; this method may return the file
      * @return the file where the map is stored
@@ -167,76 +167,76 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
     public int size() {
         return this.table.size();
     }
-    
+
     /**
      * return true if the table is empty
      */
     public boolean isEmpty() {
         return this.table.size() == 0;
     }
-    
+
     /**
      * check if a row with given key exists in the table
      * @param name
      * @return true if the row exists
      */
-    public boolean containsKey(byte[] pk) {
+    public boolean containsKey(final byte[] pk) {
         return this.table.containsKey(pk);
     }
-    
+
     /**
      * check if a row with given key exists in the table
      * This method is here to implement the Map interface
      * @param name
      * @return true if the row exists
      */
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         if (key instanceof byte[]) return containsKey((byte[]) key);
         return false;
     }
-    
+
     /**
      * the containsValue method cannot be used in this method
      * and is only here to implement the Map interface
      */
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         // this method shall not be used because it is not appropriate for this kind of data
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * get a map from the table
      * @param name
      * @return the map if one found or NULL if no entry exists or the entry is corrupt
-     * @throws RowSpaceExceededException 
+     * @throws RowSpaceExceededException
      * @throws IOException
      */
-    public Map<String, byte[]> get(byte[] pk) throws IOException, RowSpaceExceededException {
-        byte[] b = this.table.get(pk);
+    public Map<String, byte[]> get(final byte[] pk) throws IOException, RowSpaceExceededException {
+        final byte[] b = this.table.get(pk);
         if (b == null) return null;
         return b2m(b);
     }
-    
+
     /**
      * get a map from the table
      * this method is here to implement the Map interface
      * @param name
      * @return the map if one found or NULL if no entry exists or the entry is corrupt
      */
-    public Map<String, byte[]> get(Object key) {
+    public Map<String, byte[]> get(final Object key) {
         if (key instanceof byte[])
             try {
                 return get((byte[]) key);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
                 return null;
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
                 return null;
             }
         return null;
     }
-    
+
     /**
      * convenience method to get a value from a map
      * @param pk
@@ -245,10 +245,10 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @throws IOException
      * @throws RowSpaceExceededException
      */
-    public byte[] getProp(byte[] pk, String key) throws IOException, RowSpaceExceededException {
-        byte[] b = this.table.get(pk);
+    public byte[] getProp(final byte[] pk, final String key) throws IOException, RowSpaceExceededException {
+        final byte[] b = this.table.get(pk);
         if (b == null) return null;
-        Map<String, byte[]> map = b2m(b);
+        final Map<String, byte[]> map = b2m(b);
         return map.get(key);
     }
 
@@ -259,12 +259,12 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @param columnMatcher the matcher for the elements of the column
      * @return a set of primary keys where the matcher matched
      */
-    public Set<byte[]> select(String columnName, Pattern columnMatcher) {
-        Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = iterator();
+    public Set<byte[]> select(final String columnName, final Pattern columnMatcher) {
+        final Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = iterator();
         Map.Entry<byte[], Map<String, byte[]>> row;
         Map<String, byte[]> prop;
         byte[] val;
-        Set<byte[]> pks = new TreeSet<byte[]>(this.table.ordering);
+        final Set<byte[]> pks = new TreeSet<byte[]>(this.table.ordering);
         while (i.hasNext()) {
             row = i.next();
             prop = row.getValue();
@@ -283,8 +283,8 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @param columnMatcher the matcher for the elements of the column
      * @return the row where the matcher matched the given column
      */
-    public Map.Entry<byte[], Map<String, byte[]>> selectOne(String columnName, Pattern columnMatcher) {
-        Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = iterator();
+    public Map.Entry<byte[], Map<String, byte[]>> selectOne(final String columnName, final Pattern columnMatcher) {
+        final Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = iterator();
         Map.Entry<byte[], Map<String, byte[]>> row;
         Map<String, byte[]> prop;
         byte[] val;
@@ -298,7 +298,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
         }
         return null;
     }
-    
+
     /**
      * insert a map into the table
      * this method shall be used in exchange of the get method if the
@@ -308,20 +308,20 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @throws RowSpaceExceededException
      * @throws IOException
      */
-    public void insert(byte[] pk, Map<String, byte[]> map) throws RowSpaceExceededException, IOException {
-        byte[] b = BEncoder.encode(BEncoder.transcode(map));
+    public void insert(final byte[] pk, final Map<String, byte[]> map) throws RowSpaceExceededException, IOException {
+        final byte[] b = BEncoder.encode(BEncoder.transcode(map));
         this.table.insert(pk, b);
         this.columnames.addAll(map.keySet());
     }
-    
-    public void insert(byte[] pk, String key, byte[] value) throws IOException {
-        byte[] b = BEncoder.encodeMap(key, value);
+
+    public void insert(final byte[] pk, final String key, final byte[] value) throws IOException {
+        final byte[] b = BEncoder.encodeMap(key, value);
         this.table.insert(pk, b);
         this.columnames.add(key);
     }
-    
-    public void update(byte[] pk, Map<String, byte[]> map) throws RowSpaceExceededException, IOException {
-        Map<String, byte[]> entry = this.get(pk);
+
+    public void update(final byte[] pk, final Map<String, byte[]> map) throws RowSpaceExceededException, IOException {
+        final Map<String, byte[]> entry = this.get(pk);
         if (entry == null) {
             insert(pk, map);
         } else {
@@ -329,8 +329,8 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
             insert(pk, entry);
         }
     }
-    
-    public void update(byte[] pk, String key, byte[] value) throws RowSpaceExceededException, IOException  {
+
+    public void update(final byte[] pk, final String key, final byte[] value) throws RowSpaceExceededException, IOException  {
         Map<String, byte[]> entry = this.get(pk);
         if (entry == null) {
             entry = new HashMap<String, byte[]>();
@@ -347,74 +347,74 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @param name
      * @param map
      */
-    public Map<String, byte[]> put(byte[] pk, Map<String, byte[]> map)  {
+    public Map<String, byte[]> put(final byte[] pk, final Map<String, byte[]> map)  {
         try {
-            Map<String, byte[]> entry = this.get(pk);
-            byte[] b = BEncoder.encode(BEncoder.transcode(map));
+            final Map<String, byte[]> entry = this.get(pk);
+            final byte[] b = BEncoder.encode(BEncoder.transcode(map));
             this.table.insert(pk, b);
             this.columnames.addAll(map.keySet());
             return entry;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
             return null;
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
             return null;
         }
     }
-    
+
     /**
      * delete a map from the table
      * @param name
      * @throws IOException
      */
-    public void delete(byte[] pk) throws IOException {
+    public void delete(final byte[] pk) throws IOException {
         this.table.delete(pk);
     }
-    
+
     /**
      * delete a map from the table
      * @param name
-     * @throws RowSpaceExceededException 
+     * @throws RowSpaceExceededException
      * @throws IOException
      */
-    public Map<String, byte[]> remove(byte[] key) throws IOException, RowSpaceExceededException {
-        Map<String, byte[]> value = get(key);
-        this.delete(key);
+    public Map<String, byte[]> remove(final byte[] key) throws IOException, RowSpaceExceededException {
+        final Map<String, byte[]> value = get(key);
+        delete(key);
         return value;
     }
 
-    public Map<String, byte[]> remove(Object key) {
+    public Map<String, byte[]> remove(final Object key) {
         if (key instanceof byte[])
             try {
                 return remove((byte[]) key);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
                 return null;
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
                 return null;
             }
         return null;
     }
-    
+
     /**
      * Copy all the mappings from the specified map to this map.
      *
      * @param m mappings to be stored in this map
      */
-    public void putAll(Map<? extends byte[], ? extends Map<String, byte[]>> map) {
+    public void putAll(final Map<? extends byte[], ? extends Map<String, byte[]>> map) {
         for (final Map.Entry<? extends byte[], ? extends Map<String, byte[]>> me: map.entrySet()) {
             try {
                 this.insert(me.getKey(), me.getValue());
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
         }
     }
-    
+
     /**
      * remove all entries from the map;
      * possibly removes the backend-file
@@ -422,11 +422,12 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
     public void clear() {
         try {
             this.table.clear();
-        } catch (IOException e) {
+            this.columnames.clear();
+        } catch (final IOException e) {
             Log.logException(e);
         }
     }
-    
+
     /**
      * close the backen-file.
      * Should be called explicitely to ensure that all data
@@ -435,20 +436,20 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
     public void close() {
         this.table.close();
     }
-    
+
     /**
      * Return a Set of the keys contained in this map.
      * This may not be a useful method, if possible use the keys()
      * method instead to iterate all keys from the backend-file
-     * 
+     *
      * @return a set view of the keys contained in this map
      */
     public Set<byte[]> keySet() {
-        TreeSet<byte[]> set = new TreeSet<byte[]>(this.table.ordering);
+        final TreeSet<byte[]> set = new TreeSet<byte[]>(this.table.ordering);
         try {
-            Iterator<byte[]> i = this.table.keys(true, false);
+            final Iterator<byte[]> i = this.table.keys(true, false);
             while (i.hasNext()) set.add(i.next());
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         return set;
     }
 
@@ -473,7 +474,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
         // this method shall not be used because it is not appropriate for this kind of data
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * The abstract method entrySet() from AbstractMap must be implemented,
      * but never used because that is not useful for this file-based storage class.
@@ -482,14 +483,14 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * methods must be overriden in this class. These methods are:
      * size, containsValue, containsKey, get, remove, putAll, clear,
      * keySet, values, equals, hashCode and toString
-     * 
+     *
      * Instead of using this method, use the iterator() method to iterate
      * all elements in the back-end blob file
      */
     public Set<Map.Entry<byte[], Map<String, byte[]>>> entrySet() {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * iterate all rows of the table.
      * This method implements the
@@ -497,20 +498,20 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * interface
      */
     public Iterator<Map.Entry<byte[], Map<String, byte[]>>> iterator() {
-        File location = this.table.location();
-        int keylen = this.table.keylength();
+        final File location = this.table.location();
+        final int keylen = this.table.keylength();
         try {
             this.table.flushBuffer();
             return new EntryIter(location, keylen);
-        } catch (IOException e1) {
-            ByteOrder order = this.table.ordering();
-            int buffermax = this.table.getBuffermax();
+        } catch (final IOException e1) {
+            final ByteOrder order = this.table.ordering();
+            final int buffermax = this.table.getBuffermax();
             this.table.close();
             try {
-                Iterator<Map.Entry<byte[], Map<String, byte[]>>> iter = new EntryIter(location, keylen);
+                final Iterator<Map.Entry<byte[], Map<String, byte[]>>> iter = new EntryIter(location, keylen);
                 this.table = new Heap(location, keylen, order, buffermax);
                 return iter;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logSevere("PropertiesTable", e.getMessage(), e);
                 return null;
             }
@@ -525,11 +526,11 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @return
      * @throws IOException
      */
-    public static Iterator<Map.Entry<byte[], Map<String, byte[]>>> iterator(File location, int keylen) throws IOException {
+    public static Iterator<Map.Entry<byte[], Map<String, byte[]>>> iterator(final File location, final int keylen) throws IOException {
         return new EntryIter(location, keylen);
     }
-    
-    
+
+
     /**
      * a hashcode for the object
      */
@@ -552,51 +553,51 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
                 this.columnames.addAll(row.getValue().keySet());
             }
         }
-        ArrayList<String> l = new ArrayList<String>();
+        final ArrayList<String> l = new ArrayList<String>();
         l.addAll(this.columnames);
         return l;
     }
-    
-    public static void main(String[] args) {
+
+    public static void main(final String[] args) {
         if (args.length == 0) {
             // test the class
-            File f = new File(new File("maptest").getAbsolutePath());
+            final File f = new File(new File("maptest").getAbsolutePath());
             //System.out.println(f.getAbsolutePath());
             //System.out.println(f.getParent());
             if (f.exists()) FileUtils.deletedelete(f);
             try {
-                BEncodedHeap map = new BEncodedHeap(f, 4);
+                final BEncodedHeap map = new BEncodedHeap(f, 4);
                 // put some values into the map
-                Map<String, byte[]> m = new HashMap<String, byte[]>();
+                final Map<String, byte[]> m = new HashMap<String, byte[]>();
                 m.put("k", "000".getBytes()); map.insert("123".getBytes(), m);
                 m.put("k", "111".getBytes()); map.insert("456".getBytes(), m);
                 m.put("k", "222".getBytes()); map.insert("789".getBytes(), m);
                 // iterate over keys
                 Map.Entry<byte[], Map<String, byte[]>> entry;
-                Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
+                final Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
                 while (i.hasNext()) {
                     entry = i.next();
                     System.out.println(ASCII.String(entry.getKey()) + ": " + entry.getValue());
                 }
                 // clean up
                 map.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }
         } else {
-            File f = new File(args[0]);
+            final File f = new File(args[0]);
             try {
             	Map.Entry<byte[], Map<String, byte[]>> entry;
-                BEncodedHeap map = new BEncodedHeap(f, 12);
-                Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
+                final BEncodedHeap map = new BEncodedHeap(f, 12);
+                final Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
                 while (i.hasNext()) {
                     entry = i.next();
                     System.out.println(ASCII.String(entry.getKey()) + ": " + entry.getValue());
                 }
                 map.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
         }

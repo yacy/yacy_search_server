@@ -1,7 +1,7 @@
 .ui-multiselect { padding:2px 0 2px 4px; text-align:left }
 .ui-multiselect span.ui-icon { float:right }
-.ui-multiselect-single input { position:absolute !important; top: auto !important; left:-9999px; }
-.ui-multiselect-single label { padding:5px !important }
+.ui-multiselect-single .ui-multiselect-checkboxes input { position:absolute !important; top: auto !important; left:-9999px; }
+.ui-multiselect-single .ui-multiselect-checkboxes label { padding:5px !important }
 
 .ui-multiselect-header { margin-bottom:3px; padding:3px 0 3px 4px }
 .ui-multiselect-header ul { font-size:0.9em }

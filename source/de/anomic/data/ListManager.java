@@ -133,7 +133,8 @@ public class ListManager {
             final Iterator<String> it = col.iterator();
             str.append(it.next());
             while(it.hasNext()) {
-                str.append(',').append(it.next());
+            	if (str.length() > 0) str.append(',');
+            	str.append(it.next());
             }
         }
         
