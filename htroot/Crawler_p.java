@@ -27,6 +27,7 @@
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -45,6 +46,7 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
@@ -60,6 +62,7 @@ import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.ListManager;
 import de.anomic.data.WorkTables;
+import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -318,7 +321,7 @@ public class Crawler_p {
                         // get a scraper to get the title
                         final ContentScraper scraper = sb.loader.parseResource(url, CacheStrategy.IFFRESH);
                         final String title = scraper == null ? url.toNormalform(true, true) : scraper.getTitle();
-                        //final String description = scraper.getDescription();
+                        final String description = scraper.getDescription();
 
                         // stack url
                         sb.crawler.removePassive(crawlingStartURL.hash()); // if there is an old entry, delete it
@@ -368,17 +371,34 @@ public class Crawler_p {
                                     if (kk.length() > 0) tags.add(kk);
                                 }
                             }
-                            //if ("on".equals(post.get("createBookmark","off"))) {
+                            String tagStr = tags.toString();
+                            if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
+
                             // we will create always a bookmark to use this to track crawled hosts
+                            final YMarkEntry bmk = new YMarkEntry();
+                            bmk.put(YMarkEntry.BOOKMARK.URL.key(), url.toNormalform(true, false));
+                            bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), title);
+                            bmk.put(YMarkEntry.BOOKMARK.DESC.key(), description);
+                            bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), "false");
+                            bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), tagStr);
+                            bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), "/crawlStart");
+
+                            try {
+                                sb.tables.bookmarks.addBookmark("admin", bmk, false, false);
+                                } catch (final IOException e) {
+                                    Log.logException(e);
+                                } catch (final RowSpaceExceededException e) {
+                            }
+
                             final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
-                                if (bookmark != null) {
-                                    bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title /*post.get("bookmarkTitle", crawlingStart)*/);
-                                    bookmark.setOwner("admin");
-                                    bookmark.setPublic(false);
-                                    bookmark.setTags(tags, true);
-                                    sb.bookmarksDB.saveBookmark(bookmark);
-                                }
-                            //}
+                            if (bookmark != null) {
+                                bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
+                                bookmark.setOwner("admin");
+                                bookmark.setPublic(false);
+                                bookmark.setTags(tags, true);
+                                sb.bookmarksDB.saveBookmark(bookmark);
+                            }
+
                             // liftoff!
                             prop.put("info", "8");//start msg
                             prop.putHTML("info_crawlingURL", post.get("crawlingURL"));

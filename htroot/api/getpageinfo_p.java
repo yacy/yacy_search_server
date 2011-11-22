@@ -106,6 +106,7 @@ public class getpageinfo_p {
                     final StringBuilder filter = new StringBuilder(uris.size() * 40);
                     count = 0;
                     for (final MultiProtocolURI uri: uris) {
+                        if (uri == null) continue;
                         links.append(';').append(uri.toNormalform(true, false));
                         filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");
                         prop.putXML("links_" + count + "_link", uri.toNormalform(true, false));
