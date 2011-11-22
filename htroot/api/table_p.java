@@ -19,11 +19,15 @@
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -39,17 +43,85 @@ public class table_p {
         final boolean html = EXT.equals("html");
         final boolean xml = EXT.equals("xml");
 
-        String table = (post == null) ? null : post.get("table", null);
-        if (table != null && !sb.tables.hasHeap(table)) table = null;
+        String table = (post == null) ? null : post.get("table");
+        if (post == null || (!post.containsKey("commitrow") && table != null && !sb.tables.hasHeap(table))) table = null;
         prop.put("showtable", 0);
+        prop.put("tablecount", sb.tables.size());
 
-        if (table == null) return prop;
+        // apply deletion requests
+        if (table != null && post != null && post.containsKey("deletetable")) {
+            sb.tables.clear(table);
+            table = null;
+        }
+
+        if (table == null) {
+            // list all tables that we know
+            int c = 0;
+            for (final String name: sb.tables) {
+                try {
+                    if (html) {
+                        prop.putHTML("showtable_tables_" + c + "_table", name);
+                    }
+                    if (xml) {
+                        prop.putXML("showtable_tables_" + c + "_table", name);
+                    }
+                    prop.put("showtable_tables_" + c + "_num", sb.tables.size(name));
+                    c++;
+                } catch (final IOException e) {
+                }
+            }
+            prop.put("showtable_tables", c);
+            prop.put("tablecount", c);
+            return prop;
+        }
 
         final boolean showpk = post.containsKey("pk");
 
         final String selectKey = post.containsKey("selectKey") ? post.get("selectKey") : null;
         final String selectValue = (selectKey != null && post.containsKey("selectValue")) ? post.get("selectValue") : null;
 
+        final String counts = post.get("count", null);
+        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
+        final String pattern = post.get("search", "");
+        final Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
+
+
+        if (post.containsKey("deleterows")) {
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
+                if (entry.getValue().startsWith("pk_")) try {
+                    sb.tables.delete(table, entry.getValue().substring(3).getBytes());
+                } catch (final IOException e) {
+                    Log.logException(e);
+                }
+            }
+        }
+
+        if (post.containsKey("commitrow")) {
+            final String pk = post.get("pk");
+            final Map<String, byte[]> map = new HashMap<String, byte[]>();
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
+                if (entry.getKey().startsWith("col_")) {
+                    map.put(entry.getKey().substring(4), entry.getValue().getBytes());
+                }
+            }
+            try {
+                if (pk == null || pk.length() == 0) {
+                    sb.tables.insert(table, map);
+                } else {
+                    sb.tables.update(table, pk.getBytes(), map);
+                }
+            } catch (final IOException e) {
+                Log.logException(e);
+            } catch (final RowSpaceExceededException e) {
+                Log.logException(e);
+            }
+        }
+
+        // generate table
+        prop.put("showtable", 1);
+        prop.put("showtable_table", table);
+
+        // insert the columns
         ArrayList<String> columns = null;
         try {
             columns = sb.tables.columns(table);
@@ -67,12 +139,6 @@ public class table_p {
                 if (i < columns.size()) columns.add(i, row[i]);
             }
         }
-
-        // generate table
-        prop.put("showtable", 1);
-        prop.put("showtable_table", table);
-
-        // insert the columns
         prop.put("showtable_showpk", showpk ? 1 : 0);
         for (int i = 0; i < columns.size(); i++) {
             prop.putHTML("showtable_columns_" + i + "_header", columns.get(i));
@@ -80,21 +146,20 @@ public class table_p {
         prop.put("showtable_columns", columns.size());
 
         // insert all rows
-        int maxCount;
         try {
-            maxCount = Math.min(1000, sb.tables.size(table));
+            maxcount = Math.min(maxcount, sb.tables.size(table));
         } catch (final IOException e) {
             Log.logException(e);
-            maxCount = 0;
+            maxcount = 0;
         }
         int count = 0;
         try {
-            final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table);
-            final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(plainIterator, maxCount).iterator();
+            final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table, matcher);
+            final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(plainIterator, maxcount).iterator();
             Tables.Row trow;
             boolean dark = true;
             String cellName, cellValue;
-            rowloop: while ((mapIterator.hasNext()) && (count < maxCount)) {
+            rowloop: while ((mapIterator.hasNext()) && (count < maxcount)) {
                 trow = mapIterator.next();
                 if (row == null) continue;
                 prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;

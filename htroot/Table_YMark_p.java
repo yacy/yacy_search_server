@@ -40,7 +40,7 @@ public class Table_YMark_p {
 
         // show table selection
         int count = 0;
-        final Iterator<String> ti = sb.tables.tables();
+        final Iterator<String> ti = sb.tables.iterator();
         String tablename;
         prop.put("showselection", 1);
         while (ti.hasNext()) {

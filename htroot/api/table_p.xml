@@ -1,18 +1,24 @@
-#(showtable)#::
-<table name="#[table]#" count="#[num]#">
-  <columns>
-    #{columns}#
-    <column name="#[header]#" />
-    #{/columns}#
-  </columns>
-  <rows>
-  #{list}#
-    <row#(showpk)#:: key="#[pk]#"#(/showpk)#>
+<tables count="#[tablecount]#">
+#(showtable)#
+  #{tables}#
+  <table name="#[table]#" count="#[num]#"/>
+  #{/tables}#
+::
+  <table name="#[table]#" count="#[num]#">
+    <columns>
       #{columns}#
-      <column name="#[column]#">#[cell]#</column>
+      <column name="#[header]#" />
       #{/columns}#
-    </row>
-  #{/list}#
-  </rows>
-</table>
+    </columns>
+    <rows>
+    #{list}#
+      <row#(showpk)#:: key="#[pk]#"#(/showpk)#>
+        #{columns}#
+        <column name="#[column]#">#[cell]#</column>
+        #{/columns}#
+      </row>
+    #{/list}#
+    </rows>
+  </table>
 #(/showtable)#
+</tables>
