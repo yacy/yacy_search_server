@@ -111,6 +111,8 @@ public final class Tray {
 		});
 		menu.add(menuItem);
 		
+		/*
+		 *  no prominent compare since google can not be displayed in a frame anymore
 		// Compare YaCy
 		if (deutsch)
                     label = "Vergleichs-Suche";
@@ -125,6 +127,7 @@ public final class Tray {
 			}
 		});
 		menu.add(menuItem);
+		*/
 		
 		// Peer Administration
 		if (deutsch)
