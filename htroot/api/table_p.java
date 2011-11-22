@@ -26,60 +26,64 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class table_p {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+
+        final String EXT = header.get("EXT", "");
+        final boolean html = EXT.equals("html");
+        final boolean xml = EXT.equals("xml");
+
         String table = (post == null) ? null : post.get("table", null);
         if (table != null && !sb.tables.hasHeap(table)) table = null;
         prop.put("showtable", 0);
-        
+
         if (table == null) return prop;
-        
-        boolean showpk = post.containsKey("pk");
-        
-        String selectKey = post.containsKey("selectKey") ? post.get("selectKey") : null;
-        String selectValue = (selectKey != null && post.containsKey("selectValue")) ? post.get("selectValue") : null;
-        
+
+        final boolean showpk = post.containsKey("pk");
+
+        final String selectKey = post.containsKey("selectKey") ? post.get("selectKey") : null;
+        final String selectValue = (selectKey != null && post.containsKey("selectValue")) ? post.get("selectValue") : null;
+
         ArrayList<String> columns = null;
         try {
             columns = sb.tables.columns(table);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
             columns = new ArrayList<String>();
         }
-        
+
         // if a row attribute is given
         // then order the columns according to the given order
-        String[] row = post.get("row", "").split(",");
+        final String[] row = post.get("row", "").split(",");
         for (int i = 0; i < row.length; i++) {
             if (columns.contains(row[i])) {
                 columns.remove(row[i]);
                 if (i < columns.size()) columns.add(i, row[i]);
             }
         }
-        
+
         // generate table
         prop.put("showtable", 1);
         prop.put("showtable_table", table);
-        
+
         // insert the columns
         prop.put("showtable_showpk", showpk ? 1 : 0);
         for (int i = 0; i < columns.size(); i++) {
             prop.putHTML("showtable_columns_" + i + "_header", columns.get(i));
         }
         prop.put("showtable_columns", columns.size());
-        
+
         // insert all rows
         int maxCount;
         try {
             maxCount = Math.min(1000, sb.tables.size(table));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
             maxCount = 0;
         }
@@ -105,21 +109,27 @@ public class table_p {
                     } else {
                         cellValue = "";
                     }
-                    prop.putHTML("showtable_list_" + count + "_columns_" + i + "_column", cellName);
-                    prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cellValue);
+                    if (html) {
+                        prop.putHTML("showtable_list_" + count + "_columns_" + i + "_column", cellName);
+                        prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cellValue);
+                    }
+                    if (xml) {
+                        prop.putXML("showtable_list_" + count + "_columns_" + i + "_column", cellName);
+                        prop.putXML("showtable_list_" + count + "_columns_" + i + "_cell", cellValue);
+                    }
                 }
                 prop.put("showtable_list_" + count + "_columns", columns.size());
-                
+
                 count++;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
         prop.put("showtable_list", count);
         prop.put("showtable_num", count);
-        
+
         // return rewrite properties
         return prop;
     }
-    
+
 }
