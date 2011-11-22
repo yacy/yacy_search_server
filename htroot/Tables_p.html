@@ -26,6 +26,15 @@
     <script type="text/javascript" src="/js/sorttable.js"></script>
   </head>
   <body id="Tables">
+  
+<script type="text/javascript">
+//<![CDATA[
+if (window.location.search.length > 1) {
+document.write("<div id=\"api\">\<a href=\"/api/table_p.xml" + window.location.search + "\"\><img src=\"env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\"/></a></div>");
+}
+//]]>
+</script>
+
     #%env/templates/header.template%#
     #%env/templates/submenuConfig.template%#
     #(showselection)#::
