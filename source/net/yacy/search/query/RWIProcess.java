@@ -173,6 +173,7 @@ public final class RWIProcess extends Thread {
             final boolean finalizeAddAtEnd) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
+        //Log.logInfo("RWIProcess", "added a container, size = " + index.size());
 
         this.addRunning = true;
 
