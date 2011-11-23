@@ -327,7 +327,7 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",flags=").append(flags().exportB64());
             assert (s.toString().indexOf(0) < 0);
-            s.append(",lang=").append(language());
+            s.append(",lang=").append(UTF8.String(language()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",llocal=").append(llocal());
             assert (s.toString().indexOf(0) < 0);
@@ -344,7 +344,8 @@ public class URIMetadataRow implements URIMetadata {
 
             if (this.word != null) {
                 // append also word properties
-                s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(this.word.toPropertyForm()));
+                final String wprop = this.word.toPropertyForm();
+                s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(wprop));
             }
             assert (s.toString().indexOf(0) < 0);
             return s;
