@@ -36,7 +36,7 @@ import de.anomic.server.servletProperties;
 public class compare_yacy {
 
     private static final String defaultsearchL = "YaCy";
-    private static final String defaultsearchR = "bing.com";
+    private static final String defaultsearchR = "scroogle.org";
     private static final String[] order = {defaultsearchL, "YaCy (local)", "bing.com",
         /*"google.de",*/ defaultsearchR, "scroogle.org",
         "metager.de", "metager2.de (web)", "metager2.de (international)",
@@ -73,7 +73,9 @@ public class compare_yacy {
         prop.put("display", display);
 
         String default_left = sb.getConfig("compare_yacy.left", defaultsearchL);
+        if (!searchengines.containsKey(default_left)) default_left = defaultsearchL;
         String default_right = sb.getConfig("compare_yacy.right", defaultsearchR);
+        if (!searchengines.containsKey(default_right)) default_right = defaultsearchR;
 
         if (post != null) {
             if (searchengines.get(post.get("left", default_left)) != null) {
