@@ -142,17 +142,13 @@ public final class search {
         // http://localhost:8090/yacy/search.html?query=4galTpdpDM5Qgh8DKIhGKXws&abstracts=auto (search for linux and book, generate abstract automatically)
         // http://localhost:8090/yacy/search.html?query=&abstracts=4galTpdpDM5Q (only abstracts for linux)
 
-        /*
-        if ((sb.isRobinsonMode()) &&
-             	 (!((sb.isPublicRobinson()) ||
-             	    (sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))))) {
-                 // if we are a robinson cluster, answer only if this client is known by our network definition
+        if (sb.isRobinsonMode() && !sb.isPublicRobinson()) {
+            // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("links", "");
             prop.put("linkcount", "0");
             prop.put("references", "");
         	return prop;
         }
-        n*/
 
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.remoteSearchTracker.get(client);
