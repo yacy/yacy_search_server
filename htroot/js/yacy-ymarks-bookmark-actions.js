@@ -87,6 +87,9 @@ function bm_action(com,grid) {
 			success: function() {					
 			}					
 		});		
+	} else if (com=='XBEL') {
+		window.open("/api/ymarks/get_xbel.xml","_blank");
+		return false;
 	} else {
 		alert("Sorry, the function you have requested is not yet available!");
 		return false;

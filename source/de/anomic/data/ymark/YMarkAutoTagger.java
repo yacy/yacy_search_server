@@ -159,6 +159,9 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 				}
 			}
 			final String clean =  YMarkUtil.cleanTagsString(buffer.toString());
+			if(clean.equals(YMarkEntry.BOOKMARK.TAGS.deflt())) {
+				return document.getFileExtension();
+			}
 			return clean;
 		}
 		return new String();		

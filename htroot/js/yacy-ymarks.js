@@ -100,10 +100,12 @@ $(document).ready(function() {
 	     if ($("input[name=importer]:checked").val() == 'crawls') {
 		    $("input[name='root']").setValue("/Crawl Start");
 	    	$("input[name='bmkfile']").attr("disabled","disabled");
+	    	$("input[name='root']").attr("disabled","disabled");
 	     } else if ($("input[name=importer]:checked").val() == 'bmks') {             
 		    	$("input[name='bmkfile']").attr("disabled","disabled");
 	     } else {
 	    	 $("input[name='bmkfile']").removeAttr("disabled");
+	    	 $("input[name='root']").removeAttr("disabled");
 	     	 $("input[name='root']").setValue("/Imported Bookmarks");
 	     }
 	  });
@@ -157,8 +159,8 @@ $(document).ready(function() {
 		};
 		param[param.length] = { name : 'tags', value : tags };
 		$.ajax({
-			type: "GET",
-			url: "/api/ymarks/replace_tags.xml",
+			type: "POST",
+			url: "/api/ymarks/manage_tags.xml",
 			data: param,
 			dataType: "xml",
 			cache: false,

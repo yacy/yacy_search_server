@@ -132,7 +132,11 @@ public class Document {
     }
 
     public Set<String> getContentLanguages() {
-        return this.languages;
+        return this.languages;        
+    }
+    
+    public String getFileExtension() {
+    	return this.source.getFileExtension();
     }
 
     /**

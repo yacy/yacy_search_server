@@ -77,6 +77,12 @@ public class YMarkMetadata {
 		this.document = null;
 		this.indexSegment = indexSegment;
 	}
+	
+	public YMarkMetadata(final byte[] urlHash, final Segments indexSegment) {
+		this.document = null;
+		this.indexSegment = indexSegment;
+		this.uri = this.indexSegment.segment(Segments.Process.PUBLIC).urlMetadata().load(urlHash).metadata().url();
+	}
 
 	public YMarkMetadata(final Document document) {
 		this.document = document;
@@ -95,7 +101,7 @@ public class YMarkMetadata {
 			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		}
 		return this.document;
-	}
+	}	
 
 	public EnumMap<METADATA, String> getMetadata() {
 		final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);

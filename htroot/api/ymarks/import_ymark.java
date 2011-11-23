@@ -3,18 +3,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
@@ -28,7 +25,6 @@ import de.anomic.data.ymark.YMarkAutoTagger;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkHTMLImporter;
 import de.anomic.data.ymark.YMarkJSONImporter;
-import de.anomic.data.ymark.YMarkMetadata;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.data.ymark.YMarkXBELImporter;
@@ -90,7 +86,7 @@ public class import_ymark {
                     } catch (IOException e) {
                         //TODO: display an error message
                         Log.logException(e);
-                        prop.put("result", "0");
+                        prop.put("status", "0");
                         return prop;   
                     }
                     t = new Thread(surrogateReader, "YMarks - Surrogate Reader");
@@ -98,7 +94,7 @@ public class import_ymark {
                     while ((bmk = new YMarkEntry(surrogateReader.take())) != YMarkEntry.POISON) {
                         putBookmark(sb.tables.bookmarks, bmk_user, bmk, autoTaggingQueue, autotag, empty);
                     }
-                    prop.put("result", "1");
+                    prop.put("status", "1");
                 } else {
                     InputStreamReader reader = null;
                     try {
@@ -106,7 +102,7 @@ public class import_ymark {
                     } catch (UnsupportedEncodingException e1) {
                         //TODO: display an error message
                         Log.logException(e1);
-                        prop.put("result", "0");
+                        prop.put("status", "0");
                         return prop; 
                     }
                     if(post.get("importer").equals("html") && reader != null) {
@@ -116,7 +112,7 @@ public class import_ymark {
                         while ((bmk = htmlImporter.take()) != YMarkEntry.POISON) {
                             putBookmark(sb.tables.bookmarks, bmk_user, bmk, autoTaggingQueue, autotag, empty);
                         }
-                        prop.put("result", "1");                    
+                        prop.put("status", "1");                    
                     } else if(post.get("importer").equals("xbel") && reader != null) {
                         final YMarkXBELImporter xbelImporter;   
                         try {
@@ -125,7 +121,7 @@ public class import_ymark {
                         } catch (SAXException e) {
                             //TODO: display an error message
                             Log.logException(e);
-                            prop.put("result", "0");
+                            prop.put("status", "0");
                             return prop;
                         }
                         t = new Thread(xbelImporter, "YMarks - XBEL Importer");
@@ -133,7 +129,7 @@ public class import_ymark {
                         while ((bmk = xbelImporter.take()) != YMarkEntry.POISON) {
                             putBookmark(sb.tables.bookmarks, bmk_user, bmk, autoTaggingQueue, autotag, empty);
                         }
-                        prop.put("result", "1");
+                        prop.put("status", "1");
                     } else if(post.get("importer").equals("json") && reader != null) {
                         YMarkJSONImporter jsonImporter;
                         jsonImporter = new YMarkJSONImporter(reader, queueSize, root);
@@ -142,7 +138,7 @@ public class import_ymark {
                         while ((bmk = jsonImporter.take()) != YMarkEntry.POISON) {
                         	putBookmark(sb.tables.bookmarks, bmk_user, bmk, autoTaggingQueue, autotag, empty);
                         }
-                        prop.put("result", "1");
+                        prop.put("status", "1");
                     }
                 }        		
         	} else if(post.containsKey("importer") && post.get("importer").equals("crawls")) {
@@ -154,23 +150,10 @@ public class import_ymark {
 	    				row = APIcalls.next();
 	    				if(row.get(WorkTables.TABLE_API_COL_TYPE, "").equals("crawler")) {
 	    					final String url = row.get(WorkTables.TABLE_API_COL_COMMENT, "").substring(16);
-	    					final YMarkMetadata meta = new YMarkMetadata(new DigestURI(url), sb.indexSegments);
-	    					final Document document = meta.loadDocument(sb.loader);
-	    					final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();	    					
-	    					final YMarkEntry bmk_entry = new YMarkEntry(false);	
-	    					bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), url);	    					
-	    					if(!sb.tables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(url))) {
-	    						bmk_entry.put(YMarkEntry.BOOKMARK.PUBLIC.key(), "false");
-		    					bmk_entry.put(YMarkEntry.BOOKMARK.TITLE.key(), metadata.get(YMarkMetadata.METADATA.TITLE));
-		    					bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), metadata.get(YMarkMetadata.METADATA.DESCRIPTION));		    					
-	    					}
-	    					bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), root);	
-	    					if(autotag) {
-	    						bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkAutoTagger.autoTag(document, 3, sb.tables.bookmarks.getTags(bmk_user)));
-	    					}	    					
-	    					sb.tables.bookmarks.addBookmark(bmk_user, bmk_entry, merge, true);
+	    					sb.tables.bookmarks.createBookmark(sb.loader, url, bmk_user, autotag, "crawlStart", "/Crawl Start");	    					
 	    				}
-	    			}				
+	    			}
+	    			prop.put("status", "1");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -200,6 +183,7 @@ public class import_ymark {
 							bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkAutoTagger.autoTag(bookmark.getUrl(), sb.loader, 3, sb.tables.bookmarks.getTags(bmk_user)));
 						}
 						sb.tables.bookmarks.addBookmark(bmk_user, bmk_entry, merge, true);
+			        	prop.put("status", "1");
 					} catch (MalformedURLException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
