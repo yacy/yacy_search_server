@@ -12,7 +12,7 @@
       <!--<li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>-->
       <li><a href="/compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
       <li><a href="/ConfigPortal.html" class="MenuItemLink">Search Integration</a></li>
-      <li><a href="/Help.html" class="MenuItemLink">Help</a></li>
+      <li><a href="/Help.html" class="MenuItemLink">Tutorial</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupGlobalIndex">
