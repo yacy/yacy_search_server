@@ -117,8 +117,8 @@ public final class search {
             language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
-        final int     partitions = post.getInt("partitions", 30);
-        String  profile = post.get("profile", ""); // remote profile hand-over
+        final int partitions = post.getInt("partitions", 30);
+        String profile = post.get("profile", ""); // remote profile hand-over
         if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
         //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
         Bitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new Bitfield(4, post.get("constraint", "______")) : null;
@@ -142,6 +142,7 @@ public final class search {
         // http://localhost:8090/yacy/search.html?query=4galTpdpDM5Qgh8DKIhGKXws&abstracts=auto (search for linux and book, generate abstract automatically)
         // http://localhost:8090/yacy/search.html?query=&abstracts=4galTpdpDM5Q (only abstracts for linux)
 
+        /*
         if ((sb.isRobinsonMode()) &&
              	 (!((sb.isPublicRobinson()) ||
              	    (sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))))) {
@@ -151,6 +152,7 @@ public final class search {
             prop.put("references", "");
         	return prop;
         }
+        n*/
 
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.remoteSearchTracker.get(client);
