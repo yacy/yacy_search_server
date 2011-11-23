@@ -207,16 +207,9 @@ public class yacysearch {
         }
 
         // SEARCH
-        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true) ||
-                sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
-        global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global search
-
-        final boolean clustersearch = sb.isRobinsonMode() &&
-                (sb.getConfig("cluster.mode", "").equals("privatecluster") ||
-    		sb.getConfig("cluster.mode", "").equals("publiccluster"));
-        if (clustersearch) {
-            global = true;
-        } // switches search on, but search target is limited to cluster nodes
+        final boolean clustersearch = sb.isRobinsonMode() && (sb.getConfig("cluster.mode", "").equals("privatecluster") || sb.getConfig("cluster.mode", "").equals("publiccluster"));
+        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true) || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true) || clustersearch;
+        global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global searchnn
 
         // increase search statistic counter
         if (!global) {
@@ -542,9 +535,6 @@ public class yacysearch {
                 }
             }
 
-            // prepare search properties
-            final boolean globalsearch = (global) && indexReceiveGranted;
-
             // do the search
             final HandleSet queryHashes = Word.words2hashesHandles(query[0]);
             final Pattern snippetPattern = QueryParams.stringSearchPattern(originalquerystring);
@@ -584,8 +574,8 @@ public class yacysearch {
                     itemsPerPage,
                     offset,
                     urlmask,
-                    (clustersearch && globalsearch) ? QueryParams.Searchdom.CLUSTER :
-                    ((globalsearch) ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
+                    clustersearch && global ? QueryParams.Searchdom.CLUSTER :
+                    (global && indexReceiveGranted ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
                     20,
                     constraint,
                     true,
@@ -715,7 +705,7 @@ public class yacysearch {
             prop.put("num-results_itemscount", Formatter.number(0, true));
             prop.put("num-results_itemsPerPage", itemsPerPage);
             prop.put("num-results_totalcount", Formatter.number(indexcount, true));
-            prop.put("num-results_globalresults", (globalsearch) ? "1" : "0");
+            prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch) ? "1" : "0");
             prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.getRankingResult().getLocalIndexCount(), true));
             prop.put("num-results_globalresults_localMissCount", Formatter.number(theSearch.getRankingResult().getMissCount(), true));
             prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));

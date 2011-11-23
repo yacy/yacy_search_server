@@ -115,7 +115,7 @@ public final class SearchEvent {
         this.IAneardhthash = null;
         this.localSearchThread = null;
         this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
-        final boolean remote = (this.query.domType == QueryParams.Searchdom.GLOBAL || this.query.domType == QueryParams.Searchdom.CLUSTER) && peers.sizeConnected() > 0 && peers.mySeed().getFlagAcceptRemoteIndex();
+        final boolean remote = peers.sizeConnected() > 0 && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && peers.mySeed().getFlagAcceptRemoteIndex()));
         final long start = System.currentTimeMillis();
         if (remote) {
         	// initialize a ranking process that is the target for data

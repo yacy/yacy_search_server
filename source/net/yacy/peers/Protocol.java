@@ -651,11 +651,13 @@ public final class Protocol {
                 final boolean global,
                 final int partitions,
                 final String hostname,
-                final String hostaddress,
+                String hostaddress,
                 final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
                 final RankingProfile rankingProfile,
                 final Bitfield constraint) throws IOException {
             // send a search request to peer with remote Hash
+
+            //if (hostaddress.equals(mySeed.getClusterAddress())) hostaddress = "127.0.0.1:" + mySeed.getPort(); // for debugging
 
             // INPUT:
             // iam        : complete seed of the requesting peer
