@@ -85,7 +85,16 @@ public final class search {
         sb.remoteSearchLastAccess = System.currentTimeMillis();
 
         final serverObjects prop = new serverObjects();
-        if ((post == null) || (env == null)) return prop;
+        // set nice default values for error cases
+        prop.put("searchtime", "0");
+        prop.put("references", "");
+        prop.put("joincount", "0");
+        prop.put("linkcount", "0");
+        prop.put("links", "");
+        prop.put("indexcount", "");
+        prop.put("indexabstract", "");
+
+        if (post == null || env == null) return prop;
         if (!Protocol.authentifyRequest(post, env)) return prop;
         final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
 
@@ -101,7 +110,7 @@ public final class search {
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
         final int     count  = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 100), post.getInt("count", 10)); // maximum number of wanted results
-        final long    maxtime = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000), post.getLong("time", 3000)); // maximum number of wanted results
+        final long    maxtime = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000), post.getLong("time", 3000)); // maximum waiting time
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
@@ -117,8 +126,8 @@ public final class search {
             language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
-        final int     partitions = post.getInt("partitions", 30);
-        String  profile = post.get("profile", ""); // remote profile hand-over
+        final int partitions = post.getInt("partitions", 30);
+        String profile = post.get("profile", ""); // remote profile hand-over
         if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
         //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
         Bitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new Bitfield(4, post.get("constraint", "______")) : null;
@@ -142,13 +151,8 @@ public final class search {
         // http://localhost:8090/yacy/search.html?query=4galTpdpDM5Qgh8DKIhGKXws&abstracts=auto (search for linux and book, generate abstract automatically)
         // http://localhost:8090/yacy/search.html?query=&abstracts=4galTpdpDM5Q (only abstracts for linux)
 
-        if ((sb.isRobinsonMode()) &&
-             	 (!((sb.isPublicRobinson()) ||
-             	    (sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))))) {
-                 // if we are a robinson cluster, answer only if this client is known by our network definition
-        	prop.put("links", "");
-            prop.put("linkcount", "0");
-            prop.put("references", "");
+        if (sb.isRobinsonMode() && !sb.isPublicRobinson()) {
+            // if we are a robinson cluster, answer only if this client is known by our network definition
         	return prop;
         }
 
@@ -160,19 +164,19 @@ public final class search {
             if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) {
                 block = true;
             }
+        }
+        if (!block) synchronized (trackerHandles) {
             if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) {
                 block = true;
             }
+        }
+        if (!block) synchronized (trackerHandles) {
             if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) {
                 block = true;
             }
         }
-        if (block && Domains.isLocal(client, null)) block = false;
+        if (block && Domains.isLocal(client, null)) block = false; // check isLocal here to prevent dns lookup for client
         if (block) {
-            prop.put("links", "");
-            prop.put("linkcount", "0");
-            prop.put("references", "");
-            prop.put("searchtime", "0");
             return prop;
         }
 

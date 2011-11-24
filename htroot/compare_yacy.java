@@ -36,9 +36,9 @@ import de.anomic.server.servletProperties;
 public class compare_yacy {
 
     private static final String defaultsearchL = "YaCy";
-    private static final String defaultsearchR = "google.com";
+    private static final String defaultsearchR = "scroogle.org";
     private static final String[] order = {defaultsearchL, "YaCy (local)", "bing.com",
-        "google.de", defaultsearchR, "scroogle.org",
+        /*"google.de",*/ defaultsearchR, "scroogle.org",
         "metager.de", "metager2.de (web)", "metager2.de (international)",
         "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch",
         "Sciencenet", "dbpedia", "wolfram alpha", "OAIster@OCLC", "oai.yacy.net"};
@@ -47,8 +47,8 @@ public class compare_yacy {
         searchengines.put(defaultsearchL, "yacysearch.html?display=2&resource=global&query=");
         searchengines.put("YaCy (local)", "yacysearch.html?display=2&resource=local&query=");
         searchengines.put("bing.com", "http://www.bing.com/search?q=");
-        searchengines.put("google.de", "http://www.google.de/#fp=1&q=");
-        searchengines.put("google.com", "http://www.google.com/#fp=1&q=");
+        //searchengines.put("google.de", "http://www.google.de/#fp=1&q=");
+        //searchengines.put("google.com", "http://www.google.com/#fp=1&q=");
         searchengines.put("scroogle.org", "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=");
         searchengines.put("metager.de", "http://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
         searchengines.put("metager2.de (web)", "http://www.metager2.de/search.php?ses=web&q=");
@@ -73,7 +73,9 @@ public class compare_yacy {
         prop.put("display", display);
 
         String default_left = sb.getConfig("compare_yacy.left", defaultsearchL);
+        if (!searchengines.containsKey(default_left)) default_left = defaultsearchL;
         String default_right = sb.getConfig("compare_yacy.right", defaultsearchR);
+        if (!searchengines.containsKey(default_right)) default_right = defaultsearchR;
 
         if (post != null) {
             if (searchengines.get(post.get("left", default_left)) != null) {
