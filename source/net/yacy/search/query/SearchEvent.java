@@ -72,8 +72,8 @@ public final class SearchEvent {
     private QueryParams query;
     private final SeedDB peers;
     private final WorkTables workTables;
-    private RWIProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
-    private SnippetProcess resultFetcher;
+    private final RWIProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
+    private final SnippetProcess resultFetcher;
 
     private final SecondarySearchSuperviser secondarySearchSuperviser;
 
@@ -117,14 +117,15 @@ public final class SearchEvent {
         this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
         final boolean remote = peers.sizeConnected() > 0 && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && peers.mySeed().getFlagAcceptRemoteIndex()));
         final long start = System.currentTimeMillis();
+
+        // initialize a ranking process that is the target for data
+        // that is generated concurrently from local and global search threads
+        this.rankingProcess = new RWIProcess(this.query, this.order, max_results_preparation);
+
+        // start a local search concurrently
+        this.rankingProcess.start();
+
         if (remote) {
-        	// initialize a ranking process that is the target for data
-        	// that is generated concurrently from local and global search threads
-            this.rankingProcess = new RWIProcess(this.query, this.order, max_results_preparation);
-
-            // start a local search concurrently
-            this.rankingProcess.start();
-
             // start global searches
             final long timer = System.currentTimeMillis();
             this.primarySearchThreads = (this.query.queryHashes.isEmpty()) ? null : RemoteSearch.primaryRemoteSearches(
@@ -159,15 +160,13 @@ public final class SearchEvent {
                 // no search since query is empty, user might have entered no data or filters have removed all search words
                 Log.logFine("SEARCH_EVENT", "NO SEARCH STARTED DUE TO EMPTY SEARCH REQUEST.");
             }
-
-            // start worker threads to fetch urls and snippets
-            this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, this.query, this.peers, this.workTables, 3000, deleteIfSnippetFail);
         } else {
-            // do a local search
-            this.rankingProcess = new RWIProcess(this.query, this.order, max_results_preparation);
-
             if (generateAbstracts) {
-                this.rankingProcess.run(); // this is not started concurrently here on purpose!
+                // we need the results now
+                try {
+                    this.rankingProcess.join();
+                } catch (final Throwable e) {
+                }
                 // compute index abstracts
                 final long timer = System.currentTimeMillis();
                 int maxcount = -1;
@@ -193,20 +192,19 @@ public final class SearchEvent {
                 }
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), Type.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             } else {
-                this.rankingProcess.start(); // start concurrently
-                // but give process time to accumulate a certain amount of data
+                // give process time to accumulate a certain amount of data
                 // before a reading process wants to get results from it
-                for (int i = 0; i < 10; i++) {
-                    if (!this.rankingProcess.isAlive()) break;
-                    try {Thread.sleep(10);} catch (final InterruptedException e) {}
+                try {
+                    this.rankingProcess.join(100);
+                } catch (final Throwable e) {
                 }
                 // this will reduce the maximum waiting time until results are available to 100 milliseconds
                 // while we always get a good set of ranked data
             }
-
-            // start worker threads to fetch urls and snippets
-            this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, this.query, this.peers, this.workTables, 500, deleteIfSnippetFail);
         }
+
+        // start worker threads to fetch urls and snippets
+        this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, this.query, this.peers, this.workTables, 5000, deleteIfSnippetFail);
 
         // clean up events
         SearchEventCache.cleanupEvents(false);

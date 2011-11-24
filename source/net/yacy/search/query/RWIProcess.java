@@ -153,11 +153,9 @@ public final class RWIProcess extends Thread {
             this.localSearchInclusion = search.inclusion();
             final ReferenceContainer<WordReference> index = search.joined();
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.JOIN, this.query.queryString, index.size(), System.currentTimeMillis() - timer), false);
-            if (index.isEmpty()) {
-                return;
+            if (!index.isEmpty()) {
+                add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true);
             }
-
-            add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true);
         } catch (final Exception e) {
             Log.logException(e);
         } finally {
@@ -299,7 +297,7 @@ public final class RWIProcess extends Thread {
     }
 
     public boolean feedingIsFinished() {
-    	return this.feeders.get() == 0;
+    	return this.feeders.get() <= 0;
     }
 
     private boolean testFlags(final WordReference ientry) {
