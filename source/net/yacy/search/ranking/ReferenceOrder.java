@@ -219,7 +219,7 @@ public class ReferenceOrder {
            + ((this.ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.urlhash()) << 4)) << this.ranking.coeff_ybr) : 0)
            + ((this.max.urlcomps()      == this.min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - this.min.urlcomps()     ) << 8) / (this.max.urlcomps()     - this.min.urlcomps())     )) << this.ranking.coeff_urlcomps)
            + ((this.max.urllength()     == this.min.urllength()  )   ? 0 : (256 - (((t.urllength()    - this.min.urllength()    ) << 8) / (this.max.urllength()    - this.min.urllength())    )) << this.ranking.coeff_urllength)
-                                        + ((maxmaxpos == minminpos) ? 0 : (256 - (((t.minposition() - minminpos) << 8) / (maxmaxpos - minminpos))) << this.ranking.coeff_posintext)
+           + ((maxmaxpos == minminpos)                               ? 0 : (256 - (((t.minposition() - minminpos) << 8) / (maxmaxpos - minminpos))) << this.ranking.coeff_posintext)
            + ((this.max.posofphrase()   == this.min.posofphrase())   ? 0 : (256 - (((t.posofphrase()  - this.min.posofphrase()  ) << 8) / (this.max.posofphrase()  - this.min.posofphrase())  )) << this.ranking.coeff_posofphrase)
            + ((this.max.posinphrase()   == this.min.posinphrase())   ? 0 : (256 - (((t.posinphrase()  - this.min.posinphrase()  ) << 8) / (this.max.posinphrase()  - this.min.posinphrase())  )) << this.ranking.coeff_posinphrase)
            + ((this.max.distance()      == this.min.distance()   )   ? 0 : (256 - (((t.distance()     - this.min.distance()     ) << 8) / (this.max.distance()     - this.min.distance())     )) << this.ranking.coeff_worddistance)
