@@ -724,9 +724,9 @@ search.options = true
 # search domains. If set to false then that search is not available
 search.text = true
 search.image = true
-search.audio = true
-search.video = true
-search.app = true
+search.audio = false
+search.video = false
+search.app = false
 
 # number of search results displayed by default
 search.items = 10

@@ -74,11 +74,19 @@ public class ConfigPortal {
                 sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu", true));
                 sb.setConfig("publicSearchpage", post.getBoolean("publicSearchpage", true));
                 sb.setConfig("search.options", post.getBoolean("search.options", false));
+
+                sb.setConfig("search.text", post.getBoolean("search.text", false));
+                sb.setConfig("search.image", post.getBoolean("search.image", false));
+                sb.setConfig("search.audio", post.getBoolean("search.audio", false));
+                sb.setConfig("search.video", post.getBoolean("search.video", false));
+                sb.setConfig("search.app", post.getBoolean("search.app", false));
+
                 sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date", false));
                 sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size", false));
                 sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false));
                 sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
+
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete", false));
                 // construct navigation String
@@ -103,6 +111,11 @@ public class ConfigPortal {
                 sb.setConfig("publicSearchpage", true);
                 sb.setConfig("search.navigation", "hosts,authors,namespace,topics");
                 sb.setConfig("search.options", true);
+                sb.setConfig("search.text", true);
+                sb.setConfig("search.image", true);
+                sb.setConfig("search.audio", false);
+                sb.setConfig("search.video", false);
+                sb.setConfig("search.app", false);
                 sb.setConfig("search.result.show.date", true);
                 sb.setConfig("search.result.show.size", true);
                 sb.setConfig("search.result.show.metadata", true);
@@ -121,6 +134,12 @@ public class ConfigPortal {
         prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
         prop.put("publicSearchpage", sb.getConfigBool("publicSearchpage", false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
+
+        prop.put("search.text", sb.getConfigBool("search.text", false) ? 1 : 0);
+        prop.put("search.image", sb.getConfigBool("search.image", false) ? 1 : 0);
+        prop.put("search.audio", sb.getConfigBool("search.audio", false) ? 1 : 0);
+        prop.put("search.video", sb.getConfigBool("search.video", false) ? 1 : 0);
+        prop.put("search.app", sb.getConfigBool("search.app", false) ? 1 : 0);
 
         prop.put("search.result.show.date", sb.getConfigBool("search.result.show.date", false) ? 1 : 0);
         prop.put("search.result.show.size", sb.getConfigBool("search.result.show.size", false) ? 1 : 0);
