@@ -648,7 +648,7 @@ javastart_priority=10
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
 # ram cache during indexing. If you want to increase indexing speed, increase this
 # value i.e. up to one million, but increase also the memory limit to a minimum of 2GB
-wordCacheMaxCount = 100000
+wordCacheMaxCount = 50000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
@@ -762,7 +762,7 @@ search.navigation=hosts,authors,namespace,topics,filetype,protocol
 #            consider content nevertheless as available and show result without snippet
 # false:     no link verification and not snippet generation:
              all search results are valid without verification
-search.verify = cacheonly
+search.verify = iffresh
 
 # in case that a link verification fails then the corresponding index reference can be
 # deleted to clean up the index. If this property is set then failed index verification in

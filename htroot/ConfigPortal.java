@@ -79,7 +79,7 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false));
                 sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
-                sb.setConfig("search.verify", post.get("search.verify", "ifexist"));
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete", false));
                 // construct navigation String
                 String nav = "";
@@ -108,7 +108,7 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.metadata", true);
                 sb.setConfig("search.result.show.parser", true);
                 sb.setConfig("search.result.show.pictures", true);
-                sb.setConfig("search.verify", "iffresh");
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh");
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
             }
         }
