@@ -37,6 +37,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
@@ -200,7 +201,7 @@ public class YMarkTables {
     	final Pattern p = Pattern.compile(patternBuilder.toString());
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), p);
     }
-    
+
     public Iterator<Tables.Row> getBookmarksByTag(final String bmk_user, final String[] tagArray) throws IOException {
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final StringBuilder patternBuilder = new StringBuilder(BUFFER_LENGTH);
@@ -213,15 +214,15 @@ public class YMarkTables {
     		patternBuilder.append(p3);
         	patternBuilder.append('|');
 		}
-    	patternBuilder.deleteCharAt(patternBuilder.length()-1);    	
+    	patternBuilder.deleteCharAt(patternBuilder.length()-1);
     	patternBuilder.append(p6);
-    	
+
     	patternBuilder.append(tagArray.length);
     	patternBuilder.append('}');
     	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
     }
-      
+
     public List<Row> orderBookmarksBy(final Iterator<Row> rowIterator, final String sortname, final String sortorder) {
         final List<Row> sortList = new ArrayList<Row>();
         Row row;
@@ -230,7 +231,7 @@ public class YMarkTables {
             if(row != null)
                 sortList.add(row);
         }
-        Collections.sort(sortList, new TablesRowComparator(sortname, sortorder)); 
+        Collections.sort(sortList, new TablesRowComparator(sortname, sortorder));
         return sortList;
     }
 
@@ -243,7 +244,7 @@ public class YMarkTables {
         	addBookmark(bmk_user, bmk, merge, true);
     	}
     }
-    
+
     public void replaceTags(final Iterator<Row> rowIterator, final String bmk_user, final String tagString, final String replaceString) throws IOException, RowSpaceExceededException {
         final String[] tagArray = YMarkUtil.cleanTagsString(tagString).split(YMarkUtil.TAGS_SEPARATOR);
         final StringBuilder tagStringBuilder = new StringBuilder(BUFFER_LENGTH);
@@ -251,41 +252,41 @@ public class YMarkTables {
         while (rowIterator.hasNext()) {
             row = rowIterator.next();
             if(row != null) {
-            	for(int i=0; i<tagArray.length; i++) {
+            	for (final String element : tagArray) {
             		tagStringBuilder.setLength(0);
             		tagStringBuilder.append(row.get(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.deflt()));
-            		int start = tagStringBuilder.indexOf(tagArray[i]);
+            		int start = tagStringBuilder.indexOf(element);
             		int end = start;
             		while (end<=tagStringBuilder.length() && end != -1) {
           				if (end == (tagStringBuilder.length())) {
-          					if (end-start == tagArray[i].length()) {
+          					if (end-start == element.length()) {
               					if (start > 0)
-                					start--; // also replace the tag separator 
+                					start--; // also replace the tag separator
         						tagStringBuilder.replace(start, end, YMarkUtil.EMPTY_STRING);
           					}
             				break;
-            			} else if (tagStringBuilder.charAt(end) == ',') {          					
-            				if (end-start == tagArray[i].length()) {
+            			} else if (tagStringBuilder.charAt(end) == ',') {
+            				if (end-start == element.length()) {
               					if (start > 0)
-                					start--; // also replace the tag separator 
+                					start--; // also replace the tag separator
         						tagStringBuilder.replace(start, end, YMarkUtil.EMPTY_STRING);
         					} else {
-        						start = tagStringBuilder.indexOf(tagArray[i], end+1);
+        						start = tagStringBuilder.indexOf(element, end+1);
         						end = start;
         					}
             			} else if (tagStringBuilder.charAt(end) == ' ') {
-            				start = tagStringBuilder.indexOf(tagArray[i], end);
+            				start = tagStringBuilder.indexOf(element, end);
             				end = start;
             			} else {
             				end++;
             			}
-            		}            		
+            		}
             		tagStringBuilder.append(YMarkUtil.TAGS_SEPARATOR);
             		tagStringBuilder.append(replaceString);
             		row.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(tagStringBuilder.toString()));
             		this.worktables.update(TABLES.BOOKMARKS.tablename(bmk_user), row);
             	}
-            }                
+            }
         }
     }
 
@@ -306,26 +307,27 @@ public class YMarkTables {
     	bmk.put(YMarkEntry.BOOKMARK.DATE_VISITED.key(), (new YMarkDate()).toString());
     	addBookmark(bmk_user, bmk, true, true);
     }
-    
+
     public void createBookmark(final LoaderDispatcher loader, final String url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure, RowSpaceExceededException {
     	createBookmark(loader, new DigestURI(url), bmk_user, autotag, tagsString, foldersString);
     }
-    
+
     public void createBookmark(final LoaderDispatcher loader, final DigestURI url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure, RowSpaceExceededException {
-        
-    	final YMarkEntry bmk_entry = new YMarkEntry(false);                            
+
+    	final YMarkEntry bmk_entry = new YMarkEntry(false);
         final YMarkMetadata meta = new YMarkMetadata(url);
 		final Document document = meta.loadDocument(loader);
-		final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();	    					
-		bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), url.toNormalform(true, false));	    					
-		if(!this.worktables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(url.toNormalform(true, false)))) {
+		final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();
+		final String urls = url.toNormalform(true, false);
+		bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), urls);
+		if(!this.worktables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(urls))) {
 			bmk_entry.put(YMarkEntry.BOOKMARK.PUBLIC.key(), "false");
 			bmk_entry.put(YMarkEntry.BOOKMARK.TITLE.key(), metadata.get(YMarkMetadata.METADATA.TITLE));
-			bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), metadata.get(YMarkMetadata.METADATA.DESCRIPTION));		    					
+			bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), metadata.get(YMarkMetadata.METADATA.DESCRIPTION));
 		}
 		bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(foldersString));
 		final StringBuilder strb = new StringBuilder();
-		if(autotag) {			
+		if(autotag) {
 			final String autotags = YMarkAutoTagger.autoTag(document, 3, this.worktables.bookmarks.getTags(bmk_user));
 			strb.append(autotags);
 		}
@@ -333,10 +335,19 @@ public class YMarkTables {
 			strb.append(YMarkUtil.TAGS_SEPARATOR);
 			strb.append(tagsString);
 		}
-		bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.cleanTagsString(strb.toString()));		
+		bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.cleanTagsString(strb.toString()));
 		this.worktables.bookmarks.addBookmark(bmk_user, bmk_entry, true, true);
     }
-    
+
+    public boolean hasBookmark(final String bmk_user, final String urlhash) {
+        final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
+        try {
+            return this.worktables.has(bmk_table, ASCII.getBytes(urlhash));
+        } catch (final IOException e) {
+            return false;
+        }
+    }
+
 	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean mergeTags, final boolean mergeFolders) throws IOException, RowSpaceExceededException {
 		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final String date = String.valueOf(System.currentTimeMillis());

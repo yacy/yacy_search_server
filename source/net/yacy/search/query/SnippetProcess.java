@@ -36,6 +36,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.cora.ranking.WeakPriorityBlockingQueue;
+import net.yacy.cora.ranking.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.ranking.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
@@ -531,5 +532,24 @@ public class SnippetProcess {
             }
         }
         // finished, no more actions possible here
+    }
+
+    /**
+     * delete a specific entry from the search results
+     * this is used if the user clicks on a '-' sign beside the search result
+     * @param urlhash
+     * @return true if an entry was deleted, false otherwise
+     */
+    public boolean delete(final String urlhash) {
+        final Iterator<Element<ResultEntry>> i = this.result.iterator();
+        Element<ResultEntry> entry;
+        while (i.hasNext()) {
+            entry = i.next();
+            if (urlhash.equals(ASCII.String(entry.getElement().url().hash()))) {
+                i.remove();
+                return true;
+            }
+        }
+        return false;
     }
 }

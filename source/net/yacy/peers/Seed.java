@@ -434,6 +434,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
      * @return the hexadecimal representation of the given base64 hash
      */
     public static String b64Hash2hexHash(final String b64Hash) {
+        if (b64Hash.length() > 12) return "";
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
         return Digest.encodeHex(Base64Order.enhancedCoder.decode(b64Hash));
     }

@@ -65,6 +65,13 @@ public class SearchEventCache {
         if (oldEvent == null) cacheInsert++;
     }
 
+    public static boolean delete(final String urlhash) {
+        for (final SearchEvent event: lastEvents.values()) {
+            if (event.result().delete(urlhash)) return true;
+        }
+        return false;
+    }
+
     public static void cleanupEvents(boolean all) {
         // remove old events in the event cache
         if (MemoryControl.shortStatus()) all = true;
