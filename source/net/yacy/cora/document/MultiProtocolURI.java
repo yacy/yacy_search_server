@@ -487,9 +487,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                     || ch == '.' || ch == '!'
                     || ch == '~' || ch == '*'
                     || ch == '\'' || ch == '('
-                    || ch == ')' || ch == ';'
-                    || ch == ',' || ch == '='
-                    || ch == '+') {
+                    || ch == ')' || ch == ';') {
                 sbuf.append((char)ch);
             } else if (ch == '/') {                 // reserved, but may appear in post part where it should not be replaced
                 sbuf.append((char)ch);

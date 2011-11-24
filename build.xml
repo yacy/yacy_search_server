@@ -57,7 +57,6 @@
   <property name="release_windows" location="${release}/WINDOWS"/>
   <property name="release_mac" location="${release}/MAC"/>
   <property name="svnEntriesFile" location=".svn/entries"/>
-  <property name="git" location=".git"/>
   <property name="defaults" location="defaults"/>
   
   <!-- defining all needed directory names for packing search widget-->
@@ -69,47 +68,6 @@
   <property name="DESTDIR" value="DESTDIR"/>
   <property name="PKGMANAGER" value="false"/>
   <property name="RESTARTCMD" value="/etc/init.d/yacy restart"/>
-
-  <!-- determining if the .git directory exists -->
-  <condition property="isGit">
-    <available file="${git}" />
-  </condition>
-
-  <target name="buildGitRevTask">
-    <delete file="${libbuild}/GitRevTask.jar" failonerror="false" />
-    <javac srcdir="${libbuild}/GitRevTask">
-    	<classpath>
-    		<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
-    	</classpath>
-    </javac>
-    <jar destfile="${libbuild}/GitRevTask.jar" basedir="${libbuild}/GitRevTask">
-      <manifest>
-        <attribute name="Main-Class" value="GitRevTask"/>
-      </manifest>
-    </jar>
-  </target>
-
-  <target name="determineGitRevision" if="isGit" depends="buildGitRevTask">
-  	<taskdef resource="GitRevTask.properties">
-		<classpath>
-			<pathelement location="${libbuild}/GitRevTask.jar" />
-			<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
-		</classpath>
-  	</taskdef>
-  	<gitRev repoPath="${yacyroot}" property="baseRevisionNr" />
-  	
-  	<!-- replacing the old with the new revision number -->
-    <copy file="build.properties" tofile="build.properties.new">
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^releaseNr=(.*)"
-                        replace="releaseNr=$Revision: ${baseRevisionNr} $" />
-        </tokenfilter>
-      </filterchain>
-    </copy>
-    <delete file="build.properties"/>
-    <move file="build.properties.new" tofile="build.properties"/>
-  </target>
 
   <!-- determining if the .svn directory exists -->
   <condition property="svnEntriesFileExists">
@@ -153,7 +111,7 @@
   </target>
 
   <!-- reading the build properties from file -->
-  <target name="readBuildProperties" depends="determineGitRevision,determineRevisionNr">
+  <target name="readBuildProperties" depends="determineRevisionNr">
     <!-- loading some property values from file -->
     <loadproperties srcFile="build.properties">
       <filterchain>
@@ -352,8 +310,6 @@
   	<!-- copy Unix wrappers -->
     <copy todir="${release_main}">
       <fileset dir=".">
-		<include name="yacy.blue"/>
-		<include name="cleanUp.sh"/>
         <include name="startYACY.sh"/>
         <include name="stopYACY.sh"/>
         <include name="killYACY.sh"/>
@@ -552,14 +508,12 @@
     <delete file="${lib}/yacycore.jar" failonerror="false"/>
     <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
     <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/>
-    <delete file="${libbuild}/GitRevTask.jar" failonerror="false"/>
     <delete failonerror="false">
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
       <fileset dir="${htroot}" includes="**/*.class" />
       <fileset dir="test/" includes="**/*.class" />
       <fileset dir="${libbuild}/svnRevNr" includes="**/*.class" />
-      <fileset dir="${libbuild}/GitRevTask" includes="**/*.class" />
       <fileset dir="." includes="TEST-*" />
     </delete>
   </target>

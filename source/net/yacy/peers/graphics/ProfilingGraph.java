@@ -121,8 +121,8 @@ public class ProfilingGraph {
                         bytes = ((Long) event.payload).longValue();
                         x1 = (int) (time/1000);
                         y1 = (int) (bytes / 1024 / 1024);
-                        // chart.setColor("AAAAFF");
-                        // chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
+                        chart.setColor("AAAAFF");
+                        chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
                         chart.setColor("0000FF");
                         if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x0, y0, x1, y1);
                         x0 = x1; y0 = y1;

@@ -38,7 +38,7 @@ handlers = java.util.logging.FileHandler,\
 
 # Properties for the FileHandler
 java.util.logging.FileHandler.limit = 1048576
-java.util.logging.FileHandler.count = 9
+java.util.logging.FileHandler.count = 20
 java.util.logging.FileHandler.pattern = DATA/LOG/yacy%u%g.log
 java.util.logging.FileHandler.level = ALL
 java.util.logging.FileHandler.formatter=net.yacy.kelondro.logging.SimpleLogFormatter
@@ -60,7 +60,7 @@ net.yacy.kelondro.logging.ConsoleOutErrHandler.formatter=net.yacy.kelondro.loggi
 # Properties for the proxy access logger
 de.anomic.http.server.HTTPDProxyHandler.logging.enabled = TRUE
 de.anomic.http.server.HTTPDProxyHandler.logging.FileHandler.limit = 1048576
-de.anomic.http.server.HTTPDProxyHandler.logging.FileHandler.count = 5
+de.anomic.http.server.HTTPDProxyHandler.logging.FileHandler.count = 20
 de.anomic.http.server.HTTPDProxyHandler.logging.FileHandler.pattern = DATA/LOG/proxyAccess%u%g.log
 
 # Properties for the LogalizerHandler

@@ -37,9 +37,6 @@ public class MemoryControl {
     	if (strategy == null || strategy.hasError()) {
     		if (!usingStandardStrategy) {
     			strategy = new GenerationMemoryStrategy();
-//    			if (strategy.hasError()) { // perhaps we do have a G1
-//    				strategy = new G1MemoryStrategy();
-//    			}
     	    	// fall back if error detected
     	    	if (strategy.hasError()) {
     	    		usingStandardStrategy = true;
@@ -190,20 +187,17 @@ public class MemoryControl {
         System.out.println("computed max = " + (maxMemory() / mb) + " mb");
         System.out.println("using " + getStrategyName());
         final byte[][] x = new byte[100000][];
-        byte[] y;
+        
         for (int i = 0; i < 100000; i++) {
-        	if (i== 10) System.gc();
         	if (request(mb, force))
         	{
-	            y = new byte[mb];
-        		x[i] = y;
+	            x[i] = new byte[mb];
 	            System.out.println("used = " + i + " / " + (used() /mb) +
 	                    ", total = " + (total() / mb) +
 	                    ", free = " + (free() / mb) +
 	                    ", max = " + (maxMemory() / mb) +
 	                    ", avail = " + (available() / mb) +
-	                    (usingStandardStrategy? ", averageGC = " + ((StandardMemoryStrategy)getStrategy()).getAverageGCFree() :
-	                    	", proper = " + properState()));
+	                    (usingStandardStrategy? ", averageGC = " + ((StandardMemoryStrategy)getStrategy()).getAverageGCFree() : ""));
         	} else System.exit(0);
         }
 
