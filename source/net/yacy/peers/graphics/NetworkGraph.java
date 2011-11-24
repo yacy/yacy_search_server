@@ -319,7 +319,7 @@ public class NetworkGraph {
         PrintTool.arcPrint(img, centerX, centerY, innerradius + linelength, angle, name);
 
         // draw corona around dot for crawling activity
-        final int ppmx = seed.getPPM() / 30;
+        final int ppmx = seed.getPPM() / 40;
         if (coronaangle >= 0 && ppmx > 0) {
             drawCorona(img, centerX, centerY, innerradius, angle, dotsize, ppmx, coronaangle, true, false, 24, 24, 24); // color = 0..63
         }
@@ -327,7 +327,7 @@ public class NetworkGraph {
         // draw corona around dot for query activity
         final int qphx = ((int) (seed.getQPM() * 4.0));
         if (coronaangle >= 0 && qphx > 0) {
-            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, qphx, coronaangle, false, true, 8, 62, 8); // color = 0..63
+            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, qphx, coronaangle, false, true, 20, 63, 20); // color = 0..63
         }
     }
 
