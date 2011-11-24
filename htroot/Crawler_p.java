@@ -174,7 +174,13 @@ public class Crawler_p {
                     } else if (crawlingStartURL.isFTP()) {
                         newcrawlingMustMatch = "ftp://" + crawlingStartURL.getHost();
                     } else {
-                        newcrawlingMustMatch = "https?://" + crawlingStartURL.getHost();
+                        final String host = crawlingStartURL.getHost();
+                        if (host.startsWith("www.")) {
+                            newcrawlingMustMatch = "https?://" + crawlingStartURL.getHost();
+                        } else {
+                            // if the www is not given we accept that also
+                            newcrawlingMustMatch = "https?://(www.)?" + crawlingStartURL.getHost();
+                        }
                     }
                     if (subPath) newcrawlingMustMatch += crawlingStartURL.getPath();
                     newcrawlingMustMatch += ".*";
@@ -374,7 +380,7 @@ public class Crawler_p {
                             String tagStr = tags.toString();
                             if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
 
-                            // we will create always a bookmark to use this to track crawled hosts                            
+                            // we will create always a bookmark to use this to track crawled hosts
                             final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
                             if (bookmark != null) {
                                 bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
@@ -384,11 +390,11 @@ public class Crawler_p {
                                 bookmark.setTags(tags, true);
                                 sb.bookmarksDB.saveBookmark(bookmark);
                             }
-                            
+
                             // do the same for ymarks
                             // TODO: could a non admin user add crawls?
                             sb.tables.bookmarks.createBookmark(sb.loader, url, YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
-                            
+
                             // liftoff!
                             prop.put("info", "8");//start msg
                             prop.putHTML("info_crawlingURL", post.get("crawlingURL"));
