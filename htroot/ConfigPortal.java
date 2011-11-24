@@ -117,10 +117,10 @@ public class ConfigPortal {
                 sb.setConfig("search.video", false);
                 sb.setConfig("search.app", false);
                 sb.setConfig("search.result.show.date", true);
-                sb.setConfig("search.result.show.size", true);
+                sb.setConfig("search.result.show.size", false);
                 sb.setConfig("search.result.show.metadata", true);
                 sb.setConfig("search.result.show.parser", true);
-                sb.setConfig("search.result.show.pictures", true);
+                sb.setConfig("search.result.show.pictures", false);
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh");
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
             }

@@ -741,8 +741,8 @@ search.target = _self
 # these information pieces may be switched on or off
 search.result.show.date = true
 search.result.show.size = false
-search.result.show.metadata = false
-search.result.show.parser = false
+search.result.show.metadata = true
+search.result.show.parser = true
 search.result.show.pictures = false
 
 # search navigators: comma-separated list of default values for search navigation.
