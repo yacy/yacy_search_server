@@ -63,6 +63,21 @@ public final class QueryParams {
 
     public enum Searchdom {
         LOCAL, CLUSTER, GLOBAL;
+
+        public static Searchdom contentdomParser(final String dom) {
+            if ("local".equals(dom)) return LOCAL;
+            else if ("global".equals(dom)) return GLOBAL;
+            else if ("cluster".equals(dom)) return CLUSTER;
+            return LOCAL;
+        }
+
+        @Override
+        public String toString() {
+            if (this == LOCAL) return "local";
+            else if (this == CLUSTER) return "global"; // yes thats right: global, not cluster because a cluster search is a global search
+            else if (this == GLOBAL) return "global";
+            return "local";
+        }
     }
 
     private static final String ampersand = "&amp;";

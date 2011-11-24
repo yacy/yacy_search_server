@@ -75,6 +75,7 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.ContentDomain;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkTables;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -483,7 +484,7 @@ public class yacysearch {
             // if a minus-button was hit, remove a special reference first
             if (post != null && post.containsKey("deleteref")) {
                 try {
-                    if (!sb.verifyAuthentication(header, true)) {
+                    if (!sb.verifyAuthentication(header, false)) {
                         prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                         return prop;
                     }
@@ -500,6 +501,9 @@ public class yacysearch {
                         map.put("refid", "");
                         sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
                     }
+
+                    // delete the search history since this still shows the entry
+                    SearchEventCache.cleanupEvents(true);
                 } catch (final IOException e) {
                     Log.logException(e);
                 }
@@ -507,7 +511,7 @@ public class yacysearch {
 
             // if a plus-button was hit, create new voting message
             if (post != null && post.containsKey("recommendref")) {
-                if (!sb.verifyAuthentication(header, true)) {
+                if (!sb.verifyAuthentication(header, false)) {
                     prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                     return prop;
                 }
@@ -531,6 +535,23 @@ public class yacysearch {
                         map.put("tags", documents[0].dc_subject(' '));
                         sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_SURFTIPP_ADD, map);
                         documents[0].close();
+                    }
+                }
+            }
+
+            // if a bookmarks-button was hit, create new bookmark entry
+            if (post != null && post.containsKey("bookmarkref")) {
+                if (!sb.verifyAuthentication(header, false)) {
+                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                    return prop;
+                }
+                final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
+                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(bookmarkHash));
+                if (urlentry != null) {
+                    final URIMetadataRow.Components metadata = urlentry.metadata();
+                    try {
+                        sb.tables.bookmarks.createBookmark(sb.loader, metadata.url(), YMarkTables.USER_ADMIN, true, "searchresult", "/search");
+                    } catch (final Throwable e) {
                     }
                 }
             }
@@ -575,7 +596,7 @@ public class yacysearch {
                     offset,
                     urlmask,
                     clustersearch && global ? QueryParams.Searchdom.CLUSTER :
-                    (global && indexReceiveGranted ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
+                    (global && indexReceiveGranted && !post.containsKey("deleteref") ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
                     20,
                     constraint,
                     true,
