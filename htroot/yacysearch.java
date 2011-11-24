@@ -629,8 +629,8 @@ public class yacysearch {
             // log
             Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
                     "local-unfiltered(" + theSearch.getRankingResult().getLocalIndexCount() + "), " +
-                    "-local_miss(" + theSearch.getRankingResult().getMissCount() + "), " +
-                    "-local_sortout(" + theSearch.getRankingResult().getSortOutCount() + "), " +
+                    "local_miss(" + theSearch.getRankingResult().getMissCount() + "), " +
+                    "local_sortout(" + theSearch.getRankingResult().getSortOutCount() + "), " +
                     "remote(" + theSearch.getRankingResult().getRemoteResourceSize() + ") links found, " +
                     (System.currentTimeMillis() - timestamp) + " ms");
 

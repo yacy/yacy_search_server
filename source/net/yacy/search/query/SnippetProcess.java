@@ -165,7 +165,11 @@ public class SnippetProcess {
         // finally wait until enough results are there produced from the snippet fetch process
         WeakPriorityBlockingQueue.Element<ResultEntry> entry = null;
         while (System.currentTimeMillis() < finishTime) {
-            if (this.result.sizeAvailable() + this.rankingProcess.sizeQueue() <= item && this.rankingProcess.feedingIsFinished()) break; // the fail case
+
+            if (!anyWorkerAlive() && !this.rankingProcess.isAlive() && this.result.sizeAvailable() + this.rankingProcess.sizeQueue() <= item && this.rankingProcess.feedingIsFinished()) {
+                //Log.logInfo("SnippetProcess", "interrupted result fetching; item = " + item + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.sizeQueue());
+                break; // the fail case
+            }
 
             // deploy worker to get more results
             if (!anyWorkerAlive()) {
@@ -189,7 +193,7 @@ public class SnippetProcess {
 
     private int resultCounter = 0;
     public ResultEntry nextResult() {
-        final ResultEntry re = oneResult(this.resultCounter, 1000);
+        final ResultEntry re = oneResult(this.resultCounter, 3000);
         this.resultCounter++;
         return re;
     }
@@ -331,7 +335,7 @@ public class SnippetProcess {
             for (final Worker workerThread : this.workerThreads) {
                if ((workerThread != null) &&
                    (workerThread.isAlive()) &&
-                   (workerThread.busytime() < 1000)) return true;
+                   (workerThread.busytime() < 10000)) return true;
             }
         }
         return false;
