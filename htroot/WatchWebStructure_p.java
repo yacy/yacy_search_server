@@ -71,6 +71,7 @@ public class WatchWebStructure_p {
             sb.webStructure.referencesCount(DigestURI.hosthash6(host)) == 0) {
             // find domain with most references
             besthost = sb.webStructure.hostWithMaxReferences();
+            if (besthost == null) besthost = host;
         } else {
             besthost = host;
         }
