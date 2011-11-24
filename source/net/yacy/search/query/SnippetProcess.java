@@ -145,10 +145,9 @@ public class SnippetProcess {
 
         // we must wait some time until the first result page is full to get enough elements for ranking
         final long waittimeout = System.currentTimeMillis() + 300;
-        while (
-          item == 0 &&
+        if (item == 0) while (
           (!this.rankingProcess.feedingIsFinished() || this.rankingProcess.sizeQueue() > 0) &&
-          this.result.sizeAvailable() < this.query.neededResults() /* + this.query.itemsPerPage */ &&
+          this.result.sizeAvailable() < this.query.neededResults() &&
           System.currentTimeMillis() < waittimeout &&
           anyWorkerAlive()
           ) {
@@ -163,17 +162,19 @@ public class SnippetProcess {
             return re;
         }
 
-        // deploy worker to get more results
-        final int neededInclPrefetch = this.query.neededResults() + ((MemoryControl.available() > 100 * 1024 * 1024) ? this.query.itemsPerPage : 0);
-        deployWorker(Math.min(20, this.query.itemsPerPage), neededInclPrefetch);
-
         // finally wait until enough results are there produced from the snippet fetch process
         WeakPriorityBlockingQueue.Element<ResultEntry> entry = null;
         while (System.currentTimeMillis() < finishTime) {
-            if (this.result.sizeAvailable() + this.rankingProcess.sizeQueue() <= item  && !anyWorkerAlive() && this.rankingProcess.feedingIsFinished()) break;
+            if (this.result.sizeAvailable() + this.rankingProcess.sizeQueue() <= item && this.rankingProcess.feedingIsFinished()) break; // the fail case
+
+            // deploy worker to get more results
+            if (!anyWorkerAlive()) {
+                final int neededInclPrefetch = this.query.neededResults() + ((MemoryControl.available() > 100 * 1024 * 1024) ? this.query.itemsPerPage : 0);
+                deployWorker(Math.min(20, this.query.itemsPerPage), neededInclPrefetch);
+            }
+
             try {entry = this.result.element(item, 50);} catch (final InterruptedException e) {break;}
             if (entry != null) break;
-            //if (!anyWorkerAlive() && this.rankingProcess.sizeQueue() == 0 && this.rankingProcess.feedingIsFinished()) break;
         }
 
         // finally, if there is something, return the result
@@ -390,6 +391,7 @@ public class SnippetProcess {
 
                     // get next entry
                     page = SnippetProcess.this.rankingProcess.takeURL(true, Math.min(100, this.timeout - System.currentTimeMillis()));
+                    //if (page != null) Log.logInfo("ResultFetcher", "got one page: " + page.metadata().url().toNormalform(true, false));
                     //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
                     if (page == null) {
                         //Log.logWarning("ResultFetcher", "page == null");
@@ -429,7 +431,7 @@ public class SnippetProcess {
             } catch (final Exception e) {
                 Log.logException(e);
             }
-            Log.logInfo("SEARCH", "resultWorker thread " + this.id + " terminated");
+            //Log.logInfo("SEARCH", "resultWorker thread " + this.id + " terminated");
         }
 
         public void pleaseStop() {

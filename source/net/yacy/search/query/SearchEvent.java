@@ -371,15 +371,17 @@ public final class SearchEvent {
     }
 
     public ResultEntry oneResult(final int item, final long timeout) {
-        if ((this.query.domType == QueryParams.Searchdom.GLOBAL) || (this.query.domType == QueryParams.Searchdom.CLUSTER)) {
+        /*
+        if (this.query.domType == QueryParams.Searchdom.GLOBAL || this.query.domType == QueryParams.Searchdom.CLUSTER) {
             // this is a search using remote search threads. Also the local
             // search thread is started as background process
-            if ((this.localSearchThread != null) && (this.localSearchThread.isAlive())) {
+            if (this.localSearchThread != null && this.localSearchThread.isAlive()) {
                 // in case that the local search takes longer than some other
                 // remote search requests, wait that the local process terminates first
             	try {this.localSearchThread.join(300);} catch (final InterruptedException e) {}
             }
         }
+        */
         return this.resultFetcher.oneResult(item, timeout);
     }
 
