@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -333,7 +332,7 @@ public final class search {
                 final Iterator<Map.Entry<byte[], Integer>> i = theSearch.abstractsCount();
                 while (i.hasNext()) {
                     entry = i.next();
-                    indexcount.append("indexcount.").append(UTF8.String(entry.getKey())).append('=').append((entry.getValue()).toString()).append(serverCore.CRLF_STRING);
+                    indexcount.append("indexcount.").append(ASCII.String(entry.getKey())).append('=').append((entry.getValue()).toString()).append(serverCore.CRLF_STRING);
                 }
                 if (abstractSet != null) {
                     // if a specific index-abstract is demanded, attach it here

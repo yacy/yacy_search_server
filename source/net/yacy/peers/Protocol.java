@@ -482,6 +482,9 @@ public final class Protocol {
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
 
+        final boolean thisIsASecondarySearch = urlhashes.length() > 0;
+        assert !thisIsASecondarySearch || secondarySearchSuperviser == null;
+
         // create containers
         final int words = wordhashes.length() / Word.commonHashLength;
         assert words > 0 : "wordhashes = " + wordhashes;
@@ -568,8 +571,6 @@ public final class Protocol {
         } catch (final Exception e) {
             Log.logException(e);
         }
-        final boolean thisIsASecondarySearch = urlhashes.length() > 0;
-        assert !thisIsASecondarySearch || secondarySearchSuperviser == null;
 
         Network.log.logInfo("remote search: peer " + target.getName() + " sent " + container[0].size() + "/" + result.joincount + " references for " + (thisIsASecondarySearch ? "a secondary search" : "joined word queries"));
 
@@ -651,7 +652,7 @@ public final class Protocol {
                 final boolean global,
                 final int partitions,
                 final String hostname,
-                String hostaddress,
+                final String hostaddress,
                 final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
                 final RankingProfile rankingProfile,
                 final Bitfield constraint) throws IOException {

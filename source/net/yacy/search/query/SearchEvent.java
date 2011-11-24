@@ -383,11 +383,11 @@ public final class SearchEvent {
         return this.resultFetcher.oneResult(item, timeout);
     }
 
-    boolean secondarySearchStartet = false;
+    //boolean secondarySearchStartet = false;
 
     public static class HeuristicResult /*implements Comparable<HeuristicResult>*/ {
-        public final byte[] urlhash; public final String heuristicName; public final boolean redundant;
-        public HeuristicResult(final byte[] urlhash, final String heuristicName, final boolean redundant) {
+        private final byte[] urlhash; public final String heuristicName; public final boolean redundant;
+        private HeuristicResult(final byte[] urlhash, final String heuristicName, final boolean redundant) {
             this.urlhash = urlhash; this.heuristicName = heuristicName; this.redundant = redundant;
         }/*
         public int compareTo(HeuristicResult o) {
@@ -405,9 +405,9 @@ public final class SearchEvent {
 
         // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
         // this relation contains the information where specific urls can be found in specific peers
-        SortedMap<String, SortedMap<String, StringBuilder>> abstractsCache;
-        SortedSet<String> checkedPeers;
-        Semaphore trigger;
+        private final SortedMap<String, SortedMap<String, StringBuilder>> abstractsCache;
+        private final SortedSet<String> checkedPeers;
+        private final Semaphore trigger;
 
         public SecondarySearchSuperviser() {
             this.abstractsCache = new TreeMap<String, SortedMap<String, StringBuilder>>();
@@ -491,7 +491,7 @@ public final class SearchEvent {
                 }
             } catch (final InterruptedException e) {
                 // the thread was interrupted
-                // do nohing
+                // do nothing
             }
              // the time-out was reached
         }
@@ -500,12 +500,13 @@ public final class SearchEvent {
             if (this.abstractsCache == null || this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size()) return; // secondary search not possible (yet)
 
             // catch up index abstracts and join them; then call peers again to submit their urls
+
             /*
-            System.out.println("DEBUG-INDEXABSTRACT: " + abstractsCache.size() + " word references caught, " + query.queryHashes.size() + " needed");
-            for (Map.Entry<String, TreeMap<String, String>> entry: abstractsCache.entrySet()) {
-                System.out.println("DEBUG-INDEXABSTRACT: hash " + entry.getKey() + ": " + ((query.queryHashes.has(entry.getKey().getBytes()) ? "NEEDED" : "NOT NEEDED") + "; " + entry.getValue().size() + " entries"));
+            System.out.println("DEBUG-INDEXABSTRACT: " + this.abstractsCache.size() + " word references caught, " + SearchEvent.this.query.queryHashes.size() + " needed");
+            for (final Map.Entry<String, SortedMap<String, StringBuilder>> entry: this.abstractsCache.entrySet()) {
+                System.out.println("DEBUG-INDEXABSTRACT: hash " + entry.getKey() + ": " + ((SearchEvent.this.query.queryHashes.has(entry.getKey().getBytes()) ? "NEEDED" : "NOT NEEDED") + "; " + entry.getValue().size() + " entries"));
             }
-            */
+             */
 
             // find out if there are enough references for all words that are searched
             if (this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size()) return;

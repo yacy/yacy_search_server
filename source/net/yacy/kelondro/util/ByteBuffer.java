@@ -403,7 +403,7 @@ public final class ByteBuffer extends OutputStream {
 
     @Override
     public String toString() {
-	return UTF8.String(this.buffer, this.offset, this.length);
+        return UTF8.String(this.buffer, this.offset, this.length);
     }
 
     public String toString(final int left, final int length) {
@@ -415,7 +415,7 @@ public final class ByteBuffer extends OutputStream {
         final StringBuilder sb = new StringBuilder(sblength);
         int i = 0;
         sb.setLength(length);
-        for (int j = left; j < left + length; j++) sb.setCharAt(i++, (char) this.buffer[j]);
+        for (int j = left; j < left + length; j++) sb.setCharAt(i++, (char) this.buffer[this.offset + j]);
         return sb;
     }
 
@@ -504,18 +504,6 @@ public final class ByteBuffer extends OutputStream {
     public void reset() {
         this.length = 0;
         this.offset = 0;
-    }
-
-    public void reset(final int newSize) {
-        resize(newSize);
-        this.reset();
-    }
-
-    public void resize(final int newSize) {
-        if(newSize < 0) throw new IllegalArgumentException("Illegal array size: " + newSize);
-        final byte[] v = new byte[newSize];
-        System.arraycopy(this.buffer,0,v,0,newSize > this.buffer.length ? this.buffer.length : newSize);
-        this.buffer = v;
     }
 
     public void writeTo(final OutputStream dest) throws IOException {
