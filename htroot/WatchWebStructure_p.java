@@ -7,7 +7,6 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
-
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.server.serverObjects;
@@ -24,7 +23,7 @@ public class WatchWebStructure_p {
         String color_dot     = "11BB11";
         String color_line    = "222222";
         String color_lineend = "333333";
-        
+
         int width = 1024;
         int height = 576;
         int depth = 3;
@@ -32,7 +31,7 @@ public class WatchWebStructure_p {
         int time = -1;
         String host = "auto";
         String besthost;
-        
+
         if (post != null) {
             width         = post.getInt("width", 1024);
             height        = post.getInt("height", 576);
@@ -46,11 +45,11 @@ public class WatchWebStructure_p {
             color_line    = post.get("colorline",    color_line);
             color_lineend = post.get("colorlineend", color_lineend);
         }
-        
+
         if (host.equals("auto")) {
         	// try to find the host from the crawl profiles
         	CrawlProfile e;
-            for (byte[] handle: sb.crawler.getActive()) {
+            for (final byte[] handle: sb.crawler.getActive()) {
                 e = sb.crawler.getActive(handle);
                 if (e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
                     e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
@@ -64,7 +63,7 @@ public class WatchWebStructure_p {
                 break; // take the first one
             }
         }
-        
+
         // find start point
         if (host == null ||
             host.length() == 0 ||
@@ -72,10 +71,11 @@ public class WatchWebStructure_p {
             sb.webStructure.referencesCount(DigestURI.hosthash6(host)) == 0) {
             // find domain with most references
             besthost = sb.webStructure.hostWithMaxReferences();
+            if (besthost == null) besthost = host;
         } else {
             besthost = host;
         }
-        
+
         prop.putHTML("host", host);
         prop.putHTML("besthost", besthost);
         prop.put("depth", depth);

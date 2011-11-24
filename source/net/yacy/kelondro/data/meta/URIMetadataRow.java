@@ -327,7 +327,7 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",flags=").append(flags().exportB64());
             assert (s.toString().indexOf(0) < 0);
-            s.append(",lang=").append(UTF8.String(language()));
+            s.append(",lang=").append(language() == null ? "EN" : UTF8.String(language()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",llocal=").append(llocal());
             assert (s.toString().indexOf(0) < 0);

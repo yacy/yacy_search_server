@@ -1,4 +1,4 @@
-// ConfigBasic.java 
+// ConfigBasic.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -40,9 +40,8 @@ import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-
-import de.anomic.data.WorkTables;
 import de.anomic.data.Translator;
+import de.anomic.data.WorkTables;
 import de.anomic.http.server.HTTPDFileHandler;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -50,48 +49,48 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.UPnP;
 
 public class ConfigBasic {
-    
+
     private static final int NEXTSTEP_FINISHED  = 0;
     private static final int NEXTSTEP_PWD       = 1;
     private static final int NEXTSTEP_PEERNAME  = 2;
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws FileNotFoundException, IOException {
-        
+
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final String langPath = env.getDataPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
         String lang = env.getConfig("locale.language", "default");
-        
+
         final int authentication = sb.adminAuthenticated(header);
         if (authentication < 2) {
             // must authenticate
-            prop.put("AUTHENTICATE", "admin log-in"); 
+            prop.put("AUTHENTICATE", "admin log-in");
             return prop;
         }
-        
+
         // store this call as api call
         if (post != null && post.containsKey("set")) {
             sb.tables.recordAPICall(post, "ConfigBasic.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "basic settings");
         }
-        
+
         //boolean doPeerPing = false;
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
             InstantBusyThread.oneTimeJob(sb.yc, "peerPing", null, 0);
             //doPeerPing = true;
         }
-        
+
         // language settings
         if (post != null && post.containsKey("language")  && !lang.equals(post.get("language", "default")) &&
                 (Translator.changeLang(env, langPath, post.get("language", "default") + ".lng"))) {
             prop.put("changedLanguage", "1");
         }
-        
+
         // peer name settings
         final String peerName = (post == null) ? sb.peers.mySeed().getName() : post.get("peername", "");
-        
+
         // port settings
         final long port;
         if (post != null && post.getInt("port", 0) > 1023) {
@@ -108,7 +107,7 @@ public class ConfigBasic {
             sb.peers.setMyName(peerName);
             sb.peers.saveMySeed();
         }
-        
+
         // UPnP config
         final boolean upnp;
         if (post != null && post.containsKey("port")) { // hack to allow checkbox
@@ -123,22 +122,22 @@ public class ConfigBasic {
         } else {
             upnp = false;
         }
-        
+
         // check port
         final boolean reconnect;
         if (!(env.getConfigLong("port", port) == port)) {
             // validate port
             final serverCore theServerCore = (serverCore) env.getThread("10_httpd");
             env.setConfig("port", port);
-            
+
             // redirect the browser to the new port
             reconnect = true;
-            
+
             // renew upnp port mapping
             if (upnp) {
                 UPnP.addPortMapping();
             }
-            
+
             String host = null;
             if (header.containsKey(HeaderFramework.HOST)) {
                 host = header.get(HeaderFramework.HOST);
@@ -147,7 +146,7 @@ public class ConfigBasic {
             } else {
                 host = Domains.myPublicLocalIP().getHostAddress();
             }
-            
+
             prop.put("reconnect", "1");
             prop.put("reconnect_host", host);
             prop.put("nextStep_host", host);
@@ -155,11 +154,11 @@ public class ConfigBasic {
             prop.put("nextStep_port", port);
             prop.put("reconnect_sslSupport", theServerCore.withSSL() ? "1" : "0");
             prop.put("nextStep_sslSupport", theServerCore.withSSL() ? "1" : "0");
-            
+
             // generate new shortcut (used for Windows)
             //yacyAccessible.setNewPortBat(Integer.parseInt(port));
             //yacyAccessible.setNewPortLink(Integer.parseInt(port));
-            
+
             // force reconnection in 7 seconds
             theServerCore.reconnect(7000);
         } else {
@@ -176,6 +175,9 @@ public class ConfigBasic {
                 // switch to p2p mode
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+                // set default behavior for search verification
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh"); // nocache,iffresh,ifexist,cacheonly,false
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
             }
             if ("portal".equals(post.get("usecase", "")) && !"webportal".equals(networkName)) {
                 // switch to webportal network
@@ -183,6 +185,9 @@ public class ConfigBasic {
                 // switch to robinson mode
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                // set default behavior for search verification
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "ifexist"); // nocache,iffresh,ifexist,cacheonly,false
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
             }
             if ("intranet".equals(post.get("usecase", "")) && !"intranet".equals(networkName)) {
                 // switch to intranet network
@@ -190,6 +195,9 @@ public class ConfigBasic {
                 // switch to p2p mode: enable ad-hoc networks between intranet users
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                // set default behavior for search verification
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "cacheonly"); // nocache,iffresh,ifexist,cacheonly,false
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
             }
             if ("intranet".equals(post.get("usecase", ""))) {
                 final String repositoryPath = post.get("repositoryPath", "/DATA/HTROOT/repository");
@@ -199,7 +207,7 @@ public class ConfigBasic {
                 }
             }
         }
-        
+
         networkName = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "");
         if ("freeworld".equals(networkName)) {
             prop.put("setUseCase", 1);
@@ -215,18 +223,18 @@ public class ConfigBasic {
         }
         prop.put("setUseCase_port", port);
         prop.put("setUseCase_repositoryPath", sb.getConfig("repositoryPath", "/DATA/HTROOT/repository"));
-        
+
         // check if values are proper
         final boolean properPassword = (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
         final boolean properName = (sb.peers.mySeed().getName().length() >= 3) && (!(Seed.isDefaultPeerName(sb.peers.mySeed().getName())));
         final boolean properPort = (sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal());
-        
+
         if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
             env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
             env.setConfig("browserPopUpPage", "Status.html");
             HTTPDFileHandler.initDefaultPath();
         }
-        
+
         prop.put("statusName", properName ? "1" : "0");
         prop.put("statusPort", properPort ? "1" : "0");
         if (reconnect) {
@@ -240,7 +248,7 @@ public class ConfigBasic {
         } else {
             prop.put("nextStep", NEXTSTEP_FINISHED);
         }
-                
+
         final boolean upnp_enabled = env.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false);
         prop.put("upnp", "1");
         prop.put("upnp_enabled", upnp_enabled ? "1" : "0");
@@ -250,8 +258,8 @@ public class ConfigBasic {
         else {
             prop.put("upnp_success", "0");
         }
-        
-        // set default values       
+
+        // set default values
         prop.putHTML("defaultName", sb.peers.mySeed().getName());
         prop.putHTML("defaultPort", env.getConfig("port", "8090"));
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed

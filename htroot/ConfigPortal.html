@@ -48,6 +48,15 @@
           <input type="radio" name="search.options" value="false" #(search.options)#checked="checked"::#(/search.options)# />do not show Advanced Search
           </dd>
           
+          <dt>Show Media Search Options</dt>
+          <dd>
+          <input type="checkbox" name="search.text" value="true" #(search.text)#::checked="checked"#(/search.text)# />Text&nbsp;
+          <input type="checkbox" name="search.image" value="true" #(search.image)#::checked="checked"#(/search.image)# />Images&nbsp;
+          <input type="checkbox" name="search.audio" value="true" #(search.audio)#::checked="checked"#(/search.audio)# />Audio&nbsp;
+          <input type="checkbox" name="search.video" value="true" #(search.video)#::checked="checked"#(/search.video)# />Video&nbsp;
+          <input type="checkbox" name="search.app" value="true" #(search.app)#::checked="checked"#(/search.app)# />Applications
+          </dd>
+          
           <dt>Snippet Fetch Strategy &amp; Link Verification</dt>
           <dd>
           <input type="radio" name="search.verify" value="nocache" #(search.verify.nocache)#::checked="checked"#(/search.verify.nocache)# onclick="document.getElementById('search_verify_delete').disabled=false;document.getElementById('search_verify_delete').checked=true;"/>NOCACHE: no use of web cache, load all snippets online<br/>

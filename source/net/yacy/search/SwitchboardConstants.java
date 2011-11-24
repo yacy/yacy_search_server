@@ -437,6 +437,7 @@ public final class SwitchboardConstants {
 
     public static final String SEARCH_ITEMS   = "search.items";
     public static final String SEARCH_TARGET  = "search.target";
+    public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
 
     /**

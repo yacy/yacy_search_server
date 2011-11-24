@@ -648,7 +648,7 @@ javastart_priority=10
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
 # ram cache during indexing. If you want to increase indexing speed, increase this
 # value i.e. up to one million, but increase also the memory limit to a minimum of 2GB
-wordCacheMaxCount = 100000
+wordCacheMaxCount = 50000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
@@ -724,9 +724,9 @@ search.options = true
 # search domains. If set to false then that search is not available
 search.text = true
 search.image = true
-search.audio = true
-search.video = true
-search.app = true
+search.audio = false
+search.video = false
+search.app = false
 
 # number of search results displayed by default
 search.items = 10
@@ -741,8 +741,8 @@ search.target = _self
 # these information pieces may be switched on or off
 search.result.show.date = true
 search.result.show.size = false
-search.result.show.metadata = false
-search.result.show.parser = false
+search.result.show.metadata = true
+search.result.show.parser = true
 search.result.show.pictures = false
 
 # search navigators: comma-separated list of default values for search navigation.
@@ -762,7 +762,7 @@ search.navigation=hosts,authors,namespace,topics,filetype,protocol
 #            consider content nevertheless as available and show result without snippet
 # false:     no link verification and not snippet generation:
              all search results are valid without verification
-search.verify = cacheonly
+search.verify = iffresh
 
 # in case that a link verification fails then the corresponding index reference can be
 # deleted to clean up the index. If this property is set then failed index verification in
