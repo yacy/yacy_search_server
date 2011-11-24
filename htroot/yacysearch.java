@@ -299,11 +299,11 @@ public class yacysearch {
             }
             if (querystring.indexOf("/http") >= 0) {
                 querystring = querystring.replace("/http", "");
-                urlmask = "http://.*";
+                urlmask = "https?://.*";
             }
             if (querystring.indexOf("/https") >= 0) {
                 querystring = querystring.replace("/https", "");
-                urlmask = "https://.*";
+                urlmask = "https?://.*";
             }
             if (querystring.indexOf("/ftp") >= 0) {
                 querystring = querystring.replace("/ftp", "");

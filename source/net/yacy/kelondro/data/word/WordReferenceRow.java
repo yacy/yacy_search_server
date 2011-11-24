@@ -81,7 +81,6 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     public static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
 	public static final WordReferenceRow poison = new WordReferenceRow(poisonRowEntry);
 
-
     // static properties
     private static final int col_urlhash       =  0; // h 12 the url hash b64-encoded
     private static final int col_lastModified  =  1; // a  2 last-modified time of the document where word appears
@@ -316,7 +315,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     }
 
     public int hitcount() {
-        return (int) this.entry.getColLong(col_hitcount);
+        return (0xff & this.entry.getColByte(col_hitcount));
     }
 
     public Collection<Integer> positions() {
@@ -329,11 +328,11 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     }
 
     public int posinphrase() {
-        return (int) this.entry.getColLong(col_posinphrase);
+        return (0xff & this.entry.getColByte(col_posinphrase));
     }
 
     public int posofphrase() {
-        return (int) this.entry.getColLong(col_posofphrase);
+        return (0xff & this.entry.getColByte(col_posofphrase));
     }
 
     public int wordsintext() {
@@ -353,23 +352,23 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     }
 
     public int wordsintitle() {
-        return (int) this.entry.getColLong(col_wordsInTitle);
+        return (0xff & this.entry.getColByte(col_wordsInTitle));
     }
 
     public int llocal() {
-        return (int) this.entry.getColLong(col_llocal);
+        return (0xff & this.entry.getColByte(col_llocal));
     }
 
     public int lother() {
-        return (int) this.entry.getColLong(col_lother);
+        return (0xff & this.entry.getColByte(col_lother));
     }
 
     public int urllength() {
-        return (int) this.entry.getColLong(col_urlLength);
+        return (0xff & this.entry.getColByte(col_urlLength));
     }
 
     public int urlcomps() {
-        return (int) this.entry.getColLong(col_urlComps);
+        return (0xff & this.entry.getColByte(col_urlComps));
     }
 
     public Bitfield flags() {
