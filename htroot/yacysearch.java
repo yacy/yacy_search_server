@@ -503,7 +503,7 @@ public class yacysearch {
                     }
 
                     // delete the search history since this still shows the entry
-                    SearchEventCache.cleanupEvents(true);
+                    SearchEventCache.delete(delHash);
                 } catch (final IOException e) {
                     Log.logException(e);
                 }
@@ -596,7 +596,7 @@ public class yacysearch {
                     offset,
                     urlmask,
                     clustersearch && global ? QueryParams.Searchdom.CLUSTER :
-                    (global && indexReceiveGranted && !post.containsKey("deleteref") ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
+                    (global && indexReceiveGranted ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
                     20,
                     constraint,
                     true,
