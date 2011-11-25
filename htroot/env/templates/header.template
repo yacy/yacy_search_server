@@ -58,7 +58,7 @@
       <li><a href="http://forum.yacy.de" class="MenuItemLink">Deutsches Forum</a></li>
       <li><a href="http://www.yacy-forum.org" class="MenuItemLink">English Forum</a></li>
       <li><a href="http://wiki.yacy.de" class="MenuItemLink">YaCy Project Wiki</a></li>
-      <li><a href="http://svn.berlios.de/wsvn/yacy/?op=log&amp;isdir=1&amp;language=en" class="MenuItemLink">Development Change Log</a></li>      
+      <li><a href="https://gitorious.org/yacy/rc1/commits/master" class="MenuItemLink">Development Change Log</a></li>      
       <li><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" class="MenuItemLink">#(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
     </ul>
   </li>
