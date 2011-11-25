@@ -20,7 +20,7 @@ $(document).ready(function() {
 			{display: 'Crawl start', name : 'crawl_start', width : 20, sortable : false, align: 'center'},
 			{display: 'Title', name : 'title', width : 400, sortable : true, align: 'left'},
 			{display: 'Tags', name : 'tags', width : 160, sortable : false, align: 'left'},
-			{display: 'Folders', name : 'folders', width : 160, sortable : true, align: 'left', hide: true},
+			{display: 'Folders', name : 'folders', width : 160, sortable : true, align: 'left'},
 			{display: 'Date added', name : 'date_added', width : 100, sortable : true, align: 'left'},
 			{display: 'Date modified', name : 'date_modified', width : 100, sortable : true, align: 'left'},
 			{display: 'Date visited', name : 'date_visited', width : 100, sortable : true, align: 'left', hide: true},			
@@ -57,7 +57,7 @@ $(document).ready(function() {
 			{display: 'Full text (regexp)', name : ''},
 			{display: 'Tags (comma seperated)', name : '_tags'},
 			{display: 'Tags (regexp)', name : 'tags'},
-			{display: 'Singel Folder', name : '_folder'},
+			{display: 'Folders (comma seperated)', name : '_folder'},
 			{display: 'Folders (regexp)', name : 'folders'},
 			{display: 'Title (regexp)', name : 'title'},
 			{display: 'Description (regexp)', name : 'desc'}
@@ -110,10 +110,11 @@ $(document).ready(function() {
 	     }
 	  });
 
-	loadTags("#tag_include", "alpha", "");
 	$("#tag_include").multiselect({
 		noneSelectedText: "Select (multiple) tags ...",
 		height: height-50,
+		minWidth: 200,
+		maxWidth: 200,
 		selectedList: 4,
 		header: "",
 		click: function(event, ui) {
@@ -130,21 +131,33 @@ $(document).ready(function() {
 			$('#ymarks_flexigrid').flexReload();
 		},
 		beforeopen: function() {
-			// $(this).multiselect("uncheckAll");
+			loadTags("#tag_include", "alpha", "");
 		},
 		open: function() {
 			qtag = "";
 		}
 	}).multiselectfilter();	
 	
-	loadTags("#tag_select", "alpha", "");
 	$("#tag_select").multiselect({
-		noneSelectedText: "Select tags to replace ...",
+		noneSelectedText: "Select tags to remove ...",
+		minWidth: 200,
+		maxWidth: 200,
 		header: "",
 		selectedList: 4,
-		height: height - 540
+		height: height - 540,
+		beforeopen: function() {
+			loadTags("#tag_select", "alpha", "");
+		}
 	}).multiselectfilter();
 
+	$("#ymarks_qtype").multiselect({
+		noneSelectedText: "Select query type ...",
+		minWidth: 200,
+		maxWidth: 200,
+		header: "",
+		selectedList: 1
+	});
+	
 	$('#ymarks_tagmanager').submit(function() {
 		var param = [];
 		$('#ymarks_tagmanager input[type="text"],#ymarks_tagmanager input[type="radio"]:checked').each(function(i){
@@ -153,10 +166,12 @@ $(document).ready(function() {
 		var tags = "";
 		var ta = $("#tag_select").val();
 		var i = 0;
-		while (i<ta.length) {
-			tags = tags + ta[i] + ",";
-			i++;
-		};
+		if(ta !== null) {			
+			while (i<ta.length) {
+				tags = tags + ta[i] + ",";
+				i++;
+			}
+		}
 		param[param.length] = { name : 'tags', value : tags };
 		$.ajax({
 			type: "POST",
@@ -202,7 +217,7 @@ function loadTags(select, sortorder, tags) {
 				var count = $(this).attr('count');
 				var tag = $(this).attr('tag');									
 				$('<option value="'+tag+'">'+tag+' ['+count+']</option>').appendTo(select);
-			}); //close each(
+			}); //close each(			
 			$(select).multiselect('refresh');
 		}
 	}); //close $.ajax(
