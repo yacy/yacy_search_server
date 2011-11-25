@@ -73,6 +73,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      */
     public ReferenceContainerCache(final ReferenceFactory<ReferenceType> factory, final ByteOrder termOrder, final int termSize) {
         super(factory);
+        assert termOrder != null;
         this.termOrder = termOrder;
         this.termSize = termSize;
         this.containerOrder = new ContainerOrder<ReferenceType>(this.termOrder);
@@ -130,10 +131,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         // write wCache
         long wordcount = 0, urlcount = 0;
         byte[] term = null, lwh;
+        assert this.termKeyOrdering() != null;
         for (final ReferenceContainer<ReferenceType> container: cachecopy) {
             // get entries
             lwh = term;
             term = container.getTermHash();
+            if (term == null) continue;
 
             // check consistency: entries must be ordered
             assert (lwh == null || this.termKeyOrdering().compare(term, lwh) > 0);
