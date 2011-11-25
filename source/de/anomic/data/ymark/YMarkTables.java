@@ -245,48 +245,22 @@ public class YMarkTables {
     	}
     }
 
-    public void replaceTags(final Iterator<Row> rowIterator, final String bmk_user, final String tagString, final String replaceString) throws IOException, RowSpaceExceededException {
-        final String[] tagArray = YMarkUtil.cleanTagsString(tagString).split(YMarkUtil.TAGS_SEPARATOR);
-        final StringBuilder tagStringBuilder = new StringBuilder(BUFFER_LENGTH);
+    public void replaceTags(final Iterator<Row> rowIterator, final String bmk_user, final String tagString, final String replaceString) throws IOException, RowSpaceExceededException {        
+    	final HashSet<String> remove = YMarkUtil.keysStringToSet(YMarkUtil.cleanTagsString(tagString.toLowerCase()));       
+        final StringBuilder t = new StringBuilder(200);
+    	HashSet<String> tags;
         Row row;
         while (rowIterator.hasNext()) {
             row = rowIterator.next();
             if(row != null) {
-            	for (final String element : tagArray) {
-            		tagStringBuilder.setLength(0);
-            		tagStringBuilder.append(row.get(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.deflt()));
-            		int start = tagStringBuilder.indexOf(element);
-            		int end = start;
-            		while (end<=tagStringBuilder.length() && end != -1) {
-          				if (end == (tagStringBuilder.length())) {
-          					if (end-start == element.length()) {
-              					if (start > 0)
-                					start--; // also replace the tag separator
-        						tagStringBuilder.replace(start, end, YMarkUtil.EMPTY_STRING);
-          					}
-            				break;
-            			} else if (tagStringBuilder.charAt(end) == ',') {
-            				if (end-start == element.length()) {
-              					if (start > 0)
-                					start--; // also replace the tag separator
-        						tagStringBuilder.replace(start, end, YMarkUtil.EMPTY_STRING);
-        					} else {
-        						start = tagStringBuilder.indexOf(element, end+1);
-        						end = start;
-        					}
-            			} else if (tagStringBuilder.charAt(end) == ' ') {
-            				start = tagStringBuilder.indexOf(element, end);
-            				end = start;
-            			} else {
-            				end++;
-            			}
-            		}
-            		tagStringBuilder.append(YMarkUtil.TAGS_SEPARATOR);
-            		tagStringBuilder.append(replaceString);
-            		row.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(tagStringBuilder.toString()));
-            		this.worktables.update(TABLES.BOOKMARKS.tablename(bmk_user), row);
-            	}
+            	tags = YMarkUtil.keysStringToSet(row.get(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.deflt()).toLowerCase());
+            	tags.removeAll(remove);
+            	t.append(YMarkUtil.keySetToString(tags));
             }
+            t.append(YMarkUtil.TAGS_SEPARATOR);
+            t.append(replaceString);
+            row.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(t.toString()));
+            this.worktables.update(TABLES.BOOKMARKS.tablename(bmk_user), row);
         }
     }
 

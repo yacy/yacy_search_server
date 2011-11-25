@@ -56,37 +56,44 @@ function bm_action(com,grid) {
         $("select[name='bm_public']").setValue($('.trSelected',grid).find('img').attr('alt'));
         $("#ymarks_add_dialog").dialog('open');
 	} else if (com=='Crawl') {
-		var param = [];
-		var count = 0;
-		var i = 0;
-		var err = "";
-		var succ = "";
-		var msg = "";
-		$('.trSelected',grid).each(function() {
-			var pk = $(this).find('.apicall_pk').text();			
-			if (pk == "") {
-				count++;
-				err = err + "\n" + $(this).find('.url').text();
-			}
-			succ = succ  + "\n" + $(this).find('.url').text();
-			var item = {name : 'item_'+count, value : "mark_"+pk};	
-			param[i] = item;
-			i++;
-		});
-		if(i-count > 0)
-			msg = msg + "Success:"+succ;
-		if(count > 0)
-			msg = msg + "\n\nError: No entry in API Table found:"+err;
-		alert(msg);
-		param[param.length] = { name : 'execrows', value : 'true' };
-		$.ajax({
-			type: "POST",
-			data: param,
-			url: "Table_API_p.html",			
-			dataType: "html",
-			success: function() {					
-			}					
-		});		
+		if ($('.trSelected',grid).length == 1 && $(this).find('.apicall_pk').text() == "") {
+			var pk = $(this).find('.apicall_pk').text();
+			$("input[name='crawlingURL']").setValue($('.trSelected',grid).find('.url').text());
+			$("#ymarks_crawlstart").dialog('open');
+		} else {			
+			var param = [];
+			var i = 0;
+			$('.trSelected',grid).each(function() {
+				var pk = $(this).find('.apicall_pk').text();
+
+				if (pk == "") {
+					/*
+					if (crawl_param.length == 0) {
+						$('<td colspan="2">You have selected one or more bookmarks without a crawl start entry in the API table. You can define a default profile which will be used instead.</td>').appendTo("#ymarks_crawlstart_msg");
+						$("input[name='crawlingURL']").attr("disabled","disabled");
+						$("input[name='crawlingURL']").setValue("Default profile");
+						$("#ymarks_crawlstart").dialog('open');
+					}
+					*/
+					alert("Multiple selection currently only supports bookmarks"+"\n"+"with an existing crawl profile in the API table.");
+				} else {
+					var item = {name : 'item_'+i, value : "mark_"+pk};	
+					param[i] = item;
+					i++;
+				}			
+			});
+			param[param.length] = { name : 'execrows', value : 'true' };
+			$.ajax({
+				type: "POST",
+				data: param,
+				url: "Table_API_p.html",			
+				dataType: "html",
+				success: function() {					
+					$('#ymarks_flexigrid').flexReload();
+				}					
+			});	
+
+		}
 	} else if (com=='XBEL') {
 		window.open("/api/ymarks/get_xbel.xml","_blank");
 		return false;
@@ -129,6 +136,37 @@ function bm_dialog() {
     	   		});	
     		} ,
     		Cancel: function() { $("#ymarks_add_dialog").dialog("close"); }
+		} 
+	});
+	/* Initialize Crawl Start Dialog */		
+	$("#ymarks_crawlstart").dialog({			
+		autoOpen: false,
+		height: 390,
+		width: 470,
+		position: ['top',100],
+		modal: true,			
+		resizable: false,
+		buttons: { 
+    		OK: function() { 
+				var param = [];
+    			var i = 0;
+				$("#ymarks_crawler input[type='text'],#ymarks_crawler input:checked,#ymarks_crawler select,#ymarks_crawler input[type='hidden']").each(function() {
+					var item = {name : $(this).attr("name"), value : $(this).attr("value")};	
+					param[i] = item;
+					i++;
+				});
+				$.ajax({
+					type: "POST",
+					data: param,
+					url: "Crawler_p.html",			
+					dataType: "html",
+					success: function() {					
+					}					
+				});
+				$('#ymarks_flexigrid').flexReload();
+				$("#ymarks_crawlstart").dialog("close");
+    		} ,
+    		Cancel: function() { $("#ymarks_crawlstart").dialog("close"); }
 		} 
 	});
 }

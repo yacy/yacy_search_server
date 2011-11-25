@@ -88,31 +88,33 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 				</div>
 				<hr />
 				<div class="tagSelect">
-					<form id="ymarks_tagmanager" action="YMarks.html" method="POST"  enctype="multipart/form-data" accept-charset="UTF-8">
-						<h4>Tag Manager<img title="help" alt="help" class="help" src="/yacy/ui/img-2/question_blue.png"></h4>
-						All tag actions are applied to the sub-set of bookmarks defined by this query.			
+					<form id="ymarks_tagmanager" action="YMarks.html" method="post"  enctype="multipart/form-data" accept-charset="UTF-8">
+						<h4>Tag Manager<img title="help" alt="help" class="help" src="/yacy/ui/img-2/question_blue.png" /></h4>
+						All tag actions are applied to the sub-set of bookmarks defined by this query.		
 						<p>
 							<small>Query</small>
-							<input class="input" type="text" name="query" id="query" /><br />
-					    	<br />
-					    	<input type="radio" name="qtype" value="_tags" checked="checked"/> Tags (comma seperated)
-					    	<br />
-					    	<input type="radio" name="qtype" value="tags" /> Tags (regexp)
-					    	<br />
-					    	<input type="radio" name="qtype" value="_folders" /> Folders (comma seperated)
-					    	<br />
-					    	<input type="radio" name="qtype" value="folders" /> Folders (regexp)
-					    	
+							<input class="input" type="text" name="query" id="query" />
+							<br />
+					    	<small>Query Type</small>
+					    	<select id= "ymarks_qtype" name="qtype">
+					    		<option value="_tags" selected="selected">Tags (comma seperated)</option>
+					    		<option value="tags">Tags (regexp)</option>
+					    		<option value="_folder">Folders (comma seperated)</option>
+					    		<option value="folders">Folders (regexp)</option>
+					    		<option value="title">Title (regexp)</option>
+					    		<option value="desc">Description (regexp)</option>
+					    	</select>
 						</p>
 						<hr />
-						<h5>Replace Tags</h5>
 						<p>
 							<select id="tag_select" name="tags" multiple="multiple"></select><br />
 						</p>
 						<p>
-							<small>Replace with (comma separated tags)</small>
+							Enter tags to add (<i>replace with</i>)
+							<br /><small>(comma separated tags)</small>
 							<input class="input" type="text" name="replace" id="source" value="" />
 						</p>
+						<hr />
 						<p style="text-align: right">
 							<input type="submit" name="action" value="Replace" />
 						</p>
@@ -222,6 +224,77 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 					<option value="false">no</option>
 				</select>
 			</div></form>
+		</div>
+		<div id="ymarks_crawlstart" class="bm_dialog" title="Craw Start">
+		     
+		     <form id="ymarks_crawler" method="post" action="Crawler_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+		     <table cellspacing="10" cellpadding="20">
+			     <tr id="ymarks_crawlstart_msg"></tr>
+			     <tr>
+				     <td>Site</td>
+				     <td>
+				     	<input type="hidden" name="crawlingMode" id="crawlingMode" value="url" />
+				     	<input name="crawlingURL" id="crawlingURL" type="text" size="35" maxlength="256" />
+				     	<input type="hidden" name="crawlingDepth" id="crawlingDepth" value="99" />
+				     </td>
+				 <tr>
+				     <td>Scheduler</td>
+				     <td>
+			            <input type="radio" name="recrawl" value="nodoubles" checked="checked"/>run this crawl once<br/>
+						<input type="radio" name="recrawl" value="scheduler"/>scheduled, look every
+						<select name="repeat_time">			
+			              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+			              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+			              <option value="7" selected="selected">7</option>
+			              <option value="8">8</option><option value="9">9</option><option value="10">10</option>			
+			              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
+			              <option value="28">28</option><option value="30">30</option>
+						</select>
+						<select name="repeat_unit">
+			              <option value="selminutes">minutes</option>
+			              <option value="selhours">hours</option>			
+			              <option value="seldays" selected="selected">days</option>
+			            </select>
+			            <br />
+			            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for new documents automatically.
+				     </td>					     
+			     </tr>
+			     <tr>
+				     <td>Path</td>
+				     <td>
+			            <input type="radio" name="range" id="rangeDomain" value="domain" checked="checked"/>load all files in domain<br />
+						<input type="radio" name="range" id="rangeSubpath" value="subpath" />load only files in a sub-path of given url
+						<input type="hidden" name="mustnotmatch" id="mustnotmatch" value="" />			
+						<input type="hidden" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" value="off" />
+						<input type="hidden" name="crawlingDomFilterDepth" id="crawlingDomFilterDepth" value="1" />
+				     </td>
+				 <tr>			     
+			     <tr>
+				     <td>Limitations</td>
+				     <td>
+						<input type="checkbox" name="crawlingDomMaxCheck" id="crawlingDomMaxCheck"  /> not more than
+						<input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="10000" />
+						documents
+				     </td>
+				 <tr>
+			     <tr>
+				     <td>Dynamic URLs</td>
+				     <td>
+						<input type="checkbox" name="crawlingQ" id="crawlingQ"  /> allow <a href="http://en.wikipedia.org/wiki/Query_string">
+						query-strings</a> (urls with a '?' in the path)				
+						<input type="hidden" name="storeHTCache" id="storeHTCache" value="on" />				
+				        <input type="hidden" name="cachePolicy" id="cachePolicy" value="iffresh" />
+				        <input type="hidden" name="indexText" id="indexText" value="on" />
+				        <input type="hidden" name="indexMedia" id="indexMedia" value="on" />
+				        <input type="hidden" name="intention" id="intention" value="" />
+				        <input type="hidden" name="xsstopw" id="xsstopw" value="off" />
+				        <input type="hidden" name="xdstopw" id="xdstopw" value="off" />
+				        <input type="hidden" name="xpstopw" id="xpstopw" value="off" />
+				     </td>
+				 <tr>
+		     </table>
+		     <input type="hidden" value="Start New Crawl" name="crawlingstart">      
+    		</form>
 		</div>	
 		#%env/templates/footer.template%#
 	</body>

@@ -40,7 +40,7 @@ public class import_ymark {
         final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
         final boolean isAuthUser = user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
-        final int queueSize = 20;
+        final int queueSize = 200;
         
         Thread t;
         YMarkEntry bmk;
