@@ -476,36 +476,39 @@ public final class Switchboard extends serverSwitch {
         // load distributed ranking
         // very large memory configurations allow to re-compute a ranking table
         /*
-        final File hostIndexFile = new File(queuesRoot, "hostIndex.blob");
+        final File hostIndexFile = new File(this.queuesRoot, "hostIndex.blob");
         if (MemoryControl.available() > 1024 * 1024 * 1024) new Thread() {
             public void run() {
                 ReferenceContainerCache<HostReference> hostIndex; // this will get large, more than 0.5 million entries by now
                 if (!hostIndexFile.exists()) {
-                    hostIndex = BlockRank.collect(peers, webStructure);
+                    hostIndex = BlockRank.collect(Switchboard.this.peers, Switchboard.this.webStructure, Integer.MAX_VALUE);
                     BlockRank.saveHostIndex(hostIndex, hostIndexFile);
                 } else {
                     hostIndex = BlockRank.loadHostIndex(hostIndexFile);
                 }
 
                 // use an index segment to find hosts for given host hashes
-                String segmentName = getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
-                Segment segment = indexSegments.segment(segmentName);
-                MetadataRepository metadata = segment.urlMetadata();
+                final String segmentName = getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
+                final Segment segment = Switchboard.this.indexSegments.segment(segmentName);
+                final MetadataRepository metadata = segment.urlMetadata();
                 Map<String,HostStat> hostHashResolver;
                 try {
                     hostHashResolver = metadata.domainHashResolver(metadata.domainSampleCollector());
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     hostHashResolver = new HashMap<String, HostStat>();
                 }
 
                 // recursively compute a new ranking table
+                Switchboard.this.log.logInfo("BLOCK RANK: computing new ranking tables...");
                 BlockRank.ybrTables = BlockRank.evaluate(hostIndex, hostHashResolver, null, 0);
                 hostIndex = null; // we don't need that here any more, so free the memory
 
                 // use the web structure and the hostHash resolver to analyse the ranking table
-                BlockRank.analyse(BlockRank.ybrTables, webStructure, hostHashResolver);
+                Switchboard.this.log.logInfo("BLOCK RANK: analysis of " + BlockRank.ybrTables.length + " tables...");
+                BlockRank.analyse(Switchboard.this.webStructure, hostHashResolver);
                 // store the new table
-                //BlockRank.storeBlockRankTable(rankingPath);
+                Switchboard.this.log.logInfo("BLOCK RANK: storing fresh table...");
+                BlockRank.storeBlockRankTable(rankingPath);
             }
         }.start();
         */

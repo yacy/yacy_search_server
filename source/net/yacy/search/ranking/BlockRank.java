@@ -2,7 +2,7 @@
  *  BlockRankCollector
  *  Copyright 2011 by Michael Christen
  *  First released 18.05.2011 at http://yacy.net
- *  
+ *
  *  $LastChangedDate: 2011-04-26 19:39:16 +0200 (Di, 26 Apr 2011) $
  *  $LastChangedRevision: 7676 $
  *  $LastChangedBy: orbiter $
@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -49,71 +49,71 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.peers.graphics.WebStructureGraph.HostReference;
-import net.yacy.search.index.Segment;
 import net.yacy.search.index.MetadataRepository.HostStat;
+import net.yacy.search.index.Segment;
 
 
 public class BlockRank {
 
     public static BinSearch[] ybrTables = null; // block-rank tables
-    
-    
+
+
     /**
      * collect host index information from other peers. All peers in the seed database are asked
      * this may take some time; please wait up to one minute
      * @param seeds
      * @return a merged host index from all peers
      */
-    public static ReferenceContainerCache<HostReference> collect(final SeedDB seeds, final WebStructureGraph myGraph) {
-        
-        ReferenceContainerCache<HostReference> index = new ReferenceContainerCache<HostReference>(WebStructureGraph.hostReferenceFactory, Base64Order.enhancedCoder, 6);
-        
+    public static ReferenceContainerCache<HostReference> collect(final SeedDB seeds, final WebStructureGraph myGraph, int maxcount) {
+
+        final ReferenceContainerCache<HostReference> index = new ReferenceContainerCache<HostReference>(WebStructureGraph.hostReferenceFactory, Base64Order.enhancedCoder, 6);
+
         // start all jobs
-        Iterator<Seed> si = seeds.seedsConnected(true, false, null, 0.99f);
-        ArrayList<IndexRetrieval> jobs = new ArrayList<IndexRetrieval>();
-        while (si.hasNext()) {
-            IndexRetrieval loader = new IndexRetrieval(index, si.next());
+        final Iterator<Seed> si = seeds.seedsConnected(true, false, null, 0.99f);
+        final ArrayList<IndexRetrieval> jobs = new ArrayList<IndexRetrieval>();
+        while (maxcount-- > 0 && si.hasNext()) {
+            final IndexRetrieval loader = new IndexRetrieval(index, si.next());
             loader.start();
             jobs.add(loader);
         }
-        
+
         // get the local index
         if (myGraph != null) try {
-            ReferenceContainerCache<HostReference> myIndex = myGraph.incomingReferences();
+            final ReferenceContainerCache<HostReference> myIndex = myGraph.incomingReferences();
             Log.logInfo("BlockRank", "loaded " + myIndex.size() + " host indexes from my peer");
             index.merge(myIndex);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
         }
-        
+
         // wait for termination
-        for (IndexRetrieval job: jobs) try { job.join(); } catch (InterruptedException e) { }
+        for (final IndexRetrieval job: jobs) try { job.join(); } catch (final InterruptedException e) { }
         Log.logInfo("BlockRank", "create " + index.size() + " host indexes from all peers");
-        
+
         return index;
     }
-    
+
     public static class IndexRetrieval extends Thread {
-        
+
         ReferenceContainerCache<HostReference> index;
         Seed seed;
-        
-        public IndexRetrieval(ReferenceContainerCache<HostReference> index, Seed seed) {
+
+        public IndexRetrieval(final ReferenceContainerCache<HostReference> index, final Seed seed) {
             this.index = index;
             this.seed = seed;
         }
-        
+
         public void run() {
-            ReferenceContainerCache<HostReference> partialIndex = Protocol.loadIDXHosts(this.seed);
+            final ReferenceContainerCache<HostReference> partialIndex = Protocol.loadIDXHosts(this.seed);
             if (partialIndex == null || partialIndex.size() == 0) return;
             Log.logInfo("BlockRank", "loaded " + partialIndex.size() + " host indexes from peer " + this.seed.getName());
             try {
                 this.index.merge(partialIndex);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }
         }
@@ -124,47 +124,47 @@ public class BlockRank {
      * @param index
      * @param file
      */
-    public static void saveHostIndex(ReferenceContainerCache<HostReference> index, File file) {
+    public static void saveHostIndex(final ReferenceContainerCache<HostReference> index, final File file) {
         Log.logInfo("BlockRank", "saving " + index.size() + " host indexes to file " + file.toString());
         index.dump(file, Segment.writeBufferSize, false);
         Log.logInfo("BlockRank", "saved " + index.size() + " host indexes to file " + file.toString());
     }
-    
-    public static ReferenceContainerCache<HostReference> loadHostIndex(File file) {
+
+    public static ReferenceContainerCache<HostReference> loadHostIndex(final File file) {
 
         Log.logInfo("BlockRank", "reading host indexes from file " + file.toString());
-        ReferenceContainerCache<HostReference> index = new ReferenceContainerCache<HostReference>(WebStructureGraph.hostReferenceFactory, Base64Order.enhancedCoder, 6);
+        final ReferenceContainerCache<HostReference> index = new ReferenceContainerCache<HostReference>(WebStructureGraph.hostReferenceFactory, Base64Order.enhancedCoder, 6);
 
         // load from file
         try {
-            ReferenceIterator<HostReference> ri = new ReferenceIterator<HostReference>(file, WebStructureGraph.hostReferenceFactory);
+            final ReferenceIterator<HostReference> ri = new ReferenceIterator<HostReference>(file, WebStructureGraph.hostReferenceFactory);
             while (ri.hasNext()) {
-                ReferenceContainer<HostReference> references = ri.next();
+                final ReferenceContainer<HostReference> references = ri.next();
                 index.add(references);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
         }
 
         Log.logInfo("BlockRank", "read " + index.size() + " host indexes from file " + file.toString());
         return index;
     }
-    
-    public static BinSearch[] evaluate(final ReferenceContainerCache<HostReference> index, Map<String, HostStat> hostHashResolver, BinSearch[] referenceTable, int recusions) {
-        
+
+    public static BinSearch[] evaluate(final ReferenceContainerCache<HostReference> index, final Map<String, HostStat> hostHashResolver, final BinSearch[] referenceTable, int recusions) {
+
         // first find out the maximum count of the hostHashResolver
         int maxHostCount = 1;
-        for (HostStat stat: hostHashResolver.values()) {
+        for (final HostStat stat: hostHashResolver.values()) {
             if (stat.count > maxHostCount) maxHostCount = stat.count;
         }
-        
+
         // then just count the number of references. all other information from the index is not used because they cannot be trusted
-        ScoreMap<byte[]> hostScore = new OrderedScoreMap<byte[]>(index.termKeyOrdering());
+        final ScoreMap<byte[]> hostScore = new OrderedScoreMap<byte[]>(index.termKeyOrdering());
         HostStat hostStat;
         int hostCount;
-        for (ReferenceContainer<HostReference> container: index) {
+        for (final ReferenceContainer<HostReference> container: index) {
             if (container.size() == 0) continue;
             if (referenceTable == null) {
                 hostStat = hostHashResolver.get(ASCII.String(container.getTermHash()));
@@ -172,7 +172,7 @@ public class BlockRank {
                 hostScore.set(container.getTermHash(), container.size() * maxHostCount / hostCount);
             } else {
                 int score = 0;
-                Iterator<HostReference> hri = container.entries();
+                final Iterator<HostReference> hri = container.entries();
                 HostReference hr;
                 while (hri.hasNext()) {
                     hr = hri.next();
@@ -183,40 +183,40 @@ public class BlockRank {
                 hostScore.set(container.getTermHash(), score);
             }
         }
-        
+
         // now divide the scores into two halves until the score map is empty
-        List<BinSearch> table = new ArrayList<BinSearch>();
+        final List<BinSearch> table = new ArrayList<BinSearch>();
         while (hostScore.size() > 10) {
-            List<byte[]> smallest = hostScore.lowerHalf();
+            final List<byte[]> smallest = hostScore.lowerHalf();
             if (smallest.size() == 0) break; // should never happen but this ensures termination of the loop
             Log.logInfo("BlockRank", "index evaluation: computed partition of size " + smallest.size());
             table.add(new BinSearch(smallest, 6));
-            for (byte[] host: smallest) hostScore.delete(host);
+            for (final byte[] host: smallest) hostScore.delete(host);
         }
         if (hostScore.size() > 0) {
-            ArrayList<byte[]> list = new ArrayList<byte[]>();
-            for (byte[] entry: hostScore) list.add(entry);
+            final ArrayList<byte[]> list = new ArrayList<byte[]>();
+            for (final byte[] entry: hostScore) list.add(entry);
             Log.logInfo("BlockRank", "index evaluation: computed last partition of size " + list.size());
             table.add(new BinSearch(list, 6));
         }
-        
+
         // the last table entry has now a list of host hashes that has the most references
-        int binTables = Math.min(16, table.size());
-        BinSearch[] newTables = new BinSearch[binTables];
+        final int binTables = Math.min(16, table.size());
+        final BinSearch[] newTables = new BinSearch[binTables];
         for (int i = 0; i < binTables; i++) newTables[i] = table.get(table.size() - i - 1);
 
         // re-use the new table for a recursion
         if (recusions == 0) return newTables;
         return evaluate(index, hostHashResolver, newTables, --recusions); // one recursion step
     }
-    
-    public static void analyse(BinSearch[] tables, final WebStructureGraph myGraph, final Map<String, HostStat> hostHash2hostName) {
+
+    public static void analyse(final WebStructureGraph myGraph, final Map<String, HostStat> hostHash2hostName) {
         byte[] hosth = new byte[6];
         String hosths, hostn;
         HostStat hs;
-        for (int ybr = 0; ybr < tables.length; ybr++) {
-            row: for (int i = 0; i < tables[ybr].size(); i++) {
-                hosth = tables[ybr].get(i, hosth);
+        for (int ybr = 0; ybr < ybrTables.length; ybr++) {
+            row: for (int i = 0; i < ybrTables[ybr].size(); i++) {
+                hosth = ybrTables[ybr].get(i, hosth);
                 hosths = ASCII.String(hosth);
                 hostn = myGraph.hostHash2hostName(hosths);
                 if (hostn == null) {
@@ -231,8 +231,8 @@ public class BlockRank {
             }
         }
     }
-    
-    
+
+
     /**
      * load YaCy Block Rank tables
      * These tables have a very simple structure: every file is a sequence of Domain hashes, ordered by b64.
@@ -258,7 +258,7 @@ public class BlockRank {
         } catch (final IOException e) {
         }
     }
-    
+
     public static void storeBlockRankTable(final File rankingPath) {
         String ybrName;
         File f;
@@ -280,7 +280,7 @@ public class BlockRank {
         } catch (final IOException e) {
         }
     }
-    
+
     /**
      * returns the YBR ranking value in a range of 0..15, where 0 means best ranking and 15 means worst ranking
      * @param hash
@@ -289,8 +289,8 @@ public class BlockRank {
     public static int ranking(final byte[] hash) {
         return ranking(hash, ybrTables);
     }
-    
-    public static int ranking(final byte[] hash, BinSearch[] rankingTable) {
+
+    public static int ranking(final byte[] hash, final BinSearch[] rankingTable) {
         if (rankingTable == null) return 16;
         byte[] hosthash;
         if (hash.length == 6) {
