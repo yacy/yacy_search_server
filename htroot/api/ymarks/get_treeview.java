@@ -104,7 +104,14 @@ public class get_treeview {
 	        		if (foldername.length == n+1) {
 	        			prop.put("folders_"+count+"_foldername", foldername[n]);
 	    	    		prop.put("folders_"+count+"_expanded", "false");
-	    	    		prop.put("folders_"+count+"_type", "folder");
+	    	    		if(foldername[n].equals("IOExceptions"))
+	    	    			prop.put("folders_"+count+"_type", "err");	 
+	    	    		else if(foldername[n].equals("unsorted"))
+	    	    			prop.put("folders_"+count+"_type", "question");
+	    	    		else if(foldername[n].equals("Crawl Start"))
+	    	    			prop.put("folders_"+count+"_type", "crawl");	
+	    	    		else
+	    	    			prop.put("folders_"+count+"_type", "folder");	    	    		
 	    	    		prop.put("folders_"+count+"_hash", folder);				//TODO: switch from pathString to folderHash
 	    	    		prop.put("folders_"+count+"_url", "");					//TODO: insert folder url
 	    	    		prop.put("folders_"+count+"_hasChildren", "true");		//TODO: determine if folder has children
