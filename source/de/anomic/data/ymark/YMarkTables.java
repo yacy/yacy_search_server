@@ -88,7 +88,8 @@ public class YMarkTables {
     public final static String BOOKMARKS_LOG = "BOOKMARKS";
     public final static String USER_ADMIN = "admin";
 	public final static String USER_AUTHENTICATE = "AUTHENTICATE";
-	public final static String USER_AUTHENTICATE_MSG = "Authentication required!";
+	public final static String USER_AUTHENTICATE_MSG = "Bookmark user authentication required!";
+	public final static String ADMIN_AUTHENTICATE_MSG = "Admin authentication required!";
 
     public final static String p1 = "(?:^|.*,)";
     public final static String p2 = "\\Q";
@@ -299,7 +300,11 @@ public class YMarkTables {
 			bmk_entry.put(YMarkEntry.BOOKMARK.TITLE.key(), metadata.get(YMarkMetadata.METADATA.TITLE));
 			bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), metadata.get(YMarkMetadata.METADATA.DESCRIPTION));
 		}
-		bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(foldersString));
+		final String fs = YMarkUtil.cleanFoldersString(foldersString);
+		if(fs.isEmpty())
+			bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkEntry.BOOKMARK.FOLDERS.deflt());
+		else
+			bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), fs);
 		final StringBuilder strb = new StringBuilder();
 		if(autotag) {
 			final String autotags = YMarkAutoTagger.autoTag(document, 3, this.worktables.bookmarks.getTags(bmk_user));

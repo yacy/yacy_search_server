@@ -16,7 +16,6 @@ public class YMarkEntry extends TreeMap<String, String> {
     public static final String BOOKMARKS_ID = "id";
     public static final String BOOKMARKS_REF = "ref";
     public static final String FOLDERS_IMPORTED = "/imported";
-    public static final String FOLDERS_UNSORTED = "/unsorted";
 
     public static enum BOOKMARK {
     	//             key                 dc_attrb            dflt            html_attrb          xbel_attrb      json_attrb      type

@@ -36,7 +36,7 @@ import net.yacy.kelondro.data.word.Word;
 public class YMarkUtil {
     public final static String TAGS_SEPARATOR = ",";
     public final static String FOLDERS_SEPARATOR = "/";
-    public final static String EMPTY_STRING = "";
+    public final static String EMPTY_STRING = new String();
         
     /**
      * conveniance function to generate url hashes for YMark bookmarks
@@ -83,11 +83,15 @@ public class YMarkUtil {
         }
         return keySet;
     }
+    
+    public final static String cleanTagsString(final String tagsString) {
+    	return cleanTagsString(tagsString, YMarkUtil.EMPTY_STRING);
+    }
         
-    public final static String cleanTagsString(final String tagsString) {        
+    public final static String cleanTagsString(final String tagsString, final String dflt) {        
     	StringBuilder ts = new StringBuilder(tagsString);    	
     	if(ts.length() == 0)
-    		return YMarkUtil.EMPTY_STRING;
+    		return dflt;
     	// get rid of double commas and space characters following a comma
     	for (int i = 0; i < ts.length()-1; i++) {
     		if (ts.charAt(i) == TAGS_SEPARATOR.charAt(0)) {
@@ -105,9 +109,13 @@ public class YMarkUtil {
     	return ts.toString();
     }
     
-    public final static String cleanFoldersString(final String foldersString) {        
+    public final static String cleanFoldersString(final String foldersString) {
+    	return cleanFoldersString(foldersString, YMarkUtil.EMPTY_STRING);
+    }
+    
+    public final static String cleanFoldersString(final String foldersString, final String dflt) {        
     	if(foldersString.isEmpty())
-    		return YMarkUtil.EMPTY_STRING;
+    		return dflt;
     	StringBuilder fs = new StringBuilder(cleanTagsString(foldersString));    	
     	if(fs.length() == 0)
     		return YMarkEntry.BOOKMARK.FOLDERS.deflt();

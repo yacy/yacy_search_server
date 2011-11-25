@@ -146,8 +146,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 						<input type="radio" name="importer" value="surro" /> Surrogate XML<br />
 						<input type="radio" name="importer" value="dmoz" disabled="disabled" /> DMOZ XML<br />
 						<input type="radio" name="importer" value="list" disabled="disabled"/> YaCy White/Black List<br />
-						<input type="radio" name="importer" value="bmks" /> YaCy old bookmarks.db<br />
-						<input type="radio" name="importer" value="crawls" /> YaCy Crawl Starts<br />
+						<input type="radio" name="importer" value="bmks" /> YaCy old bookmarks.db (admin)<br />
+						<input type="radio" name="importer" value="crawls" /> YaCy Crawl Starts (admin)<br />
 					</p>
 					<p>
 						<small>Bookmark file</small>
@@ -194,32 +194,33 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 		</div>
 		
 		<!-- Bookmarks Edit Dialog -->	
-		<div id="ymarks_add_dialog" class="bm_dialog" title="Add & Edit Bookmark">		
+		<div id="ymarks_add_dialog" class="bm_dialog" title="Add & Edit Bookmark">
+			<img id="bmaddimg" src="/yacy/ui/img-1/Star.png" />			
 			<form id="bmaddform" method="post" accept-charset="UTF-8" action="jQuery"><div>
 				<label for="bm_url">URL:</label>
 				<br />					
-				<input type="text" name="bm_url" id="bm_url" class="bm_input" size="80" />
+				<input type="text" name="url" id="bm_url" class="bm_input" size="80" />
 				<br />
 				<label for="bm_title">Title:</label>
 				<br />
-				<input type="text" name="bm_title" id="bm_title" class="bm_input" size="80" />
+				<input type="text" name="title" id="bm_title" class="bm_input" size="80" />
 				<br />
 				<label for="bm_desc">Description:</label>
 				<br />
-				<textarea name="bm_desc" id="bm_desc" class="bm_input" rows="3" cols="20">
+				<textarea name="desc" id="bm_desc" class="bm_input" rows="3" cols="20">
 				</textarea>		
 				<br />
 				<label for="bm_path">Folder (/folder/subfolder):</label>
 				<br />
-				<input type="text" name="bm_path" id="bm_path" class="bm_input" size="80" />
+				<input type="text" name="folders" id="bm_path" class="bm_input" size="80" />
 				<br />
 				<label for="bm_tags">Tags (comma separated):</label>
 				<br />
-				<input type="text" name="bm_tags" id="bm_tags" class="bm_input" size="80" />
+				<input type="text" name="tags" id="bm_tags" class="bm_input" size="80" />
 				<br />
 				<label for="bm_public">Public:</label>
 				<br />
-				<select name="bm_public" id="bm_public" class="bm_select">
+				<select name="public" id="bm_public" class="bm_select">
 					<option value="true">yes</option>
 					<option value="false">no</option>
 				</select>
