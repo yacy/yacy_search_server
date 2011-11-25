@@ -7,6 +7,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkAutoTagger;
@@ -32,7 +33,6 @@ public class get_metadata {
         if(isAdmin || isAuthUser) {
 
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
-
 
         	String url = post.get(YMarkEntry.BOOKMARK.URL.key(),YMarkEntry.BOOKMARK.URL.deflt());
         	boolean hasProtocol = false;
@@ -70,15 +70,18 @@ public class get_metadata {
     			}
     			prop.put("crawlstart", count);
 
-			} catch (final MalformedURLException e1) {
+			} catch (final MalformedURLException e) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				Log.logException(e);
+				prop.put("status", "error");
 			} catch (final IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.logException(e);
+				prop.put("status", "error");
 			} catch (final Failure e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.logException(e);
+				prop.put("status", "error");
 			}
         } else {
         	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);

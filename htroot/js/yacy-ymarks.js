@@ -216,7 +216,7 @@ function loadTags(select, sortorder, tags) {
 			$(xml).find('tag').each(function(){					
 				var count = $(this).attr('count');
 				var tag = $(this).attr('tag');									
-				$('<option value="'+tag+'">'+tag+' ['+count+']</option>').appendTo(select);
+				$('<option value="'+tag+'">'+HTMLenc(tag)+' ['+count+']</option>').appendTo(select);
 			}); //close each(			
 			$(select).multiselect('refresh');
 		}

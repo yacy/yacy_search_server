@@ -142,6 +142,10 @@ public class import_ymark {
                     }
                 }
         	} else if(post.containsKey("importer") && post.get("importer").equals("crawls")) {
+        		if(!isAdmin) {
+        			prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.ADMIN_AUTHENTICATE_MSG);
+        			return prop;
+        		}
         		try {
 	    			final Pattern pattern = Pattern.compile("^crawl start for.*");
 					final Iterator<Tables.Row> APIcalls = sb.tables.iterator(WorkTables.TABLE_API_NAME, WorkTables.TABLE_API_COL_COMMENT, pattern);
@@ -165,6 +169,10 @@ public class import_ymark {
 					e.printStackTrace();
 				}
         	} else if(post.containsKey("importer") && post.get("importer").equals("bmks")) {
+        		if(!isAdmin) {
+        			prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.ADMIN_AUTHENTICATE_MSG);
+        			return prop;
+        		}
         		final Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(isAdmin);
             	BookmarksDB.Bookmark bookmark;
             	while(bit.hasNext()){

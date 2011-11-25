@@ -19,25 +19,32 @@ function bm_action(com,grid) {
 	}
 	else if (com=='Add') {			
 		$('#bmaddform').resetForm();
-		$("input[name='bm_url']").removeAttr("disabled");
+		$("#bm_url").removeAttr("disabled");
 		$("#bm_url").blur(function() { 
-			var url = $("input[name='bm_url']").getValue();
+			var url = $("#bm_url").getValue();
 			$.ajax({
 				type: "GET",
 				url: "/api/ymarks/get_metadata.xml?url="+url,			
 				dataType: "xml",
 				success: function(xml) {					
-					var title = $(xml).find('title').text();
-					$("input[name='bm_title']").setValue(title);
-					var desc = $(xml).find('desc').text();					
-					$("textarea[name='bm_desc']").setValue(desc);					
-					
-					var autotags = $(xml).find('autotags')
+					var title = "";
+					var desc = "";
 					var tags = "";
-					$(autotags).find('tag').each(function(){
-						tags = tags + "," + $(this).attr('name');
-					});
-					$("input[name='bm_tags']").setValue(tags);
+					if ($(xml).find('info').attr('status') === "error") {
+						$("#bmaddimg").attr("src","/yacy/ui/img-1/Smiley Star Sad.png");
+					} else {
+						var autotags = $(xml).find('autotags')						
+						title = $(xml).find('title').text();						
+						desc = $(xml).find('desc').text();						
+						tags = "";
+						$(autotags).find('tag').each(function(){
+							tags = tags + "," + $(this).attr('name');
+						});
+						$("#bmaddimg").attr("src","/yacy/ui/img-1/Smiley Star.png");						
+					}
+					$("#bm_title").setValue(title);
+					$("#bm_desc").setValue(desc);
+					$("#bm_tags").setValue(tags);
 				}					
 			});
 		});						
@@ -47,13 +54,13 @@ function bm_action(com,grid) {
 			alert("Editing of more than one selected bookmark is currently not supportet!");
 			return false;
 		}
-		$("input[name='bm_url']").attr("disabled","disabled"); 
-		$("input[name='bm_url']").setValue($('.trSelected',grid).find('.url').text());
-        $("input[name='bm_title']").setValue($('.trSelected',grid).find('h3.linktitle').text().trim());
-        $("textarea[name='bm_desc']").setValue($('.trSelected',grid).find('p.desc').text().trim());            		
-        $("input[name='bm_tags']").setValue($('.trSelected',grid).find('p.tags').text().trim().replace(/,\s/g,","));            
-        $("input[name='bm_path']").setValue($('.trSelected',grid).find('p.folders').text().replace(/,\s/g,","));
-        $("select[name='bm_public']").setValue($('.trSelected',grid).find('img').attr('alt'));
+		$("#bm_url").attr("disabled","disabled"); 
+		$("#bm_url").setValue($('.trSelected',grid).find('.url').text());
+        $("#bm_title").setValue($('.trSelected',grid).find('h3.linktitle').text().trim());
+        $("#bm_desc").setValue($('.trSelected',grid).find('p.desc').text().trim());            		
+        $("#bm_tags").setValue($('.trSelected',grid).find('p.tags').text().trim().replace(/,\s/g,","));            
+        $("#bm_path").setValue($('.trSelected',grid).find('p.folders').text().replace(/,\s/g,","));
+        $("#bm_public").setValue($('.trSelected',grid).find('img').attr('alt'));
         $("#ymarks_add_dialog").dialog('open');
 	} else if (com=='Crawl') {
 		if ($('.trSelected',grid).length == 1 && $(this).find('.apicall_pk').text() == "") {
@@ -107,23 +114,24 @@ function bm_dialog() {
 	/* Initialize Bookmark Dialog */		
 	$("#ymarks_add_dialog").dialog({			
 		autoOpen: false,
-		height: 420,
+		height: 450,
 		width: 340,
 		position: ['top',100],
 		modal: true,			
 		resizable: false,
 		buttons: { 
     		OK: function() { 
-    			var url = $("input[name='bm_url']").getValue();
-    	        var title = $("input[name='bm_title']").getValue();
-    	        var desc = $("textarea[name='bm_desc']").getValue();            		
-    	        var tags = $("input[name='bm_tags']").getValue()
-    	        var path = $("input[name='bm_path']").getValue();
-    	        var pub = $("select[name='bm_public']").getValue();
+				var param = [];
+    			var i = 0;
+    			$("#bmaddform input,#bmaddform select,#bm_desc").each(function() {
+					var item = {name : $(this).attr("name"), value : $(this).attr("value")};	
+					param[i] = item;
+					i++;
+    			});
     	        $.ajax({
     				type: "POST",
     				url: "/api/ymarks/add_ymark.xml",
-    				data: "url="+url+"&title="+title+"&desc="+desc+"&tags="+tags+"&folders="+path+"&public="+pub,						
+    				data: param,						
     				dataType: "xml",
     				success: function(xml) {
     	         		$('#bmaddform').resetForm();

@@ -36,7 +36,7 @@ public class add_ymark {
             if(post.containsKey("urlHash")) {
             	final String urlHash = post.get("urlHash",YMarkUtil.EMPTY_STRING);
             	final DigestURI url = sb.indexSegments.segment(Segments.Process.PUBLIC).urlMetadata().load(urlHash.getBytes()).metadata().url();
-            	final String folders = post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.FOLDERS_UNSORTED);
+            	final String folders = post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.BOOKMARK.FOLDERS.deflt());
             	final String tags = post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.EMPTY_STRING);
             	try {
 					sb.tables.bookmarks.createBookmark(sb.loader, url, bmk_user, true, tags, folders);
@@ -66,13 +66,13 @@ public class add_ymark {
 				}
 
 	        	final YMarkEntry bmk = new YMarkEntry();
-
+	        	
 	        	bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);
 	        	bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), post.get(YMarkEntry.BOOKMARK.TITLE.key(),YMarkEntry.BOOKMARK.TITLE.deflt()));
 	        	bmk.put(YMarkEntry.BOOKMARK.DESC.key(), post.get(YMarkEntry.BOOKMARK.DESC.key(),YMarkEntry.BOOKMARK.DESC.deflt()));
 	        	bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), post.get(YMarkEntry.BOOKMARK.PUBLIC.key(),YMarkEntry.BOOKMARK.PUBLIC.deflt()));
-	        	bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkEntry.BOOKMARK.TAGS.deflt())));
-	        	bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.FOLDERS_UNSORTED)));
+	        	bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkEntry.BOOKMARK.TAGS.deflt()),YMarkEntry.BOOKMARK.TAGS.deflt()));
+	        	bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.BOOKMARK.FOLDERS.deflt()),YMarkEntry.BOOKMARK.FOLDERS.deflt()));
 
 	            try {
 					sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
