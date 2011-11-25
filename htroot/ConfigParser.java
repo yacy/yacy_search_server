@@ -41,17 +41,17 @@ public class ConfigParser {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        
+
         if (post != null) {
-            if (!sb.verifyAuthentication(header, false)) {
+            if (!sb.verifyAuthentication(header)) {
                 // force log-in
                 prop.put("AUTHENTICATE", "admin log-in");
                 return prop;
             }
-            
+
             if (post.containsKey("parserSettings")) {
                 post.remove("parserSettings");
-                
+
                 for (final Parser parser: TextParser.parsers()) {
                     for (final String mimeType: parser.supportedMimeTypes()) {
                         TextParser.grantMime(mimeType, "on".equals(post.get("mimename_" + mimeType, "")));
@@ -60,11 +60,11 @@ public class ConfigParser {
                 env.setConfig(SwitchboardConstants.PARSER_MIME_DENY, TextParser.getDenyMime());
             }
         }
-        
-        int i = 0;        
+
+        int i = 0;
         for (final Parser parser: TextParser.parsers()) {
             prop.put("parser_" + i + "_name", parser.getName());
-            
+
             int mimeIdx = 0;
             for (final String mimeType: parser.supportedMimeTypes()) {
                 prop.put("parser_" + i + "_mime_" + mimeIdx + "_mimetype", mimeType);
@@ -74,9 +74,9 @@ public class ConfigParser {
             prop.put("parser_" + i + "_mime", mimeIdx);
             i++;
         }
-        
+
         prop.put("parser", i);
-        
+
         // return rewrite properties
         return prop;
     }

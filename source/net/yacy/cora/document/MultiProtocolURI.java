@@ -1140,6 +1140,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             final Locale locale = Domains.getLocale(this.hostAddress);
             if (locale != null && locale.getCountry() != null && locale.getCountry().length() > 0) return locale;
         }
+        /*
+        if (this.hostAddress != null) {
+            return Domains.getLocale(this.hostAddress);
+        }
+        */
         return Domains.getLocale(this.host);
     }
 

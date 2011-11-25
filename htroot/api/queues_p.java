@@ -11,46 +11,45 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
-
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class queues_p {
-    
+
     public static final String STATE_RUNNING = "running";
     public static final String STATE_PAUSED = "paused";
-    
+
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(final Date date) {
         if (date == null) return "";
         return dayFormatter.format(date);
     }
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         //wikiCode wikiTransformer = new wikiCode(switchboard);
         final serverObjects prop = new serverObjects();
         Segment segment = null;
-        boolean html = post != null && post.containsKey("html");
+        final boolean html = post != null && post.containsKey("html");
         prop.setLocalized(html);
-        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
+        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header)) {
             segment = sb.indexSegments.segment(post.get("segment"));
         }
         if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         prop.put("rejected", "0");
         //int showRejectedCount = 10;
-        
+
         Seed initiator;
-        
+
         // index size
         prop.putNum("urlpublictextSize", segment.urlMetadata().size());
         prop.putNum("rwipublictextSize", segment.termIndex().sizesMax());
 
         // loader queue
-        prop.putNum("loaderSize", sb.crawlQueues.workerSize());        
+        prop.putNum("loaderSize", sb.crawlQueues.workerSize());
         prop.putNum("loaderMax", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
         if (sb.crawlQueues.workerSize() == 0) {
             prop.put("list-loader", "0");
@@ -68,7 +67,7 @@ public class queues_p {
             }
             prop.put("list-loader", count);
         }
-        
+
         //local crawl queue
         prop.putNum("localCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
         prop.put("localCrawlState", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
@@ -94,8 +93,8 @@ public class queues_p {
         // return rewrite properties
         return prop;
     }
-    
-    
+
+
     public static final void addNTable(final Switchboard sb, final serverObjects prop, final String tableName, final List<Request> crawlerList) {
 
         int showNum = 0;

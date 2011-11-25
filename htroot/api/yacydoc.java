@@ -10,7 +10,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -38,27 +38,26 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class yacydoc {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
-        
+
         final serverObjects prop = new serverObjects();
         final Segment segment;
-        boolean html = post != null && post.containsKey("html");
+        final boolean html = post != null && post.containsKey("html");
         prop.setLocalized(html);
-        boolean authorized = sb.verifyAuthentication(header, false);
+        final boolean authorized = sb.verifyAuthentication(header);
         if (post != null && post.containsKey("segment") && authorized) {
             segment = sb.indexSegments.segment(post.get("segment"));
         } else {
             segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
-        
+
         prop.put("dc_title", "");
         prop.put("dc_creator", "");
         prop.put("dc_description", "");
@@ -71,21 +70,21 @@ public class yacydoc {
         prop.put("dc_language", "");
 
         if (post == null) return prop;
-        
-        String urlstring = post.get("url", "").trim();
+
+        final String urlstring = post.get("url", "").trim();
         String urlhash = post.get("urlhash", "").trim();
         if (urlstring.length() == 0 && urlhash.length() == 0) return prop;
 
         if (urlstring.length() > 0 && urlhash.length() == 0) {
             try {
-                DigestURI url = new DigestURI(urlstring);
+                final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 Log.logException(e);
             }
         }
         if (urlhash == null || urlhash.length() == 0) return prop;
-        
+
         final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes());
         if (entry == null) return prop;
 
@@ -94,7 +93,7 @@ public class yacydoc {
             return prop;
         }
         final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
-        
+
         prop.putXML("dc_title", metadata.dc_title());
         prop.putXML("dc_creator", metadata.dc_creator());
         prop.putXML("dc_description", ""); // this is the fulltext part in the surrogate
@@ -114,7 +113,7 @@ public class yacydoc {
         prop.putXML("yacy_referrer_url", (le == null) ? "" : le.metadata().url().toNormalform(false, true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words",entry.wordCount());
-        
+
         // return rewrite properties
         return prop;
     }

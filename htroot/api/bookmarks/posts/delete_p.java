@@ -5,7 +5,6 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -14,7 +13,7 @@ public class delete_p {
         // return variable that accumulates replacements
         final Switchboard switchboard = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        final boolean isAdmin=switchboard.verifyAuthentication(header, true);        
+        final boolean isAdmin=switchboard.verifyAuthentication(header);
         if(post!= null){
     		if(!isAdmin){
     			// force authentication if desired
@@ -22,7 +21,7 @@ public class delete_p {
         				prop.put("AUTHENTICATE","admin log-in");
         			}
         			return prop;
-    		} 
+    		}
         	try {
                 if (post.containsKey("url") && switchboard.bookmarksDB.removeBookmark(ASCII.String((new DigestURI(post.get("url", "nourl"))).hash()))) {
                 	prop.put("result", "1");
@@ -36,10 +35,10 @@ public class delete_p {
             }
         }else{
         	prop.put("result", "0");
-        }        
+        }
         // return rewrite properties
         return prop;
-    }    
+    }
 }
 
 

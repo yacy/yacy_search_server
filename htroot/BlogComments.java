@@ -44,12 +44,11 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
-
 import de.anomic.data.BlogBoard;
+import de.anomic.data.BlogBoard.BlogEntry;
 import de.anomic.data.BlogBoardComments;
 import de.anomic.data.MessageBoard;
 import de.anomic.data.UserDB;
-import de.anomic.data.BlogBoard.BlogEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -65,7 +64,7 @@ public class BlogComments {
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        boolean hasRights = sb.verifyAuthentication(header, true);
+        boolean hasRights = sb.verifyAuthentication(header);
 
         prop.put("mode_admin", hasRights ? "1" : "0");
 
@@ -107,7 +106,7 @@ public class BlogComments {
 
         final BlogBoard.BlogEntry page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
         final boolean pageExists = sb.blogDB.contains(pagename);
-        
+
         // comments not allowed
         prop.put("mode_allow", (page.getCommentMode() == 0) ? 0 : 1);
 
@@ -217,12 +216,12 @@ public class BlogComments {
                 while (i.hasNext() && count < num) {
 
                     pageid = i.next();
-                    
+
                     if(start > 0) {
                         start--;
                         continue;
                     }
-                        
+
                     entry = sb.blogCommentDB.read(pageid);
 
                     if (commentMode == 2 && !hasRights && !entry.isAllowed()) {
@@ -309,7 +308,7 @@ public class BlogComments {
             .append("/")
             .append(msgEntry.authorHash())
             .append("\nMessage to:   ")
-            .append(msgEntry.recipient()) 
+            .append(msgEntry.recipient())
             .append("/")
             .append(msgEntry.recipientHash())
             .append("\nCategory:     ")

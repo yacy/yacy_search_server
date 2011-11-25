@@ -23,7 +23,7 @@ public class feed {
         prop.put("item", "0");
 
         if ((post == null) || (env == null)) return prop;
-        final boolean authorized = sb.verifyAuthentication(header, false);
+        final boolean authorized = sb.verifyAuthentication(header);
 
         final String channelNames = post.get("set");
         if (channelNames == null) return prop;

@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -59,7 +60,10 @@ public class OAIListFriendsLoader {
     public static void init(final LoaderDispatcher loader, final Map<String, File> moreFriends) {
         listFriends.putAll(moreFriends);
         if (loader != null) for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) {
-            loader.loadIfNotExistBackground(oaiFriend.getKey(), oaiFriend.getValue(), Integer.MAX_VALUE);
+            try {
+                loader.loadIfNotExistBackground(new DigestURI(oaiFriend.getKey()), oaiFriend.getValue(), Integer.MAX_VALUE);
+            } catch (final MalformedURLException e) {
+            }
         }
     }
 

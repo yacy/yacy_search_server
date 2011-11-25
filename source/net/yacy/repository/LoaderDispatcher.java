@@ -77,7 +77,7 @@ public final class LoaderDispatcher {
     private final FTPLoader ftpLoader;
     private final SMBLoader smbLoader;
     private final FileLoader fileLoader;
-    private final ConcurrentHashMap<String, Semaphore> loaderSteering; // a map that delivers a 'finish' semaphore for urls
+    private final ConcurrentHashMap<DigestURI, Semaphore> loaderSteering; // a map that delivers a 'finish' semaphore for urls
     private final Log log;
 
     public LoaderDispatcher(final Switchboard sb) {
@@ -90,7 +90,7 @@ public final class LoaderDispatcher {
         this.ftpLoader = new FTPLoader(sb, this.log);
         this.smbLoader = new SMBLoader(sb, this.log);
         this.fileLoader = new FileLoader(sb, this.log);
-        this.loaderSteering = new ConcurrentHashMap<String, Semaphore>();
+        this.loaderSteering = new ConcurrentHashMap<DigestURI, Semaphore>();
     }
 
     public boolean isSupportedProtocol(final String protocol) {
@@ -153,8 +153,7 @@ public final class LoaderDispatcher {
     }
 
     public Response load(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, final boolean checkBlacklist) throws IOException {
-        final String url = request.url().toNormalform(true, false);
-        Semaphore check = this.loaderSteering.get(url);
+        Semaphore check = this.loaderSteering.get(request.url());
         if (check != null) {
             // a loading process may be going on for that url
             try { check.tryAcquire(5, TimeUnit.SECONDS);} catch (final InterruptedException e) {}
@@ -162,15 +161,15 @@ public final class LoaderDispatcher {
             // which may be successful faster because of a cache hit
         }
 
-        this.loaderSteering.put(url, new Semaphore(0));
+        this.loaderSteering.put(request.url(), new Semaphore(0));
         try {
             final Response response = loadInternal(request, cacheStrategy, maxFileSize, checkBlacklist);
-            check = this.loaderSteering.remove(url);
+            check = this.loaderSteering.remove(request.url());
             if (check != null) check.release(1000);
             return response;
         } catch (final IOException e) {
             // release the semaphore anyway
-            check = this.loaderSteering.remove(url);
+            check = this.loaderSteering.remove(request.url());
             if (check != null) check.release(1000);
             //Log.logException(e);
             throw new IOException(e);
@@ -386,22 +385,22 @@ public final class LoaderDispatcher {
         }
     }
 
-    public void loadIfNotExistBackground(final String url, final File cache, final int maxFileSize) {
+    public void loadIfNotExistBackground(final DigestURI url, final File cache, final int maxFileSize) {
         new Loader(url, cache, maxFileSize, CacheStrategy.IFEXIST).start();
     }
 
-    public void loadIfNotExistBackground(final String url, final int maxFileSize) {
+    public void loadIfNotExistBackground(final DigestURI url, final int maxFileSize) {
         new Loader(url, null, maxFileSize, CacheStrategy.IFEXIST).start();
     }
 
     private class Loader extends Thread {
 
-        private final String url;
+        private final DigestURI url;
         private final File cache;
         private final int maxFileSize;
         private final CacheStrategy cacheStrategy;
 
-        public Loader(final String url, final File cache, final int maxFileSize, final CacheStrategy cacheStrategy) {
+        public Loader(final DigestURI url, final File cache, final int maxFileSize, final CacheStrategy cacheStrategy) {
             this.url = url;
             this.cache = cache;
             this.maxFileSize = maxFileSize;
@@ -412,7 +411,7 @@ public final class LoaderDispatcher {
             if (this.cache != null && this.cache.exists()) return;
             try {
                 // load from the net
-                final Response response = load(request(new DigestURI(this.url), false, true), this.cacheStrategy, this.maxFileSize, true);
+                final Response response = load(request(this.url, false, true), this.cacheStrategy, this.maxFileSize, true);
                 final byte[] b = response.getContent();
                 if (this.cache != null) FileUtils.copy(b, this.cache);
             } catch (final MalformedURLException e) {} catch (final IOException e) {}

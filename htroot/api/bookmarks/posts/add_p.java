@@ -6,7 +6,6 @@ import java.util.Set;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
-
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.ListManager;
@@ -16,23 +15,23 @@ import de.anomic.server.serverSwitch;
 
 
 public class add_p {
-    
+
 	private static final serverObjects prop = new serverObjects();
 	private static Switchboard sb = null;
 	private static UserDB.Entry user = null;
-	private static boolean isAdmin = false;	
-	
+	private static boolean isAdmin = false;
+
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
-        sb = (Switchboard) env;       
-        isAdmin=sb.verifyAuthentication(header, true);
+
+        sb = (Switchboard) env;
+        isAdmin=sb.verifyAuthentication(header);
         user = sb.userDB.getUser(header);
-        
+
         // set user name
-        String username="";        
+        String username="";
         if(user != null) username=user.getUserName();
     	else if(isAdmin) username="admin";
-        
+
         if (post != null) {
             if (!isAdmin) {
             // force authentication if desired
@@ -45,7 +44,7 @@ public class add_p {
             final String title=post.get("title",url);
             final String description=post.get("description","");
             String tagsString = post.get("tags","");
-            String pathString = post.get("path","/unsorted");
+            final String pathString = post.get("path","/unsorted");
             tagsString= tagsString + "," + pathString;
             final Set<String> tags = ListManager.string2set(BookmarkHelper.cleanTagsString(tagsString));
             final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);

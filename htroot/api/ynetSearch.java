@@ -9,18 +9,17 @@ import java.util.Scanner;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class ynetSearch {
-	
-	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {        
+
+	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard switchboard = (Switchboard) env;
-        final boolean isAdmin=switchboard.verifyAuthentication(header, true);
-        final serverObjects prop = new serverObjects();              
-                
-    	if(post != null){        
+        final boolean isAdmin=switchboard.verifyAuthentication(header);
+        final serverObjects prop = new serverObjects();
+
+    	if(post != null){
     		if(!isAdmin){
 			// force authentication if desired
     			if(post.containsKey("login")){
@@ -28,7 +27,7 @@ public class ynetSearch {
     			}
     			return prop;
     		} else {
-    			InputStream is = null;    			 
+    			InputStream is = null;
     			try {
     			    String searchaddress = post.get("url");
     			    if (!searchaddress.startsWith("http://")) {
@@ -42,23 +41,23 @@ public class ynetSearch {
     			    Map.Entry<String, String> k;
     			    while(it.hasNext()) {
     			    	k = it.next();
-    			    	s = s + "&" + k.getKey() + "=" + k.getValue();    			    	
+    			    	s = s + "&" + k.getKey() + "=" + k.getValue();
     			    }
-    				// final String s = searchaddress+"&query="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");    				   				
-    				final URL url = new URL(s);     				
-    				is = url.openStream(); 
-    				final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();    				
+    				// final String s = searchaddress+"&query="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");
+    				final URL url = new URL(s);
+    				is = url.openStream();
+    				final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();
     				prop.put("http", httpout);
-    			} 
-    			catch ( final Exception e ) { 
+    			}
+    			catch ( final Exception e ) {
     				prop.put("url", "error!");
-    			} 
-    			finally { 
-    				if ( is != null ) 
-    					try { is.close(); } catch ( final IOException e ) { } 
+    			}
+    			finally {
+    				if ( is != null )
+    					try { is.close(); } catch ( final IOException e ) { }
     			}
     		}
-    	}    	  	
+    	}
     	return prop;
 	}
 }

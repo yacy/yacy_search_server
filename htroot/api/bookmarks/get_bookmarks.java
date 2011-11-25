@@ -8,15 +8,14 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.Switchboard;
-
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.UserDB;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class get_bookmarks {    
-	
+public class get_bookmarks {
+
     private static final serverObjects prop = new serverObjects();
     private static Switchboard sb = null;
     private static UserDB.Entry user = null;
@@ -29,7 +28,7 @@ public class get_bookmarks {
     private final static int SORT_SIZE = 2;
     private final static int SHOW_ALL = -1;
     */
-    
+
     private final static int MAXRESULTS = 10000;
 
     // file types and display types
@@ -42,14 +41,14 @@ public class get_bookmarks {
         RSS(3),         // .xml (.rss)
         RDF(4);         // .xml
 
-        private int value;
+        private final int value;
 
         DisplayType(final int value) {
             this.value = value;
         }
 
         int getValue() {
-            return value;
+            return this.value;
         }
     }
 
@@ -58,7 +57,7 @@ public class get_bookmarks {
         prop.clear();
         sb = (Switchboard) env;
         user = sb.userDB.getUser(header);
-        isAdmin = (sb.verifyAuthentication(header, true) || user != null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
+        isAdmin = (sb.verifyAuthentication(header) || user != null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
 
         // set user name
         final String username;
@@ -66,7 +65,7 @@ public class get_bookmarks {
         else if(isAdmin) username="admin";
         else username = "unknown";
         prop.putHTML("display_user", username);
-    	
+
         // set peer address
         prop.put("display_address", sb.peers.mySeed().getPublicAddress());
         prop.put("display_peer", sb.peers.mySeed().getName());
@@ -78,7 +77,7 @@ public class get_bookmarks {
         // String sortname = "date";
         final String qtype;
         final String query;
-    	
+
         // check for GET parameters
         if (post != null){
             itemsPerPage = (post.containsKey("rp")) ? post.getInt("rp", MAXRESULTS) : MAXRESULTS;
@@ -108,13 +107,13 @@ public class get_bookmarks {
             itemsPerPage = MAXRESULTS;
             display = DisplayType.XML.getValue();
         }
-    	
+
         int count = 0;
         int total = 0;
         int start = 0;
 
         final Iterator<String> it;
-       	
+
         if (display == DisplayType.XBEL.getValue()) {
             String root = "/";
             if ("tags".equals(qtype) && !"".equals(query)) {
@@ -200,14 +199,14 @@ public class get_bookmarks {
             prop.put("display_page", page);
             prop.put("display_total", total);
         }
-       	
+
         // return rewrite properties
         return prop;
     }
-	
+
     private static int recurseFolders(final Iterator<String> it, String root, int count, final boolean next, final String prev){
-    	String fn="";    	
-    	
+    	String fn="";
+
     	if (next) fn = it.next();
     	else fn = prev;
 
@@ -220,7 +219,7 @@ public class get_bookmarks {
             }
             return count;
     	}
-   
+
     	if (fn.startsWith(("/".equals(root) ? root : root + "/"))) {
             prop.put("display_xbel_"+count+"_elements", "<folder id=\""+BookmarkHelper.tagHash(fn)+"\">");
             count++;
@@ -233,7 +232,7 @@ public class get_bookmarks {
             if (it.hasNext()) {
                     count = recurseFolders(it, fn, count, true, fn);
             }
-    	} else {		
+    	} else {
             if (count > 0) {
                 prop.put("display_xbel_"+count+"_elements", "</folder>");
                 count++;
@@ -243,14 +242,14 @@ public class get_bookmarks {
                 root = "/";
             }
             count = recurseFolders(it, root, count, false, fn);
-    	} 
+    	}
     	return count;
     }
-	
+
     private static int print_XBEL(final Iterator<String> bit, int count) {
     	BookmarksDB.Bookmark bookmark = null;
     	Date date;
-    	while(bit.hasNext()){    			
+    	while(bit.hasNext()){
             bookmark = sb.bookmarksDB.getBookmark(bit.next());
             date = new Date(bookmark.getTimeStamp());
             prop.put("display_xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
@@ -283,5 +282,5 @@ public class get_bookmarks {
             count++;
         }
     	return count;
-    }    
+    }
 }

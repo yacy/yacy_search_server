@@ -60,8 +60,8 @@ public class CrawlResults {
         boolean showDate    = env.getConfigBool("IndexMonitorDate", true);
         boolean showWords   = env.getConfigBool("IndexMonitorWords", true);
         boolean showTitle   = env.getConfigBool("IndexMonitorTitle", true);
-        boolean showCountry = env.getConfigBool("IndexMonitorCountry", true);
-        boolean showIP      = env.getConfigBool("IndexMonitorIP", true);
+        boolean showCountry = env.getConfigBool("IndexMonitorCountry", false);
+        boolean showIP      = env.getConfigBool("IndexMonitorIP", false);
         boolean showURL     = env.getConfigBool("IndexMonitorURL", true);
 
         if (post == null) {
@@ -92,7 +92,7 @@ public class CrawlResults {
             post.containsKey("deleteentry")))) {
             final String authorization = (header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
             if (authorization.length() != 0) {
-                if (! sb.verifyAuthentication(header, true)){
+                if (! sb.verifyAuthentication(header)){
                     // force log-in (again, because wrong password was given)
                     prop.put("AUTHENTICATE", "admin log-in");
                     return prop;
@@ -122,8 +122,8 @@ public class CrawlResults {
             }
 
             if (post.containsKey("deletedomain")) {
-                final String hashpart = post.get("hashpart", null);
                 final String domain = post.get("domain", null);
+                final String hashpart = domain == null ? null : DigestURI.hosthash6(domain);
                 if (hashpart != null) {
                     // delete all urls for this domain from database
                     try {
@@ -289,7 +289,6 @@ public class CrawlResults {
                 prop.put("table_domains_" + cnt + "_feedbackpage", "CrawlResults.html");
                 prop.put("table_domains_" + cnt + "_tabletype", tabletype.getCode());
                 prop.put("table_domains_" + cnt + "_domain", domain);
-                prop.put("table_domains_" + cnt + "_hashpart", DigestURI.hosthash6(domain));
                 prop.put("table_domains_" + cnt + "_count", ResultURLs.domainCount(tabletype, domain));
                 dark = !dark;
                 cnt++;

@@ -51,7 +51,7 @@ public class index {
         }
 
         // access control
-        final boolean authorizedAccess = sb.verifyAuthentication(header, false);
+        final boolean authorizedAccess = sb.verifyAuthentication(header);
         if ((post != null) && (post.containsKey("publicPage"))) {
             if (!authorizedAccess) {
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in

@@ -34,7 +34,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.operation.yacyRelease;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -48,9 +47,9 @@ public class Steering {
         prop.put("info", "0"); //no information submitted
 
         final String requestIP = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
-        
+
         // handle access rights
-        if (!sb.verifyAuthentication(header, false)) {
+        if (!sb.verifyAuthentication(header)) {
             Log.logInfo("STEERING", "log-in attempt for steering from " + requestIP);
             prop.put("AUTHENTICATE", "admin log-in"); // force log-in
             return prop;
@@ -60,7 +59,7 @@ public class Steering {
             Log.logInfo("STEERING", "shutdown request from " + requestIP);
             sb.terminate(10, "shutdown request from Steering; ip = " + requestIP);
             prop.put("info", "3");
-            
+
             return prop;
         }
 
@@ -68,10 +67,10 @@ public class Steering {
             Log.logInfo("STEERING", "restart request from " + requestIP);
             yacyRelease.restart();
             prop.put("info", "4");
-            
+
             return prop;
         }
-        
+
         if (post.containsKey("update")) {
             Log.logInfo("STEERING", "update request from " + requestIP);
             final boolean devenvironment = new File(sb.getAppPath(), ".svn").exists();
@@ -82,7 +81,7 @@ public class Steering {
             }
             prop.put("info", "5");
             prop.putHTML("info_release", releaseFileName);
-            
+
             return prop;
         }
         return prop;
