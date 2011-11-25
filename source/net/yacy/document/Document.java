@@ -132,9 +132,9 @@ public class Document {
     }
 
     public Set<String> getContentLanguages() {
-        return this.languages;        
+        return this.languages;
     }
-    
+
     public String getFileExtension() {
     	return this.source.getFileExtension();
     }
@@ -415,8 +415,8 @@ dc_rights
             for (final Map.Entry<MultiProtocolURI, Properties> entry: this.anchors.entrySet()) {
                 url = entry.getKey();
                 if (url == null) continue;
-                final boolean noindex = entry.getValue().getProperty("rel", "").toLowerCase().indexOf("noindex") >= 0;
-                final boolean nofollow = entry.getValue().getProperty("rel", "").toLowerCase().indexOf("nofollow") >= 0;
+                final boolean noindex = entry.getValue().getProperty("rel", "").toLowerCase().indexOf("noindex",0) >= 0;
+                final boolean nofollow = entry.getValue().getProperty("rel", "").toLowerCase().indexOf("nofollow",0) >= 0;
                 if ((thishost == null && url.getHost() == null) ||
                     ((thishost != null && url.getHost() != null) &&
                      (url.getHost().endsWith(thishost) ||

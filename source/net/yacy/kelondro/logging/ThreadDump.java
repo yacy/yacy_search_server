@@ -185,7 +185,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                 state = null;
                 continue;
             }
-            if (line.charAt(0) == '"' && (p = line.indexOf("\" prio=")) > 0) {
+            if (line.charAt(0) == '"' && (p = line.indexOf("\" prio=",0)) > 0) {
                 // start a new thread
                 thread = line.substring(1, p);
                 continue;
@@ -378,7 +378,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             // check if the thread is locked or holds a lock
             if (entry.getKey().state != Thread.State.RUNNABLE) continue runf;
             for (final String s: entry.getValue()) {
-                if (s.indexOf("locked <") > 0 || s.indexOf("waiting to lock") > 0) continue runf;
+                if (s.indexOf("locked <") > 0 || s.indexOf("waiting to lock",0) > 0) continue runf;
             }
             runner.add(entry);
         }
@@ -394,7 +394,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         final Map<Lock, StackTrace> locks = new HashMap<Lock, StackTrace>();
         for (final Map.Entry<StackTrace, List<String>> entry: entrySet()) {
             for (final String s: entry.getValue()) {
-                if ((p = s.indexOf("locked <")) > 0) {
+                if ((p = s.indexOf("locked <",0)) > 0) {
                     locks.put(new Lock(s.substring(p + 8, s.indexOf('>'))), entry.getKey());
 
                 }
@@ -413,7 +413,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         final List<String> list = get(threadName);
         if (list == null) return null;
         for (final String s: list) {
-            if ((p = s.indexOf("<")) > 0 && s.indexOf("locked <") < 0) {
+            if ((p = s.indexOf('<',0)) > 0 && s.indexOf("locked <",0) < 0) {
                 return new Lock(s.substring(p + 1, s.indexOf('>')));
             }
         }

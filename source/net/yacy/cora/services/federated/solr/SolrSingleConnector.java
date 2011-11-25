@@ -362,7 +362,7 @@ public class SolrSingleConnector implements SolrConnector {
         final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
         final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();
         String u = this.solrurl;
-        int p = u.indexOf("localhost"); if (p < 0) p = u.indexOf("127.0.0.1");
+        int p = u.indexOf("localhost",0); if (p < 0) p = u.indexOf("127.0.0.1",0);
         if (p >= 0) u = u.substring(0, p) + localhostExtern + u.substring(p + 9);
         return u + (u.endsWith("/") ? "admin/" : "/admin/");
     }

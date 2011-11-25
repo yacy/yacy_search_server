@@ -725,8 +725,8 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         // now we need to initialize the session
                         if (this.commandCounter == 0) {
                             // first we need to determine the proper protocol handler
-                            if (this.request.indexOf("HTTP") >= 0)          reqProtocol = "HTTP";
-                            else                                            reqProtocol = null;
+                            if (this.request.indexOf("HTTP",0) >= 0) reqProtocol = "HTTP";
+                            else                                     reqProtocol = null;
 
                             if (this.request == null) break;
                             if (reqProtocol != null && reqProtocol.equals("HTTP")) {

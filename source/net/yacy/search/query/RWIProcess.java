@@ -192,7 +192,7 @@ public final class RWIProcess extends Thread {
 
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        final boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
+        final boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts",0) >= 0;
 
         // apply all constraints
         try {
@@ -616,14 +616,14 @@ public final class RWIProcess extends Thread {
     }
 
     public ScoreMap<String> getNamespaceNavigator() {
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace") < 0) return new ClusteredScoreMap<String>();
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace",0) < 0) return new ClusteredScoreMap<String>();
         if (this.namespaceNavigator.sizeSmaller(2)) this.namespaceNavigator.clear(); // navigators with one entry are not useful
         return this.namespaceNavigator;
     }
 
     public ScoreMap<String> getHostNavigator() {
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return result;
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts",0) < 0) return result;
 
         final Iterator<String> domhashs = this.hostNavigator.keys(false);
         URIMetadataRow row;
@@ -644,13 +644,13 @@ public final class RWIProcess extends Thread {
     }
 
     public ScoreMap<String> getProtocolNavigator() {
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("protocol") < 0) return new ClusteredScoreMap<String>();
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("protocol",0) < 0) return new ClusteredScoreMap<String>();
         if (this.protocolNavigator.sizeSmaller(2)) this.protocolNavigator.clear(); // navigators with one entry are not useful
         return this.protocolNavigator;
     }
 
     public ScoreMap<String> getFiletypeNavigator() {
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("filetype") < 0) return new ClusteredScoreMap<String>();
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("filetype",0) < 0) return new ClusteredScoreMap<String>();
         if (this.filetypeNavigator.sizeSmaller(2)) this.filetypeNavigator.clear(); // navigators with one entry are not useful
         return this.filetypeNavigator;
     }
@@ -667,7 +667,7 @@ public final class RWIProcess extends Thread {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return result;
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics",0) < 0) return result;
         if (this.ref.sizeSmaller(2)) this.ref.clear(); // navigators with one entry are not useful
         final Map<String, Float> counts = new HashMap<String, Float>();
         final Iterator<String> i = this.ref.keys(false);
@@ -725,7 +725,7 @@ public final class RWIProcess extends Thread {
     public ScoreMap<String> getAuthorNavigator() {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ConcurrentScoreMap<String>();
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors",0) < 0) return new ConcurrentScoreMap<String>();
         if (this.authorNavigator.sizeSmaller(2)) this.authorNavigator.clear(); // navigators with one entry are not useful
         return this.authorNavigator;
     }

@@ -17,12 +17,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -127,19 +127,19 @@ public class FTPClient {
 
     public FTPClient() {
 
-        currentLocalPath = new File(System.getProperty("user.dir"));
+        this.currentLocalPath = new File(System.getProperty("user.dir"));
         try {
-            currentLocalPath = new File(currentLocalPath.getCanonicalPath());
+            this.currentLocalPath = new File(this.currentLocalPath.getCanonicalPath());
         } catch (final IOException e) {
         }
 
-        account = null;
-        password = null;
-        host = null;
-        port = -1;
-        remotemessage = null;
-        remotegreeting = null;
-        remotesystem = null;
+        this.account = null;
+        this.password = null;
+        this.host = null;
+        this.port = -1;
+        this.remotemessage = null;
+        this.remotegreeting = null;
+        this.remotesystem = null;
     }
 
     public boolean exec(String command, final boolean promptIt) {
@@ -150,9 +150,9 @@ public class FTPClient {
         String com;
         boolean ret = true;
         while (command.length() > 0) {
-            pos = command.indexOf(";");
+            pos = command.indexOf(';',0);
             if (pos < 0) {
-                pos = command.indexOf("\n");
+                pos = command.indexOf("\n",0);
             }
             if (pos < 0) {
                 com = command;
@@ -162,11 +162,11 @@ public class FTPClient {
                 command = command.substring(pos + 1);
             }
             if (promptIt) {
-                log.info(prompt + com);
+                log.info(this.prompt + com);
             }
-            cmd = line2args(com);
+            this.cmd = line2args(com);
             try {
-                ret = (((Boolean) getClass().getMethod(cmd[0].toUpperCase(), new Class[0]).invoke(this, new Object[0]))
+                ret = (((Boolean) getClass().getMethod(this.cmd[0].toUpperCase(), new Class[0]).invoke(this, new Object[0]))
                         .booleanValue());
             } catch (final InvocationTargetException e) {
                 if (e.getMessage() != null) {
@@ -189,9 +189,9 @@ public class FTPClient {
                 if (notConnected()) {
                     // try a local exec
                     try {
-                        javaexec(cmd);
+                        javaexec(this.cmd);
                     } catch (final Exception ee) {
-                        log.error("Command '" + cmd[0] + "' not supported. Try 'HELP'.");
+                        log.error("Command '" + this.cmd[0] + "' not supported. Try 'HELP'.");
                     }
                 } else {
                     // try a remote exec
@@ -284,7 +284,7 @@ public class FTPClient {
         try {
 
             // set the user.dir to the actual local path
-            pr.put("user.dir", currentLocalPath.toString());
+            pr.put("user.dir", this.currentLocalPath.toString());
 
             // add the current path to the classpath
             // pr.put("java.class.path", "" + pr.get("user.dir") +
@@ -299,7 +299,7 @@ public class FTPClient {
             // Class c = this.getClass().getClassLoader().loadClass(obj);
 
             // locate public static main(String[]) method
-            Class<?>[] parameterType = new Class[1];
+            final Class<?>[] parameterType = new Class[1];
             parameterType[0] = Class.forName("[Ljava.lang.String;");
             Method m = c.getMethod("main", parameterType);
 
@@ -314,7 +314,7 @@ public class FTPClient {
             }
 
             // set the local path to the user.dir (which may have changed)
-            currentLocalPath = new File((String) pr.get("user.dir"));
+            this.currentLocalPath = new File((String) pr.get("user.dir"));
 
         } catch (final ClassNotFoundException e) {
             // log.error("cannot find class file " + obj +
@@ -352,7 +352,7 @@ public class FTPClient {
     // FTP CLIENT COMMANDS ------------------------------------
 
     public boolean ASCII() {
-        if (cmd.length != 1) {
+        if (this.cmd.length != 1) {
             log.error("Syntax: ASCII  (no parameter)");
             return true;
         }
@@ -365,7 +365,7 @@ public class FTPClient {
     }
 
     public boolean BINARY() {
-        if (cmd.length != 1) {
+        if (this.cmd.length != 1) {
             log.error("Syntax: BINARY  (no parameter)");
             return true;
         }
@@ -382,7 +382,7 @@ public class FTPClient {
     }
 
     public boolean CD() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: CD <path>");
             return true;
         }
@@ -391,14 +391,14 @@ public class FTPClient {
         }
         try {
             // send cwd command
-            send("CWD " + cmd[1]);
+            send("CWD " + this.cmd[1]);
 
             final String reply = receive();
             if (isNotPositiveCompletion(reply)) {
                 throw new IOException(reply);
             }
         } catch (final IOException e) {
-            log.error("Error: change of working directory to path " + cmd[1] + " failed.");
+            log.error("Error: change of working directory to path " + this.cmd[1] + " failed.");
         }
         return true;
     }
@@ -443,7 +443,7 @@ public class FTPClient {
     }
 
     public boolean DEL() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: DEL <file>");
             return true;
         }
@@ -451,9 +451,9 @@ public class FTPClient {
             return LDEL();
         }
         try {
-            rmForced(cmd[1]);
+            rmForced(this.cmd[1]);
         } catch (final IOException e) {
-            log.error("Error: deletion of file " + cmd[1] + " failed.");
+            log.error("Error: deletion of file " + this.cmd[1] + " failed.");
         }
         return true;
     }
@@ -463,7 +463,7 @@ public class FTPClient {
     }
 
     public boolean DIR() {
-        if (cmd.length > 2) {
+        if (this.cmd.length > 2) {
             log.error("Syntax: DIR [<path>|<file>]");
             return true;
         }
@@ -472,8 +472,8 @@ public class FTPClient {
         }
         try {
             List<String> l;
-            if (cmd.length == 2) {
-                l = list(cmd[1], false);
+            if (this.cmd.length == 2) {
+                l = list(this.cmd[1], false);
             } else {
                 l = list(".", false);
             }
@@ -496,13 +496,13 @@ public class FTPClient {
         try {
             closeConnection();
         } catch (final IOException e) {
-            ControlSocket = null;
-            DataSocketActive = null;
-            DataSocketPassive = null;
-            clientInput = null;
-            clientOutput = null;
+            this.ControlSocket = null;
+            this.DataSocketActive = null;
+            this.DataSocketPassive = null;
+            this.clientInput = null;
+            this.clientOutput = null;
         }
-        prompt = "ftp [local]>";
+        this.prompt = "ftp [local]>";
         return true;
     }
 
@@ -526,14 +526,14 @@ public class FTPClient {
     }
 
     public boolean GET() {
-        if ((cmd.length < 2) || (cmd.length > 3)) {
+        if ((this.cmd.length < 2) || (this.cmd.length > 3)) {
             log.error("Syntax: GET <remote-file> [<local-file>]");
             return true;
         }
-        final String remote = cmd[1]; // (new File(cmd[1])).getName();
-        final boolean withoutLocalFile = cmd.length == 2;
+        final String remote = this.cmd[1]; // (new File(cmd[1])).getName();
+        final boolean withoutLocalFile = this.cmd.length == 2;
 
-        final String localFilename = (withoutLocalFile) ? remote : cmd[2];
+        final String localFilename = (withoutLocalFile) ? remote : this.cmd[2];
         final File local = absoluteLocalFile(localFilename);
 
         if (local.exists()) {
@@ -563,7 +563,7 @@ public class FTPClient {
         if (l.isAbsolute()) {
             local = l;
         } else {
-            local = new File(currentLocalPath, localFilename);
+            local = new File(this.currentLocalPath, localFilename);
         }
         return local;
     }
@@ -613,7 +613,7 @@ public class FTPClient {
 
     /**
      * checks if path is a folder
-     * 
+     *
      * @param path
      * @return true if ftp-server changes to path
      */
@@ -630,7 +630,7 @@ public class FTPClient {
             final String currentFolder = pwd();
             // check if we can change to folder
             send("CWD " + path);
-            String reply = receive();
+            final String reply = receive();
             if (isNotPositiveCompletion(reply)) {
                 throw new IOException(reply);
             }
@@ -650,12 +650,12 @@ public class FTPClient {
     }
 
     public boolean GLOB() {
-        if (cmd.length != 1) {
+        if (this.cmd.length != 1) {
             log.error("Syntax: GLOB  (no parameter)");
             return true;
         }
-        glob = !glob;
-        log.info("---- globbing is now turned " + ((glob) ? "ON" : "OFF"));
+        this.glob = !this.glob;
+        log.info("---- globbing is now turned " + ((this.glob) ? "ON" : "OFF"));
         return true;
     }
 
@@ -674,14 +674,14 @@ public class FTPClient {
      */
 
     public boolean JJENCODE() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: JJENCODE <path>");
             return true;
         }
-        final String path = cmd[1];
+        final String path = this.cmd[1];
 
         final File dir = new File(path);
-        final File newPath = dir.isAbsolute() ? dir : new File(currentLocalPath, path);
+        final File newPath = dir.isAbsolute() ? dir : new File(this.currentLocalPath, path);
         if (newPath.exists()) {
             if (newPath.isDirectory()) {
                 // exec("cd \"" + remote + "\";lmkdir \"" + remote + "\";lcd \""
@@ -709,13 +709,13 @@ public class FTPClient {
     }
 
     public boolean JJDECODE() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: JJENCODE <path>");
             return true;
         }
-        final String path = cmd[1];
+        final String path = this.cmd[1];
         final File dir = new File(path);
-        final File newPath = dir.isAbsolute() ? dir : new File(currentLocalPath, path);
+        final File newPath = dir.isAbsolute() ? dir : new File(this.currentLocalPath, path);
         final File newFolder = new File(newPath.toString() + ".dir");
         if (newPath.exists()) {
             if (!newPath.isDirectory()) {
@@ -899,8 +899,8 @@ public class FTPClient {
 
     public boolean JAVA() {
         String s = "JAVA";
-        for (int i = 1; i < cmd.length; i++) {
-            s = s + " " + cmd[i];
+        for (int i = 1; i < this.cmd.length; i++) {
+            s = s + " " + this.cmd[i];
         }
         try {
             send(s);
@@ -911,21 +911,21 @@ public class FTPClient {
     }
 
     public boolean LCD() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: LCD <path>");
             return true;
         }
-        final String path = cmd[1];
+        final String path = this.cmd[1];
         final File dir = new File(path);
-        File newPath = dir.isAbsolute() ? dir : new File(currentLocalPath, path);
+        File newPath = dir.isAbsolute() ? dir : new File(this.currentLocalPath, path);
         try {
             newPath = new File(newPath.getCanonicalPath());
         } catch (final IOException e) {
         }
         if (newPath.exists()) {
             if (newPath.isDirectory()) {
-                currentLocalPath = newPath;
-                log.info("---- New local path: " + currentLocalPath.toString());
+                this.currentLocalPath = newPath;
+                log.info("---- New local path: " + this.currentLocalPath.toString());
             } else {
                 log.error("Error: local path " + newPath.toString() + " denotes not a directory.");
             }
@@ -940,27 +940,27 @@ public class FTPClient {
     }
 
     public boolean LDIR() {
-        if (cmd.length != 1) {
+        if (this.cmd.length != 1) {
             log.error("Syntax: LDIR  (no parameter)");
             return true;
         }
-        final String[] name = currentLocalPath.list();
+        final String[] name = this.currentLocalPath.list();
         for (int n = 0; n < name.length; ++n) {
-            log.info(ls(new File(currentLocalPath, name[n])));
+            log.info(ls(new File(this.currentLocalPath, name[n])));
         }
         return true;
     }
 
     /**
      * parse LIST of file
-     * 
+     *
      * @param path
      *                on ftp-server
      * @return null if info cannot be determined or error occures
      */
     public entryInfo fileInfo(final String path) {
-        if (infoCache.containsKey(path)) {
-            return infoCache.get(path);
+        if (this.infoCache.containsKey(path)) {
+            return this.infoCache.get(path);
         }
         try {
             /*
@@ -992,7 +992,7 @@ public class FTPClient {
             for (int i = 1; i < endFor; i++) {
                 info = parseListData(lines[i]);
                 if (info != null) {
-                    infoCache.put(path, info);
+                    this.infoCache.put(path, info);
                     break;
                 }
             }
@@ -1004,11 +1004,11 @@ public class FTPClient {
 
     /**
      * returns status of reply
-     * 
+     *
      * 1 Positive Preliminary reply 2 Positive Completion reply 3 Positive
      * Intermediate reply 4 Transient Negative Completion reply 5 Permanent
      * Negative Completion reply
-     * 
+     *
      * @param reply
      * @return first digit of the reply code
      */
@@ -1018,7 +1018,7 @@ public class FTPClient {
 
     /**
      * gives reply code
-     * 
+     *
      * @param reply
      * @return
      */
@@ -1028,21 +1028,21 @@ public class FTPClient {
 
     /**
      * checks if status code is in group 2 ("2xx message")
-     * 
+     *
      * @param reply
      * @return
      */
     private boolean isNotPositiveCompletion(final String reply) {
         return getStatus(reply) != 2;
     }
-    
+
     private final static Pattern lsStyle = Pattern.compile("^([-\\w]{10}).\\s*\\d+\\s+[-\\w]+\\s+[-\\w]+\\s+(\\d+)\\s+(\\w{3})\\s+(\\d+)\\s+(\\d+:?\\d*)\\s+(.*)$");
-    
+
     /**
      * parses output of LIST from ftp-server currently UNIX ls-style only, ie:
      * -rw-r--r-- 1 root other 531 Jan 29 03:26 README dr-xr-xr-x 2 root 512 Apr
      * 8 1994 etc
-     * 
+     *
      * @param line
      * @return null if not parseable
      */
@@ -1083,22 +1083,22 @@ public class FTPClient {
                 log.warn("---- Error: not ls date-format '" + dateString, e);
                 date = new Date();
             }
-            String filename = tokens.group(6);
+            final String filename = tokens.group(6);
             return new entryInfo(type, size, date, filename);
         }
         return null;
     }
 
-    
+
     public static final entryInfo POISON_entryInfo = new entryInfo();
-    
+
     public static enum filetype {
         file, link, directory;
     }
-    
+
     /**
      * parameter class
-     * 
+     *
      * @author danielr
      * @since 2008-03-13 r4558
      */
@@ -1126,10 +1126,10 @@ public class FTPClient {
             this.date = null;
             this.name = null;
         }
-        
+
         /**
          * constructor
-         * 
+         *
          * @param isDir
          * @param size
          *                bytes
@@ -1145,19 +1145,19 @@ public class FTPClient {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Object#toString()
          */
         @Override
         public String toString() {
             final StringBuilder info = new StringBuilder(100);
-            info.append(name);
+            info.append(this.name);
             info.append(" (type=");
-            info.append(type.name());
+            info.append(this.type.name());
             info.append(", size=");
-            info.append(size);
+            info.append(this.size);
             info.append(", ");
-            info.append(date);
+            info.append(this.date);
             info.append(")");
             return info.toString();
         }
@@ -1205,13 +1205,13 @@ public class FTPClient {
     }
 
     public boolean LITERAL() {
-        if (cmd.length == 1) {
+        if (this.cmd.length == 1) {
             log.error("Syntax: LITERAL <ftp-command> [<command-argument>]   (see RFC959)");
             return true;
         }
         String s = "";
-        for (int i = 1; i < cmd.length; i++) {
-            s = s + " " + cmd[i];
+        for (int i = 1; i < this.cmd.length; i++) {
+            s = s + " " + this.cmd[i];
         }
         try {
             literal(s.substring(1));
@@ -1230,28 +1230,28 @@ public class FTPClient {
     }
 
     public boolean LMKDIR() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: LMKDIR <folder-name>");
             return true;
         }
-        final File f = new File(currentLocalPath, cmd[1]);
+        final File f = new File(this.currentLocalPath, this.cmd[1]);
         if (f.exists()) {
-            log.error("Error: local file/folder " + cmd[1] + " already exists");
+            log.error("Error: local file/folder " + this.cmd[1] + " already exists");
         } else {
             if (!f.mkdir()) {
-                log.error("Error: creation of local folder " + cmd[1] + " failed");
+                log.error("Error: creation of local folder " + this.cmd[1] + " failed");
             }
         }
         return true;
     }
 
     public boolean LMV() {
-        if (cmd.length != 3) {
+        if (this.cmd.length != 3) {
             log.error("Syntax: LMV <from> <to>");
             return true;
         }
-        final File from = new File(cmd[1]);
-        final File to = new File(cmd[2]);
+        final File from = new File(this.cmd[1]);
+        final File to = new File(this.cmd[2]);
         if (!to.exists()) {
             if (from.renameTo(to)) {
                 log.info("---- \"" + from.toString() + "\" renamed to \"" + to.toString() + "\"");
@@ -1265,11 +1265,11 @@ public class FTPClient {
     }
 
     public boolean LPWD() {
-        if (cmd.length != 1) {
+        if (this.cmd.length != 1) {
             log.error("Syntax: LPWD  (no parameter)");
             return true;
         }
-        log.info("---- Local path: " + currentLocalPath.toString());
+        log.info("---- Local path: " + this.currentLocalPath.toString());
         return true;
     }
 
@@ -1278,39 +1278,39 @@ public class FTPClient {
     }
 
     public boolean LRMDIR() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: LRMDIR <folder-name>");
             return true;
         }
-        final File f = new File(currentLocalPath, cmd[1]);
+        final File f = new File(this.currentLocalPath, this.cmd[1]);
         if (!f.exists()) {
-            log.error("Error: local folder " + cmd[1] + " does not exist");
+            log.error("Error: local folder " + this.cmd[1] + " does not exist");
         } else {
             if (!f.delete()) {
-                log.error("Error: deletion of local folder " + cmd[1] + " failed");
+                log.error("Error: deletion of local folder " + this.cmd[1] + " failed");
             }
         }
         return true;
     }
 
     public boolean LRM() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: LRM <file-name>");
             return true;
         }
-        final File f = new File(currentLocalPath, cmd[1]);
+        final File f = new File(this.currentLocalPath, this.cmd[1]);
         if (!f.exists()) {
-            log.error("Error: local file " + cmd[1] + " does not exist");
+            log.error("Error: local file " + this.cmd[1] + " does not exist");
         } else {
             if (!f.delete()) {
-                log.error("Error: deletion of file " + cmd[1] + " failed");
+                log.error("Error: deletion of file " + this.cmd[1] + " failed");
             }
         }
         return true;
     }
 
     public boolean LS() {
-        if (cmd.length > 2) {
+        if (this.cmd.length > 2) {
             log.error("Syntax: LS [<path>|<file>]");
             return true;
         }
@@ -1319,8 +1319,8 @@ public class FTPClient {
         }
         try {
             List<String> l;
-            if (cmd.length == 2) {
-                l = list(cmd[1], true);
+            if (this.cmd.length == 2) {
+                l = list(this.cmd[1], true);
             } else {
                 l = list(".", true);
             }
@@ -1353,7 +1353,7 @@ public class FTPClient {
         if (status > 2) {
             throw new IOException(reply);
         }
-        
+
         // send command to the control port
         if (extended) {
             send("LIST");
@@ -1369,7 +1369,7 @@ public class FTPClient {
         if (status != 1) {
             throw new IOException(reply);
         }
-        
+
         // starting data transaction
         final Socket dataSocket = getDataSocket();
         final BufferedReader dataStream = new BufferedReader(new InputStreamReader(dataSocket.getInputStream()));
@@ -1383,13 +1383,13 @@ public class FTPClient {
                     files.add(line);
                 }
             }
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             e1.printStackTrace();
         } finally {try {
             // shutdown data connection
             dataStream.close(); // Closing the returned InputStream will
             closeDataSocket(); // close the associated socket.
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }}
         // after stream is empty we should get control completion echo
@@ -1407,7 +1407,7 @@ public class FTPClient {
     }
 
     public boolean MKDIR() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: MKDIR <folder-name>");
             return true;
         }
@@ -1416,25 +1416,25 @@ public class FTPClient {
         }
         try {
             // send mkdir command
-            send("MKD " + cmd[1]);
+            send("MKD " + this.cmd[1]);
             // read reply
             final String reply = receive();
             if (isNotPositiveCompletion(reply)) {
                 throw new IOException(reply);
             }
         } catch (final IOException e) {
-            log.error("Error: creation of folder " + cmd[1] + " failed");
+            log.error("Error: creation of folder " + this.cmd[1] + " failed");
         }
         return true;
     }
 
     public boolean MGET() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: MGET <file-pattern>");
             return true;
         }
         try {
-            mget(cmd[1], false);
+            mget(this.cmd[1], false);
         } catch (final IOException e) {
             log.error("Error: mget failed (" + e.getMessage() + ")");
         }
@@ -1446,7 +1446,7 @@ public class FTPClient {
         File local;
         for (final String remote : l) {
             if (matches(remote, pattern)) {
-                local = new File(currentLocalPath, remote);
+                local = new File(this.currentLocalPath, remote);
                 if (local.exists()) {
                     log.error("Warning: local file " + local.toString() + " overwritten.");
                     if(!local.delete())
@@ -1458,12 +1458,12 @@ public class FTPClient {
     }
 
     public boolean MOVEDOWN() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: MOVEDOWN <file-pattern>");
             return true;
         }
         try {
-            mget(cmd[1], true);
+            mget(this.cmd[1], true);
         } catch (final IOException e) {
             log.error("Error: movedown failed (" + e.getMessage() + ")");
         }
@@ -1472,11 +1472,11 @@ public class FTPClient {
 
     /**
      * public boolean MOVEUP() { }
-     * 
+     *
      * @return
      */
     public boolean MV() {
-        if (cmd.length != 3) {
+        if (this.cmd.length != 3) {
             log.error("Syntax: MV <from> <to>");
             return true;
         }
@@ -1485,26 +1485,26 @@ public class FTPClient {
         }
         try {
             // send rename commands
-            send("RNFR " + cmd[1]);
+            send("RNFR " + this.cmd[1]);
             // read reply
             String reply = receive();
             if (isNotPositiveCompletion(reply)) {
                 throw new IOException(reply);
             }
-            send("RNTO " + cmd[2]);
+            send("RNTO " + this.cmd[2]);
             // read reply
             reply = receive();
             if (isNotPositiveCompletion(reply)) {
                 throw new IOException(reply);
             }
         } catch (final IOException e) {
-            log.error("Error: rename of " + cmd[1] + " to " + cmd[2] + " failed.");
+            log.error("Error: rename of " + this.cmd[1] + " to " + this.cmd[2] + " failed.");
         }
         return true;
     }
 
     public boolean NOOP() {
-        if (cmd.length != 1) {
+        if (this.cmd.length != 1) {
             log.error("Syntax: NOOP  (no parameter)");
             return true;
         }
@@ -1517,56 +1517,56 @@ public class FTPClient {
     }
 
     public boolean OPEN() {
-        if ((cmd.length < 2) || (cmd.length > 3)) {
+        if ((this.cmd.length < 2) || (this.cmd.length > 3)) {
             log.error("Syntax: OPEN <host> [<port>]");
             return true;
         }
         int port = 21;
-        if (cmd.length == 3) {
+        if (this.cmd.length == 3) {
             try {
-                port = java.lang.Integer.parseInt(cmd[2]);
+                port = java.lang.Integer.parseInt(this.cmd[2]);
             } catch (final NumberFormatException e) {
                 port = 21;
             }
         }
-        if (cmd[1].indexOf(":") > 0) {
+        if (this.cmd[1].indexOf(':',0) > 0) {
             // port is given
-            port = java.lang.Integer.parseInt(cmd[1].substring(cmd[1].indexOf(":") + 1));
-            cmd[1] = cmd[1].substring(0, cmd[1].indexOf(":"));
+            port = java.lang.Integer.parseInt(this.cmd[1].substring(this.cmd[1].indexOf(':',0) + 1));
+            this.cmd[1] = this.cmd[1].substring(0, this.cmd[1].indexOf(':',0));
         }
         try {
-            open(cmd[1], port);
-            log.info("---- Connection to " + cmd[1] + " established.");
-            prompt = "ftp [" + cmd[1] + "]>";
+            open(this.cmd[1], port);
+            log.info("---- Connection to " + this.cmd[1] + " established.");
+            this.prompt = "ftp [" + this.cmd[1] + "]>";
         } catch (final IOException e) {
-            log.error("Error: connecting " + cmd[1] + " on port " + port + " failed: " + e.getMessage());
+            log.error("Error: connecting " + this.cmd[1] + " on port " + port + " failed: " + e.getMessage());
         }
         return true;
     }
 
     public void open(final String host, final int port) throws IOException {
-        if (ControlSocket != null) {
+        if (this.ControlSocket != null) {
             exec("close", false); // close any existing connections first
         }
 
         try {
-            ControlSocket = new Socket();
-            ControlSocket.setSoTimeout(getTimeout());
-            ControlSocket.setKeepAlive(true);
-            ControlSocket.setTcpNoDelay(true); // no accumulation until buffer is full
-            ControlSocket.setSoLinger(false, getTimeout()); // !wait for all data being written on close()
-            ControlSocket.setSendBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
-            ControlSocket.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
-            ControlSocket.connect(new InetSocketAddress(host, port), 1000);
-            clientInput = new BufferedReader(new InputStreamReader(ControlSocket.getInputStream()));
-            clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
+            this.ControlSocket = new Socket();
+            this.ControlSocket.setSoTimeout(getTimeout());
+            this.ControlSocket.setKeepAlive(true);
+            this.ControlSocket.setTcpNoDelay(true); // no accumulation until buffer is full
+            this.ControlSocket.setSoLinger(false, getTimeout()); // !wait for all data being written on close()
+            this.ControlSocket.setSendBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
+            this.ControlSocket.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
+            this.ControlSocket.connect(new InetSocketAddress(host, port), 1000);
+            this.clientInput = new BufferedReader(new InputStreamReader(this.ControlSocket.getInputStream()));
+            this.clientOutput = new DataOutputStream(new BufferedOutputStream(this.ControlSocket.getOutputStream()));
 
             // read and return server message
             this.host = host;
             this.port = port;
-            remotemessage = receive();
-            if ((remotemessage != null) && (remotemessage.length() > 3)) {
-                remotemessage = remotemessage.substring(4);
+            this.remotemessage = receive();
+            if ((this.remotemessage != null) && (this.remotemessage.length() > 3)) {
+                this.remotemessage = this.remotemessage.substring(4);
             }
         } catch (final IOException e) {
             // if a connection was opened, it should not be used
@@ -1579,21 +1579,21 @@ public class FTPClient {
      * @return
      */
     public boolean notConnected() {
-        return ControlSocket == null;
+        return this.ControlSocket == null;
     }
 
     /**
      * close all sockets
-     * 
+     *
      * @throws IOException
      */
     private void closeConnection() throws IOException {
         // cleanup
-        if (clientOutput != null) clientOutput.close();
-        if (clientInput != null) clientInput.close();
-        if (ControlSocket != null) ControlSocket.close();
-        if (DataSocketActive != null) DataSocketActive.close();
-        if (DataSocketPassive != null) DataSocketPassive.close();
+        if (this.clientOutput != null) this.clientOutput.close();
+        if (this.clientInput != null) this.clientInput.close();
+        if (this.ControlSocket != null) this.ControlSocket.close();
+        if (this.DataSocketActive != null) this.DataSocketActive.close();
+        if (this.DataSocketPassive != null) this.DataSocketPassive.close();
     }
 
     public boolean PROMPT() {
@@ -1602,12 +1602,12 @@ public class FTPClient {
     }
 
     public boolean PUT() {
-        if ((cmd.length < 2) || (cmd.length > 3)) {
+        if ((this.cmd.length < 2) || (this.cmd.length > 3)) {
             log.error("Syntax: PUT <local-file> [<remote-file>]");
             return true;
         }
-        final File local = new File(currentLocalPath, cmd[1]);
-        final String remote = (cmd.length == 2) ? local.getName() : cmd[2];
+        final File local = new File(this.currentLocalPath, this.cmd[1]);
+        final String remote = (this.cmd.length == 2) ? local.getName() : this.cmd[2];
         if (!local.exists()) {
             log.error("Error: local file " + local.toString() + " does not exist.");
             log.error("            Remote file " + remote + " not overwritten.");
@@ -1622,7 +1622,7 @@ public class FTPClient {
     }
 
     public boolean PWD() {
-        if (cmd.length > 1) {
+        if (this.cmd.length > 1) {
             log.error("Syntax: PWD  (no parameter)");
             return true;
         }
@@ -1652,7 +1652,7 @@ public class FTPClient {
     }
 
     public boolean REMOTEHELP() {
-        if (cmd.length != 1) {
+        if (this.cmd.length != 1) {
             log.error("Syntax: REMOTEHELP  (no parameter)");
             return true;
         }
@@ -1665,7 +1665,7 @@ public class FTPClient {
     }
 
     public boolean RMDIR() {
-        if (cmd.length != 2) {
+        if (this.cmd.length != 2) {
             log.error("Syntax: RMDIR <folder-name>");
             return true;
         }
@@ -1673,9 +1673,9 @@ public class FTPClient {
             return LRMDIR();
         }
         try {
-            rmForced(cmd[1]);
+            rmForced(this.cmd[1]);
         } catch (final IOException e) {
-            log.error("Error: deletion of folder " + cmd[1] + " failed.");
+            log.error("Error: deletion of folder " + this.cmd[1] + " failed.");
         }
         return true;
     }
@@ -1693,7 +1693,7 @@ public class FTPClient {
 
     /**
      * size of file on ftp-server (maybe size of directory-entry is possible)
-     * 
+     *
      * @param path
      * @return size in bytes or -1 if size cannot be determinied
      */
@@ -1730,7 +1730,7 @@ public class FTPClient {
         if (getStatusCode(reply) != 213) {
             throw new IOException(reply);
         }
-        
+
         try {
             return Integer.parseInt(reply.substring(4));
         } catch (final NumberFormatException e) {
@@ -1739,15 +1739,15 @@ public class FTPClient {
     }
 
     public boolean USER() {
-        if (cmd.length != 3) {
+        if (this.cmd.length != 3) {
             log.error("Syntax: USER <user-name> <password>");
             return true;
         }
         try {
-            login(cmd[1], cmd[2]);
-            log.info("---- Granted access for user " + cmd[1] + ".");
+            login(this.cmd[1], this.cmd[2]);
+            log.info("---- Granted access for user " + this.cmd[1] + ".");
         } catch (final IOException e) {
-            log.error("Error: authorization of user " + cmd[1] + " failed: " + e.getMessage());
+            log.error("Error: authorization of user " + this.cmd[1] + " failed: " + e.getMessage());
         }
         return true;
     }
@@ -1924,7 +1924,7 @@ public class FTPClient {
         // the pattern may contain characters '*' as wildcard for several
         // characters (also none) and '?' to match exactly one characters
         // log.info("MATCH " + name + " " + pattern);
-        if (!glob) {
+        if (!this.glob) {
             return name.equals(pattern);
         }
         if (pattern.equals("*")) {
@@ -1935,14 +1935,14 @@ public class FTPClient {
             ((matches(name, pattern.substring(1))) || (matches(name, pattern.substring(0, pattern.length() - 1))));
         }
         try {
-            int i = pattern.indexOf("?");
+            int i = pattern.indexOf('?',0);
             if (i >= 0) {
                 if (!(matches(name.substring(0, i), pattern.substring(0, i)))) {
                     return false;
                 }
                 return (matches(name.substring(i + 1), pattern.substring(i + 1)));
             }
-            i = pattern.indexOf("*");
+            i = pattern.indexOf('*',0);
             if (i >= 0) {
                 if (!(name.substring(0, i).equals(pattern.substring(0, i)))) {
                     return false;
@@ -1969,10 +1969,10 @@ public class FTPClient {
     // protocoll socket commands
 
     private void send(final String buf) throws IOException {
-        clientOutput.writeBytes(buf);
-        clientOutput.write('\r');
-        clientOutput.write('\n');
-        clientOutput.flush();
+        this.clientOutput.writeBytes(buf);
+        this.clientOutput.write('\r');
+        this.clientOutput.write('\n');
+        this.clientOutput.flush();
         if (buf.startsWith("PASS")) {
             log.info("> PASS ********");
         } else {
@@ -1985,7 +1985,7 @@ public class FTPClient {
         String reply;
 
         while (true) {
-            reply = clientInput.readLine();
+            reply = this.clientInput.readLine();
 
             // sanity check
             if (reply == null) {
@@ -2020,22 +2020,22 @@ public class FTPClient {
     private Socket getDataSocket() throws IOException {
         Socket data;
         if (isPassive()) {
-            if (DataSocketPassive == null) {
+            if (this.DataSocketPassive == null) {
                 createDataSocket();
             }
-            data = DataSocketPassive;
+            data = this.DataSocketPassive;
         } else {
-            if (DataSocketActive == null) {
+            if (this.DataSocketActive == null) {
                 createDataSocket();
             }
-            data = DataSocketActive.accept();
+            data = this.DataSocketActive.accept();
         }
         return data;
     }
 
     /**
      * create data channel
-     * 
+     *
      * @throws IOException
      */
     private void createDataSocket() throws IOException {
@@ -2048,22 +2048,22 @@ public class FTPClient {
 
     /**
      * use passive ftp?
-     * 
+     *
      * @return
      */
     private boolean isPassive() {
-        return DataSocketPassiveMode;
+        return this.DataSocketPassiveMode;
     }
 
     private void createActiveDataPort() throws IOException {
         // create data socket and bind it to free port available
-        DataSocketActive = new ServerSocket(0);
-        DataSocketActive.setSoTimeout(getTimeout());
-        DataSocketActive.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
+        this.DataSocketActive = new ServerSocket(0);
+        this.DataSocketActive.setSoTimeout(getTimeout());
+        this.DataSocketActive.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
         applyDataSocketTimeout();
 
         // get port socket has been bound to
-        final int DataPort = DataSocketActive.getLocalPort();
+        final int DataPort = this.DataSocketActive.getLocalPort();
 
         // client ip
         // InetAddress LocalIp = serverCore.publicIP();
@@ -2099,7 +2099,7 @@ public class FTPClient {
             throw new IOException(reply);
         }
 
-        DataSocketPassiveMode = false;
+        this.DataSocketPassiveMode = false;
     }
 
     private void createPassiveDataPort() throws IOException {
@@ -2150,43 +2150,43 @@ public class FTPClient {
         }
         final int dataport = (high << 8) + low;
 
-        DataSocketPassive = new Socket(datahost, dataport);
+        this.DataSocketPassive = new Socket(datahost, dataport);
         applyDataSocketTimeout();
-        DataSocketPassiveMode = true;
+        this.DataSocketPassiveMode = true;
     }
 
     /**
      * closes data connection
-     * 
+     *
      * @throws IOException
      */
     private void closeDataSocket() throws IOException {
         if (isPassive()) {
-            if (DataSocketPassive != null) {
-                DataSocketPassive.close();
-                DataSocketPassive = null;
+            if (this.DataSocketPassive != null) {
+                this.DataSocketPassive.close();
+                this.DataSocketPassive = null;
             }
         } else {
-            if (DataSocketActive != null) {
-                DataSocketActive.close();
-                DataSocketActive = null;
+            if (this.DataSocketActive != null) {
+                this.DataSocketActive.close();
+                this.DataSocketActive = null;
             }
         }
     }
 
     /**
      * sets the timeout for the socket
-     * 
+     *
      * @throws SocketException
      */
     private void applyDataSocketTimeout() throws SocketException {
         if (isPassive()) {
-            if (DataSocketPassive != null) {
-                DataSocketPassive.setSoTimeout(DataSocketTimeout * 1000);
+            if (this.DataSocketPassive != null) {
+                this.DataSocketPassive.setSoTimeout(this.DataSocketTimeout * 1000);
             }
         } else {
-            if (DataSocketActive != null) {
-                DataSocketActive.setSoTimeout(DataSocketTimeout * 1000);
+            if (this.DataSocketActive != null) {
+                this.DataSocketActive.setSoTimeout(this.DataSocketTimeout * 1000);
             }
         }
     }
@@ -2204,7 +2204,7 @@ public class FTPClient {
         send("RETR " + fileName);
 
         // read status of the command from the control port
-        String reply = receive();
+        final String reply = receive();
 
         // get status code
         final int status = getStatus(reply);
@@ -2218,18 +2218,18 @@ public class FTPClient {
             try {
                 data = getDataSocket();
                 ClientStream = data.getInputStream();
-    
+
                 // create local file
                 if (fileDest == null) {
                     outFile = new RandomAccessFile(fileName, "rw");
                 } else {
                     outFile = new RandomAccessFile(fileDest, "rw");
                 }
-    
+
                 // write remote file to local file
                 final byte[] block = new byte[blockSize];
                 int numRead;
-    
+
                 while ((numRead = ClientStream.read(block)) != -1) {
                     outFile.write(block, 0, numRead);
                     length = length + numRead;
@@ -2268,9 +2268,9 @@ public class FTPClient {
         }
     }
 
-    
+
     public byte[] get(final String fileName) throws IOException {
-        
+
         createDataSocket();
 
         // set type of the transfer
@@ -2280,7 +2280,7 @@ public class FTPClient {
         send("RETR " + fileName);
 
         // read status of the command from the control port
-        String reply = receive();
+        final String reply = receive();
 
         // get status code
         final int status = getStatus(reply);
@@ -2289,16 +2289,16 @@ public class FTPClient {
         if (status == 1) {
             Socket data = null;
             InputStream ClientStream = null;
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
             int length = 0;
             try {
                 data = getDataSocket();
                 ClientStream = data.getInputStream();
-    
+
                 // write remote file to local file
                 final byte[] block = new byte[blockSize];
                 int numRead;
-    
+
                 while ((numRead = ClientStream.read(block)) != -1) {
                     os.write(block, 0, numRead);
                     length = length + numRead;
@@ -2310,7 +2310,7 @@ public class FTPClient {
                 }
                 closeDataSocket();
             }
-            
+
             // after stream is empty we should get control completion echo
             /*reply =*/ receive();
             // boolean success = !isNotPositiveCompletion(reply);
@@ -2320,7 +2320,7 @@ public class FTPClient {
         }
     }
 
-    
+
     private void put(final String fileName, final String fileDest) throws IOException {
 
         createDataSocket();
@@ -2360,7 +2360,7 @@ public class FTPClient {
 
             // shutdown remote client connection
             data.close();
-            
+
             // after stream is empty we should get control completion echo
             reply = receive();
             final boolean success = (getStatus(reply) == 2);
@@ -2376,7 +2376,7 @@ public class FTPClient {
 
     /**
      * Login to server
-     * 
+     *
      * @param account
      * @param password
      * @throws IOException
@@ -2411,16 +2411,16 @@ public class FTPClient {
 
     /**
      * we are authorized to use the server
-     * 
+     *
      * @return
      */
     public boolean isLoggedIn() {
-        return (account != null && password != null && remotegreeting != null);
+        return (this.account != null && this.password != null && this.remotegreeting != null);
     }
 
     /**
      * remember username and password which were used to login
-     * 
+     *
      * @param account
      * @param password
      * @param reply
@@ -2429,13 +2429,13 @@ public class FTPClient {
     private void setLoginData(final String account, final String password, final String reply) {
         this.account = account;
         this.password = password;
-        remotegreeting = reply;
+        this.remotegreeting = reply;
     }
 
     private void unsetLoginData() {
-        account = null;
-        password = null;
-        remotegreeting = null;
+        this.account = null;
+        this.password = null;
+        this.remotegreeting = null;
     }
 
     public void sys() throws IOException {
@@ -2449,7 +2449,7 @@ public class FTPClient {
         }
 
         // exclude status code from reply
-        remotesystem = systemType.substring(4);
+        this.remotesystem = systemType.substring(4);
     }
 
     private void literal(final String commandLine) throws IOException {
@@ -2466,7 +2466,7 @@ public class FTPClient {
 
     /**
      * control socket timeout
-     * 
+     *
      * @return
      */
     public int getTimeout() {
@@ -2475,12 +2475,12 @@ public class FTPClient {
 
     /**
      * after this time the data connection is closed
-     * 
+     *
      * @param timeout
      *                in seconds, 0 = infinite
      */
     public void setDataSocketTimeout(final int timeout) {
-        DataSocketTimeout = timeout;
+        this.DataSocketTimeout = timeout;
 
         try {
             applyDataSocketTimeout();
@@ -2528,7 +2528,7 @@ public class FTPClient {
      * generate a list of all files on a ftp server using the anonymous account
      * @param host
      * @return a list of entryInfo from all files of the ftp server
-     * @throws IOException 
+     * @throws IOException
      */
     public static BlockingQueue<entryInfo> sitelist(final String host, final int port) throws IOException {
         final FTPClient ftpClient = new FTPClient();
@@ -2541,18 +2541,18 @@ public class FTPClient {
                 try {
                     sitelist(ftpClient, "/", queue);
                     ftpClient.quit();
-                } catch (Exception e) {} finally {
+                } catch (final Exception e) {} finally {
                     queue.add(POISON_entryInfo);
                 }
             }
         }.start();
         return queue;
     }
-    private static void sitelist(final FTPClient ftpClient, String path, LinkedBlockingQueue<entryInfo> queue) {
+    private static void sitelist(final FTPClient ftpClient, String path, final LinkedBlockingQueue<entryInfo> queue) {
         List<String> list;
         try {
             list = ftpClient.list(path, true);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             //e.printStackTrace();
             return;
         }
@@ -2575,31 +2575,31 @@ public class FTPClient {
                     sitelist(ftpClient, path + info.name, queue);
                 }
                 if (info.type == filetype.link) {
-                    int q = info.name.indexOf("->");
+                    final int q = info.name.indexOf("->",0);
                     if (q >= 0 && info.name.indexOf("..", q) < 0) {
                         //System.out.println("*** LINK:" + line);
                         info.name = info.name.substring(0, q).trim();
                         sitelist(ftpClient, path + info.name, queue);
                     }
-                    
+
                 }
             }
         }
     }
-    
+
     public StringBuilder dirhtml(String remotePath) throws IOException {
         // returns a directory listing using an existing connection
             if (isFolder(remotePath) && '/' != remotePath.charAt(remotePath.length()-1)) {
                 remotePath += '/';
             }
-            String pwd = pwd();
+            final String pwd = pwd();
             final List<String> list = list(remotePath, true);
-            if (remotesystem == null) try {sys();} catch (IOException e) {}
-            final String base = "ftp://" + ((account.equals("anonymous")) ? "" : (account + ":" + password + "@"))
-                    + host + ((port == 21) ? "" : (":" + port)) + ((remotePath.length() > 0 && remotePath.charAt(0) == '/') ? "" : pwd + "/")
+            if (this.remotesystem == null) try {sys();} catch (final IOException e) {}
+            final String base = "ftp://" + ((this.account.equals("anonymous")) ? "" : (this.account + ":" + this.password + "@"))
+                    + this.host + ((this.port == 21) ? "" : (":" + this.port)) + ((remotePath.length() > 0 && remotePath.charAt(0) == '/') ? "" : pwd + "/")
                     + remotePath;
 
-            return dirhtml(base, remotemessage, remotegreeting, remotesystem, list, true);
+            return dirhtml(base, this.remotemessage, this.remotegreeting, this.remotesystem, list, true);
     }
 
     private static StringBuilder dirhtml(
@@ -2749,17 +2749,17 @@ public class FTPClient {
         String password;
 
         public pt(final String h, final File l, final String rp, final String rn, final String a, final String p) {
-            host = h;
-            localFile = l;
-            remotePath = rp;
-            remoteName = rn;
-            account = a;
-            password = p;
+            this.host = h;
+            this.localFile = l;
+            this.remotePath = rp;
+            this.remoteName = rn;
+            this.account = a;
+            this.password = p;
         }
 
         public final void run() {
             try {
-                put(host, localFile, remotePath, remoteName, account, password);
+                put(this.host, this.localFile, this.remotePath, this.remoteName, this.account, this.password);
             } catch (final IOException e) {
                 log.error(e, e);
             }
@@ -2803,9 +2803,9 @@ public class FTPClient {
                 try {
                     ftpClient.open("192.168.1.90", 21);
                     ftpClient.login("anonymous", "anomic@");
-                    byte[] b = ftpClient.get("/Movie/ATest Ordner/Unterordner/test file.txt");
+                    final byte[] b = ftpClient.get("/Movie/ATest Ordner/Unterordner/test file.txt");
                     System.out.println(UTF8.String(b));
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -2838,7 +2838,7 @@ public class FTPClient {
                     log.error(e);
                 } catch (final IOException e) {
                     log.error(e);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     log.error(e);
                 }
             } else {
@@ -2873,5 +2873,5 @@ public class FTPClient {
             printHelp();
         }
     }
-    
+
 }

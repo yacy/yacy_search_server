@@ -629,7 +629,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                     q = q.substring(p + 1);
                     continue;
                 }
-                final int p = q.toLowerCase().indexOf("&" + sid.toLowerCase() + "=");
+                final int p = q.toLowerCase().indexOf("&" + sid.toLowerCase() + "=",0);
                 if (p < 0) continue;
                 final int p1 = q.indexOf('&', p+1);
                 if (p1 < 0) {
@@ -757,7 +757,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
         // remove all double-spaces
         int p;
-        while ((p = t.indexOf("  ")) >= 0) t = t.substring(0, p) + t.substring(p + 1);
+        while ((p = t.indexOf("  ",0)) >= 0) t = t.substring(0, p) + t.substring(p + 1);
 
         // split the string into tokens and add all camel-case splitting
         final String[] u = t.split(" ");
@@ -892,32 +892,32 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     public final boolean isCGI() {
         final String ls = unescape(this.path.toLowerCase());
-        return ls.indexOf(".cgi") >= 0 ||
-               ls.indexOf(".exe") >= 0;
+        return ls.indexOf(".cgi",0) >= 0 ||
+               ls.indexOf(".exe",0) >= 0;
     }
 
     public final boolean isIndividual() {
         final String q = unescape(this.path.toLowerCase());
         for (final String sid: sessionIDnames.keySet()) {
             if (q.startsWith(sid.toLowerCase() + "=")) return true;
-            final int p = q.indexOf("&" + sid.toLowerCase() + "=");
+            final int p = q.indexOf("&" + sid.toLowerCase() + "=",0);
             if (p >= 0) return true;
         }
         int pos;
         return
-               ((pos = q.indexOf("sid")) > 0 &&
+               ((pos = q.indexOf("sid",0)) > 0 &&
                 (q.charAt(--pos) == '?' || q.charAt(pos) == '&' || q.charAt(pos) == ';') &&
                 (pos += 5) < q.length() &&
                 (q.charAt(pos) != '&' && q.charAt(--pos) == '=')
                 ) ||
 
-               ((pos = q.indexOf("sessionid")) > 0 &&
+               ((pos = q.indexOf("sessionid",0)) > 0 &&
                 (pos += 10) < q.length() &&
                 (q.charAt(pos) != '&' &&
                  (q.charAt(--pos) == '=' || q.charAt(pos) == '/'))
                 ) ||
 
-               ((pos = q.indexOf("phpsessid")) > 0 &&
+               ((pos = q.indexOf("phpsessid",0)) > 0 &&
                 (pos += 10) < q.length() &&
                 (q.charAt(pos) != '&' &&
                  (q.charAt(--pos) == '=' || q.charAt(pos) == '/')));
@@ -1148,7 +1148,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     private static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
     public static final Pattern splitpattern = Pattern.compile(splitrex);
     public static String[] urlComps(String normalizedURL) {
-        final int p = normalizedURL.indexOf("//");
+        final int p = normalizedURL.indexOf("//",0);
         if (p > 0) normalizedURL = normalizedURL.substring(p + 2);
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }

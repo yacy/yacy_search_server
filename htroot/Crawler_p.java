@@ -131,7 +131,7 @@ public class Crawler_p {
             } else {
                 String crawlingStart = post.get("crawlingURL","").trim(); // the crawljob start url
                 // add the prefix http:// if necessary
-                int pos = crawlingStart.indexOf("://");
+                int pos = crawlingStart.indexOf("://",0);
                 if (pos == -1) {
                     if (crawlingStart.startsWith("www")) crawlingStart = "http://" + crawlingStart;
                     if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart;

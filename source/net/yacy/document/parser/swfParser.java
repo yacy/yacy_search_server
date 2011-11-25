@@ -1,4 +1,4 @@
-//swfParser.java 
+//swfParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -39,25 +39,24 @@ import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.logging.Log;
-
 import pt.tumba.parser.swf.SWF2HTML;
 
 public class swfParser extends AbstractParser implements Parser {
 
     public swfParser() {
         super("Adobe Flash Parser");
-        SUPPORTED_EXTENSIONS.add("swf");
-        SUPPORTED_MIME_TYPES.add("application/x-shockwave-flash");
-        SUPPORTED_MIME_TYPES.add("application/x-shockwave-flash2-preview");
-        SUPPORTED_MIME_TYPES.add("application/futuresplash");
-        SUPPORTED_MIME_TYPES.add("image/vnd.rn-realflash");
+        this.SUPPORTED_EXTENSIONS.add("swf");
+        this.SUPPORTED_MIME_TYPES.add("application/x-shockwave-flash");
+        this.SUPPORTED_MIME_TYPES.add("application/x-shockwave-flash2-preview");
+        this.SUPPORTED_MIME_TYPES.add("application/futuresplash");
+        this.SUPPORTED_MIME_TYPES.add("image/vnd.rn-realflash");
     }
 
     /*
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
-    public Document[] parse(final MultiProtocolURI location, final String mimeType, 
+    public Document[] parse(final MultiProtocolURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException
     {
@@ -67,11 +66,11 @@ public class swfParser extends AbstractParser implements Parser {
             String contents = "";
             try {
             	contents = swf2html.convertSWFToHTML(source);
-            } catch (NegativeArraySizeException e) {
+            } catch (final NegativeArraySizeException e) {
                 throw new Parser.Failure(e.getMessage(), location);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new Parser.Failure(e.getMessage(), location);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Log.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             }
@@ -88,9 +87,9 @@ public class swfParser extends AbstractParser implements Parser {
             int p0 = 0;
 
             //getting rid of HTML-Tags
-            p0 = contents.indexOf("<html><body>");
+            p0 = contents.indexOf("<html><body>",0);
             contents = contents.substring(p0+12);
-            p0 = contents.indexOf("</body></html>");
+            p0 = contents.indexOf("</body></html>",0);
             contents = contents.substring(0,p0);
 
             //extracting urls
@@ -98,7 +97,7 @@ public class swfParser extends AbstractParser implements Parser {
                 urlEnd = contents.indexOf(linebreak,urlStart);
                 url = contents.substring(urlStart,urlEnd);
                 urlnr = Integer.toString(++urls).toString();
-                Properties p = new Properties();
+                final Properties p = new Properties();
                 p.put("name", urlnr);
                 anchors.put(new MultiProtocolURI(url), p);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
@@ -121,13 +120,13 @@ public class swfParser extends AbstractParser implements Parser {
                     "",
                     sections,     // an array of section headlines
                     abstrct,     // an abstract
-                    0.0f, 0.0f, 
+                    0.0f, 0.0f,
                     UTF8.getBytes(contents),     // the parsed document text
                     anchors,      // a map of extracted anchors
                     null,
                     null,
                     false)};      // a treeset of image URLs
-        } catch (final Exception e) { 
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 
             // if an unexpected error occures just log the error and raise a new Parser.Failure

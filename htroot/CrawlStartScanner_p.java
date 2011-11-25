@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -38,33 +38,32 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
-
 import de.anomic.data.WorkTables;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class CrawlStartScanner_p {
-    
+
     private final static int CONCURRENT_RUNNER = 100;
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
+
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
 
         // clean up all search events
         SearchEventCache.cleanupEvents(true);
-        
+
         prop.put("noserverdetected", 0);
         prop.put("hosts", "");
         prop.put("intranet.checked", sb.isIntranetMode() ? 1 : 0);
 
         int timeout = sb.isIntranetMode() ? 200 : 3000;
         timeout = post == null ? timeout : post.getInt("timeout", timeout);
-        
+
         // make a scanhosts entry
         String hosts = post == null ? "" : post.get("scanhosts", "");
-        Set<InetAddress> ips = Domains.myIntranetIPs();
+        final Set<InetAddress> ips = Domains.myIntranetIPs();
         prop.put("intranethosts", ips.toString());
         prop.put("intranetHint", sb.isIntranetMode() ? 0 : 1);
         if (hosts.length() == 0) {
@@ -79,7 +78,7 @@ public class CrawlStartScanner_p {
             if (ip != null) hosts = ip.getHostAddress();
         }
         prop.put("scanhosts", hosts);
-        
+
         // parse post requests
         if (post != null) {
             int repeat_time = 0;
@@ -94,9 +93,9 @@ public class CrawlStartScanner_p {
                 if (repeat_unit.equals("selhours")) validTime = repeat_time * 60 * 60 * 1000;
                 if (repeat_unit.equals("seldays")) validTime = repeat_time * 24 * 60 * 60 * 1000;
             }
-            
-            boolean bigrange = post.getBoolean("bigrange", false);
-            
+
+            final boolean bigrange = post.getBoolean("bigrange", false);
+
             // case: an IP range was given; scan the range for services and display result
             if (post.containsKey("scan") && "hosts".equals(post.get("source", ""))) {
                 final Set<InetAddress> ia = new HashSet<InetAddress>();
@@ -105,7 +104,7 @@ public class CrawlStartScanner_p {
                     if (host.startsWith("https://")) host = host.substring(8);
                     if (host.startsWith("ftp://")) host = host.substring(6);
                     if (host.startsWith("smb://")) host = host.substring(6);
-                    int p = host.indexOf('/');
+                    final int p = host.indexOf('/',0);
                     if (p >= 0) host = host.substring(0, p);
                     ia.add(Domains.dnsResolve(host));
                 }
@@ -122,7 +121,7 @@ public class CrawlStartScanner_p {
                     Scanner.scancacheReplace(scanner, validTime);
                 }
             }
-            
+
             if (post.containsKey("scan") && "intranet".equals(post.get("source", ""))) {
                 final Scanner scanner = new Scanner(Domains.myIntranetIPs(), CONCURRENT_RUNNER, timeout);
                 if ("on".equals(post.get("scanftp", ""))) scanner.addFTP(bigrange);
@@ -137,27 +136,27 @@ public class CrawlStartScanner_p {
                     Scanner.scancacheReplace(scanner, validTime);
                 }
             }
-            
+
             // check crawl request
             if (post.containsKey("crawl")) {
                 // make a pk/url mapping
                 final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
                 final Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
                 while (se.hasNext()) {
-                    Scanner.Service u = se.next().getKey();
+                    final Scanner.Service u = se.next().getKey();
                     DigestURI uu;
                     try {
                         uu = new DigestURI(u.url());
                         pkmap.put(uu.hash(), uu);
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         Log.logException(e);
                     }
                 }
                 // search for crawl start requests in this mapping
                 for (final Map.Entry<String, String> entry: post.entrySet()) {
                     if (entry.getValue().startsWith("mark_")) {
-                        byte [] pk = entry.getValue().substring(5).getBytes();
-                        DigestURI url = pkmap.get(pk);
+                        final byte [] pk = entry.getValue().substring(5).getBytes();
+                        final DigestURI url = pkmap.get(pk);
                         if (url != null) {
                             String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
                             path += "&crawlingURL=" + url.toNormalform(true, false);
@@ -166,21 +165,21 @@ public class CrawlStartScanner_p {
                     }
                 }
             }
-            
+
             // check scheduler
             if ("scheduler".equals(post.get("rescan", ""))) {
-                
+
                 // store this call as api call
                 if (repeat_time > 0) {
                     // store as scheduled api call
                     sb.tables.recordAPICall(post, "CrawlStartScanner_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "network scanner for hosts: " + hosts, repeat_time, repeat_unit.substring(3));
                 }
-                
+
                 // execute the scan results
                 if (Scanner.scancacheSize() > 0) {
                     // make a comment cache
                     final Map<byte[], String> apiCommentCache = WorkTables.commentCache(sb);
-                    
+
                     String urlString;
                     DigestURI u;
                     try {
@@ -196,17 +195,17 @@ public class CrawlStartScanner_p {
                                     path += "&crawlingURL=" + urlString;
                                     WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8090), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), path, u.hash());
                                 }
-                            } catch (MalformedURLException e) {
+                            } catch (final MalformedURLException e) {
                                 Log.logException(e);
                             }
                         }
-                    } catch (ConcurrentModificationException e) {}
+                    } catch (final ConcurrentModificationException e) {}
                 }
-                
+
             }
         }
-        
+
         return prop;
     }
-    
+
 }

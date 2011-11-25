@@ -371,7 +371,7 @@ public class SnippetProcess {
             URIMetadataRow page;
             ResultEntry resultEntry;
             //final int fetchAhead = snippetMode == 0 ? 0 : 10;
-            final boolean nav_topics = SnippetProcess.this.query.navigators.equals("all") || SnippetProcess.this.query.navigators.indexOf("topics") >= 0;
+            final boolean nav_topics = SnippetProcess.this.query.navigators.equals("all") || SnippetProcess.this.query.navigators.indexOf("topics",0) >= 0;
             try {
                 //System.out.println("DEPLOYED WORKER " + id + " FOR " + this.neededResults + " RESULTS, timeoutd = " + (this.timeout - System.currentTimeMillis()));
                 int loops = 0;

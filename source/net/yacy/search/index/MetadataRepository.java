@@ -323,7 +323,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     oldUrlStr = entry.getColUTF8(1).trim();
 
                     int pos = -1;
-                    if ((pos = oldUrlStr.indexOf("://")) != -1) {
+                    if ((pos = oldUrlStr.indexOf("://",0)) != -1) {
                         // trying to correct the url
                         final String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
                         final DigestURI newUrl = new DigestURI(newUrlStr);
@@ -422,7 +422,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     }
                 }
             } catch (final RuntimeException e) {
-                if (e.getMessage() != null && e.getMessage().indexOf("not found in LURL") != -1) {
+                if (e.getMessage() != null && e.getMessage().indexOf("not found in LURL",0) != -1) {
                     Log.logWarning("URLDBCLEANER", "urlHash not found in LURL", e);
                 }
                 else {

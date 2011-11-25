@@ -533,8 +533,8 @@ public class Table implements Index, Iterable<Row.Entry> {
         if (rowb == null) return null;
         final byte[] key = row.getPrimaryKeyBytes();
         synchronized (this) {
-            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
-            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
+            //assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+            //assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
             final int i = (int) this.index.get(key);
             if (i == -1) {
                 try {
@@ -590,8 +590,8 @@ public class Table implements Index, Iterable<Row.Entry> {
         if (rowb == null) return true;
         final byte[] key = row.getPrimaryKeyBytes();
         synchronized (this) {
-            assert this.file == null || this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
-            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+            //assert this.file == null || this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+            //assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
             final int i = (int) this.index.get(key);
             if (i == -1) {
                 try {

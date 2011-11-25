@@ -676,7 +676,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public boolean indexingDenied() {
         final String s = this.metas.get("robots");
         if (s == null) return false;
-        if (s.indexOf("noindex") >= 0) return true;
+        if (s.indexOf("noindex",0) >= 0) return true;
         return false;
     }
 

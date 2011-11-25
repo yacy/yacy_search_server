@@ -1,4 +1,4 @@
-// serverClassLoader.java 
+// serverClassLoader.java
 // -----------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -43,7 +43,7 @@ public final class serverClassLoader extends ClassLoader {
 
     public serverClassLoader(final ClassLoader parent) {
         super(parent);
-        classes = new ConcurrentHashMap<File, Class<?>>(100);
+        this.classes = new ConcurrentHashMap<File, Class<?>>(100);
     }
 
     public Package[] packages() {
@@ -54,8 +54,8 @@ public final class serverClassLoader extends ClassLoader {
         // take the class out of the cache, denoted by the class file
         Class<?> c = this.classes.get(classfile);
         if (c != null) return c;
-        
-        final int p = classfile.getName().indexOf(".");
+
+        final int p = classfile.getName().indexOf('.',0);
         if (p < 0) throw new ClassNotFoundException("wrong class name: " + classfile.getName());
         final String classname = classfile.getName().substring(0, p);
 

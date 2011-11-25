@@ -208,7 +208,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // is always (but not only) called if an IO-dependent exception occurrs.
         log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
         final String message = e.getMessage();
-        if (message != null && message.indexOf("heap space") > 0) Log.logException(e);
+        if (message != null && message.indexOf("heap space",0) > 0) Log.logException(e);
         return "501 Exception occurred: " + message;
     }
 
@@ -233,8 +233,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // persistent by default, but closed with the "Connection: close"
         // property.
         boolean persistent = !(httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9) || httpVersion.equals(HeaderFramework.HTTP_VERSION_1_0));
-        if ((header.get(RequestHeader.CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1 ||
-            (header.get(RequestHeader.PROXY_CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1) {
+        if ((header.get(RequestHeader.CONNECTION, "keep-alive")).toLowerCase().indexOf("close",0) != -1 ||
+            (header.get(RequestHeader.PROXY_CONNECTION, "keep-alive")).toLowerCase().indexOf("close",0) != -1) {
             persistent = false;
         }
 

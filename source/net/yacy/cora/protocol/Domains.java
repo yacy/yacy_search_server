@@ -765,7 +765,7 @@ public class Domains {
                 b0 != 127 && // loopback
                 (b0 != 172 || b1 < 16 || b1 > 31) && // class B reserved
                 (b0 != 192 || b1 != 168) && // class C reserved
-                (a.getHostAddress().indexOf(":") < 0))
+                (a.getHostAddress().indexOf(':',0) < 0))
                 return a;
         }
         // there is only a local address
@@ -775,24 +775,24 @@ public class Domains {
             final InetAddress localHostAddress = InetAddress.getLocalHost();
             if (localHostAddress != null &&
                 (0Xff & localHostAddress.getAddress()[0]) != 127 &&
-                localHostAddress.getHostAddress().indexOf(":") < 0) return localHostAddress;
+                localHostAddress.getHostAddress().indexOf(':',0) < 0) return localHostAddress;
         } catch (final UnknownHostException e) {
         }
         // we filter out the loopback address 127.0.0.1 and all addresses without a name
         for (final InetAddress a: localHostAddresses) {
             if ((0Xff & a.getAddress()[0]) != 127 &&
-                a.getHostAddress().indexOf(":") < 0 &&
+                a.getHostAddress().indexOf(':',0) < 0 &&
                 a.getHostName() != null &&
                 !a.getHostName().isEmpty()) return a;
         }
         // if no address has a name, then take any other than the loopback
         for (final InetAddress a: localHostAddresses) {
             if ((0Xff & a.getAddress()[0]) != 127 &&
-                a.getHostAddress().indexOf(":") < 0) return a;
+                a.getHostAddress().indexOf(':',0) < 0) return a;
         }
         // if all fails, give back whatever we have
         for (final InetAddress a: localHostAddresses) {
-            if (a.getHostAddress().indexOf(":") < 0) return a;
+            if (a.getHostAddress().indexOf(':',0) < 0) return a;
         }
         // finally, just get any
         return localHostAddresses.iterator().next();

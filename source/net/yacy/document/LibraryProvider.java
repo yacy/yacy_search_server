@@ -233,7 +233,7 @@ public class LibraryProvider {
             String w;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                p = line.indexOf(" ");
+                p = line.indexOf(' ',0);
                 if (p > 0) {
                     //c = Integer.parseInt(line.substring(p + 1));
                     //if (c < 1) continue;

@@ -1,4 +1,4 @@
-// whois.java 
+// whois.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -39,7 +39,7 @@ public class whois {
             int pos;
             final Properties result = new Properties();
             while ((line = br.readLine()) != null) {
-                pos = line.indexOf(":");
+                pos = line.indexOf(':',0);
                 if (pos > 0) {
                     key = line.substring(0, pos).trim().toLowerCase();
                     value = line.substring(pos + 1).trim();

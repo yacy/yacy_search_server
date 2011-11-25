@@ -1,4 +1,4 @@
-//YaCySearchPluginFF.pac 
+//YaCySearchPluginFF.pac
 //-----------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -34,7 +34,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class YaCySearchPluginFF {
-    
+
     /**
      * @param header the complete HTTP header of the request
      * @param post any arguments for this servlet, the request carried with (GET as well as POST)
@@ -44,23 +44,23 @@ public class YaCySearchPluginFF {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         // getting the http host header
         final String hostSocket = header.get(HeaderFramework.CONNECTION_PROP_HOST);
-        
+
         String host = hostSocket;
         int port = 80;
-        final int pos = hostSocket.indexOf(":");        
+        final int pos = hostSocket.indexOf(':',0);
         if (pos != -1) {
             port = Integer.parseInt(hostSocket.substring(pos + 1));
             host = hostSocket.substring(0, pos);
-        }    
-        
+        }
+
         prop.put("host", host);
         prop.put("port", port);
         prop.putHTML("name", sb.peers.mySeed().getName());
-        
+
         return prop;
     }
-    
+
 }

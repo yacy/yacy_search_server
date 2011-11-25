@@ -259,7 +259,7 @@ public final class HTTPDFileHandler {
             String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = "unknown-host";
 
             // check hack attacks in path
-            if (path.indexOf("..") >= 0) {
+            if (path.indexOf("..",0) >= 0) {
                 HTTPDemon.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
                 return;
             }
@@ -267,7 +267,7 @@ public final class HTTPDFileHandler {
             path = UTF8.decodeURL(path);
 
             // check against hack attacks in path
-            if (path.indexOf("..") >= 0) {
+            if (path.indexOf("..",0) >= 0) {
                 HTTPDemon.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
                 return;
             }
@@ -293,7 +293,7 @@ public final class HTTPDFileHandler {
             // (the alternative is that we deliver a 401 to request authorization)
 
             // -1- the page is not protected; or
-            final boolean protectedPage = path.indexOf("_p.") > 0;
+            final boolean protectedPage = path.indexOf("_p.",0) > 0;
             boolean accessGranted = !protectedPage;
 
             // -2- a password is not configured; or
@@ -398,7 +398,7 @@ public final class HTTPDFileHandler {
                 String val;
                 while (e.hasNext()) {
                     val = e.next();
-                    if ((val != null) && (val.indexOf("<script") >= 0) && !path.equals("/Crawler_p.html")) {
+                    if ((val != null) && (val.indexOf("<script",0) >= 0) && !path.equals("/Crawler_p.html")) {
                         // deny request
                         HTTPDemon.sendRespondError(conProp,out,4,403,null,"bad post values",null);
                         return;
@@ -731,7 +731,7 @@ public final class HTTPDFileHandler {
                     }
 
                     final String cgiReturn = StringBuilder.toString();
-                    int indexOfDelimiter = cgiReturn.indexOf("\n\n");
+                    int indexOfDelimiter = cgiReturn.indexOf("\n\n",0);
                     String[] cgiHeader = new String[0];
                     if (indexOfDelimiter > -1) {
                         cgiHeader = cgiReturn.substring(0, indexOfDelimiter).split("\n");

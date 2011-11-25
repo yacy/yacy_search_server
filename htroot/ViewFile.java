@@ -358,9 +358,9 @@ public class ViewFile {
             words = words.substring(1, words.length() - 1);
         }
         words = UTF8.decodeURL(words);
-        if (words.indexOf(' ') >= 0) return words.split(" ");
-        if (words.indexOf(',') >= 0) return words.split(",");
-        if (words.indexOf('+') >= 0) return words.split("\\+");
+        if (words.indexOf(' ',0) >= 0) return words.split(" ");
+        if (words.indexOf(',',0) >= 0) return words.split(",");
+        if (words.indexOf('+',0) >= 0) return words.split("\\+");
         w = new String[1];
         w[0] = words;
         return w;

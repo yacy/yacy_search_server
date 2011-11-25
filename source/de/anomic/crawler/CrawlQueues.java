@@ -50,8 +50,8 @@ import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.Switchboard.indexingQueueEntry;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segments;
 import de.anomic.crawler.NoticedURL.StackType;
 import de.anomic.crawler.ZURL.FailCategory;
@@ -271,7 +271,7 @@ public class CrawlQueues {
                 return true;
             } catch (final IOException e) {
                 this.log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
-                if (e.getMessage().indexOf("hash is null") > 0) this.noticeURL.clear(NoticedURL.StackType.CORE);
+                if (e.getMessage().indexOf("hash is null",0) > 0) this.noticeURL.clear(NoticedURL.StackType.CORE);
             }
         }
         return true;
@@ -532,7 +532,7 @@ public class CrawlQueues {
             return true;
         } catch (final IOException e) {
             this.log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
-            if (e.getMessage().indexOf("hash is null") > 0) this.noticeURL.clear(NoticedURL.StackType.REMOTE);
+            if (e.getMessage().indexOf("hash is null",0) > 0) this.noticeURL.clear(NoticedURL.StackType.REMOTE);
             return true;
         }
     }

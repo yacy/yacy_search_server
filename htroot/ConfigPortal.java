@@ -147,10 +147,10 @@ public class ConfigPortal {
         prop.put("search.result.show.parser", sb.getConfigBool("search.result.show.parser", false) ? 1 : 0);
         prop.put("search.result.show.pictures", sb.getConfigBool("search.result.show.pictures", false) ? 1 : 0);
 
-        prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts") >= 0 ? 1 : 0);
-        prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors") >= 0 ? 1 : 0);
-        prop.put("search.navigation.namespace", sb.getConfig("search.navigation", "").indexOf("namespace") >= 0 ? 1 : 0);
-        prop.put("search.navigation.topics", sb.getConfig("search.navigation", "").indexOf("topics") >= 0 ? 1 : 0);
+        prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
+        prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors",0) >= 0 ? 1 : 0);
+        prop.put("search.navigation.namespace", sb.getConfig("search.navigation", "").indexOf("namespace",0) >= 0 ? 1 : 0);
+        prop.put("search.navigation.topics", sb.getConfig("search.navigation", "").indexOf("topics",0) >= 0 ? 1 : 0);
 
         prop.put("search.verify.nocache", sb.getConfig("search.verify", "").equals("nocache") ? 1 : 0);
         prop.put("search.verify.iffresh", sb.getConfig("search.verify", "").equals("iffresh") ? 1 : 0);

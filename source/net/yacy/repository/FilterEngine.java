@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -17,15 +17,15 @@ import net.yacy.kelondro.logging.Log;
 
 /**
  * a URL filter engine for black and white lists
- * 
+ *
  * @TODO precompile regular expressions
  *
  */
 public class FilterEngine {
-	
+
 	/** size of URL cache */
 	protected static final int CACHE_SIZE = 100;
-	
+
     public static final int ERR_TWO_WILDCARDS_IN_HOST = 1;
     public static final int ERR_SUBDOMAIN_XOR_WILDCARD = 2;
     public static final int ERR_PATH_REGEX = 3;
@@ -40,29 +40,29 @@ public class FilterEngine {
         public String path;
         public EnumSet<listTypes> types;
 
-        public FilterEntry(String path, EnumSet<listTypes>types) {
+        public FilterEntry(final String path, final EnumSet<listTypes>types) {
             this.path = path;
             this.types = types;
         }
 
         @Override
-        public int compareTo(FilterEntry fe) {
+        public int compareTo(final FilterEntry fe) {
             return this.path.compareToIgnoreCase(fe.path);
         }
     }
-	
+
     protected HashARC<DigestURI, EnumSet<listTypes>> cachedUrlHashs = null;
     protected Map<String, Set<FilterEntry>> hostpaths_matchable = null;
     protected Map<String, Set<FilterEntry>> hostpaths_notmatchable = null;
 
-    
+
     public FilterEngine() {
         // prepare the data structure
         this.hostpaths_matchable = new HashMap<String, Set<FilterEntry>>();
         this.hostpaths_notmatchable = new HashMap<String, Set<FilterEntry>>();
         this.cachedUrlHashs = new HashARC<DigestURI, EnumSet<listTypes>>(CACHE_SIZE);
     }
-    
+
     public void clear() {
     	this.cachedUrlHashs.clear();
     	this.hostpaths_matchable.clear();
@@ -72,64 +72,64 @@ public class FilterEngine {
     public int size() {
     	return this.hostpaths_matchable.size() + this.hostpaths_notmatchable.size();
     }
-    
-    public void add(String entry, EnumSet<listTypes> types) {
+
+    public void add(final String entry, final EnumSet<listTypes> types) {
     	assert entry != null;
     	int pos; // position between domain and path
     	if((pos = entry.indexOf('/')) > 0) {
     		String host = entry.substring(0, pos).trim().toLowerCase();
-            String path = entry.substring(pos + 1).trim();
+            final String path = entry.substring(pos + 1).trim();
 
             // avoid PatternSyntaxException e
             if (!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*')
             	host = "." + host;
-            
+
             if(isMatchable(host)) {
-            	if (!hostpaths_matchable.containsKey(host))
-            		hostpaths_matchable.put(host, new TreeSet<FilterEntry>());
-            	hostpaths_matchable.get(host).add(new FilterEntry(path, types));
+            	if (!this.hostpaths_matchable.containsKey(host))
+            		this.hostpaths_matchable.put(host, new TreeSet<FilterEntry>());
+            	this.hostpaths_matchable.get(host).add(new FilterEntry(path, types));
             	// TODO: update type, if there is an element
             } else {
-            	if (!hostpaths_notmatchable.containsKey(host))
-            		hostpaths_notmatchable.put(host, new TreeSet<FilterEntry>());
-            	hostpaths_notmatchable.get(host).add(new FilterEntry(path, types));            	
+            	if (!this.hostpaths_notmatchable.containsKey(host))
+            		this.hostpaths_notmatchable.put(host, new TreeSet<FilterEntry>());
+            	this.hostpaths_notmatchable.get(host).add(new FilterEntry(path, types));
             }
     	}
     }
-    
-    public void loadList(final BufferedReader in, EnumSet<listTypes> types) throws IOException {
+
+    public void loadList(final BufferedReader in, final EnumSet<listTypes> types) throws IOException {
     	String line;
     	while((line = in.readLine()) != null) {
     		line = line.trim();
         	if (line.length() > 0 && line.charAt(0) != '#')
-        		this.add(line, types);
+        		add(line, types);
     	}
     }
-    
+
     public void removeAll(final String host) {
     	assert host != null;
     	this.hostpaths_matchable.remove(host);
     	this.hostpaths_notmatchable.remove(host);
     }
-    
+
     public void remove(final String listType, final String host, final String path) {
     }
-    
+
     public boolean isListed(final DigestURI url, final EnumSet<listTypes> type) {
     	// trival anwser
     	if (url.getHost() == null)
     		return false;
-    	
-    	if(cachedUrlHashs.containsKey(url)) {
+
+    	if(this.cachedUrlHashs.containsKey(url)) {
     		// Cache Hit
-    		EnumSet<listTypes> e = cachedUrlHashs.get(url);
+    		final EnumSet<listTypes> e = this.cachedUrlHashs.get(url);
     		return e.containsAll(type);
     	} else {
     		// Cache Miss
     		return isListed(url.getHost().toLowerCase(), url.getFile(), type);
     	}
     }
-    
+
     public static boolean isMatchable (final String host) {
         try {
             if(Pattern.matches("^[a-z0-9.-]*$", host)) // simple Domain (yacy.net or www.yacy.net)
@@ -145,7 +145,7 @@ public class FilterEngine {
        return false;
     }
 
-    public boolean isListed(final String host, String path, EnumSet<listTypes> type) {
+    public boolean isListed(final String host, String path, final EnumSet<listTypes> type) {
         if (host == null) throw new NullPointerException();
         if (path == null) throw new NullPointerException();
 
@@ -153,9 +153,9 @@ public class FilterEngine {
         Set<FilterEntry> app;
 
         // try to match complete domain
-        if ((app = hostpaths_matchable.get(host)) != null) {
-        	for(FilterEntry e: app) {
-        		if (e.path.indexOf("?*") > 0) {
+        if ((app = this.hostpaths_matchable.get(host)) != null) {
+        	for(final FilterEntry e: app) {
+        		if (e.path.indexOf("?*",0) > 0) {
                     // prevent "Dangling meta character '*'" exception
                     Log.logWarning("FilterEngine", "ignored blacklist path to prevent 'Dangling meta character' exception: " + e);
                     continue;
@@ -168,14 +168,14 @@ public class FilterEngine {
         // [TL] While "." are found within the string
         int index = 0;
         while ((index = host.indexOf('.', index + 1)) != -1) {
-            if ((app = hostpaths_matchable.get(host.substring(0, index + 1) + "*")) != null) {
-            	for(FilterEntry e: app) {
+            if ((app = this.hostpaths_matchable.get(host.substring(0, index + 1) + "*")) != null) {
+            	for(final FilterEntry e: app) {
             		if((e.path.equals("*")) || (path.matches(e.path)))
             			return true;
             	}
             }
-            if ((app = hostpaths_matchable.get(host.substring(0, index))) != null) {
-            	for(FilterEntry e: app) {
+            if ((app = this.hostpaths_matchable.get(host.substring(0, index))) != null) {
+            	for(final FilterEntry e: app) {
             		if((e.path.equals("*")) || (path.matches(e.path)))
             			return true;
             	}
@@ -183,15 +183,15 @@ public class FilterEngine {
         }
         index = host.length();
         while ((index = host.lastIndexOf('.', index - 1)) != -1) {
-            if ((app = hostpaths_matchable.get("*" + host.substring(index, host.length()))) != null) {
-            	for(FilterEntry e: app) {
+            if ((app = this.hostpaths_matchable.get("*" + host.substring(index, host.length()))) != null) {
+            	for(final FilterEntry e: app) {
                     if((e.path.equals("*")) || (path.matches(e.path)))
                     	return true;
-            		
+
             	}
             }
-            if ((app = hostpaths_matchable.get(host.substring(index +1, host.length()))) != null) {
-            	for(FilterEntry e: app) {
+            if ((app = this.hostpaths_matchable.get(host.substring(index +1, host.length()))) != null) {
+            	for(final FilterEntry e: app) {
                     if((e.path.equals("*")) || (path.matches(e.path)))
                     	return true;
             	}
@@ -200,12 +200,12 @@ public class FilterEngine {
 
 
         // loop over all Regexentrys
-        for(final Entry<String, Set<FilterEntry>> entry: hostpaths_notmatchable.entrySet()) {
+        for(final Entry<String, Set<FilterEntry>> entry: this.hostpaths_notmatchable.entrySet()) {
             try {
                 if(Pattern.matches(entry.getKey(), host)) {
                     app = entry.getValue();
-                    for(FilterEntry e: app) {
-                        if(Pattern.matches(e.path, path)) 
+                    for(final FilterEntry e: app) {
+                        if(Pattern.matches(e.path, path))
                             return true;
                     }
                 }
@@ -216,7 +216,7 @@ public class FilterEngine {
         return false;
     }
 
-    public int checkError(String element, Map<String, String> properties) {
+    public int checkError(final String element, final Map<String, String> properties) {
 
         final boolean allowRegex = (properties != null) && properties.get("allowRegex").equalsIgnoreCase("true");
         int slashPos;

@@ -124,7 +124,7 @@ public class yacysearchtrailer {
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = authorNavigator.get(name);
-                anav = (name.indexOf(' ') < 0) ? "author:" + name : "author:'" + name.replace(" ", "+") + "'";
+                anav = (name.indexOf(' ',0) < 0) ? "author:" + name : "author:'" + name.replace(" ", "+") + "'";
                 prop.put(fileType, "nav-authors_element_" + i + "_name", name);
                 prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-authors_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators).toString());

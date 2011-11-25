@@ -1,4 +1,4 @@
-// BlacklistCleaner_p.java 
+// BlacklistCleaner_p.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -40,13 +40,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import de.anomic.data.ListManager;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
@@ -55,23 +51,26 @@ import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistError;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
+import de.anomic.data.ListManager;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class BlacklistCleaner_p {
-    
+
     private static final String RESULTS = "results_";
     private static final String DISABLED = "disabled_";
     private static final String BLACKLISTS = "blacklists_";
     private static final String ENTRIES = "entries_";
-        
+
     private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
-    
+
     public static final Class<?>[] supportedBLEngines = {
         Blacklist.class
     };
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        
+
         // initialize the list manager
         ListManager.switchboard = (Switchboard) env;
         ListManager.listsPath = new File(env.getDataPath(), env.getConfig("listManager.listsPath", "DATA/LISTS"));
@@ -79,7 +78,7 @@ public class BlacklistCleaner_p {
 
         // get the list of supported blacklist types
         final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;
-        final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
+        final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
 
         prop.put(DISABLED+"checked", "1");
 
@@ -131,7 +130,7 @@ public class BlacklistCleaner_p {
             prop.put("results", "0");
             putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
         }
-        
+
         return prop;
     }
 
@@ -147,7 +146,7 @@ public class BlacklistCleaner_p {
         for (int i=0; i < supportedBLEngines.length && !supported; i++) {
             supported |= (Switchboard.urlBlacklist.getClass() == supportedBLEngines[i]);
         }
-        
+
         if (supported) {
             if (!lists.isEmpty()) {
                 prop.put("disabled", "0");
@@ -226,7 +225,7 @@ public class BlacklistCleaner_p {
                 }
             }
         }
-        
+
         return r.toArray(new String[r.size()]);
     }
 
@@ -242,7 +241,7 @@ public class BlacklistCleaner_p {
     private static Map<String, BlacklistError> getIllegalEntries(final String blacklistToUse, final Blacklist blEngine, final boolean allowRegex) {
         final Map<String, BlacklistError> illegalEntries = new HashMap<String, BlacklistError>();
         final Set<String> legalEntries = new HashSet<String>();
-        
+
         final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, blacklistToUse));
         final Map<String, String> properties= new HashMap<String, String>();
         properties.put("allowRegex", String.valueOf(allowRegex));
@@ -251,7 +250,7 @@ public class BlacklistCleaner_p {
 
         for (String element : list) {
             element = element.trim();
-            
+
             // check for double-occurance
             if (legalEntries.contains(element)) {
                 illegalEntries.put(element, BlacklistError.DOUBLE_OCCURANCE);
@@ -279,37 +278,37 @@ public class BlacklistCleaner_p {
     private static int removeEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final String[] entries) {
         // load blacklist data from file
         final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, blacklistToUse));
-        
+
         boolean listChanged = false;
-        
+
         // delete the old entry from file
         for (final String entry : entries) {
             String s = entry;
-            
+
             if (list != null){
-                
+
                 // get rid of escape characters which make it impossible to
                 // properly use contains()
                 if (s.contains("\\\\")) {
                     s = s.replaceAll(Pattern.quote("\\\\"), Matcher.quoteReplacement("\\"));
                 }
-           
+
                 if (list.contains(s)) {
                     listChanged = list.remove(s);
                 }
             }
-            
+
             // remove the entry from the running blacklist engine
             for (final String supportedBlacklistType : supportedBlacklistTypes) {
                 if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklistToUse)) {
-                    final String host = (s.indexOf('/') == -1) ? s : s.substring(0, s.indexOf('/'));
-                    final String path = (s.indexOf('/') == -1) ? ".*" : s.substring(s.indexOf('/') + 1);
+                    final String host = (s.indexOf('/',0) == -1) ? s : s.substring(0, s.indexOf('/',0));
+                    final String path = (s.indexOf('/',0) == -1) ? ".*" : s.substring(s.indexOf('/',0) + 1);
                     try {
                     Switchboard.urlBlacklist.remove(supportedBlacklistType, host, path);
                     } catch (final RuntimeException e) {
                         Log.logSevere("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
                     }
-                }                
+                }
             }
             SearchEventCache.cleanupEvents(true);
         }
@@ -338,7 +337,7 @@ public class BlacklistCleaner_p {
             pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklistToUse), true));
             String host, path;
             for (final String n : newEntry) {
-                int pos = n.indexOf('/');
+                final int pos = n.indexOf('/',0);
                 if (pos < 0) {
                     host = n;
                     path = ".*";

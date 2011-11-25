@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
 public class ResponseHeader extends HeaderFramework {
 
     // response header properties
-   
+
     private static final long serialVersionUID = 0L;
     private static Logger log = Logger.getLogger(ResponseHeader.class);
 
@@ -43,69 +43,69 @@ public class ResponseHeader extends HeaderFramework {
         super();
     }
 
-    public ResponseHeader(Header[] headers) {
+    public ResponseHeader(final Header[] headers) {
         super();
         for (final Header h : headers) {
-        	this.add(h.getName(), h.getValue());
+        	add(h.getName(), h.getValue());
         }
     }
-    
+
     public ResponseHeader(final HashMap<String, String> reverseMappingCache) {
         super(reverseMappingCache);
     }
-    
+
     public ResponseHeader(final HashMap<String, String> reverseMappingCache, final Map<String, String> othermap)  {
         super(reverseMappingCache, othermap);
     }
 
     public Date date() {
-        Date d = headerDate(HeaderFramework.DATE);
+        final Date d = headerDate(HeaderFramework.DATE);
         if (d == null) return new Date(); else return d;
     }
-    
+
     public Date expires() {
         return headerDate(EXPIRES);
     }
-    
+
     public Date lastModified() {
-        Date d = headerDate(LAST_MODIFIED);
+        final Date d = headerDate(LAST_MODIFIED);
         if (d == null) return date(); else return d;
     }
-    
+
     public long age() {
         final Date lm = lastModified();
         final Date sd = date();
         if (lm == null) return Long.MAX_VALUE;
         return ((sd == null) ? new Date() : sd).getTime() - lm.getTime();
     }
-    
+
     public boolean gzip() {
         return ((containsKey(CONTENT_ENCODING)) &&
         ((get(CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
     }
 
     public static Object[] parseResponseLine(final String respLine) {
-        
+
         if ((respLine == null) || (respLine.length() == 0)) {
             return new Object[]{"HTTP/1.0",Integer.valueOf(500),"status line parse error"};
         }
-        
-        int p = respLine.indexOf(" ");
+
+        int p = respLine.indexOf(' ',0);
         if (p < 0) {
             return new Object[]{"HTTP/1.0",Integer.valueOf(500),"status line parse error"};
         }
-        
+
         String httpVer, status, statusText;
         Integer statusCode;
-        
+
         // the http version reported by the server
         httpVer = respLine.substring(0,p);
-        
+
         // Status of the request, e.g. "200 OK"
         status = respLine.substring(p + 1).trim(); // the status code plus reason-phrase
-        
+
         // splitting the status into statuscode and statustext
-        p = status.indexOf(" ");
+        p = status.indexOf(' ',0);
         try {
             statusCode = Integer.valueOf((p < 0) ? status.trim() : status.substring(0,p).trim());
             statusText = (p < 0) ? "" : status.substring(p+1).trim();
@@ -113,10 +113,10 @@ public class ResponseHeader extends HeaderFramework {
             statusCode = Integer.valueOf(500);
             statusText = status;
         }
-        
+
         return new Object[]{httpVer,statusCode,statusText};
     }
-    
+
 
     /**
      * @param header
@@ -135,15 +135,15 @@ public class ResponseHeader extends HeaderFramework {
                 // use system default
                 return Charset.defaultCharset();
             }
-        } catch(IllegalCharsetNameException e) {
+        } catch(final IllegalCharsetNameException e) {
             log.warn("Charset in header is illegal: '"+ charSetName +"'\n    "+ toString() + "\n" + e.getMessage());
             // use system default
             return Charset.defaultCharset();
-        } catch (UnsupportedCharsetException e) {
+        } catch (final UnsupportedCharsetException e) {
             log.warn("Charset in header is unsupported: '"+ charSetName +"'\n    "+ toString() + "\n" + e.getMessage());
             // use system default
             return Charset.defaultCharset();
         }
         return Charset.forName(charSetName);
-    } 
+    }
 }
