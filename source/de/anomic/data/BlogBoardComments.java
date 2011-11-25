@@ -1,4 +1,4 @@
-// BlogBoardComments.java 
+// BlogBoardComments.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -60,7 +60,7 @@ import org.xml.sax.SAXException;
 import de.anomic.data.wiki.WikiBoard;
 
 public class BlogBoardComments {
-    
+
     private final static int KEY_LENGTH = 64;
     private final static String DATE_FORMAT = "yyyyMMddHHmmss";
 
@@ -68,29 +68,29 @@ public class BlogBoardComments {
     static {
         SIMPLE_DATE_FORMATTER.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
-    
+
     private MapHeap database = null;
-    
+
     public BlogBoardComments(final File actpath) throws IOException {
         new File(actpath.getParent()).mkdir();
         //database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
-        database = new MapHeap(actpath, KEY_LENGTH, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+        this.database = new MapHeap(actpath, KEY_LENGTH, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
     }
-    
+
     public int size() {
-        return database.size();
+        return this.database.size();
     }
-    
+
     public void close() {
-        database.close();
+        this.database.close();
     }
-    
+
     static String dateString(final Date date) {
         synchronized (SIMPLE_DATE_FORMATTER) {
             return SIMPLE_DATE_FORMATTER.format(date);
         }
     }
-    
+
     private static String normalize(final String key) {
         return (key == null) ? "null" : key.trim().toLowerCase();
     }
@@ -100,7 +100,7 @@ public class BlogBoardComments {
         }
         String ret = key.trim().toLowerCase();
         int p;
-        while ((p = ret.indexOf(" ")) >= 0)
+        while ((p = ret.indexOf(' ',0)) >= 0)
             ret = ret.substring(0, p) + "%20" + key.substring(p +1);
         return ret;
     }
@@ -116,7 +116,7 @@ public class BlogBoardComments {
     public String write(final CommentEntry page) {
         // writes a new page and returns key
     	try {
-    	    database.insert(UTF8.getBytes(page.key), page.record);
+    	    this.database.insert(UTF8.getBytes(page.key), page.record);
     	    return page.key;
     	} catch (final Exception e) {
     	    Log.logException(e);
@@ -125,7 +125,7 @@ public class BlogBoardComments {
     }
     public CommentEntry read(final String key) {
         //System.out.println("DEBUG: read from blogBoardComments");
-        return read(key, database);
+        return read(key, this.database);
     }
 
     private CommentEntry read(final String key, final MapHeap base) {
@@ -137,7 +137,7 @@ public class BlogBoardComments {
         } catch (final IOException e) {
             Log.logException(e);
             record = null;
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
             record = null;
         }
@@ -157,20 +157,20 @@ public class BlogBoardComments {
         catch (final ParserConfigurationException e) {}
         catch (final SAXException e) {}
         catch (final IOException e) {}
-		
+
     	return ret;
     }
-    
+
     private boolean parseXMLimport(final Document doc) {
     	if(!"blog".equals(doc.getDocumentElement().getTagName())) {
             return false;
         }
-    	
+
     	final NodeList items = doc.getDocumentElement().getElementsByTagName("item");
     	if(items.getLength() == 0) {
             return false;
         }
-    	
+
     	for(int i = 0, n = items.getLength(); i < n; ++i) {
             String key = null, ip = null, StrSubject = null, StrAuthor = null, StrPage = null, StrDate = null;
             Date date = null;
@@ -197,55 +197,55 @@ public class BlogBoardComments {
                     StrPage = currentNode.getFirstChild().getNodeValue();
                 }
             }
-    		
+
             try {
                 date = SIMPLE_DATE_FORMATTER.parse(StrDate);
             } catch (final ParseException ex) {
                     date = new Date();
             }
-    		
+
             if (key == null || ip == null || StrSubject == null || StrAuthor == null || StrPage == null || date == null)
                 return false;
-    		
+
             byte[] subject,author,page;
             subject = UTF8.getBytes(StrSubject);
             author = UTF8.getBytes(StrAuthor);
             page = UTF8.getBytes(StrPage);
             write (newEntry(key, subject, author, ip, date, page));
     	}
-        
+
     	return true;
     }
 
     public void delete(final String key) {
     	try {
-            database.delete(UTF8.getBytes(normalize(key)));
+            this.database.delete(UTF8.getBytes(normalize(key)));
         }
         catch (final IOException e) { }
     }
-    
+
     public Iterator<byte[]> keys(final boolean up) throws IOException {
-        return database.keys(up, false);
+        return this.database.keys(up, false);
     }
 
     public static class CommentEntry {
-        
+
         String key;
         Map<String, String> record;
-    
+
         public CommentEntry(final String nkey, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page) {
-            record = new HashMap<String, String>();
-            
+            this.record = new HashMap<String, String>();
+
             setKey(nkey);
             setDate(date);
             setSubject(subject);
             setAuthor(author);
             setIp(ip);
             setPage(page);
-            
+
             WikiBoard.setAuthor(ip, UTF8.String(author));
         }
-    
+
         CommentEntry(final String key, final Map<String, String> record) {
             this.key = key;
             this.record = record;
@@ -253,36 +253,36 @@ public class BlogBoardComments {
                 this.record.put("comments", ListManager.collection2string(new ArrayList<String>()));
             }
         }
-        
+
         public String getKey() {
-            return key;
+            return this.key;
         }
-        
+
         private void setKey(final String var) {
-            key = var.substring(0, Math.min(var.length(), KEY_LENGTH));
+            this.key = var.substring(0, Math.min(var.length(), KEY_LENGTH));
         }
-        
+
         private void setSubject(final byte[] subject) {
-            if (subject == null) 
-                record.put("subject","");
-            else 
-                record.put("subject", Base64Order.enhancedCoder.encode(subject));
+            if (subject == null)
+                this.record.put("subject","");
+            else
+                this.record.put("subject", Base64Order.enhancedCoder.encode(subject));
         }
         public byte[] getSubject() {
-            final String subject = record.get("subject");
+            final String subject = this.record.get("subject");
             if (subject == null) return new byte[0];
             final byte[] subject_bytes = Base64Order.enhancedCoder.decode(subject);
             if (subject_bytes == null) return new byte[0];
             return subject_bytes;
         }
         private void setDate(Date date) {
-            if(date == null) 
-                date = new Date(); 
-            record.put("date", dateString(date));
+            if(date == null)
+                date = new Date();
+            this.record.put("date", dateString(date));
         }
         public Date getDate() {
             try {
-                final String date = record.get("date");
+                final String date = this.record.get("date");
                 if (date == null) {
                     if (Log.isFinest("Blog")) Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
                     return new Date();
@@ -294,9 +294,9 @@ public class BlogBoardComments {
                 return new Date();
             }
         }
-        
+
         public String getTimestamp() {
-            final String timestamp = record.get("date");
+            final String timestamp = this.record.get("date");
             if (timestamp == null) {
                 if (Log.isFinest("Blog")) Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
                 return dateString(new Date());
@@ -304,59 +304,59 @@ public class BlogBoardComments {
             return timestamp;
         }
         private void setAuthor(final byte[] author) {
-            if (author == null) 
-                record.put("author","");
-            else 
-                record.put("author", Base64Order.enhancedCoder.encode(author));
+            if (author == null)
+                this.record.put("author","");
+            else
+                this.record.put("author", Base64Order.enhancedCoder.encode(author));
         }
         public byte[] getAuthor() {
-            final String author = record.get("author");
-            if (author == null) 
+            final String author = this.record.get("author");
+            if (author == null)
                 return new byte[0];
             final byte[] author_byte = Base64Order.enhancedCoder.decode(author);
-            if (author_byte == null) 
+            if (author_byte == null)
                 return new byte[0];
             return author_byte;
         }
         private void setIp(String ip) {
-            if ((ip == null) || (ip.length() == 0)) 
+            if ((ip == null) || (ip.length() == 0))
                 ip = "";
-            record.put("ip", ip);
+            this.record.put("ip", ip);
         }
         public String getIp() {
-            final String ip = record.get("ip");
-            if (ip == null) 
+            final String ip = this.record.get("ip");
+            if (ip == null)
                 return "127.0.0.1";
             return ip;
         }
         private void setPage(final byte[] page) {
-            if (page == null) 
-                record.put("page", "");
-            else 
-                record.put("page", Base64Order.enhancedCoder.encode(page));
+            if (page == null)
+                this.record.put("page", "");
+            else
+                this.record.put("page", Base64Order.enhancedCoder.encode(page));
         }
         public byte[] getPage() {
-            final String page = record.get("page");
-            if (page == null) 
+            final String page = this.record.get("page");
+            if (page == null)
                 return new byte[0];
             final byte[] page_byte = Base64Order.enhancedCoder.decode(page);
-            if (page_byte == null) 
+            if (page_byte == null)
                 return new byte[0];
             return page_byte;
-        }        
+        }
         /**
-         * Is the comment allowed? 
-         * this is possible for moderated blog entry only and means 
+         * Is the comment allowed?
+         * this is possible for moderated blog entry only and means
          * the administrator has explicit allowed the comment.
-         * @return 
+         * @return
          */
         public boolean isAllowed() {
-            return "true".equals(record.get("moderated"));
-        } 
+            return "true".equals(this.record.get("moderated"));
+        }
         public void allow() {
-            record.put("moderated", "true");
-        } 
-    
+            this.record.put("moderated", "true");
+        }
+
     }
 
 }

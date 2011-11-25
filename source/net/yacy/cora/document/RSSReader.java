@@ -138,9 +138,9 @@ public class RSSReader extends DefaultHandler {
         } while(!end.contains("</"));
 
         Type type = Type.none;
-        if (end.indexOf("rss") > 0) type = Type.rss;
-        if (end.indexOf("feed") > 0) type = Type.atom;
-        if (end.indexOf("rdf") > 0) type = Type.rdf;
+        if (end.indexOf("rss",0) > 0) type = Type.rss;
+        if (end.indexOf("feed",0) > 0) type = Type.atom;
+        if (end.indexOf("rdf",0) > 0) type = Type.rdf;
         return type;
     }
 

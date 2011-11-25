@@ -109,7 +109,7 @@ public class DocumentIndex extends Segment {
                         }
                     }
                 } catch (final IOException e) {
-                    if (e.getMessage().indexOf("cannot parse") < 0) Log.logException(e);
+                    if (e.getMessage().indexOf("cannot parse",0) < 0) Log.logException(e);
                     DocumentIndex.this.callback.fail(f, e.getMessage());
                 }
             } catch (final InterruptedException e) {}

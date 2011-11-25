@@ -197,7 +197,7 @@ public class yacysearch {
         }
 
         String prefermask = (post == null) ? "" : post.get("prefermaskfilter", "");
-        if (!prefermask.isEmpty() && prefermask.indexOf(".*") < 0) {
+        if (!prefermask.isEmpty() && prefermask.indexOf(".*",0) < 0) {
             prefermask = ".*" + prefermask + ".*";
         }
 
@@ -289,42 +289,42 @@ public class yacysearch {
 
             final RankingProfile ranking = sb.getRanking();
 
-            if (querystring.indexOf("/near") >= 0) {
+            if (querystring.indexOf("/near",0) >= 0) {
             	querystring = querystring.replace("/near", "");
             	ranking.coeff_worddistance = RankingProfile.COEFF_MAX;
             }
-            if (querystring.indexOf("/date") >= 0) {
+            if (querystring.indexOf("/date",0) >= 0) {
                 querystring = querystring.replace("/date", "");
                 ranking.coeff_date = RankingProfile.COEFF_MAX;
             }
-            if (querystring.indexOf("/http") >= 0) {
+            if (querystring.indexOf("/http",0) >= 0) {
                 querystring = querystring.replace("/http", "");
                 urlmask = "https?://.*";
             }
-            if (querystring.indexOf("/https") >= 0) {
+            if (querystring.indexOf("/https",0) >= 0) {
                 querystring = querystring.replace("/https", "");
                 urlmask = "https?://.*";
             }
-            if (querystring.indexOf("/ftp") >= 0) {
+            if (querystring.indexOf("/ftp",0) >= 0) {
                 querystring = querystring.replace("/ftp", "");
                 urlmask = "ftp://.*";
             }
-            if (querystring.indexOf("/smb") >= 0) {
+            if (querystring.indexOf("/smb",0) >= 0) {
                 querystring = querystring.replace("/smb", "");
                 urlmask = "smb://.*";
             }
-            if (querystring.indexOf("/file") >= 0) {
+            if (querystring.indexOf("/file",0) >= 0) {
                 querystring = querystring.replace("/file", "");
                 urlmask = "file://.*";
             }
-            if (querystring.indexOf("/location") >= 0) {
+            if (querystring.indexOf("/location",0) >= 0) {
                 querystring = querystring.replace("/location", "");
                 if (constraint == null) {
                     constraint = new Bitfield(4);
                 }
                 constraint.set(Condenser.flag_cat_haslocation, true);
             }
-            final int lrp = querystring.indexOf("/language/");
+            final int lrp = querystring.indexOf("/language/",0);
             String lr = "";
             if (lrp >= 0) {
                 if (querystring.length() >= (lrp + 11)) {
@@ -334,7 +334,7 @@ public class yacysearch {
                 querystring = querystring.replace("/language/" + lr, "");
                 lr = lr.toLowerCase();
             }
-            final int inurl = querystring.indexOf("inurl:");
+            final int inurl = querystring.indexOf("inurl:",0);
             if (inurl >= 0) {
                 int ftb = querystring.indexOf(' ', inurl);
                 if (ftb == -1) {
@@ -346,7 +346,7 @@ public class yacysearch {
                     urlmask = ".*" + urlstr + ".*";
                 }
             }
-            final int filetype = querystring.indexOf("filetype:");
+            final int filetype = querystring.indexOf("filetype:",0);
             if (filetype >= 0) {
                 int ftb = querystring.indexOf(' ', filetype);
                 if (ftb == -1) {
@@ -375,7 +375,7 @@ public class yacysearch {
                     } else urlmask = ".*" + tenant + urlmask;
                 }
             }
-            final int site = querystring.indexOf("site:");
+            final int site = querystring.indexOf("site:",0);
             String sitehash = null;
             String sitehost = null;
             if (site >= 0) {
@@ -394,17 +394,17 @@ public class yacysearch {
                 sitehash = DigestURI.hosthash(sitehost);
             }
 
-            final int heuristicScroogle = querystring.indexOf("heuristic:scroogle");
+            final int heuristicScroogle = querystring.indexOf("heuristic:scroogle",0);
             if (heuristicScroogle >= 0) {
                 querystring = querystring.replace("heuristic:scroogle", "");
             }
 
-            final int heuristicBlekko = querystring.indexOf("heuristic:blekko");
+            final int heuristicBlekko = querystring.indexOf("heuristic:blekko",0);
             if (heuristicBlekko >= 0) {
                 querystring = querystring.replace("heuristic:blekko", "");
             }
 
-            final int authori = querystring.indexOf("author:");
+            final int authori = querystring.indexOf("author:",0);
         	String authorhash = null;
             if (authori >= 0) {
             	// check if the author was given with single quotes or without
@@ -427,7 +427,7 @@ public class yacysearch {
             	}
             	authorhash = ASCII.String(Word.word2hash(author));
             }
-            final int tld = querystring.indexOf("tld:");
+            final int tld = querystring.indexOf("tld:",0);
             if (tld >= 0) {
                 int ftb = querystring.indexOf(' ', tld);
                 if (ftb == -1) {
@@ -438,7 +438,7 @@ public class yacysearch {
                 while (domain.length() > 0 && domain.charAt(0) == '.') {
                     domain = domain.substring(1);
                 }
-                if (domain.indexOf('.') < 0) {
+                if (domain.indexOf('.',0) < 0) {
                     domain = "\\." + domain;
                 } // is tld
                 if (domain.length() > 0) {
@@ -473,7 +473,7 @@ public class yacysearch {
             // the query
             final TreeSet<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
 
-            final int maxDistance = (querystring.indexOf('"') >= 0) ? query.length - 1 : Integer.MAX_VALUE;
+            final int maxDistance = (querystring.indexOf('"',0) >= 0) ? query.length - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
             final SortedSet<String> filtered = SetTools.joinConstructive(query[0], Switchboard.stopwords);
@@ -806,7 +806,7 @@ public class yacysearch {
 
             // adding some additional properties needed for the rss feed
             String hostName = header.get("Host", "localhost");
-            if (hostName.indexOf(':') == -1) {
+            if (hostName.indexOf(':',0) == -1) {
                 hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
             }
             prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");

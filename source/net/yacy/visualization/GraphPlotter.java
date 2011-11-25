@@ -63,7 +63,7 @@ public class GraphPlotter {
     }
 
     public coordinate[] getBorder(final String name) {
-        final int p = name.indexOf("$");
+        final int p = name.indexOf('$',0);
         if (p < 0) return null;
         final coordinate from = getPoint(name.substring(0, p));
         final coordinate to = getPoint(name.substring(p + 1));

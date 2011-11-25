@@ -161,8 +161,8 @@ public final class transferRWI {
                 if (count > 1000) break; // protection against flooding
 
                 // check if RWI entry is well-formed
-                p = estring.indexOf('{');
-                if (p < 0 || estring.indexOf("x=") < 0 || !(estring.indexOf("[B@") < 0)) {
+                p = estring.indexOf('{',0);
+                if (p < 0 || estring.indexOf("x=",0) < 0 || !(estring.indexOf("[B@",0) < 0)) {
                     blocked++;
                     continue;
                 }

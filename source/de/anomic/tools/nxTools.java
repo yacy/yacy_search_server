@@ -1,4 +1,4 @@
-// nxTools.java 
+// nxTools.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -71,7 +71,7 @@ public class nxTools {
 		}
 		return result;
 	}
-    
+
     public static ArrayList<String> grep(final ArrayList<String> list, final int afterContext, final String pattern) {
         final Iterator<String> i = list.iterator();
         int ac = 0;
@@ -88,13 +88,13 @@ public class nxTools {
             ac--;
         }
         return result;
-        }    
+        }
 
     public static String tail1(final Vector<String> list) {
     	if (list == null || list.isEmpty()) return "";
     	return list.lastElement();
     }
-    
+
     public static String tail1(final ArrayList<String> list) {
         if (list == null || list.isEmpty()) return "";
         return list.get(list.size()-1);
@@ -132,7 +132,7 @@ public class nxTools {
         }
         return theLine;
     }
-    
+
     /**
      * This function shorten URL Strings<br>
      *
@@ -140,7 +140,7 @@ public class nxTools {
      * <dl><dt>normal domain:</dt><dd>http://domain.net/leftpath..rightpath</dd>
      * <dt>long domain:</dt><dd>http://very_very_long_domain.net/le..</dd></dl>
      * @param url String like a URL
-     * @param len 
+     * @param len
      * @return the shorten or the old String
      */
     public static String shortenURLString(final String url, final int len) {
@@ -149,7 +149,7 @@ public class nxTools {
         int urlLen = url.length();
         if (urlLen > len) {
             int cpos;
-            cpos = url.indexOf("://");
+            cpos = url.indexOf("://",0);
             if (cpos >= 0) {
                 cpos = url.indexOf("/", cpos + 3);
                 if (cpos < 0) { // very crazy domain or very short len

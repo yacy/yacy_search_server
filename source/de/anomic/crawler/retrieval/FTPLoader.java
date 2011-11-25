@@ -1,4 +1,4 @@
-// FTPLoader.java 
+// FTPLoader.java
 // -------------------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -49,7 +49,7 @@ import de.anomic.crawler.ZURL.FailCategory;
 public class FTPLoader {
 
     public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
-    
+
     private final Switchboard sb;
     private final Log log;
     private final long maxFileSize;
@@ -62,13 +62,13 @@ public class FTPLoader {
 
     /**
      * Loads the entry from a ftp-server
-     * 
+     *
      * @param request
      * @return
      */
-    public Response load(final Request request, boolean acceptOnlyParseable) throws IOException {
-        
-        long start = System.currentTimeMillis();
+    public Response load(final Request request, final boolean acceptOnlyParseable) throws IOException {
+
+        final long start = System.currentTimeMillis();
         final DigestURI entryUrl = request.url();
         final String fullPath = getPath(entryUrl);
 
@@ -97,7 +97,7 @@ public class FTPLoader {
 
         // create new ftp client
         final FTPClient ftpClient = new FTPClient();
-        
+
         // get a connection
         if (openConnection(ftpClient, entryUrl)) {
             // test if the specified file is a directory
@@ -113,23 +113,23 @@ public class FTPLoader {
 
             if (file.length() == 0) {
                 // directory -> get list of files
-                RequestHeader requestHeader = new RequestHeader();
+                final RequestHeader requestHeader = new RequestHeader();
                 if (request.referrerhash() != null) {
-                    DigestURI u = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
+                    final DigestURI u = this.sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
                     if (u != null) requestHeader.put(RequestHeader.REFERER, u.toNormalform(true, false));
                 }
-                
-                StringBuilder dirList = ftpClient.dirhtml(path);
+
+                final StringBuilder dirList = ftpClient.dirhtml(path);
 
                 if (dirList == null) {
                     response = null;
                 } else {
-                    ResponseHeader responseHeader = new ResponseHeader();
+                    final ResponseHeader responseHeader = new ResponseHeader();
                     responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
                     responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-                    final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
+                    final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
                     response = new Response(
-                            request, 
+                            request,
                             requestHeader,
                             responseHeader,
                             "200",
@@ -153,10 +153,10 @@ public class FTPLoader {
         if (berr.size() > 0 || response == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "Errorlog: " + berr.toString() : "";
-            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, " ftp server download, " + detail, -1);
+            this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, " ftp server download, " + detail, -1);
             throw new IOException("FTPLoader: Unable to download URL '" + request.url().toString() + "': " + detail);
         }
-        
+
         Latency.update(request.url(), System.currentTimeMillis() - start);
         return response;
     }
@@ -178,7 +178,7 @@ public class FTPLoader {
         final String userInfo = entryUrl.getUserInfo();
         String userName = "anonymous", userPwd = "anonymous";
         if (userInfo != null) {
-            final int pos = userInfo.indexOf(":");
+            final int pos = userInfo.indexOf(':',0);
             if (pos != -1) {
                 userName = userInfo.substring(0, pos);
                 userPwd = userInfo.substring(pos + 1);
@@ -210,7 +210,7 @@ public class FTPLoader {
         return true;
     }
 
-    private Response getFile(final FTPClient ftpClient, final Request request, boolean acceptOnlyParseable) throws IOException {
+    private Response getFile(final FTPClient ftpClient, final Request request, final boolean acceptOnlyParseable) throws IOException {
         // determine the mimetype of the resource
         final DigestURI url = request.url();
         final String mime = TextParser.mimeOf(url);
@@ -218,37 +218,37 @@ public class FTPLoader {
 
         // determine the file date
         final Date fileDate = ftpClient.entryDate(path);
-        
+
         // create response header
-        RequestHeader requestHeader = new RequestHeader();
+        final RequestHeader requestHeader = new RequestHeader();
         if (request.referrerhash() != null) {
-            DigestURI refurl = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
+            final DigestURI refurl = this.sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
             if (refurl != null) requestHeader.put(RequestHeader.REFERER, refurl.toNormalform(true, false));
         }
-        ResponseHeader responseHeader = new ResponseHeader();
+        final ResponseHeader responseHeader = new ResponseHeader();
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(fileDate));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
-        
+
         // if the mimetype and file extension is supported we start to download the file
         final long size = ftpClient.fileSize(path);
         responseHeader.put(HeaderFramework.CONTENT_LENGTH, String.valueOf(size));
         String parserError = null;
         if ((acceptOnlyParseable && (parserError = TextParser.supports(url, mime)) != null) ||
-            (size > maxFileSize && maxFileSize >= 0)) {
+            (size > this.maxFileSize && this.maxFileSize >= 0)) {
             // we know that we cannot process that file before loading
             // only the metadata is returned
-            
+
             if (parserError != null) {
-                log.logInfo("No parser available in FTP crawler: '" + parserError + "' for URL " + request.url().toString() + ": parsing only metadata");
+                this.log.logInfo("No parser available in FTP crawler: '" + parserError + "' for URL " + request.url().toString() + ": parsing only metadata");
             } else {
-                log.logInfo("Too big file in FTP crawler with size = " + size + " Bytes for URL " + request.url().toString() + ": parsing only metadata");
+                this.log.logInfo("Too big file in FTP crawler with size = " + size + " Bytes for URL " + request.url().toString() + ": parsing only metadata");
             }
-            
+
             // create response with metadata only
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
-            final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
-            Response response = new Response(
-                    request, 
+            final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+            final Response response = new Response(
+                    request,
                     requestHeader,
                     responseHeader,
                     "200",
@@ -256,14 +256,14 @@ public class FTPLoader {
                     null);
             return response;
         }
-        
+
         // download the remote file
-        byte[] b = ftpClient.get(path);
-        
+        final byte[] b = ftpClient.get(path);
+
         // create a response
-        final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
-        Response response = new Response(
-                request, 
+        final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+        final Response response = new Response(
+                request,
                 requestHeader,
                 responseHeader,
                 "200",
@@ -274,7 +274,7 @@ public class FTPLoader {
 
     /**
      * gets path suitable for FTP (url-decoded, double-quotes escaped)
-     * 
+     *
      * @param entryUrl
      * @return
      */

@@ -260,7 +260,7 @@ public class IndexControlURLs_p {
 
             // extend export file name
 			String s = post.get("exportfile", "");
-			if (s.indexOf('.') < 0) {
+			if (s.indexOf('.',0) < 0) {
 				if (format == 0) s = s + ".txt";
 				if (format == 1) s = s + ".html";
 				if (format == 2) s = s + ".xml";

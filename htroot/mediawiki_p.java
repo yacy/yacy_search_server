@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,48 +31,47 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.MediawikiImporter;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class mediawiki_p {
-    
+
     //http://localhost:8090/mediawiki_p.html?dump=wikipedia.de.xml&title=Kartoffel
-    public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) throws IOException {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         prop.put("title", "");
         prop.put("page", "");
-        
+
         if (post == null) {
             return post;
         }
 
-        String dump = post.get("dump", null);
-        String title = post.get("title", null);
+        final String dump = post.get("dump", null);
+        final String title = post.get("title", null);
         if (dump == null || title == null) return post;
-        
-        
-        File dumpFile = new File(sb.getDataPath(), "DATA/HTCACHE/mediawiki/" + dump);
+
+
+        final File dumpFile = new File(sb.getDataPath(), "DATA/HTCACHE/mediawiki/" + dump);
         if (!dumpFile.exists()) return post;
         MediawikiImporter.checkIndex(dumpFile);
-        MediawikiImporter.wikisourcerecord w = MediawikiImporter.find(title.replaceAll(" ", "_"), MediawikiImporter.idxFromMediawikiXML(dumpFile));
+        final MediawikiImporter.wikisourcerecord w = MediawikiImporter.find(title.replaceAll(" ", "_"), MediawikiImporter.idxFromMediawikiXML(dumpFile));
         if (w == null) {
             return post;
         }
         String page = UTF8.String(MediawikiImporter.read(dumpFile, w.start, (int) (w.end - w.start)));
-        int p = page.indexOf("<text");
+        int p = page.indexOf("<text",0);
         if (p < 0) return prop;
         p = page.indexOf('>', p);
         if (p < 0) return prop;
         p++;
-        int q = page.lastIndexOf("</text>");
+        final int q = page.lastIndexOf("</text>");
         if (q < 0) return prop;
         page = page.substring(p, q);
-        
+
         prop.putHTML("title", title);
         prop.putWiki(sb.peers.mySeed().getClusterAddress(), "page", page);
-            
+
         return prop;
     }
 }

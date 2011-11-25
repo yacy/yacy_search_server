@@ -142,7 +142,7 @@ public class SolrScheme extends ConfigurationSet {
             final String rel = p.getProperty("rel", "");   // the rel-attribute
             final String text = p.getProperty("text", ""); // the text between the <a></a> tag
             final String urls = url.toNormalform(false, false);
-            final int pr = urls.indexOf("://");
+            final int pr = urls.indexOf("://",0);
             inboundlinksURLProtocol[c] = urls.substring(0, pr);
             inboundlinksURLStub[c] = urls.substring(pr + 3);
             inboundlinksName[c] = name.length() > 0 ? name : "";
@@ -179,7 +179,7 @@ public class SolrScheme extends ConfigurationSet {
             final String rel = p.getProperty("rel", "");   // the rel-attribute
             final String text = p.getProperty("text", ""); // the text between the <a></a> tag
             final String urls = url.toNormalform(false, false);
-            final int pr = urls.indexOf("://");
+            final int pr = urls.indexOf("://",0);
             outboundlinksURLProtocol[c] = urls.substring(0, pr);
             outboundlinksURLStub[c] = urls.substring(pr + 3);
             outboundlinksName[c] = name.length() > 0 ? name : "";
@@ -246,20 +246,20 @@ public class SolrScheme extends ConfigurationSet {
             final String robots_meta = html.getMetas().get("robots");
             // this tag may have values: all, index, noindex, nofollow
             if (robots_meta != null) {
-                if (robots_meta.indexOf("all") >= 0) b += 1;      // set bit 0
-                if (robots_meta.indexOf("index") == 0 || robots_meta.indexOf(" index") >= 0 || robots_meta.indexOf(",index") >= 0 ) b += 2; // set bit 1
-                if (robots_meta.indexOf("noindex") >= 0) b += 4;  // set bit 2
-                if (robots_meta.indexOf("nofollow") >= 0) b += 8; // set bit 3
+                if (robots_meta.indexOf("all",0) >= 0) b += 1;      // set bit 0
+                if (robots_meta.indexOf("index",0) == 0 || robots_meta.indexOf(" index",0) >= 0 || robots_meta.indexOf(",index",0) >= 0 ) b += 2; // set bit 1
+                if (robots_meta.indexOf("noindex",0) >= 0) b += 4;  // set bit 2
+                if (robots_meta.indexOf("nofollow",0) >= 0) b += 8; // set bit 3
             }
             String x_robots_tag = header.get(HeaderFramework.X_ROBOTS_TAG, "");
             if (x_robots_tag.length() == 0) x_robots_tag = header.get(HeaderFramework.X_ROBOTS, "");
             // this tag may have values: noarchive, nosnippet, noindex, unavailable_after
             if (x_robots_tag.length() > 0) {
-                if (x_robots_tag.indexOf("noarchive") >= 0) b += 256;         // set bit 8
-                if (x_robots_tag.indexOf("nosnippet") >= 0) b += 512;         // set bit 9
-                if (x_robots_tag.indexOf("noindex") >= 0) b += 1024;          // set bit 10
-                if (x_robots_tag.indexOf("nofollow") >= 0) b += 2048;         // set bit 11
-                if (x_robots_tag.indexOf("unavailable_after") >=0) b += 4096; // set bit 12
+                if (x_robots_tag.indexOf("noarchive",0) >= 0) b += 256;         // set bit 8
+                if (x_robots_tag.indexOf("nosnippet",0) >= 0) b += 512;         // set bit 9
+                if (x_robots_tag.indexOf("noindex",0) >= 0) b += 1024;          // set bit 10
+                if (x_robots_tag.indexOf("nofollow",0) >= 0) b += 2048;         // set bit 11
+                if (x_robots_tag.indexOf("unavailable_after",0) >=0) b += 4096; // set bit 12
             }
             addSolr(solrdoc, "robots_i", b);
 

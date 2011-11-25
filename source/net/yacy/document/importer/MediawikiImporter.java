@@ -172,7 +172,7 @@ public class MediawikiImporter extends Thread implements Importer {
             wikiparserrecord record;
             int q;
             while ((t = r.readLine()) != null) {
-                if ((p = t.indexOf("<base>")) >= 0 && (q = t.indexOf("</base>", p)) > 0) {
+                if ((p = t.indexOf("<base>",0)) >= 0 && (q = t.indexOf("</base>", p)) > 0) {
                     //urlStub = "http://" + lang + ".wikipedia.org/wiki/";
                     this.urlStub = t.substring(p + 6, q);
                     if (!this.urlStub.endsWith("/")) {
@@ -236,9 +236,9 @@ public class MediawikiImporter extends Thread implements Importer {
                     page = false;
                     continue;
                 }
-                if ((p = t.indexOf("<title>")) >= 0) {
+                if ((p = t.indexOf("<title>",0)) >= 0) {
                     title = t.substring(p + 7);
-                    q = title.indexOf("</title>");
+                    q = title.indexOf("</title>",0);
                     if (q >= 0) title = title.substring(0, q);
                     continue;
                 }
@@ -459,7 +459,7 @@ public class MediawikiImporter extends Thread implements Importer {
         public wikisourcerecord(final byte[] chunk, final long start, final long end) {
             String s;
             s = UTF8.String(chunk);
-            final int t0 = s.indexOf("<title>");
+            final int t0 = s.indexOf("<title>",0);
             if (t0 >= 0) {
                 final int t1 = s.indexOf("</title>", t0);
                 if (t1 >= 0) {
@@ -596,7 +596,7 @@ public class MediawikiImporter extends Thread implements Importer {
             if (s.indexOf(m) >= 0) {
                 // we found the record
                 //Log.logInfo("WIKITRANSLATION", "s = " + s);
-                int p = s.indexOf("start=\"");
+                int p = s.indexOf("start=\"",0);
                 if (p < 0) return null;
                 p += 7;
                 int q = s.indexOf('"', p + 1);

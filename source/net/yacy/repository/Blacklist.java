@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -34,8 +34,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -74,11 +74,11 @@ public class Blacklist {
         }
 
         public int getInt() {
-            return errorCode;
+            return this.errorCode;
         }
 
         public long getLong() {
-            return (long) errorCode;
+            return this.errorCode;
         }
     }
     protected static final Set<String> BLACKLIST_TYPES = new HashSet<String>(Arrays.asList(new String[]{
@@ -97,7 +97,7 @@ public class Blacklist {
 
     public Blacklist(final File rootPath) {
 
-        this.setRootPath(rootPath);
+        setRootPath(rootPath);
 
         // prepare the data structure
         this.hostpaths_matchable = new HashMap<String, Map<String, List<String>>>();
@@ -241,7 +241,7 @@ public class Blacklist {
                 blacklistMap.remove(host);
             }
         }
-        
+
         final Map<String, List<String>> blacklistMapNotMatch = getBlacklistMap(blacklistType, false);
         hostList = blacklistMapNotMatch.get(host);
         if (hostList != null) {
@@ -300,7 +300,7 @@ public class Blacklist {
             final String h =
                     ((!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
 
-            List<String> hostList = blacklistMap.get(h);
+            final List<String> hostList = blacklistMap.get(h);
             if (hostList != null) {
                 ret = hostList.contains(path);
             }
@@ -322,7 +322,7 @@ public class Blacklist {
             if (temp) {
                 try {
                     urlHashCache.put(url.hash());
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                 }
             }
@@ -365,7 +365,7 @@ public class Blacklist {
         if (!matched && (app = blacklistMapMatched.get(hostlow)) != null) {
             for (int i = app.size() - 1; !matched && i > -1; i--) {
                 pp = app.get(i);
-                if (pp.indexOf("?*") > 0) {
+                if (pp.indexOf("?*",0) > 0) {
                     // prevent "Dangling meta character '*'" exception
                     Log.logWarning("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + pp);
                     continue;

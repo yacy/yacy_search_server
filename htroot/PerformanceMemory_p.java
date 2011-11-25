@@ -106,7 +106,7 @@ public class PerformanceMemory_p {
         while (i.hasNext()) {
             filename = i.next();
             mapx = Table.memoryStats(filename);
-            prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
+            prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
             prop.putNum("EcoList_" + c + "_tableSize", mapx.get(Table.StatKeys.tableSize));
 
             assert mapx.get(Table.StatKeys.tableKeyMem) != null : mapx;
@@ -140,7 +140,7 @@ public class PerformanceMemory_p {
             }
             filename = oie.getKey();
             cache = oie.getValue();
-            prop.put("indexcache_" + c + "_Name", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
+            prop.put("indexcache_" + c + "_Name", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
 
             hitmem = cache.mem();
             totalhitmem += hitmem;
@@ -163,7 +163,7 @@ public class PerformanceMemory_p {
         while (i.hasNext()) {
             filename = i.next();
             mapy = Cache.memoryStats(filename);
-            prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
+            prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
 
             // hit cache
             hitmem = Long.parseLong(mapy.get(Cache.StatKeys.objectHitMem));

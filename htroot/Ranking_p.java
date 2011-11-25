@@ -111,7 +111,7 @@ public class Ranking_p {
     	for (final Entry<String, String> entry: map.entrySet()) {
             key = entry.getKey();
             description = rankingParameters.get(key.substring(prefix.length()));
-            p = description.indexOf(';');
+            p = description.indexOf(';',0);
             if (p >= 0) {
                 name = description.substring(0, p);
                 info = description.substring(p + 1);

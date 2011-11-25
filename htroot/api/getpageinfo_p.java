@@ -61,7 +61,7 @@ public class getpageinfo_p {
 		              !url.startsWith("file://")) {
                 url = "http://" + url;
             }
-            if (actions.indexOf("title") >= 0) {
+            if (actions.indexOf("title",0) >= 0) {
                 DigestURI u = null;
                 try {
                     u = new DigestURI(url);
@@ -117,7 +117,7 @@ public class getpageinfo_p {
                     prop.putXML("filter", filter.length() > 0 ? filter.substring(1) : ".*");
                 }
             }
-            if (actions.indexOf("robots") >= 0) {
+            if (actions.indexOf("robots",0) >= 0) {
                 try {
                     final DigestURI theURL = new DigestURI(url);
 
@@ -139,7 +139,7 @@ public class getpageinfo_p {
                     Log.logException(e);
                 }
             }
-            if (actions.indexOf("oai") >= 0) {
+            if (actions.indexOf("oai",0) >= 0) {
 				try {
 					final DigestURI theURL = new DigestURI(url
 							+ "?verb=Identify");

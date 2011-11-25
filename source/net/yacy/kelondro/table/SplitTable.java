@@ -38,10 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.ranking.Order;
@@ -58,7 +54,6 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.StackIterator;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
 public class SplitTable implements Index, Iterable<Row.Entry> {
@@ -70,7 +65,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     private static final int EcoFSBufferSize = 20;
 
     // the thread pool for the keeperOf executor service
-    private ExecutorService executor;
+    //private ExecutorService executor;
 
     private Map<String, Index> tables; // a map from a date string to a kelondroIndex object
     private final Row rowdef;
@@ -240,12 +235,14 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
 
         // init the thread pool for the keeperOf executor service
+        /*
         this.executor = new ThreadPoolExecutor(
                 Math.max(this.tables.size(), Runtime.getRuntime().availableProcessors()) + 1,
                 Math.max(this.tables.size(), Runtime.getRuntime().availableProcessors()) + 1, 10,
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 new NamePrefixThreadFactory(this.prefix));
+        */
     }
 
     public void clear() throws IOException {
@@ -400,7 +397,6 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         }
     }
 
-
     private Index keeperOf(final byte[] key) {
         if (key == null) return null;
         if (this.tables == null) return null;
@@ -516,12 +512,14 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
 
     public synchronized void close() {
         if (this.tables == null) return;
+        /*
         this.executor.shutdown();
         try {
             this.executor.awaitTermination(3, TimeUnit.SECONDS);
         } catch (final InterruptedException e) {
         }
         this.executor = null;
+        */
         final Iterator<Index> i = this.tables.values().iterator();
         while (i.hasNext()) {
             i.next().close();

@@ -209,8 +209,8 @@ public class SettingsAck_p {
                 if (staticIP.length() > 8) { staticIP = staticIP.substring(8); } else { staticIP = ""; }
             }
             // TODO IPv6 support!
-            if (staticIP.indexOf(":") > 0) {
-                staticIP = staticIP.substring(0, staticIP.indexOf(":"));
+            if (staticIP.indexOf(':',0) > 0) {
+                staticIP = staticIP.substring(0, staticIP.indexOf(':',0));
             }
             if (staticIP.length() == 0) {
                 serverCore.useStaticIP = false;

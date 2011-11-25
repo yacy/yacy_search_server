@@ -647,9 +647,9 @@ public class Network {
 
                 logt = sb.peers.uploadSeedList(uploader, sb, sb.peers, seedURL);
                 if (logt != null) {
-                    if (logt.indexOf("Error") >= 0) {
+                    if (logt.indexOf("Error",0) >= 0) {
                         sb.peers.mySeed().put(Seed.PEERTYPE, prevStatus);
-                        final String errorMsg = "SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6);
+                        final String errorMsg = "SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error",0) + 6);
                         log.logSevere(errorMsg);
                         return errorMsg;
                     }

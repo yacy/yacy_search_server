@@ -70,7 +70,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         this.width = -1;
         this.height = -1;
         int p = 0;
-        if (attr != null && (p = attr.indexOf(" x ")) > 0) {
+        if (attr != null && (p = attr.indexOf(" x ",0)) > 0) {
             this.width = Integer.parseInt(attr.substring(0, p).trim());
             this.height = Integer.parseInt(attr.substring(p + 3).trim());
         }
@@ -189,7 +189,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             ientry = i.next();
             url = new DigestURI(ientry.url());
             final String u = url.toString();
-            if (u.indexOf(".ico") >= 0 || u.indexOf("favicon") >= 0) continue;
+            if (u.indexOf(".ico",0) >= 0 || u.indexOf("favicon",0) >= 0) continue;
             if (ientry.height() > 0 && ientry.height() < 32) continue;
             if (ientry.width() > 0 && ientry.width() < 32) continue;
             desc = ientry.alt();

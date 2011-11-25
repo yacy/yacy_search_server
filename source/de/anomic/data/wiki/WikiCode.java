@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import net.yacy.document.parser.html.CharacterCoding;
-
 import de.anomic.server.serverCore;
 
 /** Provides methods to handle texts that have been posted in the yacyWiki or other
@@ -43,7 +42,7 @@ import de.anomic.server.serverCore;
   * @author Alexander Schier [AS], Franz Brausze [FB], Marc Nause [MN]
   */
 public class WikiCode extends AbstractWikiParser implements WikiParser {
-    
+
     private static final String EMPTY = "";
     private static final String PIPE_ESCAPED = "&#124;";
     private static final Pattern REGEX_NOT_CHAR_NUM_OR_UNDERSCORE_PATTERN = Pattern.compile("[^a-zA-Z0-9_]");
@@ -82,8 +81,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             this.openWiki = openWiki;
             this.closeWiki = closeWiki;
 
-            openWikiLength = openWiki.length();
-            closeWikiLength = closeWiki.length();
+            this.openWikiLength = openWiki.length();
+            this.closeWikiLength = closeWiki.length();
         }
 
         Tags(final String wiki, final String openHTML, final String closeHTML) {
@@ -178,10 +177,10 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private final String cellDivider = PIPE_ESCAPED + PIPE_ESCAPED;   // ||
     private final String tableEnd = PIPE_ESCAPED + "&#125;";          // |}
     private final String attribDivider = PIPE_ESCAPED;                // |
-    private final int lenTableStart = tableStart.length();
-    private final int lenCellDivider = cellDivider.length();
-    private final int lenTableEnd = tableEnd.length();
-    private final int lenAttribDivider = attribDivider.length();
+    private final int lenTableStart = this.tableStart.length();
+    private final int lenCellDivider = this.cellDivider.length();
+    private final int lenTableEnd = this.tableEnd.length();
+    private final int lenAttribDivider = this.attribDivider.length();
 
     private enum ListType {
         ORDERED, UNORDERED;
@@ -192,8 +191,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private String defListLevel = EMPTY;
     private boolean processingCell = false;             //needed for prevention of double-execution of replaceHTML
     private boolean processingDefList = false;          //needed for definition lists
-    private boolean escape = false;                     //needed for escape
-    private boolean escaped = false;                    //needed for <pre> not getting in the way
+    private final boolean escape = false;                     //needed for escape
+    private final boolean escaped = false;                    //needed for <pre> not getting in the way
     private boolean newRowStart = false;                //needed for the first row not to be empty
     private boolean noList = false;                     //needed for handling of [= and <pre> in lists
     private boolean processingPreformattedText = false; //needed for preformatted text
@@ -220,7 +219,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             out.append(processLineOfWikiCode(hostport, line)).append(serverCore.CRLF_STRING);
         }
         out.insert(0, createTableOfContents());
-        tableOfContents.clear();
+        this.tableOfContents.clear();
         return out.toString();
     }
 
@@ -235,7 +234,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         if ((direlem = input.substring(firstPosition + tags.openWikiLength, secondPosition)) != null) {
             //counting double headlines
             int doubles = 0;
-            final Iterator<String> iterator = tableOfContents.iterator();
+            final Iterator<String> iterator = this.tableOfContents.iterator();
             String element;
             while (iterator.hasNext()) {
                 element = iterator.next();
@@ -262,7 +261,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
             //add headlines to list of headlines (so TOC can be created)
             if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
-                tableOfContents.add((tags.openWikiLength - 1) + direlem);
+                this.tableOfContents.add((tags.openWikiLength - 1) + direlem);
             }
         }
     }
@@ -277,61 +276,61 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
         final StringBuilder out = new StringBuilder();
 
-        if (line.startsWith(tableStart) && !processingTable) {
-            processingTable = true;
-            newRowStart = true;
+        if (line.startsWith(this.tableStart) && !this.processingTable) {
+            this.processingTable = true;
+            this.newRowStart = true;
             out.append("<table");
-            if (line.trim().length() > lenTableStart) {
-                out.append(filterTableProperties(line.substring(lenTableStart).trim()));
+            if (line.trim().length() > this.lenTableStart) {
+                out.append(filterTableProperties(line.substring(this.lenTableStart).trim()));
             }
             out.append(">");
-        } else if (line.startsWith(newLine) && processingTable) {          // new row
-            if (!newRowStart) {
+        } else if (line.startsWith(this.newLine) && this.processingTable) {          // new row
+            if (!this.newRowStart) {
                 out.append("\t</tr>\n");
             } else {
-                newRowStart = false;
+                this.newRowStart = false;
             }
             out.append("\t<tr>");
-        } else if (line.startsWith(cellDivider) && processingTable) {
+        } else if (line.startsWith(this.cellDivider) && this.processingTable) {
             out.append("\t\t<td");
-            final int cellEnd = (line.indexOf(cellDivider, lenCellDivider) > 0) ? (line.indexOf(cellDivider, lenCellDivider)) : (line.length());
-            int propEnd = line.indexOf(attribDivider, lenCellDivider);
-            final int occImage = line.indexOf("[[Image:", lenCellDivider);
-            final int occEscape = line.indexOf("[=", lenCellDivider);
+            final int cellEnd = (line.indexOf(this.cellDivider, this.lenCellDivider) > 0) ? (line.indexOf(this.cellDivider, this.lenCellDivider)) : (line.length());
+            int propEnd = line.indexOf(this.attribDivider, this.lenCellDivider);
+            final int occImage = line.indexOf("[[Image:", this.lenCellDivider);
+            final int occEscape = line.indexOf("[=", this.lenCellDivider);
             //If resultOf("[[Image:") is less than propEnd, that means that there is no
             //property for this cell, only an image. Without this, YaCy could get confused
             //by a | in [[Image:picture.png|alt-text]] or [[Image:picture.png|alt-text]]
             //Same for [= (part of [= =])
-            if ((propEnd > lenCellDivider) && ((occImage > propEnd) || (occImage < 0)) && ((occEscape > propEnd) || (occEscape < 0))) {
-                propEnd = line.indexOf(attribDivider, lenCellDivider) + lenAttribDivider;
+            if ((propEnd > this.lenCellDivider) && ((occImage > propEnd) || (occImage < 0)) && ((occEscape > propEnd) || (occEscape < 0))) {
+                propEnd = line.indexOf(this.attribDivider, this.lenCellDivider) + this.lenAttribDivider;
             } else {
                 propEnd = cellEnd;
             }
             // both point at same place => new line
             if (propEnd == cellEnd) {
-                propEnd = lenCellDivider;
+                propEnd = this.lenCellDivider;
             } else {
-                out.append(filterTableProperties(line.substring(lenCellDivider, propEnd - lenAttribDivider).trim()));
+                out.append(filterTableProperties(line.substring(this.lenCellDivider, propEnd - this.lenAttribDivider).trim()));
             }
             // quick&dirty fix [MN]
             if (propEnd > cellEnd) {
-                propEnd = lenCellDivider;
+                propEnd = this.lenCellDivider;
             }
-            processingTable = false;
-            processingCell = true;
+            this.processingTable = false;
+            this.processingCell = true;
             out.append(">");
             out.append(processTable(line.substring(propEnd, cellEnd).trim()));
             out.append("</td>");
-            processingTable = true;
-            processingCell = false;
+            this.processingTable = true;
+            this.processingCell = false;
             if (cellEnd < line.length()) {
                 out.append("\n");
                 out.append(processTable(line.substring(cellEnd)));
             }
-        } else if (line.startsWith(tableEnd) && (processingTable)) {          // Table end
-            processingTable = false;
+        } else if (line.startsWith(this.tableEnd) && (this.processingTable)) {          // Table end
+            this.processingTable = false;
             out.append("\t</tr>\n</table>");
-            out.append(line.substring(lenTableEnd));
+            out.append(line.substring(this.lenTableEnd));
         } else {
             out.append(line);
         }
@@ -395,7 +394,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    private String processUnorderedList(String line) {
+    private String processUnorderedList(final String line) {
         return processList(line, ListType.UNORDERED);
     }
 
@@ -410,7 +409,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
         final String ret;
 
-        if (!noList) {    //lists only get processed if not forbidden (see code for [= and <pre>).
+        if (!this.noList) {    //lists only get processed if not forbidden (see code for [= and <pre>).
 
             String listLevel;
             final String htmlOpenList;
@@ -418,12 +417,12 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             final char symbol;
 
             if (ListType.ORDERED.equals(listType)) {
-                listLevel = orderedListLevel;
+                listLevel = this.orderedListLevel;
                 symbol = '#';
                 htmlOpenList = HTML_OPEN_ORDERED_LIST;
                 htmlCloseList = HTML_CLOSE_ORDERED_LIST;
             } else if (ListType.UNORDERED.equals(listType)) {
-                listLevel = unorderedListLevel;
+                listLevel = this.unorderedListLevel;
                 symbol = ASTERISK;
                 htmlOpenList = HTML_OPEN_UNORDERED_LIST;
                 htmlCloseList = HTML_CLOSE_UNORDERED_LIST;
@@ -456,7 +455,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     i--;
                 }
                 listLevel = listLevel.substring(0, i);
-                
+
                 final int startOfContent = listLevel.length();
 
                 if (startOfContent > 0) {
@@ -474,9 +473,9 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             }
 
             if (ListType.ORDERED.equals(listType)) {
-                orderedListLevel = listLevel;
+                this.orderedListLevel = listLevel;
             } else if (ListType.UNORDERED.equals(listType)) {
-                unorderedListLevel = listLevel;
+                this.unorderedListLevel = listLevel;
             }
         } else {
             ret = line;
@@ -492,12 +491,12 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private String processDefinitionList(final String line) {
         final String ret;
 
-        if (!noList) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
+        if (!this.noList) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
 
-            if (line.startsWith(defListLevel + ";")) { //more semicolons
-                final String copyOfLine = line.substring(defListLevel.length() + 1);
+            if (line.startsWith(this.defListLevel + ";")) { //more semicolons
+                final String copyOfLine = line.substring(this.defListLevel.length() + 1);
                 final int positionOfOpeningTag;
-                if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
+                if ((positionOfOpeningTag = copyOfLine.indexOf(':',0)) > 0) {
                     final String definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
                     final String definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
                     final StringBuilder stringBuilder = new StringBuilder();
@@ -507,16 +506,16 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     stringBuilder.append(HTML_CLOSE_DEFINITION_ITEM);
                     stringBuilder.append(HTML_OPEN_DEFINITION_DESCRIPTION);
                     stringBuilder.append(definitionDescription);
-                    processingDefList = true;
+                    this.processingDefList = true;
                     ret = stringBuilder.toString();
                 } else {
                     ret = line;
                 }
-                defListLevel += ";";
-            } else if (!defListLevel.isEmpty() && line.startsWith(defListLevel)) { //equal number of semicolons
-                final String copyOfLine = line.substring(defListLevel.length());
+                this.defListLevel += ";";
+            } else if (!this.defListLevel.isEmpty() && line.startsWith(this.defListLevel)) { //equal number of semicolons
+                final String copyOfLine = line.substring(this.defListLevel.length());
                 final int positionOfOpeningTag;
-                if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
+                if ((positionOfOpeningTag = copyOfLine.indexOf(':',0)) > 0) {
                     final String definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
                     final String definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
                     final StringBuilder stringBuilder = new StringBuilder();
@@ -525,23 +524,23 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     stringBuilder.append(HTML_CLOSE_DEFINITION_ITEM);
                     stringBuilder.append(HTML_OPEN_DEFINITION_DESCRIPTION);
                     stringBuilder.append(definitionDescription);
-                    processingDefList = true;
+                    this.processingDefList = true;
                     ret = stringBuilder.toString();
                 } else {
                     ret = line;
                 }
-            } else if (!defListLevel.isEmpty()) { //less semicolons
-                int i = defListLevel.length();
+            } else if (!this.defListLevel.isEmpty()) { //less semicolons
+                int i = this.defListLevel.length();
                 String tmp = EMPTY;
-                while (!line.startsWith(defListLevel.substring(0, i))) {
+                while (!line.startsWith(this.defListLevel.substring(0, i))) {
                     tmp = HTML_CLOSE_DEFINITION_DESCRIPTION + HTML_CLOSE_DEFINITION_LIST;
                     i--;
                 }
-                defListLevel = defListLevel.substring(0, i);
-                int positionOfOpeningTag = defListLevel.length();
-                if (!defListLevel.isEmpty()) {
+                this.defListLevel = this.defListLevel.substring(0, i);
+                int positionOfOpeningTag = this.defListLevel.length();
+                if (!this.defListLevel.isEmpty()) {
                     final String copyOfLine = line.substring(positionOfOpeningTag);
-                    if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
+                    if ((positionOfOpeningTag = copyOfLine.indexOf(':',0)) > 0) {
                         final String definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
                         final String definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
                         final StringBuilder stringBuilder = new StringBuilder();
@@ -551,7 +550,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                         stringBuilder.append(HTML_CLOSE_DEFINITION_ITEM);
                         stringBuilder.append(HTML_OPEN_DEFINITION_DESCRIPTION);
                         stringBuilder.append(definitionDescription);
-                        processingDefList = true;
+                        this.processingDefList = true;
                         ret = stringBuilder.toString();
                     } else {
                         ret = line;
@@ -631,7 +630,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 // using the wikicode [[Image:share/yacy.gif]]
                 // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
                 // you are free to use other sub-paths of DATA/HTDOCS
-                if (kl.indexOf("://") < 1) {
+                if (kl.indexOf("://",0) < 1) {
                     kl = "http://" + hostport + "/" + kl;
                 }
 
@@ -656,7 +655,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 break;
             }
             kl = line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_EXTERNAL_LINK, positionOfClosingTag);
-            if ((p = kl.indexOf(" ")) > 0) {
+            if ((p = kl.indexOf(' ',0)) > 0) {
                 kv = kl.substring(p + 1);
                 kl = kl.substring(0, p);
             } // No text for the link? -> <a href="http://www.url.com/">http://www.url.com/</a>
@@ -668,7 +667,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             // using the wikicode [share/page.html]
             // or a file DATA/HTDOCS/www/page.html with [www/page.html]
             // you are free to use other sub-paths of DATA/HTDOCS
-            if (kl.indexOf("://") < 1) {
+            if (kl.indexOf("://",0) < 1) {
                 kl = "http://" + hostport + "/" + kl;
             }
             line = line.substring(0, positionOfOpeningTag) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_EXTERNAL_LINK);
@@ -683,7 +682,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @return HTML fragment
      */
     private String processPreformattedText(final String hostport, String line) {
-        if (!escaped) {
+        if (!this.escaped) {
             final int positionOfOpeningTag = line.indexOf(WIKI_OPEN_PRE_ESCAPED);
             final int positionOfClosingTag = line.indexOf(WIKI_CLOSE_PRE_ESCAPED);
             //both <pre> and </pre> in the same line
@@ -699,48 +698,48 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     line = line.replaceAll("!pre!!", "!pre!");
                 } //handles cases like <pre><pre> </pre></pre> <pre> </pre> that would cause an exception otherwise
                 else {
-                    processingPreformattedText = true;
+                    this.processingPreformattedText = true;
                     final String temp1 = processLineOfWikiCode(hostport, line.substring(0, positionOfOpeningTag - 1).replaceAll("!tmp!", "!tmp!!") + "!tmp!txt!");
-                    noList = true;
+                    this.noList = true;
                     final String temp2 = processLineOfWikiCode(hostport, line.substring(positionOfOpeningTag));
-                    noList = false;
+                    this.noList = false;
                     line = temp1.replaceAll("!tmp!txt!", temp2);
                     line = line.replaceAll("!tmp!!", "!tmp!");
-                    processingPreformattedText = false;
+                    this.processingPreformattedText = false;
                 }
             } //start <pre>
-            else if (positionOfOpeningTag >= 0 && !preformattedSpanning) {
-                processingPreformattedText = true;    //prevent surplus line breaks
+            else if (positionOfOpeningTag >= 0 && !this.preformattedSpanning) {
+                this.processingPreformattedText = true;    //prevent surplus line breaks
                 final StringBuilder openBlockQuoteTags = new StringBuilder();  //gets filled with <blockquote>s as needed
                 String preformattedText = "<pre style=\"border:dotted;border-width:thin;\">" + line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED);
                 preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
                 //taking care of indented lines
-                while (preindented < positionOfOpeningTag && positionOfOpeningTag < line.length() &&
-                        line.substring(preindented, positionOfOpeningTag).charAt(0) == WIKI_INDENTION) {
-                    preindented++;
+                while (this.preindented < positionOfOpeningTag && positionOfOpeningTag < line.length() &&
+                        line.substring(this.preindented, positionOfOpeningTag).charAt(0) == WIKI_INDENTION) {
+                    this.preindented++;
                     openBlockQuoteTags.append(HTML_OPEN_BLOCKQUOTE);
                 }
-                line = processLineOfWikiCode(hostport, line.substring(preindented, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!");
+                line = processLineOfWikiCode(hostport, line.substring(this.preindented, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!");
                 line = openBlockQuoteTags + line.replace("!pre!txt!", preformattedText);
                 line = line.replaceAll("!pre!!", "!pre!");
-                preformattedSpanning = true;
+                this.preformattedSpanning = true;
             } //end </pre>
-            else if (positionOfClosingTag >= 0 && preformattedSpanning) {
-                preformattedSpanning = false;
+            else if (positionOfClosingTag >= 0 && this.preformattedSpanning) {
+                this.preformattedSpanning = false;
                 final StringBuilder endBlockQuoteTags = new StringBuilder(); //gets filled with </blockquote>s as needed
                 String preformattedText = line.substring(0, positionOfClosingTag) + "</pre>";
                 preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
                 //taking care of indented lines
-                while (preindented > 0) {
+                while (this.preindented > 0) {
                     endBlockQuoteTags.append(HTML_CLOSE_BLOCKQUOTE);
-                    preindented--;
+                    this.preindented--;
                 }
                 line = processLineOfWikiCode(hostport, "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
                 line = line.replace("!pre!txt!", preformattedText) + endBlockQuoteTags;
                 line = line.replaceAll("!pre!!", "!pre!");
-                processingPreformattedText = false;
+                this.processingPreformattedText = false;
             } //Getting rid of surplus </pre>
-            else if (positionOfOpeningTag >= 0 && !preformattedSpanning) {
+            else if (positionOfOpeningTag >= 0 && !this.preformattedSpanning) {
                 int posTag;
                 while ((posTag = line.indexOf(WIKI_CLOSE_PRE_ESCAPED)) >= 0) {
                     line = line.substring(0, posTag) + line.substring(posTag + LEN_WIKI_CLOSE_PRE_ESCAPED);
@@ -767,23 +766,23 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         int level6 = 0;
         int doubles = 0;
         String anchorext = EMPTY;
-        if ((s = tableOfContents.size()) > 2) {
+        if ((s = this.tableOfContents.size()) > 2) {
             directory.append("<table><tr><td><div class=\"WikiTOCBox\">\n");
             for (int i = 0; i < s; i++) {
-                if (i >= tableOfContents.size()) {
+                if (i >= this.tableOfContents.size()) {
                     break;
                 }
-                element = tableOfContents.get(i);
+                element = this.tableOfContents.get(i);
                 if (element == null) {
                     continue;
                 }
                 //counting double headlines
                 doubles = 0;
                 for (int j = 0; j < i; j++) {
-                    if (j >= tableOfContents.size()) {
+                    if (j >= this.tableOfContents.size()) {
                         break;
                     }
-                    final String d = tableOfContents.get(j);
+                    final String d = this.tableOfContents.get(j);
                     if (d == null || d.isEmpty()) {
                         continue;
                     }
@@ -801,7 +800,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 final char l = element.charAt(0);
                 String temp = "";
                 if (Arrays.binarySearch(HEADLINE_LEVEL, l) >= 0 && !element.isEmpty()) {
-                    
+
                     switch (l) {
 
                        case SIX: {
@@ -911,7 +910,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @return String with replaced tags.
      */
     private String tagReplace(final String input, final Tags tags) {
-        String direlem = null;    //string to keep headlines until they get added to List dirElements
+        final String direlem = null;    //string to keep headlines until they get added to List dirElements
 
         final StringBuilder stringBuilder = new StringBuilder(input);
 
@@ -920,12 +919,12 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         //replace pattern if a pair of the pattern can be found in the line
         while (((firstPosition = stringBuilder.indexOf(tags.openWiki, secondPosition)) >= 0) &&
                 ((secondPosition = stringBuilder.indexOf(tags.closeWiki, firstPosition + tags.openWikiLength)) >= 0)) {
-            
+
             //extra treatment for headlines
             if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
                 processHeadline(stringBuilder, firstPosition, tags, secondPosition, direlem);
             } else {
-                int oldLength = stringBuilder.length();
+                final int oldLength = stringBuilder.length();
                 stringBuilder.replace(firstPosition, firstPosition + tags.openWikiLength, tags.openHTML);
                 secondPosition += stringBuilder.length() - oldLength;
                 stringBuilder.replace(secondPosition, secondPosition + tags.closeWikiLength, tags.closeHTML);
@@ -943,15 +942,15 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private String processLineOfWikiCode(final String hostport, String line) {
         //If HTML has not been replaced yet (can happen if method gets called in recursion), replace now!
         line = processMetadata(line);
-        if ((!replacedHtmlAlready || preformattedSpanning) && line.indexOf(WIKI_CLOSE_PRE_ESCAPED) < 0) {
+        if ((!this.replacedHtmlAlready || this.preformattedSpanning) && line.indexOf(WIKI_CLOSE_PRE_ESCAPED) < 0) {
             line = CharacterCoding.unicode2html(line, true);
-            replacedHtmlAlready = true;
+            this.replacedHtmlAlready = true;
         }
 
         //check if line contains preformatted symbols or if we are in a preformatted sequence already.
         if ((line.indexOf(WIKI_OPEN_PRE_ESCAPED) >= 0) ||
                 (line.indexOf(WIKI_CLOSE_PRE_ESCAPED) >= 0) ||
-                preformattedSpanning) {
+                this.preformattedSpanning) {
             line = processPreformattedText(hostport, line);
         } else {
 
@@ -991,7 +990,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
             line = tagReplace(line, Tags.STRIKE);
             line = tagReplace(line, Tags.UNDERLINE);
-            
+
             line = processUnorderedList(line);
             line = processOrderedList(line);
             line = processDefinitionList(line);
@@ -1000,10 +999,10 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
         }
 
-        if (!processingPreformattedText) {
-            replacedHtmlAlready = false;
+        if (!this.processingPreformattedText) {
+            this.replacedHtmlAlready = false;
         }
-        if (!(line.endsWith(HTML_CLOSE_LIST_ELEMENT) || processingDefList || escape || processingPreformattedText || processingTable || processingCell)) {
+        if (!(line.endsWith(HTML_CLOSE_LIST_ELEMENT) || this.processingDefList || this.escape || this.processingPreformattedText || this.processingTable || this.processingCell)) {
             line += "<br />";
         }
         return line;
@@ -1014,7 +1013,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         int p, q, s = 0;
         while ((p = line.indexOf(WIKI_OPEN_METADATA, s)) >= 0 && (q = line.indexOf(WIKI_CLOSE_METADATA, p + 1)) >= 0) {
             s = q; // continue with next position
-            String a = line.substring(p + LEN_WIKI_OPEN_METADATA, q);
+            final String a = line.substring(p + LEN_WIKI_OPEN_METADATA, q);
             if (a.toLowerCase().startsWith("coordinate")) {
                 // parse Geographical Coordinates as described in
                 // http://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style_%28dates_and_numbers%29#Geographical_coordinates
@@ -1026,24 +1025,24 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 // and if passed through this parser:
                 // {{Coordinate |NS 45/37/43.0/N |EW. 07/58/41.0/E |type=landmark |region=IT-BI}} ## means: degree/minute/second
                 // {{Coordinate |NS 51.48994 |EW. 7.33249 |type=landmark |region=DE-NW}}
-                String b[] = a.split("\\|");
+                final String b[] = a.split("\\|");
                 float lon = 0.0f, lat = 0.0f;
                 float lonm = 0.0f, latm = 0.0f;
                 String lono = "E", lato = "N";
                 String name = "";
-                for (String c: b) {
+                for (final String c: b) {
                     if (c.toLowerCase().startsWith("name=")) {
                         name = c.substring(5);
                     }
                     if (c.toUpperCase().startsWith("NS=")) {
-                        String d[] = c.substring(3).split("/");
+                        final String d[] = c.substring(3).split("/");
                         if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lato = "S"; l = -l;} lat = (float) Math.floor(l); latm = 60.0f * (l - lat);}
                         else if (d.length == 2) {lat = Float.parseFloat(d[0]); latm = Float.parseFloat(d[1]);}
                         else if (d.length == 3) {lat = Float.parseFloat(d[0]); latm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
                         if (d[d.length-1].toUpperCase().equals("S")) {}
                     }
                     if (c.toUpperCase().startsWith("EW=")) {
-                        String d[] = c.substring(3).split("/");
+                        final String d[] = c.substring(3).split("/");
                         if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lono = "W"; l = -l;} lon = (float) Math.floor(l); lonm = 60.0f * (l - lon);}
                         else if (d.length == 2) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]);}
                         else if (d.length == 3) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
@@ -1060,29 +1059,29 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         }
         return line;
     }
-    
+
     private class TableOfContent {
 
         private final List<String> toc = new ArrayList<String>();   // needs to be list which ensures order
 
         int size() {
-            return toc.size();
+            return this.toc.size();
         }
 
         String get(final int index) {
-            return toc.get(index);
+            return this.toc.get(index);
         }
 
         synchronized boolean add(final String element) {
-            return toc.add(element);
+            return this.toc.add(element);
         }
 
         Iterator<String> iterator() {
-            return toc.iterator();
+            return this.toc.iterator();
         }
 
         void clear() {
-            toc.clear();
+            this.toc.clear();
         }
     }
 }

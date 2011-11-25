@@ -1,4 +1,4 @@
-// Status.java 
+// Status.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -42,7 +42,6 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -60,13 +59,13 @@ public class Status {
         // check if the basic configuration was accessed before and forward
         prop.put("forwardToConfigBasic", 0);
         if ((post == null || !post.containsKey("noforward")) &&
-            sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic.html") < 0 &&
+            sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic.html",0) < 0 &&
             Seed.isDefaultPeerName(sb.peers.mySeed().getName())) {
             // forward to ConfigBasic
             prop.put("forwardToConfigBasic", 1);
         }
         if (post != null) post.remove("noforward");
-        
+
         if (post != null && post.size() > 0) {
             if (sb.adminAuthenticated(header) < 2) {
                 prop.put("AUTHENTICATE","admin log-in");
@@ -104,7 +103,7 @@ public class Status {
                 sb.setConfig("trayIcon", trigger_enabled);
                 redirect = true;
             }
-        	
+
             if (redirect) {
                     prop.put("LOCATION","");
                     return prop;
@@ -118,7 +117,7 @@ public class Status {
         if (adminaccess) {
             prop.put("showPrivateTable", "1");
             prop.put("privateStatusTable", "Status_p.inc");
-        } else { 
+        } else {
             prop.put("showPrivateTable", "0");
             prop.put("privateStatusTable", "");
         }
@@ -147,26 +146,26 @@ public class Status {
                 prop.put("warningMemoryLow", "1");
                 prop.put("warningMemoryLow_minSpace", minFree);
             }
-	        
+
         }
-        
+
         // version information
         //final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
         prop.put("versionpp", versionstring);
-        
+
         // place some more hints
         if ((adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0)) {
             prop.put("hintCrawlStart", "1");
         }
-        
+
         if ((adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500)) {
             prop.put("hintCrawlMonitor", "1");
         }
-        
+
         // hostname and port
         final String extendedPortString = sb.getConfig("port", "8090");
-        final int pos = extendedPortString.indexOf(":"); 
+        final int pos = extendedPortString.indexOf(':',0);
         prop.put("port",serverCore.getPortNr(extendedPortString));
         if (pos != -1) {
             prop.put("extPortFormat", "1");
@@ -174,9 +173,9 @@ public class Status {
         } else {
             prop.put("extPortFormat", "0");
         }
-        InetAddress hostIP = Domains.myPublicLocalIP();
+        final InetAddress hostIP = Domains.myPublicLocalIP();
         prop.put("host", hostIP != null ? hostIP.getHostAddress() : "Unkown IP");
-        
+
         // ssl support
         prop.put("sslSupport",sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
 
@@ -233,7 +232,7 @@ public class Status {
         }
         prop.putHTML("peerName", thisName);
         prop.put("hash", thisHash);
-        
+
         final String seedUploadMethod = sb.getConfig("seedUploadMethod", "");
         if (!"none".equalsIgnoreCase(seedUploadMethod) ||
             ("".equals(seedUploadMethod) && (sb.getConfig("seedFTPPassword", "").length() > 0 ||
@@ -262,7 +261,7 @@ public class Status {
         } else {
             prop.put(SEEDSERVER, "0"); // disabled
         }
-        
+
         if (sb.peers != null && sb.peers.sizeConnected() > 0){
             prop.put("otherPeers", "1");
             prop.putNum("otherPeers_num", sb.peers.sizeConnected());
@@ -275,7 +274,7 @@ public class Status {
         } else {
             prop.put("popup", "1");
         }
-        
+
         if (!OS.isWindows) {
         	prop.put("tray", "2");
         } else if (!sb.getConfigBool("trayIcon", false)) {
@@ -299,21 +298,21 @@ public class Status {
         final serverCore httpd = (serverCore) sb.getThread("10_httpd");
         prop.putNum("connectionsActive", httpd.getJobCount());
         prop.putNum("connectionsMax", httpd.getMaxSessionCount());
-        
+
         // Queue information
         final int loaderJobCount = sb.crawlQueues.workerSize();
         final int loaderMaxCount = sb.getConfigInt(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10);
         final int loaderPercent = (loaderMaxCount == 0) ? 0 : loaderJobCount * 100 / loaderMaxCount;
         prop.putNum("loaderQueueSize", loaderJobCount);
-        prop.putNum("loaderQueueMax", loaderMaxCount);        
+        prop.putNum("loaderQueueMax", loaderMaxCount);
         prop.put("loaderQueuePercent", (loaderPercent>100) ? 100 : loaderPercent);
-        
+
         prop.putNum("localCrawlQueueSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
         prop.put("localCrawlPaused",sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? "1" : "0");
 
         prop.putNum("remoteTriggeredCrawlQueueSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
         prop.put("remoteTriggeredCrawlPaused",sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? "1" : "0");
-        
+
         prop.putNum("stackCrawlQueueSize", sb.crawlStacker.size());
 
         // return rewrite properties

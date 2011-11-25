@@ -107,7 +107,7 @@ public class RequestHeader extends HeaderFramework {
 
     public boolean acceptGzip() {
         return ((containsKey(ACCEPT_ENCODING)) &&
-                ((get(ACCEPT_ENCODING)).toUpperCase().indexOf("GZIP")) != -1);
+                ((get(ACCEPT_ENCODING)).toUpperCase().indexOf("GZIP",0)) != -1);
     }
 
     public FileType fileType() {

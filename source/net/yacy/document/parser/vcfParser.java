@@ -1,4 +1,4 @@
-//vcfParser.java 
+//vcfParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -50,16 +50,16 @@ import net.yacy.kelondro.order.Base64Order;
  */
 public class vcfParser extends AbstractParser implements Parser {
 
-    public vcfParser() {        
+    public vcfParser() {
         super("vCard Parser");
-        SUPPORTED_EXTENSIONS.add("vcf");
-        SUPPORTED_MIME_TYPES.add("text/x-vcard");
-        SUPPORTED_MIME_TYPES.add("application/vcard");
-        SUPPORTED_MIME_TYPES.add("application/x-versit");
-        SUPPORTED_MIME_TYPES.add("text/x-versit");
-        SUPPORTED_MIME_TYPES.add("text/x-vcalendar");
+        this.SUPPORTED_EXTENSIONS.add("vcf");
+        this.SUPPORTED_MIME_TYPES.add("text/x-vcard");
+        this.SUPPORTED_MIME_TYPES.add("application/vcard");
+        this.SUPPORTED_MIME_TYPES.add("application/x-versit");
+        this.SUPPORTED_MIME_TYPES.add("text/x-versit");
+        this.SUPPORTED_MIME_TYPES.add("text/x-vcalendar");
     }
-    
+
     public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
@@ -69,54 +69,54 @@ public class vcfParser extends AbstractParser implements Parser {
             final HashMap<String, String> parsedData = new HashMap<String, String>();
             final HashMap<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
             final LinkedList<String> parsedNames = new LinkedList<String>();
-            
+
             boolean useLastLine = false;
             int lineNr = 0;
-            String line = null;            
+            String line = null;
             final BufferedReader inputReader = (charset!=null)
                                        ? new BufferedReader(new InputStreamReader(source,charset))
                                        : new BufferedReader(new InputStreamReader(source));
             while (true) {
-                
+
                 // get the next line
                 if (!useLastLine) {
                     line = inputReader.readLine();
                 } else {
                     useLastLine = false;
                 }
-                
-                if (line == null) break;                
+
+                if (line == null) break;
                 else if (line.length() == 0) continue;
-                
-                lineNr++;                
-                final int pos = line.indexOf(":");
+
+                lineNr++;
+                final int pos = line.indexOf(':',0);
                 if (pos != -1) {
                     final String key = line.substring(0,pos).trim().toUpperCase();
                     String value = line.substring(pos+1).trim();
-                    
+
                     String encoding = null;
                     final String[] keyParts = key.split(";");
                     if (keyParts.length > 1) {
-                        for (int i=0; i < keyParts.length; i++) {
-                            if (keyParts[i].toUpperCase().startsWith("ENCODING")) {
-                                encoding = keyParts[i].substring("ENCODING".length()+1);
-                            } else if (keyParts[i].toUpperCase().startsWith("QUOTED-PRINTABLE")) {
+                        for (final String keyPart : keyParts) {
+                            if (keyPart.toUpperCase().startsWith("ENCODING")) {
+                                encoding = keyPart.substring("ENCODING".length()+1);
+                            } else if (keyPart.toUpperCase().startsWith("QUOTED-PRINTABLE")) {
                                 encoding = "QUOTED-PRINTABLE";
-                            } else if (keyParts[i].toUpperCase().startsWith("BASE64")) {
+                            } else if (keyPart.toUpperCase().startsWith("BASE64")) {
                                 encoding = "BASE64";
                             }
-                            
+
                         }
                         if (encoding != null) {
                             try {
                                 if (encoding.equalsIgnoreCase("QUOTED-PRINTABLE")) {
                                     // if the value has multiple lines ...
-                                    if (line.endsWith("=")) {                                        
+                                    if (line.endsWith("=")) {
                                         do {
                                             value = value.substring(0,value.length()-1);
                                             line = inputReader.readLine();
                                             if (line == null) break;
-                                            value += line; 
+                                            value += line;
                                         } while (line.endsWith("="));
                                     }
                                     value = decodeQuotedPrintable(value);
@@ -124,7 +124,7 @@ public class vcfParser extends AbstractParser implements Parser {
                                     do {
                                         line = inputReader.readLine();
                                         if (line == null) break;
-                                        if (line.indexOf(":")!= -1) {
+                                        if (line.indexOf(':',0)!= -1) {
                                             // we have detected an illegal block end of the base64 data
                                             useLastLine = true;
                                         }
@@ -132,19 +132,19 @@ public class vcfParser extends AbstractParser implements Parser {
                                         else break;
                                     } while (line.length()!=0);
                                     value = Base64Order.standardCoder.decodeString(value);
-                                }  
+                                }
                             } catch (final Exception ey) {
-                                // Encoding error: This could occure e.g. if the base64 doesn't 
+                                // Encoding error: This could occure e.g. if the base64 doesn't
                                 // end with an empty newline
-                                // 
+                                //
                                 // We can simply ignore it.
                             }
                         }
-                    }                    
-                    
+                    }
+
                     if (key.equalsIgnoreCase("END")) {
                         String name = null, title = null;
-                        
+
                         // using the name of the current version as section headline
                         if (parsedData.containsKey("FN")) {
                             parsedNames.add(name = parsedData.get("FN"));
@@ -153,19 +153,19 @@ public class vcfParser extends AbstractParser implements Parser {
                         } else {
                             parsedNames.add(name = "unknown name");
                         }
-                        
+
                         // getting the vcard title
                         if (parsedData.containsKey("TITLE")) {
                             parsedNames.add(title = parsedData.get("TITLE"));
                         }
-                        
+
                         if (parsedTitle.length() > 0) parsedTitle.append(", ");
                         parsedTitle.append((title==null)?name:name + " - " + title);
-                        
-                        
+
+
                         // looping through the properties and add there values to
                         // the text representation of the vCard
-                        final Iterator<String> iter = parsedData.values().iterator();  
+                        final Iterator<String> iter = parsedData.values().iterator();
                         while (iter.hasNext()) {
                             value = iter.next();
                             parsedDataText.append(value).append("\r\n");
@@ -175,11 +175,11 @@ public class vcfParser extends AbstractParser implements Parser {
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
                             final MultiProtocolURI newURL = new MultiProtocolURI(value);
-                            Properties p = new Properties();
+                            final Properties p = new Properties();
                             p.put("name", newURL.toString());
-                            anchors.put(newURL, p);   
+                            anchors.put(newURL, p);
                             //parsedData.put(key,value);
-                        } catch (final MalformedURLException ex) {/* ignore this */}                                                
+                        } catch (final MalformedURLException ex) {/* ignore this */}
                     } else if (
                             !key.equalsIgnoreCase("BEGIN") &&
                             !key.equalsIgnoreCase("END") &&
@@ -192,12 +192,12 @@ public class vcfParser extends AbstractParser implements Parser {
                     ) {
                         // value = value.replaceAll(";","\t");
                         if ((value.length() > 0)) parsedData.put(key, value);
-                    } 
-                    
+                    }
+
                 } else {
-                    if (log.isFinest()) this.log.logFinest("Invalid data in vcf file" +
+                    if (this.log.isFinest()) this.log.logFinest("Invalid data in vcf file" +
                                              "\n\tURL: " + url +
-                                             "\n\tLine: " + line + 
+                                             "\n\tLine: " + line +
                                              "\n\tLine-Nr: " + lineNr);
                 }
             }
@@ -216,20 +216,20 @@ public class vcfParser extends AbstractParser implements Parser {
                     "",                         // the publisher
                     sections,                   // an array of section headlines
                     "vCard",                    // an abstract
-                    0.0f, 0.0f, 
+                    0.0f, 0.0f,
                     text,                       // the parsed document text
                     anchors,                    // a map of extracted anchors
                     null,
                     null,                       // a treeset of image URLs
                     false)};
-        } catch (final Exception e) { 
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
-            
+
             throw new Parser.Failure("Unexpected error while parsing vcf resource. " + e.getMessage(),url);
-        } 
+        }
     }
-    
+
     private String decodeQuotedPrintable(final String s) {
         if (s == null) return null;
         final byte[] b = UTF8.getBytes(s);
@@ -251,5 +251,5 @@ public class vcfParser extends AbstractParser implements Parser {
         }
         return sb.toString();
     }
-    
+
 }

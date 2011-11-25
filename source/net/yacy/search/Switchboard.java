@@ -2539,7 +2539,7 @@ public final class Switchboard extends serverSwitch {
             @Override
             public void run() {
                 String r = host;
-                if (r.indexOf("//") < 0) {
+                if (r.indexOf("//",0) < 0) {
                     r = "http://" + r;
                 }
 
@@ -2577,7 +2577,7 @@ public final class Switchboard extends serverSwitch {
             @Override
             public void run() {
                 String query = searchEvent.getQuery().queryString(true);
-                final int meta = query.indexOf("heuristic:");
+                final int meta = query.indexOf("heuristic:",0);
                 if (meta >= 0) {
                     final int q = query.indexOf(' ', meta);
                     query = (q >= 0) ? query.substring(0, meta) + query.substring(q + 1) : query.substring(0, meta);
@@ -2600,7 +2600,7 @@ public final class Switchboard extends serverSwitch {
                 }
                 final Iterator<MultiProtocolURI> i = links.keySet().iterator();
                 while (i.hasNext()) {
-                    if (i.next().toNormalform(false, false).indexOf("scroogle") >= 0) {
+                    if (i.next().toNormalform(false, false).indexOf("scroogle",0) >= 0) {
                         i.remove();
                     }
                 }
@@ -2619,7 +2619,7 @@ public final class Switchboard extends serverSwitch {
             @Override
             public void run() {
                 String query = searchEvent.getQuery().queryString(true);
-                final int meta = query.indexOf("heuristic:");
+                final int meta = query.indexOf("heuristic:",0);
                 if (meta >= 0) {
                     final int q = query.indexOf(' ', meta);
                     if (q >= 0) query = query.substring(0, meta) + query.substring(q + 1); else query = query.substring(0, meta);

@@ -33,7 +33,7 @@ public class Table_YMark_p {
         // get the user name for the selected table
         String bmk_user = null;
         if (table != null)
-        	bmk_user = table.substring(0,table.indexOf('_'));
+        	bmk_user = table.substring(0,table.indexOf('_',0));
 
         // currently selected table
         prop.put("showselection_table", table);

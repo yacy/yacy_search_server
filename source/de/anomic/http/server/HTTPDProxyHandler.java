@@ -1006,7 +1006,7 @@ public final class HTTPDProxyHandler {
         }
 
 	// only gzip-encoding is supported, remove other encodings (e. g. deflate)
-        if ((requestHeader.get(HeaderFramework.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
+        if ((requestHeader.get(HeaderFramework.ACCEPT_ENCODING,"")).indexOf("gzip",0) != -1) {
             requestHeader.put(HeaderFramework.ACCEPT_ENCODING, "gzip");
 	} else {
             requestHeader.put(HeaderFramework.ACCEPT_ENCODING, "");
@@ -1363,13 +1363,13 @@ public final class HTTPDProxyHandler {
                 errorMessage = "Unable to establish a connection to the destination host. Connect timed out.";
             } else {
                 final String exceptionMsg = e.getMessage();
-                if ((exceptionMsg != null) && (exceptionMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
+                if ((exceptionMsg != null) && (exceptionMsg.indexOf("Corrupt GZIP trailer",0) >= 0)) {
                     // just do nothing, we leave it this way
                     if (log.isFine()) log.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
                     forceConnectionClose(conProp);
-                } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset")>= 0)) {
+                } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset",0)>= 0)) {
                     errorMessage = "Connection reset";
-                } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("unknown host")>=0)) {
+                } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("unknown host",0)>=0)) {
                     try {
                         detailedErrorMsgMap = unknownHostHandling(conProp);
                         httpStatusText = "Unknown Host";
@@ -1380,10 +1380,10 @@ public final class HTTPDProxyHandler {
                     }
                 } else if ((exceptionMsg != null) &&
                   (
-                     (exceptionMsg.indexOf("socket write error")>=0) ||
-                     (exceptionMsg.indexOf("Read timed out") >= 0) ||
-                     (exceptionMsg.indexOf("Broken pipe") >= 0) ||
-                     (exceptionMsg.indexOf("server has closed connection") >= 0)
+                     (exceptionMsg.indexOf("socket write error",0)>=0) ||
+                     (exceptionMsg.indexOf("Read timed out",0) >= 0) ||
+                     (exceptionMsg.indexOf("Broken pipe",0) >= 0) ||
+                     (exceptionMsg.indexOf("server has closed connection",0) >= 0)
                   )) {
                     errorMessage = exceptionMsg;
                     Log.logException(e);
