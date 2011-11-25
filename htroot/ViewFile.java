@@ -92,7 +92,7 @@ public class ViewFile {
 
         // get segment
         Segment indexSegment = null;
-        final boolean authorized = sb.verifyAuthentication(header, false);
+        final boolean authorized = sb.verifyAuthentication(header);
         if (post != null && post.containsKey("segment") && authorized) {
             indexSegment = sb.indexSegments.segment(post.get("segment"));
         } else {
@@ -145,7 +145,7 @@ public class ViewFile {
             // this call forces the peer to download  web pages
             // it is therefore protected by the admin password
 
-            if (!sb.verifyAuthentication(header, false)) {
+            if (!sb.verifyAuthentication(header)) {
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             }

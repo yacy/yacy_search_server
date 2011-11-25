@@ -50,7 +50,7 @@ public class Collage {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        final boolean authenticated = sb.verifyAuthentication(header, false);
+        final boolean authenticated = sb.verifyAuthentication(header);
         final ResultImages.OriginEntry nextOrigin = ResultImages.next(!authenticated);
         int posXMax  = 800;
         int posYMax  = 500;

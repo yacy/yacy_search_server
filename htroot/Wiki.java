@@ -1,4 +1,4 @@
-// Wiki.java 
+// Wiki.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -43,12 +44,10 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
-
 import de.anomic.data.Diff;
 import de.anomic.data.wiki.WikiBoard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import java.util.Map;
 
 public class Wiki {
     private static final String ANONYMOUS = "anonymous";
@@ -71,7 +70,7 @@ public class Wiki {
         }
 
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
-        
+
         String access = sb.getConfig("WikiAccess", "admin");
         final String pagename = get(post, "page", "start");
         final String ip = get(post, HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
@@ -82,15 +81,15 @@ public class Wiki {
                 author = (sb.peers.mySeed() == null) ? ANONYMOUS : sb.peers.mySeed().get("Name", ANONYMOUS);
             }
         }
-        
+
         if (post != null && post.containsKey("access")) {
             // only the administrator may change the access right
-            if (!sb.verifyAuthentication(header, true)) {
+            if (!sb.verifyAuthentication(header)) {
                 // check access right for admin
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             }
-            
+
             access = post.get("access", "admin");
             sb.setConfig("WikiAccess", access);
         }
@@ -101,15 +100,15 @@ public class Wiki {
         }
 
         WikiBoard.Entry page = sb.wikiDB.read(pagename);
-        
+
         if (post != null && post.containsKey("submit")) {
-            
-            if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
+
+            if ((access.equals("admin") && (!sb.verifyAuthentication(header)))) {
                 // check access right for admin
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             }
-            
+
             // store a new page
             byte[] content;
             content = UTF8.getBytes(post.get("content", ""));
@@ -126,14 +125,14 @@ public class Wiki {
             prop.putHTML("LOCATION", "/Wiki.html?page=" + pagename);
             prop.put("LOCATION", prop.get("LOCATION"));
         }
-        
+
         if (post != null && post.containsKey("edit")) {
-            if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
+            if ((access.equals("admin") && (!sb.verifyAuthentication(header)))) {
                 // check access right for admin
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             }
-            
+
             prop.put("mode", "1"); //edit
             prop.putHTML("mode_author", author);
             prop.putHTML("mode_page-code", UTF8.String(page.page()));
@@ -177,7 +176,7 @@ public class Wiki {
             prop.put("mode", "4");
             prop.putHTML("mode_page", pagename);
             prop.putHTML("mode_error_page", pagename);
-            
+
             try {
                 final Iterator<byte[]> it = sb.wikiDB.keysBkp(true);
                 WikiBoard.Entry entry;
@@ -201,26 +200,26 @@ public class Wiki {
                     count++;
                 }
                 count--;    // don't show current version
-                
+
                 if (!oldselected) { // select latest old entry
                     prop.put("mode_error_versions_" + (count - 1) + "_oldselected", "1");
                 }
                 if (!newselected) { // select latest new entry (== current)
                     prop.put("mode_error_curselected", "1");
                 }
-                
+
                 if (count == 0) {
                     prop.put("mode_error", "2"); // no entries found
                 } else {
                     prop.put("mode_error_versions", count);
                 }
-                
+
                 entry = sb.wikiDB.read(pagename);
                 if (entry != null) {
                     prop.put("mode_error_curdate", WikiBoard.dateString(entry.date()));
                     prop.put("mode_error_curfdate", dateString(entry.date()));
                 }
-                
+
                 if (nentry == null) {
                     nentry = entry;
                 }
@@ -264,7 +263,7 @@ public class Wiki {
 
     /**
      * get key from post, use dflt if (not present or post == null)
-     * 
+     *
      * @param post
      * @param string
      * @param string2

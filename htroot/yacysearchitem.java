@@ -71,7 +71,7 @@ public class yacysearchitem {
         final String eventID = post.get("eventID", "");
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int item = post.getInt("item", -1);
-        final boolean auth = (header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
+        final boolean auth = (header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header);
         final RequestHeader.FileType fileType = header.fileType();
 
         // default settings for blank item
@@ -141,7 +141,7 @@ public class yacysearchitem {
             prop.putHTML("content_link", result.urlstring());
             prop.putHTML("content_showPictures_link", result.urlstring());
             prop.putHTML("content_target", target);
-            if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
+            if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
             prop.put("content_ranking", result.ranking);
@@ -216,7 +216,7 @@ public class yacysearchitem {
                 prop.put("content_item", "0");
             } else {
                 final String license = sb.licensedURLs.aquireLicense(ms.href);
-                sb.loader.loadIfNotExistBackground(ms.href.toNormalform(true, false), 1024 * 1024 * 10);
+                sb.loader.loadIfNotExistBackground(ms.href, 1024 * 1024 * 10);
                 prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
                 prop.putHTML("content_item_href", ms.href.toNormalform(true, false));
                 prop.putHTML("content_item_target", target);

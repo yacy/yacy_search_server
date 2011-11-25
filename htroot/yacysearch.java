@@ -87,7 +87,7 @@ public class yacysearch {
         final Switchboard sb = (Switchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
 
-        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
+        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
 
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         if (!authenticated) {
@@ -484,7 +484,7 @@ public class yacysearch {
             // if a minus-button was hit, remove a special reference first
             if (post != null && post.containsKey("deleteref")) {
                 try {
-                    if (!sb.verifyAuthentication(header, false)) {
+                    if (!sb.verifyAuthentication(header)) {
                         prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                         return prop;
                     }
@@ -511,7 +511,7 @@ public class yacysearch {
 
             // if a plus-button was hit, create new voting message
             if (post != null && post.containsKey("recommendref")) {
-                if (!sb.verifyAuthentication(header, false)) {
+                if (!sb.verifyAuthentication(header)) {
                     prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                     return prop;
                 }
@@ -541,7 +541,7 @@ public class yacysearch {
 
             // if a bookmarks-button was hit, create new bookmark entry
             if (post != null && post.containsKey("bookmarkref")) {
-                if (!sb.verifyAuthentication(header, false)) {
+                if (!sb.verifyAuthentication(header)) {
                     prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                     return prop;
                 }

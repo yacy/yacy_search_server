@@ -67,8 +67,8 @@ public class Domains {
 
     private static final String PRESENT = "";
     private static final String LOCAL_PATTERNS = "10\\..*,127\\..*,172\\.(1[6-9]|2[0-9]|3[0-1])\\..*,169\\.254\\..*,192\\.168\\..*,localhost";
-    private static final int MAX_NAME_CACHE_HIT_SIZE = 20000;
-    private static final int MAX_NAME_CACHE_MISS_SIZE = 20000;
+    private static final int MAX_NAME_CACHE_HIT_SIZE = 100000;
+    private static final int MAX_NAME_CACHE_MISS_SIZE = 100000;
     private static final int CONCURRENCY_LEVEL = Runtime.getRuntime().availableProcessors() + 1;
 
     // a dns cache
@@ -76,7 +76,7 @@ public class Domains {
     private static final ARC<String, String> NAME_CACHE_MISS = new ConcurrentARC<String, String>(MAX_NAME_CACHE_MISS_SIZE, CONCURRENCY_LEVEL);
     private static final ConcurrentHashMap<String, Object> LOOKUP_SYNC = new ConcurrentHashMap<String, Object>(100, 0.75f, Runtime.getRuntime().availableProcessors() * 2);
     private static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
-    private static final List<Pattern> LOCALHOST_PATTERNS = makePatterns(LOCAL_PATTERNS);
+    private static final List<Pattern> INTRANET_PATTERNS = makePatterns(LOCAL_PATTERNS);
     public static long cacheHit_Hit = 0, cacheHit_Miss = 0, cacheHit_Insert = 0; // for statistics only; do not write
     public static long cacheMiss_Hit = 0, cacheMiss_Miss = 0, cacheMiss_Insert = 0; // for statistics only; do not write
 
@@ -809,7 +809,7 @@ public class Domains {
         if (localHostAddresses.isEmpty()) return list; // give up
         for (final InetAddress a: localHostAddresses) {
             if (((0Xff & a.getAddress()[0]) == 127) ||
-                    (!matchesList(a.getHostAddress(), LOCALHOST_PATTERNS))) continue;
+                    (!matchesList(a.getHostAddress(), INTRANET_PATTERNS))) continue;
             list.add(a);
         }
         return list;
@@ -894,7 +894,7 @@ public class Domains {
 
         // FIXME IPv4 only
         // check local ip addresses
-        if (matchesList(host, LOCALHOST_PATTERNS)) return true;
+        if (matchesList(host, INTRANET_PATTERNS)) return true;
         if (host.startsWith("0:0:0:0:0:0:0:1")) return true;
 
         // check if there are other local IP addresses that are not in

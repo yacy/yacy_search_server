@@ -6,12 +6,12 @@ import de.anomic.server.serverSwitch;
 
 public class editTag_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
-        final Switchboard switchboard = (Switchboard) env;    	      
+
+        final Switchboard switchboard = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         boolean isAdmin = false;
-        isAdmin = switchboard.verifyAuthentication(header, true);
-        
+        isAdmin = switchboard.verifyAuthentication(header);
+
         prop.put("result", "0");//error
         //rename tags
         if(post != null && isAdmin && post.containsKey("old") && post.containsKey("new")){
@@ -21,5 +21,5 @@ public class editTag_p {
         // return rewrite properties
         return prop;
     }
-    
+
 }

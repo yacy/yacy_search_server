@@ -46,7 +46,7 @@ public class termlist_p {
         Segment segment = null;
         final boolean delete = post != null && post.containsKey("delete");
         final long mincount = post == null ? 10000 : post.getLong("mincount", 10000);
-        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
+        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header)) {
             segment = sb.indexSegments.segment(post.get("segment"));
         }
         if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);

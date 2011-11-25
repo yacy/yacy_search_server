@@ -34,20 +34,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
-
 import de.anomic.data.BlogBoard;
 import de.anomic.data.UserDB;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import java.util.List;
-import java.util.Map;
 
 public class Blog {
 
@@ -65,13 +64,13 @@ public class Blog {
         final serverObjects prop = new serverObjects();
         BlogBoard.BlogEntry page = null;
 
-        boolean hasRights = sb.verifyAuthentication(header, true);
-        
+        boolean hasRights = sb.verifyAuthentication(header);
+
         //final int display = (hasRights || post == null) ? 1 : post.getInt("display", 0);
-        //prop.put("display", display);   
+        //prop.put("display", display);
         prop.put("display", 1); // Fixed to 1
 
-        
+
         final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
         final String address = sb.peers.mySeed().getPublicAddress();
 
@@ -249,7 +248,7 @@ public class Blog {
             int start,
             int num,
             final boolean hasRights,
-            final boolean xml) 
+            final boolean xml)
     {
         final Iterator<String> i = switchboard.blogDB.getBlogIterator(false);
 
@@ -289,7 +288,7 @@ public class Blog {
             prop.put("mode_preventries_start", prevstart);
             prop.put("mode_preventries_num", num);
         } else prop.put("mode_preventries", "0");
-                
+
         return prop;
     }
 
@@ -300,7 +299,7 @@ public class Blog {
             final String address,
             final int number,
             final boolean hasRights,
-            final boolean xml) 
+            final boolean xml)
     {
         prop.putHTML("mode_entries_" + number + "_subject", UTF8.String(entry.getSubject()));
 

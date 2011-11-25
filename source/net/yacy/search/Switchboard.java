@@ -2348,7 +2348,7 @@ public final class Switchboard extends serverSwitch {
         return 1;
     }
 
-    public boolean verifyAuthentication(final RequestHeader header, final boolean strict) {
+    public boolean verifyAuthentication(final RequestHeader header) {
         // handle access rights
         switch (adminAuthenticated(header)) {
         case 0: // wrong password given
@@ -2357,7 +2357,7 @@ public final class Switchboard extends serverSwitch {
         case 1: // no password given
             return false;
         case 2: // no password stored
-            return !strict;
+            return true;
         case 3: // soft-authenticated for localhost only
             return true;
         case 4: // hard-authenticated, all ok

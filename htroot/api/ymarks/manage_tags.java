@@ -16,10 +16,10 @@ import de.anomic.server.serverSwitch;
 
 
 public class manage_tags {
-	
+
 	private static Switchboard sb = null;
 	private static serverObjects prop = null;
-	
+
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         sb = (Switchboard) env;
         prop = new serverObjects();
@@ -28,27 +28,27 @@ public class manage_tags {
         String query;
         String tags;
         String replace;
-        
+
         final UserDB.Entry user = sb.userDB.getUser(header);
-        final boolean isAdmin = (sb.verifyAuthentication(header, true));
+        final boolean isAdmin = (sb.verifyAuthentication(header));
         final boolean isAuthUser = user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
-        
+
         if(isAdmin || isAuthUser) {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
-        	        	
+
             if(post != null) {
             	query = post.get("query", post.get("tags", YMarkUtil.EMPTY_STRING));
                 qtype = post.get("qtype", "_tags");
                 tags = YMarkUtil.cleanTagsString(post.get("tags", YMarkUtil.EMPTY_STRING));
                 replace = post.get("replace", YMarkUtil.EMPTY_STRING);
-                
+
             } else {
                 query = ".*";
                 qtype = YMarkUtil.EMPTY_STRING;
                 tags = YMarkUtil.EMPTY_STRING;
                 replace = YMarkUtil.EMPTY_STRING;
             }
-            
+
             try {
                 final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
                 final Iterator<Row> row_iter;
@@ -61,7 +61,7 @@ public class manage_tags {
                         	row_iter = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
                         } else if(qtype.equals("_folder")) {
                         	row_iter = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, query);
-                        } else {                
+                        } else {
                         	row_iter = sb.tables.iterator(bmk_table, qtype, Pattern.compile(query));
                         }
                     } else {
@@ -74,15 +74,15 @@ public class manage_tags {
                 }
                 sb.tables.bookmarks.replaceTags(row_iter, bmk_user, tags, replace);
                 prop.put("status", 1);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
             	 Log.logException(e);
-			}	    	
+			}
         } else {
         	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
         }
         // return rewrite properties
         return prop;
-	}	
+	}
 }
