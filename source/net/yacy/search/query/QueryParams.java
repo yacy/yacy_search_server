@@ -88,6 +88,17 @@ public final class QueryParams {
     	FETCH_AND_VERIFY_ONLINE;
     }
 
+    public static class Modifier {
+        String s;
+        public Modifier(final String modifier) {
+            this.s = modifier;
+        }
+        public String getModifier() {
+            return this.s;
+        }
+    }
+
+
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
     public static final Pattern matchnothing_pattern = Pattern.compile("");
@@ -115,6 +126,7 @@ public final class QueryParams {
     public final String sitehash; // this is a domain hash, 6 bytes long or null
     public final String authorhash;
     public final String tenant;
+    public final Modifier modifier;
     public Seed remotepeer;
     public final Long time;
     // values that are set after a search:
@@ -152,6 +164,7 @@ public final class QueryParams {
     	this.snippetMatcher = QueryParams.catchall_pattern;
     	this.ranking = ranking;
     	this.tenant = null;
+    	this.modifier = new Modifier("");
         this.maxDistance = Integer.MAX_VALUE;
         this.urlMask = catchall_pattern;
         this.urlMask_isCatchall = true;
@@ -186,6 +199,7 @@ public final class QueryParams {
         final HandleSet fullqueryHashes,
         final Pattern snippetMatcher,
         final String tenant,
+        final String modifier,
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
         final String navigators,
@@ -209,6 +223,7 @@ public final class QueryParams {
         this.fullqueryHashes = fullqueryHashes;
         this.snippetMatcher = snippetMatcher;
         this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
+        this.modifier = new Modifier(modifier == null ? "" : modifier);
         this.ranking = ranking;
         this.maxDistance = maxDistance;
         this.contentdom = contentdom;

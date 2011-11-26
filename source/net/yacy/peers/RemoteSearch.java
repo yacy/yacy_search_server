@@ -58,6 +58,7 @@ public class RemoteSearch extends Thread {
     private final long time;
     final private RankingProfile rankingProfile;
     final private Pattern prefer, filter, snippet;
+    final private QueryParams.Modifier modifier;
     final private String language;
     final private Bitfield constraint;
     final private SeedDB peers;
@@ -68,6 +69,7 @@ public class RemoteSearch extends Thread {
               final Pattern prefer,
               final Pattern filter,
               final Pattern snippet,
+              final QueryParams.Modifier modifier,
               final String language,
               final String sitehash, final String authorhash,
               final int count, final long time, final int maxDistance,
@@ -89,6 +91,7 @@ public class RemoteSearch extends Thread {
         this.prefer = prefer;
         this.filter = filter;
         this.snippet = snippet;
+        this.modifier = modifier;
         this.language = language;
         this.sitehash = sitehash;
         this.authorhash = authorhash;
@@ -114,7 +117,7 @@ public class RemoteSearch extends Thread {
             this.urls = Protocol.search(
                         this.peers.mySeed(),
                         this.wordhashes, this.excludehashes, this.urlhashes,
-                        this.prefer, this.filter, this.snippet,
+                        this.prefer, this.filter, this.snippet, this.modifier.getModifier(),
                         this.language, this.sitehash, this.authorhash,
                         this.count, this.time, this.maxDistance, this.global, this.partitions,
                         this.targetPeer, this.indexSegment, this.containerCache, this.secondarySearchSuperviser,
@@ -156,6 +159,7 @@ public class RemoteSearch extends Thread {
     public static RemoteSearch[] primaryRemoteSearches(
             final String wordhashes, final String excludehashes,
             final Pattern prefer, final Pattern filter, final Pattern snippet,
+            final QueryParams.Modifier modifier,
             final String language,
             final String sitehash,
             final String authorhash,
@@ -193,7 +197,7 @@ public class RemoteSearch extends Thread {
             if (targetPeers[i] == null || targetPeers[i].hash == null) continue;
             try {
                 searchThreads[i] = new RemoteSearch(
-                    wordhashes, excludehashes, "", prefer, filter, snippet,
+                    wordhashes, excludehashes, "", prefer, filter, snippet, modifier,
                     language, sitehash, authorhash,
                     count, time, maxDist, true, targets, targetPeers[i],
                     indexSegment, peers, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
@@ -227,7 +231,7 @@ public class RemoteSearch extends Thread {
         if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(ASCII.getBytes(targetPeer.hash)));
         final RemoteSearch searchThread = new RemoteSearch(
-                wordhashes, "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, QueryParams.catchall_pattern, "", "", "", 20, time, 9999, true, 0, targetPeer,
+                wordhashes, "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, QueryParams.catchall_pattern, new QueryParams.Modifier(""), "", "", "", 20, time, 9999, true, 0, targetPeer,
                 indexSegment, peers, containerCache, null, blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;

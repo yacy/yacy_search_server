@@ -278,7 +278,7 @@ public class yacysearch {
             }
         }
 
-        if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
+        if (!block && (post == null || post.get("cat", "href").equals("href"))) {
             String urlmask = null;
 
             // check available memory and clean up if necessary
@@ -288,34 +288,42 @@ public class yacysearch {
             }
 
             final RankingProfile ranking = sb.getRanking();
+            final StringBuilder modifier = new StringBuilder(20);
 
             if (querystring.indexOf("/near",0) >= 0) {
             	querystring = querystring.replace("/near", "");
             	ranking.coeff_worddistance = RankingProfile.COEFF_MAX;
+            	modifier.append("/near ");
             }
             if (querystring.indexOf("/date",0) >= 0) {
                 querystring = querystring.replace("/date", "");
                 ranking.coeff_date = RankingProfile.COEFF_MAX;
+                modifier.append("/date ");
             }
             if (querystring.indexOf("/http",0) >= 0) {
                 querystring = querystring.replace("/http", "");
                 urlmask = "https?://.*";
+                modifier.append("/http ");
             }
             if (querystring.indexOf("/https",0) >= 0) {
                 querystring = querystring.replace("/https", "");
                 urlmask = "https?://.*";
+                modifier.append("/https ");
             }
             if (querystring.indexOf("/ftp",0) >= 0) {
                 querystring = querystring.replace("/ftp", "");
                 urlmask = "ftp://.*";
+                modifier.append("/ftp ");
             }
             if (querystring.indexOf("/smb",0) >= 0) {
                 querystring = querystring.replace("/smb", "");
                 urlmask = "smb://.*";
+                modifier.append("/smb ");
             }
             if (querystring.indexOf("/file",0) >= 0) {
                 querystring = querystring.replace("/file", "");
                 urlmask = "file://.*";
+                modifier.append("/file ");
             }
             if (querystring.indexOf("/location",0) >= 0) {
                 querystring = querystring.replace("/location", "");
@@ -323,16 +331,17 @@ public class yacysearch {
                     constraint = new Bitfield(4);
                 }
                 constraint.set(Condenser.flag_cat_haslocation, true);
+                modifier.append("/location ");
             }
             final int lrp = querystring.indexOf("/language/",0);
-            String lr = "";
+            String language = "";
             if (lrp >= 0) {
-                if (querystring.length() >= (lrp + 11)) {
-                    lr = querystring.substring(lrp + 9, lrp + 11);
+                if (querystring.length() >= (lrp + 12)) {
+                    language = querystring.substring(lrp + 10, lrp + 12);
                 }
-
-                querystring = querystring.replace("/language/" + lr, "");
-                lr = lr.toLowerCase();
+                querystring = querystring.replace("/language/" + language, "");
+                language = language.toLowerCase();
+                modifier.append("/language/").append(language).append(" ");
             }
             final int inurl = querystring.indexOf("inurl:",0);
             if (inurl >= 0) {
@@ -343,8 +352,9 @@ public class yacysearch {
                 final String urlstr = querystring.substring(inurl + 6, ftb);
                 querystring = querystring.replace("inurl:" + urlstr, "");
                 if (!urlstr.isEmpty()) {
-                    urlmask = ".*" + urlstr + ".*";
+                    urlmask = urlmask == null ? ".*" + urlstr + ".*" : urlmask + urlstr + ".*";
                 }
+                modifier.append("inurl:").append(urlstr).append(" ");
             }
             final int filetype = querystring.indexOf("filetype:",0);
             if (filetype >= 0) {
@@ -362,6 +372,7 @@ public class yacysearch {
                         urlmask = urlmask + ".*\\." + ft;
                     }
                 }
+                modifier.append("filetype:").append(ft).append(" ");
             }
             String tenant = null;
             if (post.containsKey("tenant")) {
@@ -392,16 +403,19 @@ public class yacysearch {
                     sitehost = sitehost.substring(0, sitehost.length() - 1);
                 }
                 sitehash = DigestURI.hosthash(sitehost);
+                modifier.append("site:").append(sitehost).append(" ");
             }
 
-            final int heuristicScroogle = querystring.indexOf("heuristic:scroogle",0);
+            final int heuristicScroogle = querystring.indexOf("/heuristic/scroogle",0);
             if (heuristicScroogle >= 0) {
-                querystring = querystring.replace("heuristic:scroogle", "");
+                querystring = querystring.replace("/heuristic/scroogle", "");
+                modifier.append("/heuristic/scroogle ");
             }
 
-            final int heuristicBlekko = querystring.indexOf("heuristic:blekko",0);
+            final int heuristicBlekko = querystring.indexOf("/heuristic/blekko",0);
             if (heuristicBlekko >= 0) {
-                querystring = querystring.replace("heuristic:blekko", "");
+                querystring = querystring.replace("/heuristic/blekko", "");
+                modifier.append("/heuristic/blekko ");
             }
 
             final int authori = querystring.indexOf("author:",0);
@@ -417,6 +431,7 @@ public class yacysearch {
                     }
                     author = querystring.substring(authori + 8, ftb);
                     querystring = querystring.replace("author:'" + author + "'", "");
+                    modifier.append("author:'").append(author).append("' ");
             	} else {
                     int ftb = querystring.indexOf(' ', authori);
                     if (ftb == -1) {
@@ -424,6 +439,7 @@ public class yacysearch {
                     }
                     author = querystring.substring(authori + 7, ftb);
                     querystring = querystring.replace("author:" + author, "");
+                    modifier.append("author:").append(author).append(" ");
             	}
             	authorhash = ASCII.String(Word.word2hash(author));
             }
@@ -435,6 +451,7 @@ public class yacysearch {
                 }
                 String domain = querystring.substring(tld + 4, ftb);
                 querystring = querystring.replace("tld:" + domain, "");
+                modifier.append("tld:").append(domain).append(" ");
                 while (domain.length() > 0 && domain.charAt(0) == '.') {
                     domain = domain.substring(1);
                 }
@@ -451,7 +468,7 @@ public class yacysearch {
 
             // read the language from the language-restrict option 'lr'
             // if no one is given, use the user agent or the system language as default
-            String language = (post == null) ? lr : post.get("lr", lr);
+            language = (post == null) ? language : post.get("lr", language);
             if (language.startsWith("lang_")) {
                 language = language.substring(5);
             }
@@ -586,6 +603,7 @@ public class yacysearch {
                     Word.words2hashesHandles(query[2]),
                     snippetPattern,
                     tenant,
+                    modifier.toString().trim(),
                     maxDistance,
                     prefermask,
                     contentdom,

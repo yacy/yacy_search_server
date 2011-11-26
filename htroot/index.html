@@ -98,7 +98,7 @@
        
       <table>
         <tr>
-          <td><label for="count">Max. number of results</label>:</td>
+          <td><label for="count">Results per page</label>:</td>
           <td>
             <input type="radio" name="maximumRecords" value="10" #(count-10)#::checked="checked"#(/count-10)#/>10
             <input type="radio" name="maximumRecords" value="50" #(count-50)#::checked="checked"#(/count-50)#/>50
@@ -109,8 +109,8 @@
           #(resource-select)#::
           <td><label for="resource">Resource</label>:</td>
           <td>
-            <input type="radio" name="resource" value="global" #(global)#::checked="checked"#(/global)# #(global-disabled)#::disabled="disabled"#(/global-disabled)#/>global
-            <input type="radio" name="resource" value="local" #(local)#::checked="checked"#(/local)#/>local
+            <input type="radio" name="resource" value="global" #(global)#::checked="checked"#(/global)# #(global-disabled)#::disabled="disabled"#(/global-disabled)#/>the peer-to-peer network
+            <input type="radio" name="resource" value="local" #(local)#::checked="checked"#(/local)#/>only the local index
           </td>
           #(/resource-select)#
         </tr>
@@ -145,22 +145,14 @@
             <input type="checkbox" id="indexof" name="indexof" #[indexofChecked]# /> <label for="indexof">only index pages</label>
           </td>
         </tr>
-        <tr><td></td><td></td></tr>
-        <tr>
-          <td>
-          <a href="http://www.yacy-websuche.de/wiki/index.php/En:SearchParameters">help: advanced parameters</a>
-          </td>
-          <td>
-          </td>
-        </tr>
       </table>
       
       <h4>Query Operators</h4>
 
-      <dl style="width:800px">
-      <dt>restrictions</dt>
-        <dd>
-        <dl style="width:600px">
+      <dl style="width:700px">
+      <dt style="width:100px">restrictions</dt>
+      <dd>
+        <dl style="width:500px">
           <dt>inurl:&lt;phrase&gt;</dt>
           <dd>only urls with the &lt;phrase&gt; in the url</dd>
           <dt>filetype:&lt;ext&gt;</dt>
@@ -171,36 +163,61 @@
           <dd>only pages with as-author-anotated &lt;author&gt;</dd>
           <dt>tld:&lt;tld&gt;</dt>
           <dd>only pages from top-level-domains &lt;tld&gt;</dd>
-          <dt>/http or /https</dt>
+          <dt>/http</dt>
           <dd>only resources from http or https servers</dd>
           <dt>/ftp</dt>
-          <dd>only resources from ftp servers</dd>
+          <dd>only resources from ftp servers (they are rare, <a href="/CrawlStartSite_p.html">crawl them yourself</a>)</dd>
           <dt>/smb</dt>
-          <dd>only resources from smb server</dd>
+          <dd>only resources from smb servers (<a href="/ConfigBasic.html">Intranet Indexing</a> must be selected)</dd>
           <dt>/file</dt>
-          <dd>only files from the local file system (intranet mode must be selected)</dd>
+          <dd>only files from a local file system (<a href="/ConfigBasic.html">Intranet Indexing</a> must be selected)</dd>
         </dl>
       </dd>
-      <dt>ranking modifier</dt>
-        <dd>
-        <dl style="width:600px">
+      <dt style="width:100px">ranking modifier</dt>
+      <dd>
+        <dl style="width:500px">
           <dt>/date</dt>
           <dd>sort by date (latest first)</dd>
           <dt>/near</dt>
           <dd>multiple words shall appear near</dd>
           <dt>"" (doublequotes)</dt>
           <dd>multiple words shall appear near</dd>
-          <dt>/language/&lt;2-character language code&gt;</dt>
-          <dd>prefer given language</dd>
+          <dt>/language/&lt;lang&gt;</dt>
+          <dd>prefer given language (an ISO639 2-letter code)</dd>
         </dl>
       </dd>
-      <dt>heuristics</dt>
-        <dd>
-        <dl style="width:600px">
-          <dt>heuristic:scroogle</dt>
+      <dt style="width:100px">heuristics</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>/heuristic/scroogle</dt>
           <dd>add search results from scroogle</dd>
-          <dt>heuristic:blekko</dt>
+          <dt>/heuristic/blekko</dt>
           <dd>add search results from blekko</dd>
+        </dl>
+      </dd>
+      </dl>
+      
+      <h4>Search Navigation</h4>
+
+      <dl style="width:700px">
+      <dt style="width:100px">keyboard shotcuts</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>tab or page-up</dt>
+          <dd>next result page</dd>
+          <dt>page-down</dt>
+          <dd>previous result page</dd>
+        </dl>
+      </dd>
+      <dt style="width:100px">automatic result retrieval</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>browser integration</dt>
+          <dd>after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'</dd>
+          <dt>search as rss feed</dt>
+          <dd>click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an <a href="http://localhost:8090/yacysearch.rss?query=news+%2Fdate&Enter=Search&verify=cacheonly&contentdom=text&nav=hosts%2Cauthors%2Cnamespace%2Ctopics%2Cfiletype%2Cprotocol&startRecord=0&indexof=off&meanCount=5&maximumRecords=10&resource=global&urlmaskfilter=.*&prefermaskfilter=">example</a>.</dd>
+          <dt>json search results</dt>
+          <dd>for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'</dd>
         </dl>
       </dd>
       </dl>
@@ -215,8 +232,6 @@
     ::
     #%env/templates/simplefooter.template%#
     #(/topmenu)#
-    <p>
     <img src="cytag.png?icon=invisible&amp;nick=yacyh_#[clientid]#&amp;tag=search" alt=""/>
-    </p>
   </body>
 </html>
