@@ -154,6 +154,56 @@
           </td>
         </tr>
       </table>
+      
+      <h4>Query Operators</h4>
+
+      <dl style="width:800px">
+      <dt>restrictions</dt>
+        <dd>
+        <dl style="width:600px">
+          <dt>inurl:&lt;phrase&gt;</dt>
+          <dd>only urls with the &lt;phrase&gt; in the url</dd>
+          <dt>filetype:&lt;ext&gt;</dt>
+          <dd>only urls with extension &lt;ext&gt;</dd>
+          <dt>site:&lt;host&gt;</dt>
+          <dd>only urls from host &lt;host&gt;</dd>
+          <dt>author:&lt;author&gt;</dt>
+          <dd>only pages with as-author-anotated &lt;author&gt;</dd>
+          <dt>tld:&lt;tld&gt;</dt>
+          <dd>only pages from top-level-domains &lt;tld&gt;</dd>
+          <dt>/http or /https</dt>
+          <dd>only resources from http or https servers</dd>
+          <dt>/ftp</dt>
+          <dd>only resources from ftp servers</dd>
+          <dt>/smb</dt>
+          <dd>only resources from smb server</dd>
+          <dt>/file</dt>
+          <dd>only files from the local file system (intranet mode must be selected)</dd>
+        </dl>
+      </dd>
+      <dt>ranking modifier</dt>
+        <dd>
+        <dl style="width:600px">
+          <dt>/date</dt>
+          <dd>sort by date (latest first)</dd>
+          <dt>/near</dt>
+          <dd>multiple words shall appear near</dd>
+          <dt>"" (doublequotes)</dt>
+          <dd>multiple words shall appear near</dd>
+          <dt>/language/&lt;2-character language code&gt;</dt>
+          <dd>prefer given language</dd>
+        </dl>
+      </dd>
+      <dt>heuristics</dt>
+        <dd>
+        <dl style="width:600px">
+          <dt>heuristic:scroogle</dt>
+          <dd>add search results from scroogle</dd>
+          <dt>heuristic:blekko</dt>
+          <dd>add search results from blekko</dd>
+        </dl>
+      </dd>
+      </dl>
       #(/searchoptions)#
     </form>
     <script type="text/javascript">

@@ -603,6 +603,10 @@ li.menugroup {
 <dl>, <dd>, <dt>
 */
 
+dd {
+  text-align:left;
+}
+
 dl.pairs dd, form dd {
   padding:0.25%;
   margin:0 0 0.25% 0.25%;
