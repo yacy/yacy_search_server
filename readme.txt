@@ -54,7 +54,7 @@ all these locations into one search result.
 
 DEPENDENCIES? WHAT OTHER SOFTWARE DO I NEED?
 
-You need java 1.5 or later to run YaCy, nothing else.
+You need java 1.6 or later to run YaCy, nothing else.
 Please download it from http://www.java.com
 
 YaCy also runs on IcedTea6.
@@ -120,7 +120,7 @@ Please clone our code and help with development!
 The code is licensed under the GPL v2.
 
 Compiling YaCy:
-- you need java 1.5 and ant
+- you need java 1.6 and ant
 - just compile: "ant clean all" - then you can "./startYACY.sh"
 - create a release tarball: "ant dist"
 - create a Mac OS release: "ant distMacApp" (works only on a Mac)
