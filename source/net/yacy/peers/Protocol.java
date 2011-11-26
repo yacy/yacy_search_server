@@ -435,6 +435,7 @@ public final class Protocol {
             final Pattern prefer,
             final Pattern filter,
             final Pattern snippet,
+            final String modifier,
             final String language,
             final String sitehash,
             final String authorhash,
@@ -471,7 +472,7 @@ public final class Protocol {
         try {
             result = new SearchResult(
                 basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
-                mySeed, wordhashes, excludehashes, urlhashes, prefer, filter, snippet, language,
+                mySeed, wordhashes, excludehashes, urlhashes, prefer, filter, snippet, modifier, language,
                 sitehash, authorhash, count, time, maxDistance, global, partitions, target.getHexHash() + ".yacyh", target.getClusterAddress(),
                 secondarySearchSuperviser, rankingProfile, constraint);
         } catch (final IOException e) {
@@ -643,6 +644,7 @@ public final class Protocol {
                 final Pattern prefer,
                 final Pattern filter,
                 final Pattern snippet,
+                final String modifier,
                 final String language,
                 final String sitehash,
                 final String authorhash,
@@ -694,6 +696,7 @@ public final class Protocol {
             parts.put("prefer", UTF8.StringBody(prefer.pattern()));
             parts.put("filter", UTF8.StringBody(filter.pattern()));
             parts.put("snippet", UTF8.StringBody(snippet.pattern()));
+            parts.put("modifier", UTF8.StringBody(modifier));
             parts.put("language", UTF8.StringBody(language));
             parts.put("sitehash", UTF8.StringBody(sitehash));
             parts.put("authorhash", UTF8.StringBody(authorhash));
@@ -1157,6 +1160,7 @@ public final class Protocol {
                                 QueryParams.matchnothing_pattern, // prefer,
                                 QueryParams.catchall_pattern, // filter,
                                 QueryParams.catchall_pattern, // snippet,
+                                "", // modifier
                                 "", // language,
                                 "", // sitehash,
                                 "", // authorhash,

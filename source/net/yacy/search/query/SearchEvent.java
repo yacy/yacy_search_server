@@ -134,6 +134,7 @@ public final class SearchEvent {
                     this.query.prefer,
                     this.query.urlMask,
                     this.query.snippetMatcher,
+                    this.query.modifier,
                     this.query.targetlang == null ? "" : this.query.targetlang,
                     this.query.sitehash == null ? "" : this.query.sitehash,
                     this.query.authorhash == null ? "" : this.query.authorhash,

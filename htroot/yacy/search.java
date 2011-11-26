@@ -116,6 +116,7 @@ public final class search {
         final long    maxtime = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000), post.getLong("time", 3000)); // maximum waiting time
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
+        final String  modifier = post.get("modifier", "").trim();
         final String  contentdom = post.get("contentdom", "text");
         final String  filter = post.get("filter", ".*"); // a filter on the url
         final Pattern snippetPattern = Pattern.compile(post.get("snippet", ".*")); // a filter on the snippet
@@ -228,6 +229,7 @@ public final class search {
                     null,
                     snippetPattern,
                     null,
+                    modifier,
                     maxdist,
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
@@ -288,6 +290,7 @@ public final class search {
                     null,
                     snippetPattern,
                     null,
+                    modifier,
                     maxdist,
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
