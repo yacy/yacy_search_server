@@ -1188,6 +1188,7 @@ Applications==Anwendungen
 more options...==mehr Optionen...
 advanced parameters==erweiterte Parameter
 Max. number of results==Max. Anzahl der Ergebnisse
+Results per page==Ergebnisse pro Seite
 Resource==Quelle
 global==global
 >local==>lokal
@@ -1202,10 +1203,50 @@ show all==alle zeigen
 #überarbeiten!!!
 Prefer mask==Vorzugsmaske
 Constraints==Einschränkungen
-only index pages==Nur Index Seiten
+only index pages==Nur Index-Seiten
 "authentication required"=="Autorisierung erforderlich"
 Disable search function for users without authorization==Suchfunktion für Benutzer ohne Autorisierung sperren
 Enable web search to everyone==Suchfunktion für alle Nutzer erlauben
+the peer-to-peer network==Peer-to-Peer-Netzwerk
+only the local index==Nur lokaler Index
+Query Operators==Such-Operatoren
+restrictions==Restriktionen
+only urls with the &lt;phrase&gt; in the url==Nur URLs, welche &lt;phrase&gt; enthalten
+only urls with extension==Nur URLs mit der Dateinamenserweiterung
+only urls from host==Nur URLs vom Server
+only pages with as-author-anotated==Nur Seiten mit dem angegebenen Autor
+only pages from top-level-domains==Nur Seiten aus der Top-Level-Domain
+only resources from http or https servers==Nur Ressources auf HTTP- oder HTTPS-Servern
+only resources from ftp servers==Nur Ressourcen auf FTP-Servern
+they are rare==eher selten
+crawl them yourself==crawlen Sie sie selbst
+only resources from smb servers==Nur Ressourcen von SMB-Servern
+Intranet Indexing</a> must be selected==Intranet-Indexierung</a> muss ausgewählt sein
+only files from a local file system==Nur Dateien aus dem lokalen Dateisystem
+ranking modifier==Ranking-Modifizierung
+sort by date==Sortierung nach Datum
+latest first==Neuste zuerst
+multiple words shall appear near==Mehrere Wörter sollen nah zusammen stehen
+doublequotes==Anführungszeichen
+prefer given language==Angegebene Sprache bevorzugen
+an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
+heuristics==Heuristiken
+add search results from scroogle==Benutze zusätzliche Ergebnisse von Scroogle
+add search results from blekko==Benutze zusätzliche Ergebnisse von Blekko
+Search Navigation==Such-Navigation
+keyboard shotcuts==Tastatur-Kürzel
+tab or page-up==Tab oder Bild hoch
+next result page==Nächste Ergebnisseite
+page-down==Bild nach unten
+previous result page==Vorherige Ergebnisseite
+automatic result retrieval==Automatische Ergebnis-Abfrage
+browser integration==Browserintegration
+after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==Nach der Suche clicken Sie auf das Suchfeld Ihres Browsers und wählen Sie '"YaCy" hinzufügen'
+search as rss feed==Suche als RSS-Feed
+click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==Klicken Sie nach der Suche auf das rote Icon in der rechten oberen Ecke. Dies funktioniert gut mit dem '/date' Ranking-Modifizierer. Hier ein
+>example==>Beispiel
+json search results==JSON-Suchergebnisse
+for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Für AJAX-Entwickler: Rufen Sie den RSS-Feed auf und ersetzen Sie '.rss' durch '.json'
 #-----------------------------
 
 #File: IndexCleaner_p.html
@@ -3210,6 +3251,9 @@ Table Viewer==Tabellen Betrachter
 #---------------------------
 YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
 ### SEARCH & BROWSE ###
+>Search==>Suche
+Web Search==Web-Suche
+File Search==Datei-Suche
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
 Search Page==Suchseite
 Rich Client Search==Rich Client Suche
@@ -3217,10 +3261,11 @@ Interactive local Search==Interaktive lokale Suche
 Compare Search==Vergleichs-Suche
 Ranking Config==Ranking Einstellungen
 >Surftips==>Surftipps
-Publication==Veröffentlichung
+Local Peer Wiki==Lokales Wiki
 >Bookmarks==>Lesezeichen
 >Help==>Hilfe
 ### INDEX CONTROL ###
+Index&nbsp;Production==Indexerzeugung
 Index&nbsp;Control==Index&nbsp;Kontrolle
 Index Creation==Indexerzeugung
 Crawler Monitor==Crawler Überwachung
