@@ -315,7 +315,7 @@ public final class yacy {
                     //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                     //if (!properPW) browserPopUpPage = "ConfigBasic.html";
                     Browser.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage);
-                } catch (final RuntimeException e) {
+                } catch (final Throwable e) {
                     // cannot open browser. This may be normal in headless environments
                     //Log.logException(e);
                 }
