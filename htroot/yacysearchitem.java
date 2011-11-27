@@ -101,6 +101,7 @@ public class yacysearchitem {
         prop.put("remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
         prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
+        prop.put("navurlBase", QueryParams.navurlBase("html", theQuery, null, theQuery.urlMask.toString(), theQuery.navigators).toString());
 
         final String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
         if (theQuery.contentdom == ContentDomain.TEXT) {

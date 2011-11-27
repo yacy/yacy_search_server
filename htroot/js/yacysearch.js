@@ -80,46 +80,45 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   document.getElementById("remoteResourceSize").firstChild.nodeValue = remoteResourceSize;
   document.getElementById("remoteIndexCount").firstChild.nodeValue = remoteIndexCount;
   document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
-  
-  var resNav = document.getElementById("resNav");
-  resNav.firstChild.nodeValue = "X";
+  document.getElementById("resNav").firstChild.nodeValue = "X";
   // compose page navigation
 
   resnav = "";
-  thispage = offset / itemsperpage;
-            if (thispage == 0) {
-            	resnav += ("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
-            } else {
-            	resnav += ("<a id=\"prevpage\" href=\"");
-                resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
-            	resnav += ("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
-            }
-            numberofpages = Math.min(10, 1 + (((localResourceSize + remoteResourceSize) - 1) / itemsperpage));
-            
-            for (i = 0; i < numberofpages; i++) {
-                if (i == thispage) {
-                    resnav += "<img src=\"env/grafics/navs";
-                    resnav += (i + 1);
-                    resnav += (".gif\" alt=\"page");
-                    resnav += (i + 1);
-                    resnav += ("\" width=\"16\" height=\"16\" />&nbsp;");
-                } else {
-                    resnav += ("<a href=\"");
-                    resnav += (navurlbase + "&amp;startRecord=" + (i * itemsperpage));
-                    resnav += ("\"><img src=\"env/grafics/navd");
-                    resnav += (i + 1);
-                    resnav += (".gif\" alt=\"page");
-                    resnav += (i + 1);
-                    resnav += ("\" width=\"16\" height=\"16\" /></a>&nbsp;");
-                }
-            }
-            if (thispage >= numberofpages) {
-            	resnav += ("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
-            } else {
-                resnav += ("<a id=\"nextpage\" href=\"");
-                resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
-                resnav += ("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
-            }
+  thispage = Math.floor(offset / itemsperpage);
+  if (thispage == 0) {
+  	resnav += ("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
+  } else {
+  	resnav += ("<a id=\"prevpage\" href=\"");
+      resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
+  	resnav += ("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
+  }
   
-  //document.getElementById("resNav").firstChild.nodeValue = resnav;
+  numberofpages = Math.min(10, 1 + ((totalcount - 1) / itemsperpage));
+  if (!numberofpages) numberofpages = 10;
+  for (i = 0; i < numberofpages; i++) {
+      if (i == thispage) {
+         resnav += "<img src=\"env/grafics/navs";
+         resnav += (i + 1);
+         resnav += (".gif\" alt=\"page");
+         resnav += (i + 1);
+         resnav += ("\" width=\"16\" height=\"16\" />&nbsp;");
+      } else {
+         resnav += ("<a href=\"");
+         resnav += (navurlbase + "&amp;startRecord=" + (i * itemsperpage));
+         resnav += ("\"><img src=\"env/grafics/navd");
+         resnav += (i + 1);
+         resnav += (".gif\" alt=\"page");
+         resnav += (i + 1);
+         resnav += ("\" width=\"16\" height=\"16\" /></a>&nbsp;");
+      }
+  }
+  if (thispage >= numberofpages) {
+  	resnav += ("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
+  } else {
+      resnav += ("<a id=\"nextpage\" href=\"");
+      resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
+      resnav += ("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
+  }
+ 
+  document.getElementById("resNav").innerHTML = resnav;
 }
