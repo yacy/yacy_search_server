@@ -355,7 +355,7 @@ public final class CrawlStacker {
             (entry.url().getFileExtension().length() > 0 && TextParser.supports(entry.url(), null) != null)
             */) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
-            if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
+            //if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;
         }
 

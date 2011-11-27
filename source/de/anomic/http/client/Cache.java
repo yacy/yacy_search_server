@@ -52,21 +52,21 @@ import net.yacy.kelondro.order.Base64Order;
 
 
 public final class Cache {
-    
+
     private static final String RESPONSE_HEADER_DB_NAME = "responseHeader.heap";
     private static final String FILE_DB_NAME = "file.array";
 
     private static Map<byte[], Map<String, String>> responseHeaderDB = null;
     private static Compressor fileDB = null;
     private static ArrayStack fileDBunbuffered = null;
-    
+
     private static long maxCacheSize = Long.MAX_VALUE;
     private static File cachePath = null;
     private static String prefix;
     public static final Log log = new Log("HTCACHE");
-    
+
     public static void init(final File htCachePath, final String peerSalt, final long CacheSizeMax) {
-        
+
         cachePath = htCachePath;
         maxCacheSize = CacheSizeMax;
         prefix = peerSalt;
@@ -87,11 +87,11 @@ public final class Cache {
             fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, 1024 * 1024 * 2, false);
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new Compressor(fileDBunbuffered, 2 * 1024 * 1024);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
     }
-    
+
     /**
      * clear the cache
      */
@@ -99,12 +99,12 @@ public final class Cache {
         responseHeaderDB.clear();
         try {
             fileDB.clear();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
         try {
             fileDBunbuffered.clear();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
     }
@@ -117,7 +117,7 @@ public final class Cache {
         maxCacheSize = newCacheSize;
         fileDBunbuffered.setMaxSize(maxCacheSize);
     }
-    
+
     /**
      * get the current actual cache size
      * @return
@@ -125,7 +125,7 @@ public final class Cache {
     public static long getActualCacheSize() {
         return fileDBunbuffered.length();
     }
-    
+
     /**
      * close the databases
      */
@@ -135,7 +135,7 @@ public final class Cache {
         }
         fileDB.close(true);
     }
-    
+
     public static void store(final DigestURI url, final ResponseHeader responseHeader, final byte[] file) throws IOException {
         if (responseHeader == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: responseHeader == null");
         if (file == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: file == null");
@@ -144,12 +144,12 @@ public final class Cache {
         // store the file
         try {
             fileDB.insert(url.hash(), file);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new IOException("Cache.store: cannot write to fileDB (1): " + e.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IOException("Cache.store: cannot write to fileDB (2): " + e.getMessage());
         }
-        
+
         // store the response header into the header database
         final HashMap<String, String> hm = new HashMap<String, String>();
         hm.putAll(responseHeader);
@@ -160,12 +160,12 @@ public final class Cache {
             } else {
                 responseHeaderDB.put(url.hash(), hm);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
         if (log.isFine()) log.logFine("stored in cache: " + url.toNormalform(true, false));
     }
-    
+
     /**
      * check if the responseHeaderDB and the fileDB has an entry for the given url
      * @param url the url of the resource
@@ -188,14 +188,14 @@ public final class Cache {
             } else {
                 responseHeaderDB.remove(url.hash());
             }
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         if (fileExists) try {
-            log.logWarning("content but not header of url " + url.toString() + " in cache; cleaned up");
+            //log.logWarning("content but not header of url " + url.toString() + " in cache; cleaned up");
             fileDB.delete(url.hash());
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         return false;
     }
-    
+
     /**
      * Returns an object containing metadata about a cached resource
      * @param url the {@link URL} of the resource
@@ -205,46 +205,46 @@ public final class Cache {
      * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
      * info object couldn't be created
      */
-    public static ResponseHeader getResponseHeader(final byte[] hash) {    
-        
+    public static ResponseHeader getResponseHeader(final byte[] hash) {
+
         // loading data from database
         Map<String, String> hdb;
         hdb = responseHeaderDB.get(hash);
         if (hdb == null) return null;
-        
+
         return new ResponseHeader(null, hdb);
     }
-    
-    
+
+
     /**
      * Returns the content of a cached resource as byte[]
      * @param url the requested resource
      * @return the resource content as byte[]. If no data
      * is available or the cached file is not readable, <code>null</code>
      * is returned.
-     * @throws IOException 
+     * @throws IOException
      */
     public static byte[] getContent(final byte[] hash) {
         // load the url as resource from the cache
         try {
-            byte[] b = fileDB.get(hash);
+            final byte[] b = fileDB.get(hash);
             if (b == null) return null;
             return b;
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             Log.logException(e);
             return null;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
             return null;
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
             return null;
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             Log.logException(e);
             return null;
         }
     }
-    
+
     /**
      * removed response header and cached content from the database
      * @param url
