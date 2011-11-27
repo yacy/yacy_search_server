@@ -20,7 +20,7 @@ var modifiertype = "";
 
 function search(search, count, offset) {
   var navhtml = document.getElementById("searchnavigation");
-  if (navhtml != null) navhtml.innerHTML = "<div>loading...</div>";
+  if (navhtml != null) navhtml.innerHTML = "<div>loading from local index...</div>";
   query = search;
   maximumRecords = count;
   if (count == "") maximumRecords = 1000;
