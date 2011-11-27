@@ -41,10 +41,11 @@ The source code is inside the release package (see /source and /htroot).
 
 == WHERE IS THE DOCUMENTATION? ==
 Documentation can be found at:
-(Home Page)     http://yacy.net/
-(German Forum)  http://forum.yacy.de/
-(Wiki:de)       http://www.yacy-websuche.de/wiki/index.php/De:Start
-(Wiki:en)       http://www.yacy-websearch.net/wiki/index.php/En:Start
+(Home Page)        http://yacy.net/
+(German Forum)     http://forum.yacy.de/
+(Wiki:de)          http://www.yacy-websuche.de/wiki/index.php/De:Start
+(Wiki:en)          http://www.yacy-websearch.net/wiki/index.php/En:Start
+(Tutorial Videos)  http://yacy.net/en/Tutorials.html and http://yacy.net/de/Lehrfilme.html
 
 Every of these locations has a (YaCy) search functionality which combines
 all these locations into one search result.
