@@ -44,11 +44,11 @@
             You need this only if you want a remote access to your peer.
             <dl class="userConfig">
               <dt><label for="adminuser">Peer User:</label></dt>
-              <dd><input type="text" name="adminuser" id="adminuser" value="#[defaultUser]#" size="16" maxlength="32" /></dd>
+              <dd><input type="text" name="adminuser" id="adminuser" value="#[defaultUser]#" size="16" maxlength="32" onFocus="document.getElementById('access_account').checked = true;"/></dd>
               <dt><label for="adminpw1">New Peer Password:</label></dt>
-              <dd><input type="password" name="adminpw1" id="adminpw1" value="" size="16" maxlength="1024" /></dd>
+              <dd><input type="password" name="adminpw1" id="adminpw1" value="" size="16" maxlength="1024" onFocus="document.getElementById('access_account').checked = true;"/></dd>
               <dt><label for="adminpw2">Repeat Peer Password:</label></dt>
-              <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="1024" /></dd>
+              <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="1024" onFocus="document.getElementById('access_account').checked = true;"/></dd>
             </dl>
           <input type="submit" name="setAdmin" value="Define Administrator" />
           </fieldset>
