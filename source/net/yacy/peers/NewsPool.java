@@ -401,8 +401,8 @@ public class NewsPool {
         if (record == null) return false;
         if (record.category() == null) return true;
         final long created = record.created().getTime();
-        if ((System.currentTimeMillis() - created) > (7L * MILLISECONDS_PER_DAY)) {
-            // remove everything after 1 week
+        if ((System.currentTimeMillis() - created) > (1L * MILLISECONDS_PER_DAY)) {
+            // remove everything after 1 day
             return true;
         }
         if ((record.category().equals(CATEGORY_WIKI_UPDATE)) &&
