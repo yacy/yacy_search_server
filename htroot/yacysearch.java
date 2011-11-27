@@ -740,7 +740,7 @@ public class yacysearch {
             }
 
             final int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
-            prop.put("num-results_offset", offset + 1);
+            prop.put("num-results_offset", offset == 0 ? 0 : offset + 1);
             prop.put("num-results_itemscount", Formatter.number(offset + theSearch.getQuery().itemsPerPage > indexcount ? offset + indexcount % theSearch.getQuery().itemsPerPage : offset + theSearch.getQuery().itemsPerPage, true));
             prop.put("num-results_itemsPerPage", itemsPerPage);
             prop.put("num-results_totalcount", Formatter.number(indexcount, true));
