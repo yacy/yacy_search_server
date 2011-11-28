@@ -41,10 +41,10 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.MapTools;
-import net.yacy.peers.Protocol;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.PeerActions;
+import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
@@ -60,7 +60,6 @@ public class Network {
         final Switchboard sb = (Switchboard) switchboard;
         final long start = System.currentTimeMillis();
 
-        // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         prop.put("menu", post == null ? 2 : (post.get("menu", "").equals("embed")) ? 0 : (post.get("menu","").equals("simple")) ? 1 : 2);
         if (sb.peers.mySeed() != null) prop.put("menu_newpeer_peerhash", sb.peers.mySeed().hash);
@@ -231,7 +230,7 @@ public class Network {
         } else {
             // generate table
             final int page = (post == null ? 1 : post.getInt("page", 1));
-            final int maxCount = (post == null ? 300 : post.getInt("maxCount", 300));
+            final int maxCount = (post == null ? 1000 : post.getInt("maxCount", 1000));
             int conCount = 0;
             if (sb.peers == null) {
                 prop.put("table", 0);//no remote senior/principal proxies known"
