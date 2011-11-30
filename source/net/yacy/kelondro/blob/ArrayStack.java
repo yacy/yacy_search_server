@@ -890,55 +890,62 @@ public class ArrayStack implements BLOB {
             final int keylength, final ByteOrder order, final File f1, final File f2, final File newFile, final int writeBuffer) {
         // iterate both files and write a new one
 
-        CloneableIterator<ReferenceContainer<ReferenceType>> i1 = null, i2 = null;
+    	ReferenceIterator<ReferenceType> i1 = null;
         try {
-            i1 = new ReferenceIterator<ReferenceType>(f1, factory);
+        	i1 = new ReferenceIterator<ReferenceType>(f1, factory);
+        	ReferenceIterator<ReferenceType> i2 = null;
+            try {
+            	i2 = new ReferenceIterator<ReferenceType>(f2, factory);
+                if (!i1.hasNext()) {
+                    if (i2.hasNext()) {
+                        HeapWriter.delete(f1);
+                        if (f2.renameTo(newFile)) return newFile;
+                        return f2;
+                    }
+                    HeapWriter.delete(f1);
+                    HeapWriter.delete(f2);
+                    return null;
+                } else if (!i2.hasNext()) {
+                    HeapWriter.delete(f2);
+                    if (f1.renameTo(newFile)) return newFile;
+                    return f1;
+                }
+                assert i1.hasNext();
+                assert i2.hasNext();
+                final File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".prt");
+                try {
+                    final HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order, writeBuffer);
+                    merge(i1, i2, order, writer);
+                    writer.close(true);
+                } catch (final IOException e) {
+                    Log.logSevere("ArrayStack", "cannot writing or close writing merge, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
+                    HeapWriter.delete(tmpFile);
+                    HeapWriter.delete(newFile);
+                    return null;
+                } catch (final RowSpaceExceededException e) {
+                    Log.logSevere("ArrayStack", "cannot merge because of memory failure: " + e.getMessage(), e);
+                    HeapWriter.delete(tmpFile);
+                    HeapWriter.delete(newFile);
+                    return null;
+                }
+                // we don't need the old files any more
+                HeapWriter.delete(f1);
+                HeapWriter.delete(f2);
+                return newFile;
+            } catch (final IOException e) {
+                Log.logSevere("ArrayStack", "cannot merge because input files cannot be read, f2 = " + f2.toString() + ": " + e.getMessage(), e);
+                return null;
+            } finally {
+            	if(i2 != null)
+            		i2.close();
+            }
         } catch (final IOException e) {
             Log.logSevere("ArrayStack", "cannot merge because input files cannot be read, f1 = " + f1.toString() + ": " + e.getMessage(), e);
             return null;
+        } finally {
+        	if(i1 != null)
+        		i1.close();
         }
-        try {
-            i2 = new ReferenceIterator<ReferenceType>(f2, factory);
-        } catch (final IOException e) {
-            Log.logSevere("ArrayStack", "cannot merge because input files cannot be read, f2 = " + f2.toString() + ": " + e.getMessage(), e);
-            return null;
-        }
-        if (!i1.hasNext()) {
-            if (i2.hasNext()) {
-                HeapWriter.delete(f1);
-                if (f2.renameTo(newFile)) return newFile;
-                return f2;
-            }
-            HeapWriter.delete(f1);
-            HeapWriter.delete(f2);
-            return null;
-        } else if (!i2.hasNext()) {
-            HeapWriter.delete(f2);
-            if (f1.renameTo(newFile)) return newFile;
-            return f1;
-        }
-        assert i1.hasNext();
-        assert i2.hasNext();
-        final File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".prt");
-        try {
-            final HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order, writeBuffer);
-            merge(i1, i2, order, writer);
-            writer.close(true);
-        } catch (final IOException e) {
-            Log.logSevere("ArrayStack", "cannot writing or close writing merge, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
-            HeapWriter.delete(tmpFile);
-            HeapWriter.delete(newFile);
-            return null;
-        } catch (final RowSpaceExceededException e) {
-            Log.logSevere("ArrayStack", "cannot merge because of memory failure: " + e.getMessage(), e);
-            HeapWriter.delete(tmpFile);
-            HeapWriter.delete(newFile);
-            return null;
-        }
-        // we don't need the old files any more
-        HeapWriter.delete(f1);
-        HeapWriter.delete(f2);
-        return newFile;
     }
 
     private static <ReferenceType extends Reference> File rewriteWorker(

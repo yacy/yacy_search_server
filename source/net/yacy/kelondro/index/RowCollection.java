@@ -48,6 +48,8 @@ import net.yacy.kelondro.util.kelondroException;
 
 public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, Cloneable {
 
+	private static final byte[] EMPTY_CACHE = new byte[0];
+	
     public  static final long growfactorLarge100 = 140L;
     public  static final long growfactorSmall100 = 120L;
     private static final int isortlimit = 20;
@@ -77,7 +79,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.rowdef = rowdef;
         this.sortBound = 0;
         this.lastTimeWrote = System.currentTimeMillis();
-        this.chunkcache = new byte[0];
+       	this.chunkcache = EMPTY_CACHE;
         this.chunkcount = 0;
     }
 
