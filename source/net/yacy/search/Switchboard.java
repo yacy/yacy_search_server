@@ -777,7 +777,7 @@ public final class Switchboard extends serverSwitch {
                          SwitchboardConstants.PEER_PING_METHOD_START,
                          SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
                          SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
-                         60000, Long.MAX_VALUE, 60000, Long.MAX_VALUE),
+                         30000, Long.MAX_VALUE, 30000, Long.MAX_VALUE),
                      2000);
         deployThread(SwitchboardConstants.INDEX_DIST, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
                      new InstantBusyThread(
