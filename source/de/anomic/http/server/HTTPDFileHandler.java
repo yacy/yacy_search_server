@@ -121,6 +121,8 @@ public final class HTTPDFileHandler {
     private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
     private static serverSwitch switchboard = null;
     private static Switchboard sb = Switchboard.getSwitchboard();
+    private final static byte[] UNRESOLVED_PATTERN = ASCII.getBytes("-UNRESOLVED_PATTERN-");
+
 
     private static File     htRootPath     = null;
     private static File     htDocsPath     = null;
@@ -976,7 +978,7 @@ public final class HTTPDFileHandler {
                         // send page in chunks and parse SSIs
                         final ByteBuffer o = new ByteBuffer();
                         // apply templates
-                        TemplateEngine.writeTemplate(fis, o, templatePatterns, ASCII.getBytes("-UNRESOLVED_PATTERN-"));
+                        TemplateEngine.writeTemplate(fis, o, templatePatterns, UNRESOLVED_PATTERN);
                         fis.close();
                         HTTPDemon.sendRespondHeader(conProp, out,
                                 httpVersion, 200, null, mimeType, -1,

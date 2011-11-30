@@ -470,7 +470,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         Entry e = get0(key);
         if (e != null && this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes())) return e;
         synchronized (this) {
-            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+            //assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
             assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
             e = get0(key);
             assert e == null || this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes());
