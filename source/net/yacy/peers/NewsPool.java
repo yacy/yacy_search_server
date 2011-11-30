@@ -257,7 +257,8 @@ public class NewsPool {
         categories.addAll(Arrays.asList(category));
     }
 
-    private final static long MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+    private final static long MILLISECONDS_PER_HOUR = 1000 * 60 * 60;
+    private final static long MILLISECONDS_PER_DAY = MILLISECONDS_PER_HOUR * 24;
 
     private final NewsDB newsDB;
     private final NewsQueue outgoingNews, publishedNews, incomingNews, processedNews;
@@ -401,7 +402,7 @@ public class NewsPool {
         if (record == null) return false;
         if (record.category() == null) return true;
         final long created = record.created().getTime();
-        if ((System.currentTimeMillis() - created) > (1L * MILLISECONDS_PER_DAY)) {
+        if ((System.currentTimeMillis() - created) > (6L * MILLISECONDS_PER_HOUR)) {
             // remove everything after 1 day
             return true;
         }
