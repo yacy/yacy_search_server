@@ -52,6 +52,8 @@ import net.yacy.visualization.RasterPlotter;
 
 public class NetworkGraph {
 
+    private final static double DOUBLE_LONG_MAX_VALUE = Long.MAX_VALUE;
+
     private static int shortestName = 10;
     private static int longestName = 30;
 
@@ -88,8 +90,8 @@ public class NetworkGraph {
             this.color = color;
         }
 
-        public int getAngle() { return Math.round(360f*this.fraction); }
-        public int getFractionPercent() { return Math.round(100f*this.fraction); }
+        public int getAngle() { return Math.round(360.0f * this.fraction); }
+        public int getFractionPercent() { return Math.round(100.0f * this.fraction); }
         public Color getColor() { return this.color; }
         public long getExecTime() { return this.execTime; }
         public String getPieceName() { return this.pieceName; }
@@ -137,7 +139,7 @@ public class NetworkGraph {
         for (final RemoteSearch primarySearche : primarySearches) {
             if (primarySearche == null) continue;
             eventPicture.setColor((primarySearche.isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
-            angle = cyc + (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(primarySearche.target().hash), null)) / ((double) Long.MAX_VALUE)));
+            angle = cyc + (360.0d * ((FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(primarySearche.target().hash), null)) / DOUBLE_LONG_MAX_VALUE));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
         }
 
@@ -146,7 +148,7 @@ public class NetworkGraph {
             for (final RemoteSearch secondarySearche : secondarySearches) {
                 if (secondarySearche == null) continue;
                 eventPicture.setColor((secondarySearche.isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
-                angle = cyc + (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(secondarySearche.target().hash), null)) / ((double) Long.MAX_VALUE)));
+                angle = cyc + (360.0d * ((FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(secondarySearche.target().hash), null)) / DOUBLE_LONG_MAX_VALUE));
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1.0, true, null, null, -1, -1, -1, false);
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1.0, true, null, null, -1, -1, -1, false);
             }
@@ -159,7 +161,7 @@ public class NetworkGraph {
         while (i.hasNext()) {
             final long[] positions = seedDB.scheme.dhtPositions(i.next());
             for (final long position : positions) {
-                angle = cyc + (360.0 * (((double) position) / ((double) Long.MAX_VALUE)));
+                angle = cyc + (360.0d * ((position) / DOUBLE_LONG_MAX_VALUE));
                 eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
             }
         }
@@ -205,6 +207,9 @@ public class NetworkGraph {
             seed = e.next();
             if (seed == null) {
                 Log.logWarning("NetworkGraph", "connected seed == null");
+                continue;
+            }
+            if (seed.hash.startsWith("AD")) {//temporary patch
                 continue;
             }
             //Log.logInfo("NetworkGraph", "drawing peer " + seed.getName());
@@ -282,8 +287,8 @@ public class NetworkGraph {
     }
 
     private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final Seed mySeed, final Seed otherSeed, final String colorLine, final int coronaangle, final boolean out, final int cyc) {
-        final int angleMy = cyc + (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(mySeed.hash), null)) / ((double) Long.MAX_VALUE)));
-        final int angleOther = cyc + (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(otherSeed.hash), null)) / ((double) Long.MAX_VALUE)));
+        final int angleMy = cyc + (int) (360.0d * FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(mySeed.hash), null) / DOUBLE_LONG_MAX_VALUE);
+        final int angleOther = cyc + (int) (360.0d * FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(otherSeed.hash), null) / DOUBLE_LONG_MAX_VALUE);
         // draw line
         img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, !out,
                 colorLine, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
@@ -303,11 +308,12 @@ public class NetworkGraph {
         final String name = seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
-        final double angle = cyc + (360.0d * (((double) FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(seed.hash), null)) / ((double) Long.MAX_VALUE)));
+        final double angle = cyc + (360.0d * FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(seed.hash), null) / DOUBLE_LONG_MAX_VALUE);
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
         int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 80;
         if (linelength > outerradius) linelength = outerradius;
         int dotsize = 2 + (int) (seed.getLinkCount() / 2000000L);
+        if (colorDot.equals(COL_MYPEER_DOT)) dotsize = dotsize + 4;
         if (dotsize > 18) dotsize = 18;
         // draw dot
         img.setColor(colorDot);
@@ -332,7 +338,7 @@ public class NetworkGraph {
     }
 
     private static void drawCorona(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final double angle, final int dotsize, int strength, final int coronaangle, final boolean inside, final boolean split, final int r, final int g, final int b) {
-        final double ca = Math.PI * 2.0 * (coronaangle) / 360.0;
+        final double ca = Math.PI * 2.0d * coronaangle / 360.0d;
         if (strength > 4) strength = 4;
         // draw a wave around crawling peers
         double wave;

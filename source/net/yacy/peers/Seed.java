@@ -63,6 +63,8 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.ranking.ClusteredScoreMap;
+import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
@@ -689,7 +691,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     private static byte[] bestGap(final SeedDB seedDB) {
         final byte[] randomHash = randomHash();
-        if ((seedDB == null) || (seedDB.sizeConnected() <= 2)) {
+        if (seedDB == null || seedDB.sizeConnected() <= 2) {
             // use random hash
             return randomHash;
         }
@@ -718,6 +720,10 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
         byte[] combined = new byte[12];
         System.arraycopy(computedHash, 0, combined, 0, 2);
         System.arraycopy(randomHash, 2, combined, 2, 10);
+        // patch for the 'first sector' problem
+        if (combined[0] == 'A' || combined[1] == 'D') { // for some strange reason there are too many of them
+            combined[1] = randomHash[1];
+        }
         // finally check if the hash is already known
         while (seedDB.hasConnected(combined) || seedDB.hasDisconnected(combined) || seedDB.hasPotential(combined)) {
             // if we are lucky then this loop will never run
@@ -930,6 +936,19 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     @Override
     public int compare(final Seed o1, final Seed o2) {
         return o1.compareTo(o2);
+    }
+
+    public static void main(final String[] args) {
+        final ScoreMap<Integer> s = new ClusteredScoreMap<Integer>();
+        for (int i = 0; i < 10000; i++) {
+            final byte[] b = randomHash();
+            s.inc(0xff & Base64Order.enhancedCoder.decodeByte(b[0]));
+            //System.out.println(ASCII.String(b));
+        }
+        final Iterator<Integer> i = s.keys(false);
+        while (i.hasNext()) {
+            System.out.println(i.next());
+        }
     }
 
 }
