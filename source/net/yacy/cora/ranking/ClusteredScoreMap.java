@@ -148,7 +148,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
                 l = Long.parseLong(s);
             }
             // fix out-of-ranges
-            if (l > Integer.MAX_VALUE) return Integer.MAX_VALUE;
+            if (l > Integer.MAX_VALUE) return Integer.MAX_VALUE; //(int) (l & (Integer.MAX_VALUE));
             if (l < 0) {
                 System.out.println("string2score: negative score for input " + s);
                 return 0;

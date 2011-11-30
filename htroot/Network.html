@@ -11,7 +11,7 @@
 
   <script type="text/javascript">
   <!--
-    imagestub = "NetworkPicture.png?width=1024&height=576&bgcolor=FFFFFF&ct=5000&coronaangle=";
+    imagestub = "NetworkPicture.png?width=1024&height=1024&bgcolor=FFFFFF&ct=9000&coronaangle=";
     imageanimindex = 0;
     imageloadindex = 0;
     imagecycles = 0;
@@ -23,7 +23,7 @@
       for (j = 0; j < 6; j++) initanimationphase(j, handle);
     }
     function initanimationphase(phase, handle) {
-      imagearray[phase] = new Image(1024, 576);
+      imagearray[phase] = new Image(1024, 1024);
       angle = phase * 60;
       imagearray[phase].src = imagestub + angle + "&handle=" + handle;
     }
@@ -71,9 +71,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <h3>YaCy Network</h3>
       <ul class="SubMenu">
         <li><a href="/Network.html" class="MenuItemLink">Network Overview</a></li>
-        <li><a href="/Network.html?page=1" class="MenuItemLink">Active&nbsp;Peers</a></li>
-        <li><a href="/Network.html?page=2" class="MenuItemLink">Passive&nbsp;Peers</a></li>
-        <li><a href="/Network.html?page=3" class="MenuItemLink">Potential&nbsp;Peers</a></li>
+        <li><a href="/Network.html?page=1&maxCount=1000" class="MenuItemLink">Active&nbsp;Peers</a></li>
+        <li><a href="/Network.html?page=2&maxCount=1000" class="MenuItemLink">Passive&nbsp;Peers</a></li>
+        <li><a href="/Network.html?page=3&maxCount=1000" class="MenuItemLink">Potential&nbsp;Peers</a></li>
       </ul>
     </div>
     #(/menu)#
@@ -229,7 +229,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 
     <div class="left">
       <p>
-        <a href="NetworkPicture.png?width=1024&amp;height=576&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=1024&amp;height=576&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="1024" height="576" /></a>
+        <a href="NetworkPicture.png?width=1024&amp;height=1024&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=1024&amp;height=1024&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="1024" height="1024" /></a>
       </p>
     </div>
     <div class="left">

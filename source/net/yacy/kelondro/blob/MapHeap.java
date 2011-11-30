@@ -194,7 +194,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             if (this.cache != null) this.cache.remove(key);
 
             // remove from file
-            this.blob.delete(key);
+            if (this.blob != null) this.blob.delete(key);
         }
     }
 

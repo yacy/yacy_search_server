@@ -223,4 +223,13 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         return r.iterator();
     }
 
+    public static void main(final String[] args) {
+        final ConcurrentScoreMap<String> a = new ConcurrentScoreMap<String>();
+        a.set("a", 55);
+        a.set("b", 3);
+        a.set("c", 80);
+        final Iterator<String> i = a.keys(true);
+        while (i.hasNext()) System.out.println(i.next());
+    }
+
 }

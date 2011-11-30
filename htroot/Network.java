@@ -230,7 +230,7 @@ public class Network {
         } else {
             // generate table
             final int page = (post == null ? 1 : post.getInt("page", 1));
-            final int maxCount = (post == null ? 1000 : post.getInt("maxCount", 1000));
+            final int maxCount = (post == null ? 9000 : post.getInt("maxCount", 9000));
             int conCount = 0;
             if (sb.peers == null) {
                 prop.put("table", 0);//no remote senior/principal proxies known"
@@ -302,7 +302,7 @@ public class Network {
                             prop.putHTML("regexerror_wrongregex", pse.getPattern());
                         }
                     }
-                    if(e != null) {
+                    if (e != null) {
                     while (e.hasNext() && conCount < maxCount) {
                         seed = e.next();
                         assert seed != null;
@@ -445,7 +445,7 @@ public class Network {
                     } // while
                     }
                     if (iAmActive) { sb.peers.removeMySeed(); }
-                    prop.putNum("table_list", conCount);
+                    prop.put("table_list", conCount);
                     prop.put("table", 1);
                     prop.putNum("table_num", conCount);
                     prop.putNum("table_total", ((page == 1) && (iAmActive)) ? (size + 1) : size );

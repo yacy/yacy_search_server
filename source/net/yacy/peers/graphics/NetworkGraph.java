@@ -53,14 +53,14 @@ import net.yacy.visualization.RasterPlotter;
 public class NetworkGraph {
 
     private static int shortestName = 10;
-    private static int longestName = 12;
+    private static int longestName = 30;
 
     public  static final String COL_BACKGROUND     = "FFFFFF";
     private static final String COL_DHTCIRCLE      = "006020";
     private static final String COL_HEADLINE       = "FFFFFF";
     private static final String COL_ACTIVE_DOT     = "000044";
-    private static final String COL_ACTIVE_LINE    = "335544";
-    private static final String COL_ACTIVE_TEXT    = "66AA88";
+    private static final String COL_ACTIVE_LINE    = "113322";
+    private static final String COL_ACTIVE_TEXT    = "226644";
     private static final String COL_PASSIVE_DOT    = "221111";
     private static final String COL_PASSIVE_LINE   = "443333";
     private static final String COL_PASSIVE_TEXT   = "663333";
@@ -122,7 +122,7 @@ public class NetworkGraph {
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
-        final RasterPlotter eventPicture = getNetworkPicture(seedDB, 120000, 640, 480, 300, 300, 1000, coronaangle, -1, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), Switchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND, cyc);
+        final RasterPlotter eventPicture = getNetworkPicture(seedDB, 120000, 640, 480, 300, 300, 9000, coronaangle, -1, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), Switchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND, cyc);
         //if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
         // TODO: fix cloning of ymageMatrix pictures
 
@@ -131,13 +131,13 @@ public class NetworkGraph {
         final int cx = eventPicture.getWidth() / 2;
         final int cy = eventPicture.getHeight() / 2 + 20;
 
-        int angle;
+        double angle;
 
         // draw in the primary search peers
         for (final RemoteSearch primarySearche : primarySearches) {
             if (primarySearche == null) continue;
             eventPicture.setColor((primarySearche.isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
-            angle = cyc + (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(primarySearche.target().hash), null)) / ((double) Long.MAX_VALUE)));
+            angle = cyc + (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(primarySearche.target().hash), null)) / ((double) Long.MAX_VALUE)));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
         }
 
@@ -146,9 +146,9 @@ public class NetworkGraph {
             for (final RemoteSearch secondarySearche : secondarySearches) {
                 if (secondarySearche == null) continue;
                 eventPicture.setColor((secondarySearche.isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
-                angle = cyc + (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(secondarySearche.target().hash), null)) / ((double) Long.MAX_VALUE)));
-                eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1, true, null, null, -1, -1, -1, false);
-                eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1, true, null, null, -1, -1, -1, false);
+                angle = cyc + (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(secondarySearche.target().hash), null)) / ((double) Long.MAX_VALUE)));
+                eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1.0, true, null, null, -1, -1, -1, false);
+                eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1.0, true, null, null, -1, -1, -1, false);
             }
         }
 
@@ -159,7 +159,7 @@ public class NetworkGraph {
         while (i.hasNext()) {
             final long[] positions = seedDB.scheme.dhtPositions(i.next());
             for (final long position : positions) {
-                angle = cyc + (int) (360.0 * (((double) position) / ((double) Long.MAX_VALUE)));
+                angle = cyc + (360.0 * (((double) position) / ((double) Long.MAX_VALUE)));
                 eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
             }
         }
@@ -299,15 +299,15 @@ public class NetworkGraph {
             final Seed seed,
             final String colorDot, final String colorLine, final String colorText,
             final int coronaangle,
-            final int cyc) {
+            final double cyc) {
         final String name = seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
-        final int angle = cyc + (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(seed.hash), null)) / ((double) Long.MAX_VALUE)));
+        final double angle = cyc + (360.0d * (((double) FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(seed.hash), null)) / ((double) Long.MAX_VALUE)));
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
-        int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 60;
+        int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 80;
         if (linelength > outerradius) linelength = outerradius;
-        int dotsize = 4 + (int) (seed.getLinkCount() / 2000000L);
+        int dotsize = 2 + (int) (seed.getLinkCount() / 2000000L);
         if (dotsize > 18) dotsize = 18;
         // draw dot
         img.setColor(colorDot);
@@ -321,17 +321,17 @@ public class NetworkGraph {
         // draw corona around dot for crawling activity
         final int ppmx = seed.getPPM() / 40;
         if (coronaangle >= 0 && ppmx > 0) {
-            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, ppmx, coronaangle, true, false, 24, 24, 24); // color = 0..63
+            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, ppmx, coronaangle, true, false, 2, 2, 2); // color = 0..63
         }
 
         // draw corona around dot for query activity
         final int qphx = ((int) (seed.getQPM() * 4.0));
         if (coronaangle >= 0 && qphx > 0) {
-            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, qphx, coronaangle, false, true, 20, 63, 20); // color = 0..63
+            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, qphx, coronaangle, false, true, 10, 40, 10); // color = 0..63
         }
     }
 
-    private static void drawCorona(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final int angle, final int dotsize, int strength, final int coronaangle, final boolean inside, final boolean split, final int r, final int g, final int b) {
+    private static void drawCorona(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final double angle, final int dotsize, int strength, final int coronaangle, final boolean inside, final boolean split, final int r, final int g, final int b) {
         final double ca = Math.PI * 2.0 * (coronaangle) / 360.0;
         if (strength > 4) strength = 4;
         // draw a wave around crawling peers

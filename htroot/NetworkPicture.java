@@ -65,7 +65,7 @@ public class NetworkPicture {
         int height = 576;
         int passiveLimit = 1440; // minutes; 1440 = 1 day; 720 = 12 hours; 1440 = 24 hours, 10080 = 1 week;
         int potentialLimit = 1440;
-        int maxCount = 1000;
+        int maxCount = 9000;
         String bgcolor = NetworkGraph.COL_BACKGROUND;
         boolean corona = true;
         int coronaangle = 0;

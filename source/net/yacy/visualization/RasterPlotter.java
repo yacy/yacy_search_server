@@ -335,9 +335,9 @@ public class RasterPlotter {
         }
     }
 
-    public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final int angle, final boolean in,
+    public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final double angle, final boolean in,
             final String colorLine, final String colorDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
-        final double a = PI180 * (angle);
+        final double a = PI180 * angle;
         final double cosa = Math.cos(a);
         final double sina = Math.sin(a);
         final int xi = cx + (int) (innerRadius * cosa);
@@ -360,18 +360,18 @@ public class RasterPlotter {
         }
     }
 
-    public void arcDot(final int cx, final int cy, final int arcRadius, final int angle, final int dotRadius) {
-        final double a = PI180 * (angle);
+    public void arcDot(final int cx, final int cy, final int arcRadius, final double angle, final int dotRadius) {
+        final double a = PI180 * angle;
         final int x = cx + (int) (arcRadius * Math.cos(a));
         final int y = cy - (int) (arcRadius * Math.sin(a));
         dot(x, y, dotRadius, true, 100);
     }
 
-    public void arcConnect(final int cx, final int cy, final int arcRadius, final int angle1, final int angle2, final boolean in,
+    public void arcConnect(final int cx, final int cy, final int arcRadius, final double angle1, final double angle2, final boolean in,
             final String colorLine, final int intensityLine,
             final String colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
-        final double a1 = PI180 * (angle1);
-        final double a2 = PI180 * (angle2);
+        final double a1 = PI180 * angle1;
+        final double a2 = PI180 * angle2;
         final int x1 = cx + (int) (arcRadius * Math.cos(a1));
         final int y1 = cy - (int) (arcRadius * Math.sin(a1));
         final int x2 = cx + (int) (arcRadius * Math.cos(a2));
@@ -387,17 +387,17 @@ public class RasterPlotter {
         }
     }
 
-    public void arcArc(final int cx, final int cy, final int arcRadius, final int angle,
+    public void arcArc(final int cx, final int cy, final int arcRadius, final double angle,
             final int innerRadius, final int outerRadius, final int intensity) {
-        final double a = PI180 * (angle);
+        final double a = PI180 * angle;
         final int x = cx + (int) (arcRadius * Math.cos(a));
         final int y = cy - (int) (arcRadius * Math.sin(a));
         arc(x, y, innerRadius, outerRadius, intensity);
     }
 
-    public void arcArc(final int cx, final int cy, final int arcRadius, final int angle,
+    public void arcArc(final int cx, final int cy, final int arcRadius, final double angle,
             final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
-        final double a = PI180 * (angle);
+        final double a = PI180 * angle;
         final int x = cx + (int) (arcRadius * Math.cos(a));
         final int y = cy - (int) (arcRadius * Math.sin(a));
         arc(x, y, innerRadius, outerRadius, fromArc, toArc);

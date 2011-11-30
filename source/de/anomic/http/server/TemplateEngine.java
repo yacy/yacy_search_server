@@ -122,30 +122,30 @@ import net.yacy.kelondro.util.FileUtils;
  */
 public final class TemplateEngine {
 
-    public final static byte hashChar = (byte)'#';
-    public final static byte[] slashChar = {(byte)'/'};
-    public final static byte pcChar  = (byte)'%';
-    public final static byte[] dpdpa = "::".getBytes();
+    private final static byte hashChar = (byte)'#';
+    private final static byte[] slashChar = {(byte)'/'};
+    private final static byte pcChar  = (byte)'%';
+    private final static byte[] dpdpa = "::".getBytes();
 
-    public final static byte lbr  = (byte)'[';
-    public final static byte rbr  = (byte)']';
-    public final static byte[] pOpen  = {hashChar, lbr};
-    public final static byte[] pClose = {rbr, hashChar};
+    private final static byte lbr  = (byte)'[';
+    private final static byte rbr  = (byte)']';
+    private final static byte[] pOpen  = {hashChar, lbr};
+    private final static byte[] pClose = {rbr, hashChar};
 
-    public final static byte lcbr  = (byte)'{';
-    public final static byte rcbr  = (byte)'}';
-    public final static byte[] mOpen  = {hashChar, lcbr};
-    public final static byte[] mClose = {rcbr, hashChar};
+    private final static byte lcbr  = (byte)'{';
+    private final static byte rcbr  = (byte)'}';
+    private final static byte[] mOpen  = {hashChar, lcbr};
+    private final static byte[] mClose = {rcbr, hashChar};
 
-    public final static byte lrbr  = (byte)'(';
-    public final static byte rrbr  = (byte)')';
-    public final static byte[] aOpen  = {hashChar, lrbr};
-    public final static byte[] aClose = {rrbr, hashChar};
+    private final static byte lrbr  = (byte)'(';
+    private final static byte rrbr  = (byte)')';
+    private final static byte[] aOpen  = {hashChar, lrbr};
+    private final static byte[] aClose = {rrbr, hashChar};
 
-    public final static byte[] iOpen  = {hashChar, pcChar};
-    public final static byte[] iClose = {pcChar, hashChar};
+    private final static byte[] iOpen  = {hashChar, pcChar};
+    private final static byte[] iClose = {pcChar, hashChar};
 
-    public final static byte[] ul = "_".getBytes();
+    private final static byte[] ul = "_".getBytes();
 
     private final static byte[] alternative_which = ASCII.getBytes(" type=\"alternative\" which=\"");
     private final static byte[] multi_num = ASCII.getBytes(" type=\"multi\" num=\"");
@@ -206,7 +206,7 @@ public final class TemplateEngine {
      */
     private final static byte[] writeTemplate(final InputStream in, final OutputStream out, final Map<String, String> pattern, final byte[] dflt, final byte[] prefix) throws IOException {
         final PushbackInputStream pis = new PushbackInputStream(in, 100);
-        final ByteArrayOutputStream keyStream = new ByteArrayOutputStream(512);
+        final ByteArrayOutputStream keyStream = new ByteArrayOutputStream(4048);
         byte[] key;
         byte[] multi_key;
         byte[] replacement;
@@ -241,6 +241,7 @@ public final class TemplateEngine {
                             try{
                                 num=Integer.parseInt(pattern.get(patternKey)); // Key contains the iteration number as string
                             }catch(final NumberFormatException e){
+                                Log.logException(e);
                                 num=0;
                             }
                         }
