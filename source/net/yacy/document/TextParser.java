@@ -280,14 +280,21 @@ public final class TextParser {
         final HashMap<Parser, Parser.Failure> failedParser = new HashMap<Parser, Parser.Failure>();
         if (MemoryControl.request(sourceArray.length * 6, false)) {
             for (final Parser parser: parsers) {
+            	ByteArrayInputStream bis = new ByteArrayInputStream(sourceArray);
                 try {
-                    docs = parser.parse(location, mimeType, documentCharset, new ByteArrayInputStream(sourceArray));
+                    docs = parser.parse(location, mimeType, documentCharset, bis);
                 } catch (final Parser.Failure e) {
                     failedParser.put(parser, e);
                     //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
                 } catch (final Exception e) {
                     failedParser.put(parser, new Parser.Failure(e.getMessage(), location));
                     //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
+                } finally {
+                	try {
+                		bis.close();
+                	} catch(IOException ioe) {
+                		// Ignore.
+                	}
                 }
                 if (docs != null) break;
             }
