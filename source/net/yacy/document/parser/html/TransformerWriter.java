@@ -551,6 +551,7 @@ public final class TransformerWriter extends Writer {
                 final char[] filtered = filterSentence(this.buffer.getChars(), quotechar);
                 if (this.out != null) this.out.write(filtered);
             }
+            this.buffer.close();
             this.buffer = null;
         }
         final char[] finalized = filterFinalize(quotechar);
@@ -561,6 +562,7 @@ public final class TransformerWriter extends Writer {
         }
         this.filterTag = null;
         this.filterOpts = null;
+        this.filterCont.close();
         this.filterCont = null;
 //      if (scraper != null) {scraper.close(); scraper = null;}
 //      if (transformer != null) {transformer.close(); transformer = null;}
