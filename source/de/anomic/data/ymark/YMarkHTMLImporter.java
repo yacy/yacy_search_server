@@ -130,24 +130,36 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 				}
 			}
 	    	final String url = (String)a.getAttribute(HTML.Attribute.HREF);
-			this.bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);
-	    	
+			this.bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);	    	
+			final StringBuilder sb = new StringBuilder(255);
 			for (YMarkEntry.BOOKMARK bmk : YMarkEntry.BOOKMARK.values()) {    
-				final String s = (String)a.getAttribute(bmk.html_attrb());    			
-    			if(s != null) {
-	    			switch(bmk) {	    					
-	    				case TAGS:
-	    					// mozilla shortcuturl
-	    					this.bmk.put(bmk.key(), YMarkUtil.cleanTagsString(s));
-	    	    			break;
-	    				case DATE_ADDED:
-	    				case DATE_MODIFIED:
-	    				case DATE_VISITED:
-	    					this.bmk.put(bmk.key(), s+MILLIS);
-	    					break;
-	    				default:
-	    					break;		    					
-	    			}
+				sb.setLength(0);   			
+				if (a.isDefined(a.isDefined(bmk.html_attrb())))
+					sb.append((String)a.getAttribute(bmk.html_attrb()));
+    			switch(bmk) {	    					
+    				case TAGS:	    					
+    					// sb already contains the mozilla shortcuturl
+    					// add delicious.com tags that are stored in the tags attribute	    					
+    					if (a.isDefined(YMarkEntry.BOOKMARK.TAGS.key())) {		    					
+    						sb.append(YMarkUtil.TAGS_SEPARATOR);
+    						sb.append((String)a.getAttribute(YMarkEntry.BOOKMARK.TAGS.key()));		    					
+    					}
+    					this.bmk.put(bmk.key(), YMarkUtil.cleanTagsString(sb.toString()));
+    	    			break;
+    				case PUBLIC:
+    					// look for delicious.com private attribute
+    					if(sb.toString().equals("0"))
+    						this.bmk.put(bmk.key(), "true");
+    					break;
+    				case DATE_ADDED:
+    				case DATE_MODIFIED:
+    				case DATE_VISITED:
+   						sb.append(sb.toString());
+   						sb.append(MILLIS);
+    					this.bmk.put(bmk.key(), sb.toString());
+    					break;
+    				default:
+    					break;		    					
 	    		} 		
 	    	}
 	    	state = STATE.BOOKMARK;

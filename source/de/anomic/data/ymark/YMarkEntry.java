@@ -25,7 +25,7 @@ public class YMarkEntry extends TreeMap<String, String> {
     	DATE_ADDED     ("date_added",      "",                 "",             "add_date",         "added",        "dateAdded",    "date"),
     	DATE_MODIFIED  ("date_modified",   "",                 "",             "last_modified",    "modified",     "lastModified", "date"),
     	DATE_VISITED   ("date_visited",    "",                 "",             "last_visited",     "visited",      "",             "date"),
-    	PUBLIC         ("public",          "",                 "flase",        "",                 "yacy:public",  "",             "lock"),
+    	PUBLIC         ("public",          "",                 "flase",        "private",          "yacy:public",  "",             "lock"),
     	TAGS           ("tags",            "dc:subject",       "unsorted",     "shortcuturl",      "yacy:tags",    "keyword",      "tag"),
     	VISITS         ("visits",          "",                 "0",            "",                 "yacy:visits",  "",             "stat"),
     	FOLDERS        ("folders",         "",                 "/unsorted",    "",                 "",             "",             "folder");
