@@ -125,6 +125,8 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         }
         } catch (final OutOfMemoryError e) {
             throw new RowSpaceExceededException(0, "readLine probably uses too much RAM", e);
+        } finally {
+            br.close();
         }
         return map;
     }
