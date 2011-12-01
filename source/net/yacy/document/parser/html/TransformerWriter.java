@@ -82,10 +82,21 @@ public final class TransformerWriter extends Writer {
             final Transformer transformer,
             final boolean passbyIfBinarySuspect
     ) {
+    	this(outStream, charSet, scraper, transformer, passbyIfBinarySuspect, 1024);
+    }
+
+    public TransformerWriter(
+            final OutputStream outStream,
+            final Charset charSet,
+            final Scraper scraper,
+            final Transformer transformer,
+            final boolean passbyIfBinarySuspect,
+            final int initialBufferSize
+    ) {
         this.outStream     = outStream;
         this.scraper       = scraper;
         this.transformer   = transformer;
-        this.buffer        = new CharBuffer(1024);
+        this.buffer        = new CharBuffer(initialBufferSize);
         this.filterTag     = null;
         this.filterOpts    = null;
         this.filterCont    = null;
