@@ -439,7 +439,7 @@ public class PeerSelection {
         final ScoreMap<String> seedScore = new ConcurrentScoreMap<String>();
         Seed ys;
         long absage;
-        final Iterator<Seed> s = seedDB.seedsConnected(true, false, null, (float) 0.0);
+        final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN); 
         int searchcount = 1000;
         if (searchcount > seedDB.sizeConnected()) searchcount = seedDB.sizeConnected();
         try {
