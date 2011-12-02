@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.logging.Log;
@@ -134,11 +133,11 @@ public class get_ymark {
                 int crawl = 0;
                 if (!crawlstart.isEmpty()) {
                 	crawl = 1;
-                	prop.put("json_"+count+"_crawlstart_info", "Crawl start in API Table");
+                	prop.put("json_"+count+"_crawlstart_info", "Crawl last executed: "+YMarkDate.ISO8601(crawlstart.date_last_exec()));
                 }
                 if (crawlstart.hasSchedule()) {
                 	crawl = 2;
-                	prop.put("json_"+count+"_crawlstart_info", "Scheduled Crawl: "+YMarkDate.ISO8601(crawlstart.date_next_exec()));
+                	prop.put("json_"+count+"_crawlstart_info", "Crawl scheduled: "+YMarkDate.ISO8601(crawlstart.date_next_exec()));
                 }
                 if (crawlstart.isRunning(sb.crawler)) {
                 	crawl = 3;

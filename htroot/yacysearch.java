@@ -179,18 +179,15 @@ public class yacysearch {
         }
 
         // collect search attributes
-        final boolean newsearch =post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former","")); //new search term
 
-        int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 5000) : (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 1000), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
-        int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
+        int maximumRecords = Math.min((authenticated) ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 5000) : (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 1000), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
+        int startRecord = post.getInt("startRecord", post.getInt("offset", 0));
 
         boolean global = post.get("resource", "local").equals("global") && sb.peers.sizeConnected() > 0;
         final boolean indexof = (post != null && post.get("indexof","").equals("on"));
 
         final String originalUrlMask;
-        if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
-            originalUrlMask = ".*";
-        } else if (!newsearch && post.containsKey("urlmaskfilter")) {
+        if (post.containsKey("urlmaskfilter")) {
             originalUrlMask = post.get("urlmaskfilter", ".*");
         } else {
             originalUrlMask = ".*";
@@ -231,8 +228,10 @@ public class yacysearch {
         final ContentDomain contentdom = ContentDomain.contentdomParser(post == null ? "text" : post.get("contentdom", "text"));
 
         // patch until better search profiles are available
-        if ((contentdom != ContentDomain.TEXT) && (itemsPerPage <= 32)) {
-            itemsPerPage = 64;
+        if (contentdom == ContentDomain.TEXT) {
+            if (maximumRecords > 50) maximumRecords = 10;
+        } else {
+            if (maximumRecords <= 32) maximumRecords = 64;
         }
 
         // check the search tracker
@@ -610,8 +609,8 @@ public class yacysearch {
                     language,
                     navigation,
                     snippetFetchStrategy,
-                    itemsPerPage,
-                    offset,
+                    maximumRecords,
+                    startRecord,
                     urlmask,
                     clustersearch && global ? QueryParams.Searchdom.CLUSTER :
                     (global && indexReceiveGranted ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
@@ -644,7 +643,7 @@ public class yacysearch {
             // create a new search event
             if (SearchEventCache.getEvent(theQuery.id(false)) == null) {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset
-                offset = 0;
+                startRecord = 0;
             }
             final SearchEvent theSearch = SearchEventCache.getEvent(
                 theQuery, sb.peers, sb.tables, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader,
@@ -653,7 +652,7 @@ public class yacysearch {
                 (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0),
                 (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
 
-            if (offset == 0) {
+            if (startRecord == 0) {
                 if (sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated) {
                     sb.heuristicSite(theSearch, sitehost);
                 }
@@ -707,7 +706,7 @@ public class yacysearch {
 
             // find geographic info
             final SortedSet<Location> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
-            if (coordinates == null || coordinates.isEmpty() || offset > 0) {
+            if (coordinates == null || coordinates.isEmpty() || startRecord > 0) {
                 prop.put("geoinfo", "0");
             } else {
                 int i = 0;
@@ -740,9 +739,9 @@ public class yacysearch {
             }
 
             final int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
-            prop.put("num-results_offset", offset == 0 ? 0 : offset + 1);
-            prop.put("num-results_itemscount", Formatter.number(offset + theSearch.getQuery().itemsPerPage > indexcount ? offset + indexcount % theSearch.getQuery().itemsPerPage : offset + theSearch.getQuery().itemsPerPage, true));
-            prop.put("num-results_itemsPerPage", itemsPerPage);
+            prop.put("num-results_offset", startRecord == 0 ? 0 : startRecord + 1);
+            prop.put("num-results_itemscount", Formatter.number(startRecord + theSearch.getQuery().itemsPerPage > indexcount ? startRecord + indexcount % theSearch.getQuery().itemsPerPage : startRecord + theSearch.getQuery().itemsPerPage, true));
+            prop.put("num-results_itemsPerPage", maximumRecords);
             prop.put("num-results_totalcount", Formatter.number(indexcount, true));
             prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch) ? "1" : "0");
             prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.getRankingResult().getLocalIndexCount(), true));
@@ -753,7 +752,7 @@ public class yacysearch {
 
             // compose page navigation
             final StringBuilder resnav = new StringBuilder(200);
-            final int thispage = offset / theQuery.displayResults();
+            final int thispage = startRecord / theQuery.displayResults();
             if (thispage == 0) {
             	resnav.append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
             } else {
@@ -789,12 +788,12 @@ public class yacysearch {
             }
             final String resnavs = resnav.toString();
             prop.put("num-results_resnav", resnavs);
-            prop.put("pageNavBottom", (indexcount - offset > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
+            prop.put("pageNavBottom", (indexcount - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
             prop.put("pageNavBottom_resnav", resnavs);
 
             // generate the search result lines; the content will be produced by another servlet
             for (int i = 0; i < theQuery.displayResults(); i++) {
-                prop.put("results_" + i + "_item", offset + i);
+                prop.put("results_" + i + "_item", startRecord + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
             }
             prop.put("results", theQuery.displayResults());
@@ -833,8 +832,8 @@ public class yacysearch {
 
         prop.put("searchagain", global ? "1" : "0");
         prop.putHTML("former", originalquerystring);
-        prop.put("count", itemsPerPage);
-        prop.put("offset", offset);
+        prop.put("count", maximumRecords);
+        prop.put("offset", startRecord);
         prop.put("resource", global ? "global" : "local");
         prop.putHTML("urlmaskfilter", originalUrlMask);
         prop.putHTML("prefermaskfilter", prefermask);
