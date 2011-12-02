@@ -106,8 +106,7 @@ public class index {
         prop.put("searchoptions_resource-select_global", global ? "1" : "0");
         prop.put("searchoptions_resource-select_global-disabled", indexReceiveGranted ? "0" : "1");
         prop.put("searchoptions_resource-select_local", global ? "0" : "1");
-        prop.put("searchoptions_urlmaskoptions", "0");
-        prop.putHTML("searchoptions_urlmaskoptions_urlmaskfilter", urlmaskfilter);
+        prop.putHTML("searchoptions_urlmaskfilter", urlmaskfilter);
         prop.put("searchoptions_prefermaskoptions", "0");
         prop.putHTML("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");

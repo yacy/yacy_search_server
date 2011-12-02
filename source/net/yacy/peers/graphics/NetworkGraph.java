@@ -198,6 +198,24 @@ public class NetworkGraph {
 
         Seed seed;
         long lastseen;
+        // start processes that actually draw the peers
+        //final BlockingQueue<drawNetworkPicturePeerJob> drawQueue = new LinkedBlockingDeque<drawNetworkPicturePeerJob>();
+        //final drawNetworkPicturePeerJob poison = new drawNetworkPicturePeerJob();
+        /*
+        final Thread[] drawThreads = new Thread[Runtime.getRuntime().availableProcessors()];
+        for (int i = 0; i < drawThreads.length; i++) {
+            drawThreads[i] = new Thread() {
+                public void run() {
+                    try {
+                        drawNetworkPicturePeerJob job;
+                        while ((job = drawQueue.take()) != poison) job.draw();
+                    } catch (final InterruptedException e) {
+                    }
+                }
+            };
+            drawThreads[i].start();
+        }
+         */
 
         // draw connected senior and principals
         int count = 0;
@@ -213,7 +231,7 @@ public class NetworkGraph {
                 continue;
             }
             //Log.logInfo("NetworkGraph", "drawing peer " + seed.getName());
-            drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, coronaangle, cyc);
+            new drawNetworkPicturePeerJob(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, coronaangle, cyc).draw();
             count++;
         }
         totalCount += count;
@@ -231,7 +249,7 @@ public class NetworkGraph {
             if (lastseen > passiveLimit) {
                 break; // we have enough, this list is sorted so we don't miss anything
             }
-            drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_PASSIVE_DOT, COL_PASSIVE_LINE, COL_PASSIVE_TEXT, coronaangle, cyc);
+            new drawNetworkPicturePeerJob(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_PASSIVE_DOT, COL_PASSIVE_LINE, COL_PASSIVE_TEXT, coronaangle, cyc).draw();
             count++;
         }
         totalCount += count;
@@ -249,13 +267,16 @@ public class NetworkGraph {
             if (lastseen > potentialLimit) {
                 break; // we have enough, this list is sorted so we don't miss anything
             }
-            drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_POTENTIAL_DOT, COL_POTENTIAL_LINE, COL_POTENTIAL_TEXT, coronaangle, cyc);
+            new drawNetworkPicturePeerJob(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_POTENTIAL_DOT, COL_POTENTIAL_LINE, COL_POTENTIAL_TEXT, coronaangle, cyc).draw();
             count++;
         }
         totalCount += count;
 
         // draw my own peer
-        drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seedDB.mySeed(), COL_MYPEER_DOT, COL_MYPEER_LINE, COL_MYPEER_TEXT, coronaangle, cyc);
+        new drawNetworkPicturePeerJob(networkPicture, width / 2, height / 2, innerradius, outerradius, seedDB.mySeed(), COL_MYPEER_DOT, COL_MYPEER_LINE, COL_MYPEER_TEXT, coronaangle, cyc).draw();
+
+        // signal termination
+        //for (@SuppressWarnings("unused") final Thread t: drawThreads) try { drawQueue.put(poison); } catch (final InterruptedException ee) {}
 
         // draw DHT activity
         if (communicationTimeout >= 0) {
@@ -283,6 +304,9 @@ public class NetworkGraph {
         PrintTool.print(networkPicture, width - 2, 6, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
         PrintTool.print(networkPicture, width - 2, 14, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", 1);
 
+        // wait for draw termination
+        //for (final Thread t: drawThreads) try { t.join(); } catch (final InterruptedException ee) {}
+
         return networkPicture;
     }
 
@@ -298,42 +322,64 @@ public class NetworkGraph {
                 colorLine, 100, null, 100, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
     }
 
-    private static void drawNetworkPicturePeer(
-            final RasterPlotter img, final int centerX, final int centerY,
-            final int innerradius, final int outerradius,
-            final Seed seed,
-            final String colorDot, final String colorLine, final String colorText,
-            final int coronaangle,
-            final double cyc) {
-        final String name = seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
-        if (name.length() < shortestName) shortestName = name.length();
-        if (name.length() > longestName) longestName = name.length();
-        final double angle = cyc + (360.0d * FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(seed.hash), null) / DOUBLE_LONG_MAX_VALUE);
-        //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
-        int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 80;
-        if (linelength > outerradius) linelength = outerradius;
-        int dotsize = 2 + (int) (seed.getLinkCount() / 2000000L);
-        if (colorDot.equals(COL_MYPEER_DOT)) dotsize = dotsize + 4;
-        if (dotsize > 18) dotsize = 18;
-        // draw dot
-        img.setColor(colorDot);
-        img.arcDot(centerX, centerY, innerradius, angle, dotsize);
-        // draw line to text
-        img.arcLine(centerX, centerY, innerradius + 18, innerradius + linelength, angle, true, colorLine, "444444", 12, coronaangle / 30, 0, true);
-        // draw text
-        img.setColor(colorText);
-        PrintTool.arcPrint(img, centerX, centerY, innerradius + linelength, angle, name);
+    private static class drawNetworkPicturePeerJob {
 
-        // draw corona around dot for crawling activity
-        final int ppmx = seed.getPPM() / 40;
-        if (coronaangle >= 0 && ppmx > 0) {
-            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, ppmx, coronaangle, true, false, 2, 2, 2); // color = 0..63
+        private RasterPlotter img;
+        private int centerX, centerY, innerradius, outerradius, coronaangle;
+        private Seed seed;
+        private String colorDot, colorLine, colorText;
+        private double cyc;
+        public drawNetworkPicturePeerJob() {} // used to produce a poison pill
+        public drawNetworkPicturePeerJob(
+                        final RasterPlotter img, final int centerX, final int centerY,
+                        final int innerradius, final int outerradius,
+                        final Seed seed,
+                        final String colorDot, final String colorLine, final String colorText,
+                        final int coronaangle,
+                        final double cyc) {
+            this.img = img;
+            this.centerX = centerX;
+            this.centerY = centerY;
+            this.innerradius = innerradius;
+            this.outerradius = outerradius;
+            this.coronaangle = coronaangle;
+            this.seed = seed;
+            this.colorDot = colorDot;
+            this.colorLine = colorLine;
+            this.colorText = colorText;
+            this.cyc = cyc;
         }
+        public void draw() {
+            final String name = this.seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
+            if (name.length() < shortestName) shortestName = name.length();
+            if (name.length() > longestName) longestName = name.length();
+            final double angle = this.cyc + (360.0d * FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(this.seed.hash), null) / DOUBLE_LONG_MAX_VALUE);
+            //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
+            int linelength = 20 + this.outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(this.seed.hash.hashCode() % 20)) / 80;
+            if (linelength > this.outerradius) linelength = this.outerradius;
+            int dotsize = 2 + (int) (this.seed.getLinkCount() / 2000000L);
+            if (this.colorDot.equals(COL_MYPEER_DOT)) dotsize = dotsize + 4;
+            if (dotsize > 18) dotsize = 18;
+            // draw dot
+            this.img.setColor(this.colorDot);
+            this.img.arcDot(this.centerX, this.centerY, this.innerradius, angle, dotsize);
+            // draw line to text
+            this.img.arcLine(this.centerX, this.centerY, this.innerradius + 18, this.innerradius + linelength, angle, true, this.colorLine, "444444", 12, this.coronaangle / 30, 0, true);
+            // draw text
+            this.img.setColor(this.colorText);
+            PrintTool.arcPrint(this.img, this.centerX, this.centerY, this.innerradius + linelength, angle, name);
 
-        // draw corona around dot for query activity
-        final int qphx = ((int) (seed.getQPM() * 4.0));
-        if (coronaangle >= 0 && qphx > 0) {
-            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, qphx, coronaangle, false, true, 10, 40, 10); // color = 0..63
+            // draw corona around dot for crawling activity
+            final int ppmx = this.seed.getPPM() / 40;
+            if (this.coronaangle >= 0 && ppmx > 0) {
+                drawCorona(this.img, this.centerX, this.centerY, this.innerradius, angle, dotsize, ppmx, this.coronaangle, true, false, 2, 2, 2); // color = 0..63
+            }
+
+            // draw corona around dot for query activity
+            final int qphx = ((int) (this.seed.getQPM() * 4.0));
+            if (this.coronaangle >= 0 && qphx > 0) {
+                drawCorona(this.img, this.centerX, this.centerY, this.innerradius, angle, dotsize, qphx, this.coronaangle, false, true, 10, 40, 10); // color = 0..63
+            }
         }
     }
 
