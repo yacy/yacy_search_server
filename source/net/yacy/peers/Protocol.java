@@ -708,7 +708,7 @@ public final class Protocol {
             // resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), 60000, hostname, parts));
             //resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
 
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 60000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 8000);
             resultMap = FileUtils.table(httpClient.POSTbytes(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false));
 
             // evaluate request result
