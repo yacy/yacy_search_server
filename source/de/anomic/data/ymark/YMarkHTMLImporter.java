@@ -134,8 +134,10 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 			final StringBuilder sb = new StringBuilder(255);
 			for (YMarkEntry.BOOKMARK bmk : YMarkEntry.BOOKMARK.values()) {    
 				sb.setLength(0);   			
-				if (a.isDefined(a.isDefined(bmk.html_attrb())))
+				if (a.isDefined(bmk.html_attrb())) {
 					sb.append((String)a.getAttribute(bmk.html_attrb()));
+					Log.logInfo(YMarkTables.BOOKMARKS_LOG, bmk.key()+" : "+sb.toString());
+				}
     			switch(bmk) {	    					
     				case TAGS:	    					
     					// sb already contains the mozilla shortcuturl
@@ -154,9 +156,8 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
     				case DATE_ADDED:
     				case DATE_MODIFIED:
     				case DATE_VISITED:
-   						sb.append(sb.toString());
-   						sb.append(MILLIS);
-    					this.bmk.put(bmk.key(), sb.toString());
+   						sb.append(MILLIS);    					
+   						this.bmk.put(bmk.key(), sb.toString());
     					break;
     				default:
     					break;		    					
@@ -174,6 +175,16 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 	}
 
 	public void handleEndTag(HTML.Tag t, int pos) {
+		// write the last bookmark, as no more <a> tags are following
+		if (t == HTML.Tag.HTML) {
+			if (!this.bmk.isEmpty()) {
+				try {
+					this.bookmarks.put(this.bmk);
+				} catch (InterruptedException e) {
+					Log.logException(e);
+				}
+			}
+		}
 		if (t == HTML.Tag.H3) {
 			state = STATE.FOLDER_DESC;
 	    } else if (t == HTML.Tag.DL) {
