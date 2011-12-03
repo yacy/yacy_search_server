@@ -167,23 +167,8 @@ public class Crawler_p {
 
                 // special cases:
                 if (crawlingStartURL!= null && fullDomain) {
-                    if (crawlingStartURL.isFile()) {
-                        newcrawlingMustMatch = "file://" + crawlingStartURL.getPath();
-                    } else if (crawlingStartURL.isSMB()) {
-                        newcrawlingMustMatch = "smb://" + crawlingStartURL.getHost();
-                    } else if (crawlingStartURL.isFTP()) {
-                        newcrawlingMustMatch = "ftp://" + crawlingStartURL.getHost();
-                    } else {
-                        final String host = crawlingStartURL.getHost();
-                        if (host.startsWith("www.")) {
-                            newcrawlingMustMatch = "https?://" + crawlingStartURL.getHost();
-                        } else {
-                            // if the www is not given we accept that also
-                            newcrawlingMustMatch = "https?://(www.)?" + crawlingStartURL.getHost();
-                        }
-                    }
-                    if (subPath) newcrawlingMustMatch += crawlingStartURL.getPath();
-                    newcrawlingMustMatch += ".*";
+                    newcrawlingMustMatch = CrawlProfile.mustMatchFilterFullDomain(crawlingStartURL);
+                    if (subPath) newcrawlingMustMatch = newcrawlingMustMatch.substring(0, newcrawlingMustMatch.length() - 2) + crawlingStartURL.getPath() + ".*";
                 }
                 if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf('/')) > 0) {
                     newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";

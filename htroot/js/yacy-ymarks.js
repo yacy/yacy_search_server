@@ -7,7 +7,7 @@ $(document).ready(function() {
 	qtag = "";
 	
 	/* Initialize Bookmark Dialog */
-	bm_dialog();	
+	bm_dialog();
 	
 	/* Initialize Flexigrid */
 	$('#ymarks_flexigrid').flexigrid({

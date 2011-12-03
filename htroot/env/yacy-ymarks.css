@@ -108,6 +108,10 @@ img.help {
 	margin: 5px 5px 5px 5px;
 }
 
+#bm_tags_tagsinput {
+	margin: 0px 0px 2px 5px;
+}
+
 
 /* YaCy Flexigrid ---------------------------*/
 .flexigrid div.fbutton .burst {

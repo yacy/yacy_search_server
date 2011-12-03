@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
@@ -475,5 +476,23 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
 
     public static long getRecrawlDate(final long oldTimeMinutes) {
         return System.currentTimeMillis() - (60000L * oldTimeMinutes);
+    }
+
+    public static String mustMatchFilterFullDomain(final MultiProtocolURI crawlingStartURL) {
+        if (crawlingStartURL.isFile()) {
+            return "file://" + crawlingStartURL.getPath() + ".*";
+        } else if (crawlingStartURL.isSMB()) {
+            return "smb://" + crawlingStartURL.getHost() + ".*";
+        } else if (crawlingStartURL.isFTP()) {
+            return "ftp://" + crawlingStartURL.getHost() + ".*";
+        } else {
+            final String host = crawlingStartURL.getHost();
+            if (host.startsWith("www.")) {
+                return "https?://" + crawlingStartURL.getHost() + ".*";
+            } else {
+                // if the www is not given we accept that also
+                return "https?://(www.)?" + crawlingStartURL.getHost() + ".*";
+            }
+        }
     }
 }
