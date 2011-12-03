@@ -3,21 +3,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
 import org.xml.sax.SAXException;
 
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.CrawlSwitchboard;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.UserDB;
 import de.anomic.data.WorkTables;
@@ -54,6 +60,8 @@ public class import_ymark {
             boolean autotag = false;
         	boolean merge = false;
         	boolean empty = false;
+        	final String indexing = post.get("indexing", "off");
+        	final boolean medialink = post.getBoolean("medialink", false);
 
         	if(post.containsKey("autotag") && !post.get("autotag", "off").equals("off")) {
         		autotag = true;
@@ -67,7 +75,7 @@ public class import_ymark {
                 t.start();
         	}
 
-        	if(isAdmin && post.containsKey("table") && post.get("table").length() > 0) {
+            if(isAdmin && post.containsKey("table") && post.get("table").length() > 0) {
         		bmk_user = post.get("table").substring(0, post.get("table").indexOf('_',0));
         	}
             if(post.containsKey("redirect") && post.get("redirect").length() > 0) {
@@ -92,7 +100,7 @@ public class import_ymark {
                     t = new Thread(surrogateReader, "YMarks - Surrogate Reader");
                     t.start();
                     while ((bmk = new YMarkEntry(surrogateReader.take())) != YMarkEntry.POISON) {
-                        putBookmark(sb.tables.bookmarks, bmk_user, bmk, autoTaggingQueue, autotag, empty);
+                        putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
                     }
                     prop.put("status", "1");
                 } else {
@@ -110,7 +118,7 @@ public class import_ymark {
                         t = new Thread(htmlImporter, "YMarks - HTML Importer");
                         t.start();
                         while ((bmk = htmlImporter.take()) != YMarkEntry.POISON) {
-                            putBookmark(sb.tables.bookmarks, bmk_user, bmk, autoTaggingQueue, autotag, empty);
+                            putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
                         }
                         prop.put("status", "1");
                     } else if(post.get("importer").equals("xbel") && reader != null) {
@@ -127,7 +135,7 @@ public class import_ymark {
                         t = new Thread(xbelImporter, "YMarks - XBEL Importer");
                         t.start();
                         while ((bmk = xbelImporter.take()) != YMarkEntry.POISON) {
-                            putBookmark(sb.tables.bookmarks, bmk_user, bmk, autoTaggingQueue, autotag, empty);
+                            putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
                         }
                         prop.put("status", "1");
                     } else if(post.get("importer").equals("json") && reader != null) {
@@ -136,7 +144,7 @@ public class import_ymark {
                         t = new Thread(jsonImporter, "YMarks - JSON Importer");
                         t.start();
                         while ((bmk = jsonImporter.take()) != YMarkEntry.POISON) {
-                        	putBookmark(sb.tables.bookmarks, bmk_user, bmk, autoTaggingQueue, autotag, empty);
+                        	putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
                         }
                         prop.put("status", "1");
                     }
@@ -219,13 +227,13 @@ public class import_ymark {
         return prop;
 	}
 
-	public static void putBookmark(final YMarkTables ymarks, final String bmk_user, final YMarkEntry bmk,
-			final ArrayBlockingQueue<String> autoTaggingQueue, final boolean autotag, final boolean empty) {
+	public static void putBookmark(final Switchboard sb, final String bmk_user, final YMarkEntry bmk,
+			final ArrayBlockingQueue<String> autoTaggingQueue, final boolean autotag, final boolean empty, final String indexing, final boolean medialink) {
 		try {
 			final String url = bmk.get(YMarkEntry.BOOKMARK.URL.key());
 			// other protocols could cause problems
 			if(url != null && url.startsWith("http")) {
-				ymarks.addBookmark(bmk_user, bmk, true, true);
+			    sb.tables.bookmarks.addBookmark(bmk_user, bmk, true, true);
 				if(autotag) {
 					if(!empty) {
 						autoTaggingQueue.put(url);
@@ -233,6 +241,16 @@ public class import_ymark {
 						autoTaggingQueue.put(url);
 					}
 				}
+
+				// fill crawler
+				if (indexing.equals("single")) {
+				    crawlStart(sb, new DigestURI(url), CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, 0, true, medialink);
+				} else if (indexing.equals("onelink")) {
+                    crawlStart(sb, new DigestURI(url), CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, 1, true, medialink);
+                } else if (indexing.equals("fulldomain")) {
+                    final DigestURI u = new DigestURI(url);
+                    crawlStart(sb, u, CrawlProfile.mustMatchFilterFullDomain(u), CrawlProfile.MATCH_NEVER_STRING, 99, false, medialink);
+                }
 			}
 		} catch (final IOException e) {
 			Log.logException(e);
@@ -242,6 +260,35 @@ public class import_ymark {
 			Log.logException(e);
 		}
 	}
+
+	public static String crawlStart(
+	                final Switchboard sb,
+	                final DigestURI startURL,
+	                final String urlMustMatch,
+	                final String urlMustNotMatch,
+	                final int depth,
+	                final boolean crawlingQ, final boolean medialink) {
+	    final CrawlProfile pe = new CrawlProfile(
+                (startURL.getHost() == null) ? startURL.toNormalform(true, false) : startURL.getHost(), null,
+                urlMustMatch,
+                urlMustNotMatch,
+                CrawlProfile.MATCH_ALL_STRING,
+                CrawlProfile.MATCH_NEVER_STRING,
+                "", depth, medialink,
+                CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE), -1, crawlingQ,
+                true, true, true, false, true, true, true,
+                CacheStrategy.IFFRESH);
+        sb.crawler.putActive(pe.handle().getBytes(), pe);
+        return sb.crawlStacker.stackCrawl(new Request(
+                sb.peers.mySeed().hash.getBytes(),
+                startURL,
+                null,
+                "CRAWLING-ROOT",
+                new Date(),
+                pe.handle(), 0, 0, 0, 0
+                ));
+	}
+
 }
 
 
