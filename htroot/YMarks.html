@@ -9,6 +9,9 @@
 		<link media="screen" type="text/css" href="/jquery/css/jquery.multiselect.css" rel="stylesheet" />
 		<script src="/jquery/js/jquery.multiselect.min.js" type="text/javascript"></script>
 		
+		<link media="screen" type="text/css" href="/jquery/css/jquery.tagsinput.css" rel="stylesheet" />
+		<script src="/jquery/js/jquery.tagsinput.min.js" type="text/javascript"></script>
+		
 		<link media="screen" type="text/css" href="/jquery/css/jquery.multiselect.filter.css" rel="stylesheet" />
 		<script src="/jquery/js/jquery.multiselect.filter.min.js" type="text/javascript"></script>		
 				
@@ -195,7 +198,21 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 		
 		<!-- Bookmarks Edit Dialog -->	
 		<div id="ymarks_add_dialog" class="bm_dialog" title="Add & Edit Bookmark">
-			<img id="bmaddimg" src="/yacy/ui/img-1/Star.png" />			
+			<table>
+				<tr>
+					<td>
+						<img id="bmaddimg" src="/yacy/ui/img-1/Star.png" />	
+					</td>
+					<td>
+						<label for="bm_public">Public:</label>
+						<br />
+						<select name="public" id="bm_public" class="bm_select">
+							<option value="true">yes</option>
+							<option value="false">no</option>
+						</select>
+					</td>
+				</tr>
+			</table>					
 			<form id="bmaddform" method="post" accept-charset="UTF-8" action="jQuery"><div>
 				<label for="bm_url">URL:</label>
 				<br />					
@@ -217,13 +234,6 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 				<label for="bm_tags">Tags (comma separated):</label>
 				<br />
 				<input type="text" name="tags" id="bm_tags" class="bm_input" size="80" />
-				<br />
-				<label for="bm_public">Public:</label>
-				<br />
-				<select name="public" id="bm_public" class="bm_select">
-					<option value="true">yes</option>
-					<option value="false">no</option>
-				</select>
 			</div></form>
 		</div>
 		<div id="ymarks_crawlstart" class="bm_dialog" title="Craw Start">
