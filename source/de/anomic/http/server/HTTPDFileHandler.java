@@ -61,10 +61,12 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -74,6 +76,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -646,143 +650,227 @@ public final class HTTPDFileHandler {
                         }
                     }
                 }
-            } else if (((switchboard.getConfigBool("cgi.allow", false)) &&                                  // check if CGI execution is allowed in config
-                    (matchesSuffix(path, switchboard.getConfig("cgi.suffixes", null))) &&  // "right" file extension?
-                    (path.substring(0, path.indexOf(targetFile.getName())).contains("/CGI-BIN/") ||
-                    path.substring(0, path.indexOf(targetFile.getName())).contains("/cgi-bin/")) &&         // file in right directory?
-                    targetFile.exists())
+            // old-school CGI execution
+            } else if ((switchboard.getConfigBool("cgi.allow", false) // check if CGI execution is allowed in config
+                    && matchesSuffix(path, switchboard.getConfig("cgi.suffixes", null)) // "right" file extension?
+                    && path.substring(0, path.indexOf(targetFile.getName())).toUpperCase().contains("/CGI-BIN/") // file in right directory?
+                    && targetFile.exists())
                     ) {
 
-                String mimeType = "text/html";
-                int statusCode = 200;
+                if (!targetFile.canExecute()) {
+                    HTTPDemon.sendRespondError(
+                            conProp,
+                            out,
+                            -1,
+                            403,
+                            null,
+                            HeaderFramework.http1_1.get(
+                                    Integer.toString(403)),
+                            null);
+                    Log.logWarning(
+                            "HTTPD",
+                            "CGI script " + targetFile.getPath()
+                            + " could not be executed due to "
+                            + "insufficient access rights.");
+                } else {
+                    String mimeType = "text/html";
+                    int statusCode = 200;
 
-                ProcessBuilder pb;
+                    final ProcessBuilder pb =
+                            new ProcessBuilder(assembleCommandFromShebang(targetFile));
+                    pb.directory(targetFile.getParentFile());
 
-                pb = new ProcessBuilder(targetFile.getAbsolutePath());
+                    final String fileSeparator =
+                            System.getProperty("file.separator", "/");
 
-                final String fileSeparator = System.getProperty("file.separator", "/");
-
-                // set environment variables
-                final Map<String, String> env = pb.environment();
-                env.put("SERVER_SOFTWARE", getDefaultHeaders(path).get(HeaderFramework.SERVER));
-                env.put("SERVER_NAME", sb.peers.mySeed().getName());
-                env.put("GATEWAY_INTERFACE", "CGI/1.1");
-                if (httpVersion != null) {
-                    env.put("SERVER_PROTOCOL", httpVersion);
-                }
-                env.put("SERVER_PORT", switchboard.getConfig("port", "8090"));
-                env.put("REQUEST_METHOD", method);
-//                env.put("PATH_INFO", "");         // TODO: implement
-//                env.put("PATH_TRANSLATED", "");   // TODO: implement
-                env.put("SCRIPT_NAME", path);
-                if (argsString != null) {
-                    env.put("QUERY_STRING", argsString);
-                }
-                env.put("REMOTE_ADDR", clientIP);
-//                env.put("AUTH_TYPE", "");         // TODO: implement
-//                env.put("REMOTE_USER", "");       // TODO: implement
-//                env.put("REMOTE_IDENT", "");      // I don't think we need this
-                env.put("DOCUMENT_ROOT", switchboard.getAppPath().getAbsolutePath() + fileSeparator + switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
-                if (requestHeader.getContentType() != null) {
-                    env.put("CONTENT_TYPE", requestHeader.getContentType());
-                }
-                if (method.equalsIgnoreCase(HeaderFramework.METHOD_POST) && body != null) {
-                    env.put("CONTENT_LENGTH", Integer.toString(requestHeader.getContentLength()));
-                }
-
-                // add values from request header to environment (see: http://hoohoo.ncsa.uiuc.edu/cgi/env.html#headers)
-                for (final Map.Entry<String, String> requestHeaderEntry : requestHeader.entrySet()) {
-                    env.put("HTTP_" + requestHeaderEntry.getKey().toUpperCase().replace("-", "_"), requestHeaderEntry.getValue());
-                }
-
-                int exitValue = 0;
-                String cgiBody = null;
-
-                try {
-                    // start execution of script
-                    final Process p = pb.start();
-
-                    final OutputStream os = new BufferedOutputStream(p.getOutputStream());
-
-                    if (method.equalsIgnoreCase(HeaderFramework.METHOD_POST) && body != null) {
-                        final byte[] buffer = new byte[1024];
-                        int len = requestHeader.getContentLength();
-                        while (len > 0) {
-                            body.read(buffer);
-                            len = len - buffer.length;
-                            os.write(buffer);
-                        }
+                    // set environment variables
+                    final Map<String, String> env = pb.environment();
+                    env.put(
+                            "SERVER_SOFTWARE",
+                            getDefaultHeaders(path).get(HeaderFramework.SERVER));
+                    env.put("SERVER_NAME", sb.peers.mySeed().getName());
+                    env.put("GATEWAY_INTERFACE", "CGI/1.1");
+                    if (httpVersion != null) {
+                        env.put("SERVER_PROTOCOL", httpVersion);
+                    }
+                    env.put("SERVER_PORT", switchboard.getConfig("port", "8090"));
+                    env.put("REQUEST_METHOD", method);
+    //                env.put("PATH_INFO", "");         // TODO: implement
+    //                env.put("PATH_TRANSLATED", "");   // TODO: implement
+                    env.put("SCRIPT_NAME", path);
+                    if (argsString != null) {
+                        env.put("QUERY_STRING", argsString);
+                    }
+                    env.put("REMOTE_ADDR", clientIP);
+    //                env.put("AUTH_TYPE", "");         // TODO: implement
+    //                env.put("REMOTE_USER", "");       // TODO: implement
+    //                env.put("REMOTE_IDENT", "");      // I don't think we need this
+                    env.put(
+                            "DOCUMENT_ROOT",
+                            switchboard.getAppPath().getAbsolutePath()
+                            + fileSeparator + switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
+                    if (requestHeader.getContentType() != null) {
+                        env.put("CONTENT_TYPE", requestHeader.getContentType());
+                    }
+                    if (method.equalsIgnoreCase(HeaderFramework.METHOD_POST)
+                            && body != null) {
+                        env.put(
+                                "CONTENT_LENGTH",
+                                Integer.toString(requestHeader.getContentLength()));
                     }
 
-                    os.close();
+                    /* add values from request header to environment
+                     * (see: http://hoohoo.ncsa.uiuc.edu/cgi/env.html#headers) */
+                    for (final Map.Entry<String, String> requestHeaderEntry
+                            : requestHeader.entrySet()) {
+                        env.put("HTTP_"
+                            + requestHeaderEntry.getKey().toUpperCase().replace("-", "_"),
+                            requestHeaderEntry.getValue());
+                    }
+
+                    int exitValue = 0;
+                    String cgiBody = null;
+                    final StringBuilder error = new StringBuilder(256);
 
                     try {
-                        p.waitFor();
-                    } catch (final InterruptedException ex) {
+                        // start execution of script
+                        final Process p = pb.start();
 
-                    }
+                        final OutputStream os =
+                                new BufferedOutputStream(p.getOutputStream());
 
-                    exitValue = p.exitValue();
+                        if (method.equalsIgnoreCase(
+                                HeaderFramework.METHOD_POST) && body != null) {
+                            final byte[] buffer = new byte[1024];
+                            int len = requestHeader.getContentLength();
+                            while (len > 0) {
+                                body.read(buffer);
+                                len = len - buffer.length;
+                                os.write(buffer);
+                            }
+                        }
 
-                    final InputStream is = new BufferedInputStream(p.getInputStream());
+                        os.close();
 
-                    final StringBuilder StringBuilder = new StringBuilder(1024);
+                        try {
+                            p.waitFor();
+                        } catch (final InterruptedException ex) {
 
-                    while (is.available() > 0) {
-                        StringBuilder.append((char) is.read());
-                    }
+                        }
 
-                    final String cgiReturn = StringBuilder.toString();
-                    int indexOfDelimiter = cgiReturn.indexOf("\n\n",0);
-                    String[] cgiHeader = new String[0];
-                    if (indexOfDelimiter > -1) {
-                        cgiHeader = cgiReturn.substring(0, indexOfDelimiter).split("\n");
-                    }
-                    cgiBody = cgiReturn.substring(indexOfDelimiter + 1);
+                        exitValue = p.exitValue();
 
-                    String key;
-                    String value;
-                    for (final String element : cgiHeader) {
-                        indexOfDelimiter = element.indexOf(':');
-                        key = element.substring(0, indexOfDelimiter).trim();
-                        value = element.substring(indexOfDelimiter + 1).trim();
-                        conProp.put(key, value);
-                        if (key.equals("Cache-Control") && value.equals("no-cache")) {
-                            nocache = true;
-                        } else if (key.equals("Content-type")) {
-                            mimeType = value;
-                        } else if (key.equals("Status")) {
-                            if (key.length() > 2) {
-                                try {
-                                    statusCode = Integer.parseInt(value.substring(0, 3));
-                                } catch (final NumberFormatException ex) {
-                                    /* tough luck, we will just have to use 200 as default value */
+                        final InputStream is =
+                                new BufferedInputStream(p.getInputStream());
+
+                        final InputStream es =
+                                new BufferedInputStream(p.getErrorStream());
+
+                        final StringBuilder processOutput =
+                                new StringBuilder(1024);
+
+                        while (is.available() > 0) {
+                            processOutput.append((char) is.read());
+                        }
+
+                        while (es.available() > 0) {
+                            error.append((char) es.read());
+                        }
+
+                        int indexOfDelimiter = processOutput.indexOf("\n\n", 0);
+                        final String[] cgiHeader;
+                        if (indexOfDelimiter > -1) {
+                            cgiHeader =
+                                    processOutput.substring(
+                                            0, indexOfDelimiter).split("\n");
+                        } else {
+                            cgiHeader = new String[0];
+                        }
+                        cgiBody = processOutput.substring(indexOfDelimiter + 1);
+
+                        String key;
+                        String value;
+                        for (final String element : cgiHeader) {
+                            indexOfDelimiter = element.indexOf(':');
+                            key = element.substring(0, indexOfDelimiter).trim();
+                            value = element.substring(indexOfDelimiter + 1).trim();
+                            conProp.put(key, value);
+                            if ("Cache-Control".equals(key)
+                                    && "no-cache".equals(value)) {
+                                nocache = true;
+                            } else if ("Content-type".equals(key)) {
+                                mimeType = value;
+                            } else if ("Status".equals(key)) {
+                                if (key.length() > 2) {
+                                    try {
+                                        statusCode =
+                                                Integer.parseInt(
+                                                        value.substring(0, 3));
+                                    } catch (final NumberFormatException ex) {
+                                        Log.logWarning(
+                                                "HTTPD",
+                                                "CGI script " + targetFile.getPath()
+                                                + " returned illegal status code \""
+                                                + value + "\".");
+                                    }
                                 }
                             }
                         }
+                    } catch (final IOException ex) {
+                        exitValue = -1;
                     }
-                } catch (final IOException ex) {
-                    exitValue = -1;
+
+                    /* did the script return an exit value != 0
+                     * and still there is supposed to be
+                     * everything right with the HTTP status?
+                     * -> change status to 500 since 200 would
+                     * be a lie
+                     */
+                    if (exitValue != 0 && statusCode == 200) {
+                        statusCode = 500;
+                    }
+
+                    targetDate = new Date(System.currentTimeMillis());
+
+                    if (exitValue == 0
+                            && cgiBody != null
+                            && !cgiBody.isEmpty()) {
+                        HTTPDemon.sendRespondHeader(
+                                conProp,
+                                out,
+                                httpVersion,
+                                statusCode,
+                                null,
+                                mimeType,
+                                cgiBody.length(),
+                                targetDate,
+                                null,
+                                null,
+                                null,
+                                null,
+                                nocache);
+                        out.write(UTF8.getBytes(cgiBody));
+                    } else {
+                        HTTPDemon.sendRespondError(
+                                conProp,
+                                out,
+                                exitValue,
+                                statusCode,
+                                null,
+                                HeaderFramework.http1_1.get(
+                                        Integer.toString(statusCode)),
+                                null);
+                        Log.logWarning(
+                                "HTTPD",
+                                "CGI script " + targetFile.getPath()
+                                + " returned exit value " + exitValue
+                                + ", body empty: "
+                                + (cgiBody == null || cgiBody.isEmpty()));
+                        if (error.length() > 0) {
+                            Log.logWarning("HTTPD", "Reported error: " + error);
+                        }
+                    }
                 }
-
-                /* did the script return an exit value != 0 and still there is supposed to be
-                 * everything right with the HTTP status? -> change status to 500 since 200 would
-                 * be a lie
-                 */
-                if (exitValue != 0 && statusCode == 200) {
-                    statusCode = 500;
-                }
-
-                targetDate = new Date(System.currentTimeMillis());
-
-                if (exitValue == 0 || (cgiBody != null && !cgiBody.equals(""))) {
-                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, cgiBody.length(), targetDate, null, null, null, null, nocache);
-                    out.write(UTF8.getBytes(cgiBody));
-                } else {
-                    HTTPDemon.sendRespondError(conProp, out, exitValue, statusCode, null, HeaderFramework.http1_1.get(Integer.toString(statusCode)), null);
-                }
-
-
             } else if ((targetClass != null) && (path.endsWith(".stream"))) {
                 // call rewrite-class
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
@@ -1175,6 +1263,29 @@ public final class HTTPDFileHandler {
         } finally {
             try {out.flush();}catch (final Exception e) {}
         }
+    }
+
+    /**
+     * Returns a list which contains parts of command
+     * which is used to start external process for
+     * CGI scripts.
+     * @param targetFile file to run
+     * @return list of parts of command
+     * @throws IOException if file can not be accessed
+     */
+    private static List<String> assembleCommandFromShebang(
+            final File targetFile)
+            throws IOException {
+        final List<String > ret = new ArrayList<String>();
+        final BufferedReader br =
+                new BufferedReader(new FileReader(targetFile), 512);
+        final String line = br.readLine();
+        if (line.startsWith("#!")) {
+            ret.addAll(Arrays.asList(line.substring(2).split(" ")));
+        }
+        ret.add(targetFile.getAbsolutePath());
+
+        return ret;
     }
 
     private static final String appendPath(final String proplist, final String path) {
