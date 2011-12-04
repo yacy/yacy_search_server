@@ -196,7 +196,7 @@ public class htmlParser extends AbstractParser implements Parser {
 
         // parsing the content
         final ContentScraper scraper = new ContentScraper(location);
-        final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false);
+        final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, sourceStream.available());
         try {
             FileUtils.copy(sourceStream, writer, c);
         } catch (final IOException e) {

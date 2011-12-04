@@ -235,21 +235,24 @@ public final class Condenser {
         if (text == null) return;
         String word;
         Word wprop;
-        WordTokenizer wordenum;
-        wordenum = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(text)), meaningLib);
-        int pip = 0;
-        while (wordenum.hasMoreElements()) {
-            word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH);
-            if (useForLanguageIdentification) this.languageIdentificator.add(word);
-            if (word.length() < 2) continue;
-            wprop = this.words.get(word);
-            if (wprop == null) wprop = new Word(0, pip, phrase);
-            if (wprop.flags == null) wprop.flags = flagstemplate.clone();
-            wprop.flags.set(flagpos, true);
-            this.words.put(word, wprop);
-            pip++;
-            this.RESULT_NUMB_WORDS++;
-            this.RESULT_DIFF_WORDS++;
+        WordTokenizer wordenum = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(text)), meaningLib);
+        try {
+	        int pip = 0;
+	        while (wordenum.hasMoreElements()) {
+	            word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH);
+	            if (useForLanguageIdentification) this.languageIdentificator.add(word);
+	            if (word.length() < 2) continue;
+	            wprop = this.words.get(word);
+	            if (wprop == null) wprop = new Word(0, pip, phrase);
+	            if (wprop.flags == null) wprop.flags = flagstemplate.clone();
+	            wprop.flags.set(flagpos, true);
+	            this.words.put(word, wprop);
+	            pip++;
+	            this.RESULT_NUMB_WORDS++;
+	            this.RESULT_DIFF_WORDS++;
+	        }
+        } finally {
+        	wordenum.close();
         }
     }
 
@@ -296,45 +299,49 @@ public final class Condenser {
 
         // read source
         final WordTokenizer wordenum = new WordTokenizer(is, meaningLib);
-        while (wordenum.hasMoreElements()) {
-            word = wordenum.nextElement().toString().toLowerCase(Locale.ENGLISH);
-            if (this.languageIdentificator != null) this.languageIdentificator.add(word);
-            if (word.length() < wordminsize) continue;
-
-            // distinguish punctuation and words
-            wordlen = word.length();
-            if (wordlen == 1 && SentenceReader.punctuation(word.charAt(0))) {
-                // store sentence
-                currsentwords.clear();
-                wordInSentenceCounter = 1;
-            } else {
-                // check index.of detection
-                if (last_last && comb_indexof && word.equals("modified")) {
-                    this.RESULT_FLAGS.set(flag_cat_indexof, true);
-                    wordenum.pre(true); // parse lines as they come with CRLF
-                }
-                if (last_index && (wordminsize > 2 || word.equals("of"))) comb_indexof = true;
-                last_last = word.equals("last");
-                last_index = word.equals("index");
-
-                // store word
-                allwordcounter++;
-                currsentwords.add(word);
-                wsp = this.words.get(word);
-                if (wsp != null) {
-                    // word already exists
-                    wordHandle = wsp.posInText;
-                    wsp.inc();
-                } else {
-                    // word does not yet exist, create new word entry
-                    wordHandle = wordHandleCount++;
-                    wsp = new Word(wordHandle, wordInSentenceCounter, sentences.size() + 100);
-                    wsp.flags = this.RESULT_FLAGS.clone();
-                    this.words.put(word, wsp);
-                }
-                // we now have the unique handle of the word, put it into the sentence:
-                wordInSentenceCounter++;
-            }
+        try {
+	        while (wordenum.hasMoreElements()) {
+	            word = wordenum.nextElement().toString().toLowerCase(Locale.ENGLISH);
+	            if (this.languageIdentificator != null) this.languageIdentificator.add(word);
+	            if (word.length() < wordminsize) continue;
+	
+	            // distinguish punctuation and words
+	            wordlen = word.length();
+	            if (wordlen == 1 && SentenceReader.punctuation(word.charAt(0))) {
+	                // store sentence
+	                currsentwords.clear();
+	                wordInSentenceCounter = 1;
+	            } else {
+	                // check index.of detection
+	                if (last_last && comb_indexof && word.equals("modified")) {
+	                    this.RESULT_FLAGS.set(flag_cat_indexof, true);
+	                    wordenum.pre(true); // parse lines as they come with CRLF
+	                }
+	                if (last_index && (wordminsize > 2 || word.equals("of"))) comb_indexof = true;
+	                last_last = word.equals("last");
+	                last_index = word.equals("index");
+	
+	                // store word
+	                allwordcounter++;
+	                currsentwords.add(word);
+	                wsp = this.words.get(word);
+	                if (wsp != null) {
+	                    // word already exists
+	                    wordHandle = wsp.posInText;
+	                    wsp.inc();
+	                } else {
+	                    // word does not yet exist, create new word entry
+	                    wordHandle = wordHandleCount++;
+	                    wsp = new Word(wordHandle, wordInSentenceCounter, sentences.size() + 100);
+	                    wsp.flags = this.RESULT_FLAGS.clone();
+	                    this.words.put(word, wsp);
+	                }
+	                // we now have the unique handle of the word, put it into the sentence:
+	                wordInSentenceCounter++;
+	            }
+	        }
+        } finally {
+        	wordenum.close();
         }
 
         if (pseudostemming) {

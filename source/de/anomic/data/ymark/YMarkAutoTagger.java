@@ -27,6 +27,9 @@ import de.anomic.crawler.retrieval.Response;
 
 public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandler {
 
+	private static final String EMPTY_STRING = new String();
+	
+	
 	public final static String SPACE = " ";
 	public final static String POISON = "";
 	public final static HashSet<String> stopwords = new HashSet<String>(Arrays.asList(".", "!", "?", "nbsp", "uuml", "ouml", "auml", "amp", "quot", "laquo", "raquo", 
@@ -83,19 +86,22 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		final TreeSet<YMarkTag> topwords = new TreeSet<YMarkTag>();
 		StringBuilder token; 
 
-		if(document != null) {
+		if(document == null) {
+			return EMPTY_STRING;
+		}
 
-			//get words from document
-			final Map<String, Word> words = new Condenser(document, true, true, LibraryProvider.dymLib).words();
-			
-			// generate potential tags from document title, description and subject
-			final int bufferSize = document.dc_title().length() + document.dc_description().length() + document.dc_subject(' ').length() + 32;
-			final StringBuilder buffer = new StringBuilder(bufferSize);
-			final StringBuilder pwords = new StringBuilder(1000);
-			buffer.append(document.dc_title().toLowerCase());
-			buffer.append(document.dc_description().toLowerCase());
-			buffer.append(document.dc_subject(' ').toLowerCase());
-			final Enumeration<StringBuilder> tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(buffer.toString())), LibraryProvider.dymLib);
+		//get words from document
+		final Map<String, Word> words = new Condenser(document, true, true, LibraryProvider.dymLib).words();
+		
+		// generate potential tags from document title, description and subject
+		final int bufferSize = document.dc_title().length() + document.dc_description().length() + document.dc_subject(' ').length() + 32;
+		final StringBuilder buffer = new StringBuilder(bufferSize);
+		final StringBuilder pwords = new StringBuilder(1000);
+		buffer.append(document.dc_title().toLowerCase());
+		buffer.append(document.dc_description().toLowerCase());
+		buffer.append(document.dc_subject(' ').toLowerCase());
+		final WordTokenizer tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(buffer.toString())), LibraryProvider.dymLib);
+		try {
 			int score = 0;
 			
 			// get phrases
@@ -163,44 +169,49 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 				return document.getFileExtension();
 			}
 			return clean;
+		} finally {
+			tokens.close();
 		}
-		return new String();		
 	}	
 	
 	private static TreeMap<String, YMarkTag> getPhrases(final Document document, final int size) {
 		final TreeMap<String, YMarkTag> phrases = new TreeMap<String, YMarkTag>();
 		final StringBuilder phrase = new StringBuilder(128);
-		final Enumeration<StringBuilder> tokens = new WordTokenizer(document.getText(), LibraryProvider.dymLib);
-		StringBuilder token;
-		int count = 0;
-		
-		// loop through text
-		while(tokens.hasMoreElements()) {				
-
-			token = tokens.nextElement();			
-			if(stopwords.contains(token.toString()) || isDigitSpace(token.toString()))
-				continue;			
+		final WordTokenizer tokens = new WordTokenizer(document.getText(), LibraryProvider.dymLib);
+		try {
+			StringBuilder token;
+			int count = 0;
 			
-			// if we have a full phrase, delete the first token
-			count++;
-			if(count > size)
-				phrase.delete(0, phrase.indexOf(SPACE)+1);
+			// loop through text
+			while(tokens.hasMoreElements()) {				
+	
+				token = tokens.nextElement();			
+				if(stopwords.contains(token.toString()) || isDigitSpace(token.toString()))
+					continue;			
+				
+				// if we have a full phrase, delete the first token
+				count++;
+				if(count > size)
+					phrase.delete(0, phrase.indexOf(SPACE)+1);
+				
+				// append new token
+				if(phrase.length() > 1)
+					phrase.append(SPACE);						
+				phrase.append(token);
+	
+				if(count >= size) {	// make sure we really have a phrase
+					if(phrases.containsKey(phrase.toString())) {
+						phrases.get(phrase.toString()).inc();
+					} else {
+						phrases.put(phrase.toString(), new YMarkTag(phrase.toString()));
+					}
+				}		
+			}
 			
-			// append new token
-			if(phrase.length() > 1)
-				phrase.append(SPACE);						
-			phrase.append(token);
-
-			if(count >= size) {	// make sure we really have a phrase
-				if(phrases.containsKey(phrase.toString())) {
-					phrases.get(phrase.toString()).inc();
-				} else {
-					phrases.put(phrase.toString(), new YMarkTag(phrase.toString()));
-				}
-			}		
+			return phrases;
+		} finally {
+			tokens.close();
 		}
-		
-		return phrases;
 	}
 
 	public static String autoTag(final String url, final LoaderDispatcher loader, final int max, final TreeMap<String, YMarkTag> tags) {

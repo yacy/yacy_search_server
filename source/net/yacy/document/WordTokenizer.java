@@ -79,6 +79,10 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         if (this.meaningLib != null) WordCache.learn(r);
         return r;
     }
+    
+    public void close() {
+    	e.close();
+    }
 
     private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
         // returns an enumeration of StringBuilder Objects
@@ -145,6 +149,9 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
             return r;
         }
 
+        public void close() {
+        	e.close();
+        }
     }
 
     public static StringBuilder trim(final StringBuilder sb) {
@@ -172,23 +179,27 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
      */
     public static SortedMap<byte[], Integer> hashSentence(final String sentence, final WordCache meaningLib) {
         final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-        final Enumeration<StringBuilder> words = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), meaningLib);
-        int pos = 0;
-        StringBuilder word;
-        byte[] hash;
-        Integer oldpos;
-        while (words.hasMoreElements()) {
-            word = words.nextElement();
-            hash = Word.word2hash(word);
-
-            // don't overwrite old values, that leads to too far word distances
-            oldpos = map.put(hash, LargeNumberCache.valueOf(pos));
-            if (oldpos != null) {
-                map.put(hash, oldpos);
-            }
-
-            pos += word.length() + 1;
+        final WordTokenizer words = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), meaningLib);
+        try {
+	        int pos = 0;
+	        StringBuilder word;
+	        byte[] hash;
+	        Integer oldpos;
+	        while (words.hasMoreElements()) {
+	            word = words.nextElement();
+	            hash = Word.word2hash(word);
+	
+	            // don't overwrite old values, that leads to too far word distances
+	            oldpos = map.put(hash, LargeNumberCache.valueOf(pos));
+	            if (oldpos != null) {
+	                map.put(hash, oldpos);
+	            }
+	
+	            pos += word.length() + 1;
+	        }
+	        return map;
+        } finally {
+        	words.close();
         }
-        return map;
     }
 }
