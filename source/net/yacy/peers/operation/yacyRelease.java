@@ -85,7 +85,7 @@ public final class yacyRelease extends yacyVersion {
         this.url = url;
     }
 
-    public yacyRelease(final MultiProtocolURI url, final PublicKey publicKey) {
+    private yacyRelease(final MultiProtocolURI url, final PublicKey publicKey) {
         this(url);
         this.publicKey = publicKey;
     }
