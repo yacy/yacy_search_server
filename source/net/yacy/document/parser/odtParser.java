@@ -114,17 +114,20 @@ public class odtParser extends AbstractParser implements Parser {
                 if (entryName.equals("content.xml")) {
                     
                     // create a writer for output
-                    writer = new CharBuffer();
-                    
-                    // extract data
-                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
-                    final SAXParser saxParser = saxParserFactory.newSAXParser();
-                    saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
-                
-                    // close readers and writers
-                    zipFileEntryStream.close();
-                    writer.close();
-                    
+                    writer = new CharBuffer((int)zipEntry.getSize());
+                    try {
+	                    // extract data
+	                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
+	                    try {
+		                    final SAXParser saxParser = saxParserFactory.newSAXParser();
+		                    saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
+	                    } finally {
+		                    // close readers and writers
+		                    zipFileEntryStream.close();
+	                    }
+                    } finally {
+                    	writer.close();
+                    }
                 } else if (entryName.equals("meta.xml")) {
                     //  meta.xml contains metadata about the document
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);

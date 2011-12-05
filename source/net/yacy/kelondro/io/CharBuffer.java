@@ -122,9 +122,9 @@ public final class CharBuffer extends Writer {
         return length;
     }
 
-    private void grow() {
-        int newsize = buffer.length * 2 + 1;
-        if (newsize < 32) newsize = 32;
+    private void grow(int minSize) {
+        int newsize = buffer.length + 1024;
+        if (newsize < minSize) newsize = minSize+1;
         char[] tmp = new char[newsize];
         System.arraycopy(buffer, offset, tmp, 0, length);
         buffer = tmp;
@@ -136,7 +136,7 @@ public final class CharBuffer extends Writer {
     }
     
     public void write(final char b) {
-        if (offset + length + 1 > buffer.length) grow();
+        if (offset + length + 1 > buffer.length) grow(offset + length + 1);
         buffer[offset + length++] = b;
     }
     
@@ -145,7 +145,7 @@ public final class CharBuffer extends Writer {
     }
     
     public void write(final char[] bb, final int of, final int le) {
-        while (offset + length + le > buffer.length) grow();
+        if (offset + length + le > buffer.length) grow(offset + length + le);
         System.arraycopy(bb, of, buffer, offset + length, le);
         length += le;
     }
@@ -476,7 +476,7 @@ public final class CharBuffer extends Writer {
     }
 
     public void close() throws IOException {
-        // TODO Auto-generated method stub        
+    	buffer = null; // assist with garbage collection 
     }
 
     public void flush() throws IOException {

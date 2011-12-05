@@ -82,10 +82,21 @@ public final class TransformerWriter extends Writer {
             final Transformer transformer,
             final boolean passbyIfBinarySuspect
     ) {
+    	this(outStream, charSet, scraper, transformer, passbyIfBinarySuspect, 1024);
+    }
+
+    public TransformerWriter(
+            final OutputStream outStream,
+            final Charset charSet,
+            final Scraper scraper,
+            final Transformer transformer,
+            final boolean passbyIfBinarySuspect,
+            final int initialBufferSize
+    ) {
         this.outStream     = outStream;
         this.scraper       = scraper;
         this.transformer   = transformer;
-        this.buffer        = new CharBuffer(1024);
+        this.buffer        = new CharBuffer(initialBufferSize);
         this.filterTag     = null;
         this.filterOpts    = null;
         this.filterCont    = null;
@@ -540,6 +551,7 @@ public final class TransformerWriter extends Writer {
                 final char[] filtered = filterSentence(this.buffer.getChars(), quotechar);
                 if (this.out != null) this.out.write(filtered);
             }
+            this.buffer.close();
             this.buffer = null;
         }
         final char[] finalized = filterFinalize(quotechar);
@@ -550,6 +562,7 @@ public final class TransformerWriter extends Writer {
         }
         this.filterTag = null;
         this.filterOpts = null;
+        if (this.filterCont != null) this.filterCont.close();
         this.filterCont = null;
 //      if (scraper != null) {scraper.close(); scraper = null;}
 //      if (transformer != null) {transformer.close(); transformer = null;}

@@ -65,7 +65,7 @@ NO OTHER SOFTWARE IS REQUIRED!
 == HOW DO I START THIS SOFTWARE? ==
 Startup and Shutdown of YaCy:
 
-- on Linux:
+- on GNU/Linux:
 to start: execute ./startYACY.sh
 to stop : execute ./stopYACY.sh
 

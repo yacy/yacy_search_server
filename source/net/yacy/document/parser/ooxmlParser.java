@@ -100,17 +100,21 @@ public class ooxmlParser extends AbstractParser implements Parser {
                 	|| entryName.startsWith("xl/worksheets/sheet")) {
                     
                     // create a writer for output
-                    writer = new CharBuffer();
-                    
-                    // extract data
-                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
-                    final SAXParser saxParser = saxParserFactory.newSAXParser();
-                    saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
-                
-                    // close readers and writers
-                    zipFileEntryStream.close();
-                    writer.close();
-                    
+                    writer = new CharBuffer((int)zipEntry.getSize());
+                    try {
+	                    // extract data
+	                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
+	                    try {
+		                    final SAXParser saxParser = saxParserFactory.newSAXParser();
+		                    saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
+		                
+		                    // close readers and writers
+	                    } finally {
+	                    	zipFileEntryStream.close();
+	                    }
+                    } finally {
+                    	writer.close();
+                    }
                 } else if (entryName.equals("docProps/core.xml")) {
                     //  meta.xml contains metadata about the document
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);

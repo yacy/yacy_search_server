@@ -750,6 +750,8 @@ Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Mein
 Manual System Update==Manuelle Systemaktualisierung
 Current installed Release==Aktuell installierte Version
 Available Releases==Verfügbare Versionen
+\(unsigned\)==(unsigniert)
+\(signed\)==(signiert)
 "Download Release"=="Version Herunterladen"
 "Check for new Release"=="Nach neuer Version suchen"
 Downloaded Releases==Heruntergeladene Versionen
@@ -3175,6 +3177,8 @@ This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.
 The query format is similar to <a href=\"http://www.loc.gov/standards/sru/\">SRU</a>.==Das Abfrageformat ist ähnlich dem <a href="http://www.loc.gov/standards/sru/">SRU</a>.
 Click the API icon to see an example call to the search rss API.==Klicken Sie auf das API Symbol, um einen Beispielaufruf der RSS Such API zu sehen.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+loading from local index...==lädt aus lokalem Index...
+e="Search"==e="Suchen"
 #-----------------------------
 
 #File: yacysearch.html

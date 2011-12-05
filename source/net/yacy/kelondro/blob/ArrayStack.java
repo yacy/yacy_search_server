@@ -898,8 +898,7 @@ public class ArrayStack implements BLOB {
                 if (!i1.hasNext()) {
                     if (i2.hasNext()) {
                         HeapWriter.delete(f1);
-                        if (f2.renameTo(newFile))
-                            return newFile;
+                        if (f2.renameTo(newFile)) return newFile;
                         return f2;
                     }
                     HeapWriter.delete(f1);
@@ -907,8 +906,7 @@ public class ArrayStack implements BLOB {
                     return null;
                 } else if (!i2.hasNext()) {
                     HeapWriter.delete(f2);
-                    if (f1.renameTo(newFile))
-                        return newFile;
+                    if (f1.renameTo(newFile)) return newFile;
                     return f1;
                 }
                 assert i1.hasNext();
