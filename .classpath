@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="source"/>
+	<classpathentry excluding="api/|env/|processing/domaingraph/applet/|yacy/|api/bookmarks/|api/ymarks/|api/bookmarks/posts/|api/bookmarks/tags/|api/bookmarks/xbel/" kind="src" path="htroot"/>
+	<classpathentry excluding="bookmarks/|ymarks/|bookmarks/posts/|bookmarks/tags/|bookmarks/xbel/" kind="src" path="htroot/api"/>
+	<classpathentry kind="src" path="htroot/env"/>
+	<classpathentry kind="src" path="htroot/yacy"/>
+	<classpathentry excluding="posts/|tags/|xbel/" kind="src" path="htroot/api/bookmarks"/>
+	<classpathentry kind="src" path="htroot/api/ymarks"/>
+	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
+	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
+	<classpathentry kind="src" path="htroot/api/bookmarks/xbel"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api.jar"/>
