@@ -1006,7 +1006,7 @@ about.body =
 
 # search heuristics
 heuristic.site = false
-heuristic.scroogle = false
+heuristic.scroogle = true
 heuristic.blekko = false
 
 # colours for generic design
