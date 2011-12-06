@@ -36,27 +36,39 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 /** draw a picture of the yacy network */
-public class NetworkPicture {
+public class NetworkPicture
+{
 
     private static final Semaphore sync = new Semaphore(1, true);
     private static EncodedImage buffer = null;
     private static long lastAccessSeconds = 0;
 
-    public static EncodedImage respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static EncodedImage respond(
+        final RequestHeader header,
+        final serverObjects post,
+        final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final boolean authorized = sb.adminAuthenticated(header) >= 2;
 
         final long timeSeconds = System.currentTimeMillis() / 1000;
-        if (buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
-            Log.logInfo("NetworkPicture", "cache hit (1); authorized = " + authorized + ", timeSeconds - lastAccessSeconds = " + (timeSeconds - lastAccessSeconds));
+        if ( buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2 ) {
+            Log.logInfo("NetworkPicture", "cache hit (1); authorized = "
+                + authorized
+                + ", timeSeconds - lastAccessSeconds = "
+                + (timeSeconds - lastAccessSeconds));
             return buffer;
         }
 
-        if (buffer != null && sync.availablePermits() == 0) return buffer;
+        if ( buffer != null && sync.availablePermits() == 0 ) {
+            return buffer;
+        }
         sync.acquireUninterruptibly();
 
-        if (buffer != null && !authorized  && timeSeconds - lastAccessSeconds < 2)  {
-            Log.logInfo("NetworkPicture", "cache hit (2); authorized = " + authorized + ", timeSeconds - lastAccessSeconds = " + (timeSeconds - lastAccessSeconds));
+        if ( buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2 ) {
+            Log.logInfo("NetworkPicture", "cache hit (2); authorized = "
+                + authorized
+                + ", timeSeconds - lastAccessSeconds = "
+                + (timeSeconds - lastAccessSeconds));
             sync.release();
             return buffer;
         }
@@ -72,7 +84,7 @@ public class NetworkPicture {
         long communicationTimeout = -1;
         int cyc = 0;
 
-        if (post != null) {
+        if ( post != null ) {
             width = post.getInt("width", width);
             height = post.getInt("height", height);
             passiveLimit = post.getInt("pal", passiveLimit);
@@ -86,18 +98,46 @@ public class NetworkPicture {
         }
 
         //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
-        if (width < 320 ) width = 320;
-        if (width > 1920) width = 1920;
-        if (height < 240) height = 240;
-        if (height > 1080) height = 1080;
-        if (!authorized) {
-            width = Math.min(1024, width);
-            height = Math.min(576, height);
+        if ( width < 320 ) {
+            width = 320;
         }
-        if (passiveLimit > 1000000) passiveLimit = 1000000;
-        if (potentialLimit > 1000000) potentialLimit = 1000000;
-        if (maxCount > 10000) maxCount = 10000;
-        buffer = new EncodedImage(NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor, cyc).getImage(), "png");
+        if ( width > 1920 ) {
+            width = 1920;
+        }
+        if ( height < 240 ) {
+            height = 240;
+        }
+        if ( height > 1080 ) {
+            height = 1080;
+        }
+        if ( !authorized ) {
+            width = Math.min(1024, width);
+            height = Math.min(1024, height);
+        }
+        if ( passiveLimit > 1000000 ) {
+            passiveLimit = 1000000;
+        }
+        if ( potentialLimit > 1000000 ) {
+            potentialLimit = 1000000;
+        }
+        if ( maxCount > 10000 ) {
+            maxCount = 10000;
+        }
+        buffer =
+            new EncodedImage(NetworkGraph.getNetworkPicture(
+                sb.peers,
+                10000,
+                width,
+                height,
+                passiveLimit,
+                potentialLimit,
+                maxCount,
+                coronaangle,
+                communicationTimeout,
+                env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"),
+                env.getConfig("network.unit.description", "unspecified"),
+                bgcolor,
+                cyc).getImage(), "png");
         lastAccessSeconds = System.currentTimeMillis() / 1000;
 
         sync.release();
