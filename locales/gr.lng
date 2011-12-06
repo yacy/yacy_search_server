@@ -152,41 +152,6 @@ Cookies==Cookies
 #---------------------------
 YaCy: Help==YaCy: Βοήθεια
 Help==Βοήθεια
-This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==Αυτός είναι ένας κατανεμημένος web crawler, αλλά και ένας caching proxy HTTP. Εσείς χρησιμοποιείτε <i>την on-line διεπαφή<i> της εφαρμογής. Μπορείτε να χρησιμοποιείτε αυτή τη διεπαφή για να ορίσετε τις προσωπικές σας προτιμήσεις και τις ρυθμίσεις του proxy, για να ελέγχετε την πρόσβαση και τις ιδιότητες του crawler. Μπορείτε, επίσης, να χρησιμοποιείτε αυτή τη διεπαφή για να ξεκινάτε κάποια crawls, να στέλνετε μηνύματα σε άλλους peers και να ελέγχετε τον δικό σας κατάλογο περιεχομένων (index), την κατάσταση της cache και τις διαδικασίες του crawling. Το πιο σημαντικό είναι ότι μπορείτε να χρησιμοποιείτε τη σελίδα αναζήτησης για να εξερευνήσετε είτε το δικό σας κατάλογο, είτε τον <i>συνολικό</i> κατάλογο.
-For more detailed information, visit the <a href="http://www.yacy.net/">YaCy homepage</a>==Για λεπτομερέστερες πληροφορίες, επισκεφθείτε το <a href="http://www.yacy.net/">Αρχική σελίδα του YaCy</a>
-Local and Global Search: Options and Functions==Τοπική και Συνολική Αναζήτηση: Επιλογές και Λειτουργίες
-The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Ο proxy προσφέρει μία διεπαφή αναζήτησης που έχει πρόσβαση στον τοπικό σας κατάλογο και που δημιουργήθηκε από τις σελίδες που περνούν μέσω του proxy.
-The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Η αναζήτηση μπορεί επίσης να εφαρμοσθεί και συνολικά, με αναζήτηση σε άλλους ισότιμους χρήστες. Μπορείτε να χρησιμοποιήσετε τις παρακάτω επιλογές για να βελτιώσετε τα αποτελέσματα της  έρευνάς σας.
-Search Word List==Αναζήτηση Καταλόγου Λέξεων
-You can search for several words simultanous. Words must be separated by a single space.==Μπορείτε να κάνετε αναζήτηση για πολλές λέξεις ταυτόχρονα. Οι λέξεις πρέπει να ξεχωρίζουν μεταξύ τους με ένα απλό διάστημα.
-The words are treated conjunctive, that means every must occur in the result, not any.== Οι λέξεις παρουσιάζονται συνδεδεμένες, αυτό σημαίνει ότι η κάθε μία πρέπει να εμφανίζεται στο αποτέλεσμα και όχι μόνο μία οποιαδήποτε από αυτές.
-If you do a global search \(see below\) you may get different results each time you do a search.==Αν επιλέξετε μία συνολική αναζήτηση \(βλέπε πιο κάτω\) μπορείτε να έχετε διαφορετικά αποτελέσματα κάθε φορά που κάνετε μία αναζήτηση.
-Maximum Number of Results==Μέγιστος Αριθμός Αποτελεσμάτων
-You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Μπορείτε να επιλέξετε τον μέγιστο αριθμό των επιθυμητών links. Δεν υποστηρίζουμε ακόμη σελίδες πολλαπλών αποτελεσμάτων για κάθε πιθανό link.
-Instead we encourage you to enhance the search result by submitting more search words.==Αντιθέτως, σας ενθαρρύνουμε να βελτιώσετε τα αποτελέσματα της αναζήτησης, υποβάλοντας περισσότερους όρους αναζήτησης.
-Result Order Options==Επιλογές για τη Σειρά Εμφάνισης Αποτελεσμάτων
-The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Η μηχανή αναζήτησης προσφέρει ένα πειραματικό σύστημα ταξινόμησης 'Ποιότητας'. Σε αντίθεση με άλλες γνωστές μηχανές αναζήτησης, εμείς προσφέρουμε, επίσης, και
-a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==μία κατάταξη των αποτελεσμάτων με βάση την ημερομηνία. Αν αλλάξετε τη σειρά εμφάνισης σε 'Ημερομηνία-Ποιότητα' τότε θα εμφανιστούν στην αρχή οι πλέον πρόσφατα ενημερωμένες σελίδες.
-For pages that have the same date the second order, 'Quality' is applied.==Οι σελίδες που φέρουν την ίδια ημερομηνία κατατάσσονται σύμφωνα με το δεύτερο κριτήριο της 'Ποιότητας'.
-This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Αυτή η μηχανή αναζήτησης φτιάχθηκε για να αναζητά τις ιστοσελίδες που περνούν τον proxy. Αλλά ο πίνακας περιεχομένων αναζήτησης (search index) διανέμεται και σε άλλους ισότιμους χρήστες,
-so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==έτσι ώστε να μπορείτε να κάνετε και μία συνολική αναζήτηση: αυτή η λειτουργία είναι, προς το παρόν, κάπως στοιχειώδης, αλλά μπορεί να επιλεχθεί για δοκιμαστικές περιπτώσεις. Στις μελλοντικές εκδόσεις οι πληροφορίες του πίνακας περιεχομένων 
-automatically distribute index information <i>before</i> a search happens to form a performant distributed hash table -- a very fast global search.==θα διανέμονται αυτόματα. <i>πριν</i> Η αναζήτηση μπορεί να φτιάχνει έναν πίνακα hash κατανεμημένο και performant -- μία συνολική έρευνα πραγματικά γρήγορη.
-Maximum Search Time==Μέγιστος Χρόνος Αναζήτησης
-Searching the local index is extremely fast, it happens within milliseconds, even for a large number \(millions\) of pages. But searching the==Οι αναζητήσεις στον τοπικό πίνακα περιεχομένων είναι εξαιρετικά γρήγορες, της τάξης των χιλιοστών του δευτερολέπτου, ακόμη και αν πρόκειται για έναν τεράστιο αριθμό /(εκατομμύρια/) σελίδων. Η αναζήτηση, όμως,
-global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==στον συνολικό πίνακα περιεχομένων απαιτεί παραπάνω χρόνο για να εντοπίσει τον σωστό απομεμακρυσμένο ισότιμο χρήστη, που να μπορεί να προσφέρει τα καλύτερα αποτελέσαματα για την αναζήτηση. Αυτό ισχύει ιδιαίτερα όταν ο
-distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==κατανεμημένος πίνακας περιεχομένων βρίκεται σε test mode. Τα αποτελέσματα των αναζητήσεων θα είναι πιο σταθερά /(οι επανειλημμένες συνολικές αναζητήσεις θα αποδίδουν πιο όμοια αποτελέσματα/) όσο πιο μεγάλος
-the search time is.==είναι ο χρόνος αναζήτησης.
-You may want to use accesskeys to navigate through the YaCy webinterface:==Μπορεί να θελήσετε να χρησιμοποιήσετε τα accesskeys για να πλοηγηθείτε στη διαδικτυακή διεπαφή του YaCy:
-Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Για τα Windows και τον Internet Explorer: Alt + Accesskey + Enter
-Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Για τα Windows και τον Mozilla/Firefox/Netscape: Alt + Accesskey
-Windows and Opera: Shift \+ Esc \+ Accesskey==Για τα Windows και το Opera: Shift + Esc + Accesskey
-Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter=Για το Macintosh και τον Internet Explorer: Str + Accesskey + Enter
-Macintosh and Safari: Strg \+ Accesskey==Για το Macintosh και το Safari: Strg + Accesskey
-Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Για το Macintosh και τον Mozilla/Firefox/Netscape: Strg + Accesskey
-Macintosh and Opera: Shift \+ Esc \+ Accesskey==Για το Macintosh και το Opera: Shift + Esc + Accesskey
-Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Για το Linux Mandrake και το Galeon/Mozilla: Alt + Accesskey
-All OS and Amaya: Strg \+ Accesskey==Για όλα τα Λ.Σ. και το Amaya: Strg + Accesskey
-
 Search Page==Σελίδα Αναζήτησης
 Network==Δίκτυο
 Status==Κατάσταση
