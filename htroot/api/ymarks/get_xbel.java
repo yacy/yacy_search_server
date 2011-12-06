@@ -131,7 +131,7 @@ public class get_xbel {
 					    		buffer.append(CharacterCoding.unicode2xml(date.toISO8601(), true));
 
 					    		buffer.append(YMarkEntry.BOOKMARK.TAGS.xbel());
-					    		buffer.append(bmk_row.get(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.deflt()));
+					    		buffer.append(CharacterCoding.unicode2xml(bmk_row.get(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.deflt()),true));
 
 					    		buffer.append(YMarkEntry.BOOKMARK.PUBLIC.xbel());
 					    		buffer.append(bmk_row.get(YMarkEntry.BOOKMARK.PUBLIC.key(), YMarkEntry.BOOKMARK.PUBLIC.deflt()));

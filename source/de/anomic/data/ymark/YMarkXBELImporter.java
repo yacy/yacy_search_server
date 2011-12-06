@@ -161,6 +161,10 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         if (XBEL.BOOKMARK.tag().equals(tag)) {
             this.bmk = new YMarkEntry();            
             this.bmk.put(YMarkEntry.BOOKMARK.URL.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.URL.xbel_attrb()));
+            //TODO: include a dynamic loop over all annotation tags 
+            this.bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.TAGS.xbel_attrb()));
+            this.bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.PUBLIC.xbel_attrb()));
+            this.bmk.put(YMarkEntry.BOOKMARK.VISITS.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.VISITS.xbel_attrb()));
             try {
 				date.parseISO8601(atts.getValue(uri, YMarkEntry.BOOKMARK.DATE_ADDED.xbel_attrb()));
 			} catch (ParseException e) {
