@@ -127,7 +127,7 @@ public class ConfigUpdate_p {
                     sb.getLog().logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.getUrl());
                     final File downloaded = updateVersion.downloadRelease();
                     prop.putHTML("candeploy_autoUpdate_downloadedRelease", updateVersion.getName());
-                    final boolean devenvironment = new File(sb.getAppPath(), ".svn").exists();
+                    final boolean devenvironment = new File(sb.getAppPath(), ".git").exists();
                     if (devenvironment) {
                         sb.getLog().logInfo("AUTO-UPDATE: omitting update because this is a development environment");
                         prop.put("candeploy_autoUpdate", "3");
@@ -156,7 +156,7 @@ public class ConfigUpdate_p {
         // version information
         final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
         prop.putHTML("candeploy_versionpp", versionstring);
-        final boolean devenvironment = new File(sb.getAppPath(), ".svn").exists();
+        final boolean devenvironment = new File(sb.getAppPath(), ".git").exists();
         float thisVersion = Float.parseFloat(yacyBuildProperties.getVersion());
         // cut off the SVN Rev in the Version
         try {

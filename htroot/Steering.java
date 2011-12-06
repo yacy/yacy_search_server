@@ -73,7 +73,7 @@ public class Steering {
 
         if (post.containsKey("update")) {
             Log.logInfo("STEERING", "update request from " + requestIP);
-            final boolean devenvironment = new File(sb.getAppPath(), ".svn").exists();
+            final boolean devenvironment = new File(sb.getAppPath(), ".git").exists();
             final String releaseFileName = post.get("releaseinstall", "");
             final File releaseFile = new File(sb.getDataPath(), "DATA/RELEASE/".replace("/", File.separator) + releaseFileName);
             if ((!devenvironment) && (releaseFileName.length() > 0) && (releaseFile.exists())) {

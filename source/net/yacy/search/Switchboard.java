@@ -1788,7 +1788,7 @@ public final class Switchboard extends serverSwitch {
                 // there is a version that is more recent. Load it and re-start with it
                 this.log.logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.getUrl());
                 final File downloaded = updateVersion.downloadRelease();
-                final boolean devenvironment = new File(this.getAppPath(), ".svn").exists();
+                final boolean devenvironment = new File(this.getAppPath(), ".git").exists();
                 if (devenvironment) {
                     this.log.logInfo("AUTO-UPDATE: omitting update because this is a development environment");
                 } else if ((downloaded == null) || (!downloaded.exists()) || (downloaded.length() == 0)) {
