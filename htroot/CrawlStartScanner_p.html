@@ -46,8 +46,15 @@
         <input type="text" name="scanhosts" value="#[scanhosts]#" size="60" maxlength="400" /><br/><br/>
     
         <input type="radio" name="source" id="sourcenet" value="intranet"#(intranet.checked)#:: checked="checked"#(/intranet.checked)# />Full Intranet Scan: #[intranethosts]#<br/>
-        timeout: <input type="text" name="timeout" value ="100" size="4"/> ms, <input type="checkbox" name="bigrange" />bigrange
         #(intranetHint)#::<div class="info">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#
+    </dd>
+    <dt>Time-Out</dt>
+    <dd>
+        <input type="text" name="timeout" value ="100" size="4"/> ms
+    </dd>
+    <dt>Subnet</dt>
+    <dd>
+        <input type="radio" name="subnet" value="24" checked="checked"/>/24 <input type="radio" name="subnet" value="16"/>/16
     </dd>
     <dt>Scan Cache</dt>
     <dd>
