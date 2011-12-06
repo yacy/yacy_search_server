@@ -62,7 +62,7 @@ public class serverSwitch
     private final File configFile;
     private final String configComment;
     private final File dataPath;
-    protected final File appPath;
+    public final File appPath;
     protected boolean firstInit;
     protected Log log;
     protected int serverJobs;

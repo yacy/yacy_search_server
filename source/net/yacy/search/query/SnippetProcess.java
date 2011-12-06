@@ -148,7 +148,7 @@ public class SnippetProcess {
         final long waittimeout = System.currentTimeMillis() + 300;
         if (item == 0) while (
           (!this.rankingProcess.feedingIsFinished() || this.rankingProcess.sizeQueue() > 0) &&
-          this.result.sizeAvailable() < this.query.neededResults() &&
+          this.result.sizeAvailable() < 3 &&
           System.currentTimeMillis() < waittimeout &&
           anyWorkerAlive()
           ) {
@@ -309,6 +309,10 @@ public class SnippetProcess {
                     this.workerThreads[i] = worker;
                     if (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0) break;
                     if (this.result.sizeAvailable() >= neededResults) break;
+                    if (this.rankingProcess.expectMoreRemoteReferences()) {
+                        long wait = this.rankingProcess.waitTimeRecommendation();
+                        if (wait > 0)try {Thread.sleep(wait);} catch ( InterruptedException e ) {}
+                    }
                 }
             }
         } else {
@@ -325,6 +329,10 @@ public class SnippetProcess {
                    }
                    if (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0) break;
                    if (this.result.sizeAvailable() >= neededResults) break;
+                   if (this.rankingProcess.expectMoreRemoteReferences()) {
+                       long wait = this.rankingProcess.waitTimeRecommendation();
+                       if (wait > 0)try {Thread.sleep(wait);} catch ( InterruptedException e ) {}
+                   }
                 }
             }
         }

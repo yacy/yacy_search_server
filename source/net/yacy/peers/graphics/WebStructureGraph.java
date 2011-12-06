@@ -62,6 +62,7 @@ import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
+import net.yacy.search.Switchboard;
 
 public class WebStructureGraph
 {
@@ -194,6 +195,7 @@ public class WebStructureGraph
         //final String refhashp = ASCII.String(lro.url.hash(), 6, 6); // ref hash part
         String nexturlhash;
         for ( final MultiProtocolURI u : lro.globalRefURLs ) {
+            if (Switchboard.getSwitchboard().shallTerminate()) break;
             final byte[] nexturlhashb = new DigestURI(u).hash();
             assert nexturlhashb != null;
             if ( nexturlhashb != null ) {

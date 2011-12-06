@@ -2598,7 +2598,7 @@ public final class Switchboard extends serverSwitch {
                 try {
                     links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE);
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    //Log.logException(e);
                     return;
                 }
                 final Iterator<MultiProtocolURI> i = links.keySet().iterator();
@@ -2858,6 +2858,10 @@ public final class Switchboard extends serverSwitch {
         (new delayedShutdown(this, delay, reason)).start();
     }
 
+    public boolean shallTerminate() {
+        return this.terminate;
+    }
+    
     public void terminate(final String reason) {
         this.terminate = true;
         this.log.logInfo("caught terminate request: " + reason);

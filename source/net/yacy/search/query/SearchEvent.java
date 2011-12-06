@@ -183,8 +183,6 @@ public final class SearchEvent
                     + remote_maxcount
                     + " URLs");
                 this.rankingProcess.moreFeeders(this.primarySearchThreads.length);
-                this.rankingProcess.setExpectedRemoteReferences(this.primarySearchThreads.length
-                    * remote_maxcount);
                 EventTracker.update(
                     EventTracker.EClass.SEARCH,
                     new ProfilingGraph.EventSearch(

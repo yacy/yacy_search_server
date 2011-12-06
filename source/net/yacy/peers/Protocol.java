@@ -617,6 +617,7 @@ public final class Protocol
         // duetime    : maximum time that a peer should spent to create a result
 
         final long timestamp = System.currentTimeMillis();
+        containerCache.addExpectedRemoteReferences(count);
         SearchResult result;
         try {
             result =
@@ -783,7 +784,7 @@ public final class Protocol
         // insert one container into the search result buffer
         // one is enough, only the references are used, not the word
         containerCache.add(container[0], false, target.getName() + "/" + target.hash, result.joincount, true);
-        containerCache.decExpectedRemoteReferences(count - container[0].size());
+        containerCache.addExpectedRemoteReferences(-count);
 
         // insert the containers to the index
         for ( final ReferenceContainer<WordReference> c : container ) {

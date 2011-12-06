@@ -68,7 +68,7 @@ import net.yacy.search.snippet.ResultEntry;
 public final class RWIProcess extends Thread
 {
 
-    private static final long maxWaitPerResult = 30;
+    private static final long maxWaitPerResult = 300;
     private static final int maxDoubleDomAll = 1000, maxDoubleDomSpecial = 10000;
 
     private final QueryParams query;
@@ -81,8 +81,8 @@ public final class RWIProcess extends Thread
 
     private int remote_resourceSize, remote_indexCount, remote_peerCount;
     private int local_indexCount;
-    private int initialExpectedRemoteReferences;
-    private final AtomicInteger expectedRemoteReferences, receivedRemoteReferences;
+    private final AtomicInteger maxExpectedRemoteReferences, expectedRemoteReferences,
+        receivedRemoteReferences;
     private final WeakPriorityBlockingQueue<WordReferenceVars> stack;
     private final AtomicInteger feeders;
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
@@ -133,20 +133,31 @@ public final class RWIProcess extends Thread
         this.ref = new ConcurrentScoreMap<String>();
         this.feeders = new AtomicInteger(1);
         this.startTime = System.currentTimeMillis();
-        this.initialExpectedRemoteReferences = 0;
+        this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.receivedRemoteReferences = new AtomicInteger(0);
     }
 
-    public void setExpectedRemoteReferences(int expectedRemoteReferences) {
-        this.initialExpectedRemoteReferences = expectedRemoteReferences;
-        this.expectedRemoteReferences.set(expectedRemoteReferences);
+    public void addExpectedRemoteReferences(int x) {
+        if ( x > 0 ) {
+            this.maxExpectedRemoteReferences.addAndGet(x);
+        }
+        this.expectedRemoteReferences.addAndGet(x);
     }
 
-    public void decExpectedRemoteReferences(int x) {
-        this.expectedRemoteReferences.addAndGet(-x);
+    public boolean expectMoreRemoteReferences() {
+        return this.expectedRemoteReferences.get() > 0;
     }
-
+    
+    public long waitTimeRecommendation() {
+        return
+            this.maxExpectedRemoteReferences.get() == 0 ? 0 :
+                Math.min(maxWaitPerResult,
+                    Math.min(
+                        maxWaitPerResult * this.expectedRemoteReferences.get() / this.maxExpectedRemoteReferences.get(),
+                        maxWaitPerResult * (100 - Math.min(100, this.receivedRemoteReferences.get())) / 100));
+    }
+    
     public QueryParams getQuery() {
         return this.query;
     }
@@ -221,13 +232,14 @@ public final class RWIProcess extends Thread
 
         // normalize entries
         final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
+        int is = index.size();
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
             this.query.id(true),
             SearchEvent.Type.NORMALIZING,
             resourceName,
-            index.size(),
+            is,
             System.currentTimeMillis() - timer), false);
-        this.receivedRemoteReferences.addAndGet(index.size());
+        if (!local) this.receivedRemoteReferences.addAndGet(is);
 
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
@@ -419,19 +431,15 @@ public final class RWIProcess extends Thread
         try {
             //System.out.println("stack.poll: feeders = " + this.feeders + ", stack.sizeQueue = " + stack.sizeQueue());
             int loops = 0; // a loop counter to terminate the reading if all the results are from the same domain
-            final long timeout = System.currentTimeMillis() + waitingtime;
             // wait some time if we did not get so much remote results so far to get a better ranking over remote results
             // we wait at most 30 milliseconds to get a maximum total waiting time of 300 milliseconds for 10 results
-            long wait =
-                this.receivedRemoteReferences.get() == 0 ? maxWaitPerResult : Math.min(
-                    maxWaitPerResult,
-                    maxWaitPerResult
-                        * this.initialExpectedRemoteReferences
-                        / this.receivedRemoteReferences.get());
+            long wait = waitTimeRecommendation();
             if ( wait > 0 ) {
+                System.out.println("*** RWIProcess extra wait: " + wait + "ms; expectedRemoteReferences = " + this.expectedRemoteReferences.get() + ", receivedRemoteReferences = " + this.receivedRemoteReferences.get() + ", initialExpectedRemoteReferences = " + this.maxExpectedRemoteReferences.get());
                 Thread.sleep(wait);
             }
             // loop as long as we can expect that we should get more results
+            final long timeout = System.currentTimeMillis() + waitingtime;
             while ( ((!feedingIsFinished() && this.addRunning) || this.stack.sizeQueue() > 0)
                 && (this.query.itemsPerPage < 1 || loops++ < this.query.itemsPerPage) ) {
                 if ( waitingtime <= 0 ) {
@@ -526,7 +534,7 @@ public final class RWIProcess extends Thread
      * applied ranking. If there are no more entries left or the timeout limit is reached then null is
      * returned. The caller may distinguish the timeout case from the case where there will be no more also in
      * the future by calling this.feedingIsFinished()
-     * 
+     *
      * @param skipDoubleDom should be true if it is wanted that double domain entries are skipped
      * @param waitingtime the time this method may take for a result computation
      * @return a metadata entry for a url

@@ -44,7 +44,8 @@ public enum ContentDomain {
     }
     
     public static ContentDomain contentdomParser(final String dom) {
-        if ("text".equals(dom)) return TEXT;
+        if ("all".equals(dom)) return ALL;
+        else if ("text".equals(dom)) return TEXT;
         else if ("image".equals(dom)) return IMAGE;
         else if ("audio".equals(dom)) return AUDIO;
         else if ("video".equals(dom)) return VIDEO;
@@ -54,7 +55,8 @@ public enum ContentDomain {
     
     @Override
     public String toString() {
-        if (this == TEXT) return "text";
+        if (this == ALL) return "all";
+        else if (this == TEXT) return "text";
         else if (this == IMAGE) return "image";
         else if (this == AUDIO) return "audio";
         else if (this == VIDEO) return "video";
