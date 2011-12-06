@@ -42,7 +42,8 @@ import java.util.zip.ZipFile;
 import net.yacy.document.StringBuilderComparator;
 import net.yacy.kelondro.logging.Log;
 
-public class GeonamesLocalization implements Localization {
+public class GeonamesLocalization implements Localization
+{
 
     /*
         The main 'geoname' table has the following fields :
@@ -68,7 +69,7 @@ public class GeonamesLocalization implements Localization {
         modification date : date of last modification in yyyy-MM-dd format
      */
 
-    private final Map<Integer, Location>  id2loc;
+    private final Map<Integer, Location> id2loc;
     private final TreeMap<StringBuilder, List<Integer>> name2ids;
     private final File file;
 
@@ -76,17 +77,20 @@ public class GeonamesLocalization implements Localization {
         // this is a processing of the cities1000.zip file from http://download.geonames.org/export/dump/
 
         this.file = file;
-        this.id2loc    = new HashMap<Integer, Location>();
-        this.name2ids  = new TreeMap<StringBuilder, List<Integer>>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+        this.id2loc = new HashMap<Integer, Location>();
+        this.name2ids =
+            new TreeMap<StringBuilder, List<Integer>>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
 
-        if (file == null || !file.exists()) return;
+        if ( file == null || !file.exists() ) {
+            return;
+        }
         BufferedReader reader;
         try {
             final ZipFile zf = new ZipFile(file);
             final ZipEntry ze = zf.getEntry("cities1000.txt");
             final InputStream is = zf.getInputStream(ze);
             reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        } catch (final IOException e) {
+        } catch ( final IOException e ) {
             Log.logException(e);
             return;
         }
@@ -96,84 +100,121 @@ public class GeonamesLocalization implements Localization {
             String line;
             String[] fields;
             Set<StringBuilder> locnames;
-            while ((line = reader.readLine()) != null) {
-                if (line.length() == 0) continue;
+            while ( (line = reader.readLine()) != null ) {
+                if ( line.length() == 0 ) {
+                    continue;
+                }
                 fields = line.split("\t");
                 final int id = Integer.parseInt(fields[0]);
                 locnames = new HashSet<StringBuilder>();
                 locnames.add(new StringBuilder(fields[1]));
                 locnames.add(new StringBuilder(fields[2]));
-                for (final String s: fields[3].split(",")) locnames.add(new StringBuilder(s));
-                final Location c = new Location(Float.parseFloat(fields[5]), Float.parseFloat(fields[4]), fields[1]);
+                for ( final String s : fields[3].split(",") ) {
+                    locnames.add(new StringBuilder(s));
+                }
+                final Location c =
+                    new Location(Float.parseFloat(fields[5]), Float.parseFloat(fields[4]), fields[1]);
                 c.setPopulation((int) Long.parseLong(fields[14]));
                 this.id2loc.put(id, c);
-                for (final StringBuilder name: locnames) {
+                for ( final StringBuilder name : locnames ) {
                     List<Integer> locs = this.name2ids.get(name);
-                    if (locs == null) locs = new ArrayList<Integer>(1);
+                    if ( locs == null ) {
+                        locs = new ArrayList<Integer>(1);
+                    }
                     locs.add(id);
                     this.name2ids.put(name, locs);
                 }
             }
-        } catch (final IOException e) {
+        } catch ( final IOException e ) {
             Log.logException(e);
         }
     }
 
+    @Override
     public int locations() {
         return this.id2loc.size();
     }
 
+    @Override
     public TreeSet<Location> find(final String anyname, final boolean locationexact) {
         final Set<Integer> r = new HashSet<Integer>();
         List<Integer> c;
         final StringBuilder an = new StringBuilder(anyname);
-        if (locationexact) {
-            c = this.name2ids.get(anyname); if (c != null) r.addAll(c);
+        if ( locationexact ) {
+            c = this.name2ids.get(an);
+            if ( c != null ) {
+                r.addAll(c);
+            }
         } else {
             final SortedMap<StringBuilder, List<Integer>> cities = this.name2ids.tailMap(an);
-            for (final Map.Entry<StringBuilder, List<Integer>> e: cities.entrySet()) {
-                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(e.getKey(), an)) r.addAll(e.getValue()); else break;
+            for ( final Map.Entry<StringBuilder, List<Integer>> e : cities.entrySet() ) {
+                if ( StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(e.getKey(), an) ) {
+                    r.addAll(e.getValue());
+                } else {
+                    break;
+                }
             }
         }
         final TreeSet<Location> a = new TreeSet<Location>();
-        for (final Integer e: r) {
+        for ( final Integer e : r ) {
             final Location w = this.id2loc.get(e);
-            if (w != null) a.add(w);
+            if ( w != null ) {
+                a.add(w);
+            }
         }
         return a;
     }
 
+    @Override
     public Set<String> recommend(final String s) {
         final Set<String> a = new HashSet<String>();
         final StringBuilder an = new StringBuilder(s);
-        if (s.length() == 0) return a;
+        if ( s.length() == 0 ) {
+            return a;
+        }
         final SortedMap<StringBuilder, List<Integer>> t = this.name2ids.tailMap(an);
-        for (final StringBuilder r: t.keySet()) {
-            if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, an)) a.add(r.toString()); else break;
+        for ( final StringBuilder r : t.keySet() ) {
+            if ( StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, an) ) {
+                a.add(r.toString());
+            } else {
+                break;
+            }
         }
         return a;
     }
 
+    @Override
     public Set<StringBuilder> recommend(final StringBuilder s) {
         final Set<StringBuilder> a = new HashSet<StringBuilder>();
-        if (s.length() == 0) return a;
+        if ( s.length() == 0 ) {
+            return a;
+        }
         final SortedMap<StringBuilder, List<Integer>> t = this.name2ids.tailMap(s);
-        for (final StringBuilder r: t.keySet()) {
-            if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, s)) a.add(r); else break;
+        for ( final StringBuilder r : t.keySet() ) {
+            if ( StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, s) ) {
+                a.add(r);
+            } else {
+                break;
+            }
         }
         return a;
     }
 
+    @Override
     public String nickname() {
         return this.file.getName();
     }
 
+    @Override
     public int hashCode() {
         return nickname().hashCode();
     }
 
+    @Override
     public boolean equals(final Object other) {
-        if (!(other instanceof Localization)) return false;
+        if ( !(other instanceof Localization) ) {
+            return false;
+        }
         return nickname().equals(((Localization) other).nickname());
     }
 }

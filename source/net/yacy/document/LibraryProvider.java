@@ -45,7 +45,8 @@ import net.yacy.document.geolocalization.OverarchingLocalization;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
-public class LibraryProvider {
+public class LibraryProvider
+{
 
     private static final String path_to_source_dictionaries = "source";
     private static final String path_to_did_you_mean_dictionaries = "didyoumean";
@@ -58,16 +59,19 @@ public class LibraryProvider {
     private static File dictRoot = null;
 
     public static enum Dictionary {
-        GEODB0("geo0", "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz"),
-        GEODB1("geo1", "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02621_2010-03-16.sql.gz"),
-        GEON0("geon0", "http://download.geonames.org/export/dump/cities1000.zip"),
-        DRW0("drw0", "http://www.ids-mannheim.de/kl/derewo/derewo-v-100000t-2009-04-30-0.1.zip");
+        GEODB0(
+            "geo0",
+            "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz" ),
+        GEODB1( "geo1", "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02624_2011-10-17.sql.gz" ),
+        GEON0( "geon0", "http://download.geonames.org/export/dump/cities1000.zip" ),
+        DRW0( "drw0", "http://www.ids-mannheim.de/kl/derewo/derewo-v-100000t-2009-04-30-0.1.zip" );
 
         public String nickname, url, filename;
+
         private Dictionary(final String nickname, final String url) {
             try {
                 this.filename = new MultiProtocolURI(url).getFileName();
-            } catch (final MalformedURLException e) {
+            } catch ( final MalformedURLException e ) {
                 assert false;
             }
             this.nickname = nickname;
@@ -77,41 +81,45 @@ public class LibraryProvider {
         public File file() {
             return new File(dictSource, this.filename);
         }
+
         public File fileDisabled() {
             return new File(dictSource, this.filename + disabledExtension);
         }
     }
 
     /**
-     * initialize the LibraryProvider as static class.
-     * This assigns default paths, and initializes the dictionary classes
-     * Additionally, if default dictionaries are given in the source path,
-     * they are translated into the input format inside the DATA/DICTIONARIES directory
-     *
+     * initialize the LibraryProvider as static class. This assigns default paths, and initializes the
+     * dictionary classes Additionally, if default dictionaries are given in the source path, they are
+     * translated into the input format inside the DATA/DICTIONARIES directory
+     * 
      * @param pathToSource
      * @param pathToDICTIONARIES
      */
     public static void initialize(final File rootPath) {
-    	dictSource = new File(rootPath, path_to_source_dictionaries);
-    	if (!dictSource.exists()) dictSource.mkdirs();
-    	dictRoot = rootPath;
+        dictSource = new File(rootPath, path_to_source_dictionaries);
+        if ( !dictSource.exists() ) {
+            dictSource.mkdirs();
+        }
+        dictRoot = rootPath;
 
         // initialize libraries
-    	integrateDeReWo();
-    	initDidYouMean();
-    	integrateOpenGeoDB();
-    	integrateGeonames();
+        integrateDeReWo();
+        initDidYouMean();
+        integrateOpenGeoDB();
+        integrateGeonames();
     }
 
     public static void integrateOpenGeoDB() {
         final File geo1 = Dictionary.GEODB1.file();
         final File geo0 = Dictionary.GEODB0.file();
-        if (geo1.exists()) {
-            if (geo0.exists()) geo0.renameTo(Dictionary.GEODB0.fileDisabled());
+        if ( geo1.exists() ) {
+            if ( geo0.exists() ) {
+                geo0.renameTo(Dictionary.GEODB0.fileDisabled());
+            }
             geoLoc.addLocalization(Dictionary.GEODB1.nickname, new OpenGeoDBLocalization(geo1, false));
             return;
         }
-        if (geo0.exists()) {
+        if ( geo0.exists() ) {
             geoLoc.addLocalization(Dictionary.GEODB0.nickname, new OpenGeoDBLocalization(geo0, false));
             return;
         }
@@ -119,15 +127,17 @@ public class LibraryProvider {
 
     public static void integrateGeonames() {
         final File geon = Dictionary.GEON0.file();
-        if (geon.exists()) {
+        if ( geon.exists() ) {
             geoLoc.addLocalization(Dictionary.GEON0.nickname, new GeonamesLocalization(geon));
             return;
         }
     }
 
     public static void initDidYouMean() {
-    	final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
-        if (!dymDict.exists()) dymDict.mkdirs();
+        final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
+        if ( !dymDict.exists() ) {
+            dymDict.mkdirs();
+        }
         dymLib = new WordCache(dymDict);
     }
 
@@ -141,15 +151,17 @@ public class LibraryProvider {
     public static void integrateDeReWo() {
         // translate input files (once..)
         final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
-        if (!dymDict.exists()) dymDict.mkdirs();
+        if ( !dymDict.exists() ) {
+            dymDict.mkdirs();
+        }
         final File derewoInput = LibraryProvider.Dictionary.DRW0.file();
         final File derewoOutput = new File(dymDict, derewoInput.getName() + ".words");
-        if (!derewoOutput.exists() && derewoInput.exists()) {
+        if ( !derewoOutput.exists() && derewoInput.exists() ) {
             // create the translation of the derewo file (which is easy in this case)
             final ArrayList<String> derewo = loadDeReWo(derewoInput, true);
             try {
                 writeWords(derewoOutput, derewo);
-            } catch (final IOException e) {
+            } catch ( final IOException e ) {
                 Log.logException(e);
             }
         }
@@ -181,14 +193,18 @@ public class LibraryProvider {
 
     private static Set<String> sortUnique(final List<String> list) {
         final Set<String> s = new TreeSet<String>();
-        for (final String t: list) s.add(t);
+        for ( final String t : list ) {
+            s.add(t);
+        }
         return s;
     }
 
     private static void writeWords(final File f, final ArrayList<String> list) throws IOException {
         final Set<String> s = sortUnique(list);
         final PrintWriter w = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-        for (final String t: s) w.println(t);
+        for ( final String t : s ) {
+            w.println(t);
+        }
         w.close();
     }
 
@@ -207,10 +223,10 @@ public class LibraryProvider {
             }
             */
             derewoTxtEntry = zip.getInputStream(zip.getEntry("derewo-v-100000t-2009-04-30-0.1"));
-        } catch (final ZipException e) {
+        } catch ( final ZipException e ) {
             Log.logException(e);
             return list;
-        } catch (final IOException e) {
+        } catch ( final IOException e ) {
             Log.logException(e);
             return list;
         }
@@ -221,8 +237,10 @@ public class LibraryProvider {
             String line;
 
             // read until text starts
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith("# -----")) break;
+            while ( (line = reader.readLine()) != null ) {
+                if ( line.startsWith("# -----") ) {
+                    break;
+                }
             }
             // read empty line
             line = reader.readLine();
@@ -231,22 +249,32 @@ public class LibraryProvider {
             int p;
             //int c;
             String w;
-            while ((line = reader.readLine()) != null) {
+            while ( (line = reader.readLine()) != null ) {
                 line = line.trim();
-                p = line.indexOf(' ',0);
-                if (p > 0) {
+                p = line.indexOf(' ', 0);
+                if ( p > 0 ) {
                     //c = Integer.parseInt(line.substring(p + 1));
                     //if (c < 1) continue;
-                    w = (toLowerCase) ? line.substring(0, p).trim().toLowerCase() : line.substring(0, p).trim();
-                    if (w.length() < 4) continue;
+                    w =
+                        (toLowerCase) ? line.substring(0, p).trim().toLowerCase() : line
+                            .substring(0, p)
+                            .trim();
+                    if ( w.length() < 4 ) {
+                        continue;
+                    }
                     list.add(w);
                 }
             }
             reader.close();
-        } catch (final IOException e) {
+        } catch ( final IOException e ) {
             Log.logException(e);
         } finally {
-            if (reader != null) try { reader.close(); } catch (final Exception e) {}
+            if ( reader != null ) {
+                try {
+                    reader.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
         return list;
     }
@@ -256,7 +284,7 @@ public class LibraryProvider {
         initialize(new File(here, "DATA/DICTIONARIES"));
         System.out.println("dymDict-size = " + dymLib.size());
         final Set<StringBuilder> r = dymLib.recommend(new StringBuilder("da"));
-        for (final StringBuilder s: r) {
+        for ( final StringBuilder s : r ) {
             System.out.println("$ " + s);
         }
         System.out.println("recommendations: " + r.size());
