@@ -435,7 +435,7 @@ public final class RWIProcess extends Thread
             // we wait at most 30 milliseconds to get a maximum total waiting time of 300 milliseconds for 10 results
             long wait = waitTimeRecommendation();
             if ( wait > 0 ) {
-                System.out.println("*** RWIProcess extra wait: " + wait + "ms; expectedRemoteReferences = " + this.expectedRemoteReferences.get() + ", receivedRemoteReferences = " + this.receivedRemoteReferences.get() + ", initialExpectedRemoteReferences = " + this.maxExpectedRemoteReferences.get());
+                //System.out.println("*** RWIProcess extra wait: " + wait + "ms; expectedRemoteReferences = " + this.expectedRemoteReferences.get() + ", receivedRemoteReferences = " + this.receivedRemoteReferences.get() + ", initialExpectedRemoteReferences = " + this.maxExpectedRemoteReferences.get());
                 Thread.sleep(wait);
             }
             // loop as long as we can expect that we should get more results
