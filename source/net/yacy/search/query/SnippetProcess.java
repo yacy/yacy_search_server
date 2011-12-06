@@ -189,6 +189,7 @@ public class SnippetProcess {
         }
         final ResultEntry re = entry.getElement();
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "retrieved, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
+        if (item == this.query.offset + this.query.itemsPerPage - 1) stopAllWorker(); // we don't need more
         return re;
     }
 
@@ -334,6 +335,16 @@ public class SnippetProcess {
                        if (wait > 0)try {Thread.sleep(wait);} catch ( InterruptedException e ) {}
                    }
                 }
+            }
+        }
+    }
+    
+    public void stopAllWorker() {
+        synchronized(this.workerThreads) {
+            for (int i = 0; i < this.workerThreads.length; i++) {
+               if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) continue;
+               this.workerThreads[i].pleaseStop();
+               this.workerThreads[i].interrupt();
             }
         }
     }
