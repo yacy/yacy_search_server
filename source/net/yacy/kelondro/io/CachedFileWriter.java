@@ -48,58 +48,65 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         this.cachelen = 0;
     }	
     
+    @Override
     public final synchronized long length() throws IOException {
         checkReopen();
         return this.RAFile.length();
     }
     
+    @Override
     public final synchronized void setLength(long length) throws IOException {
         checkReopen();
-        cachelen = 0;
-        RAFile.setLength(length);
+        this.cachelen = 0;
+        this.RAFile.setLength(length);
     }
     
+    @Override
     public final synchronized long available() throws IOException {
         checkReopen();
-        return this.length() - RAFile.getFilePointer();
+        return this.length() - this.RAFile.getFilePointer();
     }
 
+    @Override
     public final synchronized void readFully(final byte[] b, final int off, int len) throws IOException {
         checkReopen();
-        long seek = RAFile.getFilePointer();
-        if (cache != null && cachestart <= seek && cachelen - seek + cachestart >= len) {
+        long seek = this.RAFile.getFilePointer();
+        if (this.cache != null && this.cachestart <= seek && this.cachelen - seek + this.cachestart >= len) {
             // read from cache
             //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": CACHE HIT at " + seek);
-            System.arraycopy(cache, (int) (seek - cachestart), b, off, len);
-            RAFile.seek(seek + len);
+            System.arraycopy(this.cache, (int) (seek - this.cachestart), b, off, len);
+            this.RAFile.seek(seek + len);
             return;
         }
-        if (cache == null || cache.length < len) {
+        if (this.cache == null || this.cache.length < len) {
             // cannot fill cache here
-            RAFile.readFully(b, off, len);
+            this.RAFile.readFully(b, off, len);
             return;
         }
         // we fill the cache here
         long available = this.RAFile.length() - seek;
-        if (available < (long) len) throw new IOException("EOF, available = " + available + ", requested = " + len + ", this.RAFile.length() = " + this.RAFile.length() + ", seek = " + seek);
-        if (cachestart + cachelen == seek && cache.length - cachelen >= len) {
-            RAFile.readFully(cache, cachelen, len);
+        if (available == -seek) return; // we don't know how this happens but we just silently ignore it by now TODO:fixme
+        //System.out.println("*** available = " + available);
+        if (available < len) throw new IOException("EOF, available = " + available + ", requested = " + len + ", this.RAFile.length() = " + this.RAFile.length() + ", seek = " + seek);
+        if (this.cachestart + this.cachelen == seek && this.cache.length - this.cachelen >= len) {
+            this.RAFile.readFully(this.cache, this.cachelen, len);
             //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": append fill " + len + " bytes");
-            System.arraycopy(cache, cachelen, b, off, len);
-            cachelen += len;
+            System.arraycopy(this.cache, this.cachelen, b, off, len);
+            this.cachelen += len;
         } else {
             // fill the cache as much as possible
-            int m = (int) Math.min(available, (long) cache.length);
-            RAFile.readFully(cache, 0, m);
-            cachestart = seek;
-            cachelen = m;
-            if (m != len) RAFile.seek(seek + len);
+            int m = (int) Math.min(available, this.cache.length);
+            this.RAFile.readFully(this.cache, 0, m);
+            this.cachestart = seek;
+            this.cachelen = m;
+            if (m != len) this.RAFile.seek(seek + len);
             //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": replace fill " + len + " bytes");
-            System.arraycopy(cache, 0, b, off, len);
+            System.arraycopy(this.cache, 0, b, off, len);
         }
         
     }
 
+    @Override
     public final synchronized void write(final byte[] b, final int off, final int len) throws IOException {
         checkReopen();
         //assert len > 0;
@@ -127,19 +134,21 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
             // delete cache
             this.cachelen = 0;
         }
-        RAFile.write(b, off, len);
+        this.RAFile.write(b, off, len);
     }
 
+    @Override
     public final synchronized void seek(final long pos) throws IOException {
         checkReopen();
-        RAFile.seek(pos);
+        this.RAFile.seek(pos);
     }
 
+    @Override
     public final synchronized void close() {
-        if (RAFile != null) try {
-            try{RAFile.getChannel().close();} catch (IOException e) {}
+        if (this.RAFile != null) try {
+            try{this.RAFile.getChannel().close();} catch (IOException e) {}
             //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
-            RAFile.close();
+            this.RAFile.close();
             //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
         } catch (IOException e) {
             Log.logException(e);
