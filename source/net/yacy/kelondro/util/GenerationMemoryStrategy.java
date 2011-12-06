@@ -49,7 +49,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return bytes
      */
     protected final long free() {
-        return youngUsage(false).getCommitted() - youngUsage(false).getUsed();
+        return getUsage(eden, false).getCommitted() - getUsage(eden, false).getUsed();
     }
     
     /**
@@ -115,7 +115,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return bytes available to allocate in Eden Space (Young Generation)
      */
     private final long youngAvailable() {
-    	final MemoryUsage usage = youngUsage(true);
+    	final MemoryUsage usage = getUsage(eden, true);
     	return usage.getCommitted() - usage.getUsed();
     }
     
@@ -123,7 +123,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return bytes available to allocate in Tenured Space (Old Generation)
      */
     private final long oldAvailable() {
-    	final MemoryUsage usage = oldUsage(true);
+    	final MemoryUsage usage = getUsage(old, true);
     	return usage.getCommitted() - usage.getUsed();
     }
     
@@ -143,7 +143,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return if survivor fits into old space
      */
     private boolean properState(final boolean force) {
-    	final long surv = force? Math.max(M, survivorUsage(false).getUsed()) : survivorUsage(false).getCommitted();
+    	final long surv = force? Math.max(M, getUsage(survivor, false).getUsed()) : getUsage(survivor, false).getCommitted();
     	return surv < oldAvailable();
     }
     
@@ -154,52 +154,28 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      */
     protected long recommendHeapSize() {
     	// the heap/old-ration is jvm-specific and can be changed by parameter - using this + 20% buffer
-    	final double factor = 1.2 * (double)heap.getHeapMemoryUsage().getMax() / (double)oldUsage(false).getMax();
+    	final double factor = 1.2 * (double)heap.getHeapMemoryUsage().getMax() / (double)getUsage(old, false).getMax();
     	// current needed space in old gen
-    	final long neededOld = oldUsage(true).getUsed() + survivorUsage(false).getMax();
+    	final long neededOld = getUsage(old, true).getUsed() + getUsage(survivor, false).getMax();
     	return (long) (neededOld * factor);
     }
     
     /**
      * @param collected specifies whether trying to get the memory usage after the jvm recycled unused objects
-     * @return MemoryUsage of Eden Space aka Young Gen
+     * @return MemoryUsage of given MemoryPoolMXBean
      */
-    private MemoryUsage youngUsage(final boolean collected) {
+    private MemoryUsage getUsage(final MemoryPoolMXBean bean, final boolean collected) {
     	if (collected) {
-    		final MemoryUsage usage = eden.getCollectionUsage();
-    		if (usage != null) return usage;
+    		try {
+				final MemoryUsage usage = bean.getCollectionUsage();
+				if (usage != null) return usage;
+			} catch (final IllegalArgumentException e) {
+				log.logWarning(name + ": ", e);
+			}
     		error = true;
-    		log.logWarning(name + ": no young colletion usage available");
+    		log.logWarning(name + ": no colletion usage available at " + bean.getName());
     	}
-    	return eden.getUsage();
-    }
-    
-    /**
-     * @param collected specifies whether trying to get the memory usage after the jvm recycled unused objects
-     * @return MemoryUsage of Survivor
-     */
-    private MemoryUsage survivorUsage(final boolean collected) {
-    	if (collected) {
-    		final MemoryUsage usage = survivor.getCollectionUsage();
-    		if (usage != null) return usage;
-    		error = true;
-    		log.logWarning(name + ": no survivior colletion usage available");
-    	}
-    	return survivor.getUsage();
-    }
-    
-    /**
-     * @param collected specifies whether trying to get the memory usage after the jvm recycled unused objects
-     * @return MemoryUsage of Old Gen
-     */
-    private MemoryUsage oldUsage(final boolean collected) {
-    	if (collected) {
-    		final MemoryUsage usage = old.getCollectionUsage();
-    		if (usage != null) return usage;
-    		error = true;
-    		log.logWarning(name + ": no old colletion usage available");
-    	}
-    	return old.getUsage();
+    	return bean.getUsage();
     }
     
     private boolean initPoolBeans() {
