@@ -58,11 +58,25 @@ import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ResultEntry;
 import de.anomic.data.WorkTables;
 
-public final class SearchEvent {
+public final class SearchEvent
+{
 
     public enum Type {
-        INITIALIZATION, COLLECTION, JOIN, PRESORT, URLFETCH, NORMALIZING, FINALIZATION,
-        REMOTESEARCH_START, REMOTESEARCH_TERMINATE, ABSTRACTS, CLEANUP, SNIPPETFETCH_START, ONERESULT, REFERENCECOLLECTION, RESULTLIST;
+        INITIALIZATION,
+        COLLECTION,
+        JOIN,
+        PRESORT,
+        URLFETCH,
+        NORMALIZING,
+        FINALIZATION,
+        REMOTESEARCH_START,
+        REMOTESEARCH_TERMINATE,
+        ABSTRACTS,
+        CLEANUP,
+        SNIPPETFETCH_START,
+        ONERESULT,
+        REFERENCECOLLECTION,
+        RESULTLIST;
     }
 
     public static final int max_results_preparation = 3000;
@@ -87,24 +101,30 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     private final ReferenceOrder order;
 
-    protected SearchEvent(final QueryParams query,
-                             final SeedDB peers,
-                             final WorkTables workTables,
-                             final SortedMap<byte[], String> preselectedPeerHashes,
-                             final boolean generateAbstracts,
-                             final LoaderDispatcher loader,
-                             final int remote_maxcount,
-                             final long remote_maxtime,
-                             final int burstRobinsonPercent,
-                             final int burstMultiwordPercent,
-                             final boolean deleteIfSnippetFail) {
-        if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);
+    protected SearchEvent(
+        final QueryParams query,
+        final SeedDB peers,
+        final WorkTables workTables,
+        final SortedMap<byte[], String> preselectedPeerHashes,
+        final boolean generateAbstracts,
+        final LoaderDispatcher loader,
+        final int remote_maxcount,
+        final long remote_maxtime,
+        final int burstRobinsonPercent,
+        final int burstMultiwordPercent,
+        final boolean deleteIfSnippetFail) {
+        if ( MemoryControl.available() < 1024 * 1024 * 100 ) {
+            SearchEventCache.cleanupEvents(true);
+        }
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
         this.workTables = workTables;
         this.query = query;
-        this.secondarySearchSuperviser = (this.query.queryHashes.size() > 1) ? new SecondarySearchSuperviser() : null; // generate abstracts only for combined searches
-        if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
+        this.secondarySearchSuperviser =
+            (this.query.queryHashes.size() > 1) ? new SecondarySearchSuperviser() : null; // generate abstracts only for combined searches
+        if ( this.secondarySearchSuperviser != null ) {
+            this.secondarySearchSuperviser.start();
+        }
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
@@ -115,7 +135,11 @@ public final class SearchEvent {
         this.IAneardhthash = null;
         this.localSearchThread = null;
         this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
-        final boolean remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && peers.mySeed().getFlagAcceptRemoteIndex()));
+        final boolean remote =
+            (peers != null && peers.sizeConnected() > 0)
+                && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && peers
+                    .mySeed()
+                    .getFlagAcceptRemoteIndex()));
         final long start = System.currentTimeMillis();
 
         // initialize a ranking process that is the target for data
@@ -125,10 +149,11 @@ public final class SearchEvent {
         // start a local search concurrently
         this.rankingProcess.start();
 
-        if (remote) {
+        if ( remote ) {
             // start global searches
             final long timer = System.currentTimeMillis();
-            this.primarySearchThreads = (this.query.queryHashes.isEmpty()) ? null : RemoteSearch.primaryRemoteSearches(
+            this.primarySearchThreads =
+                (this.query.queryHashes.isEmpty()) ? null : RemoteSearch.primaryRemoteSearches(
                     QueryParams.hashSet2hashString(this.query.queryHashes),
                     QueryParams.hashSet2hashString(this.query.excludeHashes),
                     this.query.prefer,
@@ -151,22 +176,40 @@ public final class SearchEvent {
                     (this.query.domType == QueryParams.Searchdom.GLOBAL) ? null : preselectedPeerHashes,
                     burstRobinsonPercent,
                     burstMultiwordPercent);
-            if (this.primarySearchThreads != null) {
-                Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + remote_maxcount + " URLs");
+            if ( this.primarySearchThreads != null ) {
+                Log.logFine("SEARCH_EVENT", "STARTING "
+                    + this.primarySearchThreads.length
+                    + " THREADS TO CATCH EACH "
+                    + remote_maxcount
+                    + " URLs");
                 this.rankingProcess.moreFeeders(this.primarySearchThreads.length);
-                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
+                this.rankingProcess.setExpectedRemoteReferences(this.primarySearchThreads.length
+                    * remote_maxcount);
+                EventTracker.update(
+                    EventTracker.EClass.SEARCH,
+                    new ProfilingGraph.EventSearch(
+                        this.query.id(true),
+                        Type.REMOTESEARCH_START,
+                        "",
+                        this.primarySearchThreads.length,
+                        System.currentTimeMillis() - timer),
+                    false);
                 // finished searching
-                Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + this.primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+                Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO "
+                    + this.primarySearchThreads.length
+                    + " PEERS: "
+                    + ((System.currentTimeMillis() - start) / 1000)
+                    + " seconds");
             } else {
                 // no search since query is empty, user might have entered no data or filters have removed all search words
                 Log.logFine("SEARCH_EVENT", "NO SEARCH STARTED DUE TO EMPTY SEARCH REQUEST.");
             }
         } else {
-            if (generateAbstracts) {
+            if ( generateAbstracts ) {
                 // we need the results now
                 try {
                     this.rankingProcess.join();
-                } catch (final Throwable e) {
+                } catch ( final Throwable e ) {
                 }
                 // compute index abstracts
                 final long timer = System.currentTimeMillis();
@@ -174,30 +217,45 @@ public final class SearchEvent {
                 long mindhtdistance = Long.MAX_VALUE, l;
                 byte[] wordhash;
                 assert this.rankingProcess.searchContainerMap() != null;
-                for (final Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankingProcess.searchContainerMap().entrySet()) {
+                for ( final Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankingProcess
+                    .searchContainerMap()
+                    .entrySet() ) {
                     wordhash = entry.getKey();
                     final ReferenceContainer<WordReference> container = entry.getValue();
-                    assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = " + ASCII.String(container.getTermHash()) + ", wordhash = " + ASCII.String(wordhash);
-                    if (container.size() > maxcount) {
+                    assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = "
+                        + ASCII.String(container.getTermHash())
+                        + ", wordhash = "
+                        + ASCII.String(wordhash);
+                    if ( container.size() > maxcount ) {
                         this.IAmaxcounthash = wordhash;
                         maxcount = container.size();
                     }
                     l = FlatWordPartitionScheme.std.dhtDistance(wordhash, null, peers.mySeed());
-                    if (l < mindhtdistance) {
+                    if ( l < mindhtdistance ) {
                         // calculate the word hash that is closest to our dht position
                         mindhtdistance = l;
                         this.IAneardhthash = wordhash;
                     }
                     this.IACount.put(wordhash, LargeNumberCache.valueOf(container.size()));
-                    this.IAResults.put(wordhash, WordReferenceFactory.compressIndex(container, null, 1000).toString());
+                    this.IAResults.put(wordhash, WordReferenceFactory
+                        .compressIndex(container, null, 1000)
+                        .toString());
                 }
-                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), Type.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
+                EventTracker.update(
+                    EventTracker.EClass.SEARCH,
+                    new ProfilingGraph.EventSearch(
+                        this.query.id(true),
+                        Type.ABSTRACTS,
+                        "",
+                        this.rankingProcess.searchContainerMap().size(),
+                        System.currentTimeMillis() - timer),
+                    false);
             } else {
                 // give process time to accumulate a certain amount of data
                 // before a reading process wants to get results from it
                 try {
                     this.rankingProcess.join(100);
-                } catch (final Throwable e) {
+                } catch ( final Throwable e ) {
                 }
                 // this will reduce the maximum waiting time until results are available to 100 milliseconds
                 // while we always get a good set of ranked data
@@ -205,115 +263,157 @@ public final class SearchEvent {
         }
 
         // start worker threads to fetch urls and snippets
-        this.resultFetcher = new SnippetProcess(loader, this.rankingProcess, this.query, this.peers, this.workTables, 5000, deleteIfSnippetFail);
+        this.resultFetcher =
+            new SnippetProcess(
+                loader,
+                this.rankingProcess,
+                this.query,
+                this.peers,
+                this.workTables,
+                5000,
+                deleteIfSnippetFail);
 
         // clean up events
         SearchEventCache.cleanupEvents(false);
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), Type.CLEANUP, "", 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
+            this.query.id(true),
+            Type.CLEANUP,
+            "",
+            0,
+            0), false);
 
         // store this search to a cache so it can be re-used
-        if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);
+        if ( MemoryControl.available() < 1024 * 1024 * 100 ) {
+            SearchEventCache.cleanupEvents(true);
+        }
         SearchEventCache.put(this.query.id(false), this);
-   }
+    }
 
+    public ReferenceOrder getOrder() {
+        return this.order;
+    }
 
-   public ReferenceOrder getOrder() {
-       return this.order;
-   }
+    public long getEventTime() {
+        return this.eventTime;
+    }
 
-   public long getEventTime() {
-       return this.eventTime;
-   }
+    public void resetEventTime() {
+        this.eventTime = System.currentTimeMillis();
+    }
 
-   public void resetEventTime() {
-       this.eventTime = System.currentTimeMillis();
-   }
+    public QueryParams getQuery() {
+        return this.query;
+    }
 
-   public QueryParams getQuery() {
-       return this.query;
-   }
+    public void setQuery(final QueryParams query) {
+        this.query = query;
+        this.resultFetcher.query = query;
+    }
 
-   public void setQuery(final QueryParams query) {
-       this.query = query;
-       this.resultFetcher.query = query;
-   }
+    public void cleanup() {
+        this.resultFetcher.setCleanupState();
 
-   public void cleanup() {
-       this.resultFetcher.setCleanupState();
+        // stop all threads
+        if ( this.primarySearchThreads != null ) {
+            for ( final RemoteSearch search : this.primarySearchThreads ) {
+                if ( search != null ) {
+                    synchronized ( search ) {
+                        if ( search.isAlive() ) {
+                            search.interrupt();
+                        }
+                    }
+                }
+            }
+        }
+        if ( this.secondarySearchThreads != null ) {
+            for ( final RemoteSearch search : this.secondarySearchThreads ) {
+                if ( search != null ) {
+                    synchronized ( search ) {
+                        if ( search.isAlive() ) {
+                            search.interrupt();
+                        }
+                    }
+                }
+            }
+        }
 
-       // stop all threads
-       if (this.primarySearchThreads != null) {
-           for (final RemoteSearch search : this.primarySearchThreads) {
-               if (search != null) synchronized (search) {
-                   if (search.isAlive()) search.interrupt();
-               }
-           }
-       }
-       if (this.secondarySearchThreads != null) {
-           for (final RemoteSearch search : this.secondarySearchThreads) {
-               if (search != null) synchronized (search) {
-                   if (search.isAlive()) search.interrupt();
-               }
-           }
-       }
+        // call the worker threads and ask them to stop
+        for ( final Worker w : this.resultFetcher.workerThreads ) {
+            if ( w != null && w.isAlive() ) {
+                w.pleaseStop();
+                w.interrupt();
+                // the interrupt may occur during a MD5 computation which is resistant against interruption
+                // therefore set some more interrupts on the process
+                int ic = 10;
+                while ( ic-- > 0 & w.isAlive() ) {
+                    w.interrupt();
+                }
+            }
+        }
 
-       // call the worker threads and ask them to stop
-       for (final Worker w: this.resultFetcher.workerThreads) {
-           if (w != null && w.isAlive()) {
-               w.pleaseStop();
-               w.interrupt();
-               // the interrupt may occur during a MD5 computation which is resistant against interruption
-               // therefore set some more interrupts on the process
-               int ic = 10;
-               while (ic-- > 0 & w.isAlive()) w.interrupt();
-           }
-       }
+        // clear all data structures
+        if ( this.preselectedPeerHashes != null ) {
+            this.preselectedPeerHashes.clear();
+        }
+        if ( this.localSearchThread != null ) {
+            if ( this.localSearchThread.isAlive() ) {
+                this.localSearchThread.interrupt();
+            }
+        }
+        if ( this.IACount != null ) {
+            this.IACount.clear();
+        }
+        if ( this.IAResults != null ) {
+            this.IAResults.clear();
+        }
+        if ( this.heuristics != null ) {
+            this.heuristics.clear();
+        }
+    }
 
-       // clear all data structures
-       if (this.preselectedPeerHashes != null) this.preselectedPeerHashes.clear();
-       if (this.localSearchThread != null) if (this.localSearchThread.isAlive()) this.localSearchThread.interrupt();
-       if (this.IACount != null) this.IACount.clear();
-       if (this.IAResults != null) this.IAResults.clear();
-       if (this.heuristics != null) this.heuristics.clear();
-   }
+    public Iterator<Map.Entry<byte[], String>> abstractsString() {
+        return this.IAResults.entrySet().iterator();
+    }
 
-   public Iterator<Map.Entry<byte[], String>> abstractsString() {
-       return this.IAResults.entrySet().iterator();
-   }
+    public String abstractsString(final byte[] hash) {
+        return this.IAResults.get(hash);
+    }
 
-   public String abstractsString(final byte[] hash) {
-       return this.IAResults.get(hash);
-   }
+    public Iterator<Map.Entry<byte[], Integer>> abstractsCount() {
+        return this.IACount.entrySet().iterator();
+    }
 
-   public Iterator<Map.Entry<byte[], Integer>> abstractsCount() {
-       return this.IACount.entrySet().iterator();
-   }
+    public int abstractsCount(final byte[] hash) {
+        final Integer i = this.IACount.get(hash);
+        if ( i == null ) {
+            return -1;
+        }
+        return i.intValue();
+    }
 
-   public int abstractsCount(final byte[] hash) {
-       final Integer i = this.IACount.get(hash);
-       if (i == null) return -1;
-       return i.intValue();
-   }
+    public byte[] getAbstractsMaxCountHash() {
+        return this.IAmaxcounthash;
+    }
 
-   public byte[] getAbstractsMaxCountHash() {
-       return this.IAmaxcounthash;
-   }
+    public byte[] getAbstractsNearDHTHash() {
+        return this.IAneardhthash;
+    }
 
-   public byte[] getAbstractsNearDHTHash() {
-       return this.IAneardhthash;
-   }
-
-   boolean anyRemoteSearchAlive() {
+    boolean anyRemoteSearchAlive() {
         // check primary search threads
-        if ((this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0)) {
-            for (final RemoteSearch primarySearchThread : this.primarySearchThreads) {
-                if ((primarySearchThread != null) && (primarySearchThread.isAlive())) return true;
+        if ( (this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0) ) {
+            for ( final RemoteSearch primarySearchThread : this.primarySearchThreads ) {
+                if ( (primarySearchThread != null) && (primarySearchThread.isAlive()) ) {
+                    return true;
+                }
             }
         }
         // maybe a secondary search thread is alive, check this
-        if ((this.secondarySearchThreads != null) && (this.secondarySearchThreads.length != 0)) {
-            for (final RemoteSearch secondarySearchThread : this.secondarySearchThreads) {
-                if ((secondarySearchThread != null) && (secondarySearchThread.isAlive())) return true;
+        if ( (this.secondarySearchThreads != null) && (this.secondarySearchThreads.length != 0) ) {
+            for ( final RemoteSearch secondarySearchThread : this.secondarySearchThreads ) {
+                if ( (secondarySearchThread != null) && (secondarySearchThread.isAlive()) ) {
+                    return true;
+                }
             }
         }
         return false;
@@ -358,13 +458,13 @@ public final class SearchEvent {
     }
 
     public void addHeuristic(final byte[] urlhash, final String heuristicName, final boolean redundant) {
-        synchronized (this.heuristics) {
+        synchronized ( this.heuristics ) {
             this.heuristics.put(urlhash, new HeuristicResult(urlhash, heuristicName, redundant));
         }
     }
 
     public HeuristicResult getHeuristic(final byte[] urlhash) {
-        synchronized (this.heuristics) {
+        synchronized ( this.heuristics ) {
             return this.heuristics.get(urlhash);
         }
     }
@@ -386,23 +486,30 @@ public final class SearchEvent {
 
     //boolean secondarySearchStartet = false;
 
-    public static class HeuristicResult /*implements Comparable<HeuristicResult>*/ {
-        private final byte[] urlhash; public final String heuristicName; public final boolean redundant;
+    public static class HeuristicResult /*implements Comparable<HeuristicResult>*/
+    {
+        private final byte[] urlhash;
+        public final String heuristicName;
+        public final boolean redundant;
+
         private HeuristicResult(final byte[] urlhash, final String heuristicName, final boolean redundant) {
-            this.urlhash = urlhash; this.heuristicName = heuristicName; this.redundant = redundant;
+            this.urlhash = urlhash;
+            this.heuristicName = heuristicName;
+            this.redundant = redundant;
         }/*
-        public int compareTo(HeuristicResult o) {
+         public int compareTo(HeuristicResult o) {
             return Base64Order.enhancedCoder.compare(this.urlhash, o.urlhash);
-        }
-        public int hashCode() {
+         }
+         public int hashCode() {
             return (int) Base64Order.enhancedCoder.cardinal(this.urlhash);
-        }
-        public boolean equals(Object o) {
+         }
+         public boolean equals(Object o) {
             return Base64Order.enhancedCoder.equal(this.urlhash, ((HeuristicResult) o).urlhash);
-        }*/
+         }*/
     }
 
-    public class SecondarySearchSuperviser extends Thread {
+    public class SecondarySearchSuperviser extends Thread
+    {
 
         // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
         // this relation contains the information where specific urls can be found in specific peers
@@ -418,14 +525,15 @@ public final class SearchEvent {
 
         /**
          * add a single abstract to the existing set of abstracts
+         * 
          * @param wordhash
          * @param singleAbstract // a mapping from url-hashes to a string of peer-hashes
          */
         public void addAbstract(final String wordhash, final TreeMap<String, StringBuilder> singleAbstract) {
             final SortedMap<String, StringBuilder> oldAbstract;
-            synchronized (this.abstractsCache) {
+            synchronized ( this.abstractsCache ) {
                 oldAbstract = this.abstractsCache.get(wordhash);
-                if (oldAbstract == null) {
+                if ( oldAbstract == null ) {
                     // new abstracts in the cache
                     this.abstractsCache.put(wordhash, singleAbstract);
                     return;
@@ -433,13 +541,16 @@ public final class SearchEvent {
             }
             // extend the abstracts in the cache: join the single abstracts
             new Thread() {
+                @Override
                 public void run() {
-                    for (final Map.Entry<String, StringBuilder> oneref: singleAbstract.entrySet()) {
+                    for ( final Map.Entry<String, StringBuilder> oneref : singleAbstract.entrySet() ) {
                         final String urlhash = oneref.getKey();
                         final StringBuilder peerlistNew = oneref.getValue();
-                        synchronized (oldAbstract) {
+                        synchronized ( oldAbstract ) {
                             final StringBuilder peerlistOld = oldAbstract.put(urlhash, peerlistNew);
-                            if (peerlistOld != null) peerlistOld.append(peerlistNew);
+                            if ( peerlistOld != null ) {
+                                peerlistOld.append(peerlistNew);
+                            }
                         }
                     }
                 }
@@ -458,23 +569,26 @@ public final class SearchEvent {
             SortedMap<String, StringBuilder> urlPeerlist;
             int p;
             boolean hasURL;
-            synchronized (this) {
-                final Iterator<Map.Entry <String, SortedMap<String, StringBuilder>>> i = this.abstractsCache.entrySet().iterator();
-                while (i.hasNext()) {
+            synchronized ( this ) {
+                final Iterator<Map.Entry<String, SortedMap<String, StringBuilder>>> i =
+                    this.abstractsCache.entrySet().iterator();
+                while ( i.hasNext() ) {
                     entry = i.next();
                     word = entry.getKey();
                     urlPeerlist = entry.getValue();
                     hasURL = true;
-                    for (int j = 0; j < urls.length(); j = j + 12) {
+                    for ( int j = 0; j < urls.length(); j = j + 12 ) {
                         url = urls.substring(j, j + 12);
                         peerlist = urlPeerlist.get(url);
                         p = (peerlist == null) ? -1 : peerlist.indexOf(peerhash);
-                        if ((p < 0) || (p % 12 != 0)) {
+                        if ( (p < 0) || (p % 12 != 0) ) {
                             hasURL = false;
                             break;
                         }
                     }
-                    if (hasURL) wordlist += word;
+                    if ( hasURL ) {
+                        wordlist += word;
+                    }
                 }
             }
             return wordlist;
@@ -484,21 +598,26 @@ public final class SearchEvent {
         public void run() {
             try {
                 int t = 0;
-                while (this.trigger.tryAcquire(10000, TimeUnit.MILLISECONDS)) {
+                while ( this.trigger.tryAcquire(10000, TimeUnit.MILLISECONDS) ) {
                     // a trigger was released
                     prepareSecondarySearch();
                     t++;
-                    if (t > 10) break;
+                    if ( t > 10 ) {
+                        break;
+                    }
                 }
-            } catch (final InterruptedException e) {
+            } catch ( final InterruptedException e ) {
                 // the thread was interrupted
                 // do nothing
             }
-             // the time-out was reached
+            // the time-out was reached
         }
 
         private void prepareSecondarySearch() {
-            if (this.abstractsCache == null || this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size()) return; // secondary search not possible (yet)
+            if ( this.abstractsCache == null
+                || this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size() ) {
+                return; // secondary search not possible (yet)
+            }
 
             // catch up index abstracts and join them; then call peers again to submit their urls
 
@@ -510,12 +629,17 @@ public final class SearchEvent {
              */
 
             // find out if there are enough references for all words that are searched
-            if (this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size()) return;
+            if ( this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size() ) {
+                return;
+            }
 
             // join all the urlhash:peerlist relations: the resulting map has values with a combined peer-list list
-            final SortedMap<String, StringBuilder> abstractJoin = SetTools.joinConstructive(this.abstractsCache.values(), true);
-            if (abstractJoin.isEmpty()) return;
-            // the join result is now a urlhash: peer-list relation
+            final SortedMap<String, StringBuilder> abstractJoin =
+                SetTools.joinConstructive(this.abstractsCache.values(), true);
+            if ( abstractJoin.isEmpty() ) {
+                return;
+                // the join result is now a urlhash: peer-list relation
+            }
 
             // generate a list of peers that have the urls for the joined search result
             final SortedMap<String, StringBuilder> secondarySearchURLs = new TreeMap<String, StringBuilder>(); // a (peerhash:urlhash-liststring) mapping
@@ -524,17 +648,19 @@ public final class SearchEvent {
             final String mypeerhash = SearchEvent.this.peers.mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
-            for (final Map.Entry<String, StringBuilder> entry: abstractJoin.entrySet()) {
+            for ( final Map.Entry<String, StringBuilder> entry : abstractJoin.entrySet() ) {
                 url = entry.getKey();
                 peerlist = entry.getValue();
                 //System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peerlist);
                 mypeercount = 0;
-                for (int j = 0; j < peerlist.length(); j += 12) {
+                for ( int j = 0; j < peerlist.length(); j += 12 ) {
                     peer = peerlist.substring(j, j + 12);
-                    if ((peer.equals(mypeerhash)) && (mypeercount++ > 1)) continue;
+                    if ( (peer.equals(mypeerhash)) && (mypeercount++ > 1) ) {
+                        continue;
+                    }
                     //if (peers.indexOf(peer) < j) continue; // avoid doubles that may appear in the abstractJoin
                     urls = secondarySearchURLs.get(peer);
-                    if (urls == null) {
+                    if ( urls == null ) {
                         urls = new StringBuilder(24);
                         urls.append(url);
                         secondarySearchURLs.put(peer, urls);
@@ -543,27 +669,47 @@ public final class SearchEvent {
                     }
                     secondarySearchURLs.put(peer, urls);
                 }
-                if (mypeercount == 1) mypeerinvolved = true;
+                if ( mypeercount == 1 ) {
+                    mypeerinvolved = true;
+                }
             }
 
             // compute words for secondary search and start the secondary searches
             String words;
-            SearchEvent.this.secondarySearchThreads = new RemoteSearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs.size()];
+            SearchEvent.this.secondarySearchThreads =
+                new RemoteSearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs
+                    .size()];
             int c = 0;
-            for (final Map.Entry<String, StringBuilder> entry: secondarySearchURLs.entrySet()) {
+            for ( final Map.Entry<String, StringBuilder> entry : secondarySearchURLs.entrySet() ) {
                 peer = entry.getKey();
-                if (peer.equals(mypeerhash)) continue; // we don't need to ask ourself
-                if (this.checkedPeers.contains(peer)) continue; // do not ask a peer again
+                if ( peer.equals(mypeerhash) ) {
+                    continue; // we don't need to ask ourself
+                }
+                if ( this.checkedPeers.contains(peer) ) {
+                    continue; // do not ask a peer again
+                }
                 urls = entry.getValue();
                 words = wordsFromPeer(peer, urls);
-                if (words.length() == 0) continue; // ???
+                if ( words.length() == 0 ) {
+                    continue; // ???
+                }
                 assert words.length() >= 12 : "words = " + words;
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls + " from words: " + words);
                 SearchEvent.this.rankingProcess.moreFeeders(1);
                 this.checkedPeers.add(peer);
-                SearchEvent.this.secondarySearchThreads[c++] = RemoteSearch.secondaryRemoteSearch(
-                        words, urls.toString(), 6000, SearchEvent.this.query.getSegment(), SearchEvent.this.peers, SearchEvent.this.rankingProcess, peer, Switchboard.urlBlacklist,
-                        SearchEvent.this.query.ranking, SearchEvent.this.query.constraint, SearchEvent.this.preselectedPeerHashes);
+                SearchEvent.this.secondarySearchThreads[c++] =
+                    RemoteSearch.secondaryRemoteSearch(
+                        words,
+                        urls.toString(),
+                        6000,
+                        SearchEvent.this.query.getSegment(),
+                        SearchEvent.this.peers,
+                        SearchEvent.this.rankingProcess,
+                        peer,
+                        Switchboard.urlBlacklist,
+                        SearchEvent.this.query.ranking,
+                        SearchEvent.this.query.constraint,
+                        SearchEvent.this.preselectedPeerHashes);
             }
 
         }
@@ -575,8 +721,14 @@ public final class SearchEvent {
     }
 
     public boolean workerAlive() {
-        if (this.resultFetcher== null || this.resultFetcher.workerThreads == null) return false;
-        for (final Worker w: this.resultFetcher.workerThreads) if (w != null && w.isAlive()) return true;
+        if ( this.resultFetcher == null || this.resultFetcher.workerThreads == null ) {
+            return false;
+        }
+        for ( final Worker w : this.resultFetcher.workerThreads ) {
+            if ( w != null && w.isAlive() ) {
+                return true;
+            }
+        }
         return false;
     }
 

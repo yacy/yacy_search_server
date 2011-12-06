@@ -24,7 +24,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 package net.yacy.search.index;
 
 import java.io.File;
@@ -51,13 +50,13 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ContentDomain;
 
-
 /**
  * convenience class to access the yacycore library from outside of yacy to put files into the index
+ * 
  * @author Michael Christen
- *
  */
-public class DocumentIndex extends Segment {
+public class DocumentIndex extends Segment
+{
 
     private static final RankingProfile textRankingDefault = new RankingProfile(ContentDomain.TEXT);
     //private Bitfield zeroConstraint = new Bitfield(4);
@@ -66,7 +65,8 @@ public class DocumentIndex extends Segment {
     static {
         try {
             poison = new DigestURI("file://.");
-        } catch (final MalformedURLException e) {}
+        } catch ( final MalformedURLException e ) {
+        }
     }
     BlockingQueue<DigestURI> queue; // a queue of document ID's
     private final Worker[] worker;
@@ -74,20 +74,21 @@ public class DocumentIndex extends Segment {
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
 
-
-    public DocumentIndex(final File segmentPath, final CallbackListener callback, final int cachesize) throws IOException {
+    public DocumentIndex(final File segmentPath, final CallbackListener callback, final int cachesize)
+        throws IOException {
         super(new Log("DocumentIndex"), segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
         final int cores = Runtime.getRuntime().availableProcessors() + 1;
         this.callback = callback;
         this.queue = new LinkedBlockingQueue<DigestURI>(cores * 300);
         this.worker = new Worker[cores];
-        for (int i = 0; i < cores; i++) {
+        for ( int i = 0; i < cores; i++ ) {
             this.worker[i] = new Worker(i);
             this.worker[i].start();
         }
     }
 
-    class Worker extends Thread {
+    class Worker extends Thread
+    {
         public Worker(final int count) {
             super(workerThreadGroup, "query-" + count);
         }
@@ -97,22 +98,27 @@ public class DocumentIndex extends Segment {
             DigestURI f;
             URIMetadataRow[] resultRows;
             try {
-                while ((f = DocumentIndex.this.queue.take()) != poison) try {
-                    resultRows = add(f);
-                    for (final URIMetadataRow resultRow: resultRows) {
-                        if (DocumentIndex.this.callback != null) {
-                            if (resultRow == null) {
-                                DocumentIndex.this.callback.fail(f, "result is null");
-                            } else {
-                                DocumentIndex.this.callback.commit(f, resultRow);
+                while ( (f = DocumentIndex.this.queue.take()) != poison ) {
+                    try {
+                        resultRows = add(f);
+                        for ( final URIMetadataRow resultRow : resultRows ) {
+                            if ( DocumentIndex.this.callback != null ) {
+                                if ( resultRow == null ) {
+                                    DocumentIndex.this.callback.fail(f, "result is null");
+                                } else {
+                                    DocumentIndex.this.callback.commit(f, resultRow);
+                                }
                             }
                         }
+                    } catch ( final IOException e ) {
+                        if ( e.getMessage().indexOf("cannot parse", 0) < 0 ) {
+                            Log.logException(e);
+                        }
+                        DocumentIndex.this.callback.fail(f, e.getMessage());
                     }
-                } catch (final IOException e) {
-                    if (e.getMessage().indexOf("cannot parse",0) < 0) Log.logException(e);
-                    DocumentIndex.this.callback.fail(f, e.getMessage());
                 }
-            } catch (final InterruptedException e) {}
+            } catch ( final InterruptedException e ) {
+            }
         }
     }
 
@@ -128,70 +134,79 @@ public class DocumentIndex extends Segment {
     }
 
     private URIMetadataRow[] add(final DigestURI url) throws IOException {
-        if (url == null) throw new IOException("file = null");
-        if (url.isDirectory()) throw new IOException("file should be a document, not a path");
-        if (!url.canRead()) throw new IOException("cannot read file");
+        if ( url == null ) {
+            throw new IOException("file = null");
+        }
+        if ( url.isDirectory() ) {
+            throw new IOException("file should be a document, not a path");
+        }
+        if ( !url.canRead() ) {
+            throw new IOException("cannot read file");
+        }
         Document[] documents;
         long length;
         try {
             length = url.length();
-        } catch (final Exception e) {
+        } catch ( final Exception e ) {
             length = -1;
         }
         try {
             documents = TextParser.parseSource(url, null, null, length, url.getInputStream(null, -1), true);
-        } catch (final Exception e) {
+        } catch ( final Exception e ) {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }
         //Document document = Document.mergeDocuments(url, null, documents);
         final URIMetadataRow[] rows = new URIMetadataRow[documents.length];
         int c = 0;
-        for (final Document document: documents) {
+        for ( final Document document : documents ) {
             final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib);
-            rows[c++] = super.storeDocument(
-                url,
-                null,
-                new Date(url.lastModified()),
-                new Date(),
-                url.length(),
-                document,
-                condenser,
-                null,
-                DocumentIndex.class.getName() + ".add"
-                );
+            rows[c++] =
+                super.storeDocument(
+                    url,
+                    null,
+                    new Date(url.lastModified()),
+                    new Date(),
+                    url.length(),
+                    document,
+                    condenser,
+                    null,
+                    DocumentIndex.class.getName() + ".add");
         }
         return rows;
     }
 
     /**
-     * add a file or a directory of files to the index
-     * If the given file is a path to a directory, the complete sub-tree is indexed
+     * add a file or a directory of files to the index If the given file is a path to a directory, the
+     * complete sub-tree is indexed
+     * 
      * @param start
      */
     public void addConcurrent(final DigestURI start) throws IOException {
         assert (start != null);
         assert (start.canRead()) : start.toString();
-        if (!start.isDirectory()) {
+        if ( !start.isDirectory() ) {
             try {
                 this.queue.put(start);
-            } catch (final InterruptedException e) {}
+            } catch ( final InterruptedException e ) {
+            }
             return;
         }
         final String[] s = start.list();
         DigestURI w;
-        for (final String t: s) {
+        for ( final String t : s ) {
             try {
                 w = new DigestURI(start, t);
-                if (w.canRead() && !w.isHidden()) {
-                    if (w.isDirectory()) {
+                if ( w.canRead() && !w.isHidden() ) {
+                    if ( w.isDirectory() ) {
                         addConcurrent(w);
                     } else {
                         try {
                             this.queue.put(w);
-                        } catch (final InterruptedException e) {}
+                        } catch ( final InterruptedException e ) {
+                        }
                     }
                 }
-            } catch (final MalformedURLException e1) {
+            } catch ( final MalformedURLException e1 ) {
                 Log.logException(e1);
             }
         }
@@ -199,13 +214,15 @@ public class DocumentIndex extends Segment {
 
     /**
      * do a full-text search of a given string and return a specific number of results
+     * 
      * @param querystring
      * @param count
      * @return a list of files that contain the given string
      */
     public ArrayList<DigestURI> find(final String querystring, int count) {
         // make a query and start a search
-        final QueryParams query = new QueryParams(querystring, count, null, this, textRankingDefault, "DocumentIndex");
+        final QueryParams query =
+            new QueryParams(querystring, count, null, this, textRankingDefault, "DocumentIndex");
         final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
         final RWIProcess rankedCache = new RWIProcess(query, order, SearchEvent.max_results_preparation);
         rankedCache.start();
@@ -214,40 +231,48 @@ public class DocumentIndex extends Segment {
         URIMetadataRow row;
         final ArrayList<DigestURI> files = new ArrayList<DigestURI>();
         Components metadata;
-        while ((row = rankedCache.takeURL(false, 1000)) != null) {
+        while ( (row = rankedCache.takeURL(false, 1000)) != null ) {
             metadata = row.metadata();
-            if (metadata == null) continue;
+            if ( metadata == null ) {
+                continue;
+            }
             files.add(metadata.url());
             count--;
-            if (count == 0) break;
+            if ( count == 0 ) {
+                break;
+            }
         }
         return files;
     }
 
     /**
-     * close the index.
-     * This terminates all worker threads and then closes the segment.
+     * close the index. This terminates all worker threads and then closes the segment.
      */
     @Override
     public void close() {
         // send termination signal to worker threads
-        for (@SuppressWarnings("unused") final Worker element : this.worker) {
+        for ( @SuppressWarnings("unused")
+        final Worker element : this.worker ) {
             try {
                 this.queue.put(poison);
-            } catch (final InterruptedException e) {}
+            } catch ( final InterruptedException e ) {
+            }
         }
         // wait for termination
-        for (final Worker element : this.worker) {
+        for ( final Worker element : this.worker ) {
             try {
                 element.join();
-            } catch (final InterruptedException e) {}
+            } catch ( final InterruptedException e ) {
+            }
         }
         // close the segment
         super.close();
     }
 
-    public interface CallbackListener {
+    public interface CallbackListener
+    {
         public void commit(DigestURI f, URIMetadataRow resultRow);
+
         public void fail(DigestURI f, String failReason);
     }
 
@@ -260,35 +285,44 @@ public class DocumentIndex extends Segment {
         // DocumentIndex yacyindex add test/parsertest
         // DocumentIndex yacyindex search steht
         System.setProperty("java.awt.headless", "true");
-        if (args.length < 3) return;
+        if ( args.length < 3 ) {
+            return;
+        }
         final File segmentPath = new File(args[0]);
         System.out.println("using index files at " + segmentPath.getAbsolutePath());
         final CallbackListener callback = new CallbackListener() {
+            @Override
             public void commit(final DigestURI f, final URIMetadataRow resultRow) {
                 System.out.println("indexed: " + f.toString());
             }
+
+            @Override
             public void fail(final DigestURI f, final String failReason) {
                 System.out.println("not indexed " + f.toString() + ": " + failReason);
             }
         };
         try {
-            if (args[1].equals("add")) {
+            if ( args[1].equals("add") ) {
                 final DigestURI f = new DigestURI(args[2]);
                 final DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
                 di.addConcurrent(f);
                 di.close();
             } else {
                 String query = "";
-                for (int i = 2; i < args.length; i++) query += args[i];
+                for ( int i = 2; i < args.length; i++ ) {
+                    query += args[i];
+                }
                 query.trim();
                 final DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
                 final ArrayList<DigestURI> results = di.find(query, 100);
-                for (final DigestURI f: results) {
-                    if (f != null) System.out.println(f.toString());
+                for ( final DigestURI f : results ) {
+                    if ( f != null ) {
+                        System.out.println(f.toString());
+                    }
                 }
                 di.close();
             }
-        } catch (final IOException e) {
+        } catch ( final IOException e ) {
             Log.logException(e);
         }
         //System.exit(0);
