@@ -26,6 +26,7 @@
 
 package net.yacy.search.query;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
@@ -516,8 +517,8 @@ public final class SearchEvent
         private final Semaphore trigger;
 
         public SecondarySearchSuperviser() {
-            this.abstractsCache = new TreeMap<String, SortedMap<String, StringBuilder>>();
-            this.checkedPeers = new TreeSet<String>();
+            this.abstractsCache = Collections.synchronizedSortedMap(new TreeMap<String, SortedMap<String, StringBuilder>>());
+            this.checkedPeers = Collections.synchronizedSortedSet(new TreeSet<String>());
             this.trigger = new Semaphore(0);
         }
 
@@ -527,16 +528,14 @@ public final class SearchEvent
          * @param wordhash
          * @param singleAbstract // a mapping from url-hashes to a string of peer-hashes
          */
-        public void addAbstract(final String wordhash, final TreeMap<String, StringBuilder> singleAbstract) {
+        public void addAbstract(final String wordhash, final SortedMap<String, StringBuilder> singleAbstract) {
             final SortedMap<String, StringBuilder> oldAbstract;
-            synchronized ( this.abstractsCache ) {
                 oldAbstract = this.abstractsCache.get(wordhash);
                 if ( oldAbstract == null ) {
                     // new abstracts in the cache
                     this.abstractsCache.put(wordhash, singleAbstract);
                     return;
                 }
-            }
             // extend the abstracts in the cache: join the single abstracts
             new Thread() {
                 @Override
@@ -544,11 +543,9 @@ public final class SearchEvent
                     for ( final Map.Entry<String, StringBuilder> oneref : singleAbstract.entrySet() ) {
                         final String urlhash = oneref.getKey();
                         final StringBuilder peerlistNew = oneref.getValue();
-                        synchronized ( oldAbstract ) {
-                            final StringBuilder peerlistOld = oldAbstract.put(urlhash, peerlistNew);
-                            if ( peerlistOld != null ) {
-                                peerlistOld.append(peerlistNew);
-                            }
+                        final StringBuilder peerlistOld = oldAbstract.put(urlhash, peerlistNew);
+                        if ( peerlistOld != null ) {
+                            peerlistOld.append(peerlistNew);
                         }
                     }
                 }
@@ -567,26 +564,24 @@ public final class SearchEvent
             SortedMap<String, StringBuilder> urlPeerlist;
             int p;
             boolean hasURL;
-            synchronized ( this ) {
-                final Iterator<Map.Entry<String, SortedMap<String, StringBuilder>>> i =
-                    this.abstractsCache.entrySet().iterator();
-                while ( i.hasNext() ) {
-                    entry = i.next();
-                    word = entry.getKey();
-                    urlPeerlist = entry.getValue();
-                    hasURL = true;
-                    for ( int j = 0; j < urls.length(); j = j + 12 ) {
-                        url = urls.substring(j, j + 12);
-                        peerlist = urlPeerlist.get(url);
-                        p = (peerlist == null) ? -1 : peerlist.indexOf(peerhash);
-                        if ( (p < 0) || (p % 12 != 0) ) {
-                            hasURL = false;
-                            break;
-                        }
+            final Iterator<Map.Entry<String, SortedMap<String, StringBuilder>>> i =
+                this.abstractsCache.entrySet().iterator();
+            while ( i.hasNext() ) {
+                entry = i.next();
+                word = entry.getKey();
+                urlPeerlist = entry.getValue();
+                hasURL = true;
+                for ( int j = 0; j < urls.length(); j = j + 12 ) {
+                    url = urls.substring(j, j + 12);
+                    peerlist = urlPeerlist.get(url);
+                    p = (peerlist == null) ? -1 : peerlist.indexOf(peerhash);
+                    if ( (p < 0) || (p % 12 != 0) ) {
+                        hasURL = false;
+                        break;
                     }
-                    if ( hasURL ) {
-                        wordlist += word;
-                    }
+                }
+                if ( hasURL ) {
+                    wordlist += word;
                 }
             }
             return wordlist;

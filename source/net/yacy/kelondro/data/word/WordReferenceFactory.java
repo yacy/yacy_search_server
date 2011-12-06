@@ -26,8 +26,10 @@
 
 package net.yacy.kelondro.data.word;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
@@ -39,15 +41,18 @@ import net.yacy.kelondro.util.ByteBuffer;
 
 public class WordReferenceFactory implements ReferenceFactory<WordReference> {
 
+    @Override
     public WordReference produceSlow(final Entry e) {
         return new WordReferenceRow(e);
     }
     
+    @Override
     public WordReference produceFast(final WordReference r) {
         if (r instanceof WordReferenceVars) return r;
         return new WordReferenceVars(r);
     }
 
+    @Override
     public Row getRow() {
         return WordReferenceRow.urlEntryRow;
     }
@@ -110,8 +115,8 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference> {
      * @param peerhash
      * @return
      */
-    public static final TreeMap<String, StringBuilder> decompressIndex(ByteBuffer ci, final String peerhash) {
-        TreeMap<String, StringBuilder> target = new TreeMap<String, StringBuilder>();
+    public static final SortedMap<String, StringBuilder> decompressIndex(ByteBuffer ci, final String peerhash) {
+        SortedMap<String, StringBuilder> target = Collections.synchronizedSortedMap(new TreeMap<String, StringBuilder>());
         // target is a mapping from url-hashes to a string of peer-hashes
         if (ci.byteAt(0) != '{' || ci.byteAt(ci.length() - 1) != '}') return target;
         //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
