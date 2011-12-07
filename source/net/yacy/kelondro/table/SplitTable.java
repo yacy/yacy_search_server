@@ -106,12 +106,14 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         init();
     }
 
+    @Override
     public long mem() {
         long m = 0;
         for (final Index i: this.tables.values()) m += i.mem();
         return m;
     }
 
+    @Override
     public final byte[] smallestKey() {
         final HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
         for (final Index oi: this.tables.values()) try {
@@ -122,6 +124,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return keysort.smallestKey();
     }
 
+    @Override
     public final byte[] largestKey() {
         final HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
         for (final Index oi: this.tables.values()) try {
@@ -222,6 +225,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             }
             final Table a = table;
             final Thread p = new Thread() {
+                @Override
                 public void run() {
                     a.warmUp();
                 }
@@ -245,6 +249,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         */
     }
 
+    @Override
     public void clear() throws IOException {
     	close();
     	final String[] l = this.path.list();
@@ -273,10 +278,12 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         FileUtils.deletedelete(tabledir);
     }
 
+    @Override
     public String filename() {
         return new File(this.path, this.prefix).toString();
     }
 
+    @Override
     public int size() {
         final Iterator<Index> i = this.tables.values().iterator();
         int s = 0;
@@ -284,6 +291,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return s;
     }
 
+    @Override
     public boolean isEmpty() {
         final Iterator<Index> i = this.tables.values().iterator();
         while (i.hasNext()) if (!i.next().isEmpty()) return false;
@@ -298,20 +306,24 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return s;
     }
 
+    @Override
     public Row row() {
         return this.rowdef;
     }
 
+    @Override
     public boolean has(final byte[] key) {
         return keeperOf(key) != null;
     }
 
+    @Override
     public Row.Entry get(final byte[] key, final boolean forcecopy) throws IOException {
         final Index keeper = keeperOf(key);
         if (keeper == null) return null;
         return keeper.get(key, forcecopy);
     }
 
+    @Override
     public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
         Row.Entry entry;
@@ -344,6 +356,8 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         // check size and age of given table; in case it is too large or too old
         // create a new table
         assert table != null;
+        long t = System.currentTimeMillis();
+        if (((t / 1000) % 10) != 0) return table; // we check only every 10 seconds because all these file and parser operations are very expensive
         final String name = new File(table.filename()).getName();
         long d;
         try {
@@ -352,12 +366,13 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             Log.logSevere("SplitTable", "", e);
             d = 0;
         }
-        if (d + this.fileAgeLimit < System.currentTimeMillis() || new File(this.path, name).length() >= this.fileSizeLimit) {
+        if (d + this.fileAgeLimit < t || new File(this.path, name).length() >= this.fileSizeLimit) {
             return newTable();
         }
         return table;
     }
 
+    @Override
     public Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         Index keeper = keeperOf(row.getPrimaryKeyBytes());
@@ -377,6 +392,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public boolean put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         final byte[] key = row.getPrimaryKeyBytes();
@@ -406,6 +422,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return null;
     }
 
+    @Override
     public void addUnique(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         Index table = (this.current == null) ? null : this.tables.get(this.current);
@@ -416,6 +433,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         table.addUnique(row);
     }
 
+    @Override
     public List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         final Iterator<Index> i = this.tables.values().iterator();
         final List<RowCollection> report = new ArrayList<RowCollection>();
@@ -425,18 +443,21 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return report;
     }
 
+    @Override
     public boolean delete(final byte[] key) throws IOException {
         final Index table = keeperOf(key);
         if (table == null) return false;
         return table.delete(key);
     }
 
+    @Override
     public Row.Entry remove(final byte[] key) throws IOException {
         final Index table = keeperOf(key);
         if (table == null) return null;
         return table.remove(key);
     }
 
+    @Override
     public Row.Entry removeOne() throws IOException {
         final Iterator<Index> i = this.tables.values().iterator();
         Index table, maxtable = null;
@@ -454,6 +475,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return maxtable.removeOne();
     }
 
+    @Override
     public List<Row.Entry> top(final int count) throws IOException {
         final Iterator<Index> i = this.tables.values().iterator();
         Index table, maxtable = null;
@@ -471,6 +493,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return maxtable.top(count);
     }
 
+    @Override
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(this.tables.size());
         final Iterator<Index> i = this.tables.values().iterator();
@@ -482,6 +505,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return MergeIterator.cascade(c, this.rowdef.objectOrder, MergeIterator.simpleMerge, up);
     }
 
+    @Override
     public CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<Row.Entry>> c = new ArrayList<CloneableIterator<Row.Entry>>(this.tables.size());
         final Iterator<Index> i = this.tables.values().iterator();
@@ -491,6 +515,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return MergeIterator.cascade(c, this.entryOrder, MergeIterator.simpleMerge, up);
     }
 
+    @Override
     public Iterator<Entry> iterator() {
         try {
             return rows();
@@ -499,6 +524,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
         final CloneableIterator<Row.Entry>[] c = new CloneableIterator[this.tables.size()];
@@ -510,6 +536,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return StackIterator.stack(c);
     }
 
+    @Override
     public synchronized void close() {
         if (this.tables == null) return;
         /*
@@ -527,6 +554,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         this.tables = null;
     }
 
+    @Override
     public void deleteOnExit() {
         for (final Index i: this.tables.values()) i.deleteOnExit();
     }

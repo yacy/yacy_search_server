@@ -9,8 +9,8 @@ Version:		@REPL_VERSION@_@REPL_REVISION_NR@
 Release:		3
 License:		GPL
 Group:			Application/Internet
-Source0:		svn://svn.berlios.de/yacy/trunk
-URL:			http://www.yacy.net/yacy/
+Source0:		git@gitorious.org:yacy/rc1.git
+URL:			http://yacy.net
 Requires:		bash
 Requires:		sudo
 Requires:		coreutils
@@ -90,6 +90,7 @@ cp AUTHORS COPYRIGHT ChangeLog gpl.txt readme.txt ${RPM_BUILD_ROOT}$YACYDDIR/
 
 install -m 744 *.sh ${RPM_BUILD_ROOT}$YACYCDIR/				# start/stop/kill scripts
 rm -r `find ${RPM_BUILD_ROOT}/ -type d -name '.svn'`		# delete unwanted .svn-folders
+rm -r `find ${RPM_BUILD_ROOT}/ -type d -name '.git'`		# delete unwanted .git-folders
 
 # location for init-script
 install -d ${RPM_BUILD_ROOT}/etc/init.d/

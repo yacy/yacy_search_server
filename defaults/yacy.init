@@ -125,7 +125,7 @@ update.cycle = 168
 # It is recommended to set this list to low developer version numbers
 update.blacklist = ...[123]
 # a update can also restricted with a concept property, which can decide if an
-# update is only valid if it either is a main release or any svn release including new development releases
+# update is only valid if it either is a main release or any release including new development releases
 # Valid keywords are 'main' and 'any'
 update.concept = any
 # the following values are set automatically:
