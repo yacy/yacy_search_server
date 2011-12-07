@@ -3333,7 +3333,7 @@ Index Cleaner==Index Aufräumer
 #File: env/templates/submenuConfig.template
 #---------------------------
 Peer Administration Console==控制台
-Status==状态
+#Status==状态
 Basic Configuration==基本设置
 >Accounts==>账户
 Network Configuration==网络设置
