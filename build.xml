@@ -56,7 +56,6 @@
   <property name="release_main" location="${release}/MAIN"/>
   <property name="release_windows" location="${release}/WINDOWS"/>
   <property name="release_mac" location="${release}/MAC"/>
-  <property name="svnEntriesFile" location=".svn/entries"/>
   <property name="git" location=".git"/>
   <property name="defaults" location="defaults"/>
   
@@ -111,49 +110,9 @@
     <move file="build.properties.new" tofile="build.properties"/>
   </target>
 
-  <!-- determining if the .svn directory exists -->
-  <condition property="svnEntriesFileExists">
-    <available file="${svnEntriesFile}" />
-  </condition>
-
-  <!-- 
-    if the .svn directory exists we try to determine the real
-    svn revision number of the working base now
--->
-
-  <target name="buildSvnRevNr">
-    <delete file="${libbuild}/svnRevNr.jar" failonerror="false" />
-    <javac srcdir="${libbuild}/svnRevNr" />
-    <jar destfile="${libbuild}/svnRevNr.jar" basedir="${libbuild}/svnRevNr">
-      <manifest>
-        <attribute name="Main-Class" value="svnRevNrParser"/>
-      </manifest>
-    </jar>
-  </target>
-
-  <target name="determineRevisionNr" if="svnEntriesFileExists" depends="buildSvnRevNr">
-    <!-- define a custom ant task to read the revision number from file -->
-    <taskdef resource="svnRevNrParser.properties" classpath="${libbuild}/svnRevNr.jar"/>
-
-    <!-- determine the revision number -->
-    <echo message="Trying to read Revision number from file ${svnEntriesFile}"/>
-    <svnrevnr file="${svnEntriesFile}" property="baseRevisionNr"/>
-
-    <!-- replacing the old with the new revision number -->
-    <copy file="build.properties" tofile="build.properties.new">
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^releaseNr=(.*)"
-                        replace="releaseNr=$Revision: ${baseRevisionNr} $" />
-        </tokenfilter>
-      </filterchain>
-    </copy>
-    <delete file="build.properties"/>
-    <move file="build.properties.new" tofile="build.properties"/>
-  </target>
-
   <!-- reading the build properties from file -->
-  <target name="readBuildProperties" depends="determineGitRevision,determineRevisionNr">
+  <!-- <target name="readBuildProperties" depends="determineGitRevision"> -->
+  <target name="readBuildProperties">
     <!-- loading some property values from file -->
     <loadproperties srcFile="build.properties">
       <filterchain>
@@ -178,8 +137,8 @@
     <echo message="YaCy Version number: ${releaseVersion}" />
     <filter token="REPL_VERSION" value="${releaseVersion}" />
 
-    <!-- YaCy SVN Revision number -->
-    <echo message="YaCy Revision number: ${releaseNr}" />
+    <!-- YaCy Release <revision number -->
+    <echo message="YaCy Release number: ${releaseNr}" />
     <filter token="REPL_REVISION_NR" value="${releaseNr}"/>
 
     <!-- YaCy root directory -->
@@ -818,7 +777,7 @@
     <!-- replacing the old with the new revision number -->
     <replaceregexp file="debian/changelog"
                   match="yacy \(.*\) unstable; urgency=low"
-                  replace="yacy (${releaseVersion}svn${baseRevisionNr}) unstable; urgency=low" />
+                  replace="yacy (${releaseVersion}.${baseRevisionNr}) unstable; urgency=low" />
 
     <!-- build debian package -->
     <exec executable="dpkg-buildpackage">
