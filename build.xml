@@ -58,6 +58,9 @@
   <property name="release_mac" location="${release}/MAC"/>
   <property name="git" location=".git"/>
   <property name="defaults" location="defaults"/>
+
+  <!-- pseudo default releaseNr as fallback --> 
+  <property name="releaseNr" value="9000" />
   
   <!-- defining all needed directory names for packing search widget-->
   <property name="jquery" location="htroot/jquery/"/>
@@ -95,33 +98,13 @@
 			<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
 		</classpath>
   	</taskdef>
-  	<gitRev repoPath="${yacyroot}" property="baseRevisionNr" />
-  	
-  	<!-- replacing the old with the new revision number -->
-    <copy file="build.properties" tofile="build.properties.new">
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^releaseNr=(.*)"
-                        replace="releaseNr=$Revision: ${baseRevisionNr} $" />
-        </tokenfilter>
-      </filterchain>
-    </copy>
-    <delete file="build.properties"/>
-    <move file="build.properties.new" tofile="build.properties"/>
+  	<gitRev repoPath="${yacyroot}" revprop="releaseNr" dateprop="DSTAMP" />
   </target>
 
   <!-- reading the build properties from file -->
-  <!-- <target name="readBuildProperties" depends="determineGitRevision"> -->
-  <target name="readBuildProperties">
+  <target name="readBuildProperties" depends="determineGitRevision">
     <!-- loading some property values from file -->
-    <loadproperties srcFile="build.properties">
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^releaseNr=\$Revision:\s(.*)\s\$"
-                        replace="releaseNr=\1"/>
-        </tokenfilter>
-      </filterchain>
-    </loadproperties>
+    <loadproperties srcFile="build.properties" />
   </target>
 
   <!-- initializing all needed variables -->

@@ -1,8 +1,7 @@
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -19,36 +18,48 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 public class GitRevTask extends org.apache.tools.ant.Task {
 	
 	private String repoPath;
-	private String property;
+	private String revprop;
+	private String dateprop;
 	
 	public void setRepoPath(final String repoPath) {
 		this.repoPath = repoPath;
 	}
 
-    public void setProperty(String property) {
-        this.property = property;
+    public void setRevprop(String revprop) {
+        this.revprop = revprop;
+    }
+
+    public void setDateprop(String dateprop) {
+        this.dateprop = dateprop;
     }
 	
 	public void execute() {
-		if (this.property==null || this.property.length() == 0) {
-            log("svn entries file name property was not set properly",Project.MSG_ERR);
+		if (this.revprop==null || this.revprop.length() == 0) {
+            log("git entries file name revprop was not set properly",Project.MSG_ERR);
+            return;
+        }
+		if (this.dateprop==null || this.dateprop.length() == 0) {
+            log("git entries file name dateprop was not set properly",Project.MSG_ERR);
             return;
         }
 
         String revision = null;
 		String lastTag = null;
+		String commitDate = null;
 		try {
 			final File src = new File(repoPath);
 			final Repository repo = new FileRepositoryBuilder().readEnvironment()
 					.findGitDir(src).build();
 			final ObjectId head = repo.resolve("HEAD");
-			final String gitrev = head.getName().substring(0, 8);
 			
 			final Git git = new Git(repo);
 			final List<RevTag> tags = git.tagList().call();
 			
 			final RevWalk walk = new RevWalk(repo);
-			walk.markStart(walk.parseCommit(head));
+			final RevCommit headCommit = walk.parseCommit(head);
+			final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+			commitDate = df.format(headCommit.getAuthorIdent().getWhen());
+			walk.markStart(headCommit);
 			int distance = 0;
 			for (final RevCommit commit : walk) {
 				for (final RevTag tag : tags) {
@@ -57,39 +68,33 @@ public class GitRevTask extends org.apache.tools.ant.Task {
 						break;
 					}
 				}
-				if (lastTag == null) lastTag = findRev(commit.getFullMessage());
-				if (lastTag != null || distance++ > 99) break;
+				if (lastTag != null || distance++ > 999) break;
 			}
 			walk.dispose();
 			if (lastTag == null) {
-				revision = "dev" + "-" + gitrev;
+				revision = "0000";
 			} else {
-				revision = lastTag + "-" + distance + "-" + gitrev;
+				revision = Integer.toString(distance + 9000);
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
         Project theProject = getProject();
         if (theProject != null) {
-            theProject.setProperty(this.property, lastTag);
-            log("Property '" + this.property + "' set to '" + revision + "'", Project.MSG_VERBOSE);                
+            theProject.setProperty(this.revprop, revision);
+            log("Property '" + this.revprop + "' set to '" + revision + "'", Project.MSG_VERBOSE);
+            theProject.setProperty(this.dateprop, commitDate);
+            log("Property '" + this.dateprop + "' set to '" + commitDate + "'", Project.MSG_VERBOSE);
         }
-	}
-	
-	private String findRev(final String message) {
-		final Pattern pattern = Pattern.compile("trunk@(\\d{4})\\s+");
-		final Matcher matcher = pattern.matcher(message);
-		if (matcher.find()) {
-			return matcher.group(1);
-		}
-		return null;
 	}
 	
 	public static void main(String[] args) {
 		GitRevTask gitRevTask = new GitRevTask();
 		gitRevTask.setRepoPath("/home/sgaebel/git/yacy.rc1");
+		gitRevTask.setRevprop("baseRevisionNr");
+		gitRevTask.setDateprop("DSTAMP");
 		
 		gitRevTask.execute();
 	}
