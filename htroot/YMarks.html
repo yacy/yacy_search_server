@@ -143,14 +143,40 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 					<input type="hidden" value="/YMarks.html" name="redirect">
 					<h4>Bookmark Importer<img alt="help" title="If you put in your bookmarks here, you can access them anywhere where you have access to your YaCy peer. Think of it as your 'personal cloud' for bookmarking." class="help" src="/yacy/ui/img-2/question_blue.png"></h4>
 				    <p>
-					    <input type="radio" name="importer" value="html" checked="checked" /> Netscape HTML<br />
-					    <input type="radio" name="importer" value="json" /> Firefox JSON<br />
-						<input type="radio" name="importer" value="xbel" /> XBEL<br />
-						<input type="radio" name="importer" value="surro" /> Surrogate XML<br />
-						<input type="radio" name="importer" value="dmoz" disabled="disabled" /> DMOZ XML<br />
-						<input type="radio" name="importer" value="list" disabled="disabled"/> YaCy White/Black List<br />
-						<input type="radio" name="importer" value="bmks" /> YaCy old bookmarks.db (admin)<br />
-						<input type="radio" name="importer" value="crawls" /> YaCy Crawl Starts (admin)<br />
+				    	<table cellspacing="3">
+							<tr>
+								<td> <input type="radio" name="importer" value="html" checked="checked" /> </td>
+								<td>Netscape HTML</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="importer" value="json" /></td>
+								<td>Firefox JSON</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="importer" value="xbel" /></td>
+								<td>XBEL</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="importer" value="surro" /></td>
+								<td>Surrogate XML</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="importer" value="dmoz" disabled="disabled" /></td>
+								<td>DMOZ XML</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="importer" value="list" disabled="disabled"/></td>
+								<td>YaCy White/Black List</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="importer" value="bmks" /></td>
+								<td>YaCy bookmarks.db (admin)</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="importer" value="crawls" /></td>
+								<td>YaCy Crawl Starts (admin)</td>
+							</tr>
+				    	</table>
 					</p>
 					<p>
 						<small>Bookmark file</small>
@@ -169,26 +195,50 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 					<hr />
 					<h4>Automatic tagging<img alt="help" title="Tags are words that are attached to documents as metadata. It is possible to read all the documents and find the attached tags automatically." class="help" src="/yacy/ui/img-2/question_blue.png"></h4>
 					<p>
-					    <input type="radio" name="autotag" value="off" checked="checked" /> Off
-					    <br />
-					    <input type="radio" name="autotag" value="empty" /> Only for empty tags
-					    <br />
-					    <input type="radio" name="autotag" value="overwrite" /> Overwriting existing tags
-					    <br />
-					    <input type="radio" name="autotag" value="merge" /> Merging with existing tags
+						<table cellspacing="5">
+							<tr>
+								<td><input type="radio" name="autotag" value="off" checked="checked" /></td>
+								<td>Off</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="autotag" value="empty" /></td>
+								<td>Only for empty tags</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="autotag" value="overwrite" /></td>
+								<td>Overwriting existing tags</td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="autotag" value="merge" /></td>
+								<td>Merging with existing tags</td>
+							</tr>
+						</table>   
 					</p>
 					<hr />
 					<h4>Automatic Indexing<img alt="help" title="While doing the bookmark import, YaCy can push all URLs to the indexing process" class="help" src="/yacy/ui/img-2/question_blue.png"></h4>
 					<p>
-					    <input type="radio" name="indexing" value="off" checked="checked" /> No indexing
-					    <br />
-					    <input type="radio" name="indexing" value="single" /> Index every bookmark entry
-					    <br />
-					    <input type="radio" name="indexing" value="onelink" /> Index every bookmark entry plus all directly linked pages
-					    <br />
-					    <input type="radio" name="indexing" value="fulldomain" /> Index all domains from all bookmarks completely
-					    <br /><br />
-					    <input type="checkbox" name="medialink" /> also all media (image/movie/document) links
+					    <table cellspacing="5">
+					    	<tr>
+					    		<td><input type="radio" name="indexing" value="off" checked="checked" /></td>
+					    		<td>No indexing</td>
+					    	</tr>
+					    	<tr>
+					    		<td><input type="radio" name="indexing" value="single" /></td>
+					    		<td>Index every bookmark entry</td>
+					    	</tr>
+					    	<tr>
+					    		<td><input type="radio" name="indexing" value="onelink" /></td>
+					    		<td>Index every bookmark entry plus all directly linked pages</td>
+					    	</tr>
+							<tr>
+					    		<td><input type="radio" name="indexing" value="fulldomain" /></td>
+					    		<td>Index all domains from all bookmarks completely</td>
+					    	</tr>
+					    	<tr>
+					    		<td><input type="checkbox" name="medialink" /></td>
+					    		<td><br />include all media (image/movie/document) links</td>
+					    	</tr>
+					    </table>
 					</p>
 					<hr />
 					<p style="text-align: right">
