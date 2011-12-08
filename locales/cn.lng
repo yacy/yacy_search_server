@@ -373,7 +373,7 @@ Skins can be installed from download locations==安装下载皮肤
 Install new skin from URL==从URL安装皮肤
 Use this skin==使用这个皮肤
 "Install"=="安装"
-Make sure that you only download data from trustworthy sources. The new Skin file==确保您的皮肤是从可靠第三方获得. 如果存在相同文件
+Make sure that you only download data from trustworthy sources. The new Skin file==确保您的皮肤文件是从可靠源获得. 如果存在相同文件
 might overwrite existing data if a file of the same name exists already.==, 新皮肤会覆盖旧的.
 >Unable to get URL:==>无法打开链接:
 Error saving the skin.==保存皮肤时出错.
@@ -389,100 +389,100 @@ Use Case: what do you want to do with YaCy:==用途: 您用Yacy做什么:
 Community-based web search==基于社区的网络搜索
 Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==加入并支持全球网络 'freeworld', 自由地搜索.
 Search portal for your own web pages==属于您自己的搜索引擎
-Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ihre YaCy Installation verhält sich unabhängig von den anderen Peers und Sie können Ihren eigenen Index bestimmen, indem Sie einen eigenen Web-Crawl starten. Dies kann benutzt werden, um Ihre eigenen Internetseiten zu durchsuchen oder ein Themen-basiertes Portal aufzubauen.
-Files may also be shared with the YaCy server, assign a path here:==Dateien können auch mit dem YaCy Server unter folgendem Pfad zugänglich gemacht werden:
-This path can be accessed at ==Der Pfad ist erreichbar unter 
-Use that path as crawl start point.==Verwenden Sie diesen Pfad als den Startpunkt für den Crawl.
-Intranet Indexing==Intranet Indexierung
-Create a search portal for your intranet or web pages or your \(shared\) file system.==Ein Suchportal für Ihre Intranet oder öffentlichen Webseiten oder ihr (verteiltes) Dateisystem.
-URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URLs mit folgenden Protokollen (HTTP/HTPPS/FTP) und einem lokalen Domainnamen oder einer IP oder folgende URLs können verwendet werden
-or smb:==oder smb:
-Your peer name has not been customized; please set your own peer name==Ihr Peername wurde noch nicht angepasst; bitte setzen Sie einen eigenen Peernamen ein
-You may change your peer name==Sie können Ihren Peernamen ändern
-Peer Name:==Peername:
-Your peer cannot be reached from outside==Ihr Peer kann nicht von außen erreicht werden
-which is not fatal, but would be good for the YaCy network==was nicht schlimm ist, aber anders wäre für das YaCy-Netzwerk noch besser
-please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Bitte öffnen Sie Ihre Firewall auf diesem Port und/oder stellen Sie einen virtuellen Server in Ihrem Router ein um Verbindungen auf diesem Port zu erlauben
-Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreicht werden
-Peer Port:==Peer-Port:
-Configure your router for YaCy:==Ihren Router für YaCy konfigurieren:
-Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
-Set Configuration==Konfiguration speichern
-What you should do next:==Was Sie als Nächstes tun können:
-Your basic configuration is complete! You can now \(for example\)==Ihre Grundeinstellungen sind vollständig! Sie können jetzt (beispielsweise)
-just <==Einfach <
-start an uncensored search==eine unzensierte Suche beginnen
-start your own crawl</a> and contribute to the global index, or create your own private web index==einen eigenen Crawl starten</a> und zum globalen Index beitragen, oder einen eigenen privaten Webindex aufbauen
-set a personal peer profile</a> \(optional settings\)==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe)
-monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a>, was andere Peers gerade machen
-Your Peer name is a default name; please set an individual peer name.==Ihr Peer-Name ist ein Standardname; bitte stellen Sie einen individuellen Namen ein.
-You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein Passwort gesetzt.
-Some pages are protected by passwords.==Einige Seiten sind passwortgeschützt.
-You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Sie sollten ein Password in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> setzen, um Ihren YaCy Peer abzusichern.</p>::
-You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall geöffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
-This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich, wenn Sie vollständig am YaCy-Netzwerk teilhaben möchten.
-You can also use your peer without opening it, but this is not recomended.==Sie können Ihren Peer auch nutzen ohne ihn zu öffnen, dies wird jedoch nicht empfohlen.
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==本机YaCy的peer创建与索引过程独立于其他peer, 即您可以定义自己的搜索偏向.
+Files may also be shared with the YaCy server, assign a path here:==您也能与YaCy服务器共享内容, 在这里指定路径:
+This path can be accessed at ==此路径可被以下访问
+Use that path as crawl start point.==将此路径作为索引起点.
+Intranet Indexing==局域网索引
+Create a search portal for your intranet or web pages or your \(shared\) file system.==创建您自己的局域网, 网页或者您共享的文件系统.
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==适合http/https/ftp协议的有链接/主机名/IP
+or smb:==或者服务器信息块(SMB):
+Your peer name has not been customized; please set your own peer name==您的peer尚未命名, 请命名它
+You may change your peer name==您可以改变您的peer名称
+Peer Name:==Peer名称:
+Your peer cannot be reached from outside==外部将不能访问您的peer
+which is not fatal, but would be good for the YaCy network==此举有利于YaCy网络
+please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==请改变您的防火墙或者虚拟机路由设置, 从而外网能访问这个端口
+Your peer can be reached by other peers==外部将能访问您的peer
+Peer Port:==Peer端口:
+Configure your router for YaCy:==设置您的路由器:
+Configuration was not successful. This may take a moment.==配置失败. 这需要花费一些时间.
+Set Configuration==配置成功
+What you should do next:==下一步您该做的:
+Your basic configuration is complete! You can now \(for example\)==配置成功, 您现在可以
+just <==开始<
+start an uncensored search==自由地搜索了
+start your own crawl</a> and contribute to the global index, or create your own private web index==开始您的索引, 并将其贡献给全球索引, 或者创建一个您自己的私人搜索网页
+set a personal peer profile</a> \(optional settings\)==设置私人peer</a> (可选项)
+monitor at the network page</a> what the other peers are doing==监视网络页面</a>, 以及其他peer的活动
+Your Peer name is a default name; please set an individual peer name.==您的peer名称为系统默认, 请设置另外一个名称.
+You did not set a user name and/or a password.==您未设置用户名和/或密码.
+Some pages are protected by passwords.==一些页面受密码保护.
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==您可以在 <a href="ConfigAccounts_p.html">账户菜单</a> 设置密码, 从而加强您的YaCy peer安全性.</p>::
+You did not open a port in your firewall or your router does not forward the server port to your peer.==您未打开防火墙端口或者您的路由器未能与主机的服务端口建立链接.
+This is needed if you want to fully participate in the YaCy network.==如果您要完全加入YaCy网络, 此项是必须的.
+You can also use your peer without opening it, but this is not recomended.==不开放您的peer您也能使用, 但是不推荐.
 #-----------------------------
 
 #File: ConfigHeuristics_p.html
 #---------------------------
-Heuristics Configuration==Heuristik Konfiguration
-A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="http://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
+Heuristics Configuration==启发式配置
+A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="http://de.wikipedia.org/wiki/Heuristik">启发式</a> '是一个依赖于经验来解决问题, 学习与发现问题的过程.' (Wikipedia).
 The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
-Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
-When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Wenn eine Such Heuristik verwendet wird, werden die gefunden Links nicht direkt als Suchergebnisse angezeigt aber dafür die geladenen Seiten indexiert und mit dem anderen Inhalt abgespeichert.
-This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Damit wird sichergestellt dass die Sperrlisten verwendet werden können und dass die Suchbegriffe auch wirklich auf den Seiten auftauchen, die mithilfe der Heuristik gefunden wurden.
-The success of heuristics are marked with an image==Der Erfolg der Heuristik wird mit einem Bild markiert
-heuristic:&lt;name&gt;==Heuristik:&lt;Name&gt;
+您可以在这里开启启发式搜索, 通过猜测链接, 嵌套搜索和访问其他搜索引擎, 从而找到更多符合您期望的结果.
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==开始启发式搜索时, 搜索结果给出的链接并不是直接搜索的链接, 而是已经缓存在其他服务器上的结果.
+This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==这保证了黑名单的有效性, 并且搜索关键字是通过启发式搜索找到的.
+The success of heuristics are marked with an image==启发式搜索找到的结果会被特定图标标记
+heuristic:&lt;name&gt;==启发式:&lt;名称&gt;
 #\(redundant\)==(redundant)
-\(new link\)==(neuer Link)
-below the favicon left from the search result entry:==unter dem Favicon links vom Eintrag des Suchergebnisses:
-The search result was discovered by a heuristic, but the link was already known by YaCy==Das Suchergebnis wurde durch eine Heuristik gefunden, aber der Link war YaCy schon bekannt
-The search result was discovered by a heuristic, not previously known by YaCy==Das Suchergebnis wurde durch eine Heuristik gefunden, aber YaCy vorher noch nicht bekannt.
-\'site\'-operator: instant shallow crawl=='site'-Operator: Sofortiger oberflächlicher Crawl
-When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Wenn eine Suche mit dem 'site'-Operator gestartet wird (z.B.: 'download site:yacy.net') dann wird der Host des 'site'-Operator sofort gecrawlt mit einer auf den Host beschränkten Suchtiefe von 1.
-That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Das bedeutet: Gleich nach der Suchanfrage wird die Portalseite des Hosts geladen und jede verlinkte Seite die auf eine Seite auf demselben Host verweist.
-Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Weil dieser 'Sofort Crawl' auch die robots.txt und eine minimale Zugriffszeit für folgende Seiten berücksichtigen muss, ist diese Heuristik sehr langsam - aber kann alle gewünschten Suchergebniss finden indem eine zweite Suche (nach einigen Sekunden Pause) gestartet wird. 
-scroogle: load external search result list==scroogle: externe Suchergebnis Listen laden
-When using this heuristic, then every search request line is used for a call to scroogle.==Diese Heuristik verwendet jede Zeile der Suchanfrage für einen Aufruf von Scroogle.
-20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 Ergebnisse werden von Scroogle geholt und simultan geladen, geparst und sofort indexiert.	  
+\(new link\)==(新链接)
+below the favicon left from the search result entry:==搜索结果中使用的图标:
+The search result was discovered by a heuristic, but the link was already known by YaCy==搜索结果通过启发式搜索, 且链接已知
+The search result was discovered by a heuristic, not previously known by YaCy==搜索结果通过启发式搜索, 且链接未知
+\'site\'-operator: instant shallow crawl=='站点'-操作符: 即时浅抓取
+When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==当使用'站点'-操作符搜索时(比如: 'download site:yacy.net') ,主机就会立即抓取层数为最大限制深度-1层的内容.
+That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==意即: 在链接请求发出后, 搜索引擎就会载入在同一主机中每一个与此页面相连的网页.
+Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==因为'立即抓取'依赖于robots.txt和两个相连页面的最小访问时间, 所以这个启发式选项会相当慢, 但是在第二次搜索时会搜索到更多条目(需要间隔几秒钟).
+scroogle: load external search result list==scroogle: 载入外部搜索引擎结果
+When using this heuristic, then every search request line is used for a call to scroogle.==开启这个选项时, 每一次搜索都会引入scroogle的结果.
+20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==同时读取并索引从scroogle获得的20个结果.
 #-----------------------------
 
 #File: ConfigHTCache_p.html
 #---------------------------
-Hypertext Cache Configuration==Hypertext Cache Konfiguration
-The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Der Hypertext Cache speichert Inhalte die per HTTP und FTP Protokoll geholt wurden. Dokumente von smb:// und file:// Umgebungen werden nicht gecached.
-The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Der Cache ist ein rotierender Cache: Wenn er voll ist werden die ältesten Einträge gelöscht und neue werden am selben Speicherplatz abgelegt.
-HTCache Configuration==HTCache Konfiguration
-The path where the cache is stored==Der Pfad an dem der Cache gespeichert wird
-The current size of the cache==Die aktuelle Größe des Caches
-The maximum size of the cache==Die maximale Größe des Caches
-"Set"=="Setzen"
-Cleanup==Aufräumen
-Cache Deletion==Cache 删除
-Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
-Delete robots.txt Cache==Lösche robots.txt Cache
+Hypertext Cache Configuration==超文本缓存配置
+The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==HTCache存储着从HTTP和FTP协议获得的内容. 其中从smb:// 和 file:// 取得的内容不会被缓存.
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==此缓存是队列式的: 队列满时, 会删除旧内容, 从而加入新内容.
+HTCache Configuration==HTCache配置
+The path where the cache is stored==缓存存储路径
+The current size of the cache==当前缓存大小
+The maximum size of the cache==缓存最大尺寸
+"Set"=="设置"
+Cleanup==清除
+Cache Deletion==删除缓存
+Delete HTTP &amp; FTP Cache==删除HTTP &amp; FTP 缓存
+Delete robots.txt Cache==删除robots.txt 缓存
 "Delete"=="删除"
 #-----------------------------
 
 #File: ConfigLanguage_p.html
 #---------------------------
-Language selection==Sprachauswahl
-You can change the language of the YaCy-webinterface with translation files.==Hier können Sie die Sprache ändern. Wählen Sie die gewünschte Sprache aus der Liste aus.
-Current language</label>==Aktuelle Sprache</label>
+Language selection==语言选择
+You can change the language of the YaCy-webinterface with translation files.==您可以使用翻译文件来改变YaCy操作界面的语言.
+Current language</label>==当前语言</label>
 #default\(english\)==Deutsch
-Author\(s\) \(chronological\)</label>==Autoren (chronologisch)</label>
-Send additions to maintainer</em>==Schicken Sie Ergänzungen bitte an</em>
-Available Languages</label>==Verfügbare Sprachen</label>
-Install new language from URL==Neue Sprachdatei herunterladen
-Use this language==Diese Sprachdatei sofort benutzen
-"Use"=="Benutzen"
+Author\(s\) \(chronological\)</label>==作者(按时间排序)</label>
+Send additions to maintainer</em>==向维护者提交补丁</em>
+Available Languages</label>==可用语言</label>
+Install new language from URL==从URL安装新语言
+Use this language==使用此语言
+"Use"=="使用"
 "Delete"=="删除"
-"Install"=="Installieren"
-Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu installieren:
-Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
-Make sure that you only download data from trustworthy sources. The new language file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
-might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+"Install"=="安装"
+Unable to get URL:==打开链接失败:
+Error saving the language file.==保存语言文件时发生错误.
+Make sure that you only download data from trustworthy sources. The new language file==确保您的数据是从可靠源下载. 如果存在相同文件名
+might overwrite existing data if a file of the same name exists already.==, 旧文件将被覆盖.
 #-----------------------------
 
 #File: ConfigLiveSearch.html
