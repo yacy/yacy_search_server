@@ -18,7 +18,7 @@
 # Only part 1.
 # Contributors are in chronological order, not how much they did absolutely.
 # Thank you for your help!
-<!-- lang -->default\(english\)==中文
+<!-- lang -->default\(english\)==Chinese
 <!-- author -->==lofyer
 <!-- maintainer -->==lofyer
 #-----------------------------
@@ -28,7 +28,7 @@
 Access Tracker==访问跟踪
 Server Access Overview==网站访问概况
 This is a list of \#\[num\]\# requests to the local http server within the last hour.==最近一小时内有 #[num]# 个到本地的访问请求.
-This is a list of requests to the local http server within the last hour.==此列表显示最近一小时内到本地的访问请求.
+This is a list of requests to the local http server within the last hour.==此列表显示最近一小时内到本机的访问请求.
 Showing \#\[num\]\# requests.==显示 #[num]# 个请求.
 >Host<==>主机<
 >Path<==>路径<
@@ -56,7 +56,7 @@ Expected Results==期望结果
 Returned Results==返回结果
 Used Time \(ms\)==消耗时间(毫秒)
 URL fetch \(ms\)==获取URL(毫秒)
-Snippet comp \(ms\)==片段比较(in ms)
+Snippet comp \(ms\)==片段比较(毫秒)
 Query==查询字符
 >User Agent<==>用户端信息<
 Search Word Hashes==搜索字哈希值
@@ -78,7 +78,7 @@ collect blacklist entries from other peers.==同样，其他人也能将黑名�
 Active list:==激活列表:
 No blacklist selected==未选中黑名单
 Select list:==选中黑名单:
-not shared::shared==未共享::共享
+not shared::shared==未共享::已共享
 "select"=="选择"
 Create new list:==创建:
 "create"=="创建"
@@ -105,7 +105,7 @@ domain.net\/fullpath<==domain.net/绝对路径<
 a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==一个完整的<a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">正则表达式</a> (慢)
 #was removed from blacklist==wurde aus Blacklist entfernt
 #was added to the blacklist==wurde zur Blacklist hinzugefügt
-Activate this list for==激活此项给
+Activate this list for==为以下条目激活此名单
 Show entries:==显示条目:
 Entries per page:==页面条目:
 "Go"=="Go"
@@ -145,7 +145,7 @@ other YaCy peers:==其他的YaCy Peers:
 #URL:==URL:
 plain text file:<==文本文件:<
 XML file:==XML文件:
-Upload a regular text file which contains one blacklist entry per line.==上传一个每行都有一个黑名单条目的普通文本文件.
+Upload a regular text file which contains one blacklist entry per line.==上传一个每行都有一个黑名单条目的文本文件.
 Upload an XML file which contains one or more blacklists.==上传一个包含一个或多个黑名单的XML文件.
 Export blacklist items to...==导出黑名单到...
 Here you can export a blacklist as an XML file. This file will contain additional==您可以导出黑名单到一个XML文件中，此文件含有
@@ -162,7 +162,7 @@ Blacklist Test==黑名单测试
 Used Blacklist engine:==使用的黑名单引擎:
 Test list:==测试黑名单:
 "Test"=="测试"
-The tested URL was==这个URL
+The tested URL was==此链接
 It is blocked for the following cases:==由于以下原因，此名单无效:
 #Crawling==Crawling
 #DHT==DHT
@@ -177,7 +177,7 @@ Surftips==建议
 by==by
 Comments</a>==评论</a>
 >edit==>编辑
->delete==>löschen
+>delete==>删除
 Edit<==编辑<
 previous entries==前一个条目
 next entries==下一个条目
@@ -209,7 +209,7 @@ Confirm deletion==确定删除
 Yes, delete it.==是, 删除.
 No, leave it.==不, 保留.
 Import was successful!==导入成功!
-Import failed, maybe the supplied file was no valid blog-backup?==导入失败,可能提供的文件不是有效的博客副本?
+Import failed, maybe the supplied file was no valid blog-backup?==导入失败, 可能提供的文件不是有效的博客副本?
 Please select the XML-file you want to import:==请选择您想导入的XML文件:
 #-----------------------------
 
@@ -226,7 +226,7 @@ Subject:==标题:
 Text:==内容:
 You can use==您可以用
 Yacy-Wiki Code==YaCy-Wiki 代码
-here.==benutzen.
+here.==在这里.
 "Submit"=="提交"
 "Preview"=="预览"
 "Discard"=="取消"
@@ -237,8 +237,8 @@ here.==benutzen.
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': 书签
 
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==书签列表也能用作RSS订阅.当您选择某个标签时您也可执行这个操作.
-Click the API icon to load the RSS from the current selection.==点击API图表以从当前选择项中载入RSS.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==获取所有API,可以访问 <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+Click the API icon to load the RSS from the current selection.==点击API图标以从当前选择书签中载入RSS.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==获取所有API, 可以访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
 <h3>Bookmarks==<h3>书签
 Bookmarks \(==书签\(
 #Login==登录
@@ -255,7 +255,7 @@ Edit Bookmark==编辑书签
 Title:==标题:
 Description:==描述:
 Folder \(/folder/subfolder\):==目录(/目录/子目录):
-Tags \(comma separated\):==标签 (以逗号隔开):
+Tags \(comma separated\):==标签(以逗号隔开):
 >Public:==>公共的:
 yes==是
 no==否
@@ -285,8 +285,8 @@ unsorted==默认排序
 #File: Collage.html
 #---------------------------
 Image Collage==图像拼贴
-Private Queue==私有队列
-Public Queue==公共队列
+Private Queue==私有
+Public Queue==公共
 #-----------------------------
 
 
@@ -313,7 +313,7 @@ No password is set for the administration account.==管理员账户未设置密�
 Please define a password for the admin account.==请设置一个管理员密码.
 Admin Account==管理员
 Access from localhost without account==本地匿名访问
-Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==从您自己的电脑访问(本地访问)已被授权. 不需要设置管理员账户.
+Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==您可以从自己的电脑访问(本地访问). 不需要设置管理员账户.
 Access only with qualified account==只允许授权用户访问
 You need this only if you want a remote access to your peer.==如果您需要能从远端访问到本地peer的授权, 您可以设置此项.
 Peer User:==Peer用户:
@@ -343,8 +343,8 @@ Appearance and Integration==外观界面
 You can change the appearance of the YaCy interface with skins.==您可以在这里修改Yacy的外观界面.
 #You can change the appearance of YaCy with skins==Sie können hier das Erscheinungsbild von YaCy mit Skins ändern
 The selected skin and language also affects the appearance of the search page.==选择的皮肤和语言也会影响到搜索页面的外观.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==如果您<a href="ConfigPortal.html">创建Yacy门户</a>那么您能
-change the appearance of the search page here.==在 <a href="ConfigPortal.html">这里</a> 改变搜索页面的外观.
+If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==如果您<a href="ConfigPortal.html">创建YaCy门户</a>,
+change the appearance of the search page here.==那么您能在<a href="ConfigPortal.html">这里</a> 改变搜索页面的外观.
 #and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 Skin Selection==选择皮肤
 Select one of the default skins, download new skins, or create your own skin.==选择一个默认皮肤, 下载新皮肤或者创建属于您自己的皮肤.
@@ -353,7 +353,7 @@ Available Skins==可用皮肤
 "Use"=="使用"
 "Delete"=="删除"
 >Skin Color Definition<==>改变皮肤颜色<
-The generic skin \'generic_pd\' can be configured here with custom colors:==普通皮肤 'generic_pd' 能在这里定制颜色:
+The generic skin \'generic_pd\' can be configured here with custom colors:== 能在这里修改皮肤'generic_pd'的颜色:
 >Background<==>背景<
 >Text<==>文本<
 >Legend<==>说明<
@@ -365,8 +365,8 @@ The generic skin \'generic_pd\' can be configured here with custom colors:==普�
 >Sign&nbsp;\'bad\'<==>符号&nbsp;'坏'<
 >Sign&nbsp;\'good\'<==>符号&nbsp;'好'<
 >Sign&nbsp;\'other\'<==>符号&nbsp;'其他'<
->Search&nbsp;Headline<==>搜索&nbsp;标题<
->Search&nbsp;URL==>搜索&nbsp;URL
+>Search&nbsp;Headline<==>搜索页面&nbsp;标题<
+>Search&nbsp;URL==>搜索页面&nbsp;链接<
 "Set Colors"=="设置颜色"
 >Skin Download<==>下载皮肤<
 Skins can be installed from download locations==安装下载皮肤
@@ -391,11 +391,11 @@ Join and support the global network \'freeworld\', search the web with an uncens
 Search portal for your own web pages==属于您自己的搜索引擎
 Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==本机YaCy的peer创建与索引过程独立于其他peer, 即您可以定义自己的搜索偏向.
 Files may also be shared with the YaCy server, assign a path here:==您也能与YaCy服务器共享内容, 在这里指定路径:
-This path can be accessed at ==此路径可被以下访问
+This path can be accessed at ==可以通过以下链接访问
 Use that path as crawl start point.==将此路径作为索引起点.
 Intranet Indexing==局域网索引
 Create a search portal for your intranet or web pages or your \(shared\) file system.==创建您自己的局域网, 网页或者您共享的文件系统.
-URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==适合http/https/ftp协议的有链接/主机名/IP
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==适合http/https/ftp协议的链接/主机名/IP
 or smb:==或者服务器信息块(SMB):
 Your peer name has not been customized; please set your own peer name==您的peer尚未命名, 请命名它
 You may change your peer name==您可以改变您的peer名称
@@ -405,9 +405,9 @@ which is not fatal, but would be good for the YaCy network==此举有利于YaCy�
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==请改变您的防火墙或者虚拟机路由设置, 从而外网能访问这个端口
 Your peer can be reached by other peers==外部将能访问您的peer
 Peer Port:==Peer端口:
-Configure your router for YaCy:==设置您的路由器:
+Configure your router for YaCy:==设置本机路由:
 Configuration was not successful. This may take a moment.==配置失败. 这需要花费一些时间.
-Set Configuration==配置成功
+Set Configuration==保存设置
 What you should do next:==下一步您该做的:
 Your basic configuration is complete! You can now \(for example\)==配置成功, 您现在可以
 just <==开始<
@@ -430,7 +430,7 @@ Heuristics Configuration==启发式配置
 A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="http://de.wikipedia.org/wiki/Heuristik">启发式</a> '是一个依赖于经验来解决问题, 学习与发现问题的过程.' (Wikipedia).
 The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
 您可以在这里开启启发式搜索, 通过猜测链接, 嵌套搜索和访问其他搜索引擎, 从而找到更多符合您期望的结果.
-When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==开始启发式搜索时, 搜索结果给出的链接并不是直接搜索的链接, 而是已经缓存在其他服务器上的结果.
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==开启启发式搜索时, 搜索结果给出的链接并不是直接搜索的链接, 而是已经缓存在其他服务器上的结果.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==这保证了黑名单的有效性, 并且搜索关键字是通过启发式搜索找到的.
 The success of heuristics are marked with an image==启发式搜索找到的结果会被特定图标标记
 heuristic:&lt;name&gt;==启发式:&lt;名称&gt;
@@ -440,7 +440,7 @@ below the favicon left from the search result entry:==搜索结果中使用的�
 The search result was discovered by a heuristic, but the link was already known by YaCy==搜索结果通过启发式搜索, 且链接已知
 The search result was discovered by a heuristic, not previously known by YaCy==搜索结果通过启发式搜索, 且链接未知
 \'site\'-operator: instant shallow crawl=='站点'-操作符: 即时浅抓取
-When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==当使用'站点'-操作符搜索时(比如: 'download site:yacy.net') ,主机就会立即抓取层数为最大限制深度-1层的内容.
+When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==当使用'站点'-操作符搜索时(比如: 'download site:yacy.net') ,主机就会立即抓取层数为 最大限制深度-1 的内容.
 That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==意即: 在链接请求发出后, 搜索引擎就会载入在同一主机中每一个与此页面相连的网页.
 Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==因为'立即抓取'依赖于robots.txt和两个相连页面的最小访问时间, 所以这个启发式选项会相当慢, 但是在第二次搜索时会搜索到更多条目(需要间隔几秒钟).
 scroogle: load external search result list==scroogle: 载入外部搜索引擎结果
@@ -450,7 +450,7 @@ When using this heuristic, then every search request line is used for a call to 
 
 #File: ConfigHTCache_p.html
 #---------------------------
-Hypertext Cache Configuration==超文本缓存配置
+Hypertext Cache Configuration==HTCache配置
 The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==HTCache存储着从HTTP和FTP协议获得的内容. 其中从smb:// 和 file:// 取得的内容不会被缓存.
 The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==此缓存是队列式的: 队列满时, 会删除旧内容, 从而加入新内容.
 HTCache Configuration==HTCache配置
