@@ -760,7 +760,7 @@
     <!-- replacing the old with the new revision number -->
     <replaceregexp file="debian/changelog"
                   match="yacy \(.*\) unstable; urgency=low"
-                  replace="yacy (${releaseVersion}.${baseRevisionNr}) unstable; urgency=low" />
+                  replace="yacy (${releaseVersion}.${releaseNr}) unstable; urgency=low" />
 
     <!-- build debian package -->
     <exec executable="dpkg-buildpackage">
