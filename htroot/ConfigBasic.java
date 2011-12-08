@@ -61,7 +61,7 @@ public class ConfigBasic {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        final String langPath = env.getDataPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
+        final File langPath = new File(sb.getAppPath("locale.source", "locales").getAbsolutePath());
         String lang = env.getConfig("locale.language", "default");
 
         final int authentication = sb.adminAuthenticated(header);

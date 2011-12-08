@@ -323,26 +323,8 @@ public final class yacy {
                 // unlock yacyTray browser popup
                 Tray.lockBrowserPopup = false;
 
-                // Copy the shipped locales into DATA, existing files are overwritten
-                final File locale_work   = sb.getDataPath("locale.work", "DATA/LOCALE/locales");
-                final File locale_source = sb.getAppPath("locale.source", "locales");
-                try{
-                    final File[] locale_source_files = locale_source.listFiles();
-                    mkdirsIfNeseccary(locale_work);
-                    File target;
-                    for (final File locale_source_file : locale_source_files) {
-                    	target = new File(locale_work, locale_source_file.getName());
-                        if (locale_source_file.getName().endsWith(".lng")) {
-                        	if (target.exists()) delete(target);
-                            FileUtils.copy(locale_source_file, target);
-                        }
-                    }
-                    Log.logInfo("STARTUP", "Copied the default locales to " + locale_work.toString());
-                }catch(final NullPointerException e){
-                    Log.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
-                }
-
                 //regenerate Locales from Translationlist, if needed
+                final File locale_source = sb.getAppPath("locale.source", "locales");
                 final String lang = sb.getConfig("locale.language", "");
                 if (!lang.equals("") && !lang.equals("default")) { //locale is used
                     String currentRev = "";
@@ -357,7 +339,7 @@ public final class yacy {
                     if (!currentRev.equals(sb.getConfig("svnRevision", ""))) try { //is this another version?!
                         final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
                         final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
-                        if (Translator.translateFilesRecursive(sourceDir, destDir, new File(locale_work, lang + ".lng"), "html,template,inc", "locale")){ //translate it
+                        if (Translator.translateFilesRecursive(sourceDir, destDir, new File(locale_source, lang + ".lng"), "html,template,inc", "locale")){ //translate it
                             //write the new Versionnumber
                             final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
                             bw.write(sb.getConfig("svnRevision", "Error getting Version"));

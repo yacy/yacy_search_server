@@ -40,17 +40,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
-
 import de.anomic.server.serverSwitch;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Wordlist based translator
@@ -58,6 +57,9 @@ import java.util.Set;
  * Uses a Property like file with phrases or single words to translate a string or a file
  * */
 public class Translator {
+
+    public final static String LANG_FILENAME_FILTER = "^.*\\.lng$";
+    
     public static String translate(final String source, final Map<String, String> translationTable){
         final Set<String> keys = translationTable.keySet();
         String result = source;
@@ -215,7 +217,7 @@ public class Translator {
     }
 
     public static Map<String, String> langMap(final serverSwitch env) {
-        final String[] ms = env.getConfig("locale.lang", "").split(",");
+        final String[] ms = "default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk,gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky,cn/&#27721;&#35821;/&#28450;&#35486;".split(",");
         final Map<String, String> map = new HashMap<String, String>();
         for (final String element : ms) {
             int p = element.indexOf('/');
@@ -225,7 +227,7 @@ public class Translator {
         return map;
     }
         
-    public static boolean changeLang(final serverSwitch env, final String langPath, final String lang) {
+    public static boolean changeLang(final serverSwitch env, final File langPath, final String lang) {
         boolean ret = false;
 
         if ("default".equals(lang) || "default.lng".equals(lang)) {
@@ -255,5 +257,9 @@ public class Translator {
             }
         }
         return ret;
+    }
+    
+    public static List<String> langFiles(File langPath) {
+        return FileUtils.getDirListing(langPath, Translator.LANG_FILENAME_FILTER);
     }
 }

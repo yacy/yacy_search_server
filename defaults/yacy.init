@@ -223,9 +223,7 @@ defaultFiles = index.html,index.htm,default.html,search.html,console.html,contro
 # the <dir> must exist as sub-path to htLocalePath
 # the htLocaleSelection selects from the given locales, value=one-of-<dir>
 locale.source=locales
-locale.work=DATA/LOCALE/locales
 locale.translated_html=DATA/LOCALE/htroot
-locale.lang=default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk,gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky
 locale.language=default
 
 # virtual host for httpdFileServlet access
