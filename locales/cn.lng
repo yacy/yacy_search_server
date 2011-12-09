@@ -20,7 +20,7 @@
 # Thank you for your help!
 <!-- lang -->default\(english\)==Chinese
 <!-- author -->==lofyer
-<!-- maintainer -->==lofyer
+<!-- maintainer -->==lofyer@gmail.com
 #-----------------------------
 
 #File: AccessTracker_p.html
@@ -353,7 +353,7 @@ Available Skins==可用皮肤
 "Use"=="使用"
 "Delete"=="删除"
 >Skin Color Definition<==>改变皮肤颜色<
-The generic skin \'generic_pd\' can be configured here with custom colors:== 能在这里修改皮肤'generic_pd'的颜色:
+The generic skin \'generic_pd\' can be configured here with custom colors:==能在这里修改皮肤'generic_pd'的颜色:
 >Background<==>背景<
 >Text<==>文本<
 >Legend<==>说明<
@@ -487,118 +487,118 @@ might overwrite existing data if a file of the same name exists already.==, 旧�
 
 #File: ConfigLiveSearch.html
 #---------------------------
-Integration of a Search Field for Live Search==Integration eines Suchfeldes für die Live Suche
-A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
-This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
-Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
-Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
-Code Snippet:==Code Ausschnitt:
-YaCy Portal Search==YaCy Portal Suche
-"Search"=="Suche"
-Configuration options and defaults for \'yconf\':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
-Defaults<==Standardeinstellungen<
+Integration of a Search Field for Live Search==搜索栏集成即搜即得
+A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page=='即搜即得'输入栏: 即当您在搜索栏键入关键字时, 会在网页中弹出搜索对话框按钮
+This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==当您在线使用YaCy时, 您会在搜索页面看到相应功能(页面右上角)
+Just use the code snippet below to integrate that in your own web pages==将以下代码添加到您的网页中
+Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==对于形如 '#[ip]#:#[port]#' 的地址, 请用具体值来替换
+Code Snippet:==代码:
+YaCy Portal Search==YaCy门户搜索
+"Search"=="搜索"
+Configuration options and defaults for \'yconf\':==配置设置和默认的'yconf':
+Defaults<==默认<
 url<==URL<
-is a mandatory property - no default<==muss angegeben werden<
-YaCy P2P Web Search==YaCy P2P Web Suche
-Size and position \(width \| height \| position\)==Größe und Position (Breite | Höhe | Position)
-Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
-Animation effects \(show | hide\)==Animationseffekte (show | hide)
+is a mandatory property - no default<==固有参数 - 非默认<
+YaCy P2P Web Search==YaCy P2P 网页搜索
+Size and position \(width \| height \| position\)==尺寸和位置(宽度 | 高度 | 位置)
+Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==指定对话框位置. 对于位置: 'center', 'left', 'right', 'top', 'bottom' 的值, 或者一个包含对应位置值的数组 (以左上角为参考位置的像素数), 或者字符串值 (e.g. ['right','top'] 对应右上角)
+Animation effects \(show | hide\)==动画效果 (显示 | 隐藏)
 The effect to be used. Possible values: \'blind\', \'clip\', \'drop\', \'explode\', \'fold\', \'puff\', \'slide\', \'scale\', \'size\', \'pulsate\'.==
-Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
-Interaction \(modal \| resizable\)==Interaktion (modal | resizable)
-If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled \(i.e. cannot be interacted with\).==Wenn modal auf true gesetzt wird verhält sich der Dialog genau so; Andere Elemente auf der Seite werden deaktiviert. (können also solange das Fenster geöffnet ist nicht verwendet werden)
-Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
-If resizable is set to true, the dialog will be resizeable.==Wenn resizable auf true gesetzt wird, kann man die Größe des Dialogfensters verändern.
-Load JavaScript load_js==JavaScript laden load_js
-If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==Wenn load_js auf false gesetzt wird, müssen Sie manuell das benötigte Javascript auf Ihrer Portalseite laden.
-This can help to avoid timing problems or double loading.==Das kann helfen Timing Probleme oder das doppelte Laden zu verhindern.
-Load Stylesheets load_css==Stylesheets laden load_css
-If load_css is set to false, you have to manually load the needed CSS on your portal page.==Wenn load_css auf false gesetzt wird, müssen Sie manuell das benötigte CSS auf Ihrer Portalseite laden. 
+可用特效: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
+Interaction \(modal \| resizable\)==对话框 (modal | 可变)
+If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled \(i.e. cannot be interacted with\).==如果选中modal属性, 则对话框会有modal行为; 否则页面上就不具有此特性. (即不能进行交互操作).
+Modal dialogs create an overlay below the dialog but above other page elements.==Modal对话框会在页面元素下面而不是其上创建覆盖层.
+If resizable is set to true, the dialog will be resizeable.==如果选中可变属性, 对话框大小就是可变的.
+Load JavaScript load_js==载入页面JavaScript
+If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==如果未选中载入页面JavaScript, 那么您可能需要手动加载页面里的JavaScript.
+This can help to avoid timing problems or double loading.==这有助于避免分时或者重载问题.
+Load Stylesheets load_css==载入页面样式
+If load_css is set to false, you have to manually load the needed CSS on your portal page.==如果未选中载入页面样式, 您需要手动加载页面里的CSS文件.
 #Themes==Themes
-You can <==Sie können <
-download</a> ready made themes or <a href=\"http://jqueryui.com/themeroller/\" target=\"_blank\">create</a>==fertige Themes herunterladen</a> oder <a href="http://jqueryui.com/themeroller/" target="_blank">erstellen</a>
-your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==Ihr ganz eigenes Theme. <br/>Themes werden im folgenden Verzeichnis installiert: DATA/HTDOCS/yacy/ui/css/themes/
+You can <==您能够<
+download</a> ready made themes or <a href=\"http://jqueryui.com/themeroller/\" target=\"_blank\">create</a>==下载</a>或者<a href="http://jqueryui.com/themeroller/" target="_blank">创建</a>
+your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==一个您自己的主题. <br/>主题文件安装在: DATA/HTDOCS/yacy/ui/css/themes/
 #-----------------------------
 
 #File: ConfigNetwork_p.html
 #---------------------------
-Network Configuration==Netzwerk Einstellungen
-No changes were made!==Es wurden keine Änderungen vorgenommen!
-Accepted Changes==Änderungen wurden gespeichert
-Inapplicable Setting Combination==unpassende Einstellungskombination
+Network Configuration==网络设置
+No changes were made!==未作出任何改变!
+Accepted Changes==应用设置
+Inapplicable Setting Combination==设置未被应用
 #P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
-For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Für P2P-Tätigkeit muss mindestens DHT-Verteilung oder DHT-Empfang (oder beides) aktiviert sein. Ansonsten haben Sie einen Robinson-Peer definiert
-Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==Die globale Suche im P2P-Modus ist nur erlaubt, wenn der Index-Empfang aktiviert ist. Sie sind im P2P-Modus, aber Sie dürfen keine anderen Peers durchsuchen.
-For Robinson Mode, index distribution and receive is switched off==Im Robinson-Modus werden Indexverteilung und -empfang deaktiviert
+For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==对于P2P操作, 需要配置DHT分布网络或者DHT设备(或都要配置). 因此您需要定义一个Robinson配置.
+Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==仅当接收索引选项打开时, 才能进行P2P全球搜索.
+For Robinson Mode, index distribution and receive is switched off==在Robinson模式中, 索引分发和接收是默认关闭的.
 #This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
 #This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
-Network and Domain Specification==Netzwerk und Domain Spezifikation
+Network and Domain Specification==指定网络和域.
 # With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
 # Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
-YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Sie können an einem verteiltem Netz aus YaCy Peers mitwirken oder einen eigenständigen Peer betreiben.
-To control that all participants within a web indexing domain have access to the same domain,==Um zu kontrollieren, dass alle Teilnehmer innerhalb einer Indexierungs Domain Zugriff zu der selben Domain haben, 
-this network definition must be equal to all members of the same YaCy network.==müssen diese Netzwerkdefinitionen bei allen Mitgliedern des YaCy Netzwerkes gleich sein.
-Network Definition==Netzwerk Definition
-Network Nick==Netzwerk Nick
-Long Description==Lange Beschreibung
-Indexing Domain==Indexierungs Domain
+YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==您可以操作由YaCy peer组成的计算网格或者一个单独节点.
+To control that all participants within a web indexing domain have access to the same domain,==进行索引的域需要具有访问权限才能控制相同域内的所有成员,
+this network definition must be equal to all members of the same YaCy network.==且此设置对同一YaCy网络内的所有成员有效.
+Network Definition==网络定义
+Network Nick==网络别名
+Long Description==描述
+Indexing Domain==索引域
 #DHT==DHT
-"Change Network"=="Netzwerk wechseln"
-Distributed Computing Network for Domain==Verteiltes Rechnen Netzwerk für die Domain
-You can configure if you want to participate at the global YaCy network or if you want to have your==Sie können einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
-own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben möchten. Sie können auch
-a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabhängige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
-peers, which we call a 'Robinson' peer.==Dies nennen wir einen 'Robinson'-Peer.
-Peer-to-Peer Mode==Peer-to-Peer Modus
->Index Distribution==>Index-Verteilung
-This enables automated, DHT-ruled Index Transmission to other peers==Dies aktiviert den automatischen, DHT-basierten Versand an andere Peers
->enabled==>aktiviert
-disabled during crawling==während des Crawlings deaktiviert
-disabled during indexing==während des Indexierens deaktiviert
->Index Receive==>Index-Empfang
-Accept remote Index Transmissions==Remote Index-Übertragungen akzeptieren
-This works only if you have a senior peer. The DHT-rules do not work without this function==Dies funktioniert nur, wenn Sie einen Senior-Peer haben. Die DHT-Regeln arbeiten nicht ohne diese Funktion
->reject==>verwerfe
-accept transmitted URLs that match your blacklist==akzeptiere übertragene URLs, die zu Ihrer Blacklist passen
+"Change Network"=="改变网络"
+Distributed Computing Network for Domain==域内分布式计算网络.
+You can configure if you want to participate at the global YaCy network or if you want to have your==如果要加入YaCy全球网络或者仅仅
+own separate search cluster with or without connection to the global network. You may also define==作为一个独立的搜索cluster, 请配置此项.
+a completely independent search engine instance, without any data exchange between your peer and other==您也可以不与其他peer有任何数据交换, 作一个完全独立的搜索引擎.
+peers, which we call a 'Robinson' peer.==对于这种配置的peer, 即叫做Robinson peer.
+Peer-to-Peer Mode==点对点模式
+>Index Distribution==>索引分发
+This enables automated, DHT-ruled Index Transmission to other peers==自动向其他peer传递DHT规则的索引
+>enabled==>开启
+disabled during crawling==在crawl时关闭
+disabled during indexing==在索引时关闭
+>Index Receive==>接收索引
+Accept remote Index Transmissions==接受远端索引传递
+This works only if you have a senior peer. The DHT-rules do not work without this function==仅当您拥有更上级peer时有效. 如果未设置此项, DHT规则不生效
+>reject==>拒绝
+accept transmitted URLs that match your blacklist==接受符合黑名单的URL
 #>Accept Remote Crawl Requests==>Remotecrawl-Anfragen akzeptieren
 #Perform web indexing upon request of another peer==Führe Indexierung bei Anfrage eines anderen Peers aus
 #This works only if you are a senior peer==Dies funktioniert nur, wenn Sie ein Senior-Peer sind
 #Load with a maximum of==Lade mit maximal
 #pages per minute==Seiten pro Minute (PPM)
->Robinson Mode==>Robinson Modus
-If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Falls Ihr Peer im 'Robinson Modus' läuft, so verwenden Sie YaCy als Suchmaschine für Ihr eigenes Suchportal, ohne Datenaustausch mit anderen Peers
-There is no index receive and no index distribution between your peer and any other peer==Es gibt keinen Index-Empfang von und keine Index-Verteilung zu anderen Peers
-In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==Im Fall eines Robinson-Clusters können Remotecrawl-Anfragen von Peers des selben Clusters akzeptiert werden
->Private Peer==>Privater Peer
-Your search engine will not contact any other peer, and will reject every request==Ihre Suchmaschine wird keine fremden Peers kontaktieren und alle Anfragen anderer Peers ablehnen
+>Robinson Mode==>Robinson模式
+If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==如果您的peer运行在'Robinson模式', 您能在不与其他peer交换数据的情况下进行搜索
+There is no index receive and no index distribution between your peer and any other peer==您不会与其他peer进行索引传递
+In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==对于Robinson模式的cluster， 一样会应答远端的crawl请求
+>Private Peer==>私有Peer
+Your search engine will not contact any other peer, and will reject every request==您的搜索引擎不会与其他peer联系, 并会拒绝每一个外部请求
 #>Private Cluster==>Privater Cluster
 #Your peer is part of a private cluster without public visibility
 #Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster
 #Search requests are spread over all peers of the cluster, and answered from all peers of the cluster
 #List of ip:port - addresses of the cluster: \(comma-separated\)
->Public Cluster==>Öffentlicher Cluster
-Your peer is part of a public cluster within the YaCy network==Ihr Peer ist Teil eines öffentlichen Clusters innerhalb des YaCy-Netzwerkes
-Index data is not distributed, but remote crawl requests are distributed and accepted==Indexdaten werden nicht verteilt, aber Remotecrawl-Anfragen werden verteilt und akzeptiert
-Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Suchanfragen werden über alle Peers des Clusters verteilt und von allen Peers des Clusters beantwortet
-List of .yacy or .yacyh - domains of the cluster: \(comma-separated\)==Liste von .yacy oder .yacyh Domains der Peers des Clusters: (kommagetrennt)
->Public Peer==>Öffentlicher Peer
-You are visible to other peers and contact them to distribute your presence==Sie sind für andere Peers sichtbar und kontaktieren sie um ihnen Ihre Anwesenheit mitzuteilen
-Your peer does not accept any outside index data, but responds on all remote search requests==Ihr Peer akzeptiert keinerlei Indexdaten von außen, aber antwortet auf alle Remote-Suchanfragen
+>Public Cluster==>公共Cluster
+Your peer is part of a public cluster within the YaCy network==您的peer属于YaCy网络内的一个公共cluster
+Index data is not distributed, but remote crawl requests are distributed and accepted==索引数据没有被分发, 但是外部的crawl请求会被分发和接受
+Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==搜索请求在当前cluster内的所有peer中传播, 并且这些peer同样会作出回应
+List of .yacy or .yacyh - domains of the cluster: \(comma-separated\)==Cluster内 .yacy 或者 .yacyh 的域名列表 : (以逗号隔开)
+>Public Peer==>公共Peer
+You are visible to other peers and contact them to distribute your presence==对于其他peer您是可见的, 与他们联系以分发你的索引
+Your peer does not accept any outside index data, but responds on all remote search requests==您的peer不接受任何外部索引数据, 但是会回应所有外部搜索请求
 #>Peer Tags==>Peer Tags
-When you allow access from the YaCy network, your data is recognized using keywords==Falls Sie Zugriff vom YaCy-Netzwerk aus erlauben, so werden Ihre Daten anhand von Schlüsselwörtern erkannt
-Please describe your search portal with some keywords \(comma-separated\)==Bitte beschreiben Sie Ihr Suchportal mit einigen Schlüsselwörtern (kommagetrennt)
-If you leave the field empty, no peer asks your peer. If you fill in a \'\*\', your peer is always asked.==Wenn Sie das Feld leer lassen werden Sie keine Anfragen von anderen Peers bekommen. Wenn Sie ein '*' eintragen, wird Ihr Peer immer abgefragt.
-"Save"=="Speichern"
+When you allow access from the YaCy network, your data is recognized using keywords==当您允许YaCy网络的访问时, 您的数据会以关键字形式表示
+Please describe your search portal with some keywords \(comma-separated\)==请用关键字描述您的搜索门户 (以逗号隔开)
+If you leave the field empty, no peer asks your peer. If you fill in a \'\*\', your peer is always asked.==如果此部分留空, 那么您的peer不会被其他peer访问. 如果内容是 '*' 则标示您的peer永远被允许访问.
+"Save"=="保存"
 #-----------------------------
 
 #File: ConfigParser.html
 #---------------------------
-Parser Configuration==Parser Einstellungen
-Content Parser Settings==Inhalt Parser Einstellungen
-With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen können Sie das Parsen zusätzlicher Dateitypen basierend auf ihren MIME-Typen ermöglichen.
-For a detailed description of the various MIME-types take a look at==Für eine detailierte Beschreibung der verschiedenen MIME-Typen können Sie einen Blick auf
-http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
-enable/disable Parser==Parser aktiv / inaktiv
+Parser Configuration==解析配置
+Content Parser Settings==内容解析设置
+With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==此设置能开启/关闭依据文件类型(MIME)的内容解析.
+For a detailed description of the various MIME-types take a look at==关于MIME的详细描述请参考
+http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>.
+enable/disable Parser==Parser 开启 / 关闭
 # --- Parser Names are hard-coded BEGIN ---
 ##Mime-Type==MIME Typ
 ##Microsoft Powerpoint Parser==Microsoft Powerpoint Parser
@@ -624,118 +624,118 @@ enable/disable Parser==Parser aktiv / inaktiv
 #Open Office XML Document Parser==Open Office XML Dokument Parser
 #BMP Image Parser==BMP Bild Parser
 # --- Parser Names are hard-coded END ---
-"Submit"=="Speichern"
+"Submit"=="提交"
 #-----------------------------
 
 #File: ConfigPortal.html
 #---------------------------
-Integration of a Search Portal==Integration eines Suchportals
-If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==Wenn Sie YaCy als Suchportal für Ihre Webseiten integrieren wollen, können Sie auch die Icons und Nachrichten auf den Suchseiten verändern.
-The search page may be customized.==Die Suchseite kann auf die eigenen Bedürfnisse zugeschnitten werden.
-You can change the \'corporate identity\'-images, the greeting line==Sie können die 'Corporate Identity' Bilder, die Grußzeile
-and a link to a home page that is reached when the \'corporate identity\'-images are clicked.==und einen Link auf die Homepage ändern, der aufgerufen wird wenn die 'Corporate Identity' Bilder angeklickt werden.
+Integration of a Search Portal==搜索门户设置
+If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==如果您想将YaCy作为您的网站搜索门户, 您可能需要在这改变搜索页面的图标和信息.
+The search page may be customized.==搜索页面可以自由定制.
+You can change the \'corporate identity\'-images, the greeting line==您可以改变 'Corporate Identity' 图像, 问候语
+and a link to a home page that is reached when the \'corporate identity\'-images are clicked.==和一个指向首页的 'Corporate Identity' 图像链接.
 To change also colours and styles use the <a href=\"ConfigAppearance_p.html\">Appearance Servlet</a> for different skins and languages.==
-Um auch die Farben und Stile zu verändern verwenden Sie das <a href="ConfigAppearance_p.html">Servlet Aussehen</a> für andere Skins und Sprachen.
-Greeting Line<==Grußzeile<
-URL of Home Page<==URL der Homepage<
-URL of a Small Corporate Image<==URL des kleinen Corporate Identity Bildes<
-URL of a Large Corporate Image<==URL des großen Corporate Identity Bildes<
-Show Navigation Bar on Search Page?==Navigationsleiste auf Suchseite anzeigen?
-Show Navigation Top-Menu&nbsp;==Zeige Top-Menu Navigation&nbsp;
-no link to YaCy Menu \(admin must navigate to /Status.html manually\)==kein Verweis auf YaCy Menu (Der Admin muss manuell auf /Status.html wechseln)
-Show Advanced Search Options on Search Page?==Erweiterte Suchoptionen auf Suchseite anzeigen?
-Show Advanced Search Options on index.html&nbsp;==Erweiterte Suchoptionen auf index.html anzeigen?
-do not show Advanced Search==Erweiterte Suche nicht anzeigen
-Show Information Links for each Search Result Entry==Informationslinks für jeden Suchergebnis Eintrag anzeigen
->Date&==>Datum&
->Size&==>Größe&
->Metadata&==>Metadaten&
+若要改变颜色和风格,请到<a href="ConfigAppearance_p.html">外观选项</a>选择您喜欢的皮肤和语言.
+Greeting Line<==问候语<
+URL of Home Page<==首页链接<
+URL of a Small Corporate Image<==小图位置<
+URL of a Large Corporate Image<==大图位置<
+Show Navigation Bar on Search Page?==显示导航栏和搜索页?
+Show Navigation Top-Menu&nbsp;==显示顶级导航菜单&nbsp;
+no link to YaCy Menu \(admin must navigate to /Status.html manually\)==没有到YaCy菜单的链接(管理页面必须指向/Status.html)
+Show Advanced Search Options on Search Page?==在搜索页显示高级搜索选项?
+Show Advanced Search Options on index.html&nbsp;==在index.html显示高级搜索选项?
+do not show Advanced Search==不显示高级搜索
+Show Information Links for each Search Result Entry==显示搜索结果的链接信息
+>Date&==>日期&
+>Size&==>大小&
+>Metadata&==>元数据&
 >Parser&==>Parser&
->Pictures==>Bilder
-Default Pop-Up Page<==Standard Pop-up<
->Status Page==>Status Seite
->Search Front Page==>Frontseite Suche
->Search Page \(small header\)==>Suchseite (kleine Kopfzeile)
->Interactive Search Page==>Interaktive Suchseite
-Default index.html Page \(by forwarder\)==Standard index.html Seite (durch Weiterleitung)
-Target for Click on Search Results==Zielfenster beim Klicken auf ein Suchergebnis
+>Pictures==>图像
+Default Pop-Up Page<==默认弹出页面<
+>Status Page==>状态页面
+>Search Front Page==>搜索首页
+>Search Page \(small header\)==>搜索页面(二级标题)
+>Interactive Search Page==>交互搜索页面
+Default index.html Page \(by forwarder\)==默认index.html(前向指定)
+Target for Click on Search Results==点击搜索结果时
 
-\"_blank\" \(new window\)=="_blank" (Neues Fenster)
-\"_self\" \(same window\)=="_self" (Im gleichen Fenster)
-\"_parent\" \(the parent frame of a frameset\)=="_parent" (Der Parent Frame eines Framesets)
-\"_top\" \(top of all frames\)=="_top" (Oberster Frame)
-\"searchresult\" \(a default custom page name for search results\)=="Suchergebnis" (Eine standardmäßig konfigurierbare Setie für Suchergebnisse)
+\"_blank\" \(new window\)=="_blank" (新窗口)
+\"_self\" \(same window\)=="_self" (同一窗口)
+\"_parent\" \(the parent frame of a frameset\)=="_parent" (父级窗口)
+\"_top\" \(top of all frames\)=="_top" (置顶)
+\"searchresult\" \(a default custom page name for search results\)=="搜索结果" (搜索结果页面名称)
 
-"Change Search Page"=="Ändere die Suchseite"
-"Set to Default Values"=="Standardwerte setzen"
-The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann mit einem iframe in Ihre eigenen Webseiten eingebaut werden. Verwenden Sie dazu den folgenden Code:
-This would look like:==Das würde so aussehen:
-For a search page with a small header, use this code:==Für eine Suchseite mit kleiner Kopfzeile verwenden Sie folgenden Code:
-A third option is the interactive search. Use this code:==Als dritte Option gibt es die interaktive Suche. Verwenden Sie dazu folgenden Code:
+"Change Search Page"=="改变搜索页"
+"Set to Default Values"=="设为默认值"
+The search page can be integrated in your own web pages with an iframe. Simply use the following code:==使用以下代码, 将搜索页能集成在网页框架中:
+This would look like:==示例:
+For a search page with a small header, use this code:==对于一个拥有二级标题的页面, 可使用以下代码:
+A third option is the interactive search. Use this code:==交互搜索代码:
 #-----------------------------
 
 #File: ConfigProfile_p.html
 #---------------------------
-Your Personal Profile==Ihr persönliches Profil
-You can create a personal profile here, which can be seen by other YaCy-members==Hier können Sie Ihr persönliches Profil verwalten, welches andere YaCy-Benutzer ansehen können
-or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
+Your Personal Profile==您的个人资料
+You can create a personal profile here, which can be seen by other YaCy-members==您可以在这创建个人资料, 而且对其他YaCy成员可见
+or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==或者<a href="ViewProfile.html?hash=localhash">在公共场所时</a>使用<a href="ViewProfile.rdf?hash=localhash">FOAF RDF 文件</a>.
 #Name==Name
 #Nick Name==Nick Name
-Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
+Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==首页(显示在每个<a href="/Supporter.html">支持者</a> 页面中, 前提是您的peer在线).
 #eMail==eMail
 #ICQ==ICQ
 #Jabber==Jabber
 #Yahoo!==Yahoo!
 #MSN==MSN
 #Skype==Skype
-Comment==Kommentar
-"Save"=="Speichern"
-You can use <==Sie können <
-> here.==> hier im Profil benutzen.
+Comment==注释
+"Save"=="保存"
+You can use <==在这里您可以用<
+> here.==>.
 #-----------------------------
 
 #File: ConfigProperties_p.html
 #---------------------------
-Advanced Config==Erweiterte Einstellungen
-Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie können alles ändern, bedenken Sie aber, dass einige Änderungen einen Neustart von YaCy erfordern und andere Änderungen YaCy ganz zum Absturz bringen können.
-For explanation please look into defaults/yacy.init==Eine Erklärung finden Sie in der Datei defaults/yacy.init
-"Save"=="Speichern"
+Advanced Config==高级设置
+Here are all configuration options from YaCy.==这里显示YaCy所有设置.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==您可以改变任何这里的设置, 当然, 有的需要重启才能生效, 有的甚至能引起YaCy崩溃.
+For explanation please look into defaults/yacy.init==详细内容请参考defaults/yacy.init
+"Save"=="保存"
 #-----------------------------
 
 #File: ConfigRobotsTxt_p.html
 #---------------------------
-Exclude Web-Spiders==Web-Spider ausschließen
-Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==Hier können Sie eine robots.txt für alle Webcrawler die das Webinterface Ihres Peers indexieren wollen, erstellen.
-is a volunteer agreement most search-engines \(including YaCy\) follow.==ist ein freiwilliger Standard den die meisten Suchmaschinen (inkl. YaCy) befolgen.
-It disallows crawlers to access webpages or even entire domains.==Er kann Crawlern den Zugriff auf Webseiten oder sogar ganze Domains verbieten.
-Deny access to==Verbiete die Erfassung
-Entire Peer==des ganzen Peers
-Status page==der Statusseite
-Network pages==der Netzwerkseiten
-Surftips==der Surftipps
-News pages==der News-Seiten
-Blog==des Blogs
-Wiki=des Wikis
-Public bookmarks==der öffentlichen Lesezeichen
-Home Page==der Home-Page
-File Share==des File-Shares
-"Save restrictions"=="Beschränkungen speichern"
+Exclude Web-Spiders==排除Web-Spider
+Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==在这里您可以创建一个robots.txt, 以阻止试图访问您peer网络接口的网络爬虫.
+is a volunteer agreement most search-engines \(including YaCy\) follow.==是一个大多数搜索引擎(包括YaCy)都遵守的协议.
+It disallows crawlers to access webpages or even entire domains.==它会阻止网络爬虫(crawlers)进入网页甚至是整个域.
+Deny access to==禁止访问以下页面
+Entire Peer==整个peer
+Status page==状态页面
+Network pages==网络页面
+Surftips==建议
+News pages==新闻
+Blog==博客
+Wiki=维基
+Public bookmarks==公共书签
+Home Page==首页
+File Share==共享文件
+"Save restrictions"=="保存"
 #-----------------------------
 
 #File: ConfigSearchBox.html
 #---------------------------
-Integration of a Search Box==Integration einer Suchbox
-We give information how to integrate a search box on any web page that==Hier finden Sie Informationen dazu wie man eine Suchbox auf jeder Webseite einsetzen kann das
-calls the normal YaCy search window.==ein normales YaCy Suchfenster aufruft.
-Simply use the following code:==Verwenden Sie einfach den folgenden Code:
-  MySearch==  Meine Suche
-"Search"=="Suchen"
-This would look like:==Das sieht dann so aus:
-This does not use a style sheet file to make the integration into another web page with a different style sheet easier.==Da hier keine Stylesheet Datei verwendet wird, gestaltet sich die Integration in andere Webseiten mit einem anderen Stylesheet einfacher.
-You would need to change the following items:==Sie müssen dazu die folgenden Einträge ändern:
-Replace the given colors \#eeeeee \(box background\) and \#cccccc \(box border\)==Ersetzen sie die vorgegebenen Farben #eeeeee (Hintergrund der Box) and #cccccc (Boxenrand)
-Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Meine Suche" mit Ihrer eigenen Nachricht
+Integration of a Search Box==搜索框设置
+We give information how to integrate a search box on any web page that==如何将一个搜索框集成到任意
+calls the normal YaCy search window.==调用YaCy搜索的页面.
+Simply use the following code:==使用以下代码:
+  MySearch== 我的搜索 
+"Search"=="搜索"
+This would look like:==示例:
+This does not use a style sheet file to make the integration into another web page with a different style sheet easier.==在这里并没有使用样式文件, 因为这样会比较容易将其嵌入到不同样式的页面里.
+You would need to change the following items:==您可能需要以下条目:
+Replace the given colors \#eeeeee \(box background\) and \#cccccc \(box border\)==替换已给颜色 #eeeeee (框架背景) 和 #cccccc (框架边框)
+Replace the word \"MySearch\" with your own message==用您想显示的信息替换"我的搜索"
 #-----------------------------
 
 #File: ConfigUpdate_p.html
