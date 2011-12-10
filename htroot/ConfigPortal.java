@@ -86,17 +86,20 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false));
                 sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
-
+                    
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete", false));
+
+                sb.setConfig("about.headline", post.get("about.headline", ""));
+                sb.setConfig("about.body", post.get("about.body", ""));
+                
                 // construct navigation String
                 String nav = "";
                 if (post.getBoolean("search.navigation.hosts", false)) nav += "hosts,";
                 if (post.getBoolean("search.navigation.authors", false)) nav += "authors,";
                 if (post.getBoolean("search.navigation.namespace", false)) nav += "namespace,";
                 if (post.getBoolean("search.navigation.topics", false)) nav += "topics,";
-                if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1);
-                 sb.setConfig("search.navigation", nav);
+                if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1); sb.setConfig("search.navigation", nav);
             }
             if (post.containsKey("searchpage_default")) {
                 sb.setConfig(SwitchboardConstants.GREETING, "P2P Web Search");
@@ -123,6 +126,8 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.pictures", false);
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh");
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
+                prop.put("about.headline", "");
+                prop.put("about.body", "");
             }
         }
 
@@ -158,6 +163,9 @@ public class ConfigPortal {
         prop.put("search.verify.cacheonly", sb.getConfig("search.verify", "").equals("cacheonly") ? 1 : 0);
         prop.put("search.verify.false", sb.getConfig("search.verify", "").equals("false") ? 1 : 0);
         prop.put("search.verify.delete", sb.getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true) ? 1 : 0);
+
+        prop.put("about.headline", sb.getConfig("about.headline", ""));
+        prop.put("about.body", sb.getConfig("about.body", ""));
 
         final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
         prop.put("popupFront", 0);
