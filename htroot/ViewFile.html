@@ -14,15 +14,12 @@
 </a>
 <span>See the page info about the url.</span>
 </div>
-  
-    #(display)#
-    #%env/templates/simpleheader.template%#
-    ::
-    #%env/templates/header.template%#
-    #%env/templates/submenuIndexControl.template%#
-    ::
+    #(topmenu)#
     #%env/templates/embeddedheader.template%#
-    #(/display)#
+    ::
+    #%env/templates/simpleheader.template%#
+    #(/topmenu)#
+    
     <h2>View URL Content</h2>
 
     <form method="get" action="ViewFile.html" accept-charset="ascii">

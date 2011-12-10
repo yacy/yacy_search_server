@@ -694,6 +694,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return this.host;
     }
 
+    public String getTLD() {
+        int p = this.host.lastIndexOf('.');
+        if (p < 0) return "";
+        return this.host.substring(p + 1);
+    }
+
     public InetAddress getInetAddress() {
         if (this.hostAddress != null) return this.hostAddress;
         this.hostAddress = Domains.dnsResolve(this.host.toLowerCase());

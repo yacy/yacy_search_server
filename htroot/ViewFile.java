@@ -76,10 +76,9 @@ public class ViewFile {
 
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
+        prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
 
         if (post == null) {
-            prop.put("display", 1);
-            prop.put("error_display", 0);
             prop.putHTML("error_words", "");
             prop.put("error_vMode-sentences", "1");
             prop.put("error", "1");
@@ -87,8 +86,6 @@ public class ViewFile {
             prop.put("viewMode", VIEW_MODE_NO_TEXT);
             return prop;
         }
-
-        final int display = post.getInt("display", 1);
 
         // get segment
         Segment indexSegment = null;
@@ -98,9 +95,6 @@ public class ViewFile {
         } else {
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
-
-        prop.put("display", display);
-        prop.put("error_display", display);
 
         if (post.containsKey("words"))
             prop.putHTML("error_words", post.get("words"));
@@ -212,7 +206,9 @@ public class ViewFile {
         } else if (viewMode.equals("iframeCache")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_CACHE);
             final String ext = url.getFileExtension();
-            if ("jpg.jpeg.png.gif".indexOf(ext) >= 0) {
+            prop.put("viewMode_png", 0);
+            prop.put("viewMode_html", 0);
+            if (ext.length() > 0 && "jpg.jpeg.png.gif".indexOf(ext) >= 0) {
                 prop.put("viewMode_png", 1);
                 prop.put("viewMode_png_url", url.toNormalform(false, true));
             } else {
