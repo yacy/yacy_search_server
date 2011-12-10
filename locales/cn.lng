@@ -892,7 +892,7 @@ Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\
 since it shows crawl requests from other peers.==因为它含有来自其他peer的请求.
 Case \(7\) occurs if surrogate files are imported==如果导入了替代品, 则事件(7)发生.
 The image above illustrates the data flow initiated by web index acquisition.==以上图像为网页索引的数据流.
-Some processes occur double to document the complex index migration structure.==(翻译)对于读写同一文件的进程, 复杂化索引混合结构.
+Some processes occur double to document the complex index migration structure.==一些进程可能出现双重文件索引结构混合的情况.
 \(1\) Results of Remote Crawl Receipts==(1) 远程crawl回执结果 
 This is the list of web pages that this peer initiated to crawl,==这是peer初始化时crawl的网页列表,
 but had been crawled by <em>other</em> peers.==但是已被<em>其他</em>peer crawl.
