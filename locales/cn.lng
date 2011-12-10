@@ -853,7 +853,7 @@ MaxAge</strong>==最大寿命</strong>
 #Auto Filter Content</strong>==Auto Inhalts Filter</strong>
 Max Page Per Domain</strong>==每个域中拥有最大页面</strong>
 Accept==接受
-Fill Proxy Cache==填充代理Cache
+Fill Proxy Cache==填充代理缓存
 Local Text Indexing==本地文本索引
 Local Media Indexing==本地媒体索引
 Remote Indexing==远程索引
@@ -891,15 +891,15 @@ so you need to log-in with your administration password.==所以您最好设置�
 Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==事件(6)与事件(1)相反, 显示本地回执. 它也包含索引结果, 但不属于隐私
 since it shows crawl requests from other peers.==因为它含有来自其他peer的请求.
 Case \(7\) occurs if surrogate files are imported==如果导入了替代品, 则事件(7)发生.
-The image above illustrates the data flow initiated by web index acquisition.==以上图像为网页索引的数据流.
+The image above illustrates the data flow initiated by web index acquisition.==上图为网页索引的数据流.
 Some processes occur double to document the complex index migration structure.==一些进程可能出现双重文件索引结构混合的情况.
 \(1\) Results of Remote Crawl Receipts==(1) 远程crawl回执结果 
 This is the list of web pages that this peer initiated to crawl,==这是peer初始化时crawl的网页列表,
-but had been crawled by <em>other</em> peers.==但是已被<em>其他</em>peer crawl.
+but had been crawled by <em>other</em> peers.==但是先前它们已被<em>其他</em>peer crawl.
 This is the 'mirror'-case of process \(6\).==这是进程(6)的'镜像'实例
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>用法:</em> 在这获得入口, 如果您开始'索引创建'页面并选中了
+<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>用法:</em> 您可以在这获得细目, 如果'索引创建'页面中选中了
 'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request=='远程索引'. 每一个远端peer索引页面所依据的peer请求
-is reported back and can be monitored here.==都会被报告并能在这里显示.
+is reported back and can be monitored here.==都在这里显示.
 \(2\) Results for Result of Search Queries==(2) 搜索查询结果报告页
 This index transfer was initiated by your peer by doing a search query.==通过搜索, 此索引转移能被初始化.
 The index was crawled and contributed by other peers.==这个索引是被其他peer贡献与crawl的.
@@ -910,13 +910,13 @@ These links here have been transmitted to you because your peer is the most appr
 the logic of the Global Distributed Hash Table.==您的peer是最适合存储它们的.
 <em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>用法:</em>当您选中了在'索引控制'里的'接收索引'时, 这个表会被填充.
 \(4\) Results for Proxy Indexing==(4) 代理索引结果
-These web pages had been indexed as result of your proxy usage.==由于您使用了代理, 这些网页被索引了.
-No personal or protected page is indexed==无被索引的私人或受保护网页
-such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==通过检测cookie用途和提交参数(链接中或者HTTP协议)能够识别出此类网页
+These web pages had been indexed as result of your proxy usage.==以下是由于使用代理而索引的网页.
+No personal or protected page is indexed==不包括私人或受保护网页
+such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==通过检测cookie用途和提交参数(链接中或者HTTP协议)能够识别出此类网页,
 and automatically excluded from indexing.==并在索引时自动排除.
 <em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>用法:</em>必须把YaCy用作代理才能填充此表格.
-Set the proxy settings of your browser to the same port as given==设置浏览器代理端口与
-on the 'Settings'-page in the 'Proxy and Administration Port' field.=='设置'页面'代理和管理端口'选项中的端口一致.
+Set the proxy settings of your browser to the same port as given==将浏览器代理端口设置为
+on the 'Settings'-page in the 'Proxy and Administration Port' field.=='设置'页面'代理和管理端口'选项中的端口.
 \(5\) Results for Local Crawling==(5) 本地crawl结果
 These web pages had been crawled by your own crawl task.==您的crawl任务crawl了这些网页.
 <em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>用法:</em>在'索引创建'页面设置crawl起始点以开始crawl.
