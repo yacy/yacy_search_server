@@ -929,7 +929,7 @@ Statistics about \#\[domains\]\# domains in this stack:==此栈显示有关 #[do
 \(7\) Results from surrogates import==\(7\) 替代品导入结果
 These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的替代文件中导入
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>用法:</em>将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
-\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH 导入</a>\)
+\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(例如 <a href="/IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH 导入</a>\)
 #Domain==Domain
 #URLs=URLs
 "delete all"=="全部删除"
