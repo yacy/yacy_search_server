@@ -740,207 +740,207 @@ Replace the word \"MySearch\" with your own message==用您想显示的信息替
 
 #File: ConfigUpdate_p.html
 #---------------------------
-Manual System Update==Manuelle Systemaktualisierung
-Current installed Release==Aktuell installierte Version
-Available Releases==Verfügbare Versionen
-"Download Release"=="Version Herunterladen"
-"Check for new Release"=="Nach neuer Version suchen"
-Downloaded Releases==Heruntergeladene Versionen
-No downloaded releases available for deployment.==Keine heruntergeladenen Releases zum Installieren verfügbar.
-no&nbsp;automated installation on development environments==Keine automatische Installation in Entwicklungsumgebungen
-"Install Release"=="Version Installieren"
-"Delete Release"=="Version löschen"
-Automatic Update==Automatische Aktualisierung
-check for new releases, download if available and restart with downloaded release==suche nach neuer Version, lade sie herunter und starte neu mit dieser Version
-"Check \+ Download \+ Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
-Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Der Download von Version #[downloadedRelease]# ist beendet. Ein Neustart ist eingeleitet.
-No more recent release found.==Kein neuere Version gefunden.
-Release will be installed. Please wait.==Das Release wird installiert. Bitte warten.
-You installed YaCy with a package manager.==Sie haben YaCy mit einer Paketverwaltung oder Installer installiert.
-To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Paketmanager.
-Omitting update because this is a development environment.==Update ausgelassen weil dies ein Entwicklersystem ist.
-Omitting update because download of release \#\[downloadedRelease\]\# failed.==Update ausgelassen weil der Download von Version #[downloadedRelease]# fehlschlug.
-Automated System Update==Automatische Systemaktualisierung
-manual update==manuelle Aktualisierung
-no automatic look-up, updates can be made manually using this interface \(see options above\)==Keine automatische Aktualisierung. Updates können manuell gemacht werden (siehe die Optionen oben).
-automatic update==automatische Aktualisierung
-updates are made within fixed cycles:==Aktualisierungen werden nach festen Regeln gemacht:
-Time between lookup==Zeit zwischen Update Prüfungen
-hours==Stunden
-Release blacklist==Versionen Negativliste
-regex on release number strings==regex mit Versionsnummern
-Release type==Release Typ
-only main releases==nur offizielle Versionen
-any release including developer releases==jede Version, auch Entwickler Versionen
-Signed autoupdate:==signierte Aktualisierung:
-only accept signed files==Nur signierte Dateien akzeptieren
-"Submit"=="Speichern"
-Accepted Changes.==Änderungen akzeptiert.
-System Update Statistics==System Aktualisierungs Statistiken
-Last System Lookup==Letzter System Check
-never==niemals
-Last Release Download==Letzter Download
-Last Deploy==Letztes Update
+Manual System Update==系统升级
+Current installed Release==当前版本
+Available Releases==可用版本
+"Download Release"=="下载更新"
+"Check for new Release"=="检查更新"
+Downloaded Releases==已下载
+No downloaded releases available for deployment.==无可用更新.
+no&nbsp;automated installation on development environments==开发环境中自动安装
+"Install Release"=="安装更新"
+"Delete Release"=="删除更新"
+Automatic Update==自动更新
+check for new releases, download if available and restart with downloaded release==检查更新, 如果可用则重启并使用
+"Check \+ Download \+ Install Release Now"=="检查 + 下载 + 现在安装"
+Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== 已完成下载 #[downloadedRelease]# . 重启并初始化.
+No more recent release found.==无最近更新.
+Release will be installed. Please wait.==准备安装更新. 请稍等.
+You installed YaCy with a package manager.==您使用包管理器安装的YaCy.
+To update YaCy, use the package manager:==用包管理器以升级YaCy:
+Omitting update because this is a development environment.==因当前为开发环境, 忽略安装升级.
+Omitting update because download of release \#\[downloadedRelease\]\# failed.==下载 #[downloadedRelease]# 失败, 忽略安装升级.
+Automated System Update==系统自动升级
+manual update==手动升级
+no automatic look-up, updates can be made manually using this interface \(see options above\)==无自动检查更新时, 可以使用这个接口安装更新(参见上述).
+automatic update==自动更新
+updates are made within fixed cycles:==每隔一定时间自动检查更新:
+Time between lookup==检查周期
+hours==小时
+Release blacklist==版本黑名单
+regex on release number strings==版本号正则表达式
+Release type==版本类型
+only main releases==仅主版本号
+any release including developer releases==任何版本, 包括测试版
+Signed autoupdate:==签名升级:
+only accept signed files==仅接受签名文件
+"Submit"=="提交"
+Accepted Changes.==已接受改变.
+System Update Statistics==系统升级状况
+Last System Lookup==上一次查找更新
+never==从未
+Last Release Download==最近一次下载更新
+Last Deploy==最近一次应用更新
 #-----------------------------
 
 #File: Connections_p.html
 #---------------------------
-Connection Tracking==Verbindungsstatus
-Incoming Connections==Eingehende Verbindungen
-Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt.
-Protocol</td>==Protokoll</td>
-Duration==Dauer
-Source IP\[:Port\]==Quell-IP[:Port]
-Dest. IP\[:Port\]==Ziel-IP[:Port]
-Command</td>==Kommando</td>
-Used==Benutzt
-Close==Schließen
-Waiting for new request nr.==Warte auf neue Anfrage Nr.
-Outgoing Connections==Ausgehende Verbindungen
-Showing \#\[clientActive\]\# pooled outgoing connections used as:==Gezeigt werden #[clientActive]# zusammengefasste ausgehende Verbindungen, benutzt als:
-Duration==Dauer
+Connection Tracking==连接跟踪
+Incoming Connections==进入连接
+Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==显示 #[numActiveRunning]# 活动, #[numActivePending]# 挂起连接, 最大允许 #[numMax]# 个进入连接.
+Protocol</td>==协议</td>
+Duration==持续时间
+Source IP\[:Port\]==来源IP[:端口]
+Dest. IP\[:Port\]==目标IP[:端口]
+Command</td>==命令</td>
+Used==使用的
+Close==关闭
+Waiting for new request nr.==等待新请求数.
+Outgoing Connections==外出连接
+Showing \#\[clientActive\]\# pooled outgoing connections used as:==显示 #[clientActive]# 个外出链接, 用作:
+Duration==持续时间
 #ID==ID
 #-----------------------------
 
 #File: CookieMonitorIncoming_p.html
 #---------------------------
-Incoming Cookies Monitor==Überwachung eingehender Cookies
-Cookie Monitor: Incoming Cookies==Cookie Überwachung: Eingehende Cookies
-This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Liste aller Cookies, die ein Webserver an Clients des YaCy Proxys geschickt hat:
-Showing \#\[num\]\# entries from a total of \#\[total\]\# Cookies.==Angezeigt werden #[num]# Einträge von insgesamt #[total]# Cookies.
-Sending Host==Host (Sender)
-Date</td>==Datum</td>
-Receiving Client==Client (Empfänger)
+Incoming Cookies Monitor==进入Cookies监视
+Cookie Monitor: Incoming Cookies==Cookie监视: 进入Cookies
+This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Web服务器已向YaCy代理客户端发送的Cookies:
+Showing \#\[num\]\# entries from a total of \#\[total\]\# Cookies.==显示 #[num]# 个条目, 总共 #[total]# 个Cookies.
+Sending Host==发送主机
+Date</td>==日期</td>
+Receiving Client==接收主机
 #Cookie==Cookie
-"Enable Cookie Monitoring"=="Cookie Überwachung aktivieren"
-"Disable Cookie Monitoring"=="Cookie Überwachung deaktivieren"
+"Enable Cookie Monitoring"=="开启Cookie监视"
+"Disable Cookie Monitoring"=="关闭Cookie监视"
 #-----------------------------
 
 #File: CookieMonitorOutgoing_p.html
 #---------------------------
-Outgoing Cookies Monitor==Überwachung ausgehender Cookies
-Cookie Monitor: Outgoing Cookies==Cookie Überwachung: Ausgehende Cookies
-This is a list of cookies that browsers using the YaCy proxy sent to webservers:==Dies ist eine Auflistung aller Cookies, die Browser, die den YaCy Proxy benutzen, an einen Webserver geschickt haben:
-Showing \#\[num\]\# entries from a total of \#\[total\]\# Cookies.==Angezeigt werden #[num]# Einträge von insgesamt #[total]# Cookies.
-Receiving Host==Host (Empfänger)
-Date</td>==Datum</td>
-Sending Client==Client (Sender)
+Outgoing Cookies Monitor==外出Cookie监视
+Cookie Monitor: Outgoing Cookies==Cookie监视: 外出Cookie
+This is a list of cookies that browsers using the YaCy proxy sent to webservers:==YaCy代理以通过浏览器向Web服务器发送的Cookie:
+Showing \#\[num\]\# entries from a total of \#\[total\]\# Cookies.==显示 #[num]# 个条目,  总共 #[total]# 个Cookies.
+Receiving Host==接收主机
+Date</td>==日期</td>
+Sending Client==发送主机
 #Cookie==Cookie
-"Enable Cookie Monitoring"=="Cookie Überwachung aktivieren"
-"Disable Cookie Monitoring"=="Cookie Überwachung deaktivieren"
+"Enable Cookie Monitoring"=="开启Cookie监视"
+"Disable Cookie Monitoring"=="关闭Cookie监视"
 #-----------------------------
 
 #File: CrawlProfileEditor_p.html
 #---------------------------
->Crawl Profile Editor<==>Crawl Profil Editor<
->Crawler Steering<==>Crawler Steuerung<
->Crawl Scheduler<==>Crawl Planer<
->Scheduled Crawls can be modified in this table<==>Geplante Crawls können in dieser Tabelle geändert werden<
-Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl Profile beinhalten Informationen über einen Crawl Prozess der gerade ausgeführt wird.
+>Crawl Profile Editor<==>Crawl文件编辑<
+>Crawler Steering<==>Crawler引导<
+>Crawl Scheduler<==>Crawl安排<
+>Scheduled Crawls can be modified in this table<==>请在下表中修改已安排的crawl<
+Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl文件里保存有正在运行的crawl进程信息.
 
 #Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen über eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl gehört.
 #The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile für Remote Crawl, <a href="/ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
 #cannot be altered here as they are hard-coded.==können nicht verändert werden, weil sie "hard-coded" sind.
-Crawl Profile List==Crawl Profil Liste
-Crawl Thread==Crawl Art
+Crawl Profile List==Crawl文件列表
+Crawl Thread==Crawl线程
 #Status==Status
 #Start URL==Start URL
->Depth</strong>==>Tiefe</strong>
-Must Match==Muss zutreffen
-Must Not Match==Muss nicht zutreffen
-MaxAge</strong>==Max. Alter</strong>
+>Depth</strong>==>深度</strong>
+Must Match==必须匹配
+Must Not Match==必须不符
+MaxAge</strong>==最大寿命</strong>
 #Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
 #Auto Filter Content</strong>==Auto Inhalts Filter</strong>
-Max Page Per Domain</strong>==Max. Seiten pro Domain</strong>
-Accept==Akzeptiere
-Fill Proxy Cache==Fülle Proxy Cache
-Local Text Indexing==Lokal Text Indexieren
-Local Media Indexing==Lokal Media Indexieren
-Remote Indexing==Remote Indexieren
+Max Page Per Domain</strong>==每个域中拥有最大页面</strong>
+Accept==接受
+Fill Proxy Cache==填充代理Cache
+Local Text Indexing==本地文本索引
+Local Media Indexing==本地媒体索引
+Remote Indexing==远程索引
 #Status / Action==Status / Aktion
 #terminated::active==beendet::aktiv
-no::yes==nein::ja
-Running==Läuft
-"Terminate"=="Beenden"
-Finished==Beendet
+no::yes==否::是
+Running==运行中
+"Terminate"=="终结"
+Finished==已完成
 "Delete"=="删除"
-"Delete finished crawls"=="Beendete Crawls löschen"
-Select the profile to edit==Profil zur Bearbeitung auswählen
-"Edit profile"=="Profil bearbeiten"
-An error occurred during editing the crawl profile:==Es trat folgender Fehler bei der Bearbeitung des Crawl Profils auf:
-Edit Profile==Bearbeite Profil
-"Submit changes"=="Änderungen speichern"
+"Delete finished crawls"=="删除已完成的crawl进程"
+Select the profile to edit==选择要修改的文件
+"Edit profile"=="修改文件"
+An error occurred during editing the crawl profile:==修改crawl文件时发生错误:
+Edit Profile==修改文件
+"Submit changes"=="提交改变"
 #-----------------------------
 
 #File: CrawlResults.html
 #---------------------------
-Crawl Results<==Crawl Ergebnisse<
-Overview</a>==Überblick</a>
-Receipts</a>==Rückmeldungen</a>
-Queries</a>==Suchanfragen</a>
-DHT Transfer==DHT-Verteilung
-Proxy Use==Proxy Benutzung
-Local Crawling</a>==Lokales Crawlen</a>
-Global Crawling</a>==Globales Crawlen</a>
-Surrogate Import</a>==Surrogat Import</a>
->Crawl Results Overview<==>Crawl Ergebnisse Überblick<
-These are monitoring pages for the different indexing queues.==Das sind die Seiten zur Überwachung der verschiedenen Indexier Warteschlangen.
-YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermenüs oben beschrieben.
-above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Dort kann man ausserdem eine Tabelle mit den Resultaten des Index sehen. Informationen in diesen Tabellen sind als privat eingestuft,
-so you need to log-in with your administration password.==also müssen Sie sich mit Ihrem Administrator Passwort einloggen, um sie zu sehen.
-Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==Fall (6) ist ein Monitor des lokalen Empfangs-Generator, der Gegensatz zu (1). Er enthält ausserdem einen Index Resulate Monitor, ist aber nicht privat,
-since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
-Case \(7\) occurs if surrogate files are imported==Fall (7) tritt ein wenn Surrogat Dateien importiert werden.
-The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Datenfluss, der durch die Index Erwerbung über das Internet entsteht.
-Some processes occur double to document the complex index migration structure.==Einige Prozesse erscheinen doppelt, um die Komplexizität der Index Verteilungs Struktur zu erklären.
-\(1\) Results of Remote Crawl Receipts==(1) Ergebnisse der Remote Crawl Rückmeldungen
-This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
-but had been crawled by <em>other</em> peers.==die aber von <em>anderen</em> Peers gecrawlt wurden.
-This is the 'mirror'-case of process \(6\).==Dies ist der 'Gegensatz' Prozess zu (6)
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Einträge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
-is reported back and can be monitored here.==wird nun zurück gemeldet und hier angezeigt.
-\(2\) Results for Result of Search Queries==(2) Ergebnisse der Resultate bei Suchanfragen
-This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
-The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
-<em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>Anwendungsfall:</em> Diese Liste füllt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
-\(3\) Results for Index Transfer==(3) Ergebnisse der DHT-Verteilung
-The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgeführt.
-These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer übermittelt, da er am angemessensten zur Speicherung
-the logic of the Global Distributed Hash Table.==übereinstimmend mit der Logic der verteilten Hash Tabelle ist.
-<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Anwendung:</em> Dies Liste füllt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
-\(4\) Results for Proxy Indexing==(4) Ergebnisse der Proxy Indexierung
-These web pages had been indexed as result of your proxy usage.==Diese Internetseiten wurden durch die Benutzung des Proxy indexiert.
-No personal or protected page is indexed==Weder persönliche noch geschützte Seiten werden indexiert
-such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Solche Seiten werden durch die Benutzung von Cookies oder POST-Parametern (in der URL oder im HTTP Protokoll) identifiziert
-and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
-<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>Anwendung:</em> Sie müssen YaCy als Proxy benutzen, um diese Tabelle zu füllen.
-Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
-on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
-\(5\) Results for Local Crawling==(5) Ergebnisse des lokalen Crawlens
-These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen Crawl auf der 'Index erzeugen' Seite gestartet haben.
-<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Anwendung:</em> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
-\(6\) Results for Global Crawling==(6) Ergebnisse des globalen Crawlens
-These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
-This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste füllt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
-The stack is empty.==Die Liste ist leer.
-Statistics about \#\[domains\]\# domains in this stack:==Statistiken über #[domains]# Domains in diesem Bereich:
-\(7\) Results from surrogates import==\(7\) Ergebnisse aus dem Surrogat Import
-These records had been imported from surrogate files in DATA/SURROGATES/in==Diese Datensätze wurden aus Surrogat Dateien in DATA/SURROGATES/in importiert
-<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>Anwendungsfall:</em> Dateien mit Dublin Core Metadaten Inhalt in das DATA/SURROGATES/in kopieren oder eine der Index Import Funktionen nutzen
-\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportMediawiki_p.html">MediaWiki Dump Import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
+Crawl Results<==Crawl结果<
+Overview</a>==概况</a>
+Receipts</a>==回执</a>
+Queries</a>=请求</a>
+DHT Transfer==DHT转移
+Proxy Use==Proxy使用 
+Local Crawling</a>==本地crawl</a>
+Global Crawling</a>==全球crawl</a>
+Surrogate Import</a>==替代品导入</a>
+>Crawl Results Overview<==>Crawl结果一览<
+These are monitoring pages for the different indexing queues.==索引队列监视页面.
+YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy使用5种不同的方式来获取网络索引. 进程(1-5)的细节在子菜单中显示
+above which also will show you a table with indexing results so far. The information in these tables is considered as private,==以上列表也会显示目前的索引结果. 表中的信息应该视为隐私, 
+so you need to log-in with your administration password.==所以您最好设置一个有密码的管理员账户来查看.
+Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==事件(6)与事件(1)相反, 显示本地回执. 它也包含索引结果, 但不属于隐私
+since it shows crawl requests from other peers.==因为它含有来自其他peer的请求.
+Case \(7\) occurs if surrogate files are imported==如果导入了替代品, 则事件(7)发生.
+The image above illustrates the data flow initiated by web index acquisition.==以上图像为网页索引的数据流.
+Some processes occur double to document the complex index migration structure.==(翻译)对于读写同一文件的进程, 复杂化索引混合结构.
+\(1\) Results of Remote Crawl Receipts==(1) 远程crawl回执结果 
+This is the list of web pages that this peer initiated to crawl,==这是peer初始化时crawl的网页列表,
+but had been crawled by <em>other</em> peers.==但是已被<em>其他</em>peer crawl.
+This is the 'mirror'-case of process \(6\).==这是进程(6)的'镜像'实例
+<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>用法:</em> 在这获得入口, 如果您开始'索引创建'页面并选中了
+'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request=='远程索引'. 每一个远端peer索引页面所依据的peer请求
+is reported back and can be monitored here.==都会被报告并能在这里显示.
+\(2\) Results for Result of Search Queries==(2) 搜索查询结果报告页
+This index transfer was initiated by your peer by doing a search query.==通过搜索, 此索引转移能被初始化.
+The index was crawled and contributed by other peers.==这个索引是被其他peer贡献与crawl的.
+<em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>用法:</em>当您在'搜索页面'进行搜索时, 此表会被填充.
+\(3\) Results for Index Transfer==(3) 索引转移结果
+The url fetch was initiated and executed by other peers.==被其他peer初始化并抓取的URL.
+These links here have been transmitted to you because your peer is the most appropriate for storage according to==这些链接已经被传递给你, 因为根据全球分布哈希表的计算,
+the logic of the Global Distributed Hash Table.==您的peer是最适合存储它们的.
+<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>用法:</em>当您选中了在'索引控制'里的'接收索引'时, 这个表会被填充.
+\(4\) Results for Proxy Indexing==(4) 代理索引结果
+These web pages had been indexed as result of your proxy usage.==由于您使用了代理, 这些网页被索引了.
+No personal or protected page is indexed==无被索引的私人或受保护网页
+such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==通过检测cookie用途和提交参数(链接中或者HTTP协议)能够识别出此类网页
+and automatically excluded from indexing.==并在索引时自动排除.
+<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>用法:</em>必须把YaCy用作代理才能填充此表格.
+Set the proxy settings of your browser to the same port as given==设置浏览器代理端口与
+on the 'Settings'-page in the 'Proxy and Administration Port' field.=='设置'页面'代理和管理端口'选项中的端口一致.
+\(5\) Results for Local Crawling==(5) 本地crawl结果
+These web pages had been crawled by your own crawl task.==您的crawl任务crawl了这些网页.
+<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>用法:</em>在'索引创建'页面设置crawl起始点以开始crawl.
+\(6\) Results for Global Crawling==(6) 全球crawl结果
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==这些网页已经被您的peer索引, 但是它们是被远端peer crawl的.
+This is the 'mirror'-case of process \(1\).==这是进程(1)的'镜像'实例.
+<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>用法:</em>如果您选中了'索引创建'页面的'接受远端crawl请求', 则会在此列表中显示. 
+The stack is empty.==栈为空.
+Statistics about \#\[domains\]\# domains in this stack:==此栈显示有关 #[domains]# 域的数据:
+\(7\) Results from surrogates import==\(7\) 替代品导入结果
+These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的替代文件中导入
+<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>用法:</em>将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
+\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH 导入</a>\)
 #Domain==Domain
 #URLs=URLs
-"delete all"=="Alle 删除"
-Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Einträge in diesem Bereich.
-Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Einträge aus diesem Bereich von insgesamt #[all]# Einträgen.
-"clear list"=="Liste leeren"
+"delete all"=="全部删除"
+Showing all \#\[all\]\# entries in this stack.==显示栈中所有 #[all]# 条目.
+Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==显示栈中 #[all]# 条目的最近 #[count]# 行.
+"clear list"=="清除列表"
 #Initiator==Initiator
->Executor==>Ausführender
->Modified==>Änderungsdatum
->Words==>Wörter
->Title==>Titel
+>Executor==>执行
+>Modified==>已改变
+>Words==>单词
+>Title==>标题
 #URL==URL
 "delete"=="删除"
 #-----------------------------
