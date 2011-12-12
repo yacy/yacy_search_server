@@ -26,6 +26,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import de.anomic.data.WorkTables;
@@ -93,6 +94,10 @@ public class ConfigPortal {
                 sb.setConfig("about.headline", post.get("about.headline", ""));
                 sb.setConfig("about.body", post.get("about.body", ""));
                 
+                String excludehosts = post.get("search.excludehosts", "");
+                sb.setConfig("search.excludehosts", excludehosts);
+                sb.setConfig("search.excludehosth", DigestURI.hosthashes(excludehosts));
+                
                 // construct navigation String
                 String nav = "";
                 if (post.getBoolean("search.navigation.hosts", false)) nav += "hosts,";
@@ -126,8 +131,10 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.pictures", false);
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh");
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
-                prop.put("about.headline", "");
-                prop.put("about.body", "");
+                sb.setConfig("about.headline", "");
+                sb.setConfig("about.body", "");
+                sb.setConfig("search.excludehosts", "");
+                sb.setConfig("search.excludehosth", "");
             }
         }
 
@@ -166,6 +173,9 @@ public class ConfigPortal {
 
         prop.put("about.headline", sb.getConfig("about.headline", ""));
         prop.put("about.body", sb.getConfig("about.body", ""));
+
+        prop.put("search.excludehosts", sb.getConfig("search.excludehosts", ""));
+        prop.put("search.excludehosth", sb.getConfig("search.excludehosth", ""));
 
         final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
         prop.put("popupFront", 0);

@@ -109,12 +109,18 @@
           </select>
           </dd>
           
+          <dt>Exclude Hosts</dt>
+          <dd>List of hosts that shall be excluded from search results by default but can be included using the site:&lt;host&gt; operator:<br/>
+          <input type="text" name="search.excludehosts" value="#[search.excludehosts]#" size="60" /><br/>
+          #[search.excludehosth]#
+          </dd>
+          
           <dt>'About' Column<br/>(shown in a column alongside<br/>with the search result page)</dt>
           <dd><input type="text" name="about.headline" value="#[about.headline]#" size="60" />(Headline)</br>
           <textarea name="about.body" cols="60" rows="8">#[about.body]#</textarea>(Content)
           </dd>
           
-          <dt>&nbsp;</dt>
+         <dt>&nbsp;</dt>
           <dd>
             <input type="submit" name="searchpage_set" value="Change Search Page" />&nbsp;&nbsp;
             <input type="submit" name="searchpage_default" value="Set to Default Values" />
