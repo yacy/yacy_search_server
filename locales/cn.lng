@@ -882,7 +882,7 @@ DHT Transfer==DHT转移
 Proxy Use==Proxy使用 
 Local Crawling</a>==本地crawl</a>
 Global Crawling</a>==全球crawl</a>
-Surrogate Import</a>==替代品导入</a>
+Surrogate Import</a>==导入副本</a>
 >Crawl Results Overview<==>Crawl结果一览<
 These are monitoring pages for the different indexing queues.==索引队列监视页面.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy使用5种不同的方式来获取网络索引. 进程(1-5)的细节在子菜单中显示
@@ -890,7 +890,7 @@ above which also will show you a table with indexing results so far. The informa
 so you need to log-in with your administration password.==所以您最好设置一个有密码的管理员账户来查看.
 Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==事件(6)与事件(1)相反, 显示本地回执. 它也包含索引结果, 但不属于隐私
 since it shows crawl requests from other peers.==因为它含有来自其他peer的请求.
-Case \(7\) occurs if surrogate files are imported==如果导入了替代品, 则事件(7)发生.
+Case \(7\) occurs if surrogate files are imported==如果导入了副本, 则事件(7)发生.
 The image above illustrates the data flow initiated by web index acquisition.==上图为网页索引的数据流.
 Some processes occur double to document the complex index migration structure.==一些进程可能出现双重文件索引结构混合的情况.
 \(1\) Results of Remote Crawl Receipts==(1) 远程crawl回执结果 
@@ -926,8 +926,8 @@ This is the 'mirror'-case of process \(1\).==这是进程(1)的'镜像'实例.
 <em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>用法:</em>如果您选中了'索引创建'页面的'接受远端crawl请求', 则会在此列表中显示. 
 The stack is empty.==栈为空.
 Statistics about \#\[domains\]\# domains in this stack:==此栈显示有关 #[domains]# 域的数据:
-\(7\) Results from surrogates import==\(7\) 替代品导入结果
-These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的替代文件中导入
+\(7\) Results from surrogates import==\(7\) 副本导入结果
+These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的副本文件中导入
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>用法:</em>将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
 \(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(例如 <a href="/IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH 导入</a>\)
 #Domain==Domain
@@ -1163,7 +1163,7 @@ The scheduler on crawls can be changed or removed using the <a href=\"Table_API_
 YaCy: Help==YaCy: 帮助
 Tutorial==新手教程
 You are using the administration interface of your own search engine==您正在搜索引擎的管理界面
-You can create your own search index with YaCy==您可以用YaCy创建您自己的搜索索引
+You can create your own search index with YaCy==您可以用YaCy创建属于自己的搜索索引
 To learn how to do that, watch one of the demonstration videos below==观看以下demo视频以了解更多
 
 #-----------------------------
@@ -1211,15 +1211,15 @@ only pages with as-author-anotated==仅作者授权页面
 only pages from top-level-domains==仅来自顶级域名的页面
 only resources from http or https servers==仅来自http/https服务器的资源
 only resources from ftp servers==仅来自ftp服务器的资源
-they are rare==它们很少
-crawl them yourself==您自己crawl它们
+they are rare==很少
+crawl them yourself==您需要crawl它们
 only resources from smb servers==仅来自smb服务器的资源
 Intranet Indexing</a> must be selected==局域网索引</a>必须被选中
 only files from a local file system==仅来自本机文件系统的文件
 ranking modifier==排名修改
 sort by date==按日期排序
 latest first==最新者居首
-multiple words shall appear near==多个字会出现在
+multiple words shall appear near==引用多个字
 doublequotes==双引号
 prefer given language==首选语言
 an ISO639 2-letter code==ISO639标准的双字母代码
@@ -1268,128 +1268,128 @@ RWI-DB-Cleaner - Clean up the database by deletion of words with reference to bl
 
 #File: IndexControlRWIs_p.html
 #---------------------------
-Reverse Word Index Administration==Reverse Wort Indexverwaltung
-The local index currently contains \#\[wcount\]\# reverse word indexes==Der lokale Index enthält im Moment #[wcount]# inverse Wort Indexe
-RWI Retrieval \(= search for a single word\)==RWI Abfrage (= Suche nach einem einzelnen Wort)
-Select Segment:==Segment Auswahl:
-Retrieve by Word:<==Abfrage nach Wort:<
-"Show URL Entries for Word"=="URL Einträge für Wort zeigen"
-Retrieve by Word-Hash==Abfrage nach Wort-Hash
-"Show URL Entries for Word-Hash"=="URL Einträge für Wort-Hash zeigen"
-"Generate List"=="Liste erstellen"
-Cleanup==Aufräumen
->Index Deletion<==>Index Löschung<
->Delete Search Index<==>Lösche Suchindex<
-Stop Crawler and delete Crawl Queues==Crawler anhalten und Crawler Warteschlangen löschen
-Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
-Delete robots.txt Cache==Lösche robots.txt Cache
-Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-Holen Fehler während der Suche
+Reverse Word Index Administration==详细索引字管理
+The local index currently contains \#\[wcount\]\# reverse word indexes==本地索引包含 #[wcount]# 个索引字
+RWI Retrieval \(= search for a single word\)==RWI接收(= 搜索单个单词)
+Select Segment:==选择片段:
+Retrieve by Word:<==输入单词:<
+"Show URL Entries for Word"=="显示单词的入口URL"
+Retrieve by Word-Hash==输入单词Hash值
+"Show URL Entries for Word-Hash"=="显示单词Hash值的入口URL"
+"Generate List"=="生成列表"
+Cleanup==清理
+>Index Deletion<==>删除索引<
+>Delete Search Index<==>删除搜索索引<
+Stop Crawler and delete Crawl Queues==停止crawl并删除crawl队列
+Delete HTTP &amp; FTP Cache==删除HTTP &amp; FTP缓存
+Delete robots.txt Cache==删除robots.txt缓存
+Delete cached snippet-fetching failures during search==删除已缓存的错误信息
 "Delete"=="删除"
-No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
-No entry for word hash==Keinen Eintrag zu Wort-Hash
-Search result==Suchergebnis
-total URLs</td>==insgesamte URLs</td>
-appearance in</td>==kommt vor in</td>
-in link type</td>==im Link-Typ</td>
-document type</td>==Dokumenten-Typ</td>
-<td>description</td>==<td>Beschreibung</td>
-<td>title</td>==<td>Titel</td>
-<td>creator</td>==<td>Erzeuger</td>
-<td>subject</td>==<td>Thema</td>
+No entry for word \'\#\[word\]\#\'==无'#[word]#'的对应条目
+No entry for word hash==无条目对应
+Search result==搜索结果
+total URLs</td>==全部URL</td>
+appearance in</td>==出现在</td>
+in link type</td>==链接类型</td>
+document type</td>==文件类型</td>
+<td>description</td>==<td>描述</td>
+<td>title</td>==<td>标题</td>
+<td>creator</td>==<td>创建者</td>
+<td>subject</td>==<td>主题</td>
 <td>url</td>==<td>URL</td>
-<td>emphasized</td>==<td>betont</td>
-<td>image</td>==<td>Bilder</td>
-<td>audio</td>==<td>Audio</td>
-<td>video</td>==<td>Video</td>
-<td>app</td>==<td>Anwendung</td>
-index of</td>==Index of</td>
->Selection</td>==>Auswahl</td>
-Display URL List==Anzeige der URL-Liste
-Number of lines==Zeilenanzahl
-all lines==alle Zeilen
-"List Selected URLs"=="Ausgewählte URLs anzeigen"
-Transfer RWI to other Peer==RWI Transfer an anderen Peer
-Transfer by Word-Hash==Transfer per Wort-Hash
-"Transfer to other peer"=="An anderen Peer senden"
-to Peer==an Peer
-<dd>select==<dd>auswählen
-or enter a hash==oder Hash eingeben
-Sequential List of Word-Hashes==aufeinanderfolgende Liste der URL-Hashes
-No URL entries related to this word hash==Keine URL Einträge zugehörig zu diesem Wort Hash
-\#\[count\]\# URL entries related to this word hash==#[count]# URL Einträge zugehörig zu diesem Wort Hash
-Resource</td>==Ressource</td>
-Negative Ranking Factors==Negative Ranking Faktoren
-Positive Ranking Factors==Positive Ranking Faktoren
-Reverse Normalized Weighted Ranking Sum==Inverse normalisierte gewichtete Ranking Summe
+<td>emphasized</td>==<td>高亮</td>
+<td>image</td>==<td>图像</td>
+<td>audio</td>==<td>音频</td>
+<td>video</td>==<td>视频</td>
+<td>app</td>==<td>应用</td>
+index of</td>==索引</td>
+>Selection</td>==>选择</td>
+Display URL List==显示URL列表
+Number of lines==行数
+all lines==全部
+"List Selected URLs"=="列出选中URL"
+Transfer RWI to other Peer==传递RWI给其他peer
+Transfer by Word-Hash==按字Hash值传递
+"Transfer to other peer"=="传递"
+to Peer==指定peer
+<dd>select==<dd>选择
+or enter a hash==或者输入peer的Hash值
+Sequential List of Word-Hashes==字Hash值的顺序列表
+No URL entries related to this word hash==无对应入口URL对于字Hash
+\#\[count\]\# URL entries related to this word hash==#[count]# 个入口URL与此字Hash相关
+Resource</td>==资源</td>
+Negative Ranking Factors==负向排名因素
+Positive Ranking Factors==正向排名因素
+Reverse Normalized Weighted Ranking Sum==反向常规加权排名和
 hash</td>==Hash</td>
-dom length</td>==Domain Länge</td>
+dom length</td>==域长度</td>
 ybr</td>==YBR</td>
 #url comps</td>
-url length</td>==URL Länge</td>
-pos in text</td>==Pos. im Text</td>
-pos of phrase</td>==Pos. des Satzes</td>
-pos in phrase</td>==Pos. im Satz</td>
-word distance</td>==Wort Distanz</td>
-<td>authority</td>==<td>Autorität</td>
-<td>date</td>==<td>Datum</td>
-words in title</td>==Wörter im Titel</td>
-words in text</td>==Wörter im Text</td>
-local links</td>==lokale Links</td>
-remote links</td>==remote Links</td>
-hitcount</td>==Trefferzahl</td>
+url length</td>==URL长度</td>
+pos in text</td>==文中位置</td>
+pos of phrase</td>==短语位置</td>
+pos in phrase</td>==在短语中位置</td>
+word distance</td>==字间距离</td>
+<td>authority</td>==<td>权限</td>
+<td>date</td>==<td>日期</td>
+words in title</td>==标题字数</td>
+words in text</td>==内容字数</td>
+local links</td>==本地链接</td>
+remote links</td>==远程链接</td>
+hitcount</td>==命中数</td>
 #props</td>==</td>
-unresolved URL Hash==ungelöster URL-Hash
-Word Deletion==Wort Löschung
-Deletion of selected URLs==Löschung von selektierten URLs
-delete also the referenced URL \(recommended, may produce unresolved references==lösche ebenso die verwiesene URL (empfohlen, produziert eventuell ungelöste Referenzen
-at other word indexes but they do not harm\)==an anderen Wort Indizes, aber es verursacht keinen Schaden
-for every resolvable and deleted URL reference, delete the same reference at every other word where==für jede lösbare und gelöschte URL Referenz, lösche die selbe Referenz bei jedem anderen Wort, wo
-the reference exists \(very extensive, but prevents further unresolved references\)==die Referenz existiert (sehr umfassend, aber bewahrt vor weiteren ungelösten Referenzen)
-"Delete reference to selected URLs"=="Referenz und markierte URLs löschen"
-"Delete Word"=="Wort löschen"
-Blacklist Extension==Blacklist Erweiterung
-"Add selected URLs to blacklist"=="Markierte URLs zu Blacklist hinzufügen"
-"Add selected domains to blacklist"=="Markierte Domains zu Blacklist hinzufügen"
+unresolved URL Hash==未解析URL Hash值
+Word Deletion==删除关键字
+Deletion of selected URLs==删除选中URL
+delete also the referenced URL \(recommended, may produce unresolved references==同时删除关联URL (推荐, 虽然在索引时
+at other word indexes but they do not harm\)==会产生未解析关联, 但是不影响系统性能)
+for every resolvable and deleted URL reference, delete the same reference at every other word where==对于已解析并已删除的URL关联来说, 则会删除它与其他关键字的关联
+the reference exists \(very extensive, but prevents further unresolved references\)==(很多, 但是会阻止未解析关联的产生)
+"Delete reference to selected URLs"=="删除与选中URL的关联"
+"Delete Word"=="删除关键字"
+Blacklist Extension==黑名单扩展
+"Add selected URLs to blacklist"=="添加选中URL到黑名单"
+"Add selected domains to blacklist"=="添加选中域到黑名单"
 #-----------------------------
 
 #File: IndexControlURLs_p.html
 #---------------------------
-URL References Administration==URL Referenzen Administration
-The local index currently contains \#\[ucount\]\# URL references==Der lokale Index enthält im Moment #[ucount]# URL-Referenzen
-URL Retrieval==URL Abfrage
-Select Segment:==Segment Auswahl:
-Retrieve by URL:<==Abfrage nach URL:<
-"Show Details for URL"=="Details für URL zeigen"
-Retrieve by URL-Hash==Abfrage nach URL-Hash
-"Show Details for URL-Hash"=="Details für URL-Hash zeigen"
-"Generate List"=="Liste erstellen"
-Statistics about top-domains in URL Database==Statistik über die Top-Domains in der URL Datenbank
-Show top==Zeige die
-domains from all URLs.==Top-Domains aus allen URLs.
-"Generate Statistics"=="Statistik erstellen"
-Statistics about the top-\#\[domains\]\# domains in the database:==Statistik über die Top-#[domains]# Domains in der Datenbank:
-"delete all"=="Alle 删除"
+URL References Administration==URL关联管理
+The local index currently contains \#\[ucount\]\# URL references==目前本地索引含有 #[ucount]# 个URL关联
+URL Retrieval==URL获取
+Select Segment:==选择片段:
+Retrieve by URL:<==输入URL:<
+"Show Details for URL"=="显示细节"
+Retrieve by URL-Hash==输入URL Hash值
+"Show Details for URL-Hash"=="显示细节"
+"Generate List"=="生成列表"
+Statistics about top-domains in URL Database==URL数据库中顶级域数据
+Show top==显示全部URL中的
+domains from all URLs.==个域.
+"Generate Statistics"=="生成数据"
+Statistics about the top-\#\[domains\]\# domains in the database:==数据库中头 #[domains]# 个域的数据:
+"delete all"=="全部删除"
 #Domain==Domain
 #URLs==URLs
-Sequential List of URL-Hashes==Sequentielle Liste der URL-Hashes
-Loaded URL Export==Export geladener URLs
-Export File==Export-Datei
+Sequential List of URL-Hashes==URL Hash顺序列表
+Loaded URL Export==导出已加载URL
+Export File==导出文件
 #URL Filter==URL Filter
 #Export Format==Export Format
 #Only Domain <i>\(superfast\)==Nur Domains <i>(sehr schnell)
-Only Domain:==Liste mit nur Domainnamen:
-Full URL List:==Liste mit vollständiger URL:
-Plain Text List \(domains only\)==Einfache Text Liste (nur Domains)
-HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
+Only Domain:==仅域名:
+Full URL List:==完整URL列表:
+Plain Text List \(domains only\)==文本文件(仅域名)
+HTML \(domains as URLs, no title\)==HTML (超链接格式的域名, 不包括标题)
 #Full URL List <i>\(high IO\)==Vollständige URL Liste <i>(hoher IO)
-Plain Text List \(URLs only\)==Einfache Text Liste (nur URLs)
-HTML \(URLs with title\)==HTML (URLs mit Titel)
+Plain Text List \(URLs only\)==文本文件(仅URL)
+HTML \(URLs with title\)==HTML (带标题的URL)
 #XML (RSS)==XML (RSS)
-"Export URLs"=="URLs exportieren"
-Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Export nach Datei #[exportfile]# läuft ..  #[urlcount]# URLs bisher
-Finished export of \#\[urlcount\]\# URLs to file==Export beendet und #[urlcount]# URLs gespeichert in Datei
-Export to file \#\[exportfile\]\# failed:==Export in Datei #[exportfile]# fehlgeschlagen:
-No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
+"Export URLs"=="导出URL"
+Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==正在导出到 #[exportfile]#  .. 已经导出 #[urlcount]# 个URL
+Finished export of \#\[urlcount\]\# URLs to file==已完成导出 #[urlcount]# 个URL到文件
+Export to file \#\[exportfile\]\# failed:==导出到文件 #[exportfile]# 失败:
+No entry found for URL-hash==未找到合适条目对应URL-Hash
 #URL String</td>==URL Adresse</td>
 #Hash</td>==Hash</td>
 #Description</td>==Beschreibung</td>
@@ -1400,82 +1400,82 @@ No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
 #Language</td>==Sprache</td>
 #Size</td>==Größe</td>
 #Words</td>==Wörter</td>
-"Show Content"=="Inhalt anzeigen"
-"Delete URL"=="URL löschen"
-this may produce unresolved references at other word indexes but they do not harm==dies mag ungelöste Referenzen an anderen Wort Indizes erzeugen, aber es richtet keinen Schaden an
-"Delete URL and remove all references from words"=="URL löschen und alle Referenzen zu Wörtern entfernen"
-delete the reference to this url at every other word where the reference exists \(very extensive, but prevents unresolved references\)==löscht die Referenz zu dieser URL und jedem anderen Wort, wo die Referenz existiert (sehr umfassend, aber bewahrt vor ungelösten Referenzen)
+"Show Content"=="显示内容"
+"Delete URL"=="删除URL"
+this may produce unresolved references at other word indexes but they do not harm==这可能和其他关键字产生未解析关联, 但是这并不影响系统性能
+"Delete URL and remove all references from words"=="删除URl并从关键字中删除所有关联"
+delete the reference to this url at every other word where the reference exists \(very extensive, but prevents unresolved references\)==删除指向此链接的关联字,(很多, 但是会阻止未解析关联的产生)
 #-----------------------------
 
 #File: IndexCreateLoaderQueue_p.html
 #---------------------------
-Loader Queue==Lade-Puffer
-The loader set is empty==Der Lade-Puffer ist leer.
-There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Einträge in dem Lade-Puffer:
-Initiator==Initiator
-Depth==Tiefe
+Loader Queue==加载器
+The loader set is empty==无加载器
+There are \#\[num\]\# entries in the loader set:==加载器中有 #[num]# 个条目:
+Initiator==发起者
+Depth==深度
 #URL==URL
 #-----------------------------
 
 #File: IndexCreateParserErrors_p.html
 #---------------------------
-Parser Errors==Parser Fehler
-Rejected URL List:==Liste der zurückgewiesenen URLs:
-There are \#\[num\]\# entries in the rejected-urls list.==Es befinden sich #[num]# Einträge in Liste der zurückgewiesenen URLs.
-Showing latest \#\[num\]\# entries.==Es werden die letzten #[num]# Einträge angezeigt.
-"show more"=="Mehr anzeigen"
-"clear list"=="Liste löschen"
-There are \#\[num\]\# entries in the rejected-queue:==Es befinden sich #[num]# Einträge in der zurückgewiesenen URL Liste:
+Parser Errors==解析错误
+Rejected URL List:==拒绝URL列表:
+There are \#\[num\]\# entries in the rejected-urls list.==在拒绝URL列表中有 #[num]# 个条目.
+Showing latest \#\[num\]\# entries.==显示最近的 #[num]# 个条目.
+"show more"=="更多"
+"clear list"=="清除列表"
+There are \#\[num\]\# entries in the rejected-queue:==拒绝队列中有 #[num]# 个条目:
 #Initiator==Initiator
-Executor==Ausführender
+Executor==执行器
 #URL==URL
-Fail-Reason==Fehlermeldung
+Fail-Reason==错误原因
 #-----------------------------
 
 #File: ContentIntegrationPHPBB3_p.html
 #---------------------------
-Content Integration: Retrieval from phpBB3 Databases==Integration von Inhalt: Import aus phpBB3 Datenbanken
-It is possible to extract texts directly from mySQL and postgreSQL databases.==Es ist möglich Texte direkt aus MySQL und PostgreSQL Datenbanken zu extrahieren.
-Each extraction is specific to the data that is hosted in the database.==Jeder Vorgang extrahiert genau die Datensätze die in der Datenbank gehostet werden.
-This interface gives you access to the phpBB3 forums software content.==Dieses Interface erlaubt den Zugriff auf die Inhalte der phpBB3 Forum Software.
-If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==Wenn aus einer importierten Datenbank gelesen werden soll sind hier einige Hinweise, um Probleme zu vermeiden wenn Datenbankdumps in phpMyAdmin importiert werden.
-before importing large database dumps, set==Bevor große Datenbankdumps importiert werden die folgende Zeile
-in phpmyadmin/config.inc.php and place your dump file in /tmp \(Otherwise it is not possible to upload files larger than 2MB\)==in die Datei phpmyadmin/config.inc.php schreiben und die Datenbank Datei in /tmp ablegen (Andernfalls ist es nicht möglich Dateien größer als 2MB hochzuladen)
-deselect the partial import flag==Den teilweisen Import Flag abschalten
-When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/SURROGATE/in erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
-All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und können recycelt werden wenn ein Index gelöscht wird.
-The URL stub==Der Teil der URL
-like http://forum.yacy-websuche.de==wie z.B. http://forum.yacy-websuche.de
-this must be the path right in front of '\/viewtopic.php\?'==dies muss den kompletten Pfad vor '\/viewtopic.php\?' enthalten
-Type==Typ
-> of database<==> der Datenbank<
-use either 'mysql' or 'pgsql'==Verwende entweder 'mysql' oder 'pgsql'
-Host=Hostname
-> of the database<==> der Datenbank<
-of database service==des Datenbank Dienstes
-usually 3306 for mySQL==normalerweise 3306 für MySQL
-Name of the database==Name der Datenbank
-on the host==auf dem Host
-Table prefix string==Tabellen Präfix
-for table names==für Tabellennamen
-User==Benutzer
-that can access the database==mit Zugriff auf die Datenbank
-Password==Passwort
-for the account of that user given above==für den Zugang des oben angegebenen Benutzers
-Posts per file==Beiträge pro Datei
-in exported surrogates==in der exportierten Hilfsdatei
-Check database connection==Datenbankverbindung überprüfen
-Export Content to Surrogates==Exportiere Inhalt in Hilfsdateien
-Import a database dump==Importieren eines Datenbankauszugs
-Import Dump==Datenbankdump importieren
-Posts in database==Beiträge in Datenbank
-first entry==Erster Eintrag
-last entry==Letzter Eintrag
-Info failed:==Info Fehlgeschlagen:
-Export successful! Wrote \#\[files\]\# files in DATA/SURROGATES/in==Export erfolgreich! #[files]# Dateien in DATA/SURROGATES/in geschrieben
-Export failed:==Export fehlgeschlagen:
-Import successful!==Import erfolgreich!
-Import failed:==Import fehlgeschlagen:
+Content Integration: Retrieval from phpBB3 Databases==内容集成: 从phpBB3数据库中导入
+It is possible to extract texts directly from mySQL and postgreSQL databases.==能直接从mysql或者postgresql中解压出内容.
+Each extraction is specific to the data that is hosted in the database.==每次解压都针对主机数据库中的数据.
+This interface gives you access to the phpBB3 forums software content.==通过此接口能访问phpBB3论坛软件内容.
+If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==如果从使用phpMyAdmin读取数据库内容, 您可能会用到以下建议:
+before importing large database dumps, set==在导入尺寸较大的数据库时,
+in phpmyadmin/config.inc.php and place your dump file in /tmp \(Otherwise it is not possible to upload files larger than 2MB\)==设置phpmyadmin/config.inc.php的内容, 并将您的数据库文件放到 /tmp 目录下(否则不能上传大于2MB的文件)
+deselect the partial import flag==取消部分导入
+When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==导出过程开始时, 在 DATA/SURROGATE/in 目录下自动生成副本文件, 并且会被索引器自动抓取.
+All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==所有被索引的副本文件都在 DATA/SURROGATE/out 目录下, 并被索引器循环利用.
+The URL stub==URL根域名
+like http://forum.yacy-websuche.de==比如链接 http://forum.yacy-websuche.de
+this must be the path right in front of '\/viewtopic.php\?'==必须在'\/viewtopic.php\?'前面
+Type==数据库
+> of database<==> 类型<
+use either 'mysql' or 'pgsql'==使用'mysql'或者'pgsql'
+Host=数据库
+> of the database<==> 主机名<
+of database service==数据库服务
+usually 3306 for mySQL==MySQL中通常是3306
+Name of the database==主机
+on the host==数据库
+Table prefix string==table
+for table names==前缀
+User==数据库
+that can access the database==用户名
+Password==给定用户名的
+for the account of that user given above==访问密码
+Posts per file==导出副本中
+in exported surrogates==每个文件拥有的最大条目
+Check database connection==检查数据库连接
+Export Content to Surrogates==导出到副本
+Import a database dump==导入数据库
+Import Dump==导入
+Posts in database==数据库中条目
+first entry==第一个
+last entry==最后一个
+Info failed:==错误信息:
+Export successful! Wrote \#\[files\]\# files in DATA/SURROGATES/in==导出成功! #[files]# 已写入到 DATA/SURROGATES/in 目录
+Export failed:==导出失败:
+Import successful!==导入成功!
+Import failed:==导入失败:
 #-----------------------------
 
 #File: DictionaryLoader_p.html
