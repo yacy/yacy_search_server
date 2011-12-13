@@ -389,10 +389,10 @@ or smb:==oder smb:
 Your peer name has not been customized; please set your own peer name==Ihr Peername wurde noch nicht angepasst; bitte setzen Sie einen eigenen Peernamen ein
 You may change your peer name==Sie können Ihren Peernamen ändern
 Peer Name:==Имя пира:
-Your peer cannot be reached from outside==Ihr Peer kann nicht von außen erreicht werden
-which is not fatal, but would be good for the YaCy network==was nicht schlimm ist, aber anders wäre für das YaCy-Netzwerk noch besser
-please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Bitte öffnen Sie Ihre Firewall auf diesem Port und/oder stellen Sie einen virtuellen Server in Ihrem Router ein um Verbindungen auf diesem Port zu erlauben
-Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreicht werden
+Your peer cannot be reached from outside==Ваш пир недоступен извне
+which is not fatal, but would be good for the YaCy network==это не критично, но это не хорошо для сети YaCy
+please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==пожалуйста откройте настройки Вашего брендмауэра и/или настройки виртуального сервера на Вашем роуторе для открытия подключений на этот порт
+Your peer can be reached by other peers==Ваш пир не может быть доступен с других пиров
 Peer Port:==Порт пира:
 Configure your router for YaCy:==Ihren Router für YaCy konfigurieren:
 Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
@@ -2565,63 +2565,64 @@ value="add"==value="hinzufügen"
 #-----------------------------
 #File: Status.html
 #---------------------------
-Console Status==Konsolen Status
-Log-in as administrator to see full status==Als Administrator einloggen, für kompletten Status
-Welcome to YaCy!==Willkommen bei YaCy!
-Your settings are _not_ protected!</strong>==Ihre Einstellungen sind _nicht_ mit einem Kennwort geschützt!</strong>
-Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Bitte öffnen Sie die <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> <strong>sofort</strong>
-and set an administration password.==und geben Sie ein Administrator Passwort ein.
+Console Status==Статус консоли
+Log-in as administrator to see full status==Зайдите как Administrator чтобы увидить всю статистику
+Welcome to YaCy!==Добро пожаловать в YaCy!
+Your settings are _not_ protected!</strong>==Ваши настройка не защищены</strong>
+Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Пожалуйста перейдите по ссылке <a href="ConfigAccounts_p.html">Настройка аккаунта</a> <strong>немедленно</strong>
+and set an administration password.==и установите пароль Администратора.
 You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
 The peer must go online to get a peer address.==Ihr Peer muss online gehen, um eine Adresse zu bekommen.
-You cannot be reached from outside.==Ihr Peer kann nicht von außen erreicht werden.
-A possible reason is that you are behind a firewall, NAT or Router.==Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden.
-But you can <a href="index.html">search the internet</a> using the other peers'==Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index
-global index on your own search page.==der anderen Peers von Ihrer Suchseite aus benutzen.
-"bad"=="schlecht"
-"idea"="idee"
-"good"="gut"
-"Follow YaCy on Twitter"=="Folge YaCy auf Twitter"
-We encourage you to open your firewall for the port you configured \(usually: 8090\),==Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8090) in Ihrer Firewall zu öffnen,
-or to set up a 'virtual server' in your router settings \(often called DMZ\).==oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt).
-Please be fair, contribute your own index to the global index.==Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
-Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Der freie Festplattenspeicher ist geringer als #[minSpace]#. Crawling wurde deaktiviert. Bitte beheben Sie 
-it as soon as possible and restart YaCy.==dieses Problem so schnell wie möglich und starten Sie YaCy neu.
+You cannot be reached from outside.==Вы недоступны извне.
+A possible reason is that you are behind a firewall, NAT or Router.==Возможно Вы находитесь за брандмауэром, NAT или роутоером.
+But you can <a href="index.html">search the internet</a> using the other peers'==Но Вы можете <a href="index.html">выполнять поиск</a>, используя помощь других пиров
+global index on your own search page.==перейдя на главную страницу поиска.
+"bad"=="плохой"
+"idea"="идея"
+"good"="хороший"
+"Follow YaCy on Twitter"=="Следуй за YaCy на Twitter"
+We encourage you to open your firewall for the port you configured \(usually: 8090\),==Мы рекомендуем Вам открыть доступ к порту на Вашем брандмауэре который Вы настроили (обычно: 8090),
+or to set up a 'virtual server' in your router settings \(often called DMZ\).==или выполните настройку "виртуального сервера" в настройках Вашего роутера (настройка обычно называется DMZ).
+Please be fair, contribute your own index to the global index.==Пожалуйста примите участие в создании глобального поискового индекса.
+Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Свободное место на диске меньше чем #[minSpace]#. Сканирование сайтов деактивировано. Пожалуйста освободите место на диске.
+it as soon as possible and restart YaCy.==Это также потребует перезапуск YaCy.
 Free memory is lower than \#\[minSpace\]\#. DHT has been disabled. Please fix==Es steht weniger als #[minSpace]# Arbeitsspeicher zur Verfügung. DHT wurde deaktiviert. Bitte beheben Sie 
 Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
-Install YaCy==Installiere YaCy
+Install YaCy==Установка YaCy
 You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterstützen den globalen Index,
 which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> können.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
-Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ihr Webseiten Indexierer ist untätig. Sie können <a href="CrawlStartSite_p.html">hier</a> einen Web Crawl starten
-Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==Ihr Webseiten Indexierer ist beschäftigt. Sie können Ihren Web Crawl <a href="Crawler_p.html">hier</a> kontrollieren
+Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ваш индексатор веб сайтов простаивает. Вы можете начать сканирование сайта <a href="CrawlStartSite_p.html">по ссылке</a>
+Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==Ваш индексатор веб сайтов работает. Вы можете посмотреть его работу <a href="Crawler_p.html">по этой ссылке</a>
 #-----------------------------
 #File: Status_p.inc
 #---------------------------
 System Status==Статус системы
 Process</dt>==Процесс</dt>
-Unknown==unbekannt
+Unknown==Неизвестный
 Uptime==Время работы
+days==дней
 System Resources==Системные ресурсы
 Processors:==Процессоров:
-Protection==Sicherheit
-Password is missing==Kein Passwort
-password-protected==Passwort-geschützt
-Unrestricted access from localhost==Uneingeschränkter Zugriff von localhost
+Protection==Защита
+Password is missing==Пароль не используется
+password-protected==Пароль используется
+Unrestricted access from localhost==Неограниченный доступ с локального хоста
 Address</dt>==Адрес</dt>
+Host==Хост
 peer address not assigned==Peer Adresse nicht zugewiesen
-Public Address:==Öffentliche Adresse:
-YaCy Address:==YaCy Adresse:
+Public Address:==Публичный адрес:
+YaCy Address:==YaCy адрес:
 #Peer Host==Peer Host
 #Port Forwarding Host==Port Forwarding Host
-not used==nicht benutzt
-broken==unterbrochen
+broken==повреждено
 connected==подключено
-Remote Proxy==Удаленный прокси
-not used==nicht benutzt
-Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
+Remote Proxy==Прокси сервер
+not used==не используется
+Used for YaCy -> YaCy communication:==Использовано для YaCy -> YaCy коммуникаций:
 WARNING:==WARNUNG:
 You do this on your own risk.==Sie verwenden diese Einstellung auf Ihr eigenes Risiko.
 If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==Wenn Sie diese Option verwenden, ohne dass YaCy auf einem Desktop PC läuft, oder ohne installiertes Java 6, wird YaCy vermutlich nicht mehr starten.
@@ -2629,33 +2630,36 @@ In this case, you will have to edit the configuration manually in DATA/SETTINGS/
 >Experimental<==>Experimentell<
 Yes==Да
 No==Нет
-Auto-popup on start-up==Auto-Popup beim Starten
-Disabled==Deaktiviert
-Enable\]==Aktivieren]
-Enabled <a==Aktiviert <a
-Disable\]==Deaktivieren]
-Memory Usage==Speicherverbrauch
+Auto-popup on start-up==Вслывающие сообщения при запуске
+Disabled==Отключено
+Enable\]==Включено]
+Enabled <a==Статус: <a
+Disable\]==Отключено]
+Tray-Icon==Иконка в трее
+Memory Usage==Использование памяти
 free:==Свободно:
 total:==Всего:
 max:==Максимально:
-
-Configure==Einstellen
-Reset</a>==Zurücksetzen</a>
-Incoming Connections==Eingehende Verbindungen
+Configure==Настройка
+Traffic==Трафик
+Reset</a>==Сброс</a>
+Proxy:==Прокси
+Crawler:==Сканер сайтов:
+Incoming Connections==Входящих соединений:
 Active:==Активно:
 Max:==Максимально:
 #Indexing Queue==Indexier Puffer
-Loader Queue==Lade Puffer
-paused==angehalten
-Queues==Puffer
-Local Crawl==Lokales Crawlen
-Remote triggered Crawl==eingehende Remote-Crawls
+Loader Queue==Загружено запросов
+paused==на паузе
+Queues==Запросы
+Local Crawl==Локальный сканер
+Remote triggered Crawl==Удаленный сканер
 Pre-Queueing==Vor-Pufferung
-Seed server==Seed Server
-Configure==Konfigurieren
-Enabled: Updating to server==Aktiviert, Seed Server:
-Last upload: #\[lastUpload\]# ago.==Letzte Aktualisierung vor: #\[lastUpload\]#
-Enabled: Updating to file==Aktiviert: Aktualisiere die Datei
+Seed server==Скорость сервера
+Configure==Настройка
+Enabled: Updating to server==Включено: Обновление на сервер:
+Last upload: #\[lastUpload\]# ago.==Последная передача: #\[lastUpload\]#
+Enabled: Updating to file==Включено: Обновление до файла
 #-----------------------------
 #File: Steering.html
 #---------------------------
@@ -2719,19 +2723,17 @@ to change the configuration or to request crawl actions.==um Konfigurationen zu 
 These recorded actions can be used to repeat specific actions and to send them==Diese aufgezeichneten Aktionen können dazu verwendet werden, bestimmte Aktionen wiederholt auszuführen und um sie
 to a scheduler for a periodic execution.==einem Scheduler für periodische Ausführung zu übergeben.
 >Recorded Actions<==>Aufgezeichnete Aktionen<
-"next page"=="Nächste Seite"
-"previous page"=="Vorherige Seite"
-"next page"=="Keine nächste Seite"
-"previous page"=="Keine vorherige Seite"
+"previous page"=="предыдущая страница"
+"next page"=="следующая страница"
  of \#\[of\]\#== von #[of]#
->Date==>Datum
->Type==>Typ
->Comment==>Kommentar
+>Date==>Дата
+>Type==>Тип
+>Comment==>Комментарий
 Call<br/>Count<==Aufruf<br/>Zähler<
 Recording<==Aufzeichnungs<
-Last&nbsp;Exec==Letzte&nbsp;Ausführung
-Next&nbsp;Exec==Nächste&nbsp;Ausführung
->Scheduler<==>Geplante Ausführung<
+Last&nbsp;Exec==Последний &nbsp;запуск
+Next&nbsp;Exec==Следующий&nbsp;запуск
+>Scheduler<==>Планировщик<
 #>URL<==>URL
 >no repetition<==>keine Wiederholung<
 >activate scheduler<==>Ausführung planen<
@@ -2740,9 +2742,9 @@ Next&nbsp;Exec==Nächste&nbsp;Ausführung
 >Result of API execution==>Ergebnis der API Ausführung
 #>Status<==>Status>
 #>URL<==>URL<
->minutes<==>Minuten<
->hours<==>Stunden<
->days<==>Tage<
+>minutes<==>минут<
+>hours<==>часов<
+>days<==>дней<
 Scheduled actions are executed after the next execution date has arrived within a time frame of \#\[tfminutes\]\# minutes.==Geplante Aktionen werden innerhalb eines #[tfminutes]# Minuten Zeitfensters ausgeführt wenn der nächste Ausführungszeitpunkt erreicht wurde.
 #-----------------------------
 #File: Table_RobotsTxt_p.html
