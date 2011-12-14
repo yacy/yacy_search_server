@@ -490,15 +490,15 @@ public class PeerSelection {
     public static Map<String, Seed> seedsByAge(final SeedDB seedDB, final boolean up, int count) {
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
         Seed ys;
-        long age;
+        //long age;
         final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN); 
         try {
             final Map<String, Seed> result = new HashMap<String, Seed>();
             while (s.hasNext() && count-- > 0) {
                 ys = s.next();
                 if (ys != null && ys.hash != null) {
-                    age = (System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60;
-                    System.out.println("selected seedsByAge up=" + up + ", age/min = " + age);
+                    //age = (System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60;
+                    //System.out.println("selected seedsByAge up=" + up + ", age/min = " + age);
                     result.put(ys.hash, ys);
                 }
             }
