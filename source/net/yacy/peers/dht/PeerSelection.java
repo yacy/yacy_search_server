@@ -231,7 +231,7 @@ public class PeerSelection {
         private final SeedDB seedDB;
         private final HandleSet doublecheck;
         private int remaining;
-        private boolean alsoMyOwn;
+        private final boolean alsoMyOwn;
         
         private acceptRemoteIndexSeedEnum(SeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
             this.seedDB = seedDB;
@@ -242,19 +242,20 @@ public class PeerSelection {
             this.alsoMyOwn = alsoMyOwn;
         }
         
+        @Override
         public boolean hasNext() {
-            return nextSeed != null;
+            return this.nextSeed != null;
         }
 
         private Seed nextInternal() {
             if (this.remaining <= 0) return null;
             Seed s;
             try {
-                while (se.hasNext()) {
-                    s = se.next();
+                while (this.se.hasNext()) {
+                    s = this.se.next();
                     if (s == null) return null;
                     byte[] hashb = ASCII.getBytes(s.hash);
-                    if (doublecheck.has(hashb)) return null;
+                    if (this.doublecheck.has(hashb)) return null;
                     try {
                         this.doublecheck.put(hashb);
                     } catch (RowSpaceExceededException e) {
@@ -262,7 +263,7 @@ public class PeerSelection {
                         break;
                     }
                     if (s.getFlagAcceptRemoteIndex() ||
-                        (alsoMyOwn && s.hash.equals(seedDB.mySeed().hash)) // Accept own peer regardless of FlagAcceptRemoteIndex
+                        (this.alsoMyOwn && s.hash.equals(this.seedDB.mySeed().hash)) // Accept own peer regardless of FlagAcceptRemoteIndex
                        ) { 
                         this.remaining--;
                         return s;
@@ -271,18 +272,20 @@ public class PeerSelection {
             } catch (final kelondroException e) {
                 System.out.println("DEBUG acceptRemoteIndexSeedEnum:" + e.getMessage());
                 Network.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
-                seedDB.resetActiveTable();
+                this.seedDB.resetActiveTable();
                 return null;
             }
             return null;
         }
         
+        @Override
         public Seed next() {
-            final Seed next = nextSeed;
-            nextSeed = nextInternal();
+            final Seed next = this.nextSeed;
+            this.nextSeed = nextInternal();
             return next;
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -309,8 +312,8 @@ public class PeerSelection {
 
         private Iterator<Seed> e;
         private int steps;
-        private float minVersion;
-        private SeedDB seedDB;
+        private final float minVersion;
+        private final SeedDB seedDB;
         private boolean alsoMyOwn;
         private int pass, insertOwnInPass;
         private Seed nextSeed;
@@ -330,41 +333,44 @@ public class PeerSelection {
             this.nextSeed = nextInternal();
         }
         
+        @Override
         public boolean hasNext() {
-            return (nextSeed != null) || alsoMyOwn;
+            return (this.nextSeed != null) || this.alsoMyOwn;
         }
 
         public Seed nextInternal() {
-            if (steps == 0) return null;
-            steps--;
+            if (this.steps == 0) return null;
+            this.steps--;
             
-            if (!e.hasNext() && pass == 1) {
-                e = seedDB.seedsConnected(true, false, null, minVersion);
-                pass = 2;
+            if (!this.e.hasNext() && this.pass == 1) {
+                this.e = this.seedDB.seedsConnected(true, false, null, this.minVersion);
+                this.pass = 2;
             }
-            if (e.hasNext()) {
-                return e.next();
+            if (this.e.hasNext()) {
+                return this.e.next();
             }
-            steps = 0;
+            this.steps = 0;
             return null;
         }
 
+        @Override
         public Seed next() {
-            if (alsoMyOwn &&
-                ((pass > insertOwnInPass) ||
-                 (pass == insertOwnInPass && nextSeed == null) || // Own hash is last in line
-                 (pass == insertOwnInPass && nextSeed != null && (Base64Order.enhancedCoder.compare(ASCII.getBytes(seedDB.mySeed().hash), ASCII.getBytes(nextSeed.hash)) < 0)))
+            if (this.alsoMyOwn &&
+                ((this.pass > this.insertOwnInPass) ||
+                 (this.pass == this.insertOwnInPass && this.nextSeed == null) || // Own hash is last in line
+                 (this.pass == this.insertOwnInPass && this.nextSeed != null && (Base64Order.enhancedCoder.compare(ASCII.getBytes(this.seedDB.mySeed().hash), ASCII.getBytes(this.nextSeed.hash)) < 0)))
                ) {
                 // take my own seed hash instead the enumeration result
-                alsoMyOwn = false;
-                return seedDB.mySeed();
+                this.alsoMyOwn = false;
+                return this.seedDB.mySeed();
             } else {
-                final Seed next = nextSeed;
-                nextSeed = nextInternal();
+                final Seed next = this.nextSeed;
+                this.nextSeed = nextInternal();
                 return next;
             }
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -381,48 +387,52 @@ public class PeerSelection {
     
     private static class providesRemoteCrawlURLsEnum implements Iterator<Seed> {
 
-        private Iterator<Seed> se;
+        private final Iterator<Seed> se;
         private Seed nextSeed;
-        private SeedDB seedDB;
+        private final SeedDB seedDB;
         
         private providesRemoteCrawlURLsEnum(final SeedDB seedDB) {
             this.seedDB = seedDB;
-            se = getDHTSeeds(seedDB, null, yacyVersion.YACY_POVIDES_REMOTECRAWL_LISTS);
-            nextSeed = nextInternal();
+            this.se = getDHTSeeds(seedDB, null, yacyVersion.YACY_POVIDES_REMOTECRAWL_LISTS);
+            this.nextSeed = nextInternal();
         }
         
+        @Override
         public boolean hasNext() {
-            return nextSeed != null;
+            return this.nextSeed != null;
         }
 
         private Seed nextInternal() {
             Seed s;
             try {
-                while (se.hasNext()) {
-                    s = se.next();
+                while (this.se.hasNext()) {
+                    s = this.se.next();
                     if (s == null) return null;
                     if (s.getLong(Seed.RCOUNT, 0) > 0) return s;
                 }
             } catch (final kelondroException e) {
                 System.out.println("DEBUG providesRemoteCrawlURLsEnum:" + e.getMessage());
                 Network.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
-                seedDB.resetActiveTable();
+                this.seedDB.resetActiveTable();
                 return null;
             }
             return null;
         }
         
+        @Override
         public Seed next() {
-            final Seed next = nextSeed;
-            nextSeed = nextInternal();
+            final Seed next = this.nextSeed;
+            this.nextSeed = nextInternal();
             return next;
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
 
     }
+
 
     /**
      * get either the youngest or oldest peers from the seed db. Count as many as requested
@@ -431,7 +441,7 @@ public class PeerSelection {
      * @param count number of wanted peers
      * @return a hash map of peer hashes to seed object
      */
-    public static Map<String, Seed> seedsByAge(final SeedDB seedDB, final boolean up, int count) {
+    public static Map<String, Seed> seedsByAgeX(final SeedDB seedDB, final boolean up, int count) {
         
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
 
@@ -467,4 +477,38 @@ public class PeerSelection {
             return null;
         }
     }
+    
+
+
+    /**
+     * get either the youngest or oldest peers from the seed db. Count as many as requested
+     * @param seedDB
+     * @param up if up = true then get the most recent peers, if up = false then get oldest
+     * @param count number of wanted peers
+     * @return a hash map of peer hashes to seed object
+     */
+    public static Map<String, Seed> seedsByAge(final SeedDB seedDB, final boolean up, int count) {
+        if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
+        Seed ys;
+        long age;
+        final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN); 
+        try {
+            final Map<String, Seed> result = new HashMap<String, Seed>();
+            while (s.hasNext() && count-- > 0) {
+                ys = s.next();
+                if (ys != null && ys.hash != null) {
+                    age = (System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60;
+                    System.out.println("selected seedsByAge up=" + up + ", age/min = " + age);
+                    result.put(ys.hash, ys);
+                }
+            }
+            return result;
+        } catch (final kelondroException e) {
+            Network.log.logSevere("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    
+    
 }

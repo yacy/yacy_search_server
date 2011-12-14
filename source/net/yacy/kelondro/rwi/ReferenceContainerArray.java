@@ -32,6 +32,7 @@ import java.util.Iterator;
 import net.yacy.cora.ranking.Rating;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.BLOB;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
@@ -110,9 +111,9 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * objects in the cache.
      * @throws IOException
      */
-    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startWordHash, final boolean rot) {
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) {
         try {
-            return new ReferenceContainerIterator(startWordHash, rot);
+            return new ReferenceContainerIterator(startWordHash, rot, excludePrivate);
         } catch (final IOException e) {
             Log.logException(e);
             return null;
@@ -126,33 +127,39 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         // so this class simulates wCache.tailMap(startWordHash).values().iterator()
         // plus the mentioned features
 
-        private final boolean rot;
+        private final boolean rot, excludePrivate;
         protected CloneableIterator<byte[]> iterator;
 
-        public ReferenceContainerIterator(final byte[] startWordHash, final boolean rot) throws IOException {
+        public ReferenceContainerIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) throws IOException {
             this.rot = rot;
+            this.excludePrivate = excludePrivate;
             this.iterator = ReferenceContainerArray.this.array.keys(true, startWordHash);
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
 
+        @Override
         public ReferenceContainerIterator clone(final Object secondWordHash) {
             try {
-				return new ReferenceContainerIterator((byte[]) secondWordHash, this.rot);
+				return new ReferenceContainerIterator((byte[]) secondWordHash, this.rot, this.excludePrivate);
 			} catch (final IOException e) {
 			    Log.logException(e);
 				return null;
 			}
         }
 
+        @Override
         public boolean hasNext() {
             if (this.iterator == null) return false;
             if (this.rot) return true;
             return this.iterator.hasNext();
         }
 
+        @Override
         public ReferenceContainer<ReferenceType> next() {
-			if (this.iterator.hasNext()) try {
-                return get(this.iterator.next());
+			while (this.iterator.hasNext()) try {
+			    byte[] b = this.iterator.next();
+			    if (this.excludePrivate && Word.isPrivate(b)) continue;
+                return get(b);
             } catch (final Throwable e) {
                 Log.logException(e);
                 return null;
@@ -163,17 +170,24 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             }
             try {
                 this.iterator = ReferenceContainerArray.this.array.keys(true, null);
-                return get(this.iterator.next());
+                while (this.iterator.hasNext()) {
+                    byte[] b = this.iterator.next();
+                    if (this.excludePrivate && Word.isPrivate(b)) continue;
+                    return get(b);
+                }
+                return null;
             } catch (final Throwable e) {
                 Log.logException(e);
                 return null;
             }
         }
 
+        @Override
         public void remove() {
             this.iterator.remove();
         }
 
+        @Override
         public Iterator<ReferenceContainer<ReferenceType>> iterator() {
             return this;
         }
@@ -185,9 +199,9 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * the startWordHash may be null to iterate all from the beginning
      * @throws IOException
      */
-    public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] startWordHash, final boolean rot) {
+    public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) {
         try {
-            return new ReferenceCountIterator(startWordHash, rot);
+            return new ReferenceCountIterator(startWordHash, rot, excludePrivate);
         } catch (final IOException e) {
             Log.logException(e);
             return null;
@@ -196,34 +210,39 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
     public class ReferenceCountIterator implements CloneableIterator<Rating<byte[]>>, Iterable<Rating<byte[]>> {
 
-        private final boolean rot;
+        private final boolean rot, excludePrivate;
         protected CloneableIterator<byte[]> iterator;
 
-        public ReferenceCountIterator(final byte[] startWordHash, final boolean rot) throws IOException {
+        public ReferenceCountIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) throws IOException {
             this.rot = rot;
+            this.excludePrivate = excludePrivate;
             this.iterator = ReferenceContainerArray.this.array.keys(true, startWordHash);
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
 
+        @Override
         public ReferenceCountIterator clone(final Object secondWordHash) {
             try {
-                return new ReferenceCountIterator((byte[]) secondWordHash, this.rot);
+                return new ReferenceCountIterator((byte[]) secondWordHash, this.rot, this.excludePrivate);
             } catch (final IOException e) {
                 Log.logException(e);
                 return null;
             }
         }
 
+        @Override
         public boolean hasNext() {
             if (this.iterator == null) return false;
             if (this.rot) return true;
             return this.iterator.hasNext();
         }
 
+        @Override
         public Rating<byte[]> next() {
             byte[] reference;
-            if (this.iterator.hasNext()) try {
+            while (this.iterator.hasNext()) try {
                 reference = this.iterator.next();
+                if (this.excludePrivate && Word.isPrivate(reference)) continue;
                 return new Rating<byte[]>(reference, count(reference));
             } catch (final Throwable e) {
                 Log.logException(e);
@@ -233,20 +252,24 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             if (!this.rot) {
                 return null;
             }
-            try {
+            while (this.iterator.hasNext()) try {
                 this.iterator = ReferenceContainerArray.this.array.keys(true, null);
                 reference = this.iterator.next();
+                if (this.excludePrivate && Word.isPrivate(reference)) continue;
                 return new Rating<byte[]>(reference, count(reference));
             } catch (final Throwable e) {
                 Log.logException(e);
                 return null;
             }
+            return null;
         }
 
+        @Override
         public void remove() {
             this.iterator.remove();
         }
 
+        @Override
         public Iterator<Rating<byte[]>> iterator() {
             return this;
         }
@@ -355,6 +378,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             this.wordHash = wordHash;
         }
 
+        @Override
         public byte[] rewrite(final byte[] b) throws RowSpaceExceededException {
             if (b == null) return null;
             final ReferenceContainer<ReferenceType> c = this.rewriter.reduce(new ReferenceContainer<ReferenceType>(ReferenceContainerArray.this.factory, this.wordHash, RowSet.importRowSet(b, ReferenceContainerArray.this.factory.getRow())));

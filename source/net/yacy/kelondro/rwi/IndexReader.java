@@ -35,7 +35,7 @@ public interface IndexReader<ReferenceType extends Reference> {
     public int size();
     public boolean has(byte[] wordHash); // should only be used if in case that true is returned the getContainer is NOT called
     public ReferenceContainer<ReferenceType> get(byte[] wordHash, HandleSet urlselection);
-    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(byte[] startWordHash, boolean rot);
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(byte[] startWordHash, boolean rot, boolean excludePrivate);
     public void close();
 
 }

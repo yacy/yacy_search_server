@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.ranking.Rating;
 import net.yacy.kelondro.blob.HeapWriter;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -89,14 +90,17 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * every index entry is made for a term which has a fixed size
      * @return the size of the term
      */
+    @Override
     public int termKeyLength() {
         return this.termSize;
     }
 
+    @Override
     public void clear() {
         if (this.cache != null) this.cache.clear();
     }
 
+    @Override
     public void close() {
     	this.cache = null;
     }
@@ -191,6 +195,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return list;
     }
 
+    @Override
     public int size() {
         return (this.cache == null) ? 0 : this.cache.size();
     }
@@ -209,8 +214,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return max;
     }
 
+    @Override
     public Iterator<ReferenceContainer<ReferenceType>> iterator() {
-        return referenceContainerIterator(null, false);
+        return referenceContainerIterator(null, false, false);
     }
 
     /**
@@ -218,8 +224,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
      */
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startWordHash, final boolean rot) {
-        return new ReferenceContainerIterator(startWordHash, rot);
+    @Override
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) {
+        return new ReferenceContainerIterator(startWordHash, rot, excludePrivate);
     }
 
     /**
@@ -233,40 +240,47 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         // so this class simulates wCache.tailMap(startWordHash).values().iterator()
         // plus the mentioned features
 
-        private final boolean rot;
+        private final boolean rot, excludePrivate;
         private final List<ReferenceContainer<ReferenceType>> cachecopy;
         private int p;
         private byte[] latestTermHash;
 
-        public ReferenceContainerIterator(byte[] startWordHash, final boolean rot) {
+        public ReferenceContainerIterator(byte[] startWordHash, final boolean rot, final boolean excludePrivate) {
             this.rot = rot;
+            this.excludePrivate = excludePrivate;
             if (startWordHash != null && startWordHash.length == 0) startWordHash = null;
             this.cachecopy = sortedClone();
             assert this.cachecopy != null;
             assert ReferenceContainerCache.this.termOrder != null;
             this.p = 0;
             if (startWordHash != null) {
+                byte[] b;
                 while ( this.p < this.cachecopy.size() &&
-                        ReferenceContainerCache.this.termOrder.compare(this.cachecopy.get(this.p).getTermHash(), startWordHash) < 0
+                        ReferenceContainerCache.this.termOrder.compare(b = this.cachecopy.get(this.p).getTermHash(), startWordHash) < 0 &&
+                        !(excludePrivate && Word.isPrivate(b))
                       ) this.p++;
             }
             this.latestTermHash = null;
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
 
+        @Override
         public ReferenceContainerIterator clone(final Object secondWordHash) {
-            return new ReferenceContainerIterator((byte[]) secondWordHash, this.rot);
+            return new ReferenceContainerIterator((byte[]) secondWordHash, this.rot, this.excludePrivate);
         }
 
+        @Override
         public boolean hasNext() {
             if (this.rot) return this.cachecopy.size() > 0;
             return this.p < this.cachecopy.size();
         }
 
+        @Override
         public ReferenceContainer<ReferenceType> next() {
-            if (this.p < this.cachecopy.size()) {
+            while (this.p < this.cachecopy.size()) {
                 final ReferenceContainer<ReferenceType> c = this.cachecopy.get(this.p++);
                 this.latestTermHash = c.getTermHash();
+                if (this.excludePrivate && Word.isPrivate(this.latestTermHash)) continue;
                 try {
                     return c.topLevelClone();
                 } catch (final RowSpaceExceededException e) {
@@ -280,21 +294,27 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             }
             if (this.cachecopy.isEmpty()) return null;
             this.p = 0;
-            final ReferenceContainer<ReferenceType> c = this.cachecopy.get(this.p++);
-            this.latestTermHash = c.getTermHash();
-            try {
-                return c.topLevelClone();
-            } catch (final RowSpaceExceededException e) {
-                Log.logException(e);
-                return null;
+            while  (this.p < this.cachecopy.size()) {
+                final ReferenceContainer<ReferenceType> c = this.cachecopy.get(this.p++);
+                this.latestTermHash = c.getTermHash();
+                if (this.excludePrivate && Word.isPrivate(this.latestTermHash)) continue;
+                try {
+                    return c.topLevelClone();
+                } catch (final RowSpaceExceededException e) {
+                    Log.logException(e);
+                    return null;
+                }
             }
+            return null;
         }
 
+        @Override
         public void remove() {
             System.arraycopy(this.cachecopy, this.p, this.cachecopy, this.p - 1, this.cachecopy.size() - this.p);
             ReferenceContainerCache.this.cache.remove(new ByteArray(this.latestTermHash));
         }
 
+        @Override
         public Iterator<ReferenceContainer<ReferenceType>> iterator() {
             return this;
         }
@@ -302,8 +322,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     }
 
     @Override
-    public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] startHash, final boolean rot) {
-        return new ReferenceCountIterator(startHash, rot);
+    public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] startHash, final boolean rot, boolean excludePrivate) {
+        return new ReferenceCountIterator(startHash, rot, excludePrivate);
     }
 
     /**
@@ -312,40 +332,47 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      */
     public class ReferenceCountIterator implements CloneableIterator<Rating<byte[]>>, Iterable<Rating<byte[]>> {
 
-        private final boolean rot;
+        private final boolean rot, excludePrivate;
         private final List<Rating<ByteArray>> cachecounts;
         private int p;
         private byte[] latestTermHash;
 
-        public ReferenceCountIterator(byte[] startWordHash, final boolean rot) {
+        public ReferenceCountIterator(byte[] startWordHash, final boolean rot, boolean excludePrivate) {
             this.rot = rot;
+            this.excludePrivate = excludePrivate;
             if (startWordHash != null && startWordHash.length == 0) startWordHash = null;
             this.cachecounts = ratingList();
             assert this.cachecounts != null;
             assert ReferenceContainerCache.this.termOrder != null;
             this.p = 0;
             if (startWordHash != null) {
+                byte[] b;
                 while ( this.p < this.cachecounts.size() &&
-                        ReferenceContainerCache.this.termOrder.compare(this.cachecounts.get(this.p).getObject().asBytes(), startWordHash) < 0
+                        ReferenceContainerCache.this.termOrder.compare(b = this.cachecounts.get(this.p).getObject().asBytes(), startWordHash) < 0 &&
+                        !(excludePrivate && Word.isPrivate(b))
                       ) this.p++;
             }
             this.latestTermHash = null;
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
 
+        @Override
         public ReferenceCountIterator clone(final Object secondWordHash) {
-            return new ReferenceCountIterator((byte[]) secondWordHash, this.rot);
+            return new ReferenceCountIterator((byte[]) secondWordHash, this.rot, this.excludePrivate);
         }
 
+        @Override
         public boolean hasNext() {
             if (this.rot) return this.cachecounts.size() > 0;
             return this.p < this.cachecounts.size();
         }
 
+        @Override
         public Rating<byte[]> next() {
-            if (this.p < this.cachecounts.size()) {
+            while (this.p < this.cachecounts.size()) {
                 final Rating<ByteArray> c = this.cachecounts.get(this.p++);
                 this.latestTermHash = c.getObject().asBytes();
+                if (this.excludePrivate && Word.isPrivate(this.latestTermHash)) continue;
                 return new Rating<byte[]>(c.getObject().asBytes(), c.getScore());
             }
             // rotation iteration
@@ -354,16 +381,22 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             }
             if (this.cachecounts.isEmpty()) return null;
             this.p = 0;
-            final Rating<ByteArray> c = this.cachecounts.get(this.p++);
-            this.latestTermHash = c.getObject().asBytes();
-            return new Rating<byte[]>(c.getObject().asBytes(), c.getScore());
+            while (this.p < this.cachecounts.size()) {
+                final Rating<ByteArray> c = this.cachecounts.get(this.p++);
+                this.latestTermHash = c.getObject().asBytes();
+                if (this.excludePrivate && Word.isPrivate(this.latestTermHash)) continue;
+                return new Rating<byte[]>(c.getObject().asBytes(), c.getScore());
+            }
+            return null;
         }
 
+        @Override
         public void remove() {
             System.arraycopy(this.cachecounts, this.p, this.cachecounts, this.p - 1, this.cachecounts.size() - this.p);
             ReferenceContainerCache.this.cache.remove(new ByteArray(this.latestTermHash));
         }
 
+        @Override
         public Iterator<Rating<byte[]>> iterator() {
             return this;
         }
@@ -376,6 +409,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param key
      * @return true, if the key is used in the heap; false otherwise
      */
+    @Override
     public boolean has(final byte[] key) {
         return this.cache.containsKey(new ByteArray(key));
     }
@@ -386,7 +420,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @return the indexContainer if one exist, null otherwise
      * @throws
      */
+    @Override
     public ReferenceContainer<ReferenceType> get(final byte[] key, final HandleSet urlselection) {
+        if (this.cache == null) return null;
         final ReferenceContainer<ReferenceType> c = this.cache.get(new ByteArray(key));
         if (urlselection == null) return c;
         if (c == null) return null;
@@ -413,6 +449,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param key
      * @return
      */
+    @Override
     public int count(final byte[] key) {
         final ReferenceContainer<ReferenceType> c = this.cache.get(new ByteArray(key));
         if (c == null) return 0;
@@ -424,6 +461,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null otherwise
      */
+    @Override
     public ReferenceContainer<ReferenceType> delete(final byte[] termHash) {
         // returns the index that had been deleted
         assert this.cache != null;
@@ -431,9 +469,11 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return this.cache.remove(new ByteArray(termHash));
     }
 
+    @Override
     public void removeDelayed(final byte[] termHash, final byte[] urlHashBytes) {
         remove(termHash, urlHashBytes);
     }
+    @Override
     public boolean remove(final byte[] termHash, final byte[] urlHashBytes) {
         assert this.cache != null;
         if (this.cache == null) return false;
@@ -453,10 +493,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return false;
     }
 
+    @Override
     public void removeDelayed(final byte[] termHash, final HandleSet urlHashes) {
         remove(termHash, urlHashes);
     }
 
+    @Override
     public int remove(final byte[] termHash, final HandleSet urlHashes) {
         assert this.cache != null;
         if (this.cache == null) return  0;
@@ -478,8 +520,10 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return 0;
     }
 
+    @Override
     public void removeDelayed() {}
 
+    @Override
     public void add(final ReferenceContainer<ReferenceType> container) throws RowSpaceExceededException {
         // this puts the entries into the cache
         if (this.cache == null || container == null || container.isEmpty()) return;
@@ -503,6 +547,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
     }
 
+    @Override
     public void add(final byte[] termHash, final ReferenceType newEntry) throws RowSpaceExceededException {
         assert this.cache != null;
         if (this.cache == null) return;
@@ -535,10 +580,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
     }
 
+    @Override
     public int minMem() {
         return 0;
     }
 
+    @Override
     public ByteOrder termKeyOrdering() {
         return this.termOrder;
     }
@@ -548,6 +595,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         public ContainerOrder(final ByteOrder order) {
             this.o = order;
         }
+        @Override
         public int compare(final ReferenceContainer<ReferenceType> arg0, final ReferenceContainer<ReferenceType> arg1) {
             if (arg0 == arg1) return 0;
             if (arg0 == null) return -1;

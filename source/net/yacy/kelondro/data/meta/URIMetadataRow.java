@@ -428,7 +428,7 @@ public class URIMetadataRow implements URIMetadata {
 
     public byte[] language() {
         byte[] b = this.entry.getColBytes(col_lang, true);
-        if (b[0] == (byte)'[') {
+        if (b == null || b[0] == (byte)'[') {
             String tld = this.metadata().url.getTLD();
             if (tld.length() < 2 || tld.length() > 2) return ASCII.getBytes("en");
             return ASCII.getBytes(tld);

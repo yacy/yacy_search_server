@@ -29,7 +29,6 @@ package net.yacy.search.query;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -147,13 +146,13 @@ public final class QueryParams {
             final Segment indexSegment,
             final RankingProfile ranking,
             final String userAgent) {
-
-    	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(UTF8.getBytes(queryString)))) {
+        byte[] queryHash;
+    	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryHash = UTF8.getBytes(queryString)))) {
             this.queryString = null;
             this.queryHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.excludeHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {
-                this.queryHashes.put(UTF8.getBytes(queryString));
+                this.queryHashes.put(queryHash);
             } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }

@@ -107,6 +107,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
 
     private class CleanupThread extends Thread {
+        @Override
         public void run() {
             while (IndexCell.this.cleanupShallRun) {
                 try {
@@ -211,6 +212,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * every index entry is made for a term which has a fixed size
      * @return the size of the term
      */
+    @Override
     public int termKeyLength() {
         return this.ram.termKeyLength();
     }
@@ -220,6 +222,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public void add(final ReferenceContainer<ReferenceType> newEntries) throws IOException, RowSpaceExceededException {
         try {
             this.ram.add(newEntries);
@@ -234,6 +237,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     }
 
+    @Override
     public void add(final byte[] termHash, final ReferenceType entry) throws IOException, RowSpaceExceededException {
         try {
             this.ram.add(termHash, entry);
@@ -250,6 +254,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     /**
      * checks if there is any container for this termHash, either in RAM or any BLOB
      */
+    @Override
     public boolean has(final byte[] termHash) {
         if (this.ram.has(termHash)) return true;
         return this.array.has(termHash);
@@ -259,6 +264,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * count number of references for a given term
      * this method may cause strong IO load if called too frequently.
      */
+    @Override
     public int count(final byte[] termHash) {
         final Integer cachedCount = this.countCache.get(termHash);
         if (cachedCount != null) return cachedCount.intValue();
@@ -295,6 +301,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * @throws IOException
      * @return a container with merged ReferenceContainer from RAM and the file array or null if there is no data to be returned
      */
+    @Override
     public ReferenceContainer<ReferenceType> get(final byte[] termHash, final HandleSet urlselection) throws IOException {
         final ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
         ReferenceContainer<ReferenceType> c1 = null;
@@ -335,6 +342,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * the deleted containers are merged and returned as result of the method
      * @throws IOException
      */
+    @Override
     public ReferenceContainer<ReferenceType> delete(final byte[] termHash) throws IOException {
         removeDelayed();
         ReferenceContainer<ReferenceType> c1 = null;
@@ -362,6 +370,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
     }
 
+    @Override
     public void removeDelayed(final byte[] termHash, final HandleSet urlHashes) {
         HandleSet r;
         synchronized (this.removeDelayedURLs) {
@@ -381,6 +390,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
     }
 
+    @Override
     public void removeDelayed(final byte[] termHash, final byte[] urlHashBytes) {
         HandleSet r;
         synchronized (this.removeDelayedURLs) {
@@ -400,6 +410,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
     }
 
+    @Override
     public void removeDelayed() throws IOException {
         final HandleSet words = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
         synchronized (this.removeDelayedURLs) {
@@ -422,6 +433,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * new BLOBs. This returns the sum of all url references that have been removed
      * @throws IOException
      */
+    @Override
     public int remove(final byte[] termHash, final HandleSet urlHashes) throws IOException {
         this.countCache.remove(termHash);
         final int removed = this.ram.remove(termHash, urlHashes);
@@ -437,6 +449,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         return removed + (reduced / this.array.rowdef().objectsize);
     }
 
+    @Override
     public boolean remove(final byte[] termHash, final byte[] urlHashBytes) throws IOException {
         this.countCache.remove(termHash);
         final boolean removed = this.ram.remove(termHash, urlHashBytes);
@@ -469,6 +482,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             }
         }
 
+        @Override
         public ReferenceContainer<ReferenceType> reduce(final ReferenceContainer<ReferenceType> container) {
             container.sort();
             container.removeEntries(this.urlHashes);
@@ -477,22 +491,33 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     }
 
+    @Override
     public Iterator<ReferenceContainer<ReferenceType>> iterator() {
-        return referenceContainerIterator(null, false);
+        return referenceContainerIterator(null, false, false);
     }
 
-    public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] starttermHash, final boolean rot) {
-        return this.array.referenceCountIterator(starttermHash, false);
+    @Override
+    public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] starttermHash, final boolean rot, final boolean excludePrivate) {
+        return this.array.referenceCountIterator(starttermHash, false, excludePrivate);
     }
 
-    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] starttermHash, final boolean rot) {
+    @Override
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startTermHash, final boolean rot, final boolean excludePrivate) {
+        return referenceContainerIterator(startTermHash, rot, excludePrivate);
+    }
+
+    @Override
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startTermHash, final boolean rot, final boolean excludePrivate, final boolean ram) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(this.factory, this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer<ReferenceType>(this.factory, starttermHash));
+        containerOrder.rotate(new ReferenceContainer<ReferenceType>(this.factory, startTermHash));
+        if (ram) {
+            return this.ram.referenceContainerIterator(startTermHash, rot, excludePrivate);
+        }
         return new MergeIterator<ReferenceContainer<ReferenceType>>(
-            this.ram.referenceContainerIterator(starttermHash, rot),
+            this.ram.referenceContainerIterator(startTermHash, rot, excludePrivate),
             new MergeIterator<ReferenceContainer<ReferenceType>>(
-                this.ram.referenceContainerIterator(starttermHash, false),
-                this.array.referenceContainerIterator(starttermHash, false),
+                this.ram.referenceContainerIterator(startTermHash, false, excludePrivate),
+                this.array.referenceContainerIterator(startTermHash, false, excludePrivate),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,
                 true),
@@ -501,24 +526,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             true);
     }
 
-    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startTermHash, final boolean rot, final boolean ram) {
-        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(this.factory, this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer<ReferenceType>(this.factory, startTermHash));
-        if (ram) {
-            return this.ram.referenceContainerIterator(startTermHash, rot);
-        }
-        return new MergeIterator<ReferenceContainer<ReferenceType>>(
-                this.ram.referenceContainerIterator(startTermHash, false),
-                this.array.referenceContainerIterator(startTermHash, false),
-                containerOrder,
-                ReferenceContainer.containerMergeMethod,
-                true);
-    }
-
     /**
      * clear the RAM and BLOB part, deletes everything in the cell
      * @throws IOException
      */
+    @Override
     public synchronized void clear() throws IOException {
         this.countCache.clear();
         this.removeDelayedURLs.clear();
@@ -531,6 +543,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * BLOB file the next time a cell is opened. A name for the dump is automatically generated
      * and is composed of the current date and the cell salt
      */
+    @Override
     public synchronized void close() {
         this.countCache.clear();
         try {removeDelayed();} catch (final IOException e) {}
@@ -543,6 +556,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.array.close();
     }
 
+    @Override
     public int size() {
         throw new UnsupportedOperationException("an accumulated size of index entries would not reflect the real number of words, which cannot be computed easily");
     }
@@ -563,10 +577,12 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         return m;
     }
 
+    @Override
     public int minMem() {
         return 10 * 1024 * 1024;
     }
 
+    @Override
     public ByteOrder termKeyOrdering() {
         return this.array.ordering();
     }
@@ -581,26 +597,32 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.array.mountBLOBFile(blobFile);
     }
 
+    @Override
     public long getBufferMaxAge() {
         return System.currentTimeMillis();
     }
 
+    @Override
     public int getBufferMaxReferences() {
         return this.ram.maxReferences();
     }
 
+    @Override
     public long getBufferMinAge() {
         return System.currentTimeMillis();
     }
 
+    @Override
     public int getBufferSize() {
         return this.ram.size();
     }
 
+    @Override
     public long getBufferSizeBytes() {
         return 10000 * this.ram.size(); // guessed; we don't know that exactly because there is no statistics here (expensive, not necessary)
     }
 
+    @Override
     public void setBufferMaxWordCount(final int maxWords) {
         this.maxRamEntries = maxWords;
     }

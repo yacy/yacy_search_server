@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -168,7 +169,7 @@ public class Dispatcher {
 
         final ArrayList<ReferenceContainer<WordReference>> containers = new ArrayList<ReferenceContainer<WordReference>>(maxContainerCount);
 
-        final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.segment.termIndex().referenceContainerIterator(hash, true, ram);
+        final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.segment.termIndex().referenceContainerIterator(hash, true, true, ram); // very important that rotation is true here
         ReferenceContainer<WordReference> container;
         int refcount = 0;
 
@@ -185,6 +186,7 @@ public class Dispatcher {
 
         ) {
             if (container.isEmpty()) continue;
+            if (Word.isPrivate(container.getTermHash())) continue; // exclude private containers
             refcount += container.size();
             containers.add(container);
         }

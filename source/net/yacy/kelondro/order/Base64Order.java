@@ -36,10 +36,10 @@ import net.yacy.cora.ranking.Order;
 
 public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
 
-    protected static final byte[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes();
-    protected static final byte[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes();
-    protected static final byte[] ahpla_standard = new byte[128];
-    protected static final byte[] ahpla_enhanced = new byte[128];
+    public  static final byte[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes();
+    public  static final byte[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes();
+    private static final byte[] ahpla_standard = new byte[128];
+    private static final byte[] ahpla_enhanced = new byte[128];
 
     static {
         for (int i = 0; i < 128; i++) {
@@ -92,16 +92,19 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return z;
     }
 
+    @Override
     public Order<byte[]> clone() {
         final Base64Order o = new Base64Order(this.asc, this.rfc1113compliant);
         o.rotate(this.zero);
         return o;
     }
 
+    @Override
     public final boolean wellformed(final byte[] a) {
         return wellformed(a, 0, a.length);
     }
 
+    @Override
     public final boolean wellformed(final byte[] a, final int astart, final int alength) {
         assert (astart + alength <= a.length) : "astart = " + astart + ", alength = " + alength + ", a.length = " + a.length;
         int b;
@@ -120,6 +123,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return null;
     }
 
+    @Override
     public final String signature() {
         if ((!this.asc) && (!this.rfc1113compliant)) return "Bd";
         if ((!this.asc) && ( this.rfc1113compliant)) return "bd";
@@ -347,6 +351,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return b;
     }
 
+    @Override
     public final long cardinal(final byte[] key) {
         if (this.zero == null) return cardinalI(key, 0, key.length);
         final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
@@ -355,6 +360,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
 
+    @Override
     public final long cardinal(final byte[] key, final int off, final int len) {
         if (this.zero == null) return cardinalI(key, off, len);
         final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
@@ -375,6 +381,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return (x > 0) ? 1 : (x < 0) ? -1 : 0;
     }
 
+    @Override
     public final boolean equal(final byte[] a, final byte[] b) {
         if ((a == null) && (b == null)) return true;
         if ((a == null) || (b == null)) return false;
@@ -388,6 +395,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return true;
     }
 
+    @Override
     public final boolean equal(final byte[] a, int astart, final byte[] b, int bstart, int length) {
         if ((a == null) && (b == null)) return true;
         if ((a == null) || (b == null)) return false;
@@ -397,6 +405,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return true;
     }
 
+    @Override
     public final int compare(final byte[] a, final byte[] b) {
         try {
         return (this.asc) ?
@@ -423,6 +432,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         }
     }
 
+    @Override
     public final int compare(final byte[] a, final byte[] b, final int length) {
         try {
             return (this.asc) ?
@@ -444,6 +454,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         }
     }
 
+    @Override
     public final int compare(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
         try {
             return (this.asc) ?

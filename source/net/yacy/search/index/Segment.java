@@ -253,6 +253,7 @@ public class Segment {
             }
             wordCount++;
             if (searchEvent != null && !searchEvent.getQuery().excludeHashes.has(wordhash) && searchEvent.getQuery().queryHashes.has(wordhash)) {
+                // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
                 ReferenceContainer<WordReference> container;
                 try {
                     container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
@@ -472,6 +473,7 @@ public class Segment {
             this.rwiCountAtStart = termIndex().sizesMax();
         }
 
+        @Override
         public void run() {
             Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             ReferenceContainer<WordReference> container = null;
@@ -479,7 +481,7 @@ public class Segment {
             DigestURI url = null;
             final HandleSet urlHashs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             try {
-                Iterator<ReferenceContainer<WordReference>> indexContainerIterator = Segment.this.termIndex.referenceContainer(this.startHash, false, 100, false).iterator();
+                Iterator<ReferenceContainer<WordReference>> indexContainerIterator = Segment.this.termIndex.referenceContainer(this.startHash, false, false, 100, false).iterator();
                 while (indexContainerIterator.hasNext() && this.run) {
                     waiter();
                     container = indexContainerIterator.next();
@@ -512,7 +514,7 @@ public class Segment {
 
                     if (!containerIterator.hasNext()) {
                         // We may not be finished yet, try to get the next chunk of wordHashes
-                        final TreeSet<ReferenceContainer<WordReference>> containers = Segment.this.termIndex.referenceContainer(container.getTermHash(), false, 100, false);
+                        final TreeSet<ReferenceContainer<WordReference>> containers = Segment.this.termIndex.referenceContainer(container.getTermHash(), false, false, 100, false);
                         indexContainerIterator = containers.iterator();
                         // Make sure we don't get the same wordhash twice, but don't skip a word
                         if ((indexContainerIterator.hasNext()) && (!container.getTermHash().equals(indexContainerIterator.next().getTermHash()))) {

@@ -108,6 +108,7 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
     public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(
                             byte[] startHash,
                             boolean rot,
+                            boolean excludePrivate,
                             boolean buffer
                             ) throws IOException;
 
@@ -127,6 +128,7 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
     public TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(
                             byte[] startHash,
                             boolean rot,
+                            boolean excludePrivate,
                             int count,
                             boolean buffer
                             ) throws IOException;

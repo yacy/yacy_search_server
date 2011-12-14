@@ -54,6 +54,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public void merge(final Index<ReferenceType> otherIndex) throws IOException, RowSpaceExceededException {
         byte[] term;
         for (final ReferenceContainer<ReferenceType> otherContainer: otherIndex) {
@@ -71,6 +72,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         }
     }
 
+    @Override
     public void removeDelayed(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
@@ -80,6 +82,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         }
     }
 
+    @Override
     public int remove(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
@@ -91,14 +94,14 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         return c;
     }
 
-    public synchronized TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(final byte[] startHash, final boolean rot, int count) throws IOException {
+    public synchronized TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(final byte[] startHash, final boolean rot, final boolean excludePrivate, int count) throws IOException {
         // creates a set of indexContainers
         // this does not use the cache
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(this.factory, termKeyOrdering().clone());
         final ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(this.factory, startHash);
         containerOrder.rotate(emptyContainer);
         final TreeSet<ReferenceContainer<ReferenceType>> containers = new TreeSet<ReferenceContainer<ReferenceType>>(containerOrder);
-        final Iterator<ReferenceContainer<ReferenceType>> i = referenceContainerIterator(startHash, rot);
+        final Iterator<ReferenceContainer<ReferenceType>> i = referenceContainerIterator(startHash, rot, excludePrivate);
         //if (ram) count = Math.min(size(), count);
         ReferenceContainer<ReferenceType> container;
         // this loop does not terminate using the i.hasNex() predicate when rot == true
@@ -126,6 +129,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * @param urlselection
      * @return map of wordhash:indexContainer
      */
+    @Override
     public TreeMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final HandleSet wordHashes, final HandleSet urlselection) {
     	// first check if there is any entry that has no match; this uses only operations in ram
     	/*
@@ -212,6 +216,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         return new TermSearch<ReferenceType>(this, queryHashes, excludeHashes, urlselection, termFactory, maxDistance);
     }
 
+    @Override
     public Row referenceRow() {
         return this.factory.getRow();
     }
