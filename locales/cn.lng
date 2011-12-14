@@ -340,7 +340,7 @@ Save User==保存用户
 #File: ConfigAppearance_p.html
 #---------------------------
 Appearance and Integration==外观界面
-You can change the appearance of the YaCy interface with skins.==您可以在这里修改Yacy的外观界面.
+You can change the appearance of the YaCy interface with skins.==您可以在这里修改YaCy的外观界面.
 #You can change the appearance of YaCy with skins==Sie können hier das Erscheinungsbild von YaCy mit Skins ändern
 The selected skin and language also affects the appearance of the search page.==选择的皮肤和语言也会影响到搜索页面的外观.
 If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==如果您<a href="ConfigPortal.html">创建YaCy门户</a>,
@@ -383,9 +383,9 @@ Error saving the skin.==保存皮肤时出错.
 #---------------------------
 Access Configuration==访问设置
 Basic Configuration==基本设置
-Your YaCy Peer needs some basic information to operate properly==您的Yacy Peer需要一些基本信息才能工作
+Your YaCy Peer needs some basic information to operate properly==您的YaCy Peer需要一些基本信息才能工作
 Select a language for the interface==选择界面语言
-Use Case: what do you want to do with YaCy:==用途: 您用Yacy做什么:
+Use Case: what do you want to do with YaCy:==用途: 您用YaCy做什么:
 Community-based web search==基于社区的网络搜索
 Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==加入并支持全球网络 'freeworld', 自由地搜索.
 Search portal for your own web pages==属于您自己的搜索引擎
@@ -834,7 +834,7 @@ Sending Client==发送主机
 #---------------------------
 >Crawl Profile Editor<==>Crawl文件编辑<
 >Crawler Steering<==>Crawler引导<
->Crawl Scheduler<==>Crawl安排<
+>Crawl Scheduler<==>定期Crawl<
 >Scheduled Crawls can be modified in this table<==>请在下表中修改已安排的crawl<
 Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl文件里保存有正在运行的crawl进程信息.
 
@@ -882,7 +882,7 @@ DHT Transfer==DHT转移
 Proxy Use==Proxy使用 
 Local Crawling</a>==本地crawl</a>
 Global Crawling</a>==全球crawl</a>
-Surrogate Import</a>==替代品导入</a>
+Surrogate Import</a>==导入副本</a>
 >Crawl Results Overview<==>Crawl结果一览<
 These are monitoring pages for the different indexing queues.==索引队列监视页面.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy使用5种不同的方式来获取网络索引. 进程(1-5)的细节在子菜单中显示
@@ -890,7 +890,7 @@ above which also will show you a table with indexing results so far. The informa
 so you need to log-in with your administration password.==所以您最好设置一个有密码的管理员账户来查看.
 Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==事件(6)与事件(1)相反, 显示本地回执. 它也包含索引结果, 但不属于隐私
 since it shows crawl requests from other peers.==因为它含有来自其他peer的请求.
-Case \(7\) occurs if surrogate files are imported==如果导入了替代品, 则事件(7)发生.
+Case \(7\) occurs if surrogate files are imported==如果导入了副本, 则事件(7)发生.
 The image above illustrates the data flow initiated by web index acquisition.==上图为网页索引的数据流.
 Some processes occur double to document the complex index migration structure.==一些进程可能出现双重文件索引结构混合的情况.
 \(1\) Results of Remote Crawl Receipts==(1) 远程crawl回执结果 
@@ -926,8 +926,8 @@ This is the 'mirror'-case of process \(1\).==这是进程(1)的'镜像'实例.
 <em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>用法:</em>如果您选中了'索引创建'页面的'接受远端crawl请求', 则会在此列表中显示. 
 The stack is empty.==栈为空.
 Statistics about \#\[domains\]\# domains in this stack:==此栈显示有关 #[domains]# 域的数据:
-\(7\) Results from surrogates import==\(7\) 替代品导入结果
-These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的替代文件中导入
+\(7\) Results from surrogates import==\(7\) 副本导入结果
+These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的副本文件中导入
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>用法:</em>将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
 \(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(例如 <a href="/IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH 导入</a>\)
 #Domain==Domain
@@ -947,60 +947,60 @@ Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==显示�
 
 #File: CrawlStartExpert_p.html
 #---------------------------
-Expert Crawl Start==Experten Crawl Start
-Start Crawling Job:==Starte Crawling Aufgabe:
-You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie können hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterlädt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterlädt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
-Attribute<==Attribut<
-Value<==Wert<
-Description<==Beschreibung<
->Starting Point:==>Startpunkt:
->From URL==>Von URL
-From Sitemap==Von Sitemap
-From File==Von Datei
-Existing start URLs are always re-crawled.==Existierende Start-URLs werden immer wieder gecrawled.
-Other already visited URLs are sorted out as \"double\", if they are not allowed using the re-crawl option.==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert, wenn diese nicht ausdrücklich per Re-crawl Option zugelassen wurden.
-Create Bookmark==Lesezeichen erstellen
-\(works with "Starting Point: From URL" only\)==(funktioniert nur mit "Startpunkt von URL")
-Title<==Titel<
-Folder<==Ordner<
-This option lets you create a bookmark from your crawl start URL.==Diese Option gibt Ihnen die Möglichkeit ein Lesezeichen aus Ihrer Crawl Start URL zu erstellen.
-Crawling Depth</label>==Crawling-Tiefe</label>
-This defines how often the Crawler will follow links \(of links..\) embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links (von Links ...) in Webseiten folgen wird.
-0 means that only the page you enter under \"Starting Point\" will be added==0 bedeutet, dass nur die Seite unter "Startpunkt"
-to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==dem Index zugefügt wird. 2-4 ist gut für normales Indexieren. Werte über 8 sind nicht nützlich, denn eine Suche mit Suchtiefe 8 würde
-index approximately 25.600.000.000 pages, maybe this is the whole WWW.==ungefähr 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
-Scheduled re-crawl<==Geplanter Re-Crawl<
->no&nbsp;doubles<==>Keine&nbsp;Dubletten<
-run this crawl once and never load any page that is already known, only the start-url may be loaded again.==Führe diesen Crawl einmalig aus und lade niemals eine schon bekannte Seite nach. Nur die URL unter Startpunkt darf noch einmal geladen werden.
->re-load<==>Nachladen<
-run this crawl once, but treat urls that are known since==führe diesen Crawl einmalig aus aber behandle URLs die bereits seit
->years<==>Jahre<
->months<==>Monate<
->days<==>Tage<
->hours<==>Stunden<
-not as double and load them again. No scheduled re-crawl.==bekannt sind nicht als Dubletten und lade sie erneut.
->scheduled<==>Geplant<
-after starting this crawl, repeat the crawl every==Nach dem Start dieses Crawls, führe ihn jede
-> automatically.==> automatisch aus.
-A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==Ein Web Crawl führt eine Dubletten Prüfung anhand einer internen Datenbank gegen alle im Internet gefunden Links durch. Wenn dieselbe URL wieder gefunden wird,
-then the url is treated as double when you check the \'no doubles\' option. A url may be loaded again when it has reached a specific age,==wird die URL als Dublette behandelt wenn die 'Keine Doubletten' Option ausgewählt wurde. Eine URL kann noch einmal geladen werden wenn sie ein bestimmtes Alter erreicht hat.
-to use that check the \'re-load\' option. When you want that this web crawl is repeated automatically, then check the \'scheduled\' option.==Dafür kann die 'Nachladen' Option verwendet werden. Wenn der Web Crawl automatisch wiederholt werden soll, kann die 'Geplant' Option ausgewählt werden.
-In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.==In diesem Fall wird der Crawl erneut nach der eingestellten Zeit ausgeführt und keine URL aus einem vorhergegangenem Crawl wird als Dublette ausgelassen.
-Must-Match Filter==Muss-entsprechen Filter
-Use filter==Filter nutzen
-Restrict to start domain==Auf Startdomain beschränken
-Restrict to sub-path==Auf Sub-Pfad beschränken
+Expert Crawl Start==Crawl高级设置
+Start Crawling Job:==开始Crawl任务:
+You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==您可以将指定URL作为网页crawling的起始点. "Crawling"意即YaCy会下载指定的网站, 并解析出网站中链接的所有内容, 其深度由"Crawling深度"指定.
+Attribute<==属性<
+Value<==值<
+Description<==描述<
+>Starting Point:==>起始点:
+>From URL==>来自URL
+From Sitemap==来自站点地图
+From File==来自文件
+Existing start URLs are always re-crawled.==已存在的起始链接将会被重新crawl.
+Other already visited URLs are sorted out as \"double\", if they are not allowed using the re-crawl option.==对于已经访问过的链接, 如果它们不允许被重新crawl，则被标记为'重复'.
+Create Bookmark==创建书签
+\(works with "Starting Point: From URL" only\)==(仅从"起始链接"开始)
+Title<==标题<
+Folder<==目录<
+This option lets you create a bookmark from your crawl start URL.==此选项会将起始链接设为书签.
+Crawling Depth</label>==Crawling深度</label>
+This defines how often the Crawler will follow links \(of links..\) embedded in websites.==此选项为crawler跟踪网站嵌入链接的深度.
+0 means that only the page you enter under \"Starting Point\" will be added==设置为 0 代表仅将"起始点"
+to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==添加到索引. 建议设置为2-4. 由于设置为8会索引将近25,000,000,000个页面, 所以不建议设置大于8的值,
+index approximately 25.600.000.000 pages, maybe this is the whole WWW.==这可能是整个互联网的内容.
+Scheduled re-crawl<==已安排的重新Crawl<
+>no&nbsp;doubles<==>无&nbsp;重复<
+run this crawl once and never load any page that is already known, only the start-url may be loaded again.==仅运行一次crawl, 并且不载入重复网页, 可能会重载起始链接.
+>re-load<==>重载<
+run this crawl once, but treat urls that are known since==运行此crawl, 但是将链接视为从
+>years<==>年<
+>months<==>月<
+>days<==>日<
+>hours<==>时<
+not as double and load them again. No scheduled re-crawl.==不重复并重新载入. 无安排的crawl任务.
+>scheduled<==>定期<
+after starting this crawl, repeat the crawl every==运行此crawl后, 每隔
+> automatically.==> 运行.
+A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==网页crawl参照自身数据库, 对所有找到的链接进行重复性检查. 如果链接重复,
+then the url is treated as double when you check the \'no doubles\' option. A url may be loaded again when it has reached a specific age,==并且'无重复'选项打开, 则被以重复链接对待. 如果链接存在时间超过一定时间,
+to use that check the \'re-load\' option. When you want that this web crawl is repeated automatically, then check the \'scheduled\' option.==并且'重载'选项打开, 则此链接会被重新读取. 当您想这些crawl自动运行时, 请选中'定期'选项.
+In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.==此种情况下, crawl会每隔一定时间自动运行并且不会重复寻找前一次crawl中的链接.
+Must-Match Filter==必须与过滤器匹配
+Use filter==使用过滤器
+Restrict to start domain==限制为起始域
+Restrict to sub-path==限制为子路经
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Dieser Filter ist ein emacs-ähnlicher regulärer Ausdruck, der mit den zu crawlenden URLs übereinstimmen muss;
-The filter is a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regular expression</a>==Dieser Filter ist ein <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Regulärer Ausdruck</a>
-that must match with the URLs which are used to be crawled; default is \'catch all\'.==der auf die zum Crawlen verwendeten URLs zutreffen muss. Die Standard Einstellung ist 'alle zulassen'.
-Example: to allow only urls that contain the word \'science\', set the filter to \'.*science.*\'.==Beispiel: Um nur URLs zuzulassen, die das Wort 'Wissenschaft' beeinhalten, setzen Sie den Filter auf '.*Wissenschaft.*'.
-You can also use an automatic domain-restriction to fully crawl a single domain.==Sie können aber auch eine automatische Domain-Beschränkung benutzen, um eine einzelne Domain komplett zu crawlen.
-Must-Not-Match Filter==Muss-nicht-entsprechen Filter
-This filter must not match to allow that the page is accepted for crawling.==Dieser Filter muss nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
-The empty string is a never-match filter which should do well for most cases.==Ein leeres Feld ist ein niemals-passend Filter, der in den meisten Fällen gute Dienste leisten sollte.
-If you don't know what this means, please leave this field empty.==Wenn Sie nicht wissen, was dies bedeutet, lassen Sie das Feld einfach leer.
+The filter is a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regular expression</a>==过滤是一组<a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">正则表达式</a>
+that must match with the URLs which are used to be crawled; default is \'catch all\'.==, 它们表示了要抓取的链接规则; 默认是'抓取所有'.
+Example: to allow only urls that contain the word \'science\', set the filter to \'.*science.*\'.==比如: 如果仅抓取包含'科学'的链接, 可将过滤器设置为 '.*.*'.
+You can also use an automatic domain-restriction to fully crawl a single domain.==您也可以使用域限制来抓取整个域.
+Must-Not-Match Filter==必须与过滤器不匹配
+This filter must not match to allow that the page is accepted for crawling.==这个过滤器表示了所有不被抓取的网页规则.
+The empty string is a never-match filter which should do well for most cases.==对于大多数情况可以留空.
+If you don't know what this means, please leave this field empty.==如果您不知道这些设置的意义, 请将此留空.
 #Re-crawl known URLs:==Re-crawl bekannter URLs:
-Use</label>:==Benutzen</label>:
+Use</label>:==使用</label>:
 #It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es hängt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl älter als das angegebene
 #Auto-Dom-Filter:==Auto-Dom-Filter:
 #This option will automatically create a domain-filter which limits the crawl on domains the crawler==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschränkt ,
@@ -1008,388 +1008,388 @@ Use</label>:==Benutzen</label>:
 #restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==und dann den folgenden Crawl automatisch auf die Domains zu beschränken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe für
 #for this example would be 1.==dieses Beispiel wäre 1.
 #The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschränkt wird.
-Maximum Pages per Domain:==Maximale Seiten pro Domain:
-Page-Count==Seitenanzahl
-You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.==Sie können die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
-You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Sie können diese Option auch mit dem 'Auto-Dom-Filter' kombinieren, so dass das Limit für alle Domains mit der
-the given depth. Domains outside the given depth are then sorted-out anyway.==angegebenen Tiefe gilt. Domains ausserhalb der angegebenen Tiefe werden einfach aussortiert.
-Accept URLs with==Akzeptiere URLs mit
-dynamic URLs==dynamische URLs
-A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
-is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
-Store to Web Cache==Speichern im Web-Cache
-This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardmäßig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
+Maximum Pages per Domain:==每个域允许的最多页面:
+Page-Count==页面计数
+You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.==您可以将从单个域中抓取和索引的页面数目限制为此值.
+You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==您可以将此设置与'Auto-Dom-Filter'结合起来, 以限制给定深度中所有域.
+the given depth. Domains outside the given depth are then sorted-out anyway.==超出深度范围的域会被自动忽略.
+Accept URLs with==接受链接
+dynamic URLs==动态URL
+A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==动态页面通常用问号标记. 通常不会抓取指向动态页面的链接. 然而, 也有些含有静态内容的页面用问号标记.
+is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==如果您不确定, 不要选中此项, 以防抓取时陷入死循环.
+Store to Web Cache==存储到网页缓存
+This option is used by default for proxy prefetch, but is not needed for explicit crawling.==这个选项默认打开, 并用于预抓取, 但对于精确抓取此选项无效.
 
-Policy for usage of Web Cache==Regeln für die Nutzung des Web Caches
-The caching policy states when to use the cache during crawling:==Die Caching Regeln legen fest wann der Cache während des Crawlen verwendet wird:
+Policy for usage of Web Cache==网页缓存使用策略
+The caching policy states when to use the cache during crawling:==缓存策略即表示抓取时何时使用缓存:
 #no&nbsp;cache==no&nbsp;cache
-no&nbsp;cache==kein&nbsp;Cache
+no&nbsp;cache==无&nbsp;缓存
 #if&nbsp;fresh==if&nbsp;fresh
-if&nbsp;fresh==bei&nbsp;frischem&nbsp;Cache&nbsp;Hit
+if&nbsp;fresh==如果&nbsp;有更新&nbsp;缓存&nbsp;命中
 #if&nbsp;exist==if&nbsp;exist
-if&nbsp;exist==bei&nbsp;Cache&nbsp;Hit
+if&nbsp;exist==如果&nbsp;缓存&nbsp;命中
 #cache&nbsp;only==cache&nbsp;only
-cache&nbsp;only==nur&nbsp;Cache
-never use the cache, all content from fresh internet source;==Den Cache nie verwenden, allen Inhalt frisch von der Online Quelle
-use the cache if the cache exists and is fresh using the proxy-fresh rules;==Verwende den Cache, wenn ein Treffer im Cache existiert und dieser aktuell ist.
-use the cache if the cache exist. Do no check freshness. Otherwise use online source;==Verwende den Cache, wenn ein Treffer existiert ohne die Aktualität zu prüfen. Andernfalls verwende die Quelle online;
-never go online, use all content from cache. If no cache exist, treat content as unavailable==Gehe niemals online, verwende nur den Cache Inhalt. Wenn kein Cache existiert, behandle den Inhalt als nicht verfügbar
+cache&nbsp;only==仅&nbsp;缓存
+never use the cache, all content from fresh internet source;==从不使用缓存内容, 全部从因特网资源即时抓取;
+use the cache if the cache exists and is fresh using the proxy-fresh rules;==如果缓存中存在并且是最新则使用代理刷新规则;
+use the cache if the cache exist. Do no check freshness. Otherwise use online source;==如果缓存存在则使用缓存. 不检查是否最新. 否则使用最新源;
+never go online, use all content from cache. If no cache exist, treat content as unavailable==从不检查线上内容, 全部使用缓存内容. 如果缓存存在, 将其视为无效
 
-Do Local Indexing:==Lokales Indexieren:
-index text==Indexiere Text
-index media==Indexiere Medien
-This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterlädt. Dies sollte standardmässig aktiviert sein, ausser Sie wollen den
-Document Cache without indexing.==Dokumenten Cache ohne Indexierung füllen.
-Do Remote Indexing==Nutze Remote Indexierung
-Describe your intention to start this global crawl \(optional\)==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional)
-This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer für Ihren Crawl benutzen.
-If you need your crawling results locally, you should switch this off.==Wenn Sie die Crawling Ergebnisse lokal benötigen, sollten Sie diese Funktion deaktivieren.
-Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers können einen remote Crawl initiieren oder erhalten.
-A YaCyNews message will be created to inform all peers about a global crawl==Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren 
-so they can omit starting a crawl with the same start point.==damit sie es vermeiden können, einen Crawl vom selben Startpunkt zu starten.
-Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschließen
-This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem häufig vorkommende Wörter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle Wörter von der Indexierung auszuschließen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
-check this box.==aktivieren Sie diese Box.
-"Start New Crawl"=="Neuen Crawl starten"
+Do Local Indexing:==本地索引:
+index text==索引文本
+index media==索引媒体
+This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==此选项开启时, crawler会下载网页索引. 默认打开, 除非您仅要填充
+Document Cache without indexing.==文件缓存而不进行索引.
+Do Remote Indexing==远程索引
+Describe your intention to start this global crawl \(optional\)==在这填入您要进行全球crawl的目的(可选)
+This message will appear in the 'Other Peer Crawl Start' table of other peers.==此消息会显示在其他peer的'其他peer crawl起始'列表中.
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果选中, crawler会联系其他peer, 并将其作为此次crawl的远程索引器.
+If you need your crawling results locally, you should switch this off.==如果您仅想crawl本地内容, 请关闭此设置.
+Only senior and principal peers can initiate or receive remote crawls.==仅高级peer和主peer能初始化或者接收远程crawl.
+A YaCyNews message will be created to inform all peers about a global crawl==YaCy新闻消息中会通知其他peer这个全球crawl,
+so they can omit starting a crawl with the same start point.==然后他们才能以相同起始点进行crawl.
+Exclude <em>static</em> Stop-Words==排除<em>静态</em>非索引字
+This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==此项用于规避极常用字, 比如 "个", "他", "她", "它"等. 当要在索引时排除所有在<tt>yacy.stopwords</tt>文件中的字词时,
+check this box.==请选中此项.
+"Start New Crawl"=="开始新crawl"
 #-----------------------------
 
 #File: CrawlStartIntranet_p.html
 #---------------------------
 #Intranet Crawl Start==Intranet Crawl Start
-When an index domain is configured to contain intranet links,==Wenn eine Index Domain konfiguriert wurde die Intranet Links enthält,
-the intranet may be scanned for available servers.==kann dieses Intranet auf verfügbare Server gescannt werden.
-Please select below the servers in your intranet that you want to fetch into the search index.==Bitte in der folgenden Server Liste aus Ihrem Intranet auswählen, welche Sie in den Suchindex aufnehmen wollen.
-This network definition does not allow intranet links.==Diese Netzwerk Konfiguration erlaubt keine Intranet Links.
-A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==Eine Liste mit Servern aus dem Intranet ist nur verfügbar, wenn Sie YaCy auch konfiguriert haben Intranetseiten zu indexieren.
-To do so, open the <a href=\"ConfigBasic.html\">Basic Configuration</a> servlet and select the \'Intranet Indexing\' use case.==Um diese Einstellung vorzunehmen, bitte im Servlet <a href="ConfigBasic.html">Basis Konfiguration</a> den Anwendungsfall 'Intranet Indexierung' auswählen.
-Available Intranet Server==Verfügbare Intranet Server
+When an index domain is configured to contain intranet links,==当索引域中包含局域网链接时,
+the intranet may be scanned for available servers.==可用服务器会扫描它们.
+Please select below the servers in your intranet that you want to fetch into the search index.==以下服务器在您的局域网中, 请选择您想添加到搜索索引中的主机.
+This network definition does not allow intranet links.==当前网络定义不允许局域网链接.
+A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==仅当您将YaCy配置为索引局域网目标, 以下条目才有效.
+To do so, open the <a href=\"ConfigBasic.html\">Basic Configuration</a> servlet and select the \'Intranet Indexing\' use case.==将YaCy配置为索引局域网目标, 打开<a href="ConfigBasic.html">基本设置</a>页面, 选中'索引局域网'.
+Available Intranet Server==可用局域网服务器
 #>IP<==>IP<
 #>URL<==>URL<
->Process<==>Status<
->not in index<==>Nicht im Index<
->indexed<==>Indexiert<
-"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawler hinzu"
+>Process<==>状态<
+>not in index<==>不在索引中<
+>indexed<==>已加入索引<
+"Add Selected Servers to Crawler"=="添加选中服务器到crawler"
 #-----------------------------
 
 #File: CrawlStartScanner_p.html
 #---------------------------
-Network Scanner==Netzwerk Scanner
-YaCy can scan a network segment for available http, ftp and smb server.==YaCy kann ein Netzwerksegment auf verfügbare HTTP, FTP und SMB Server hin absuchen.
-You must first select a IP range and then, after this range is scanned,==Sie müssen zuerst einen IP Bereich festlegen  und dann, nachdem dieser Bereich gescannt wurde,
-it is possible to select servers that had been found for a full-site crawl.==ist es möglich einen gefunden Server für eine volle Seiten Suche crawlen zu lassen.
+Network Scanner==网络扫描器
+YaCy can scan a network segment for available http, ftp and smb server.==YaCy可扫描http, ftp 和smb服务器.
+You must first select a IP range and then, after this range is scanned,==须先指定IP范围, 再进行扫描,
+it is possible to select servers that had been found for a full-site crawl.==才有可能选择主机并将其作为全站crawl的服务器.
 No servers had been detected in the given IP range \#\[iprange\]\#. 
-Please enter a different IP range for another scan.==Bitte geben Sie einen anderen IP Bereich ein für einen weiteren Scan.
-Please wait...==Bitte warten...
->Scan the network<==>Das Netzwerk Scannen<
-Scan Range==Scan Bereich
-Scan sub-range with given host==Scanne Unterbereich von angegebenen Host aus
-Full Intranet Scan:==Voller Intranet Scan:
-Do not use intranet scan results, you are not in an intranet environment!==Verwenden Sie nicht die Intranet Scan Resultate, da sie sich nicht in einer Intranet Umgebung befinden!
->Scan Cache<==>Scan Cache<
-accumulate scan results with access type \"granted\" into scan cache \(do not delete old scan result\)==Sammle Scan Ergebnisse mit dem Zugriffstyp "granted" im Scan Cache (Lösche keine alten Scan Ergebnisse)
->Service Type<==>Service Typ<
+Please enter a different IP range for another scan.==未检测到可用服务器, 请重新指定IP范围.
+Please wait...==请稍候...
+>Scan the network<==>扫描网络<
+Scan Range==扫描范围
+Scan sub-range with given host==扫描给定主机的子域
+Full Intranet Scan:==局域网完全扫描:
+Do not use intranet scan results, you are not in an intranet environment!==由于您当前不处于局域网环境, 请不要使用局域网扫描结果!
+>Scan Cache<==>扫描缓存<
+accumulate scan results with access type \"granted\" into scan cache \(do not delete old scan result\)==使用"已授权"的缓存以加速扫描(不要删除上次扫描结果)
+>Service Type<==>服务类型<
 #>ftp==>FTP
 #>smb==>SMB
 #>http==>HTTP
 #>https==>HTTPS
->Scheduler<==>Scan Planung<
-run only a scan==Nur einmalig Scannen
-scan and add all sites with granted access automatically. This disables the scan cache accumulation.==Scannen und alle Webseiten mit erlaubtem Zugriff automatisch hinzufügen. Diese Einstellungen deaktiviert die Scan Cache Ansammlung.
-Look every==Überprüfe alle
->minutes<==>Minuten<
->hours<==>Stunden<
->days<==>Tage<
-again and add new sites automatically to indexer.==wieder und füge neue Seiten automatisch zum Indexer hinzu.
-Sites that do not appear during a scheduled scan period will be excluded from search results.==Seiten die nicht im Laufe eines geplanten Scans auftauchen werden von den Suchergebnissen ausgeschlossen.
-"Scan"=="Scannen"
-The following servers had been detected:==Die folgenden Server wurden entdeckt:
-Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
->Protocol<==>Protokoll<
+>Scheduler<==>定期扫描<
+run only a scan==运行一次扫描
+scan and add all sites with granted access automatically. This disables the scan cache accumulation.==扫描并自动添加已授权站点. 此选项会关闭缓存扫描加速.
+Look every==每隔
+>minutes<==>分<
+>hours<==>时<
+>days<==>天<
+again and add new sites automatically to indexer.==再次检视, 并自动添加新站点到索引器中.
+Sites that do not appear during a scheduled scan period will be excluded from search results.==周期扫描中未上线的站点会被自动排除.
+"Scan"=="扫描"
+The following servers had been detected:==已检测到以下服务器:
+Available server within the given IP range==指定IP范围内的可用服务器
+>Protocol<==>协议<
 #>IP<==>IP<
 #>URL<==>URL<
->Access<==>Zugriff<
->Process<==>Prozess<
->unknown<==>unbekannt<
->empty<==>leer<
->granted<==>erlaubt<
->denied<==>verweigert<
->not in index<==>nicht im Index<
->indexed<==>indexiert<
-"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawlen hinzu"
+>Access<==>权限<
+>Process<==>状态<
+>unknown<==>未知<
+>empty<==>空<
+>granted<==>已授权<
+>denied<==>拒绝<
+>not in index<==>未在索引中<
+>indexed<==>已被索引<
+"Add Selected Servers to Crawler"=="添加选中服务器到crawler"
 #-----------------------------
 
 #File: CrawlStartSite_p.html
 #---------------------------
->Site Crawling<==>Seiten Crawlen<
-Site Crawler:==Seiten Crawler:
-Download all web pages from a given domain or base URL.==Downloaden aller Webseiten von einer gegebenen Domain oder Basis URL.
->Site Crawl Start<==>Seiten Crawl Start<
->Site<==>Seite<
-Link-List of URL==Link Liste der URL
->Scheduler<==>Zeitplanung<
-run this crawl once==führe diesen Crawl nur einmalig aus
-scheduled, look every==geplant, überprüfe alle
->minutes<==>Minuten<
->hours<==>Stunden<
->days<==>Tage<
-for new documents automatically.==automatisch auf neue Dokument.
->Path<==>Pfad<
-load all files in domain==Lade alle Dateien in der Domäne
-load only files in a sub-path of given url==Lade nur Dateien in einem Unterpfad der angegebenen URL
->Limitation<==>Einschränkungen<
-not more than <==nicht mehr als <
->documents<==>Dokumente<
->Dynamic URLs<==>Dynamische URLs<
-allow <==erlaube <
-urls with a \'\?\' in the path==URLs mit einem '?' im Pfad
+>Site Crawling<==>crawl站点<
+Site Crawler:==站点crawler:
+Download all web pages from a given domain or base URL.==下载给定域或者URL里的所有网页.
+>Site Crawl Start<==>起始crawl站点<
+>Site<==>站点<
+Link-List of URL==URL链接表
+>Scheduler<==>定时器<
+run this crawl once==运行此crawl
+scheduled, look every==每
+>minutes<==>分钟<
+>hours<==>小时<
+>days<==>天<
+for new documents automatically.==, 以自动查找新文件.
+>Path<==>路径<
+load all files in domain==载入域中所有文件
+load only files in a sub-path of given url==仅载入给定URL子路径中文件
+>Limitation<==>限制<
+not more than <==不超过<
+>documents<==>文件<
+>Dynamic URLs<==>动态URL<
+allow <==允许<
+urls with a \'\?\' in the path==路径中含有'?'
 #>Start<==>Start<
-"Start New Crawl"=="Starte neuen Crawl"
-Hints<==Hinweise<
->Crawl Speed Limitation<==>Einschränkung der Crawl Geschwindigkeit<
-No more that two pages are loaded from the same host in one second \(not more that 120 document per minute\) to limit the load on the target server.==Es werden nicht mehr als 2 Seiten pro Sekunde vom selben Host geladen (nicht mehr als 120 Dokumente per Minute), um die Last auf den Zielserver zu minimieren.
->Target Balancer<==>Ziel Balancer<
-A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.==Ein zweiter Crawl für einen anderen Host erhöht den Durchsatz auf ein Maximum von 240 Dokumenten pro Minute weil der der Crawler Balancer die Last über alle Hosts verteilt.
->High Speed Crawling<==>Hochgeschwindigkeits Crawlen<
-A \'shallow crawl\' which is not limited to a single host \(or site\)==Ein 'oberflächlicher Crawl' der nicht auf einen einzelnen Host (oder eine Seite) limitiert ist
-can extend the pages per minute \(ppm\) rate to unlimited documents per minute when the number of target hosts is high.==kann die Anzahl der Seiten pro Minute (ppm) auf unendlich viele Dokumente pro Minute erweitern wenn die Anzahl der Ziel Hosts hoch ist.
-This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==Das kann erreicht werden durch Verwendung des <a href="CrawlStartExpert_p.html">Crawl Start (Expert)</a> Servlets.
->Scheduler Steering<==>Geplante Steuerung<
-The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==Die geplante Ausführung von Crawls kann geändert oder entfernt werden mit der <a href="Table_API_p.html">API Aktionen Steuerung</a>.
+"Start New Crawl"=="开始新crawl"
+Hints<==提示<
+>Crawl Speed Limitation<==>crawl速度限制<
+No more that two pages are loaded from the same host in one second \(not more that 120 document per minute\) to limit the load on the target server.==每秒最多从同一主机中载入两个页面(每分钟不超过120个文件)以限制目标主机负载.
+>Target Balancer<==>目标平衡器<
+A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.==对于不同主机的二次crawl, 会上升到每分钟最多240个文件, 因为crawler会自动平衡所有主机的负载.
+>High Speed Crawling<==>高速crawl<
+A \'shallow crawl\' which is not limited to a single host \(or site\)==当目标主机很多时, 用于多个主机(或站点)的'浅crawl'方式,
+can extend the pages per minute \(ppm\) rate to unlimited documents per minute when the number of target hosts is high.==会增加每秒页面数(ppm).
+This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==对应设置<a href="CrawlStartExpert_p.html">专家模式起始crawla>选项.
+>Scheduler Steering<==>定时器引导<
+The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==可以使用<a href="Table_API_p.html">API引导</a>改变或删除crawl定时器.
 #-----------------------------
 
 #File: Help.html
 #---------------------------
-YaCy: Help==YaCy: Hilfe
-Tutorial==Anleitung
-You are using the administration interface of your own search engine==Sie benutzen gerade das Administrationsinterface ihrer eigenen Suchmaschine
-You can create your own search index with YaCy==Sie können mit YaCy Ihren eigenen Suchindex erstellen
-To learn how to do that, watch one of the demonstration videos below==Bitte sehen Sie als Anleitung eine Demonstration (2. Video unten in deutscher Sprache)
+YaCy: Help==YaCy: 帮助
+Tutorial==新手教程
+You are using the administration interface of your own search engine==您正在搜索引擎的管理界面
+You can create your own search index with YaCy==您可以用YaCy创建属于自己的搜索索引
+To learn how to do that, watch one of the demonstration videos below==观看以下demo视频以了解更多
 
 #-----------------------------
 
 #File: index.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
+YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': 搜索页面
 #kiosk mode==Kiosk Modus
-"Search"=="Suchen"
+"Search"=="搜索"
 #Text==Text
-Images==Bilder
+Images==图像
 #Audio==Audio
-Video==Videos
-Applications==Anwendungen
-more options...==mehr Optionen...
-advanced parameters==erweiterte Parameter
-Max. number of results==Max. Anzahl der Ergebnisse
-Results per page==Ergebnisse pro Seite
-Resource==Quelle
-global==global
->local==>lokal
-Global search is disabled because==Die globale Suche ist deaktiviert, denn
-DHT Distribution</a> is==die DHT-Verteilung</a> ist
-Index Receive</a> is==der Index-Empfang</a> ist 
-DHT Distribution and Index Receive</a> are==DHT-Verteilung und Index-Empfang</a> sind
-disabled.\#\(==deaktiviert.#(
-URL mask==URL-Filter
-restrict on==beschränken auf
-show all==alle zeigen
+Video==视频
+Applications==应用程序
+more options...==更多设置...
+advanced parameters==高级参数
+Max. number of results==搜索结果最多有
+Results per page==每个页面显示结果
+Resource==资源
+global==全球
+>local==>本地
+Global search is disabled because==全球搜索被禁用, 因为
+DHT Distribution</a> is==DHT分发</a>被
+Index Receive</a> is==索引接收</a>被
+DHT Distribution and Index Receive</a> are==DHT分发和索引接受</a>被
+disabled.\#\(==禁用.#(
+URL mask==URL掩码
+restrict on==限制
+show all==显示所有
 #überarbeiten!!!
-Prefer mask==Vorzugsmaske
-Constraints==Einschränkungen
-only index pages==Nur Index-Seiten
-"authentication required"=="Autorisierung erforderlich"
-Disable search function for users without authorization==Suchfunktion für Benutzer ohne Autorisierung sperren
-Enable web search to everyone==Suchfunktion für alle Nutzer erlauben
-the peer-to-peer network==Peer-to-Peer-Netzwerk
-only the local index==Nur lokaler Index
-Query Operators==Such-Operatoren
-restrictions==Restriktionen
-only urls with the &lt;phrase&gt; in the url==Nur URLs, welche &lt;phrase&gt; enthalten
-only urls with extension==Nur URLs mit der Dateinamenserweiterung
-only urls from host==Nur URLs vom Server
-only pages with as-author-anotated==Nur Seiten mit dem angegebenen Autor
-only pages from top-level-domains==Nur Seiten aus der Top-Level-Domain
-only resources from http or https servers==Nur Ressources auf HTTP- oder HTTPS-Servern
-only resources from ftp servers==Nur Ressourcen auf FTP-Servern
-they are rare==eher selten
-crawl them yourself==crawlen Sie sie selbst
-only resources from smb servers==Nur Ressourcen von SMB-Servern
-Intranet Indexing</a> must be selected==Intranet-Indexierung</a> muss ausgewählt sein
-only files from a local file system==Nur Dateien aus dem lokalen Dateisystem
-ranking modifier==Ranking-Modifizierung
-sort by date==Sortierung nach Datum
-latest first==Neuste zuerst
-multiple words shall appear near==Mehrere Wörter sollen nah zusammen stehen
-doublequotes==Anführungszeichen
-prefer given language==Angegebene Sprache bevorzugen
-an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
-heuristics==Heuristiken
-add search results from scroogle==Benutze zusätzliche Ergebnisse von Scroogle
-add search results from blekko==Benutze zusätzliche Ergebnisse von Blekko
-Search Navigation==Such-Navigation
-keyboard shotcuts==Tastatur-Kürzel
-tab or page-up==Tab oder Bild hoch
-next result page==Nächste Ergebnisseite
-page-down==Bild nach unten
-previous result page==Vorherige Ergebnisseite
-automatic result retrieval==Automatische Ergebnis-Abfrage
-browser integration==Browserintegration
-after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==Nach der Suche clicken Sie auf das Suchfeld Ihres Browsers und wählen Sie '"YaCy" hinzufügen'
-search as rss feed==Suche als RSS-Feed
-click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==Klicken Sie nach der Suche auf das rote Icon in der rechten oberen Ecke. Dies funktioniert gut mit dem '/date' Ranking-Modifizierer. Hier ein
->example==>Beispiel
-json search results==JSON-Suchergebnisse
-for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Für AJAX-Entwickler: Rufen Sie den RSS-Feed auf und ersetzen Sie '.rss' durch '.json'
+Prefer mask==首选掩码
+Constraints==约束
+only index pages==仅索引页面
+"authentication required"=="需要认证"
+Disable search function for users without authorization==禁止未授权用户搜索
+Enable web search to everyone==允许所有人搜索
+the peer-to-peer network==P2P网络
+only the local index==仅本地索引
+Query Operators==查询操作
+restrictions==限制
+only urls with the &lt;phrase&gt; in the url==仅包含&lt;phrase&gt;的URL
+only urls with extension==仅带扩展名的URL
+only urls from host==仅来自主机的URL
+only pages with as-author-anotated==仅作者授权页面
+only pages from top-level-domains==仅来自顶级域名的页面
+only resources from http or https servers==仅来自http/https服务器的资源
+only resources from ftp servers==仅来自ftp服务器的资源
+they are rare==很少
+crawl them yourself==您需要crawl它们
+only resources from smb servers==仅来自smb服务器的资源
+Intranet Indexing</a> must be selected==局域网索引</a>必须被选中
+only files from a local file system==仅来自本机文件系统的文件
+ranking modifier==排名修改
+sort by date==按日期排序
+latest first==最新者居首
+multiple words shall appear near==引用多个字
+doublequotes==双引号
+prefer given language==首选语言
+an ISO639 2-letter code==ISO639标准的双字母代码
+heuristics==启发式
+add search results from scroogle==添加来自scroogle的搜索结果
+add search results from blekko==添加来自blekko的搜索结果
+Search Navigation==搜索导航
+keyboard shotcuts==快捷键
+tab or page-up==Tab或者Page Up
+next result page==下一页
+page-down==Page Down
+previous result page==上一页
+automatic result retrieval==自动结果检索
+browser integration==浏览集成
+after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==搜索后, 点击浏览器右上方区域中的默认搜索引擎, 并选择'添加"YaCy"'
+search as rss feed==作为RSS-Feed搜索
+click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==搜索后点击右上方的红色图标. 配合'/date'排名修改, 能取得较好效果.
+>example==>例
+json search results==JSON搜索结果
+for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==对AJAX开发者: 获取搜索结果页的RSS-Feed, 并用'.json'替换'.rss'搜索结果链接中的扩展名
 #-----------------------------
 
 #File: IndexCleaner_p.html
 #---------------------------
-Index Cleaner==Index Aufräumer
->URL-DB-Cleaner==>URL-DB-Aufräumer
+Index Cleaner==索引清理
+>URL-DB-Cleaner==>URL-DB-清理
 #ThreadAlive:
 #ThreadToString:
-Total URLs searched:==Insgesamt durchsuchte URLs:
-Blacklisted URLs found:==URLS auf Blacklist gefunden:
-Percentage blacklisted:==Prozent auf Blacklist:
-last searched URL:==zuletzt durchsuchte URL: 
-last blacklisted URL found:==zuletzt gefundene URL auf Blacklist:
->RWI-DB-Cleaner==>RWI-DB-Aufräumer
-RWIs at Start:==RWIs beim Start:
-RWIs now:==RWIs jetzt: 
-wordHash in Progress:==Wort-Hash in Benutzung:
-last wordHash with deleted URLs:==letzter Wort-Hash mit gelöschten URLs:
-Number of deleted URLs in on this Hash:==Anzahl an gelöschten URLs in diesem Hash:
-URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-DB-Aufräumer - Räumen Sie Ihre Datenbank auf, indem Sie URLs, die auf Ihrer Blacklist stehen, löschen:
-Start/Resume==Start/Fortsetzen
-Stop==Stopp
-Pause==Anhalten
-RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWI-DB-Aufräumer - Räumen Sie Ihre Datenbank auf, indem Sie Wörter, die mit Ihrer Blacklist verbunden sind, löschen:
+Total URLs searched:==搜索到的全部URL:
+Blacklisted URLs found:==搜索到的黑名单URL:
+Percentage blacklisted:==黑名单占百分比:
+last searched URL:==最近搜索到的URL: 
+last blacklisted URL found:==最近搜索到的黑名单URL:
+>RWI-DB-Cleaner==>RWI-DB-清理
+RWIs at Start:==启动时RWIs:
+RWIs now:==当前RWIs: 
+wordHash in Progress:==处理中的Hash值:
+last wordHash with deleted URLs:==已删除URL的Hash值:
+Number of deleted URLs in on this Hash:==此Hash中已删除的URL数:
+URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-DB-清理 - 清理数据库, 会删除黑名单URl:
+Start/Resume==开始/继续
+Stop==停止
+Pause==暂停
+RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWI-DB-清理 - 清理数据库, 会删除与黑名单URL相关的信息:
 #-----------------------------
 
 #File: IndexControlRWIs_p.html
 #---------------------------
-Reverse Word Index Administration==Reverse Wort Indexverwaltung
-The local index currently contains \#\[wcount\]\# reverse word indexes==Der lokale Index enthält im Moment #[wcount]# inverse Wort Indexe
-RWI Retrieval \(= search for a single word\)==RWI Abfrage (= Suche nach einem einzelnen Wort)
-Select Segment:==Segment Auswahl:
-Retrieve by Word:<==Abfrage nach Wort:<
-"Show URL Entries for Word"=="URL Einträge für Wort zeigen"
-Retrieve by Word-Hash==Abfrage nach Wort-Hash
-"Show URL Entries for Word-Hash"=="URL Einträge für Wort-Hash zeigen"
-"Generate List"=="Liste erstellen"
-Cleanup==Aufräumen
->Index Deletion<==>Index Löschung<
->Delete Search Index<==>Lösche Suchindex<
-Stop Crawler and delete Crawl Queues==Crawler anhalten und Crawler Warteschlangen löschen
-Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
-Delete robots.txt Cache==Lösche robots.txt Cache
-Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-Holen Fehler während der Suche
+Reverse Word Index Administration==详细索引字管理
+The local index currently contains \#\[wcount\]\# reverse word indexes==本地索引包含 #[wcount]# 个索引字
+RWI Retrieval \(= search for a single word\)==RWI接收(= 搜索单个单词)
+Select Segment:==选择片段:
+Retrieve by Word:<==输入单词:<
+"Show URL Entries for Word"=="显示单词的入口URL"
+Retrieve by Word-Hash==输入单词Hash值
+"Show URL Entries for Word-Hash"=="显示单词Hash值的入口URL"
+"Generate List"=="生成列表"
+Cleanup==清理
+>Index Deletion<==>删除索引<
+>Delete Search Index<==>删除搜索索引<
+Stop Crawler and delete Crawl Queues==停止crawl并删除crawl队列
+Delete HTTP &amp; FTP Cache==删除HTTP &amp; FTP缓存
+Delete robots.txt Cache==删除robots.txt缓存
+Delete cached snippet-fetching failures during search==删除已缓存的错误信息
 "Delete"=="删除"
-No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
-No entry for word hash==Keinen Eintrag zu Wort-Hash
-Search result==Suchergebnis
-total URLs</td>==insgesamte URLs</td>
-appearance in</td>==kommt vor in</td>
-in link type</td>==im Link-Typ</td>
-document type</td>==Dokumenten-Typ</td>
-<td>description</td>==<td>Beschreibung</td>
-<td>title</td>==<td>Titel</td>
-<td>creator</td>==<td>Erzeuger</td>
-<td>subject</td>==<td>Thema</td>
+No entry for word \'\#\[word\]\#\'==无'#[word]#'的对应条目
+No entry for word hash==无条目对应
+Search result==搜索结果
+total URLs</td>==全部URL</td>
+appearance in</td>==出现在</td>
+in link type</td>==链接类型</td>
+document type</td>==文件类型</td>
+<td>description</td>==<td>描述</td>
+<td>title</td>==<td>标题</td>
+<td>creator</td>==<td>创建者</td>
+<td>subject</td>==<td>主题</td>
 <td>url</td>==<td>URL</td>
-<td>emphasized</td>==<td>betont</td>
-<td>image</td>==<td>Bilder</td>
-<td>audio</td>==<td>Audio</td>
-<td>video</td>==<td>Video</td>
-<td>app</td>==<td>Anwendung</td>
-index of</td>==Index of</td>
->Selection</td>==>Auswahl</td>
-Display URL List==Anzeige der URL-Liste
-Number of lines==Zeilenanzahl
-all lines==alle Zeilen
-"List Selected URLs"=="Ausgewählte URLs anzeigen"
-Transfer RWI to other Peer==RWI Transfer an anderen Peer
-Transfer by Word-Hash==Transfer per Wort-Hash
-"Transfer to other peer"=="An anderen Peer senden"
-to Peer==an Peer
-<dd>select==<dd>auswählen
-or enter a hash==oder Hash eingeben
-Sequential List of Word-Hashes==aufeinanderfolgende Liste der URL-Hashes
-No URL entries related to this word hash==Keine URL Einträge zugehörig zu diesem Wort Hash
-\#\[count\]\# URL entries related to this word hash==#[count]# URL Einträge zugehörig zu diesem Wort Hash
-Resource</td>==Ressource</td>
-Negative Ranking Factors==Negative Ranking Faktoren
-Positive Ranking Factors==Positive Ranking Faktoren
-Reverse Normalized Weighted Ranking Sum==Inverse normalisierte gewichtete Ranking Summe
+<td>emphasized</td>==<td>高亮</td>
+<td>image</td>==<td>图像</td>
+<td>audio</td>==<td>音频</td>
+<td>video</td>==<td>视频</td>
+<td>app</td>==<td>应用</td>
+index of</td>==索引</td>
+>Selection</td>==>选择</td>
+Display URL List==显示URL列表
+Number of lines==行数
+all lines==全部
+"List Selected URLs"=="列出选中URL"
+Transfer RWI to other Peer==传递RWI给其他peer
+Transfer by Word-Hash==按字Hash值传递
+"Transfer to other peer"=="传递"
+to Peer==指定peer
+<dd>select==<dd>选择
+or enter a hash==或者输入peer的Hash值
+Sequential List of Word-Hashes==字Hash值的顺序列表
+No URL entries related to this word hash==无对应入口URL对于字Hash
+\#\[count\]\# URL entries related to this word hash==#[count]# 个入口URL与此字Hash相关
+Resource</td>==资源</td>
+Negative Ranking Factors==负向排名因素
+Positive Ranking Factors==正向排名因素
+Reverse Normalized Weighted Ranking Sum==反向常规加权排名和
 hash</td>==Hash</td>
-dom length</td>==Domain Länge</td>
+dom length</td>==域长度</td>
 ybr</td>==YBR</td>
 #url comps</td>
-url length</td>==URL Länge</td>
-pos in text</td>==Pos. im Text</td>
-pos of phrase</td>==Pos. des Satzes</td>
-pos in phrase</td>==Pos. im Satz</td>
-word distance</td>==Wort Distanz</td>
-<td>authority</td>==<td>Autorität</td>
-<td>date</td>==<td>Datum</td>
-words in title</td>==Wörter im Titel</td>
-words in text</td>==Wörter im Text</td>
-local links</td>==lokale Links</td>
-remote links</td>==remote Links</td>
-hitcount</td>==Trefferzahl</td>
+url length</td>==URL长度</td>
+pos in text</td>==文中位置</td>
+pos of phrase</td>==短语位置</td>
+pos in phrase</td>==在短语中位置</td>
+word distance</td>==字间距离</td>
+<td>authority</td>==<td>权限</td>
+<td>date</td>==<td>日期</td>
+words in title</td>==标题字数</td>
+words in text</td>==内容字数</td>
+local links</td>==本地链接</td>
+remote links</td>==远程链接</td>
+hitcount</td>==命中数</td>
 #props</td>==</td>
-unresolved URL Hash==ungelöster URL-Hash
-Word Deletion==Wort Löschung
-Deletion of selected URLs==Löschung von selektierten URLs
-delete also the referenced URL \(recommended, may produce unresolved references==lösche ebenso die verwiesene URL (empfohlen, produziert eventuell ungelöste Referenzen
-at other word indexes but they do not harm\)==an anderen Wort Indizes, aber es verursacht keinen Schaden
-for every resolvable and deleted URL reference, delete the same reference at every other word where==für jede lösbare und gelöschte URL Referenz, lösche die selbe Referenz bei jedem anderen Wort, wo
-the reference exists \(very extensive, but prevents further unresolved references\)==die Referenz existiert (sehr umfassend, aber bewahrt vor weiteren ungelösten Referenzen)
-"Delete reference to selected URLs"=="Referenz und markierte URLs löschen"
-"Delete Word"=="Wort löschen"
-Blacklist Extension==Blacklist Erweiterung
-"Add selected URLs to blacklist"=="Markierte URLs zu Blacklist hinzufügen"
-"Add selected domains to blacklist"=="Markierte Domains zu Blacklist hinzufügen"
+unresolved URL Hash==未解析URL Hash值
+Word Deletion==删除关键字
+Deletion of selected URLs==删除选中URL
+delete also the referenced URL \(recommended, may produce unresolved references==同时删除关联URL (推荐, 虽然在索引时
+at other word indexes but they do not harm\)==会产生未解析关联, 但是不影响系统性能)
+for every resolvable and deleted URL reference, delete the same reference at every other word where==对于已解析并已删除的URL关联来说, 则会删除它与其他关键字的关联
+the reference exists \(very extensive, but prevents further unresolved references\)==(很多, 但是会阻止未解析关联的产生)
+"Delete reference to selected URLs"=="删除与选中URL的关联"
+"Delete Word"=="删除关键字"
+Blacklist Extension==黑名单扩展
+"Add selected URLs to blacklist"=="添加选中URL到黑名单"
+"Add selected domains to blacklist"=="添加选中域到黑名单"
 #-----------------------------
 
 #File: IndexControlURLs_p.html
 #---------------------------
-URL References Administration==URL Referenzen Administration
-The local index currently contains \#\[ucount\]\# URL references==Der lokale Index enthält im Moment #[ucount]# URL-Referenzen
-URL Retrieval==URL Abfrage
-Select Segment:==Segment Auswahl:
-Retrieve by URL:<==Abfrage nach URL:<
-"Show Details for URL"=="Details für URL zeigen"
-Retrieve by URL-Hash==Abfrage nach URL-Hash
-"Show Details for URL-Hash"=="Details für URL-Hash zeigen"
-"Generate List"=="Liste erstellen"
-Statistics about top-domains in URL Database==Statistik über die Top-Domains in der URL Datenbank
-Show top==Zeige die
-domains from all URLs.==Top-Domains aus allen URLs.
-"Generate Statistics"=="Statistik erstellen"
-Statistics about the top-\#\[domains\]\# domains in the database:==Statistik über die Top-#[domains]# Domains in der Datenbank:
-"delete all"=="Alle 删除"
+URL References Administration==URL关联管理
+The local index currently contains \#\[ucount\]\# URL references==目前本地索引含有 #[ucount]# 个URL关联
+URL Retrieval==URL获取
+Select Segment:==选择片段:
+Retrieve by URL:<==输入URL:<
+"Show Details for URL"=="显示细节"
+Retrieve by URL-Hash==输入URL Hash值
+"Show Details for URL-Hash"=="显示细节"
+"Generate List"=="生成列表"
+Statistics about top-domains in URL Database==URL数据库中顶级域数据
+Show top==显示全部URL中的
+domains from all URLs.==个域.
+"Generate Statistics"=="生成数据"
+Statistics about the top-\#\[domains\]\# domains in the database:==数据库中头 #[domains]# 个域的数据:
+"delete all"=="全部删除"
 #Domain==Domain
 #URLs==URLs
-Sequential List of URL-Hashes==Sequentielle Liste der URL-Hashes
-Loaded URL Export==Export geladener URLs
-Export File==Export-Datei
+Sequential List of URL-Hashes==URL Hash顺序列表
+Loaded URL Export==导出已加载URL
+Export File==导出文件
 #URL Filter==URL Filter
 #Export Format==Export Format
 #Only Domain <i>\(superfast\)==Nur Domains <i>(sehr schnell)
-Only Domain:==Liste mit nur Domainnamen:
-Full URL List:==Liste mit vollständiger URL:
-Plain Text List \(domains only\)==Einfache Text Liste (nur Domains)
-HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
+Only Domain:==仅域名:
+Full URL List:==完整URL列表:
+Plain Text List \(domains only\)==文本文件(仅域名)
+HTML \(domains as URLs, no title\)==HTML (超链接格式的域名, 不包括标题)
 #Full URL List <i>\(high IO\)==Vollständige URL Liste <i>(hoher IO)
-Plain Text List \(URLs only\)==Einfache Text Liste (nur URLs)
-HTML \(URLs with title\)==HTML (URLs mit Titel)
+Plain Text List \(URLs only\)==文本文件(仅URL)
+HTML \(URLs with title\)==HTML (带标题的URL)
 #XML (RSS)==XML (RSS)
-"Export URLs"=="URLs exportieren"
-Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Export nach Datei #[exportfile]# läuft ..  #[urlcount]# URLs bisher
-Finished export of \#\[urlcount\]\# URLs to file==Export beendet und #[urlcount]# URLs gespeichert in Datei
-Export to file \#\[exportfile\]\# failed:==Export in Datei #[exportfile]# fehlgeschlagen:
-No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
+"Export URLs"=="导出URL"
+Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==正在导出到 #[exportfile]#  .. 已经导出 #[urlcount]# 个URL
+Finished export of \#\[urlcount\]\# URLs to file==已完成导出 #[urlcount]# 个URL到文件
+Export to file \#\[exportfile\]\# failed:==导出到文件 #[exportfile]# 失败:
+No entry found for URL-hash==未找到合适条目对应URL-Hash
 #URL String</td>==URL Adresse</td>
 #Hash</td>==Hash</td>
 #Description</td>==Beschreibung</td>
@@ -1400,82 +1400,82 @@ No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
 #Language</td>==Sprache</td>
 #Size</td>==Größe</td>
 #Words</td>==Wörter</td>
-"Show Content"=="Inhalt anzeigen"
-"Delete URL"=="URL löschen"
-this may produce unresolved references at other word indexes but they do not harm==dies mag ungelöste Referenzen an anderen Wort Indizes erzeugen, aber es richtet keinen Schaden an
-"Delete URL and remove all references from words"=="URL löschen und alle Referenzen zu Wörtern entfernen"
-delete the reference to this url at every other word where the reference exists \(very extensive, but prevents unresolved references\)==löscht die Referenz zu dieser URL und jedem anderen Wort, wo die Referenz existiert (sehr umfassend, aber bewahrt vor ungelösten Referenzen)
+"Show Content"=="显示内容"
+"Delete URL"=="删除URL"
+this may produce unresolved references at other word indexes but they do not harm==这可能和其他关键字产生未解析关联, 但是这并不影响系统性能
+"Delete URL and remove all references from words"=="删除URl并从关键字中删除所有关联"
+delete the reference to this url at every other word where the reference exists \(very extensive, but prevents unresolved references\)==删除指向此链接的关联字,(很多, 但是会阻止未解析关联的产生)
 #-----------------------------
 
 #File: IndexCreateLoaderQueue_p.html
 #---------------------------
-Loader Queue==Lade-Puffer
-The loader set is empty==Der Lade-Puffer ist leer.
-There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Einträge in dem Lade-Puffer:
-Initiator==Initiator
-Depth==Tiefe
+Loader Queue==加载器
+The loader set is empty==无加载器
+There are \#\[num\]\# entries in the loader set:==加载器中有 #[num]# 个条目:
+Initiator==发起者
+Depth==深度
 #URL==URL
 #-----------------------------
 
 #File: IndexCreateParserErrors_p.html
 #---------------------------
-Parser Errors==Parser Fehler
-Rejected URL List:==Liste der zurückgewiesenen URLs:
-There are \#\[num\]\# entries in the rejected-urls list.==Es befinden sich #[num]# Einträge in Liste der zurückgewiesenen URLs.
-Showing latest \#\[num\]\# entries.==Es werden die letzten #[num]# Einträge angezeigt.
-"show more"=="Mehr anzeigen"
-"clear list"=="Liste löschen"
-There are \#\[num\]\# entries in the rejected-queue:==Es befinden sich #[num]# Einträge in der zurückgewiesenen URL Liste:
+Parser Errors==解析错误
+Rejected URL List:==拒绝URL列表:
+There are \#\[num\]\# entries in the rejected-urls list.==在拒绝URL列表中有 #[num]# 个条目.
+Showing latest \#\[num\]\# entries.==显示最近的 #[num]# 个条目.
+"show more"=="更多"
+"clear list"=="清除列表"
+There are \#\[num\]\# entries in the rejected-queue:==拒绝队列中有 #[num]# 个条目:
 #Initiator==Initiator
-Executor==Ausführender
+Executor==执行器
 #URL==URL
-Fail-Reason==Fehlermeldung
+Fail-Reason==错误原因
 #-----------------------------
 
 #File: ContentIntegrationPHPBB3_p.html
 #---------------------------
-Content Integration: Retrieval from phpBB3 Databases==Integration von Inhalt: Import aus phpBB3 Datenbanken
-It is possible to extract texts directly from mySQL and postgreSQL databases.==Es ist möglich Texte direkt aus MySQL und PostgreSQL Datenbanken zu extrahieren.
-Each extraction is specific to the data that is hosted in the database.==Jeder Vorgang extrahiert genau die Datensätze die in der Datenbank gehostet werden.
-This interface gives you access to the phpBB3 forums software content.==Dieses Interface erlaubt den Zugriff auf die Inhalte der phpBB3 Forum Software.
-If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==Wenn aus einer importierten Datenbank gelesen werden soll sind hier einige Hinweise, um Probleme zu vermeiden wenn Datenbankdumps in phpMyAdmin importiert werden.
-before importing large database dumps, set==Bevor große Datenbankdumps importiert werden die folgende Zeile
-in phpmyadmin/config.inc.php and place your dump file in /tmp \(Otherwise it is not possible to upload files larger than 2MB\)==in die Datei phpmyadmin/config.inc.php schreiben und die Datenbank Datei in /tmp ablegen (Andernfalls ist es nicht möglich Dateien größer als 2MB hochzuladen)
-deselect the partial import flag==Den teilweisen Import Flag abschalten
-When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/SURROGATE/in erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
-All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und können recycelt werden wenn ein Index gelöscht wird.
-The URL stub==Der Teil der URL
-like http://forum.yacy-websuche.de==wie z.B. http://forum.yacy-websuche.de
-this must be the path right in front of '\/viewtopic.php\?'==dies muss den kompletten Pfad vor '\/viewtopic.php\?' enthalten
-Type==Typ
-> of database<==> der Datenbank<
-use either 'mysql' or 'pgsql'==Verwende entweder 'mysql' oder 'pgsql'
-Host=Hostname
-> of the database<==> der Datenbank<
-of database service==des Datenbank Dienstes
-usually 3306 for mySQL==normalerweise 3306 für MySQL
-Name of the database==Name der Datenbank
-on the host==auf dem Host
-Table prefix string==Tabellen Präfix
-for table names==für Tabellennamen
-User==Benutzer
-that can access the database==mit Zugriff auf die Datenbank
-Password==Passwort
-for the account of that user given above==für den Zugang des oben angegebenen Benutzers
-Posts per file==Beiträge pro Datei
-in exported surrogates==in der exportierten Hilfsdatei
-Check database connection==Datenbankverbindung überprüfen
-Export Content to Surrogates==Exportiere Inhalt in Hilfsdateien
-Import a database dump==Importieren eines Datenbankauszugs
-Import Dump==Datenbankdump importieren
-Posts in database==Beiträge in Datenbank
-first entry==Erster Eintrag
-last entry==Letzter Eintrag
-Info failed:==Info Fehlgeschlagen:
-Export successful! Wrote \#\[files\]\# files in DATA/SURROGATES/in==Export erfolgreich! #[files]# Dateien in DATA/SURROGATES/in geschrieben
-Export failed:==Export fehlgeschlagen:
-Import successful!==Import erfolgreich!
-Import failed:==Import fehlgeschlagen:
+Content Integration: Retrieval from phpBB3 Databases==内容集成: 从phpBB3数据库中导入
+It is possible to extract texts directly from mySQL and postgreSQL databases.==能直接从mysql或者postgresql中解压出内容.
+Each extraction is specific to the data that is hosted in the database.==每次解压都针对主机数据库中的数据.
+This interface gives you access to the phpBB3 forums software content.==通过此接口能访问phpBB3论坛软件内容.
+If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==如果从使用phpMyAdmin读取数据库内容, 您可能会用到以下建议:
+before importing large database dumps, set==在导入尺寸较大的数据库时,
+in phpmyadmin/config.inc.php and place your dump file in /tmp \(Otherwise it is not possible to upload files larger than 2MB\)==设置phpmyadmin/config.inc.php的内容, 并将您的数据库文件放到 /tmp 目录下(否则不能上传大于2MB的文件)
+deselect the partial import flag==取消部分导入
+When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==导出过程开始时, 在 DATA/SURROGATE/in 目录下自动生成副本文件, 并且会被索引器自动抓取.
+All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==所有被索引的副本文件都在 DATA/SURROGATE/out 目录下, 并被索引器循环利用.
+The URL stub==URL根域名
+like http://forum.yacy-websuche.de==比如链接 http://forum.yacy-websuche.de
+this must be the path right in front of '\/viewtopic.php\?'==必须在'\/viewtopic.php\?'前面
+Type==数据库
+> of database<==> 类型<
+use either 'mysql' or 'pgsql'==使用'mysql'或者'pgsql'
+Host=数据库
+> of the database<==> 主机名<
+of database service==数据库服务
+usually 3306 for mySQL==MySQL中通常是3306
+Name of the database==主机
+on the host==数据库
+Table prefix string==table
+for table names==前缀
+User==数据库
+that can access the database==用户名
+Password==给定用户名的
+for the account of that user given above==访问密码
+Posts per file==导出副本中
+in exported surrogates==每个文件拥有的最大条目
+Check database connection==检查数据库连接
+Export Content to Surrogates==导出到副本
+Import a database dump==导入数据库
+Import Dump==导入
+Posts in database==数据库中条目
+first entry==第一个
+last entry==最后一个
+Info failed:==错误信息:
+Export successful! Wrote \#\[files\]\# files in DATA/SURROGATES/in==导出成功! #[files]# 已写入到 DATA/SURROGATES/in 目录
+Export failed:==导出失败:
+Import successful!==导入成功!
+Import failed:==导入失败:
 #-----------------------------
 
 #File: DictionaryLoader_p.html
