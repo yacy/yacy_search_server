@@ -677,22 +677,22 @@ A third option is the interactive search. Use this code:==Третьим вар�
 #-----------------------------
 #File: ConfigProfile_p.html
 #---------------------------
-Your Personal Profile==Ihr persönliches Profil
-You can create a personal profile here, which can be seen by other YaCy-members==Hier können Sie Ihr persönliches Profil verwalten, welches andere YaCy-Benutzer ansehen können
-or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
-#Name==Name
-#Nick Name==Nick Name
-Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
+Your Personal Profile==Ваш персональный профиль
+You can create a personal profile here, which can be seen by other YaCy-members==Вы можете создать персональный профиль в этом разделе, который может быть доступен другим участникам Yacy.
+or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==или <a href="ViewProfile.html?hash=localhash">в публичном доступе</a> используя <a href="ViewProfile.rdf?hash=localhash">файл FOAF RDF</a>.
+>Name<==>Ваше имя<
+Nick Name==Ваш ник
+Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Домашная страница (отображается на каждой <a href="/Supporter.html">поддерживаемой странице,</a> столько сколько Ваш пир в онлайне).
 #eMail==eMail
 #ICQ==ICQ
 #Jabber==Jabber
 #Yahoo!==Yahoo!
 #MSN==MSN
 #Skype==Skype
-Comment==Kommentar
-"Save"=="Speichern"
-You can use <==Sie können <
-> here.==> hier im Profil benutzen.
+Comment==Комментарий
+"Save"=="Сохранить"
+You can use <==Вы можете использовать <
+> here.==> для Вашего профиля.
 #-----------------------------
 #File: ConfigProperties_p.html
 #---------------------------
@@ -1822,109 +1822,109 @@ You cannot call this page directly. Instead, use a link on the <a href="Network.
 #-----------------------------
 #File: Network.html
 #---------------------------
-YaCy Search Network==YaCy Suche Netzwerk
-YaCy Network<==YaCy Netzwerk<
-The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
+YaCy Search Network==Поиск сети YaCy
+YaCy Network<==Сеть YaCy<
+The information that is presented on this page can also be retrieved as XML==Информация, указанная на этой странице также может быть получена как XML
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-Network Overview==Netzwerkübersicht
-Active&nbsp;Peers==Aktive Peers
-Passive&nbsp;Peers==Passive Peers
-Potential&nbsp;Peers==Potenzielle Peers
-Active Peers in \'\#\[networkName\]\#\' Network==Aktive Peers im '#[networkName]#' Netzwerk
-Passive Peers in \'\#\[networkName\]\#\' Network==Passive Peers im '#[networkName]#' Netzwerk
-Potential Peers in \'\#\[networkName\]\#\' Network==Potentielle Peers im '#[networkName]#' Netzwerk
+Network Overview==Обзор сети
+Active&nbsp;Peers==Активные пиры
+Passive&nbsp;Peers==Пассивные пиры
+Potential&nbsp;Peers==Потенциальные пиры
+Active Peers in \'\#\[networkName\]\#\' Network==Активные пиры в сети '#[networkName]#'
+Passive Peers in \'\#\[networkName\]\#\' Network==Пассивные пиры в сети '#[networkName]#'
+Potential Peers in \'\#\[networkName\]\#\' Network==потенциальные пиры в сети '#[networkName]#'
 Manually contacting Peer==Kontaktiere Peer manuell
 no remote \#\[peertype\]\# peer for this list known==Kein remote Peer #[peertype]# bekannt oder online.
 Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Gezeigt werden #[num]# Einträge von insgesamt #[total]# Peers.
 send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==Sende Nachricht (<strong>m</strong>)/<br/>Zeige Profil (<strong>p</strong>)/<br/>Ändere Wiki (<strong>w</strong>)/<br/>Durchsuche Blog (<strong>b</strong>)
 Search for a peername \(RegExp allowed\)==Suche nach Peernamen (RegExp erlaubt)
-"Search"=="Suche"
-Name==Name
-Address==Adresse
-Hash==Hash
-Type==Typ
-Release/<br/>SVN==YaCy Version/<br/>SVN
+"Search"=="Поиск"
+Name==Имя
+Address==Адрес
+Hash==Хэш
+Type==Тип
+Release/<br/>SVN==YaCy версия/<br/>SVN
 Last<br/>Seen==Zuletzt<br/>online
-Location==Ort
->URLs for<br/>Remote<br/>Crawl<==>URLs zum<br/>Remote<br/>Crawlen<
-Offset==Versatz
-Send message to peer==Sende Nachricht an Peer
-View profile of peer==Zeige Profil des Peers
-Read and edit wiki on peer==Lese und ändere Wiki des Peers
+Location==Расположение
+>URLs for<br/>Remote<br/>Crawl<==>URLs адреса для<br/>Удаленных<br/>сканеров<
+Offset==Смещение
+Send message to peer==Отправить сообщение пиру
+View profile of peer==Zeige Просмотр профиля пира
+Read and edit wiki on peer==Читать и редактировать wiki у пира
 Browse blog of peer==Durchsuche den Blog von Peer
 #"Ranking Receive: no"=="Ranking Empfang: nein"
 #"no ranking receive"=="kein Ranking Empfang"
 #"Ranking Receive: yes"=="Ranking Empfang: ja"
 #"Ranking receive enabled"=="Ranking Empfang aktiv"
-"DHT Receive: yes"=="DHT Empfang: ja"
-"DHT receive enabled"=="DHT Empfang aktiv"
-"DHT Receive: no; \#\[peertags\]\#"=="DHT Empfang: nein; #[peertags]#"
-"DHT Receive: no"=="DHT Empfang: nein"
+"DHT Receive: yes"=="DHT прием: да"
+"DHT receive enabled"=="DHT прием активен"
+"DHT Receive: no; \#\[peertags\]\#"=="DHT прием: нет; #[peertags]#"
+"DHT Receive: no"=="DHT прием: нет"
 #no tags given==keine Tags angegeben
-"no DHT receive"=="kein DHT Empfang"
-"Accept Crawl: no"=="Akzeptiert Crawl: nein"
-"no crawl"=="kein Crawl"
-"Accept Crawl: yes"=="Akzeptiert Crawl: ja"
-"crawl possible"=="Crawl möglich"
-Contact: passive==Kontakt: passiv
-Contact: direct==Kontakt: direkt
-Seed download: possible==Seed Download: möglich
-runtime:==Laufzeit:
+"no DHT receive"=="нет получения DHT"
+"Accept Crawl: no"=="Принято сканирование: нет"
+"no crawl"=="нет сканирования"
+"Accept Crawl: yes"=="Принято сканирование: да"
+"crawl possible"=="Сканирование возможно"
+Contact: passive==Контакт: пассивный
+Contact: direct==Контакт: прямой
+Seed download: possible==Загрузка сида: возможна
+runtime:==время работы:
 #Peers==Peers
 #YaCy Cluster==YaCy Cluster
->Network<==>Netzwerk<
-#>Online Peers<==>Online Peers<
->Number of<br/>Documents<==>Anzahl der<br/>Dokumente<
-Indexing Speed:==Indexiergeschwindigkeit:
-Pages Per Minute \(PPM\)==Seiten pro Minute (PPM)
-Query Frequency:==Abfragegeschwindigkeit:
-Queries Per Hour \(QPH\)==Abfragen pro Stunde (QPH)
->Today<==>Heute<
->Last&nbsp;Week<==>Letzte&nbsp;Woche<
->Last&nbsp;Month<==>Letzter&nbsp;Monat<
->Now<==>Jetzt<
->Active<==>Aktiv<
->Passive<==>Passiv<
->Potential<==>Potentiell<
->This Peer<==>Dieser Peer<
-URLs for<br/>Remote Crawl==URLs zum<br/>Remote Crawlen
-"The YaCy Network"=="Das YaCy Netzwerk"
-Indexing<br/>PPM==Indexier<br/>PPM
-\(public&nbsp;local\)==öffentlich&nbsp;lokal
-\(remote\)==(extern)
-Your Peer:==Ihr Peer:
+>Network<==>Сеть<
+>Online Peers<==>Пиров в онлайне<
+>Number of<br/>Documents<==>Количество<br/>документов<
+Indexing Speed:==Скорость индексации:
+Pages Per Minute \(PPM\)==Страниц в Минуту (СвМ)
+Query Frequency:==Частота запросов:
+Queries Per Hour \(QPH\)==Запросов в час (ЗвЧ)
+>Today<==>Сегодня<
+>Last&nbsp;Week<==>Последняя неделя<
+>Last&nbsp;Month<==>Последний месяц<
+>Now<==>Сейчас<
+>Active<==>Активных<
+>Passive<==>Пассивных<
+>Potential<==>Потенциальных<
+>This Peer<==>Этот пир<
+URLs for<br/>Remote Crawl==URLs адреса для удаленных сборщиков
+"The YaCy Network"=="YaCy сеть"
+Indexing<br/>PPM==Индекстирование<br/>СвМ
+\(public&nbsp;local\)==публичный&nbsp;<br/>локальный
+\(remote\)==(удаленный)
+Your Peer:==Ваш пир:
 #>Name<==>Name<
-#>Info<==>Info<
-#>Version<==>Version<
+>Info<==>Информация<
+>Version<==>Версия<
 #>UTC<==>UTC<
->Uptime<==>Laufzeit<
-#>Links<==>Links<
+>Uptime<==>Продолжительность работы<
+>Links<==>Ссылок<
 #>RWIs<==>RWIs<
-Sent<br/>Words==Gesendete<br/>Wörter
-Sent<br/>URLs==Gesendete<br/>URLs
-Received<br/>Words==Empfangene<br/>Wörter
-Received<br/>URLs==Empfangene<br/>URLs
-Known<br/>Seeds==Bekannte<br/>Seeds
-Connects<br/>per hour==Verbindungen<br/>pro Stunde
+Sent<br/>Words==Отправлено<br/>слов
+Sent<br/>URLs==Отправлено<br/>URL ссылок
+Received<br/>Words==Получено<br/>слов
+Received<br/>URLs==Получено<br/>URL ссылок
+Known<br/>Seeds==Известные<br/>сиды
+Connects<br/>per hour==соединений<br/>в час
 #Version==Version
 #Own/Other==Eigene/Andere
->dark green font<==>dunkelgrüne Schrift<
-senior/principal peers==Senior/Principal Peers
->light green font<==>hellgrüne Schrift<
->passive peers<==>passive Peers<
->pink font<==>pinke Schrift<
-junior peers==Junior Peers
-red point==roter Punkt
-this peer==Ihr Peer
->grey waves<==>graue Wellen<
->crawling activity<==>Crawl Aktivität<
->green radiation<==>grüne Strahlung<
->strong query activity<==>starke Abfrage Aktivität<
->red lines<==>rote Linien<
->DHT-out<==>DHT ausgehend<
->green lines<==>grüne Linien<
->DHT-in<==>DHT eingehend<
+>dark green font<==>шрифт темно-зеленый<
+senior/principal peers==Старшие/основные пиры
+>light green font<==>шрифт светло-зеленный<
+>passive peers<==>пассивные пиры<
+>pink font<==>шрифт розовый<
+junior peers==младшие пиры
+red point==красная точка
+this peer==Ваш пир
+>grey waves<==>серые волны<
+>crawling activity<==>выполняется сканирование<
+>green radiation<==>зеленое излучение<
+>strong query activity<==>высокая активность запросов<
+>red lines<==>красные линии<
+>DHT-out<==>DHT выход<
+>green lines<==>зеленые линии<
+>DHT-in<==>DHT вход<
 #DHT-out==DHT-out
 #You are in online mode, but probably no internet resource is available.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung.You are in online mode, but probably no internet resource is available.
 #Please check your internet connection.==Bitte überprüfen Sie Ihre Internetverbindung.
@@ -2895,27 +2895,28 @@ reversed order==umgekehrte Reihenfolge
 #-----------------------------
 #File: ViewProfile.html
 #---------------------------
-Local Peer Profile:==Lokales Peer Profil:
-Remote Peer Profile==Remote Peer Profil
-Wrong access of this page==Falscher Zugriff auf diese Seite
+Local Peer Profile:==Профиль локального пира:
+Remote Peer Profile==Профиль удаленного пира
+Wrong access of this page==Неверный доступ на эту страницу
 The requested peer is unknown or a potential peer.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer.
-The profile can't be fetched.==Das Profil kann nicht geladen werden.
-The peer==Der Peer
-is not online.==ist nicht online.
-This is the Profile of==Dies ist das Profil von
-#Name==Name
-#Nick Name==Nick Name
-#Homepage==Homepage
+The profile can't be fetched.==Этот профиль не может быть выбран
+The peer==Пир
+is not online.==не на свящи.
+This is the Profile of==Профиль
+>Name<==>Имя<
+Nick Name==Ник
+Homepage==Домашная страница
 #eMail==eMail
 #ICQ==ICQ
 #Jabber==Jabber
 #Yahoo!==Yahoo!
 #MSN==MSN
 #Skype==Skype
-Comment==Kommentar
-View this profile as==Zeige dieses Profil als 
-> or==> oder
+Comment==Комментарий
+View this profile as==Просмотр этого профиля как 
+> or==> или
 #vCard==vCard
+You can edit your profile <a href="/ConfigProfile_p.html">here</a>==Вы можете изменить свой профиль <a href="/ConfigProfile_p.html">по этой ссылке</a>
 #-----------------------------
 #File: Crawler_p.html
 #---------------------------
