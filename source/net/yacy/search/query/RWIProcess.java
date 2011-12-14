@@ -311,6 +311,9 @@ public final class RWIProcess extends Thread
                 // check site constraints
                 final String hosthash = iEntry.hosthash();
                 if ( this.query.sitehash == null ) {
+                    if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
+                        continue pollloop;
+                    }
                     // no site constraint there; maybe collect host navigation information
                     if ( nav_hosts && this.query.urlMask_isCatchall ) {
                         this.hostNavigator.inc(hosthash);

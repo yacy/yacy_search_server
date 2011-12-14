@@ -30,6 +30,8 @@ package net.yacy.kelondro.data.meta;
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -71,6 +73,37 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         }
         return (url == null) ? null : ASCII.String(url.hash(), 6, 6);
     }
+    
+    /**
+     * from a given list of hosts make a list of host hashes
+     * the list is separated by comma
+     * @param hostlist
+     * @return list of host hashes without separation
+     */
+    public static String hosthashes(final String hostlist) {
+        String[] hs = hostlist.split(",");
+        StringBuilder sb = new StringBuilder(hostlist.length());
+        for (String h: hs) {
+            if (h == null) continue;
+            h = h.trim();
+            if (h.length() == 0) continue;
+            h = hosthash(h);
+            if (h == null || h.length() != 6) continue;
+            sb.append(h);
+        }
+        return sb.toString();
+    }
+    
+    public static Set<String> hosthashess(String hosthashes) {
+        if (hosthashes == null || hosthashes.length() == 0) return null;
+        HashSet<String> h = new HashSet<String>();
+        assert hosthashes.length() % 6 == 0;
+        for (int i = 0; i < hosthashes.length(); i = i + 6) {
+            h.add(hosthashes.substring(i, i + 6));
+        }
+        return h;
+    }
+    
 
     /**
      * DigestURI from File

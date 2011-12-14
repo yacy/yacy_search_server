@@ -618,6 +618,7 @@ public class yacysearch {
                     constraint,
                     true,
                     sitehash,
+                    DigestURI.hosthashess(sb.getConfig("search.excludehosth", "")),
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,

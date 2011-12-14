@@ -762,6 +762,9 @@ search.navigation=hosts,authors,namespace,topics,filetype,protocol
              all search results are valid without verification
 search.verify = iffresh
 
+search.excludehosts=
+search.excludehosth=
+
 # in case that a link verification fails then the corresponding index reference can be
 # deleted to clean up the index. If this property is set then failed index verification in
 # the cases of nocache, iffresh and ifexist causes an index deletion

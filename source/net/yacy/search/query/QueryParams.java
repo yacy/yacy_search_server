@@ -29,8 +29,10 @@ package net.yacy.search.query;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -124,6 +126,7 @@ public final class QueryParams {
     private final Segment indexSegment;
     public final String host; // this is the client host that starts the query, not a site operator
     public final String sitehash; // this is a domain hash, 6 bytes long or null
+    public final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
     public final String authorhash;
     public final String tenant;
     public final Modifier modifier;
@@ -182,6 +185,7 @@ public final class QueryParams {
         this.snippetCacheStrategy = null;
         this.host = null;
         this.sitehash = null;
+        this.siteexcludes = null;
         this.authorhash = null;
         this.remotepeer = null;
         this.time = Long.valueOf(System.currentTimeMillis());
@@ -208,6 +212,7 @@ public final class QueryParams {
         final Searchdom domType, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
         final String site,
+        final Set<String> siteexcludes,
         final String authorhash,
         final int domainzone,
         final String host,
@@ -250,6 +255,7 @@ public final class QueryParams {
         this.constraint = constraint;
         this.allofconstraint = allofconstraint;
         this.sitehash = site; assert site == null || site.length() == 6;
+        this.siteexcludes = siteexcludes != null && siteexcludes.size() == 0 ? null: siteexcludes;
         this.authorhash = authorhash; assert authorhash == null || !authorhash.isEmpty();
         this.snippetCacheStrategy = snippetCacheStrategy;
         this.host = host;
@@ -490,6 +496,8 @@ public final class QueryParams {
         context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString()));
         context.append(asterisk);
         context.append(this.sitehash);
+        context.append(asterisk);
+        context.append(this.siteexcludes);
         context.append(asterisk);
         context.append(this.authorhash);
         context.append(asterisk);
