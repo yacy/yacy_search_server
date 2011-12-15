@@ -41,6 +41,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.UTF8;
@@ -50,18 +51,7 @@ import net.yacy.kelondro.logging.Log;
 
 public class Digest {
 
-    private final static int digestThreads = Runtime.getRuntime().availableProcessors() * 4;
-	public static BlockingQueue<MessageDigest> digestPool = new ArrayBlockingQueue<MessageDigest>(digestThreads);
-	static {
-		for (int i = 0; i < digestThreads; i++)
-			try {
-				final MessageDigest digest = MessageDigest.getInstance("MD5");
-				digest.reset();
-				digestPool.add(digest);
-			} catch (final NoSuchAlgorithmException e) {
-			    Log.logException(e);
-			}
-	}
+	public static BlockingQueue<MessageDigest> digestPool = new LinkedBlockingDeque<MessageDigest>();
 
     public static String encodeHex(final long in, final int length) {
         String s = Long.toHexString(in);
@@ -114,44 +104,25 @@ public class Digest {
 
     public static byte[] encodeMD5Raw(final String key) {
     	MessageDigest digest = null;
-    	boolean fromPool = true;
-    	if (digestPool.size() == 0) {
+    	digest = digestPool.poll();
+    	if (digest == null) {
     	    // if there are no digest objects left, create some on the fly
     	    // this is not the most effective way but if we wouldn't do that the encoder would block
     	    try {
                 digest = MessageDigest.getInstance("MD5");
                 digest.reset();
-                fromPool = false;
             } catch (final NoSuchAlgorithmException e) {
             }
     	}
-        if (digest == null) try {
-            digest = digestPool.take();
-        } catch (final InterruptedException e) {
-        	Log.logWarning("Digest", "using generic instead of pooled digest");
-        	try {
-				digest = MessageDigest.getInstance("MD5");
-			} catch (final NoSuchAlgorithmException e1) {
-			    Log.logException(e1);
-			}
-			digest.reset();
-			fromPool = false;
-		}
         byte[] keyBytes;
         keyBytes = UTF8.getBytes(key);
         digest.update(keyBytes);
         final byte[] result = digest.digest();
         digest.reset();
-        if (fromPool) {
-            returntopool: while (true) {
-                try {
-                    digestPool.put(digest);
-                    break returntopool;
-                } catch (final InterruptedException e) {
-                    // we MUST return that digest to the pool
-                    continue returntopool;
-                }
-            }
+        try {
+            digestPool.put(digest);
+            //System.out.println("Digest Pool size = " + digestPool.size());
+        } catch ( InterruptedException e ) {
         }
         return result;
     }
@@ -250,6 +221,7 @@ public class Digest {
             }
         }
 
+        @Override
         public MessageDigest call() {
             try {
                 filechunk c;
