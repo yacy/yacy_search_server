@@ -213,8 +213,10 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         int p = (this.host == null) ? -1 : this.host.lastIndexOf('.');
         String dom = (p > 0) ? dom = this.host.substring(0, p) : "";
         p = dom.lastIndexOf('.'); // locate subdomain
-        String subdom = "";
-        if (p > 0) {
+        final String subdom;
+        if (p <= 0) {
+            subdom = "";
+        } else {
             subdom = dom.substring(0, p);
             dom = dom.substring(p + 1);
         }

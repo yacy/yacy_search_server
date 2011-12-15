@@ -83,6 +83,7 @@ public class htmlParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("text/csv");
     }
 
+    @Override
     public Document[] parse(
             final MultiProtocolURI location,
             final String mimeType,
@@ -196,7 +197,7 @@ public class htmlParser extends AbstractParser implements Parser {
 
         // parsing the content
         final ContentScraper scraper = new ContentScraper(location);
-        final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, sourceStream.available());
+        final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, Math.max(4096, sourceStream.available()));
         try {
             FileUtils.copy(sourceStream, writer, c);
         } catch (final IOException e) {

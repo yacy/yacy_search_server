@@ -189,12 +189,15 @@ public class URIMetadataRow implements URIMetadata {
             final float lat,
             final float lon) {
         final CharBuffer s = new CharBuffer(360);
-        s.append(url.toNormalform(false, true)).append(10);
-        s.append(dc_title).append(10);
-        s.append(dc_creator.length() > 80 ? dc_creator.substring(0, 80) : dc_creator).append(10);
-        s.append(dc_subject.length() > 120 ? dc_subject.substring(0, 120) : dc_subject).append(10);
-        s.append(dc_publisher).append(10);
-        if (lon == 0.0f && lat == 0.0f) s.append(10); else s.append(Float.toString(lat)).append(',').append(Float.toString(lon)).append(10);
+        s.append(url.toNormalform(false, true)).appendLF();
+        s.append(dc_title).appendLF();
+        if (dc_creator.length() > 80) s.append(dc_creator, 0, 80); else s.append(dc_creator);
+        s.appendLF();
+        if (dc_subject.length() > 120) s.append(dc_subject, 0, 120); else s.append(dc_subject);
+        s.appendLF();
+        if (dc_publisher.length() > 80) s.append(dc_publisher, 0, 80); else s.append(dc_publisher);
+        s.appendLF();
+        if (lon == 0.0f && lat == 0.0f) s.appendLF(); else s.append(Float.toString(lat)).append(',').append(Float.toString(lon)).appendLF();
 		return UTF8.getBytes(s.toString());
     }
 

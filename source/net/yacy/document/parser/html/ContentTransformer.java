@@ -55,17 +55,18 @@ public class ContentTransformer extends AbstractTransformer implements Transform
         super(linkTags0, linkTags1);
     }
 
+    @Override
     public void init(final String initarg) {
-        if (bluelist == null) {
+        if (this.bluelist == null) {
             // here, the init arg is used to load a list of blue-listed words
-            bluelist = new ArrayList<String>();
+            this.bluelist = new ArrayList<String>();
             final File f = new File(initarg);
             if (f.canRead()) {
                 try {
                     final BufferedReader r = new BufferedReader(new FileReader(f));
                     String s;
                     while ((s = r.readLine()) != null) {
-                        if (s.length() > 0 && s.charAt(0) != '#') bluelist.add(s.toLowerCase());
+                        if (s.length() > 0 && s.charAt(0) != '#') this.bluelist.add(s.toLowerCase());
                     }
                     r.close();
                 } catch (final IOException e) {
@@ -75,8 +76,9 @@ public class ContentTransformer extends AbstractTransformer implements Transform
         }
     }
 
+    @Override
     public boolean isIdentityTransformer() {
-        return bluelist.isEmpty();
+        return this.bluelist.isEmpty();
     }
 
     private static char[] genBlueLetters(int length) {
@@ -84,7 +86,7 @@ public class ContentTransformer extends AbstractTransformer implements Transform
             length = length / 2;
             if (length > 10) length = 7;
             while (length-- > 0) {
-                bb.append((int)'X');
+                bb.append('X');
             }
             bb.append("</FONT> ");
             final char[] result = bb.getChars();
@@ -97,16 +99,17 @@ public class ContentTransformer extends AbstractTransformer implements Transform
     }
 
     private boolean bluelistHit(final char[] text) {
-        if (text == null || bluelist == null) return false;
+        if (text == null || this.bluelist == null) return false;
         final String lc = new String(text).toLowerCase();
-        for (int i = 0; i < bluelist.size(); i++) {
-            if (lc.indexOf(bluelist.get(i)) >= 0) return true;
+        for (int i = 0; i < this.bluelist.size(); i++) {
+            if (lc.indexOf(this.bluelist.get(i)) >= 0) return true;
         }
         return false;
     }
     
+    @Override
     public char[] transformText(final char[] text) {
-        if (bluelist != null) {
+        if (this.bluelist != null) {
             if (bluelistHit(text)) {
                 // System.out.println("FILTERHIT: " + text);
                 return genBlueLetters(text.length);

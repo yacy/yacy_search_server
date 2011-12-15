@@ -44,7 +44,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
-import net.yacy.kelondro.util.LookAheadIterator;
 
 
 public class MapDataMining extends MapHeap {
@@ -105,7 +104,7 @@ public class MapDataMining extends MapHeap {
         }
 
         // fill cluster and accumulator with values
-        if ((sortfields != null) || (longaccfields != null) || (floataccfields != null)) try {
+        if (sortfields != null || longaccfields != null || floataccfields != null) try {
             final CloneableIterator<byte[]> it = super.keys(true, false);
             byte[] mapnameb;
             String cell;
@@ -122,37 +121,49 @@ public class MapDataMining extends MapHeap {
                 }
                 if (map == null) break;
 
-                if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) {
-                    cell = map.get(sortfields[i]);
-                    if (cell != null) cluster[i].set(UTF8.String(mapnameb), ClusteredScoreMap.object2score(cell));
+                if (sortfields != null && cluster != null) {
+                    for (int i = 0; i < sortfields.length; i++) {
+                        cell = map.get(sortfields[i]);
+                        if (cell != null) cluster[i].set(UTF8.String(mapnameb), ClusteredScoreMap.object2score(cell));
+                    }
                 }
 
-                if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) {
-                    cell = map.get(longaccfields[i]);
-                    valuel = 0;
-                    if (cell != null) try {
-                        valuel = Long.parseLong(cell);
-                        longaccumulator[i] = Long.valueOf(longaccumulator[i].longValue() + valuel);
-                    } catch (final NumberFormatException e) {}
+                if (longaccfields != null && longaccumulator != null) {
+                    for (int i = 0; i < longaccfields.length; i++) {
+                        cell = map.get(longaccfields[i]);
+                        valuel = 0;
+                        if (cell != null) try {
+                            valuel = Long.parseLong(cell);
+                            longaccumulator[i] = Long.valueOf(longaccumulator[i].longValue() + valuel);
+                        } catch (final NumberFormatException e) {}
+                    }
                 }
 
-                if (floataccfields != null && floataccumulator != null) for (int i = 0; i < floataccfields.length; i++) {
-                    cell = map.get(floataccfields[i]);
-                    valued = 0f;
-                    if (cell != null) try {
-                        valued = Float.parseFloat(cell);
-                        floataccumulator[i] = new Float(floataccumulator[i].floatValue() + valued);
-                    } catch (final NumberFormatException e) {}
+                if (floataccfields != null && floataccumulator != null) {
+                    for (int i = 0; i < floataccfields.length; i++) {
+                        cell = map.get(floataccfields[i]);
+                        valued = 0f;
+                        if (cell != null) try {
+                            valued = Float.parseFloat(cell);
+                            floataccumulator[i] = new Float(floataccumulator[i].floatValue() + valued);
+                        } catch (final NumberFormatException e) {}
+                    }
                 }
             }
         } catch (final IOException e) {}
 
         // fill cluster
-        if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) this.sortClusterMap.put(sortfields[i], cluster[i]);
+        if (sortfields != null && cluster != null) {
+            for (int i = 0; i < sortfields.length; i++) this.sortClusterMap.put(sortfields[i], cluster[i]);
+        }
 
         // fill acc map
-        if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) this.accLong.put(longaccfields[i], longaccumulator[i]);
-        if (floataccfields != null && floataccumulator != null) for (int i = 0; i < floataccfields.length; i++) this.accFloat.put(floataccfields[i], floataccumulator[i]);
+        if (longaccfields != null && longaccumulator != null) {
+            for (int i = 0; i < longaccfields.length; i++) this.accLong.put(longaccfields[i], longaccumulator[i]);
+        }
+        if (floataccfields != null && floataccumulator != null) {
+            for (int i = 0; i < floataccfields.length; i++) this.accFloat.put(floataccfields[i], floataccumulator[i]);
+        }
     }
 
     @Override
@@ -213,7 +224,7 @@ public class MapDataMining extends MapHeap {
         float valued;
         Long longaccumulator;
         Float floataccumulator;
-        if (this.longaccfields != null)
+        if (this.longaccfields != null) {
             for (final String longaccfield : this.longaccfields) {
                 value = map.get(longaccfield);
                 if (value != null) {
@@ -228,7 +239,8 @@ public class MapDataMining extends MapHeap {
                     } catch (final NumberFormatException e) {}
                 }
             }
-        if (this.floataccfields != null)
+        }
+        if (this.floataccfields != null) {
             for (final String floataccfield : this.floataccfields) {
                 value = map.get(floataccfield);
                 if (value != null) {
@@ -243,6 +255,7 @@ public class MapDataMining extends MapHeap {
                     } catch (final NumberFormatException e) {}
                 }
             }
+        }
     }
 
     private void updateSortCluster(final String key, final Map<String, String> map) {
@@ -283,23 +296,6 @@ public class MapDataMining extends MapHeap {
         super.delete(key);
     }
 
-/* would be better but does not work (recursion)
-    @Override
-    public synchronized void delete(final byte[] key) throws IOException {
-        if (key == null) return;
-
-        // update elementCount
-        Map<String, String> map = super.remove(key);
-        if (map != null && (sortfields != null || longaccfields != null || floataccfields != null)) {
-            // update accumulators (subtract)
-            if ((longaccfields != null) || (floataccfields != null)) updateAcc(map, false);
-
-            // remove from sortCluster
-            if (sortfields != null) deleteSortCluster(UTF8.String(key));
-        }
-    }
-*/
-
     private void deleteSortCluster(final String key) {
         if (key == null) return;
         ScoreMap<String> cluster;
@@ -327,34 +323,34 @@ public class MapDataMining extends MapHeap {
             this.s = s;
         }
 
+        @Override
         public boolean hasNext() {
             return this.s.hasNext();
         }
 
+        @Override
         public byte[] next() {
             final String r = this.s.next();
             if (r == null) return null;
             return UTF8.getBytes(r);
         }
 
+        @Override
         public void remove() {
             this.s.remove();
         }
 
     }
 
-    public synchronized mapIterator maps(final boolean up, final String field) {
-        return new mapIterator(keys(up, field));
+    @Override
+    public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final String whereKey, final String isValue) throws IOException {
+        return super.entries(whereKey, isValue);
     }
-
-    public synchronized mapIterator maps(final boolean up, final boolean rotating) throws IOException {
-        return new mapIterator(keys(up, rotating));
+    
+    public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final String field) {
+        return new MapIterator(keys(up, field), null, null);
     }
-
-    public synchronized mapIterator maps(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
-        return new mapIterator(keys(up, rotating, firstKey, secondKey));
-    }
-
+    
     public synchronized long getLongAcc(final String field) {
         final Long accumulator = this.accLong.get(field);
         if (accumulator == null) return -1;
@@ -389,50 +385,33 @@ public class MapDataMining extends MapHeap {
         super.close();
     }
 
-    public class mapIterator extends LookAheadIterator<Map<String, String>> implements Iterator<Map<String, String>> {
-        // enumerates Map-Type elements
-        // the key is also included in every map that is returned; it's key is 'key'
+/*
+    public byte[] lookupBy(
+            final String whereKey,
+            final String isValue
+    ) {
 
-        private final Iterator<byte[]> keyIterator;
 
-        private mapIterator(final Iterator<byte[]> keyIterator) {
-            this.keyIterator = keyIterator;
-        }
-
-        public Map<String, String> next0() {
-            if (this.keyIterator == null) return null;
-            byte[] nextKey;
-            Map<String, String> map;
-            while (this.keyIterator.hasNext()) {
-                nextKey = this.keyIterator.next();
-                try {
-                    map = get(nextKey, false);
-                } catch (final IOException e) {
-                    Log.logWarning("MapDataMining", e.getMessage());
-                    continue;
-                } catch (final RowSpaceExceededException e) {
-                    Log.logException(e);
-                    continue;
-                }
-                if (map == null) continue; // circumvention of a modified exception
-                map.put("key", UTF8.String(nextKey));
-                return map;
-            }
-            return null;
-        }
-    } // class mapIterator
-
+    }
+*/
 
     public static void main(final String[] args) {
         try {
-            final MapDataMining db = new MapDataMining(new File("/tmp/MapDataMinig.test.db"), Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, new String[] {"X"}, new String[] {"X"}, new String[] {}, null);
-            final Map<String, String> m1 = new HashMap<String, String>(); m1.put("X", Long.toString(System.currentTimeMillis()));
+            File f = new File("/tmp/MapDataMinig.test.db");
+            f.delete();
+            final MapDataMining db = new MapDataMining(f, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, new String[] {"X"}, new String[] {"X"}, new String[] {}, null);
+            final Map<String, String> m1 = new HashMap<String, String>();
+            long t = System.currentTimeMillis();
+            m1.put("X", Long.toString(t));
             db.put("abcdefghijk1".getBytes(), m1);
-            final Map<String, String> m2 = new HashMap<String, String>(); m2.put("X", Long.toString(System.currentTimeMillis() - 1000));
+            final Map<String, String> m2 = new HashMap<String, String>();
+            m2.put("X", Long.toString(t - 1000));
             db.put("abcdefghijk2".getBytes(), m2);
-            final Map<String, String> m3 = new HashMap<String, String>(); m3.put("X", Long.toString(System.currentTimeMillis() + 2000));
+            final Map<String, String> m3 = new HashMap<String, String>();
+            m3.put("X", Long.toString(t + 2000));
             db.put("abcdefghijk3".getBytes(), m3);
 
+            // iterate the keys, sorted by field X in ascending order (must be: abcdefghijk2 - abcdefghijk1 - abcdefghijk3)
             final Iterator<byte[]> i1 = db.keys(true, "X");
             byte[] k;
             while (i1.hasNext()) {
@@ -440,11 +419,12 @@ public class MapDataMining extends MapHeap {
                 System.out.println(new String(k));
             }
 
-            final Iterator<Map<String, String>> i2 = db.maps(false, "X");
-            Map<String, String> e;
+            // iterate the maps, sorted by field X in descending order (must be: abcdefghijk3 - abcdefghijk1 - abcdefghijk2)
+            final Iterator<Map.Entry<byte[], Map<String, String>>> i2 = db.entries(false, "X");
+            Map.Entry<byte[], Map<String, String>> e;
             while (i2.hasNext()) {
                 e = i2.next();
-                System.out.println(e);
+                System.out.println(UTF8.String(e.getKey()) + ":" + e.getValue());
             }
 
             System.exit(0);

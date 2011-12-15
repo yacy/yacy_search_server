@@ -47,6 +47,7 @@ import java.util.zip.ZipOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -881,15 +882,15 @@ public final class yacy {
                 final File dbFile = new File(yacyDBPath,dbFileName);
                 final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, SeedDB.sortFields, SeedDB.longaccFields, SeedDB.doubleaccFields, null);
 
-                MapDataMining.mapIterator it;
-                it = db.maps(true, false);
+                Iterator<Map.Entry<byte[], Map<String, String>>> it;
+                it = db.entries(true, false);
                 while (it.hasNext()) {
-                    final Map<String, String> dna = it.next();
-                    String peerHash = dna.get("key");
+                    final Map.Entry<byte[], Map<String, String>> dna = it.next();
+                    String peerHash = UTF8.String(dna.getKey());
                     if (peerHash.length() < Word.commonHashLength) {
-                        final String peerName = dna.get("Name");
-                        final String peerIP = dna.get("IP");
-                        final String peerPort = dna.get("Port");
+                        final String peerName = dna.getValue().get("Name");
+                        final String peerIP = dna.getValue().get("IP");
+                        final String peerPort = dna.getValue().get("Port");
 
                         while (peerHash.length() < Word.commonHashLength) { peerHash = peerHash + "_"; }
                         System.err.println("Invalid Peer-Hash found in '" + dbFileName + "': " + peerName + ":" +  peerHash + ", http://" + peerIP + ":" + peerPort);
