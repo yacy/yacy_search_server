@@ -1,26 +1,26 @@
-// BEncodedHeapShard.java
-// (C) 2011 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 16.11.2011 on http://yacy.net
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// LICENSE
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  BEncodedHeapShard
+ *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ *  First released 16.12.2011 at http://yacy.net
+ *
+ *  $LastChangedDate: 2011-04-14 00:04:23 +0200 (Do, 14 Apr 2011) $
+ *  $LastChangedRevision: 7653 $
+ *  $LastChangedBy: orbiter $
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.kelondro.blob;
 
@@ -33,11 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.storage.AbstractMapStore;
+import net.yacy.cora.storage.MapStore;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -118,14 +120,15 @@ public class BEncodedHeapShard extends AbstractMapStore implements MapStore {
                    filename.endsWith(".heap");
         }
         
+        @Override
         public String getShardName(String filename) {
             return filename.substring(0, this.template.length);
         }
     }
     
     private ConcurrentHashMap<String, MapStore> shard;
-    private File baseDir;
-    private Method shardMethod;
+    private final File baseDir;
+    private final Method shardMethod;
     
     public BEncodedHeapShard(File baseDir, Method shardMethod) {
         this.shard = new ConcurrentHashMap<String, MapStore>();

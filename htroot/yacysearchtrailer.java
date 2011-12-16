@@ -27,7 +27,7 @@
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.ranking.ScoreMap;
+import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;

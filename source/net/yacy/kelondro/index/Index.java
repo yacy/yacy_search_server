@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.cora.order.CloneableIterator;
 
 
 public interface Index extends Iterable<Row.Entry> {

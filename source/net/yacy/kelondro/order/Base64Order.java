@@ -30,8 +30,9 @@ package net.yacy.kelondro.order;
 import java.util.Comparator;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.ranking.AbstractOrder;
-import net.yacy.cora.ranking.Order;
+import net.yacy.cora.order.AbstractOrder;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.Order;
 
 
 public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {

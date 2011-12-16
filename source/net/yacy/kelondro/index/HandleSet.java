@@ -34,9 +34,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.SetTools;
 
 

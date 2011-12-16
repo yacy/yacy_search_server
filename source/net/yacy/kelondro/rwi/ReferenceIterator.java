@@ -30,11 +30,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import net.yacy.cora.order.CloneableIterator;
 import net.yacy.kelondro.blob.HeapReader;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.LookAheadIterator;
 
 /**

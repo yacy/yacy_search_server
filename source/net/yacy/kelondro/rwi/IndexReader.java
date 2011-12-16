@@ -26,8 +26,8 @@
 
 package net.yacy.kelondro.rwi;
 
+import net.yacy.cora.order.CloneableIterator;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.order.CloneableIterator;
 
 
 public interface IndexReader<ReferenceType extends Reference> {

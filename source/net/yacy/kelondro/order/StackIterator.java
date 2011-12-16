@@ -24,6 +24,8 @@ package net.yacy.kelondro.order;
 
 import java.util.ConcurrentModificationException;
 
+import net.yacy.cora.order.CloneableIterator;
+
 
 public class StackIterator<E> implements CloneableIterator<E> {
     

@@ -30,7 +30,7 @@ package net.yacy.kelondro.rwi;
 import java.io.IOException;
 import java.util.TreeSet;
 
-import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.cora.order.CloneableIterator;
 
 
 /*

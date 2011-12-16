@@ -29,7 +29,9 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
-import net.yacy.cora.ranking.Rating;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.sorting.Rating;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.BLOB;
 import net.yacy.kelondro.data.word.Word;
@@ -38,8 +40,6 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.CloneableIterator;
 
 
 public final class ReferenceContainerArray<ReferenceType extends Reference> {

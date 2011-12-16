@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import net.yacy.cora.ranking.Order;
+import net.yacy.cora.order.Order;
 
 
 public abstract class AbstractBufferedIndex<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements BufferedIndex<ReferenceType> {

@@ -27,7 +27,7 @@ import java.util.Iterator;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.ranking.Rating;
+import net.yacy.cora.sorting.Rating;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
