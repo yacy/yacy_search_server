@@ -50,7 +50,7 @@ public interface MapStore extends Map<byte[], Map<String, byte[]>>, Iterable<Map
     public CloneableIterator<byte[]> keyIterator();
     
     /**
-     * most of the MapMap implementations are file-based, so we should consider a close method
+     * most of the MapStore implementations are file-based, so we should consider a close method
      */
     public void close();
 }
