@@ -87,29 +87,28 @@ public class yacydoc {
         final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes());
         if (entry == null) return prop;
 
-        final URIMetadataRow.Components metadata = entry.metadata();
-        if (metadata.url() == null) {
+        if (entry.url() == null) {
             return prop;
         }
         final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
 
-        prop.putXML("dc_title", metadata.dc_title());
-        prop.putXML("dc_creator", metadata.dc_creator());
+        prop.putXML("dc_title", entry.dc_title());
+        prop.putXML("dc_creator", entry.dc_creator());
         prop.putXML("dc_description", ""); // this is the fulltext part in the surrogate
-        prop.putXML("dc_subject", metadata.dc_subject());
-        prop.putXML("dc_publisher", metadata.dc_publisher());
+        prop.putXML("dc_subject", entry.dc_subject());
+        prop.putXML("dc_publisher", entry.dc_publisher());
         prop.putXML("dc_contributor", "");
         prop.putXML("dc_date", ISO8601Formatter.FORMATTER.format(entry.moddate()));
         prop.putXML("dc_type", String.valueOf(entry.doctype()));
-        prop.putXML("dc_identifier", metadata.url().toNormalform(false, true));
+        prop.putXML("dc_identifier", entry.url().toNormalform(false, true));
         prop.putXML("dc_language", ASCII.String(entry.language()));
-        prop.put("geo_lat", metadata.lat());
-        prop.put("geo_long", metadata.lon());
+        prop.put("geo_lat", entry.lat());
+        prop.put("geo_long", entry.lon());
 
-        prop.put("yacy_urlhash", metadata.url().hash());
+        prop.put("yacy_urlhash", entry.url().hash());
         prop.putXML("yacy_loaddate", entry.loaddate().toString());
         prop.putXML("yacy_referrer_hash", (le == null) ? "" : ASCII.String(le.hash()));
-        prop.putXML("yacy_referrer_url", (le == null) ? "" : le.metadata().url().toNormalform(false, true));
+        prop.putXML("yacy_referrer_url", (le == null) ? "" : le.url().toNormalform(false, true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words",entry.wordCount());
 

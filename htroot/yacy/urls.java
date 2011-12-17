@@ -112,7 +112,6 @@ public class urls {
             final int count = urlhashes.length() / 12;
         	int c = 0;
         	URIMetadataRow entry;
-        	URIMetadataRow.Components metadata;
             DigestURI referrer;
             for (int i = 0; i < count; i++) {
                 entry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));
@@ -120,12 +119,11 @@ public class urls {
                 // find referrer, if there is one
                 referrer = sb.getURL(Segments.Process.PUBLIC, entry.referrerHash());
                 // create RSS entry
-                metadata = entry.metadata();
-                prop.put("item_" + c + "_title", metadata.dc_title());
-                prop.putXML("item_" + c + "_link", metadata.url().toNormalform(true, false));
+                prop.put("item_" + c + "_title", entry.dc_title());
+                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true, false));
                 prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
-                prop.putXML("item_" + c + "_description", metadata.dc_title());
-                prop.put("item_" + c + "_author", metadata.dc_creator());
+                prop.putXML("item_" + c + "_description", entry.dc_title());
+                prop.put("item_" + c + "_author", entry.dc_creator());
                 prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.moddate()));
                 prop.put("item_" + c + "_guid", ASCII.String(entry.hash()));
                 c++;

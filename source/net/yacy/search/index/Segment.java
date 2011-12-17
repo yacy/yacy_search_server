@@ -422,12 +422,11 @@ public class Segment {
         // determine the url string
         final URIMetadataRow entry = urlMetadata().load(urlhash);
         if (entry == null) return 0;
-        final URIMetadataRow.Components metadata = entry.metadata();
-        if (metadata == null || metadata.url() == null) return 0;
+        if (entry.url() == null) return 0;
 
         try {
             // parse the resource
-            final Document document = Document.mergeDocuments(metadata.url(), null, loader.loadDocuments(loader.request(metadata.url(), true, false), cacheStrategy, 10000, Integer.MAX_VALUE));
+            final Document document = Document.mergeDocuments(entry.url(), null, loader.loadDocuments(loader.request(entry.url(), true, false), cacheStrategy, 10000, Integer.MAX_VALUE));
             if (document == null) {
                 // delete just the url entry
                 urlMetadata().remove(urlhash);
@@ -496,7 +495,7 @@ public class Segment {
                         if (ue == null) {
                             urlHashs.put(entry.urlhash());
                         } else {
-                            url = ue.metadata().url();
+                            url = ue.url();
                             if (url == null || Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
                                 urlHashs.put(entry.urlhash());
                             }

@@ -197,14 +197,13 @@ public class Bookmarks {
                         // try to get the bookmark from the LURL database
                         final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(ASCII.getBytes(urlHash));
                         if (urlentry != null) try {
-                            final URIMetadataRow.Components metadata = urlentry.metadata();
-                            final Document document = Document.mergeDocuments(metadata.url(), null, sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE));
+                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE));
                             prop.put("mode_edit", "0"); // create mode
-                            prop.put("mode_url", metadata.url().toNormalform(false, true));
-                            prop.putHTML("mode_title", metadata.dc_title());
-                            prop.putHTML("mode_description", (document == null) ? metadata.dc_title(): document.dc_title());
-                            prop.putHTML("mode_author", metadata.dc_creator());
-                            prop.putHTML("mode_tags", (document == null) ? metadata.dc_subject() : document.dc_subject(','));
+                            prop.put("mode_url", urlentry.url().toNormalform(false, true));
+                            prop.putHTML("mode_title", urlentry.dc_title());
+                            prop.putHTML("mode_description", (document == null) ? urlentry.dc_title(): document.dc_title());
+                            prop.putHTML("mode_author", urlentry.dc_creator());
+                            prop.putHTML("mode_tags", (document == null) ? urlentry.dc_subject() : document.dc_subject(','));
                             prop.putHTML("mode_path","");
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed

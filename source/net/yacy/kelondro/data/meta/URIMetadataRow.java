@@ -378,7 +378,39 @@ public class URIMetadataRow implements URIMetadata {
     	return this.ranking;
     }
 
-    public Components metadata() {
+    public boolean matches(final Pattern matcher) {
+        return this.metadata().matches(matcher);
+    }
+    
+    public DigestURI url() {
+        return this.metadata().url();
+    }
+    
+    public String  dc_title()  {
+        return this.metadata().dc_title();
+    }
+    
+    public String  dc_creator() {
+        return this.metadata().dc_creator();
+    }
+    
+    public String  dc_publisher() {
+        return this.metadata().dc_publisher();
+    }
+    
+    public String  dc_subject()   {
+        return this.metadata().dc_subject();
+    }
+
+    public float lat() {
+        return this.metadata().lat();
+    }
+
+    public float lon() {
+        return this.metadata().lon();
+    }
+    
+    private Components metadata() {
         // avoid double computation of metadata elements
         if (this.comp != null) return this.comp;
         // parse elements from comp field;
@@ -545,7 +577,7 @@ public class URIMetadataRow implements URIMetadata {
         //return "{" + core + "}";
     }
 
-    public class Components {
+    private class Components {
         private DigestURI url;
         private String urlRaw;
         private byte[] urlHash;

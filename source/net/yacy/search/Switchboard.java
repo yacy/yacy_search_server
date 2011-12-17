@@ -108,7 +108,6 @@ import net.yacy.gui.Tray;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -1214,9 +1213,7 @@ public final class Switchboard extends serverSwitch {
         if (urlhash.length == 0) return null;
         final URIMetadataRow le = this.indexSegments.urlMetadata(process).load(urlhash);
         if (le != null) {
-            final Components metadata = le.metadata();
-            if (metadata == null) return null;
-            return metadata.url();
+            return le.url();
         }
         return this.crawlQueues.getURL(urlhash);
     }
@@ -2290,11 +2287,11 @@ public final class Switchboard extends serverSwitch {
             final long t = System.currentTimeMillis();
             final Map<String, String> response = Protocol.crawlReceipt(Switchboard.this.peers.mySeed(), this.initiatorPeer, "crawl", "fill", "indexed", this.reference, "");
             if (response == null) {
-                Switchboard.this.log.logInfo("Sending crawl receipt for '" + this.reference.metadata().url().toNormalform(false, true) + "' to " + this.initiatorPeer.getName() + " FAILED, send time = " + (System.currentTimeMillis() - t));
+                Switchboard.this.log.logInfo("Sending crawl receipt for '" + this.reference.url().toNormalform(false, true) + "' to " + this.initiatorPeer.getName() + " FAILED, send time = " + (System.currentTimeMillis() - t));
                 return;
             }
             final String delay = response.get("delay");
-            Switchboard.this.log.logInfo("Sending crawl receipt for '" + this.reference.metadata().url().toNormalform(false, true) + "' to " + this.initiatorPeer.getName() + " success, delay = " + delay + ", send time = " + (System.currentTimeMillis() - t));
+            Switchboard.this.log.logInfo("Sending crawl receipt for '" + this.reference.url().toNormalform(false, true) + "' to " + this.initiatorPeer.getName() + " success, delay = " + delay + ", send time = " + (System.currentTimeMillis() - t));
         }
     }
 

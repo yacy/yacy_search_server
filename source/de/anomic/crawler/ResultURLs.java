@@ -115,7 +115,7 @@ public final class ResultURLs {
         try {
             final ScoreMap<String> domains = getDomains(stackType);
             if (domains != null) {
-                domains.inc(e.metadata().url().getHost());
+                domains.inc(e.url().getHost());
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/3: " + ex.toString());

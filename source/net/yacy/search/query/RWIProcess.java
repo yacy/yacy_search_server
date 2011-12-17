@@ -563,18 +563,9 @@ public final class RWIProcess extends Thread
                 continue;
             }
 
-            // prepare values for constraint check
-            final URIMetadataRow.Components metadata = page.metadata();
-
-            // check errors
-            if ( metadata == null ) {
-                this.sortout++;
-                continue; // rare case where the url is corrupted
-            }
-
             if ( !this.query.urlMask_isCatchall ) {
                 // check url mask
-                if ( !metadata.matches(this.query.urlMask) ) {
+                if ( !page.matches(this.query.urlMask) ) {
                     this.sortout++;
                     continue;
                 }
@@ -588,14 +579,14 @@ public final class RWIProcess extends Thread
             }
 
             // check for more errors
-            if ( metadata.url() == null ) {
+            if ( page.url() == null ) {
                 this.sortout++;
                 continue; // rare case where the url is corrupted
             }
 
-            final String pageurl = metadata.url().toNormalform(true, true);
-            final String pageauthor = metadata.dc_creator();
-            final String pagetitle = metadata.dc_title().toLowerCase();
+            final String pageurl = page.url().toNormalform(true, true);
+            final String pageauthor = page.dc_creator();
+            final String pagetitle = page.dc_title().toLowerCase();
 
             // check exclusion
             if ( (QueryParams.anymatch(pagetitle, this.query.excludeHashes))
@@ -620,7 +611,7 @@ public final class RWIProcess extends Thread
             // check location constraint
             if ( (this.query.constraint != null)
                 && (this.query.constraint.get(Condenser.flag_cat_haslocation))
-                && (metadata.lat() == 0.0f || metadata.lon() == 0.0f) ) {
+                && (page.lat() == 0.0f || page.lon() == 0.0f) ) {
                 this.sortout++;
                 continue;
             }
@@ -654,7 +645,7 @@ public final class RWIProcess extends Thread
             }
 
             // namespace navigation
-            String pagepath = metadata.url().getPath();
+            String pagepath = page.url().getPath();
             if ( (p = pagepath.indexOf(':')) >= 0 ) {
                 pagepath = pagepath.substring(0, p);
                 p = pagepath.lastIndexOf('/');
@@ -665,17 +656,17 @@ public final class RWIProcess extends Thread
             }
 
             // protocol navigation
-            final String protocol = metadata.url().getProtocol();
+            final String protocol = page.url().getProtocol();
             this.protocolNavigator.inc(protocol);
 
             // file type navigation
-            final String fileext = metadata.url().getFileExtension();
+            final String fileext = page.url().getFileExtension();
             if ( fileext.length() > 0 ) {
                 this.filetypeNavigator.inc(fileext);
             }
 
             // check Scanner
-            if ( !Scanner.acceptURL(metadata.url()) ) {
+            if ( !Scanner.acceptURL(page.url()) ) {
                 this.sortout++;
                 continue;
             }
@@ -785,7 +776,7 @@ public final class RWIProcess extends Thread
                 }
                 urlhash = this.hostResolver.get(hosthash);
                 row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(urlhash);
-                hostname = row == null ? null : row.metadata().url().getHost();
+                hostname = row == null ? null : row.url().getHost();
                 if ( hostname != null ) {
                     result.set(hostname, this.hostNavigator.get(hosthash));
                 }

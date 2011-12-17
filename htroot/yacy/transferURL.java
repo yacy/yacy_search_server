@@ -34,10 +34,10 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.Seed;
 import net.yacy.peers.EventChannel;
-import net.yacy.peers.Protocol;
 import net.yacy.peers.Network;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
@@ -108,8 +108,7 @@ public final class transferURL {
                 }
 
                 // check if entry is well-formed
-                final URIMetadataRow.Components metadata = lEntry.metadata();
-                if (metadata == null || metadata.url() == null) {
+                if (lEntry.url() == null) {
                     Network.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
                     continue;
@@ -123,28 +122,28 @@ public final class transferURL {
                 }
 
                 // check if the entry is blacklisted
-                if ((blockBlacklist) && (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url()))) {
-                    if (Network.log.isFine()) Network.log.logFine("transferURL: blocked blacklisted URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                if ((blockBlacklist) && (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, lEntry.url()))) {
+                    if (Network.log.isFine()) Network.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;
                 }
 
                 // check if the entry is in our network domain
-                final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(metadata.url());
+                final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(lEntry.url());
                 if (urlRejectReason != null) {
-                    if (Network.log.isFine()) Network.log.logFine("transferURL: blocked URL '" + metadata.url() + "' (" + urlRejectReason + ") from peer " + otherPeerName);
+                    if (Network.log.isFine()) Network.log.logFine("transferURL: blocked URL '" + lEntry.url() + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;
                 }
 
                 // write entry to database
-                if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.metadata().url().toNormalform(true, false));
+                if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true, false));
                 try {
                     sb.indexSegments.urlMetadata(Segments.Process.DHTIN).store(lEntry);
                     ResultURLs.stack(lEntry, iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);
-                    if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                    if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;
                 } catch (final IOException e) {
                     Log.logException(e);

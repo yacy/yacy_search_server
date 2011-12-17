@@ -41,7 +41,6 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.RWIProcess;
@@ -230,13 +229,8 @@ public class DocumentIndex extends Segment
         // search is running; retrieve results
         URIMetadataRow row;
         final ArrayList<DigestURI> files = new ArrayList<DigestURI>();
-        Components metadata;
         while ( (row = rankedCache.takeURL(false, 1000)) != null ) {
-            metadata = row.metadata();
-            if ( metadata == null ) {
-                continue;
-            }
-            files.add(metadata.url());
+            files.add(row.url());
             count--;
             if ( count == 0 ) {
                 break;
