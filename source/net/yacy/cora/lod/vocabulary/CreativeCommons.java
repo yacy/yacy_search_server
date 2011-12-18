@@ -41,12 +41,20 @@ public enum CreativeCommons implements Vocabulary {
     
     // License Properties
     permits(new Literal[]{
-            PermitLiteral.Reproduction,
-            PermitLiteral.Distribution,
-            PermitLiteral.DerivativeWorks,
-            PermitLiteral.Sharing}),
-    requires,
-    prohibits,
+        PermitLiteral.Reproduction,
+        PermitLiteral.Distribution,
+        PermitLiteral.DerivativeWorks,
+        PermitLiteral.Sharing}),
+    requires(new Literal[]{
+        RequirementLiteral.Notice,
+        RequirementLiteral.Attribution,
+        RequirementLiteral.ShareAlike,
+        RequirementLiteral.SourceCode,
+        RequirementLiteral.Copyleft,
+        RequirementLiteral.LesserCopyleft}),
+    prohibits(new Literal[]{
+        ProhibitionLiteral.CommercialUse,
+        ProhibitionLiteral.HighIncomeNationUse}),
     jurisdiction,
     legalcode,
     deprecatedOn,
@@ -58,13 +66,12 @@ public enum CreativeCommons implements Vocabulary {
     attributionURL,
     useGuidelines;
 
-
     enum PermitLiteral implements Literal {
         
-        Reproduction("Reproduction", null, ".*"),
-        Distribution("Distribution", null, ".*"),
-        DerivativeWorks("Derivative Works",null, ".*"),
-        Sharing("Sharing", null, ".*");
+        Reproduction("Reproduction", "http://creativecommons.org/ns#Permission", ".*"),
+        Distribution("Distribution", "http://creativecommons.org/ns#Permission", ".*"),
+        DerivativeWorks("Derivative Works", "http://creativecommons.org/ns#Permission", ".*"),
+        Sharing("Sharing", "http://creativecommons.org/ns#Permission", ".*");
         
         String terminal;
         MultiProtocolURI subject;
@@ -84,22 +91,84 @@ public enum CreativeCommons implements Vocabulary {
         }
         
         @Override
-        public String getTerminal() {
-            return this.terminal;
-        }
+        public String getTerminal() { return this.terminal; }
 
         @Override
-        public MultiProtocolURI getSubject() {
-            return this.subject;
-        }
+        public MultiProtocolURI getSubject() { return this.subject; }
 
         @Override
-        public Pattern getDiscoveryPattern() {
-            return this.discoveryPattern;
-        }
+        public Pattern getDiscoveryPattern() { return this.discoveryPattern; }
     }
     
-    public final static String IDENTIFIER = "http://dublincore.org/documents/2010/10/11/dces/";
+    enum RequirementLiteral implements Literal {
+        
+        Notice("Notice", "http://creativecommons.org/ns#Requirement", ".*"),
+        Attribution("Attribution", "http://creativecommons.org/ns#Requirement", ".*"),
+        ShareAlike("Share Alike", "http://creativecommons.org/ns#Requirement", ".*"),
+        SourceCode("Source Code", "http://creativecommons.org/ns#Requirement", ".*"),
+        Copyleft("Copyleft", "http://creativecommons.org/ns#Requirement", ".*"),
+        LesserCopyleft("Lesser Copyleft", "http://creativecommons.org/ns#Requirement", ".*");
+        
+        String terminal;
+        MultiProtocolURI subject;
+        Pattern discoveryPattern;
+        
+        private RequirementLiteral(
+                String terminal,
+                String subject,
+                String discoveryPattern) {
+            this.terminal = terminal;
+            try {
+                this.subject = subject == null ? null : new MultiProtocolURI(subject);
+            } catch (MalformedURLException e) {
+                this.subject = null;
+            }
+            this.discoveryPattern = Pattern.compile(discoveryPattern == null ? ".*" : discoveryPattern);
+        }
+        
+        @Override
+        public String getTerminal() { return this.terminal; }
+
+        @Override
+        public MultiProtocolURI getSubject() { return this.subject; }
+
+        @Override
+        public Pattern getDiscoveryPattern() { return this.discoveryPattern; }
+    }
+
+    enum ProhibitionLiteral implements Literal {
+        
+        CommercialUse("Commercial Use", "http://creativecommons.org/ns#Prohibition", ".*"),
+        HighIncomeNationUse("High Income Nation Use", "http://creativecommons.org/ns#Prohibition", ".*");
+        
+        String terminal;
+        MultiProtocolURI subject;
+        Pattern discoveryPattern;
+        
+        private ProhibitionLiteral(
+                String terminal,
+                String subject,
+                String discoveryPattern) {
+            this.terminal = terminal;
+            try {
+                this.subject = subject == null ? null : new MultiProtocolURI(subject);
+            } catch (MalformedURLException e) {
+                this.subject = null;
+            }
+            this.discoveryPattern = Pattern.compile(discoveryPattern == null ? ".*" : discoveryPattern);
+        }
+        
+        @Override
+        public String getTerminal() { return this.terminal; }
+
+        @Override
+        public MultiProtocolURI getSubject() { return this.subject; }
+
+        @Override
+        public Pattern getDiscoveryPattern() { return this.discoveryPattern; }
+    }
+    
+    public final static String IDENTIFIER = "http://creativecommons.org/ns#";
     public final static String PREFIX = "cc";
     
     private final String predicate;

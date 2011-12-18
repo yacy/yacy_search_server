@@ -36,7 +36,6 @@ import net.yacy.cora.lod.Vocabulary;
 public enum YaCyMetadata implements Vocabulary {
 
     hash,     // the url's hash
-    comp,     // components: the url, description, author and tags. As 5th element, an ETag is possible
     mod,      // last-modified from the httpd
     load,     // time when the url was loaded
     fresh,    // time until this url is fresh
@@ -56,7 +55,6 @@ public enum YaCyMetadata implements Vocabulary {
     
     /*
         "String hash-12, " +            // the url's hash
-        "String comp-360, " +           // components: the url, description, author and tags. As 5th element, an ETag is possible
         "Cardinal mod-4 {b256}, " +     // last-modified from the httpd
         "Cardinal load-4 {b256}, " +    // time when the url was loaded
         "Cardinal fresh-4 {b256}, " +   // time until this url is fresh
