@@ -29,6 +29,7 @@ import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.lod.vocabulary.Rdf;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.MapStore;
@@ -52,7 +53,7 @@ public class TripleStore {
     public Node get(byte[] id) {
         Map<String, byte[]> n = this.store.get(id);
         if (n == null) return null;
-        return new Node(n);
+        return new Node(Rdf.Description, n);
     }
 
     public boolean isEmpty() {
@@ -62,7 +63,7 @@ public class TripleStore {
     public Node put(byte[] id, Node node) {
         Map<String, byte[]> n = this.store.put(id, node);
         if (n == null) return null;
-        return new Node(n);
+        return new Node(Rdf.Description, n);
     }
 
     public void putAll(TripleStore entries) {
@@ -77,7 +78,7 @@ public class TripleStore {
     public Node remove(byte[] id) {
         Map<String, byte[]> n = this.store.remove(id);
         if (n == null) return null;
-        return new Node(n);
+        return new Node(Rdf.Description, n);
     }
 
     public int size() {

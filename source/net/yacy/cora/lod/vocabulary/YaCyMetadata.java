@@ -25,6 +25,11 @@
 
 package net.yacy.cora.lod.vocabulary;
 
+import java.util.Set;
+
+import net.yacy.cora.lod.Literal;
+import net.yacy.cora.lod.Vocabulary;
+
 /**
  * this is the vocabulary of the 'classic' YaCy metadata database
  */
@@ -85,6 +90,11 @@ public enum YaCyMetadata implements Vocabulary {
     @Override
     public String getPrefix() {
         return PREFIX;
+    }
+    
+    @Override
+    public Set<Literal> getLiterals() {
+        return null;
     }
 
     @Override

@@ -28,20 +28,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.lod.vocabulary.Vocabulary;
+import net.yacy.cora.lod.vocabulary.Rdf;
 
+/**
+ * class for a RDF node element. For a short primer see
+ * http://www.w3.org/TR/REC-rdf-syntax/
+ */
 public class Node extends HashMap<String, byte[]> implements Map<String, byte[]> {
 
     private static final long serialVersionUID = -6715118942251224832L;
     
     public static final String SUBJECT = "rdf:about";
 
-    public Node() {
+    private final Rdf type;
+    
+    public Node(Rdf type) {
         super();
+        this.type = type;
     }
     
-    public Node(byte[] subject) {
-        super();
+    public Node(Rdf type, byte[] subject) {
+        this(type);
         this.put(SUBJECT, subject);
     }
     
@@ -51,9 +58,13 @@ public class Node extends HashMap<String, byte[]> implements Map<String, byte[]>
      * for a blank node the SUBJECT can be omitted
      * @param set
      */
-    public Node(Map<String, byte[]> set) {
-        super();
+    public Node(Rdf type, Map<String, byte[]> set) {
+        this(type);
         this.putAll(set);
+    }
+    
+    public Rdf getType() {
+        return this.type;
     }
     
     public boolean isBlank() {
@@ -82,7 +93,8 @@ public class Node extends HashMap<String, byte[]> implements Map<String, byte[]>
 
     public byte[] toObject() {
         StringBuilder sb = new StringBuilder(this.size() * 50);
-        sb.append("<rdf:Description");
+        sb.append("<");
+        sb.append(this.type.getPredicate());
         byte[] subject = this.get(SUBJECT);
         if (subject != null) sb.append(" rdf:about=\"").append(UTF8.String(subject)).append('\"');
         sb.append(">\n");
@@ -92,7 +104,9 @@ public class Node extends HashMap<String, byte[]> implements Map<String, byte[]>
             sb.append(UTF8.String(entry.getValue()));
             sb.append("</").append(entry.getKey()).append(">\n");
         }
-        sb.append("</rdf:Description>\n");
+        sb.append("</");
+        sb.append(this.type.getPredicate());
+        sb.append(">\n");
         return UTF8.getBytes(sb);
     }
     

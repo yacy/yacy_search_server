@@ -25,6 +25,11 @@
 
 package net.yacy.cora.lod.vocabulary;
 
+import java.util.Set;
+
+import net.yacy.cora.lod.Literal;
+import net.yacy.cora.lod.Vocabulary;
+
 public enum HttpHeader implements Vocabulary {
 
     //The following properties may appear in nodes of type Request:
@@ -98,6 +103,11 @@ public enum HttpHeader implements Vocabulary {
     @Override
     public String getPrefix() {
         return PREFIX;
+    }
+    
+    @Override
+    public Set<Literal> getLiterals() {
+        return null;
     }
 
     @Override
