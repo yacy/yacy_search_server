@@ -1,7 +1,7 @@
 /**
- *  Geo
+ *  Foaf
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 16.12.2011 at http://yacy.net
+ *  First released 17.12.2011 at http://yacy.net
  *
  *  $LastChangedDate: 2011-04-14 00:04:23 +0200 (Do, 14 Apr 2011) $
  *  $LastChangedRevision: 7653 $
@@ -29,28 +29,23 @@ import java.util.Set;
 import net.yacy.cora.lod.Literal;
 import net.yacy.cora.lod.Vocabulary;
 
-public enum Geo implements Vocabulary {
-
-    Long,
-    Lat;
-    
-    public final static String IDENTIFIER = "http://www.w3.org/2003/01/geo/wgs84_pos#";
-    public final static String PREFIX = "geo";
-    
-    private final String predicate;
-    
-    private Geo() {
-        this.predicate = PREFIX + ":" +  this.name().toLowerCase();
-    }
+/**
+ * The friend of a friend vocabulary. see:
+ * http://xmlns.com/foaf/spec/
+ */
+public enum Foaf implements Vocabulary {
+    ;
 
     @Override
     public String getIdentifier() {
-        return IDENTIFIER;
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
     public String getPrefix() {
-        return PREFIX;
+        // TODO Auto-generated method stub
+        return null;
     }
     
     @Override
@@ -60,6 +55,8 @@ public enum Geo implements Vocabulary {
 
     @Override
     public String getPredicate() {
-        return this.predicate;
+        // TODO Auto-generated method stub
+        return null;
     }
+
 }

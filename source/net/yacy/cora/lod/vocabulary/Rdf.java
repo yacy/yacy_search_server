@@ -1,7 +1,7 @@
 /**
- *  Vocabulary
+ *  Rdf
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 16.12.2011 at http://yacy.net
+ *  First released 17.12.2011 at http://yacy.net
  *
  *  $LastChangedDate: 2011-04-14 00:04:23 +0200 (Do, 14 Apr 2011) $
  *  $LastChangedRevision: 7653 $
@@ -22,27 +22,48 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package net.yacy.cora.lod.vocabulary;
 
-public interface Vocabulary {
-    
-    /**
-     * get the RDF identifier
-     * @return
-     */
-    public String getIdentifier();
+import java.util.Set;
 
-    /**
-     * get the prefix for the predicates of this vocabulary
-     * @return
-     */
-    public String getPrefix();
+import net.yacy.cora.lod.Literal;
+import net.yacy.cora.lod.Vocabulary;
+
+public enum Rdf implements Vocabulary {
     
-    /**
-     * get the predicate name which already contains the prefix and the ':'
-     * @return
-     */
-    public String getPredicate();
+    RDF,
+    Description,
+    Bag,
+    Seq,
+    Alt;
+
+    public final static String IDENTIFIER = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    public final static String PREFIX = "rdf";
     
+    private final String predicate;
+    
+    private Rdf() {
+        this.predicate = PREFIX + ":" +  this.name();
+    }
+
+    @Override
+    public String getIdentifier() {
+        return IDENTIFIER;
+    }
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
+    
+    @Override
+    public Set<Literal> getLiterals() {
+        return null;
+    }
+
+    @Override
+    public String getPredicate() {
+        return this.predicate;
+    }
+
 }
