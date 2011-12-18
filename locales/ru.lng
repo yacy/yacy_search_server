@@ -865,15 +865,15 @@ Edit Profile==Bearbeite Profil
 #-----------------------------
 #File: CrawlResults.html
 #---------------------------
-Crawl Results<==Crawl Ergebnisse<
-Overview</a>==Überblick</a>
-Receipts</a>==Rückmeldungen</a>
-Queries</a>==Suchanfragen</a>
-DHT Transfer==DHT-Verteilung
-Proxy Use==Proxy Benutzung
-Local Crawling</a>==Lokales Crawlen</a>
+Crawl Results<==Результат сканирования<
+Overview</a>==Обзор</a>
+Receipts</a>==Получения</a>
+Queries</a>==Запросы</a>
+DHT Transfer==DHT-пересылка
+Proxy Use==Использование прокси
+Local Crawling</a>==Локальное сканирование</a>
 Global Crawling</a>==Globales Crawlen</a>
-Surrogate Import</a>==Surrogat Import</a>
+Surrogate Import</a>==Сурогатный испорт</a>
 >Crawl Results Overview<==>Crawl Ergebnisse Überblick<
 These are monitoring pages for the different indexing queues.==Das sind die Seiten zur Überwachung der verschiedenen Indexier Warteschlangen.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermenüs oben beschrieben.
@@ -923,17 +923,17 @@ These records had been imported from surrogate files in DATA/SURROGATES/in==Dies
 \(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportMediawiki_p.html">MediaWiki Dump Import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
 #Domain==Domain
 #URLs=URLs
-"delete all"=="Alle Löschen"
+"delete all"=="удалить все"
 Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Einträge in diesem Bereich.
 Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Einträge aus diesem Bereich von insgesamt #[all]# Einträgen.
-"clear list"=="Liste leeren"
+"clear list"=="очистить список"
 #Initiator==Initiator
 >Executor==>Ausführender
 >Modified==>Änderungsdatum
->Words==>Wörter
+>Words==>Слов
 >Title==>Titel
 #URL==URL
-"delete"=="Löschen"
+"delete"=="удалить"
 #-----------------------------
 #File: CrawlStartExpert_p.html
 #---------------------------
@@ -1115,34 +1115,35 @@ Start URL==Начальный URL
 Link-List of URL==Список ссылок URL адресов
 Sitemap URL==Карта сайта URL
 >Scheduler<==>Планировщик<
-run this crawl once==führe diesen Crawl nur einmalig aus
-scheduled, look every==geplant, überprüfe alle
+run this crawl once==запустить сканирование один раз
+scheduled, look every==по рассписанию, сканировать каждые
 >minutes<==>минут<
 >hours<==>часов<
 >days<==>дней<
-for new documents automatically.==automatisch auf neue Dokument.
->Path<==>Pfad<
-load all files in domain==Lade alle Dateien in der Domäne
-load only files in a sub-path of given url==Lade nur Dateien in einem Unterpfad der angegebenen URL
->Limitation<==>Einschränkungen<
-not more than <==nicht mehr als <
->documents<==>Dokumente<
->Dynamic URLs<==>Dynamische URLs<
-allow <==erlaube <
-urls with a \'\?\' in the path==URLs mit einem '?' im Pfad
+for new documents automatically.==автоматически, на наличие новых документов.
+>Path<==>Путь<
+load all files in domain==загрузить все файлы в этом домене
+load only files in a sub-path of given url==загрузить файлы только по ссылкам указаных в URL адресе
+>Limitation<==>Ограничения<
+not more than <==не больше чем <
+>documents<==>документов<
+>Dynamic URLs<==>Динамический URL<
+query-strings==строка запроса
+allow <==позволить <
+urls with a \'\?\' in the path==URL адреса '?' в адресе
 >Start<==>Запуск<
 "Start New Crawl"=="Запуск нового сканирования"
-Hints<==Hinweise<
+Hints<==Подсказки<
 >Crawl Speed Limitation<==>Ограничение скорости сканирования<
-No more that two pages are loaded from the same host in one second \(not more that 120 document per minute\) to limit the load on the target server.==Es werden nicht mehr als 2 Seiten pro Sekunde vom selben Host geladen (nicht mehr als 120 Dokumente per Minute), um die Last auf den Zielserver zu minimieren.
+No more that two pages are loaded from the same host in one second \(not more that 120 document per minute\) to limit the load on the target server.==Не более чем две странички с одного хоста в секунду (не более чем 120 документов в минуту), для ограничения загруженности удаленного сервера.
 >Target Balancer<==>Цель балансировки<
-A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.==Ein zweiter Crawl für einen anderen Host erhöht den Durchsatz auf ein Maximum von 240 Dokumenten pro Minute weil der der Crawler Balancer die Last über alle Hosts verteilt.
+A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.==Второе сканирование по другому хосту увеличивает пропускную способность сканирования до 240 документов в минуту с балансировкой нагрузки по всем хостам.
 >High Speed Crawling<==>Высокая скорость сканирования<
-A \'shallow crawl\' which is not limited to a single host \(or site\)==Ein 'oberflächlicher Crawl' der nicht auf einen einzelnen Host (oder eine Seite) limitiert ist
-can extend the pages per minute \(ppm\) rate to unlimited documents per minute when the number of target hosts is high.==kann die Anzahl der Seiten pro Minute (ppm) auf unendlich viele Dokumente pro Minute erweitern wenn die Anzahl der Ziel Hosts hoch ist.
-This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==Das kann erreicht werden durch Verwendung des <a href="CrawlStartExpert_p.html">Crawl Start (Expert)</a> Servlets.
+A \'shallow crawl\' which is not limited to a single host \(or site\)=='Медленное сканирование' не ограничено по одному хосту (или сайту)
+can extend the pages per minute \(ppm\) rate to unlimited documents per minute when the number of target hosts is high.==скорость сканирования которого страниц в минуту (СвМ) может быть увеличено на неограниченное, когда число удаленных хостов высока.
+This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==Это можно сделать с помощью <a href="CrawlStartExpert_p.html">запуска экспектора сканирования</a>.
 >Scheduler Steering<==>Управление планировщиком<
-The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==Die geplante Ausführung von Crawls kann geändert oder entfernt werden mit der <a href="Table_API_p.html">API Aktionen Steuerung</a>.
+The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==Рассписание сканирование может быть изменено или удалено используя <a href="Table_API_p.html">управлением API</a>.
 #-----------------------------
 #File: Help.html
 #---------------------------
@@ -1314,8 +1315,8 @@ pos in phrase</td>==Pos. im Satz</td>
 word distance</td>==Wort Distanz</td>
 <td>authority</td>==<td>Autorität</td>
 <td>date</td>==<td>Дата</td>
-words in title</td>==Wörter im Titel</td>
-words in text</td>==Wörter im Text</td>
+words in title</td>==слов в заголовке</td>
+words in text</td>==слов в тексте</td>
 local links</td>==lokale Links</td>
 remote links</td>==remote Links</td>
 hitcount</td>==Trefferzahl</td>
@@ -1379,8 +1380,8 @@ No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
 #Referrer</td>==Referrer</td>
 #Doctype</td>==Dokumententyp</td>
 #Language</td>==Язык</td>
-#Size</td>==Größe</td>
-#Words</td>==Wörter</td>
+#Size</td>==Размер</td>
+#Words</td>==Слов</td>
 "Show Content"=="Inhalt anzeigen"
 "Delete URL"=="URL löschen"
 this may produce unresolved references at other word indexes but they do not harm==dies mag ungelöste Referenzen an anderen Wort Indizes erzeugen, aber es richtet keinen Schaden an
@@ -1457,7 +1458,7 @@ Import failed:==Import fehlgeschlagen:
 #-----------------------------
 #File: DictionaryLoader_p.html
 #---------------------------
-Dictionary Loader==Wörterbuch Download
+Dictionary Loader==Загрузка словоря
 YaCy can use external libraries to enable or enhance some functions. These libraries are not==YaCy kann externe Bibliotheken zum Erweitern oder Aktivieren bestimmter Funktionen verwenden. Diese Bibliotheken sind nicht
 included in the main release of YaCy because they would increase the application file too much.==im Standard Release von YaCy enthalten weil diese die Anwendungsdatei zu stark vergrößern würden.
 You can download additional files here.==Sie können zusätzliche Dateien hier herunterladen.
@@ -1507,7 +1508,7 @@ Anchor Name==Anker Name
 #-----------------------------
 #File: IndexCreateWWWLocalQueue_p.html
 #---------------------------
-Local Crawl Queue==Lokaler Crawl-Puffer
+Local Crawl Queue==Очередь локального сборщика
 This queue stores the urls that shall be crawled localy by this peer.==Dieser Puffer enthält URLs, die von diesem Peer lokal gecrawlt werden sollen.
 It may also contain urls that are computed by the proxy-prefetch.==Sie enthält auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
 The local crawler queue is empty==Der lokale Crawler-Puffer ist leer.
@@ -2920,57 +2921,58 @@ You can edit your profile <a href="/ConfigProfile_p.html">here</a>==Вы мож�
 #-----------------------------
 #File: Crawler_p.html
 #---------------------------
-Crawler Queues==Crawler Puffer
-PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
-#Traffic \(Crawler\)==Traffic (Crawler)
-RWI RAM \(Word Cache\)==RWI RAM (Wörter Zwischenspeicher)
+Crawler Queues==Запросы сканирования
+PPM \(Pages Per Minute\)==Страниц в Минуту (СвМ)
+Traffic \(Crawler\)==Трафик (Сканера)
+RWI RAM \(Word Cache\)==RWI RAM (Кэш слов)
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Fehler im Profil Management. Bitte stoppen Sie YaCy, löschen Sie die Datei DATA/PLASMADB/crawlProfiles0.db
 and restart.==und starten Sie YaCy neu.
-Error:==Fehler:
+Error:==Ошибка:
 Application not yet initialized. Sorry. Please wait some seconds and repeat==Anwendung noch nicht initialisiert. Bitte warten Sie noch ein paar Sekunden und versuchen 
-ERROR: Crawl filter==FEHLER: Crawl Maske
-does not match with==stimmt nicht überein mit
-crawl root==dem Crawlstart
-Please try again with different==Bitte probieren Sie es erneut mit einer anderen
-filter. ::==Maske. ::
-Crawling of==Crawling von
-failed. Reason:==schlug fehl. Grund:
-Error with URL input==Fehler mit URL Eingabe
+ERROR: Crawl filter==ОШИБКА: фильтр сканирования
+does not match with==не совпадает с
+crawl root==корень сканирования
+Please try again with different==Попробуйте ещё раз с различием
+filter. ::==фильтр. ::
+Crawling of==Сканирование
+failed. Reason:==неудачно. Grund:
+Error with URL input==Ошибка с указаным URL
 Error with file input==Fehler mit Datei Eingabe
-started.==gestartet.
-Please wait some seconds,==Bitte warten Sie einige Sekunden, 
-it may take some seconds until the first result appears there.==es kann einige Sekunden dauern, bis hier die ersten Ergebnisse zu sehen sind.
+started.==запущено.
+Please wait some seconds,==Пожалуйста, ожидайне несколько секун, 
+it may take some seconds until the first result appears there.==это может занять несколько секунд пока ожидается первый результат.
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Ihr Crawl Seiten indexiert, die Sie nicht indexiert haben wollen, können Sie diese <a href="IndexCreateWWWLocalQueue_p.html">hier</a> löschen.
-Crawl Queue:==Crawler Puffer:
-Queue</th>==Puffer</th>
-Profile</th>==Profil</th>
-Initiator==Auftraggeber
-Depth</th>==Tiefe</th>
-Modified Date==Änderungsdatum
-Anchor Name==Linktitel
+Crawl Queue:==Очередь сканирования:
+Queue</th>==Очередь</th>
+Profile</th>==Профиль</th>
+Initiator==Инициатор
+Depth</th>==Глубина</th>
+Modified Date==Дата модифицирования
+Anchor Name==Имя якоря
 #URL==URL
-Delete==Löschen
-Next update in==Nächste Aktualisierung in
-/> seconds.==/> Sekunden.
-See a access timing <a href="/api/latency_p.xml">here</a>==<a href="/api/latency_p.xml">Hier</a> gibt es eine Tabelle mit Latenz- und Zugriffszeiten
-Queue</th>==Puffer</th>
->Size==>Größe
-#Max==Max
+Delete==Удалить
+Next update in==Следующее обновление через
+/> seconds.==/> секунд.
+See a access timing <a href="/api/latency_p.xml">here</a>==Смотрите сроки доступа <a href="/api/latency_p.xml">по этой ссылке</a>
+Queue</th>==Очередь</th>
+>Size==>Размер
+Max<==Максимально<
 #Indexing</td>==Indexieren</td>
-Loader==Lader
-Local Crawler==Lokaler Crawler
-unlimited==uneingeschränkt
-#Remote Crawler==Remote Crawler
-Speed==Geschwindigkeit
-"minimum"=="Minimum"
-"custom"=="benutzerdefiniert"
-"maximum"=="Maximum"
-Database==Datenbank
+Loader==Загрузка
+Local Crawler==Локальный сканер
+Limit Crawler==Ограничения сканера
+Remote Crawler==Удаленный сканер
+unlimited==неограниченно
+Speed<==Скорость<
+"minimum"=="минимально"
+"custom"=="по заказу"
+"maximum"=="максимально"
+Database==База данных
 Entries==Einträge
-Pages \(URLs\)==Seiten (URLs)
-RWIs \(Words\)==RWIs (Wörter)
-Indicator==Indikator
-Level==Stufe
+Pages \(URLs\)==Страниц (URL адресов)
+RWIs \(Words\)==RWIs (Слов)
+Indicator==Индикатор
+Level==Уровень
 #-----------------------------
 #File: WatchWebStructure_p.html
 #---------------------------
@@ -3169,7 +3171,7 @@ Index Creation==Создание индекса
 Crawler Monitor==Монитор сканирования
 Crawl Results==Результат сканирования
 Crawler / Harvester==Сканирование / Сбор
-Creation Monitor==Монитор создания
+Creation Monitor==Монитор сканирования
 Index Administration==Администрирование индекса
 Filter &amp; Blacklists==Фильтр &amp; Черный список
 ### SEARCH INTEGRATION ###
@@ -3260,23 +3262,33 @@ Import OAI-PMH Sources==Importiere OAI-PMH Quellen
 #-----------------------------
 #File: env/templates/submenuCookie.template
 #---------------------------
-Cookie Menu==Cookie Menü
-Incoming&nbsp;Cookies==Eingehende Cookies
-Outgoing&nbsp;Cookies==Ausgehende Cookies
+Cookie Menu==Меню куки
+Incoming&nbsp;Cookies==Входящие куки
+Outgoing&nbsp;Cookies==Исходящие куки
 #-----------------------------
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
-Processing Monitor==Prozess Monitor
-Crawler Queues==Crawler Puffer
-Loader<==Lade Puffer<
-Rejected URLs==Abgelehnte URLs
->Queues<==>Warteschlangen<
-Local<==Lokal<
-#Global==Global
-#Remote==Remote
-Crawler Steering==Crawl Steuerung
-Scheduler and Profile Editor<==Scheduler und Profil Editor<
-#robots.txt Monitor==robots.txt Monitor
+Web Crawler==Сканер веб
+Processing Monitor==Монитор процессов
+Crawler Queues==Запросы сканирования
+Loader<==Загрузчик<
+Rejected URLs==Отклоненные URL адреса
+>Queues<==>Очередь<
+Local<==Локально<
+Global==Глобально
+Remote==Удаленный
+Crawl Results==Результаты сканирования
+Overview==Обзор
+Receipts==Прием
+Queries==Запросы
+DHT Transfer==DHT пересылка
+Proxy Use==Использование прокси
+Local Crawling==Локальное сканирование
+Global Crawling==Глобальное сканирование
+Surrogate Import==Сурогатный испорт
+Crawler Steering==Управление сканированием
+Scheduler and Profile Editor<==Расписание и Редактор профиля<
+robots.txt Monitor==Монитор robots.txt
 #-----------------------------
 #File: env/templates/submenuCustomization.template
 #---------------------------
@@ -3504,7 +3516,7 @@ Search term:==Suchbegriff:
 "help"=="Hilfe"
 Resource/Network:==Ressource/Netzwerk:
 freeworld==freeworld
-local peer==lokaler Peer
+local peer==локальный пир
 >bookmarks==>Lesezeichen
 sciencenet==ScienceNet
 >Language:==>Язык:
