@@ -263,22 +263,15 @@ public class ConfigBasic {
         prop.putHTML("defaultName", sb.peers.mySeed().getName());
         prop.putHTML("defaultPort", env.getConfig("port", "8090"));
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
+        prop.put("lang_de", "0");
+        prop.put("lang_fr", "0");
+        prop.put("lang_cn", "0");
+        prop.put("lang_ru", "0");
+        prop.put("lang_en", "0");
         if ("default".equals(lang)) {
-            prop.put("langDeutsch", "0");
-            prop.put("langFrancais", "0");
-            prop.put("langEnglish", "1");
-        } else if ("fr".equals(lang)) {
-            prop.put("langDeutsch", "0");
-            prop.put("langFrancais", "1");
-            prop.put("langEnglish", "0");
-        } else if ("de".equals(lang)) {
-            prop.put("langDeutsch", "1");
-            prop.put("langFrancais", "0");
-            prop.put("langEnglish", "0");
+            prop.put("lang_en", "1");
         } else {
-            prop.put("langDeutsch", "0");
-            prop.put("langFrancais", "0");
-            prop.put("langEnglish", "0");
+            prop.put("lang_" + lang, "1");
         }
         return prop;
     }
