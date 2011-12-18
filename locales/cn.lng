@@ -657,7 +657,7 @@ Default Pop-Up Page<==默认弹出页面<
 >Search Front Page==>搜索首页
 >Search Page \(small header\)==>搜索页面(二级标题)
 >Interactive Search Page==>交互搜索页面
-Default index.html Page \(by forwarder\)==默认index.html(前向指定)
+Default index.html Page \(by forwarder\)==默认index.html(前者指定)
 Target for Click on Search Results==点击搜索结果时
 
 \"_blank\" \(new window\)=="_blank" (新窗口)
@@ -833,7 +833,7 @@ Sending Client==发送主机
 #File: CrawlProfileEditor_p.html
 #---------------------------
 >Crawl Profile Editor<==>Crawl文件编辑<
->Crawler Steering<==>Crawler引导<
+>Crawler Steering<==>Crawler向导<
 >Crawl Scheduler<==>定期Crawl<
 >Scheduled Crawls can be modified in this table<==>请在下表中修改已安排的crawl<
 Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl文件里保存有正在运行的crawl进程信息.
@@ -996,7 +996,7 @@ that must match with the URLs which are used to be crawled; default is \'catch a
 Example: to allow only urls that contain the word \'science\', set the filter to \'.*science.*\'.==比如: 如果仅抓取包含'科学'的链接, 可将过滤器设置为 '.*.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==您也可以使用域限制来抓取整个域.
 Must-Not-Match Filter==必须与过滤器不匹配
-This filter must not match to allow that the page is accepted for crawling.==这个过滤器表示了所有不被抓取的网页规则.
+This filter must not match to allow that the page is accepted for crawling.==此过滤器表示了所有不被抓取的网页规则.
 The empty string is a never-match filter which should do well for most cases.==对于大多数情况可以留空.
 If you don't know what this means, please leave this field empty.==如果您不知道这些设置的意义, 请将此留空.
 #Re-crawl known URLs:==Re-crawl bekannter URLs:
@@ -1154,8 +1154,8 @@ A second crawl for a different host increases the throughput to a maximum of 240
 A \'shallow crawl\' which is not limited to a single host \(or site\)==当目标主机很多时, 用于多个主机(或站点)的'浅crawl'方式,
 can extend the pages per minute \(ppm\) rate to unlimited documents per minute when the number of target hosts is high.==会增加每秒页面数(ppm).
 This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==对应设置<a href="CrawlStartExpert_p.html">专家模式起始crawla>选项.
->Scheduler Steering<==>定时器引导<
-The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==可以使用<a href="Table_API_p.html">API引导</a>改变或删除crawl定时器.
+>Scheduler Steering<==>定时器向导<
+The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==可以使用<a href="Table_API_p.html">API向导</a>改变或删除crawl定时器.
 #-----------------------------
 
 #File: Help.html
@@ -2364,7 +2364,7 @@ Crawler Settings==Crawler设置
 HTTP Networking==HTTP网络
 #Remote Proxy \(optional\)==Remote Proxy (optional)
 Seed Upload Settings==Seed上传设置
-Message Forwarding \(optional\)==前向消息(可选)
+Message Forwarding \(optional\)==消息发送(可选)
 #-----------------------------
 
 #File: Settings_Crawler.inc
@@ -2544,400 +2544,400 @@ value="Submit"==value="提交"
 
 #File: SettingsAck_p.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Einstellung Verarbeitung
-Settings Receipt:==Einstellungen angenommen:
-No information has been submitted==Es wurden keine Informationen übertragen.
-Error with submitted information.==Es gab einen Fehler bei der Übertragung der Informationen.
-Nothing changed.</p>==Nichts wurde verändert.</p>
-The user name must be given.==Der User Name muss angegeben werden
-Your request cannot be processed.==Ihre Anfrage konnte nicht bearbeitet werden.
-The password redundancy check failed. You have probably misstyped your password.==Die Passwortüberprüfung schlug fehl. Sie haben sich wahrscheinlich vertippt.
-Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Runterfahren</strong><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
-Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
-Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zurück zu den Einstellungen gehen wollen, müssen Sie sich neu einloggen.
-Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden geändert.
-Your proxy account check has been disabled, since you did not supply a password.==Ihr Proxy Account Test wurde deaktiviert, weil sie kein Passwort eingegeben haben.
-The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
-The proxy port is:==Der Proxy Port ist:
-Port rebinding will be done in a few seconds.==Die Port Neubindung wird in wenigen Sekunden abgeschlossen sein.
-You can reach your YaCy server under the new location==Sie können Ihren YaCy Server unter folgender neuer Adresse erreichen:
-Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurden geändert.
-Your server access filter is now set to==Ihr Proxy Zugangs Filter ist nun gesetzt auf
-Auto pop-up of the Status page is now <strong>disabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>deaktiviert.</strong>
-Auto pop-up of the Status page is now <strong>enabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>aktiviert.</strong>
-You are now permanently <strong>online</strong>.==Sie sind nun im <strong>permanenten Online Modus</strong>.
-After a short while you should see the effect on the====Nach kurzer Zeit können Sie die Änderungen auf der
-status</a> page.==Status-Seite</a> sehen.
-The Peer Name is:==Der Name dieses Peers ist:
-Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
-Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Seed Einstellungen wurden geändert.#(success)#::Sie sind nun ein Principal Peer.
-Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geändert, aber etwas stimmt nicht.
-Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
-Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
-The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden geändert.
-The new setting is effective immediately, you don't need to re-start.==Die neuen Einstellungen wirken sofort. Sie brauchen den Peer nicht neu zu starten.
-The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==Der eingegebene Peername wird bereits von einem anderen Peer benutzt. Bitte wählen Sie einen anderen Namen.</strong> Der Peername wurde nicht geändert.
-Your Peer Language is:==Ihre Peer Sprache ist:
+YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': 设置
+Settings Receipt:==菜单设置:
+No information has been submitted==未提交信息.
+Error with submitted information.==提交信息发生错误.
+Nothing changed.</p>==无任何改变.</p>
+The user name must be given.==必须给出用户名.
+Your request cannot be processed.==不能响应请求.
+The password redundancy check failed. You have probably misstyped your password.==密码冗余检查错误.
+Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==正在关闭</strong><br />所有crawl任务完成后程序会关闭.
+Your administration account setting has been made.==已创建管理账户设置.
+Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==新帐户名是 #[user]#. 密码输入正确.<br />如果返回设置页面, 需要再次输入密码.
+Your proxy access setting has been changed.==代理访问设置已改变.
+Your proxy account check has been disabled, since you did not supply a password.==不能进行代理账户检查, 密码不正确.
+The new proxy IP filter is set to==代理IP过滤设置为
+The proxy port is:==代理端口号:
+Port rebinding will be done in a few seconds.==端口在几秒后绑定完成.
+You can reach your YaCy server under the new location==可以通过新位置访问YaCy服务器:
+Your proxy access setting has been changed.==代理访问设置已改变.
+Your server access filter is now set to==服务器访问过滤为
+Auto pop-up of the Status page is now <strong>disabled</strong>==自动弹出状态页面<strong>关闭.</strong>
+Auto pop-up of the Status page is now <strong>enabled</strong>==自动弹出状态页面<strong>打开.</strong>
+You are now permanently <strong>online</strong>.==您现在处于永久<strong>在线状态</strong>.
+After a short while you should see the effect on the====一会儿可以在
+status</a> page.==Status</a> 页面看到变化.
+The Peer Name is:==peer名:
+Your static Ip\(or DynDns\) is:==静态IP(或DynDns)为:
+Seed Settings changed.\#\(success\)\#::You are now a principal peer.==seed设置已改变.#(success)#::本地peer已成为主要peer.
+Seed Settings changed, but something is wrong.==seed设置已改变, 但是未完全成功.
+Seed Uploading was deactivated automatically.==seed上传自动关闭. 
+Please return to the settings page and modify the data.==请返回设置页面修改参数.
+The remote-proxy setting has been changed==远程代理设置已改变.
+The new setting is effective immediately, you don't need to re-start.==新设置立即生效.
+The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==提交的peer名已存在, 请更改.</strong> peer名未改变.
+Your Peer Language is:==peer语言:
 The submitted peer name is not well-formed. Please choose a different name.</strong> The Peer name has not been changed.
 Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
 #The new parser settings where changed successfully.==Die neuen Parser Einstellungen wurden erfolgreich gespeichert.
 Parsing of the following mime-types was enabled:
-Seed Upload method was changed successfully.==Seed Upload Methode wurde erfolgreich geändert.
-You are now a principal peer.==Sie sind nun ein Principal Peer.
-Seed Upload Method:==Seed Upload Methode:
-Seed File URL:==Seed Datei URL:
-Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden geändert.
-Transparent Proxy Support is:==Durchsichtige Proxy Unterstützung ist:
-Connection Keep-Alive Support is:==Verbindung aufrecht erhalten Unterstützung ist:
-Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich geändert.
-Message Forwarding Support is:==Nachrichten Weiterleitungs Unterstützung:
-Message Forwarding Command:==Nachrichten Weiterleitungskommando:
-Recipient Address:==Empfänger Adresse:
-Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
-You are now <strong>event-based online</strong>.==Sie sind nun im  <strong>aktivitätsbasierten Modus</strong>.
-After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
-You are now in <strong>Cache Mode</strong>.==Sie sind nun im <strong>Cache Modus</strong>.
-Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem Modus verfügbar.
-After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
-You can now go back to the==Sie können nun zurück zu den
-Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere Änderungen vorzunehmen.
-You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun unter seiner neuen Adresse erreicht werden:
+Seed Upload method was changed successfully.==seed上传方式改变成功.
+You are now a principal peer.==本地peer已成为主要peer.
+Seed Upload Method:==seed上传方式:
+Seed File URL:==seed文件URL:
+Your proxy networking settings have been changed.==代理网络设置已改变.
+Transparent Proxy Support is:==透明代理支持:
+Connection Keep-Alive Support is:==连接保持支持:
+Your message forwarding settings have been changed.==消息发送设置已改变.
+Message Forwarding Support is:==消息发送支持:
+Message Forwarding Command:==消息:
+Recipient Address:==收件人地址:
+Please return to the settings page and modify the data.==请返回设置页面修改参数.
+You are now <strong>event-based online</strong>.==您现在处于<strong>事件驱动在线</strong>.
+After a short while you should see the effect on the==查看变化
+You are now in <strong>Cache Mode</strong>.==您现在处于<strong>Cache模式</strong>.
+Only Proxy-cache ist available in this mode.==此模式下仅代理缓存可用.
+After a short while you should see the effect on the==查看变化
+You can now go back to the==现在可返回
+Settings</a> page if you want to make more changes.==设置</a> 页面, 如果需要更改更多参数的话.
+You can reach your YaCy server under the new location==现在可以通过新位置访问YaCy服务器:
 #-----------------------------
 
 #File: Settings_MessageForwarding.inc
 #---------------------------
-Message Forwarding==Nachrichten Weiterleitung
-With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen können Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
-Enable message forwarding==Aktiviere Nachrichten Weiterleitung
-Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
-Forwarding Command==Weiterleitungskommando
-The command-line program that should be used to forward the message.<br />==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />
-Forwarding To==Weiterleiten An
-The recipient email-address.<br />==Die E-Mail Adresse des Empfängers.<br />
-e.g.:==z.B.:
-"Submit"=="Speichern"
-Changes will take effect immediately.==Änderungen sind sofort wirksam.
+Message Forwarding==消息发送
+With this settings you can activate or deactivate forwarding of yacy-messages via email.==此设置能打开或关闭电邮发送yacy消息.
+Enable message forwarding==打开消息发送
+Enabling/Disabling message forwarding via email.==打开/关闭email发送.
+Forwarding Command==发送命令
+The command-line program that should be used to forward the message.<br />==将用于发送消息的命令行程序.<br />
+Forwarding To==发送给
+The recipient email-address.<br />==收件人email地址.<br />
+e.g.:==比如:
+"Submit"=="提交"
+Changes will take effect immediately.==改变立即生效.
 #-----------------------------
 
 #File: sharedBlacklist_p.html
 #---------------------------
-Shared Blacklist==Freigegebene Blacklist
-Add Items to Blacklist==添加 von Daten zur Blacklist
-Unable to store the items into the blacklist file:==Es war nicht möglich in folgender Blacklist Datei die Daten zu speichern:
+Shared Blacklist==共享黑名单
+Add Items to Blacklist==添加条目到黑名单
+Unable to store the items into the blacklist file:==不能存储条目到黑名单文件:
 #File Error! Wrong Path?==Datei Fehler! Falscher Pfad?
-YaCy-Peer &quot;<span class="settingsValue">\#\[name\]\#</span>&quot; not found.==YaCy Peer YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; nicht gefunden.
-not found or empty list.==nicht gefunden oder leere Liste.
-Wrong Invocation! Please invoke with==Falscher Aufruf! Bitte nur so aufrufen
-Blacklist source:==Blacklist Quelle:
-Blacklist target:==Blacklist Ziel:
-Blacklist item==Blacklist Eintrag
-"select all"=="alle auswählen"
-"deselect all"=="alle abwählen"
-value="add"==value="hinzufügen"
+YaCy-Peer &quot;<span class="settingsValue">\#\[name\]\#</span>&quot; not found.==YaCy peer&quot;<span class="settingsValue">#[name]#</span>&quot; 未找到.
+not found or empty list.==未找到或者列表为空.
+Wrong Invocation! Please invoke with==调用错误! 请使用配合
+Blacklist source:==黑名单源:
+Blacklist target:==黑名单目的:
+Blacklist item==黑名单条目
+"select all"=="全部选择"
+"deselect all"=="全部反选"
+value="add"==value="添加"
 #-----------------------------
 
 #File: Status.html
 #---------------------------
-Console Status==Konsolen Status
-Log-in as administrator to see full status==Als Administrator einloggen, für kompletten Status
-Welcome to YaCy!==Willkommen bei YaCy!
-Your settings are _not_ protected!</strong>==Ihre Einstellungen sind _nicht_ mit einem Kennwort geschützt!</strong>
-Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==Bitte öffnen Sie die <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> <strong>sofort</strong>
-and set an administration password.==und geben Sie ein Administrator Passwort ein.
-You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
-The peer must go online to get a peer address.==Ihr Peer muss online gehen, um eine Adresse zu bekommen.
-You cannot be reached from outside.==Ihr Peer kann nicht von außen erreicht werden.
-A possible reason is that you are behind a firewall, NAT or Router.==Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden.
-But you can <a href="index.html">search the internet</a> using the other peers'==Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index
-global index on your own search page.==der anderen Peers von Ihrer Suchseite aus benutzen.
-"bad"=="schlecht"
-"idea"="idee"
-"good"="gut"
-"Follow YaCy on Twitter"=="Folge YaCy auf Twitter"
-We encourage you to open your firewall for the port you configured \(usually: 8090\),==Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8090) in Ihrer Firewall zu öffnen,
-or to set up a 'virtual server' in your router settings \(often called DMZ\).==oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt).
-Please be fair, contribute your own index to the global index.==Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
-Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Der freie Festplattenspeicher ist geringer als #[minSpace]#. Crawling wurde deaktiviert. Bitte beheben Sie 
-it as soon as possible and restart YaCy.==dieses Problem so schnell wie möglich und starten Sie YaCy neu.
-Free memory is lower than \#\[minSpace\]\#. DHT has been disabled. Please fix==Es steht weniger als #[minSpace]# Arbeitsspeicher zur Verfügung. DHT wurde deaktiviert. Bitte beheben Sie 
-Latest public version is==Die neueste stabile Version ist
-You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
+Console Status==控制台状态
+Log-in as administrator to see full status==登录管理用户以查看完整状态
+Welcome to YaCy!==欢迎使用YaCy!
+Your settings are _not_ protected!</strong>==您的设置未受保护!</strong>
+Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==请打开<a href="ConfigAccounts_p.html">账户设置</a> <strong>页面</strong>
+and set an administration password.==并设置管理密码.
+You have not published your peer seed yet. This happens automatically, just wait.==尚未发布您的peer seed. 将会自动发布, 请稍候.
+The peer must go online to get a peer address.==peer必须上线获得peer地址.
+You cannot be reached from outside.==外部不能访问您的peer.
+A possible reason is that you are behind a firewall, NAT or Router.==很可能是您在防火墙, NAT或者路由的后面.
+But you can <a href="index.html">search the internet</a> using the other peers'==但是您依然能进行<a href="index.html">搜索</a>
+global index on your own search page.==, 需要通过其他peer的全球索引.
+"bad"=="坏"
+"idea"="主意"
+"good"="好"
+"Follow YaCy on Twitter"=="在Twitter上关注YaCy"
+We encourage you to open your firewall for the port you configured \(usually: 8090\),==我们推荐您开发防火墙端口(通常是: 8090),
+or to set up a 'virtual server' in your router settings \(often called DMZ\).==或者在路由设置中(DMZ)建立一个"虚拟服务器".
+Please be fair, contribute your own index to the global index.==请公平地贡献您的索引给全球索引.
+Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==空闲磁盘空间低于 #[minSpace]#. crawl已被关闭,
+it as soon as possible and restart YaCy.==请尽快修复并重启YaCy.
+Free memory is lower than \#\[minSpace\]\#. DHT has been disabled. Please fix==空闲内存低于 #[minSpace]#. DHT已被关闭,
+Latest public version is==最新版本为
+You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==您可以下载最新版本YaCy, 点此进行升级并重启:
 #"Update YaCy"=="Update YaCy"
-Install YaCy==Installiere YaCy
-You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterstützen den globalen Index,
-which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> können.
-You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
-where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
-Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ihr Webseiten Indexierer ist untätig. Sie können <a href="CrawlStartSite_p.html">hier</a> einen Web Crawl starten
-Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==Ihr Webseiten Indexierer ist beschäftigt. Sie können Ihren Web Crawl <a href="Crawler_p.html">hier</a> kontrollieren
+Install YaCy==安装YaCy
+You are running a server in senior mode and you support the global internet index,==服务器运行在高级模式, 并支持全球索引,
+which you can also <a href="index.html">search yourself</a>.==在其中您也能进行<a href="index.html">本地搜索</a>.
+You have a principal peer because you publish your seed-list to a public accessible server==您拥有一个主要peer, 因为您向公共服务器公布了您的seed列表,
+where it can be retrieved using the URL==可使用此URL进行接收:
+Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==网页索引器当前空闲. 可以点击<a href="CrawlStartSite_p.html">这里</a>开始网页crawl
+Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==网页索引器当前忙碌. 点击<a href="Crawler_p.html">这里</a>查看状态.
 #-----------------------------
 
 #File: Status_p.inc
 #---------------------------
 #System Status==System Status
-Process</dt>==Prozess</dt>
-Unknown==unbekannt
-Uptime==Online seit
-System Resources==Systemressourcen
-Processors:==Prozessoren:
-Protection==Sicherheit
-Password is missing==Kein Passwort
-password-protected==Passwort-geschützt
-Unrestricted access from localhost==Uneingeschränkter Zugriff von localhost
-Address</dt>==Adresse</dt>
-peer address not assigned==Peer Adresse nicht zugewiesen
-Public Address:==Öffentliche Adresse:
-YaCy Address:==YaCy Adresse:
+Process</dt>==进程</dt>
+Unknown==未知
+Uptime==运行时间
+System Resources==系统资源
+Processors:==处理器:
+Protection==保护
+Password is missing==无密码
+password-protected==受密码保护
+Unrestricted access from localhost==本地无限制访问
+Address</dt>==地址</dt>
+peer address not assigned==未分配peer地址
+Public Address:==公共地址:
+YaCy Address:==YaCy地址:
 #Peer Host==Peer Host
 #Port Forwarding Host==Port Forwarding Host
-not used==nicht benutzt
-broken==unterbrochen
-connected==verbunden
+not used==未使用
+broken==已损坏
+connected==已连接
 #Remote Proxy==Remote Proxy
-not used==nicht benutzt
-Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
-WARNING:==WARNUNG:
-You do this on your own risk.==Sie verwenden diese Einstellung auf Ihr eigenes Risiko.
-If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==Wenn Sie diese Option verwenden, ohne dass YaCy auf einem Desktop PC läuft, oder ohne installiertes Java 6, wird YaCy vermutlich nicht mehr starten.
-In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==In dem Fall müssen Sie die Konfiguration manuell in der folgenden Konfigurationsdatei ändern DATA/SETTINGS/yacy.conf
->Experimental<==>Experimentell<
-Yes==Ja
-No==Nein
-Auto-popup on start-up==Auto-Popup beim Starten
-Disabled==Deaktiviert
-Enable\]==Aktivieren]
-Enabled <a==Aktiviert <a
-Disable\]==Deaktivieren]
-Memory Usage==Speicherverbrauch
-free:==Frei:
-total:==Total:
-max:==Maximal:
+not used==未使用
+Used for YaCy -> YaCy communication:==用于YaCy -> YaCy通信:
+WARNING:==注意:
+You do this on your own risk.==此动作危险.
+If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==如果您不是在台式机上或者已安装Java6的机器上运行, 可能会破坏开机程序.
+In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==在此情况下, 您需要手动修改配置文件 DATA/SETTINGS/yacy.conf
+>Experimental<==>实验性<
+Yes==是
+No==否
+Auto-popup on start-up==启动时自动弹出
+Disabled==关闭
+Enable\]==打开]
+Enabled <a==打开 <a
+Disable\]==关闭]
+Memory Usage==内存使用
+free:==空闲:
+total:==全部:
+max:==最大:
 
-Configure==Einstellen
-Reset</a>==Zurücksetzen</a>
-Incoming Connections==Eingehende Verbindungen
-Active:==Aktiv:
+Configure==配置
+Reset</a>==重启</a>
+Incoming Connections==流入连接
+Active:==活动:
 #Max:Max:
 #Indexing Queue==Indexier Puffer
-Loader Queue==Lade Puffer
-paused==angehalten
-Queues==Puffer
-Local Crawl==Lokales Crawlen
-Remote triggered Crawl==eingehende Remote-Crawls
-Pre-Queueing==Vor-Pufferung
-Seed server==Seed Server
-Configure==Konfigurieren
-Enabled: Updating to server==Aktiviert, Seed Server:
+Loader Queue==加载器队列
+paused==已暂停
+Queues==队列
+Local Crawl==本地crawl
+Remote triggered Crawl==引入远端crawl
+Pre-Queueing==预排序
+Seed server==seed服务器
+Configure==配置
+Enabled: Updating to server==已打开, 与服务器同步:
 Last upload: #\[lastUpload\]# ago.==Letzte Aktualisierung vor: #\[lastUpload\]#
-Enabled: Updating to file==Aktiviert: Aktualisiere die Datei
+Enabled: Updating to file==已打开: 与文件同步
 #-----------------------------
 
 #File: Steering.html
 #---------------------------
-Steering</title>==Steuerung</title>
-Checking peer status...==Überprüfe Peer Status ...
-Peer is online again, forwarding to status page...==Peer ist wieder online. Weiterleitung auf Status Seite ...
-Peer is not online yet, will check again in a few seconds...==Peer ist noch nicht online. Nächste Prüfung in wenigen Sekunden ...
-No action submitted==Keine Aktion übermittelt
-Go back to the <a href="Settings_p.html">Settings</a> page==Zurück zur Seite mit den <a href="Settings_p.html">Erweiterten Einstellungen</a>
-Your system is not protected by a password==Ihr System wird nicht von einem Passwort geschützt
-Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Bitte legen Sie ein Administrator Passwort auf der Seite <a href="/ConfigAccounts_p.html">Benutzerverwaltung</a> fest.
-You don't have the correct access right to perform this task.==Sie haben nicht die Erlaubnis diese Anwendung auszuführen.
-Please log in.==Bitte melden Sie sich an.
-You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie weitere Änderungen vornehmen wollen.
-See you soon!==Bis bald!
-Just a moment, please!==Einen Moment bitte!
-Application will terminate after working off all scheduled tasks.==YaCy Proxy wird beendet, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
-Then YaCy will restart.==Dann wird YaCy neu gestartet.
-If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen können, dann ist der Neustart fehlgeschlagen.
-Installing release==Installiere Release
-YaCy will be restarted after installation==YaCy wird nach der Installation neugestartet
+Steering</title>==向导</title>
+Checking peer status...==正在检查peer状态...
+Peer is online again, forwarding to status page...==peer再次上线, 正在传输状态...
+Peer is not online yet, will check again in a few seconds...==peer尚未上线, 几秒后重新检测...
+No action submitted==未提交动作
+Go back to the <a href="Settings_p.html">Settings</a> page==将返回<a href="Settings_p.html">设置</a>页面
+Your system is not protected by a password==您的系统未受密码保护
+Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==请在<a href="/ConfigAccounts_p.html">用户管理</a>页面设置管理密码.
+You don't have the correct access right to perform this task.==无执行此任务权限.
+Please log in.==请登录.
+You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==您现在可以返回<a href="Settings_p.html">设置</a>页面进行详细设置.
+See you soon!==See you soon!
+Just a moment, please!==请稍候.
+Application will terminate after working off all scheduled tasks.==程序在所有任务完成后将停止,
+Then YaCy will restart.==然后YaCy会重新启动.
+If you can't reach YaCy's interface after 5 minutes restart failed.==如果5分钟后不能访问此页面说明重启失败.
+Installing release==正在安装
+YaCy will be restarted after installation==YaCy在安装完成后会重新启动
 #-----------------------------
 
 #File: Supporter.html
 #---------------------------
-Supporter<==Unterstützer<
+Supporter<==参与者<
 "Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"
-Supporter are switched off for users without authorization==Die Unterstützer-Seiten sind ausgeschaltet für Benutzer ohne Erlaubnis
-"bookmark"=="Lesezeichen"
-"Add to bookmarks"=="Zu den Lesezeichen hinzufügen"
-"positive vote"=="Positive Bewertung"
-"Give positive vote"=="Link positiv bewerten"
-"negative vote"=="Negative Bewertung"
-"Give negative vote"=="Link negativ bewerten"
-provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==bereitgestellt durch YaCy Peers mit einer URL in ihrem Profil. Es werden nur URLs von Peers angezeigt, die online sind.
+Supporter are switched off for users without authorization==未授权用户不属于参与者范畴
+"bookmark"=="书签"
+"Add to bookmarks"=="添加到书签"
+"positive vote"=="好评"
+"Give positive vote"=="给予好评"
+"negative vote"=="差评"
+"Give negative vote"=="给予差评"
+provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==由各peer提供. 仅显示peer中当前在线的URL.
 #-----------------------------
 
 #File: Surftips.html
 #---------------------------
-Surftips</title>==Surftipps</title>
-Surftips</h2>==Surftipps</h2>
-Surftips are switched off==Surftipps sind ausgeschaltet
-title="bookmark"==title="Lesezeichen"
-alt="Add to bookmarks"==alt="Zu den Lesezeichen hinzufügen"
-title="positive vote"==title="Positive Bewertung"
-alt="Give positive vote"==alt="Link positiv bewerten"
-title="negative vote"==title="Negative Bewertung"
-alt="Give negative vote"==alt="Link negativ bewerten"
-YaCy Supporters<==YaCy Unterstützer<
->a list of home pages of yacy users<==>Eine Liste von Homepages von YaCy Nutzern<
-provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
-"Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
-"authentication required"=="Autorisierung erforderlich"
-Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
-Show surftips to everyone==Zeige Surftipps allen Benutzern
+Surftips</title>==建议</title>
+Surftips</h2>==建议</h2>
+Surftips are switched off==建议已关闭
+title="bookmark"==title="书签"
+alt="Add to bookmarks"==alt="添加到书签"
+title="positive vote"==title="好评"
+alt="Give positive vote"==alt="给予好评"
+title="negative vote"==title="差评"
+alt="Give negative vote"==alt="给予差评"
+YaCy Supporters<==YaCy参与者<
+>a list of home pages of yacy users<==>YaCy用户的主页<
+provided by YaCy peers using public bookmarks, link votes and crawl start points==由使用公共书签, 链接评价和crawl起始点的peer提供
+"Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="输入推荐链接备注. (可留空.)"
+"authentication required"=="需要认证"
+Hide surftips for users without autorization==隐藏非认证用户的建议功能
+Show surftips to everyone==所有人均可使用建议
 #-----------------------------
 
 #File: Table_API_p.html
 #---------------------------
-: Peer Steering==: Peer Steuerung
-Steering of API Actions<==Steuerung der API Aktionen<
-This table shows actions that had been issued on the YaCy interface==Diese Tabelle zeigt Aktionen, die auf dem YaCy Interface ausgelöst wurden, 
-to change the configuration or to request crawl actions.==um Konfigurationen zu ändern oder Crawl Aktionen anzufordern.
-These recorded actions can be used to repeat specific actions and to send them==Diese aufgezeichneten Aktionen können dazu verwendet werden, bestimmte Aktionen wiederholt auszuführen und um sie
-to a scheduler for a periodic execution.==einem Scheduler für periodische Ausführung zu übergeben.
->Recorded Actions<==>Aufgezeichnete Aktionen<
-"next page"=="Nächste Seite"
-"previous page"=="Vorherige Seite"
-"next page"=="Keine nächste Seite"
-"previous page"=="Keine vorherige Seite"
- of \#\[of\]\#== von #[of]#
->Date==>Datum
->Type==>Typ
->Comment==>Kommentar
-Call<br/>Count<==Aufruf<br/>Zähler<
-Recording<==Aufzeichnungs<
-Last&nbsp;Exec==Letzte&nbsp;Ausführung
-Next&nbsp;Exec==Nächste&nbsp;Ausführung
->Scheduler<==>Geplante Ausführung<
+: Peer Steering==: Peer向导
+Steering of API Actions<==API动作向导<
+This table shows actions that had been issued on the YaCy interface==此表显示YaCy用于
+to change the configuration or to request crawl actions.==改变配置或者请求crawl的动作接口函数.
+These recorded actions can be used to repeat specific actions and to send them==它们用于重复执行某一指定动作,
+to a scheduler for a periodic execution.==或者用于周期执行一系列动作.
+>Recorded Actions<==>已记录动作<
+"next page"=="下一页"
+"previous page"=="上一页"
+"next page"=="下一页"
+"previous page"=="上一页"
+ of \#\[of\]\#== 共 #[of]#
+>Date==>日期
+>Type==>类型
+>Comment==>注释
+Call<br/>Count<==调用<br/>次数<
+Recording<==正在记录<
+Last&nbsp;Exec==上次&nbsp;执行
+Next&nbsp;Exec==下次&nbsp;执行
+>Scheduler<==>定时器<
 #>URL<==>URL
->no repetition<==>keine Wiederholung<
->activate scheduler<==>Ausführung planen<
-"Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
-"Delete Selected Actions"=="Lösche ausgewählte Aktionen"
->Result of API execution==>Ergebnis der API Ausführung
+>no repetition<==>无安排<
+>activate scheduler<==>激活定时器<
+"Execute Selected Actions"=="执行选中活动"
+"Delete Selected Actions"=="删除选中活动"
+>Result of API execution==>API执行结果
 #>Status<==>Status>
 #>URL<==>URL<
->minutes<==>Minuten<
->hours<==>Stunden<
->days<==>Tage<
-Scheduled actions are executed after the next execution date has arrived within a time frame of \#\[tfminutes\]\# minutes.==Geplante Aktionen werden innerhalb eines #[tfminutes]# Minuten Zeitfensters ausgeführt wenn der nächste Ausführungszeitpunkt erreicht wurde.
+>minutes<==>分钟<
+>hours<==>小时<
+>days<==>天<
+Scheduled actions are executed after the next execution date has arrived within a time frame of \#\[tfminutes\]\# minutes.==已安排动作会在 #[tfminutes]# 分钟后执行.
 #-----------------------------
 
 #File: Table_RobotsTxt_p.html
 #---------------------------
-Table Viewer==Tabellenanzeige
-The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
-Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
->robots.txt table<==>robots.txt Tabelle<
+Table Viewer==表格查看
+The information that is presented on this page can also be retrieved as XML==此页信息也可表示为XML
+Click the API icon to see the XML.==点击API图标查看XML.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API列表, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki</a>.
+>robots.txt table<==>robots.txt 列表<
 #-----------------------------
 
 ### This Tables section is removed in current SVN Versions
 #File: Tables_p.html
 #---------------------------
-Table Administration==Administration der Datenbank Tabellen
-Table Selection==Tabellenauswahl
-Select Table:==Auswahl Tabelle:
+Table Administration==表格管理
+Table Selection==选择表格
+Select Table:==选择表格:
 #"Show Table"=="Zeige Tabelle"
-show max.==Zeige max.
->all<==>alle<
-entries,==Einträge,
-search rows for==filtere Zeilen nach
-"Search"=="Suche"
-Table Editor: showing table==Tabellen Editor: zeige Tabelle
+show max.==显示最多.
+>all<==>全部<
+entries,==个条目,
+search rows for==搜索内容
+"Search"=="搜索"
+Table Editor: showing table==表格编辑器: 显示表格
 #PK==Primärschlüssel
-"Edit Selected Row"=="Bearbeite ausgwählte Zeile"
-"Add a new Row"=="Füge neue Zeile ein"
-"Delete Selected Rows"=="Lösche ausgewählte Zeile"
-"Delete Table"=="Lösche Tabelle"
-Row Editor==Zeileneditor
-Primary Key==Primärschlüssel
-"Commit"=="Absenden"
+"Edit Selected Row"=="编辑选中行"
+"Add a new Row"=="添加新行"
+"Delete Selected Rows"=="删除选中行"
+"Delete Table"=="删除表格"
+Row Editor==行编辑器
+Primary Key==主键
+"Commit"=="备注"
 #-----------------------------
 
 #File: Table_YMark_p.html
 #---------------------------
-Table Viewer==Tabellen Anzeige
-YMark Table Administration==YMark Tabellen Administration
-Table Editor: showing table==Tabellen Editor: Angezeigte Tabelle
-"Edit Selected Row"=="Bearbeite angezeigte Reihe"
-"Add a new Row"=="Füge neue Zeile ein"
-"Delete Selected Rows"=="Lösche ausgewählte Reihe"
-"Delete Table"=="Lösche Tabelle"
-"Rebuild Index"=="Index neu aufbauen"
-Primary Key==Primärschlüssel
->Row Editor<==>Reihen Editor<
-"Commit"=="Eintragen"
-Table Selection==Tabellen Auswahl
-Select Table:==Wähle Tabelle:
-show max. entries==Zeige max. Einträge
->all<==>Alle<
-Display columns:==Zeige Spalten:
-"load"=="Laden"
-Search/Filter Table==Suche/Filter Tabelle
-search rows for==Suche Reihen mit
-"Search"=="Suche"
+Table Viewer==表格查看
+YMark Table Administration==YMark表格管理
+Table Editor: showing table==表格编辑器: 显示表格
+"Edit Selected Row"=="编辑选中行"
+"Add a new Row"=="添加新行"
+"Delete Selected Rows"=="删除选中行"
+"Delete Table"=="删除表格"
+"Rebuild Index"=="重建索引"
+Primary Key==主键
+>Row Editor<==>行编辑器<
+"Commit"=="备注"
+Table Selection==选择表格
+Select Table:==选择表格:
+show max. entries==显示最多条目
+>all<==>所有<
+Display columns:==显示列:
+"load"=="载入"
+Search/Filter Table==搜索/过滤表格
+search rows for==搜索
+"Search"=="搜索"
 #>Tags<==>Tags<
->select a tag<==>Tag auswählen<
->Folders<==>Ordner<
->select a folder<==>Ordner auswählen<
->Import Bookmarks<==>Importiere Lesezeichen<
+>select a tag<==>选择标签<
+>Folders<==>目录<
+>select a folder<==>选择目录<
+>Import Bookmarks<==>导入书签<
 #Importer:==Importer:
 #>XBEL Importer<==>XBEL Importer<
 #>Netscape HTML Importer<==>Netscape HTML Importer<
-"import"=="Importieren"
+"import"=="导入"
 #-----------------------------
 
 #File: terminal_p.html
 #---------------------------
 #YaCy System Monitor==YaCy System Monitor
-Search Form==Suchformular
-Crawl Start==Crawl starten
-Status Page==Status Seite
-Confirm Shutdown==Bestätige Herunterfahren
->&lt;Shutdown==>&lt;Herunterfahren
-Event Terminal==Ereignis Terminal
-Image Terminal==Bilder Terminal
+Search Form==搜索页面
+Crawl Start==开始crawl
+Status Page==状态页面
+Confirm Shutdown==确认关闭
+>&lt;Shutdown==>&lt;关闭程序
+Event Terminal==事件终端
+Image Terminal==图形终端
 #Domain Monitor==Domain Monitor
-"Loading Processing software..."=="Verarbeitungs Software wird geladen..."
-This browser does not have a Java Plug-in.==Dieser Browser besitzt kein Java Plug-In.
-Get the latest Java Plug-in here.==Holen Sie sich das neueste Java Plug-In hier.
-Resource Monitor==Ressourcen Monitor
-Network Monitor==Netzwerk Monitor
+"Loading Processing software..."=="正在载入软件..."
+This browser does not have a Java Plug-in.==此浏览器没有安装Java插件.
+Get the latest Java Plug-in here.==在此获取.
+Resource Monitor==资源监视器
+Network Monitor==网络监视器
 #-----------------------------
 
 #File: Threaddump_p.html
 #---------------------------
-YaCy Debugging: Thread Dump==YaCy Debug: Thread Dump
-Threaddump<==Thread Dump<
-"Single Threaddump"=="Einzelner Thread Dump"
-"Multiple Dump Statistic"=="Mehrfache Dump Statistiken"
+YaCy Debugging: Thread Dump==YaCy Debug: 线程Dump
+Threaddump<==线程Dump<
+"Single Threaddump"=="单线程Dump"
+"Multiple Dump Statistic"=="多个Dump数据"
 #"create Threaddump"=="Threaddump erstellen"
 #-----------------------------
 
 #File: User.html
 #---------------------------
-User Page==Benutzer Seite
-You are not logged in.<br />==Sie sind nicht angemeldet.<br /> 
-Username:==Benutzername:
-Password: <input==Passwort: <input
-"login"=="anmelden"
-You are currently logged in as \#\[username\]\#.==Sie sind nun angemeldet als #[username]#.
-You have used==Sie haben bereits
-minutes of your onlinetime limit of==Minuten Ihres Online-Zeitlimits von
-minutes per day.==Minuten pro Tag verbraucht.
-old Password==altes Passwort
-new Password<==neues Passwort<
-new Password\(repetition\)==neues Passwort (Wiederholung)
-"Change"=="Ändern"
-You are currently logged in as admin.==Sie sind derzeit als Administrator angemeldet.
-value="logout"==value="abmelden"
-\(after logout you will be prompted for your password again. simply click "cancel"\)==(nach dem Abmelden werden Sie erneut nach dem Passwort gefragt. Klicken Sie einfach auf abbrechen)
-Password was changed.==Das Passwort wurde gewechselt.
-Old Password is wrong.==Das alte Passwort ist falsch.
-New Password and its repetition do not match.==Das neue Passwort und die Wiederholung stimmen nicht überein.
-New Password is empty.==Das neue Passwort ist leer.
+User Page==用户页面
+You are not logged in.<br />==当前未登录.<br /> 
+Username:==用户名:
+Password: <input==密码: <输入
+"login"=="登录"
+You are currently logged in as \#\[username\]\#.==当前作为 #[username]# 登录.
+You have used==可用时间已使用
+minutes of your onlinetime limit of==分钟, 共
+minutes per day.==分钟每天.
+old Password==旧密码
+new Password<==新密码<
+new Password\(repetition\)==新密码(重复)
+"Change"=="改变"
+You are currently logged in as admin.==当前作为管理员登录.
+value="logout"==value="注销"
+\(after logout you will be prompted for your password again. simply click "cancel"\)==(注销后需要重新输入密码)
+Password was changed.==密码已改变.
+Old Password is wrong.==密码输入错误.
+New Password and its repetition do not match.==新密码两次输入不匹配.
+New Password is empty.==新密码为空.
 #-----------------------------
 
 #File: ViewFile.html
