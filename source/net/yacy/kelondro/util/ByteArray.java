@@ -27,7 +27,7 @@ package net.yacy.kelondro.util;
 import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.cora.order.ByteOrder;
 
 
 /**

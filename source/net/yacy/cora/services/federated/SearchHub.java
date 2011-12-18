@@ -32,10 +32,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.ranking.ConcurrentScoreMap;
-import net.yacy.cora.ranking.ScoreMap;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.sorting.ScoreMap;
 
 public class SearchHub {
 

@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
 import javax.swing.event.EventListenerList;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.ranking.ClusteredScoreMap;
+import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.Evaluation.Element;
@@ -115,17 +115,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     // class variables: collectors for links
-    private Map<MultiProtocolURI, Properties> anchors;
+    private final Map<MultiProtocolURI, Properties> anchors;
     private final Map<MultiProtocolURI, String> rss, css;
     private final Set<MultiProtocolURI> script, frames, iframes;
-    private Map<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
+    private final Map<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
     private final Map<String, String> metas;
     private String title;
     //private String headline;
     private List<String>[] headlines;
     private final ClusteredScoreMap<String> bold, italic;
     private final List<String> li;
-    private CharBuffer content;
+    private final CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
     private float lon, lat;
     private MultiProtocolURI canonical;
@@ -187,23 +187,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.anchors.put(url, p0);
     }
 
-    /*
-    private void mergeAnchors(final MultiProtocolURI url, final String key, final String value) {
-        if (value == null) return;
-        if (value.length() == 0) return;
-        Properties p0 = this.anchors.get(url);
-        if (p0 == null) {
-            p0 = new Properties();
-            p0.put(key, value);
-            this.anchors.put(url, p0);
-            return;
-        }
-        // merge properties
-        p0.put(key, value);
-        this.anchors.put(url, p0);
-    }
-     */
-
+    @Override
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + UTF8.String(newtext));
         int p, pl, q, s = 0;
@@ -295,7 +279,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (final MalformedURLException e) {}
         }
         // append string to content
-        if (b.length() != 0) this.content.append(b).append(32);
+        if (!b.isEmpty()) {
+            this.content.append(b);
+            this.content.appendSpace();
+        }
     }
 
     private final static Pattern dpssp = Pattern.compile("://");
@@ -317,6 +304,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
 
+    @Override
     public void scrapeTag0(final String tagname, final Properties tagopts) {
         if (tagname.equalsIgnoreCase("img")) {
             final String src = tagopts.getProperty("src", EMPTY_STRING);
@@ -407,6 +395,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         fireScrapeTag0(tagname, tagopts);
     }
 
+    @Override
     public void scrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + UTF8.String(text));
         if (tagname.equalsIgnoreCase("a") && text.length < 2048) {
@@ -481,6 +470,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
 
+    @Override
     public void scrapeComment(final char[] comment) {
         this.evaluationScores.match(Element.comment, comment);
     }
@@ -837,11 +827,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public void close() {
         // free resources
         super.close();
-        this.anchors = null;
-        this.images = null;
+        this.anchors.clear();
+        this.images.clear();
         this.title = null;
         this.headlines = null;
-        this.content = null;
+        this.content.clear();
         this.root = null;
     }
 

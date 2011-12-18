@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.ranking.OrderedScoreMap;
-import net.yacy.cora.ranking.ScoreMap;
+import net.yacy.cora.sorting.OrderedScoreMap;
+import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.kelondro.index.BinSearch;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;

@@ -41,9 +41,9 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.ranking.ScoreMap;
-import net.yacy.cora.ranking.WeakPriorityBlockingQueue;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -244,6 +244,7 @@ public final class search {
                     null,
                     false,
                     sitehash,
+                    null,
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,
@@ -305,6 +306,7 @@ public final class search {
                     constraint,
                     false,
                     sitehash,
+                    null,
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,

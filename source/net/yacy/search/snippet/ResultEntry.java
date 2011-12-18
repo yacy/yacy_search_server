@@ -51,7 +51,6 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     
     // payload objects
     private final URIMetadataRow urlentry;
-    private final URIMetadataRow.Components urlcomps; // buffer for components
     private String alternative_urlstring;
     private String alternative_urlname;
     private final TextSnippet textSnippet;
@@ -67,20 +66,19 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                        final List<MediaSnippet> mediaSnippets,
                        final long dbRetrievalTime, final long snippetComputationTime) {
         this.urlentry = urlentry;
-        this.urlcomps = urlentry.metadata();
         this.alternative_urlstring = null;
         this.alternative_urlname = null;
         this.textSnippet = textSnippet;
         this.mediaSnippets = mediaSnippets;
         this.dbRetrievalTime = dbRetrievalTime;
         this.snippetComputationTime = snippetComputationTime;
-        final String host = urlcomps.url().getHost();
+        final String host = urlentry.url().getHost();
         if (host != null && host.endsWith(".yacyh")) {
             // translate host into current IP
             int p = host.indexOf('.');
             final String hash = Seed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
             final Seed seed = peers.getConnected(hash);
-            final String filename = urlcomps.url().getFile();
+            final String filename = urlentry.url().getFile();
             String address = null;
             if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                 // seed is not known from here
@@ -90,7 +88,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                             ("yacyshare " +
                              filename.replace('?', ' ') +
                              " " +
-                             urlcomps.dc_title()), null).keySet()),
+                             urlentry.dc_title()), null).keySet()),
                              urlentry.hash());
                 } catch (IOException e) {
                     Log.logException(e);
@@ -98,14 +96,14 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                 indexSegment.urlMetadata().remove(urlentry.hash()); // clean up
                 throw new RuntimeException("index void");
             }
-            alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
-            alternative_urlname = "http://share." + seed.getName() + ".yacy" + filename;
-            if ((p = alternative_urlname.indexOf('?')) > 0) alternative_urlname = alternative_urlname.substring(0, p);
+            this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
+            this.alternative_urlname = "http://share." + seed.getName() + ".yacy" + filename;
+            if ((p = this.alternative_urlname.indexOf('?')) > 0) this.alternative_urlname = this.alternative_urlname.substring(0, p);
         }
     }
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(urlentry.hash());
+        return ByteArray.hashCode(this.urlentry.hash());
     }
     @Override
     public boolean equals(final Object obj) {
@@ -113,37 +111,37 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         if (obj == null) return false;
         if (!(obj instanceof ResultEntry)) return false;
         ResultEntry other = (ResultEntry) obj;
-        return Base64Order.enhancedCoder.equal(urlentry.hash(), other.urlentry.hash());
+        return Base64Order.enhancedCoder.equal(this.urlentry.hash(), other.urlentry.hash());
     }
     public byte[] hash() {
-        return urlentry.hash();
+        return this.urlentry.hash();
     }
     public DigestURI url() {
-        return urlcomps.url();
+        return this.urlentry.url();
     }
     public Bitfield flags() {
-        return urlentry.flags();
+        return this.urlentry.flags();
     }
     public String urlstring() {
-        return (alternative_urlstring == null) ? urlcomps.url().toNormalform(false, true) : alternative_urlstring;
+        return (this.alternative_urlstring == null) ? this.urlentry.url().toNormalform(false, true) : this.alternative_urlstring;
     }
     public String urlname() {
-        return (alternative_urlname == null) ? MultiProtocolURI.unescape(urlcomps.url().toNormalform(false, true)) : alternative_urlname;
+        return (this.alternative_urlname == null) ? MultiProtocolURI.unescape(this.urlentry.url().toNormalform(false, true)) : this.alternative_urlname;
     }
     public String title() {
-        return urlcomps.dc_title();
+        return this.urlentry.dc_title();
     }
     public String publisher() {
         // dc:publisher
-        return urlcomps.dc_publisher();
+        return this.urlentry.dc_publisher();
     }
     public String creator() {
         // dc:creator, the author
-        return urlcomps.dc_creator();
+        return this.urlentry.dc_creator();
     }
     public String subject() {
         // dc:subject, keywords
-        return urlcomps.dc_subject();
+        return this.urlentry.dc_subject();
     }
     public TextSnippet textSnippet() {
         return this.textSnippet;
@@ -152,31 +150,31 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return this.mediaSnippets;
     }
     public Date modified() {
-        return urlentry.moddate();
+        return this.urlentry.moddate();
     }
     public int filesize() {
-        return urlentry.size();
+        return this.urlentry.size();
     }
     public int limage() {
-        return urlentry.limage();
+        return this.urlentry.limage();
     }
     public int laudio() {
-        return urlentry.laudio();
+        return this.urlentry.laudio();
     }
     public int lvideo() {
-        return urlentry.lvideo();
+        return this.urlentry.lvideo();
     }
     public int lapp() {
-        return urlentry.lapp();
+        return this.urlentry.lapp();
     }
     public float lat() {
-        return urlentry.metadata().lat();
+        return this.urlentry.lat();
     }
     public float lon() {
-        return urlentry.metadata().lon();
+        return this.urlentry.lon();
     }
     public WordReferenceVars word() {
-        final Reference word = urlentry.word();
+        final Reference word = this.urlentry.word();
         assert word instanceof WordReferenceVars;
         return (WordReferenceVars) word;
     }
@@ -188,14 +186,16 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     }
     public String resource() {
         // generate transport resource
-        if ((textSnippet == null) || (!textSnippet.exists())) {
-            return urlentry.toString();
+        if ((this.textSnippet == null) || (!this.textSnippet.exists())) {
+            return this.urlentry.toString();
         }
-        return urlentry.toString(textSnippet.getLineRaw());
+        return this.urlentry.toString(this.textSnippet.getLineRaw());
     }
+    @Override
     public int compareTo(ResultEntry o) {
         return Base64Order.enhancedCoder.compare(this.urlentry.hash(), o.urlentry.hash());
     }
+    @Override
     public int compare(ResultEntry o1, ResultEntry o2) {
         return Base64Order.enhancedCoder.compare(o1.urlentry.hash(), o2.urlentry.hash());
     }

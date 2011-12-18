@@ -35,11 +35,11 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.AbstractWriter;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -125,12 +125,12 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public boolean containsKey(byte[] key) {
-        assert index != null;
+        assert this.index != null;
         key = normalizeKey(key);
         synchronized (this) {
             // check the buffer
-            assert buffer != null;
-            if (buffer != null) {
+            assert this.buffer != null;
+            if (this.buffer != null) {
                 if (this.buffer.containsKey(key)) return true;
             }
             return super.containsKey(key);
@@ -147,13 +147,13 @@ public final class Heap extends HeapModifier implements BLOB {
     private void add(byte[] key, final byte[] blob) throws IOException {
         assert blob.length > 0;
         if ((blob == null) || (blob.length == 0)) return;
-        final int pos = (int) file.length();
+        final int pos = (int) this.file.length();
         try {
-            index.put(key, pos);
-            file.seek(pos);
-            file.writeInt(this.keylength + blob.length);
-            file.write(key);
-            file.write(blob, 0, blob.length);
+            this.index.put(key, pos);
+            this.file.seek(pos);
+            this.file.writeInt(this.keylength + blob.length);
+            this.file.write(key);
+            this.file.write(blob, 0, blob.length);
         } catch (RowSpaceExceededException e) {
             throw new IOException(e.getMessage()); // should never occur;
         }
@@ -166,8 +166,8 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws RowSpaceExceededException 
      */
     public void flushBuffer() throws IOException {
-        assert buffer != null;
-        if (buffer == null) return;
+        assert this.buffer != null;
+        if (this.buffer == null) return;
         
         // check size of buffer
         Iterator<Map.Entry<byte[], byte[]>> i = this.buffer.entrySet().iterator();
@@ -196,18 +196,18 @@ public final class Heap extends HeapModifier implements BLOB {
         
         // append all contents of the buffer into one byte[]
         i = this.buffer.entrySet().iterator();
-        final long pos = file.length();
+        final long pos = this.file.length();
         long posFile = pos;
         posBuffer = 0;
         byte[] ba = new byte[l + (4 + this.keylength) * this.buffer.size()];
         byte[] b;
-        SortedMap<byte[], byte[]> nextBuffer = new TreeMap<byte[], byte[]>(ordering);
+        SortedMap<byte[], byte[]> nextBuffer = new TreeMap<byte[], byte[]>(this.ordering);
         flush: while (i.hasNext()) {
             entry = i.next();
             key = normalizeKey(entry.getKey());
             blob = entry.getValue();
             try {
-                index.put(key, posFile);
+                this.index.put(key, posFile);
             } catch (RowSpaceExceededException e) {
                 nextBuffer.put(entry.getKey(), blob);
                 continue flush;
@@ -245,8 +245,8 @@ public final class Heap extends HeapModifier implements BLOB {
         
         synchronized (this) {
             // check the buffer
-            assert buffer != null;
-            if (buffer != null) {
+            assert this.buffer != null;
+            if (this.buffer != null) {
                 byte[] blob = this.buffer.get(key);
                 if (blob != null) return blob;
             }
@@ -267,8 +267,8 @@ public final class Heap extends HeapModifier implements BLOB {
 
         synchronized (this) {
             // check the buffer
-            assert buffer != null;
-            if (buffer != null) {
+            assert this.buffer != null;
+            if (this.buffer != null) {
                 byte[] blob = this.buffer.get(key);
                 if (blob != null) return blob.length;
             }
@@ -284,8 +284,8 @@ public final class Heap extends HeapModifier implements BLOB {
     @Override
     public synchronized void clear() throws IOException {
         Log.logInfo("Heap", "clearing heap " + this.name());
-        assert buffer != null;
-        if (buffer == null) buffer = new TreeMap<byte[], byte[]>(ordering);
+        assert this.buffer != null;
+        if (this.buffer == null) this.buffer = new TreeMap<byte[], byte[]>(this.ordering);
     	this.buffer.clear();
         this.buffersize = 0;
         super.clear();
@@ -297,7 +297,7 @@ public final class Heap extends HeapModifier implements BLOB {
     @Override
     public synchronized void close(final boolean writeIDX) {
         Log.logInfo("Heap", "closing heap " + this.name());
-    	if (file != null && buffer != null) {
+    	if (this.file != null && this.buffer != null) {
             try {
                 flushBuffer();
             } catch (IOException e) {
@@ -306,7 +306,7 @@ public final class Heap extends HeapModifier implements BLOB {
         }
     	this.buffer = null;
     	super.close(writeIDX);
-    	assert file == null;
+    	assert this.file == null;
     }
     
     @Override
@@ -351,11 +351,11 @@ public final class Heap extends HeapModifier implements BLOB {
             assert this.buffer != null;
             
             // if there is not enough space in the buffer, flush all
-            if (this.buffersize + b.length > buffermax || MemoryControl.shortStatus()) {
+            if (this.buffersize + b.length > this.buffermax || MemoryControl.shortStatus()) {
                 // this is too big. Flush everything
                 super.shrinkWithGapsAtEnd();
                 flushBuffer();
-                if (b.length > buffermax) {
+                if (b.length > this.buffermax) {
                     this.add(key, b);
                 } else {
                     if (this.buffer != null) {
@@ -387,6 +387,7 @@ public final class Heap extends HeapModifier implements BLOB {
         final int reclen = b.length + this.keylength;
         Map.Entry<Long, Integer> entry;
         Iterator<Map.Entry<Long, Integer>> i = this.free.entrySet().iterator();
+        int acount = 0, bcount = 0;
         while (i.hasNext()) {
             entry = i.next();
             if (entry.getValue().intValue() == reclen) {
@@ -397,14 +398,14 @@ public final class Heap extends HeapModifier implements BLOB {
                 this.index.put(key, entry.getKey());
                 
                 // write to file
-                file.seek(entry.getKey().longValue());
-                final int reclenf = file.readInt();
+                this.file.seek(entry.getKey().longValue());
+                final int reclenf = this.file.readInt();
                 assert reclenf == reclen;
-                file.write(key);
+                this.file.write(key);
                 if (this.keylength > key.length) {
-                    for (int j = 0; j < this.keylength - key.length; j++) file.write(HeapWriter.ZERO);
+                    for (int j = 0; j < this.keylength - key.length; j++) this.file.write(HeapWriter.ZERO);
                 }
-                file.write(b);
+                this.file.write(b);
 
                 // remove the entry from the free list
                 i.remove();
@@ -414,10 +415,13 @@ public final class Heap extends HeapModifier implements BLOB {
                 // finished!
                 return true;
             }
+            acount++;
             // look for the biggest size
-            if (entry.getValue() > lsize) {
+            if (entry.getValue().intValue() > lsize) {
                 lseek = entry.getKey();
                 lsize = entry.getValue();
+                bcount++;
+                if (acount > 100 || bcount > 10) break; // in case that we have really a lot break here
             }
         }
         
@@ -429,21 +433,21 @@ public final class Heap extends HeapModifier implements BLOB {
             // data structure in the file
             
             // write the new entry
-            file.seek(lseek);
-            file.writeInt(reclen);
-            file.write(key);
+            this.file.seek(lseek);
+            this.file.writeInt(reclen);
+            this.file.write(key);
             if (this.keylength > key.length) {
-                for (int j = 0; j < this.keylength - key.length; j++) file.write(HeapWriter.ZERO);
+                for (int j = 0; j < this.keylength - key.length; j++) this.file.write(HeapWriter.ZERO);
             }
-            file.write(b);
+            this.file.write(b);
             
             // add the index to the new entry
-            index.put(key, lseek);
+            this.index.put(key, lseek);
             
             // define the new empty entry
             final int newfreereclen = lsize - reclen - 4;
             assert newfreereclen > 0;
-            file.writeInt(newfreereclen);
+            this.file.writeInt(newfreereclen);
             
             // remove the old free entry
             this.free.remove(lseek);
@@ -473,8 +477,8 @@ public final class Heap extends HeapModifier implements BLOB {
             super.deleteFingerprint();
             
             // check the buffer
-            assert buffer != null;
-            if (buffer != null) {
+            assert this.buffer != null;
+            if (this.buffer != null) {
                 byte[] blob = this.buffer.remove(key);
                 if (blob != null) {
                     this.buffersize -= blob.length;

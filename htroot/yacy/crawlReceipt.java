@@ -33,8 +33,8 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.Seed;
 import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
 import de.anomic.crawler.ResultURLs;
@@ -125,15 +125,14 @@ public final class crawlReceipt {
             return prop;
         }
 
-        final URIMetadataRow.Components metadata = entry.metadata();
-        if (metadata.url() == null) {
+        if (entry.url() == null) {
             if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
 
         // check if the entry is in our network domain
-        final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(metadata.url());
+        final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(entry.url());
         if (urlRejectReason != null) {
             if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
@@ -145,7 +144,7 @@ public final class crawlReceipt {
             sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
             ResultURLs.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
-            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + metadata.url().toNormalform(false, true));
+            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true));
 
             // ready for more
             prop.put("delay", "10");

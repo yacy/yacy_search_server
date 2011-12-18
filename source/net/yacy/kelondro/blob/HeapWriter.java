@@ -31,10 +31,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.ByteOrder;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.util.FileUtils;
 
 

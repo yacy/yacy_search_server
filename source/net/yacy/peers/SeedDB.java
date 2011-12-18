@@ -274,22 +274,27 @@ public final class SeedDB implements AlternativeDomainNames {
         this.myBotIDs.add(name + ".yacy");
     }
 
+    @Override
     public String myAlternativeAddress() {
         return mySeed().getName() + ".yacy";
     }
 
+    @Override
     public String myIP() {
         return mySeed().getIP();
     }
 
+    @Override
     public int myPort() {
         return mySeed().getPort();
     }
 
+    @Override
     public String myName() {
         return this.mySeed.getName();
     }
 
+    @Override
     public String myID() {
         return this.mySeed.hash;
     }
@@ -697,7 +702,7 @@ public final class SeedDB implements AlternativeDomainNames {
         final HandleSet badPeerHashes = new HandleSet(12, Base64Order.enhancedCoder, 0);
 
         if (lookupConnected) {
-            // enumerate the cache and simultanous insert values
+            // enumerate the cache and simultaneously insert values
             final Iterator<Seed> e = seedsConnected(true, false, null, (float) 0.0);
             while (e.hasNext()) {
                 seed = e.next();
@@ -1004,7 +1009,7 @@ public final class SeedDB implements AlternativeDomainNames {
 
     private class seedEnum implements Iterator<Seed> {
 
-        private MapDataMining.mapIterator it;
+        private Iterator<Map.Entry<byte[], Map<String, String>>> it;
         private Seed nextSeed;
         private final MapDataMining database;
         private float minVersion;
@@ -1013,7 +1018,7 @@ public final class SeedDB implements AlternativeDomainNames {
             this.database = database;
             this.minVersion = minVersion;
             try {
-                this.it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey, secondKey);
+                this.it = (firstKey == null) ? database.entries(up, rot) : database.entries(up, rot, firstKey, secondKey);
                 float version;
                 while (true) {
                     this.nextSeed = internalNext();
@@ -1039,7 +1044,7 @@ public final class SeedDB implements AlternativeDomainNames {
         private seedEnum(final boolean up, final String field, final MapDataMining database) {
             this.database = database;
             try {
-                this.it = database.maps(up, field);
+                this.it = database.entries(up, field);
                 this.nextSeed = internalNext();
             } catch (final kelondroException e) {
                 Log.logException(e);
@@ -1058,7 +1063,7 @@ public final class SeedDB implements AlternativeDomainNames {
         private Seed internalNext() {
             if (this.it == null || !(this.it.hasNext())) return null;
             try {
-                Map<String, String> dna0;
+                Map.Entry<byte[], Map<String, String>> dna0;
                 ConcurrentHashMap<String, String> dna;
                 while (this.it.hasNext()) {
                     try {
@@ -1069,15 +1074,14 @@ public final class SeedDB implements AlternativeDomainNames {
                     }
                     assert dna0 != null;
                     if (dna0 == null) continue;
-                    if (dna0 instanceof ConcurrentHashMap) {
-                        dna = (ConcurrentHashMap<String, String>) dna0;
+                    if (dna0.getValue() instanceof ConcurrentHashMap) {
+                        dna = (ConcurrentHashMap<String, String>) dna0.getValue();
                     } else {
                         dna = new ConcurrentHashMap<String, String>();
-                        dna.putAll(dna0);
+                        dna.putAll(dna0.getValue());
                     }
-                    final String hash = dna.remove("key");
-                    //assert hash != null;
-                    if (hash == null) continue; // bad seed
+                    if (dna0.getKey() == null) continue; // bad seed
+                    final String hash = UTF8.String(dna0.getKey());
                     return new Seed(hash, dna);
                 }
                 return null;

@@ -32,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,17 +43,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.LookAheadIterator;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.kelondroException;
 
 public class MapHeap implements Map<byte[], Map<String, String>> {
 
@@ -85,6 +86,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
      * clears the content of the database
      * @throws IOException
      */
+    @Override
     public synchronized void clear() {
     	try {
             this.blob.clear();
@@ -168,6 +170,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         }
     }
 
+    @Override
     public Map<String, String> put(final byte[] key, final Map<String, String> newMap) {
         Map<String, String> v = null;
         try {
@@ -200,6 +203,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         }
     }
 
+    @Override
     public Map<String, String> remove(final Object key)  {
         Map<String, String> v = null;
         try {
@@ -218,6 +222,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
      * @throws IOException
      */
 
+    @Override
     public boolean containsKey(final Object k) {
         if (!(k instanceof byte[])) return false;
         assert k != null;
@@ -241,6 +246,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         return get(key, true);
     }
 
+    @Override
     public Map<String, String> get(final Object key) {
         if (key == null) return null;
         try {
@@ -375,6 +381,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             this.iterator = (rotating) ? new RotateIterator<byte[]>(i, secondKey, MapHeap.this.blob.size()) : i;
         }
 
+        @Override
         public byte[] next() {
             return removeFillchar(this.iterator.next());
         }
@@ -399,23 +406,29 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         }
 
     }
-
-    public synchronized MapIterator entries(final boolean up, final boolean rotating) throws IOException {
-        return new MapIterator(keys(up, rotating));
+    
+    public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final String whereKey, final String isValue) throws IOException {
+        return new MapIterator(this.blob.keys(true, null), whereKey, isValue);
     }
 
-    public synchronized MapIterator entries(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
-        return new MapIterator(keys(up, rotating, firstKey, secondKey));
+    public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final boolean rotating) throws IOException {
+        return new MapIterator(keys(up, rotating), null, null);
+    }
+
+    public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
+        return new MapIterator(keys(up, rotating, firstKey, secondKey), null, null);
     }
 
     /**
      * ask for the number of entries
      * @return the number of entries in the table
      */
+    @Override
     public synchronized int size() {
         return (this.blob == null) ? 0 : this.blob.size();
     }
 
+    @Override
     public synchronized boolean isEmpty() {
         return (this.blob == null) ? true : this.blob.isEmpty();
     }
@@ -435,48 +448,52 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
     public void finalize() {
         close();
     }
-
-    public class MapIterator implements Iterator<Map<String, String>> {
+    
+    public class MapIterator extends LookAheadIterator<Map.Entry<byte[], Map<String, String>>> implements Iterator<Map.Entry<byte[], Map<String, String>>> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
-        Iterator<byte[]> keyIterator;
-        boolean finish;
+        private final Iterator<byte[]> keyIterator;
+        private final String whereKey, isValue;
 
-        public MapIterator(final Iterator<byte[]> keyIterator) {
+        MapIterator(final Iterator<byte[]> keyIterator, final String whereKey, final String isValue) {
             this.keyIterator = keyIterator;
-            this.finish = false;
+            this.whereKey = whereKey;
+            this.isValue = isValue;
         }
 
-        public boolean hasNext() {
-            return (!(this.finish)) && (this.keyIterator.hasNext());
-        }
-
-        public Map<String, String> next() {
-            byte[] nextKey = this.keyIterator.next();
-            if (nextKey == null) {
-                this.finish = true;
-                return null;
+        @Override
+        public Map.Entry<byte[], Map<String, String>> next0() {
+            if (this.keyIterator == null) return null;
+            byte[] nextKey;
+            Map<String, String> map;
+            while (this.keyIterator.hasNext()) {
+                nextKey = this.keyIterator.next();
+                try {
+                    map = get(nextKey, false);
+                } catch (final IOException e) {
+                    Log.logWarning("MapDataMining", e.getMessage());
+                    continue;
+                } catch (final RowSpaceExceededException e) {
+                    Log.logException(e);
+                    continue;
+                }
+                if (map == null) continue; // circumvention of a modified exception
+                // check if the where case holds
+                if (this.whereKey != null && this.isValue != null) {
+                    String v = map.get(this.whereKey);
+                    if (v == null) continue;
+                    if (!v.equals(this.isValue)) continue;
+                }
+                // produce entry
+                Map.Entry<byte[], Map<String, String>> entry = new AbstractMap.SimpleImmutableEntry<byte[], Map<String, String>>(nextKey, map);
+                return entry;
             }
-            nextKey = normalizeKey(nextKey); // the key must be normalized because the keyIterator may iterate over not-normalized keys
-            try {
-                final Map<String, String> obj = get(nextKey, false);
-                if (obj == null) throw new kelondroException("no more elements available");
-                return obj;
-            } catch (final IOException e) {
-                this.finish = true;
-                return null;
-            } catch (final RowSpaceExceededException e) {
-                this.finish = true;
-                return null;
-            }
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
+            return null;
         }
     } // class mapIterator
 
+    @Override
     public void putAll(final Map<? extends byte[], ? extends Map<String, String>> map) {
         for (final Map.Entry<? extends byte[], ? extends Map<String, String>> me: map.entrySet()) {
             try {
@@ -489,6 +506,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         }
     }
 
+    @Override
     public Set<byte[]> keySet() {
         final TreeSet<byte[]> set = new TreeSet<byte[]>(this.blob.ordering());
         try {
@@ -498,16 +516,19 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         return set;
     }
 
+    @Override
     public Collection<Map<String, String>> values() {
         // this method shall not be used because it is not appropriate for this kind of data
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Set<java.util.Map.Entry<byte[], Map<String, String>>> entrySet() {
         // this method shall not be used because it is not appropriate for this kind of data
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean containsValue(final Object value) {
         // this method shall not be used because it is not appropriate for this kind of data
         throw new UnsupportedOperationException();

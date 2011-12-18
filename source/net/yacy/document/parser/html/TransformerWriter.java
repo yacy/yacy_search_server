@@ -82,7 +82,7 @@ public final class TransformerWriter extends Writer {
             final Transformer transformer,
             final boolean passbyIfBinarySuspect
     ) {
-    	this(outStream, charSet, scraper, transformer, passbyIfBinarySuspect, 1024);
+    	this(outStream, charSet, scraper, transformer, passbyIfBinarySuspect, 4096);
     }
 
     public TransformerWriter(
@@ -115,9 +115,9 @@ public final class TransformerWriter extends Writer {
 
     public static char[] genTag0raw(final String tagname, final boolean opening, final char[] tagopts) {
             final CharBuffer bb = new CharBuffer(tagname.length() + tagopts.length + 3);
-            bb.append((int)'<');
+            bb.append('<');
             if (!opening) {
-                bb.append((int)'/');
+                bb.append('/');
             }
             bb.append(tagname);
             if (tagopts.length > 0) {
@@ -125,7 +125,7 @@ public final class TransformerWriter extends Writer {
                 bb.append(tagopts);
 //              else bb.append((byte) 32).append(tagopts);
             }
-            bb.append((int)'>');
+            bb.append('>');
             final char[] result = bb.getChars();
             try {
                 bb.close();
@@ -137,15 +137,15 @@ public final class TransformerWriter extends Writer {
 
     public static char[] genTag1raw(final String tagname, final char[] tagopts, final char[] text) {
             final CharBuffer bb = new CharBuffer(2 * tagname.length() + tagopts.length + text.length + 5);
-            bb.append((int)'<').append(tagname);
+            bb.append('<').append(tagname);
             if (tagopts.length > 0) {
 //              if (tagopts[0] == (byte) 32)
                 bb.append(tagopts);
 //              else bb.append((byte) 32).append(tagopts);
             }
-            bb.append((int)'>');
+            bb.append('>');
             bb.append(text);
-            bb.append((int)'<').append((int)'/').append(tagname).append((int)'>');
+            bb.append('<').append('/').append(tagname).append('>');
             final char[] result = bb.getChars();
             try {
                 bb.close();
@@ -158,12 +158,12 @@ public final class TransformerWriter extends Writer {
     public static char[] genTag0(final String tagname, final Properties tagopts, final char quotechar) {
             final char[] tagoptsx = (tagopts.isEmpty()) ? null : genOpts(tagopts, quotechar);
             final CharBuffer bb = new CharBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
-            bb.append((int)'<').append(tagname);
+            bb.append('<').append(tagname);
             if (tagoptsx != null) {
-                bb.append(32);
+                bb.appendSpace();
                 bb.append(tagoptsx);
             }
-            bb.append((int)'>');
+            bb.append('>');
             final char[] result = bb.getChars();
             try {
                 bb.close();
@@ -176,7 +176,7 @@ public final class TransformerWriter extends Writer {
     public static char[] genTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
             final char[] gt0 = genTag0(tagname, tagopts, quotechar);
             final CharBuffer cb = new CharBuffer(gt0, gt0.length + text.length + tagname.length() + 3);
-            cb.append(text).append((int)'<').append((int)'/').append(tagname).append((int)'>');
+            cb.append(text).append('<').append('/').append(tagname).append('>');
             final char[] result = cb.getChars();
             try {
                 cb.close();
@@ -193,9 +193,9 @@ public final class TransformerWriter extends Writer {
             String key;
             while (e.hasMoreElements()) {
                 key = (String) e.nextElement();
-                bb.append(32).append(key).append((int)'=').append((int)quotechar);
+                bb.appendSpace().append(key).append('=').append(quotechar);
                 bb.append(prop.getProperty(key));
-                bb.append((int)quotechar);
+                bb.append(quotechar);
             }
             final char[] result;
             if (bb.length() > 0)
@@ -530,12 +530,14 @@ public final class TransformerWriter extends Writer {
         write(b, 0, b.length);
     }
 
+    @Override
     public void write(final char b[], final int off, final int len) throws IOException {
 //      System.out.println(UTF8.String(b, off, len));
         if ((off | len | (b.length - (len + off)) | (off + len)) < 0) throw new IndexOutOfBoundsException();
         for (int i = off ; i < (len - off) ; i++) this.write(b[i]);
     }
 
+    @Override
     public void flush() throws IOException {
         // we cannot flush the current string this.buffer to prevent that
         // the filter process is messed up
@@ -544,6 +546,7 @@ public final class TransformerWriter extends Writer {
         // if you want to flush all, call close() at end of writing;
     }
 
+    @Override
     public void close() throws IOException {
         final char quotechar = (this.inSingleQuote) ? singlequote : doublequote;
         if (this.buffer != null) {

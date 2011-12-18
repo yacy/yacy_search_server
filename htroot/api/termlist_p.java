@@ -27,7 +27,7 @@ import java.util.Iterator;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.ranking.Rating;
+import net.yacy.cora.sorting.Rating;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
@@ -50,7 +50,7 @@ public class termlist_p {
             segment = sb.indexSegments.segment(post.get("segment"));
         }
         if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        final Iterator<Rating<byte[]>> i = segment.termIndex().referenceCountIterator(null, false);
+        final Iterator<Rating<byte[]>> i = segment.termIndex().referenceCountIterator(null, false, false);
         Rating<byte[]> e;
         int c = 0, termnumber = 0;
         byte[] termhash, maxterm = null;

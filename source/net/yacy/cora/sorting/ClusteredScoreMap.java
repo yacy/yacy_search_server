@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.ranking;
+package net.yacy.cora.sorting;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,10 +58,12 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         this.encnt = 0;
     }
 
+    @Override
     public Iterator<E> iterator() {
         return this.map.keySet().iterator();
     }
 
+    @Override
     public synchronized void clear() {
         this.map.clear();
         this.pam.clear();
@@ -73,6 +75,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
      * shrink the cluster to a demanded size
      * @param maxsize
      */
+    @Override
     public void shrinkToMaxSize(final int maxsize) {
         if (maxsize < 0) return;
         Long key;
@@ -90,6 +93,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
      * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
      * @param minScore
      */
+    @Override
     public void shrinkToMinScore(final int minScore) {
         int score;
         Long key;
@@ -121,7 +125,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         if (o instanceof Long) {
             final long l = ((Long) o).longValue();
             if (l < Integer.MAX_VALUE) return (int) l;
-            o = ((Long) o).toString();
+            return (int) (l & Integer.MAX_VALUE);
         }
         if (o instanceof Float) {
             final double d = 1000f * ((Float) o).floatValue();
@@ -148,13 +152,13 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
                 l = Long.parseLong(s);
             }
             // fix out-of-ranges
-            if (l > Integer.MAX_VALUE) return Integer.MAX_VALUE; //(int) (l & (Integer.MAX_VALUE));
+            if (l > Integer.MAX_VALUE) return (int) (l & Integer.MAX_VALUE);
             if (l < 0) {
                 System.out.println("string2score: negative score for input " + s);
                 return 0;
             }
             return (int) l;
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             // try it lex
             int len = s.length();
             if (len > 5) len = 5;
@@ -188,26 +192,32 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         return this.gcount;
     }
 
+    @Override
     public synchronized int size() {
         return this.map.size();
     }
 
+    @Override
     public boolean sizeSmaller(final int size) {
         return this.map.size() < size;
     }
 
+    @Override
     public synchronized boolean isEmpty() {
         return this.map.isEmpty();
     }
 
+    @Override
     public synchronized void inc(final E obj) {
         inc(obj, 1);
     }
 
+    @Override
     public synchronized void dec(final E obj) {
         inc(obj, -1);
     }
 
+    @Override
     public void set(final E obj, final int newScore) {
         if (obj == null) return;
         synchronized (this) {
@@ -242,6 +252,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         this.gcount += newScore;
     }
 
+    @Override
     public void inc(final E obj, final int incrementScore) {
         if (obj == null) return;
         synchronized (this) {
@@ -277,10 +288,12 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         this.gcount += incrementScore;
     }
 
+    @Override
     public void dec(final E obj, final int incrementScore) {
         inc(obj, -incrementScore);
     }
 
+    @Override
     public int delete(final E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
@@ -302,10 +315,12 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         return oldScore;
     }
 
+    @Override
     public synchronized boolean containsKey(final E obj) {
         return this.map.containsKey(obj);
     }
 
+    @Override
     public int get(final E obj) {
         if (obj == null) return 0;
         final Long cs;
@@ -316,30 +331,36 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         return (int) ((cs.longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
+    @Override
     public synchronized int getMaxScore() {
         if (this.map.isEmpty()) return -1;
         return (int) ((this.pam.lastKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
+    @Override
     public synchronized int getMinScore() {
         if (this.map.isEmpty()) return -1;
         return (int) ((this.pam.firstKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
+    @Override
     public synchronized E getMaxKey() {
         if (this.map.isEmpty()) return null;
         return this.pam.get(this.pam.lastKey());
     }
 
+    @Override
     public synchronized E getMinKey() {
         if (this.map.isEmpty()) return null;
         return this.pam.get(this.pam.firstKey());
     }
 
+    @Override
     public String toString() {
         return this.map + " / " + this.pam;
     }
 
+    @Override
     public synchronized Iterator<E> keys(final boolean up) {
         if (up) return new simpleScoreIterator<E>();
         return new reverseScoreIterator<E>();
@@ -354,10 +375,12 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
             this.view = ClusteredScoreMap.this.pam;
         }
 
+        @Override
         public boolean hasNext() {
             return !this.view.isEmpty();
         }
 
+        @Override
         public E next() {
             this.key = this.view.lastKey();
             this.view = this.view.headMap(this.key);
@@ -366,6 +389,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
             return value;
         }
 
+        @Override
         public void remove() {
             final Object val = ClusteredScoreMap.this.pam.remove(this.key);
             if (val != null) ClusteredScoreMap.this.map.remove(val);
@@ -382,16 +406,19 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
             this.ii = ClusteredScoreMap.this.pam.entrySet().iterator();
         }
 
+        @Override
         public boolean hasNext() {
             return this.ii.hasNext();
         }
 
+        @Override
         public E next() {
             this.entry = this.ii.next();
             //System.out.println("cluster simple iterator: score = " + ((((Long) entry.getKey()).longValue() & 0xFFFFFFFF00000000L) >> 32) + ", handle = " + (((Long) entry.getKey()).longValue() & 0xFFFFFFFFL) + ", value = " + entry.getValue());
             return this.entry.getValue();
         }
 
+        @Override
         public void remove() {
             this.ii.remove();
             if (this.entry.getValue() != null) ClusteredScoreMap.this.map.remove(this.entry.getValue());

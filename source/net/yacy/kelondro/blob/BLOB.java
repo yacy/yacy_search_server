@@ -28,9 +28,9 @@ package net.yacy.kelondro.blob;
 
 import java.io.IOException;
 
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
 import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.CloneableIterator;
 
 
 public interface BLOB {

@@ -32,12 +32,12 @@ import java.io.IOException;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import net.yacy.cora.ranking.Rating;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.sorting.Rating;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.CloneableIterator;
 
 
 public interface Index <ReferenceType extends Reference> extends Iterable<ReferenceContainer<ReferenceType>> {
@@ -146,7 +146,8 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
      */
     public CloneableIterator<Rating<byte[]>> referenceCountIterator(
                             byte[] startHash,
-                            boolean rot
+                            boolean rot,
+                            boolean excludePrivate
                             ) throws IOException;
 
     /**
@@ -159,13 +160,15 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
      */
     public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(
                             byte[] startHash,
-                            boolean rot
+                            boolean rot,
+                            boolean excludePrivate
                             ) throws IOException;
 
 
     public TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(
                             byte[] startHash,
                             boolean rot,
+                            boolean excludePrivate,
                             int count
                             ) throws IOException;
 

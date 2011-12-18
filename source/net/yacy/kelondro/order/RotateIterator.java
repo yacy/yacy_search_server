@@ -26,6 +26,8 @@
 
 package net.yacy.kelondro.order;
 
+import net.yacy.cora.order.CloneableIterator;
+
 
 public class RotateIterator<E> implements CloneableIterator<E> {
     

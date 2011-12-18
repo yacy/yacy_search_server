@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
@@ -55,7 +56,6 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
@@ -253,6 +253,7 @@ public class Segment {
             }
             wordCount++;
             if (searchEvent != null && !searchEvent.getQuery().excludeHashes.has(wordhash) && searchEvent.getQuery().queryHashes.has(wordhash)) {
+                // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
                 ReferenceContainer<WordReference> container;
                 try {
                     container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
@@ -421,12 +422,11 @@ public class Segment {
         // determine the url string
         final URIMetadataRow entry = urlMetadata().load(urlhash);
         if (entry == null) return 0;
-        final URIMetadataRow.Components metadata = entry.metadata();
-        if (metadata == null || metadata.url() == null) return 0;
+        if (entry.url() == null) return 0;
 
         try {
             // parse the resource
-            final Document document = Document.mergeDocuments(metadata.url(), null, loader.loadDocuments(loader.request(metadata.url(), true, false), cacheStrategy, 10000, Integer.MAX_VALUE));
+            final Document document = Document.mergeDocuments(entry.url(), null, loader.loadDocuments(loader.request(entry.url(), true, false), cacheStrategy, 10000, Integer.MAX_VALUE));
             if (document == null) {
                 // delete just the url entry
                 urlMetadata().remove(urlhash);
@@ -472,6 +472,7 @@ public class Segment {
             this.rwiCountAtStart = termIndex().sizesMax();
         }
 
+        @Override
         public void run() {
             Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             ReferenceContainer<WordReference> container = null;
@@ -479,7 +480,7 @@ public class Segment {
             DigestURI url = null;
             final HandleSet urlHashs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             try {
-                Iterator<ReferenceContainer<WordReference>> indexContainerIterator = Segment.this.termIndex.referenceContainer(this.startHash, false, 100, false).iterator();
+                Iterator<ReferenceContainer<WordReference>> indexContainerIterator = Segment.this.termIndex.referenceContainer(this.startHash, false, false, 100, false).iterator();
                 while (indexContainerIterator.hasNext() && this.run) {
                     waiter();
                     container = indexContainerIterator.next();
@@ -494,7 +495,7 @@ public class Segment {
                         if (ue == null) {
                             urlHashs.put(entry.urlhash());
                         } else {
-                            url = ue.metadata().url();
+                            url = ue.url();
                             if (url == null || Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
                                 urlHashs.put(entry.urlhash());
                             }
@@ -512,7 +513,7 @@ public class Segment {
 
                     if (!containerIterator.hasNext()) {
                         // We may not be finished yet, try to get the next chunk of wordHashes
-                        final TreeSet<ReferenceContainer<WordReference>> containers = Segment.this.termIndex.referenceContainer(container.getTermHash(), false, 100, false);
+                        final TreeSet<ReferenceContainer<WordReference>> containers = Segment.this.termIndex.referenceContainer(container.getTermHash(), false, false, 100, false);
                         indexContainerIterator = containers.iterator();
                         // Make sure we don't get the same wordhash twice, but don't skip a word
                         if ((indexContainerIterator.hasNext()) && (!container.getTermHash().equals(indexContainerIterator.next().getTermHash()))) {

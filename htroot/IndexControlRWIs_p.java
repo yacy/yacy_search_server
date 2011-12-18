@@ -377,7 +377,7 @@ public class IndexControlRWIs_p
             if ( post.containsKey("keyhashsimilar") ) {
                 try {
                     final Iterator<ReferenceContainer<WordReference>> containerIt =
-                        segment.termIndex().referenceContainer(keyhash, true, 256, false).iterator();
+                        segment.termIndex().referenceContainer(keyhash, true, false, 256, false).iterator();
                     ReferenceContainer<WordReference> container;
                     i = 0;
                     int rows = 0, cols = 0;
@@ -427,7 +427,7 @@ public class IndexControlRWIs_p
                             final URIMetadataRow e = segment.urlMetadata().load(b);
                             segment.urlMetadata().remove(b);
                             if ( e != null ) {
-                                url = e.metadata().url();
+                                url = e.url();
                                 pw.println(url.getHost() + "/" + url.getFile());
                                 for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
                                     if ( ListManager.listSetContains(
@@ -463,7 +463,7 @@ public class IndexControlRWIs_p
                             final URIMetadataRow e = segment.urlMetadata().load(b);
                             segment.urlMetadata().remove(b);
                             if ( e != null ) {
-                                url = e.metadata().url();
+                                url = e.url();
                                 pw.println(url.getHost() + "/.*");
                                 for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
                                     if ( ListManager.listSetContains(
@@ -530,10 +530,7 @@ public class IndexControlRWIs_p
             String us;
             long rn = -1;
             while ( !ranked.isEmpty() && (entry = ranked.takeURL(false, 1000)) != null ) {
-                if ( (entry == null) || (entry.metadata() == null) ) {
-                    continue;
-                }
-                url = entry.metadata().url();
+                url = entry.url();
                 if ( url == null ) {
                     continue;
                 }

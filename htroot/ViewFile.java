@@ -117,14 +117,13 @@ public class ViewFile {
         // get the urlEntry that belongs to the url hash
         if (urlHash.length() > 0 && (urlEntry = indexSegment.urlMetadata().load(ASCII.getBytes(urlHash))) != null) {
             // get the url that belongs to the entry
-            final URIMetadataRow.Components metadata = urlEntry.metadata();
-            if ((metadata == null) || (metadata.url() == null)) {
+            if (urlEntry == null || urlEntry.url() == null) {
                 prop.put("error", "3");
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
                 return prop;
             }
-            url = metadata.url();
-            descr = metadata.dc_title();
+            url = urlEntry.url();
+            descr = urlEntry.dc_title();
             //urlEntry.wordCount();
             size = urlEntry.size();
             pre = urlEntry.flags().get(Condenser.flag_cat_indexof);

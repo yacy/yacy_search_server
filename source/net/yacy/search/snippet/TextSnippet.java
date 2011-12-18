@@ -144,7 +144,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public TextSnippet(
             final LoaderDispatcher loader,
             final String solrText,
-            final URIMetadataRow.Components comp,
+            final URIMetadataRow row,
             final HandleSet queryhashes,
             final CacheStrategy cacheStrategy,
             final boolean pre,
@@ -152,7 +152,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             final int maxDocLen,
             final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
-        final DigestURI url = comp.url();
+        final DigestURI url = row.url();
         if (queryhashes.isEmpty()) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
             init(url.hash(), null, ResultClass.ERROR_NO_HASH_GIVEN, "no query hashes given");
@@ -185,7 +185,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
             // if then no sentences are found, we fail-over to get the content from the re-loaded document
             if (sentences == null) {
-                final Document document = loadDocument(loader, comp, queryhashes, cacheStrategy, url, reindexing, source);
+                final Document document = loadDocument(loader, row, queryhashes, cacheStrategy, url, reindexing, source);
                 if (document == null) {
                     return;
                 }
@@ -251,7 +251,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
     private Document loadDocument(
             final LoaderDispatcher loader,
-            final URIMetadataRow.Components comp,
+            final URIMetadataRow row,
             final HandleSet queryhashes,
             final CacheStrategy cacheStrategy,
             final DigestURI url,
@@ -266,12 +266,12 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // first try to get the snippet from metadata
             String loc;
             final Request request = loader.request(url, true, reindexing);
-            final boolean inCache = de.anomic.http.client.Cache.has(comp.url());
+            final boolean inCache = de.anomic.http.client.Cache.has(row.url());
             final boolean noCacheUsage = url.isFile() || url.isSMB() || cacheStrategy == null;
-            if (containsAllHashes(loc = comp.dc_title(), queryhashes) ||
-                containsAllHashes(loc = comp.dc_creator(), queryhashes) ||
-                containsAllHashes(loc = comp.dc_subject(), queryhashes) ||
-                containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
+            if (containsAllHashes(loc = row.dc_title(), queryhashes) ||
+                containsAllHashes(loc = row.dc_creator(), queryhashes) ||
+                containsAllHashes(loc = row.dc_subject(), queryhashes) ||
+                containsAllHashes(loc = row.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
                 // try to create the snippet from information given in the url
                 if (inCache) response = loader == null ? null : loader.load(request, CacheStrategy.CACHEONLY, true);
                 Document document = null;
@@ -391,10 +391,12 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return l.toString().trim();
     }
 
+    @Override
     public int compareTo(final TextSnippet o) {
         return Base64Order.enhancedCoder.compare(this.urlhash, o.urlhash);
     }
 
+    @Override
     public int compare(final TextSnippet o1, final TextSnippet o2) {
         return o1.compareTo(o2);
     }

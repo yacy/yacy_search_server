@@ -180,7 +180,6 @@ public class CrawlResults {
             String urlstr, urltxt;
             Seed initiatorSeed, executorSeed;
             URIMetadataRow urle;
-            URIMetadataRow.Components metadata;
 
             int cnt = 0;
             final Iterator<Map.Entry<String, InitExecEntry>> i = ResultURLs.results(tabletype);
@@ -193,11 +192,9 @@ public class CrawlResults {
                         Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;
                         urltxt = null;
-                        metadata = null;
                         continue;
                     }
-                    metadata = urle.metadata();
-                    urlstr = metadata.url().toNormalform(false, true);
+                    urlstr = urle.url().toNormalform(false, true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
 
                     initiatorSeed = entry.getValue() == null || entry.getValue().initiatorHash == null ? null : sb.peers.getConnected(ASCII.String(entry.getValue().initiatorHash));
@@ -236,11 +233,11 @@ public class CrawlResults {
                         prop.put("table_indexed_" + cnt + "_showTitle", (showTitle) ? "1" : "0");
                         prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
 
-                        if (metadata == null || metadata.dc_title() == null || metadata.dc_title().trim().length() == 0)
+                        if (urle.dc_title() == null || urle.dc_title().trim().length() == 0)
                             prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "0");
                         else {
                             prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "1");
-                            prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", metadata.dc_title());
+                            prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", urle.dc_title());
                         }
 
                         prop.put("table_indexed_" + cnt + "_showTitle_available_urlHash", entry.getKey());
@@ -250,13 +247,13 @@ public class CrawlResults {
 
                     if (showCountry && urle != null) {
                         prop.put("table_indexed_" + cnt + "_showCountry", "1");
-                        prop.put("table_indexed_" + cnt + "_showCountry_country", metadata.url().getLocale().getCountry());
+                        prop.put("table_indexed_" + cnt + "_showCountry_country", urle.url().getLocale().getCountry());
                     } else
                         prop.put("table_indexed_" + cnt + "_showCountry", "0");
 
                     if (showIP && urle != null) {
                         prop.put("table_indexed_" + cnt + "_showIP", "1");
-                        prop.put("table_indexed_" + cnt + "_showIP_ip", metadata.url().getInetAddress().getHostAddress());
+                        prop.put("table_indexed_" + cnt + "_showIP_ip", urle.url().getInetAddress().getHostAddress());
                     } else
                         prop.put("table_indexed_" + cnt + "_showIP", "0");
 

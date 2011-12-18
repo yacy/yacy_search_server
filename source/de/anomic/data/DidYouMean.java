@@ -7,8 +7,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import net.yacy.cora.ranking.ClusteredScoreMap;
-import net.yacy.cora.ranking.ReversibleScoreMap;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.StringBuilderComparator;
 import net.yacy.kelondro.data.word.Word;

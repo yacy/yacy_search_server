@@ -534,18 +534,17 @@ public class yacysearch {
                 final String recommendHash = post.get("recommendref", ""); // urlhash
                 final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(recommendHash));
                 if (urlentry != null) {
-                    final URIMetadataRow.Components metadata = urlentry.metadata();
                     Document[] documents = null;
                     try {
-                        documents = sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE);
+                        documents = sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE);
                     } catch (final IOException e) {
                     } catch (final Parser.Failure e) {
                     }
                     if (documents != null) {
                         // create a news message
                         final Map<String, String> map = new HashMap<String, String>();
-                        map.put("url", metadata.url().toNormalform(false, true).replace(',', '|'));
-                        map.put("title", metadata.dc_title().replace(',', ' '));
+                        map.put("url", urlentry.url().toNormalform(false, true).replace(',', '|'));
+                        map.put("title", urlentry.dc_title().replace(',', ' '));
                         map.put("description", documents[0].dc_title().replace(',', ' '));
                         map.put("author", documents[0].dc_creator());
                         map.put("tags", documents[0].dc_subject(' '));
@@ -564,9 +563,8 @@ public class yacysearch {
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
                 final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(bookmarkHash));
                 if (urlentry != null) {
-                    final URIMetadataRow.Components metadata = urlentry.metadata();
                     try {
-                        sb.tables.bookmarks.createBookmark(sb.loader, metadata.url(), YMarkTables.USER_ADMIN, true, "searchresult", "/search");
+                        sb.tables.bookmarks.createBookmark(sb.loader, urlentry.url(), YMarkTables.USER_ADMIN, true, "searchresult", "/search");
                     } catch (final Throwable e) {
                     }
                 }
@@ -618,6 +616,7 @@ public class yacysearch {
                     constraint,
                     true,
                     sitehash,
+                    DigestURI.hosthashess(sb.getConfig("search.excludehosth", "")),
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,

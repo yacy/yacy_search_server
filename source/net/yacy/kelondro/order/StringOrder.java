@@ -30,7 +30,8 @@ package net.yacy.kelondro.order;
 import java.util.Comparator;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.ranking.Order;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.Order;
 
 public class StringOrder implements Comparator<String> {
 

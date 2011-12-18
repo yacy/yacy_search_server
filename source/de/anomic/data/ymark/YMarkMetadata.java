@@ -81,7 +81,7 @@ public class YMarkMetadata {
 	public YMarkMetadata(final byte[] urlHash, final Segments indexSegment) {
 		this.document = null;
 		this.indexSegment = indexSegment;
-		this.uri = this.indexSegment.segment(Segments.Process.PUBLIC).urlMetadata().load(urlHash).metadata().url();
+		this.uri = this.indexSegment.segment(Segments.Process.PUBLIC).urlMetadata().load(urlHash).url();
 	}
 
 	public YMarkMetadata(final Document document) {
@@ -115,14 +115,10 @@ public class YMarkMetadata {
         	metadata.put(METADATA.WORDCOUNT, String.valueOf(urlEntry.wordCount()));
         	metadata.put(METADATA.MIMETYPE, String.valueOf(urlEntry.doctype()));
         	metadata.put(METADATA.LANGUAGE, UTF8.String(urlEntry.language()));
-
-        	final URIMetadataRow.Components meta = urlEntry.metadata();
-        	if (meta != null) {
-	        	metadata.put(METADATA.TITLE, meta.dc_title());
-	        	metadata.put(METADATA.CREATOR, meta.dc_creator());
-	        	metadata.put(METADATA.KEYWORDS, meta.dc_subject());
-	        	metadata.put(METADATA.PUBLISHER, meta.dc_publisher());
-        	}
+        	metadata.put(METADATA.TITLE, urlEntry.dc_title());
+        	metadata.put(METADATA.CREATOR, urlEntry.dc_creator());
+	        metadata.put(METADATA.KEYWORDS, urlEntry.dc_subject());
+	        metadata.put(METADATA.PUBLISHER, urlEntry.dc_publisher());
         }
         return metadata;
 	}

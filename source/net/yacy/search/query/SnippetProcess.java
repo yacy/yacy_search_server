@@ -34,12 +34,12 @@ import java.util.regex.Pattern;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.ranking.ScoreMap;
-import net.yacy.cora.ranking.WeakPriorityBlockingQueue;
-import net.yacy.cora.ranking.WeakPriorityBlockingQueue.Element;
-import net.yacy.cora.ranking.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
+import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
+import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -365,7 +365,6 @@ public class SnippetProcess {
 
         private final long timeout; // the date until this thread should try to work
         private long lastLifeSign; // when the last time the run()-loop was executed
-        private final int id;
         private final CacheStrategy cacheStrategy;
         private final int neededResults;
         private final Pattern snippetPattern;
@@ -373,7 +372,6 @@ public class SnippetProcess {
         private final SolrConnector solr;
 
         public Worker(final int id, final long maxlifetime, final CacheStrategy cacheStrategy, final Pattern snippetPattern, final int neededResults) {
-            this.id = id;
             this.cacheStrategy = cacheStrategy;
             this.lastLifeSign = System.currentTimeMillis();
             this.snippetPattern = snippetPattern;
@@ -481,15 +479,14 @@ public class SnippetProcess {
         // find the url entry
 
         long startTime = System.currentTimeMillis();
-        final URIMetadataRow.Components metadata = page.metadata();
-        if (metadata == null) return null;
+        if (page == null) return null;
         final long dbRetrievalTime = System.currentTimeMillis() - startTime;
 
         if (cacheStrategy == null) {
             final TextSnippet snippet = new TextSnippet(
                     null,
                     solrText,
-                    metadata,
+                    page,
                     this.snippetFetchWordHashes,
                     null,
                     ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
@@ -506,7 +503,7 @@ public class SnippetProcess {
             final TextSnippet snippet = new TextSnippet(
                     this.loader,
                     solrText,
-                    metadata,
+                    page,
                     this.snippetFetchWordHashes,
                     cacheStrategy,
                     ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
@@ -514,7 +511,7 @@ public class SnippetProcess {
                     Integer.MAX_VALUE,
                     !this.query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            Log.logInfo("SEARCH", "text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
 
             if (!snippet.getErrorCode().fail()) {
                 // we loaded the file and found the snippet
@@ -526,16 +523,16 @@ public class SnippetProcess {
             } else {
                 // problems with snippet fetch
                 final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
-                if (this.deleteIfSnippetFail) this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), metadata.url(), this.query.queryHashes, reason);
-                Log.logInfo("SEARCH", "sorted out url " + metadata.url().toNormalform(true, false) + " during search: " + reason);
+                if (this.deleteIfSnippetFail) this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.queryHashes, reason);
+                Log.logInfo("SEARCH", "sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
         } else {
             // attach media information
             startTime = System.currentTimeMillis();
-            final List<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), this.snippetFetchWordHashes, this.query.contentdom, cacheStrategy, 6000, !this.query.isLocal());
+            final List<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(page.url(), this.snippetFetchWordHashes, this.query.contentdom, cacheStrategy, 6000, !this.query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
+            Log.logInfo("SEARCH", "media snippet load time for " + page.url() + ": " + snippetComputationTime);
 
             if (mediaSnippets != null && !mediaSnippets.isEmpty()) {
                 // found media snippets, return entry
@@ -545,8 +542,8 @@ public class SnippetProcess {
             } else {
                 // problems with snippet fetch
                 final String reason = "no media snippet";
-                if (this.deleteIfSnippetFail) this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), metadata.url(), this.query.queryHashes, reason);
-                Log.logInfo("SEARCH", "sorted out url " + metadata.url().toNormalform(true, false) + " during search: " + reason);
+                if (this.deleteIfSnippetFail) this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.queryHashes, reason);
+                Log.logInfo("SEARCH", "sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
         }

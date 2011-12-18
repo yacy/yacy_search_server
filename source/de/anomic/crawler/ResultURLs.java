@@ -34,8 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.ranking.ClusteredScoreMap;
-import net.yacy.cora.ranking.ScoreMap;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
@@ -115,7 +115,7 @@ public final class ResultURLs {
         try {
             final ScoreMap<String> domains = getDomains(stackType);
             if (domains != null) {
-                domains.inc(e.metadata().url().getHost());
+                domains.inc(e.url().getHost());
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/3: " + ex.toString());

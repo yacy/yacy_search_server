@@ -38,10 +38,12 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.storage.MapStore;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.BDecoder;
@@ -53,9 +55,7 @@ import net.yacy.kelondro.util.FileUtils;
  * store a table of properties (instead of fixed-field entries) this is realized using blobs and BEncoded
  * property lists
  */
-public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>,
-    Iterable<Map.Entry<byte[], Map<String, byte[]>>>
-{
+public class BEncodedHeap implements MapStore {
 
     private Heap table;
     private final LinkedHashSet<String> columnames;
@@ -89,6 +89,42 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>,
         this.columnames = new LinkedHashSet<String>();
     }
 
+    @Override
+    public ByteOrder getOrdering() {
+        return this.table.ordering;
+    }
+
+    @Override
+    public CloneableIterator<byte[]> keyIterator() {
+        try {
+            return this.table.keys(true, false);
+        } catch (IOException e) {
+            Log.logSevere("BEncodedHeap", "returning empty iterator for failed key iteration: " + e.getMessage(), e);
+            return new CloneableIterator<byte[]>(){
+
+                @Override
+                public boolean hasNext() {
+                    return false;
+                }
+
+                @Override
+                public byte[] next() {
+                    return null;
+                }
+
+                @Override
+                public void remove() {
+                }
+
+                @Override
+                public CloneableIterator<byte[]> clone(Object modifier) {
+                    return this;
+                }
+                
+            };
+        }
+    }
+    
     public byte[] encodedKey(final String key) {
         return Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(key), this.table.keylength);
     }
@@ -487,7 +523,10 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>,
      * are flushed
      */
     public void close() {
+        int s = this.size();
+        File f = this.table.heapFile;
         this.table.close();
+        if (s == 0) f.delete();
     }
 
     /**

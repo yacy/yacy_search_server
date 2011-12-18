@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.cora.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
 
 

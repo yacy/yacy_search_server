@@ -693,14 +693,10 @@ public final class Protocol
             if ( urlEntry.hash().length != 12 ) {
                 continue; // bad url hash
             }
-            final URIMetadataRow.Components metadata = urlEntry.metadata();
-            if ( metadata == null ) {
-                continue;
-            }
-            if ( blacklist.isListed(Blacklist.BLACKLIST_SEARCH, metadata.url()) ) {
+            if ( blacklist.isListed(Blacklist.BLACKLIST_SEARCH, urlEntry.url()) ) {
                 if ( Network.log.isInfo() ) {
                     Network.log.logInfo("remote search: filtered blacklisted url "
-                        + metadata.url()
+                        + urlEntry.url()
                         + " from peer "
                         + target.getName());
                 }
@@ -708,11 +704,11 @@ public final class Protocol
             }
 
             final String urlRejectReason =
-                Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(metadata.url());
+                Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(urlEntry.url());
             if ( urlRejectReason != null ) {
                 if ( Network.log.isInfo() ) {
                     Network.log.logInfo("remote search: rejected url '"
-                        + metadata.url()
+                        + urlEntry.url()
                         + "' ("
                         + urlRejectReason
                         + ") from peer "
@@ -740,7 +736,7 @@ public final class Protocol
                     + " does not belong to word-attached-hash "
                     + ASCII.String(entry.urlhash())
                     + "; url = "
-                    + metadata.url()
+                    + urlEntry.url()
                     + " from peer "
                     + target.getName());
                 continue; // spammed
@@ -1530,7 +1526,7 @@ public final class Protocol
                             null // constraint);
                         );
                     for ( final URIMetadataRow link : result.links ) {
-                        System.out.println(link.metadata().url().toNormalform(true, false));
+                        System.out.println(link.url().toNormalform(true, false));
                         System.out.println(link.snippet());
                     }
                 } catch ( final IOException e ) {

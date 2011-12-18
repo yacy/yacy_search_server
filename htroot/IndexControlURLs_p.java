@@ -158,7 +158,7 @@ public class IndexControlURLs_p {
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
-                urlstring = entry.metadata().url().toNormalform(false, true);
+                urlstring = entry.url().toNormalform(false, true);
                 prop.put("urlstring", "");
                 sb.urlRemove(segment, urlhash.getBytes());
                 prop.putHTML("result", "Removed URL " + urlstring);
@@ -210,7 +210,7 @@ public class IndexControlURLs_p {
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
-                prop.putHTML("urlstring", entry.metadata().url().toNormalform(false, true));
+                prop.putHTML("urlstring", entry.url().toNormalform(false, true));
                 prop.putAll(genUrlProfile(segment, entry, urlhash));
                 prop.put("statistics", 0);
             }
@@ -333,21 +333,20 @@ public class IndexControlURLs_p {
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        final URIMetadataRow.Components metadata = entry.metadata();
         final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
-        if (metadata == null || metadata.url() == null) {
+        if (entry.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
         prop.put("genUrlProfile", "2");
-        prop.putHTML("genUrlProfile_urlNormalform", metadata.url().toNormalform(false, true));
+        prop.putHTML("genUrlProfile_urlNormalform", entry.url().toNormalform(false, true));
         prop.put("genUrlProfile_urlhash", urlhash);
-        prop.put("genUrlProfile_urlDescr", metadata.dc_title());
+        prop.put("genUrlProfile_urlDescr", entry.dc_title());
         prop.put("genUrlProfile_moddate", entry.moddate().toString());
         prop.put("genUrlProfile_loaddate", entry.loaddate().toString());
         prop.put("genUrlProfile_referrer", (le == null) ? 0 : 1);
-        prop.putHTML("genUrlProfile_referrer_url", (le == null) ? "<unknown>" : le.metadata().url().toNormalform(false, true));
+        prop.putHTML("genUrlProfile_referrer_url", (le == null) ? "<unknown>" : le.url().toNormalform(false, true));
         prop.put("genUrlProfile_referrer_hash", (le == null) ? "" : ASCII.String(le.hash()));
         prop.put("genUrlProfile_doctype", String.valueOf(entry.doctype()));
         prop.put("genUrlProfile_language", entry.language());

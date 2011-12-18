@@ -45,9 +45,9 @@ public final class CharBuffer extends Writer {
 
     
     public CharBuffer() {
-        buffer = new char[10];
-        length = 0;
-        offset = 0;
+        this.buffer = new char[10];
+        this.length = 0;
+        this.offset = 0;
     }
     
     public CharBuffer(final int initLength) {
@@ -57,44 +57,44 @@ public final class CharBuffer extends Writer {
     }        
     
     public CharBuffer(final char[] bb) {
-        buffer = bb;
-        length = bb.length;
-        offset = 0;
+        this.buffer = bb;
+        this.length = bb.length;
+        this.offset = 0;
     }
 
     public CharBuffer(final char[] bb, final int initLength) {
         this.buffer = new char[initLength];
-        System.arraycopy(bb, 0, buffer, 0, bb.length);
-        length = bb.length;
-        offset = 0;
+        System.arraycopy(bb, 0, this.buffer, 0, bb.length);
+        this.length = bb.length;
+        this.offset = 0;
     }
     
     public CharBuffer(final char[] bb, final int of, final int le) {
         if (of * 2 > bb.length) {
-            buffer = new char[le];
-            System.arraycopy(bb, of, buffer, 0, le);
-            length = le;
-            offset = 0;
+            this.buffer = new char[le];
+            System.arraycopy(bb, of, this.buffer, 0, le);
+            this.length = le;
+            this.offset = 0;
         } else {
-            buffer = bb;
-            length = le;
-            offset = of;
+            this.buffer = bb;
+            this.length = le;
+            this.offset = of;
         }
     }
 
     public CharBuffer(final CharBuffer bb) {
-        buffer = bb.buffer;
-        length = bb.length;
-        offset = bb.offset;
+        this.buffer = bb.buffer;
+        this.length = bb.length;
+        this.offset = bb.offset;
     }
 
     public CharBuffer(final File f) throws IOException {
         // initially fill the buffer with the content of a file
         if (f.length() > Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
 
-        length = 0;
-        buffer = new char[(int) f.length()*2];
-        offset = 0;
+        this.length = 0;
+        this.buffer = new char[(int) f.length()*2];
+        this.offset = 0;
 
         FileReader fr = null;
         try {
@@ -114,52 +114,66 @@ public final class CharBuffer extends Writer {
 
     public void clear() {
         this.buffer = new char[0];
-        length = 0;
-        offset = 0;
+        this.length = 0;
+        this.offset = 0;
     }
     
     public int length() {
-        return length;
+        return this.length;
     }
 
     private void grow(int minSize) {
-        int newsize = buffer.length + 1024;
+        int newsize = this.buffer.length + 1024;
         if (newsize < minSize) newsize = minSize+1;
         char[] tmp = new char[newsize];
-        System.arraycopy(buffer, offset, tmp, 0, length);
-        buffer = tmp;
-        offset = 0;
+        System.arraycopy(this.buffer, this.offset, tmp, 0, this.length);
+        this.buffer = tmp;
+        this.offset = 0;
     }
 
+    @Override
     public void write(final int b) {
         write((char)b);
     }
     
     public void write(final char b) {
-        if (offset + length + 1 > buffer.length) grow(offset + length + 1);
-        buffer[offset + length++] = b;
+        if (this.offset + this.length + 1 > this.buffer.length) grow(this.offset + this.length + 1);
+        this.buffer[this.offset + this.length++] = b;
     }
     
+    @Override
     public void write(final char[] bb) {
         write(bb, 0, bb.length);
     }
     
+    @Override
     public void write(final char[] bb, final int of, final int le) {
-        if (offset + length + le > buffer.length) grow(offset + length + le);
-        System.arraycopy(bb, of, buffer, offset + length, le);
-        length += le;
+        if (this.offset + this.length + le > this.buffer.length) grow(this.offset + this.length + le);
+        System.arraycopy(bb, of, this.buffer, this.offset + this.length, le);
+        this.length += le;
     }
 
-// do not use/implement the following method, a
-// "overridden method is a bridge method"
-// will occur
-//    public serverCharBuffer append(char b) {
-//        write(b);
-//        return this;
-//    }
+    private static final char SPACE = ' ';
+    private static final char CR = (char) 13;
+    private static final char LF = (char) 10;
+    
+    public CharBuffer appendSpace() {
+        write(SPACE);
+        return this;
+    }
+
+    public CharBuffer appendCR() {
+        write(CR);
+        return this;
+    }
+
+    public CharBuffer appendLF() {
+        write(LF);
+        return this;
+    }
 
     public CharBuffer append(final int i) {
-        write((char) (i));
+        write((char) i);
         return this;
     }
 
@@ -173,6 +187,7 @@ public final class CharBuffer extends Writer {
         return this;
     }
 
+    @Override
     public CharBuffer append(final char c) {
         write(c);     
         return this;
@@ -180,39 +195,36 @@ public final class CharBuffer extends Writer {
     
     public CharBuffer append(final String s) {
         final char[] temp = new char[s.length()];
-        s.getChars(0, temp.length, temp, 0);        
-        return append(temp);
+        s.getChars(0, temp.length, temp, 0);
+        write(temp);
+        return this;
     }    
     
     public CharBuffer append(final String s, final int off, final int len) {
         final char[] temp = new char[len];
-        s.getChars(off, (off + len), temp, 0);        
-        return append(temp);
+        s.getChars(off, (off + len), temp, 0);
+        write(temp);
+        return this;
     }
     
     public CharBuffer append(final CharBuffer bb) {
-        return append(bb.buffer, bb.offset, bb.length);
+        write(bb.buffer, bb.offset, bb.length);
+        return this;
     }
-
-//    public serverCharBuffer append(Object o) {
-//        if (o instanceof String) return append((String) o);
-//        if (o instanceof char[]) return append((char[]) o);
-//        return null;
-//    }
     
     public char charAt(final int pos) {
         if (pos < 0) throw new IndexOutOfBoundsException();
-        if (pos > length) throw new IndexOutOfBoundsException();
-        return buffer[offset + pos];
+        if (pos > this.length) throw new IndexOutOfBoundsException();
+        return this.buffer[this.offset + pos];
     }
 
     public void deleteCharAt(final int pos) {
         if (pos < 0) return;
-        if (pos >= length) return;
-        if (pos == length - 1) {
-            length--;
+        if (pos >= this.length) return;
+        if (pos == this.length - 1) {
+            this.length--;
         } else {
-            System.arraycopy(buffer, offset + pos + 1, buffer, offset + pos, length - pos - 1);
+            System.arraycopy(this.buffer, this.offset + pos + 1, this.buffer, this.offset + pos, this.length - pos - 1);
         }
     }
     
@@ -225,20 +237,20 @@ public final class CharBuffer extends Writer {
     }
 
     public int indexOf(final char b, final int start) {
-        if (start >= length) return -1;
-        for (int i = start; i < length; i++) if (buffer[offset + i] == b) return i;
+        if (start >= this.length) return -1;
+        for (int i = start; i < this.length; i++) if (this.buffer[this.offset + i] == b) return i;
         return -1;
     }
 
     public int indexOf(final char[] bs, final int start) {
-        if (start + bs.length > length) return -1;
-        loop: for (int i = start; i <= length - bs.length; i++) {
+        if (start + bs.length > this.length) return -1;
+        loop: for (int i = start; i <= this.length - bs.length; i++) {
             // first test only first char
-            if (buffer[offset + i] != bs[0]) continue loop;
+            if (this.buffer[this.offset + i] != bs[0]) continue loop;
             
             // then test all remaining char
             for (int j = 1; j < bs.length; j++) {
-                if (buffer[offset + i + j] != bs[j]) continue loop;
+                if (this.buffer[this.offset + i + j] != bs[j]) continue loop;
             }
             
             // found hit
@@ -278,14 +290,14 @@ public final class CharBuffer extends Writer {
     }
 
     public int lastIndexOf(final char b) {
-        for (int i = length - 1; i >= 0; i--) if (buffer[offset + i] == b) return i;
+        for (int i = this.length - 1; i >= 0; i--) if (this.buffer[this.offset + i] == b) return i;
         return -1;
     }
 
     public boolean startsWith(final char[] bs) {
-        if (length < bs.length) return false;
+        if (this.length < bs.length) return false;
         for (int i = 0; i < bs.length; i++) {
-            if (buffer[offset + i] != bs[i]) return false;
+            if (this.buffer[this.offset + i] != bs[i]) return false;
         }
         return true;
     }
@@ -295,45 +307,45 @@ public final class CharBuffer extends Writer {
     }
 
     public char[] getChars(final int start) {
-        return getChars(start, length);
+        return getChars(start, this.length);
     }
 
     public char[] getChars(final int start, final int end) {
         // start is inclusive, end is exclusive
-        if (end > length) throw new IndexOutOfBoundsException("getBytes: end > length");
-        if (start > length) throw new IndexOutOfBoundsException("getBytes: start > length");
+        if (end > this.length) throw new IndexOutOfBoundsException("getBytes: end > length");
+        if (start > this.length) throw new IndexOutOfBoundsException("getBytes: start > length");
         final char[] tmp = new char[end - start];
-        System.arraycopy(buffer, offset + start, tmp, 0, end - start);
+        System.arraycopy(this.buffer, this.offset + start, tmp, 0, end - start);
         return tmp;
     }
     
     public byte[] getBytes() {
-        return UTF8.getBytes(new String(buffer, offset, length));
+        return UTF8.getBytes(new String(this.buffer, this.offset, this.length));
     }
 
     public CharBuffer trim(final int start) {
         // the end value is outside (+1) of the wanted target array
-        if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
-        offset = offset + start;
-        length = length - start;
+        if (start > this.length) throw new IndexOutOfBoundsException("trim: start > length");
+        this.offset = this.offset + start;
+        this.length = this.length - start;
         return this;
     }
 
     public CharBuffer trim(final int start, final int end) {
         // the end value is outside (+1) of the wanted target array
-        if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
-        if (end > length) throw new IndexOutOfBoundsException("trim: end > length");
+        if (start > this.length) throw new IndexOutOfBoundsException("trim: start > length");
+        if (end > this.length) throw new IndexOutOfBoundsException("trim: end > length");
         if (start > end) throw new IndexOutOfBoundsException("trim: start > end");
-        offset = offset + start;
-        length = end - start;
+        this.offset = this.offset + start;
+        this.length = end - start;
         return this;
     }
 
     public CharBuffer trim() {
         int l = 0;
-        while ((l < length) && (buffer[offset + l] <= ' ')) l++;
-        int r = length;
-        while ((r > 0) && (buffer[offset + r - 1] <= ' ')) r--;
+        while ((l < this.length) && (this.buffer[this.offset + l] <= ' ')) l++;
+        int r = this.length;
+        while ((r > 0) && (this.buffer[this.offset + r - 1] <= ' ')) r--;
         if (l > r) r = l;
         return trim(l, r);
     }
@@ -342,12 +354,12 @@ public final class CharBuffer extends Writer {
         // returns true, if trim() would result in an empty serverByteBuffer
         if (includeNonLetterBytes) {
             char b;
-            for (int i = 0; i < length; i++) {
-                b = buffer[offset + i];
+            for (int i = 0; i < this.length; i++) {
+                b = this.buffer[this.offset + i];
                 if (((b >= '0') && (b <= '9')) || ((b >= 'A') && (b <= 'Z')) || ((b >= 'a') && (b <= 'z'))) return false;
             }
         } else {
-            for (int i = 0; i < length; i++) if (buffer[offset + i] > 32) return false;
+            for (int i = 0; i < this.length; i++) if (this.buffer[this.offset + i] > 32) return false;
         }
         return true;
     }
@@ -356,86 +368,87 @@ public final class CharBuffer extends Writer {
         // returns number of whitespace char at the beginning of text
         if (includeNonLetterBytes) {
             char b;
-            for (int i = 0; i < length; i++) {
-                b = buffer[offset + i];
+            for (int i = 0; i < this.length; i++) {
+                b = this.buffer[this.offset + i];
                 if (((b >= '0') && (b <= '9')) || ((b >= 'A') && (b <= 'Z')) || ((b >= 'a') && (b <= 'z'))) return i;
             }
         } else {
-            for (int i = 0; i < length; i++) if (buffer[offset + i] > 32) return i;
+            for (int i = 0; i < this.length; i++) if (this.buffer[this.offset + i] > 32) return i;
         }
-        return length;
+        return this.length;
     }
     
     public int whitespaceEnd(final boolean includeNonLetterBytes) {
         // returns position of whitespace at the end of text
         if (includeNonLetterBytes) {
             char b;
-            for (int i = length - 1; i >= 0; i--) {
-                b = buffer[offset + i];
+            for (int i = this.length - 1; i >= 0; i--) {
+                b = this.buffer[this.offset + i];
                 if (((b >= '0') && (b <= '9')) || ((b >= 'A') && (b <= 'Z')) || ((b >= 'a') && (b <= 'z'))) return i + 1;
             }
         } else {
-            for (int i = length - 1; i >= 0; i--) if (buffer[offset + i] > 32) return i + 1;
+            for (int i = this.length - 1; i >= 0; i--) if (this.buffer[this.offset + i] > 32) return i + 1;
         }
         return 0;
     }
     
     
+    @Override
     public String toString() {
-        return new String(buffer, offset, length);
+        return new String(this.buffer, this.offset, this.length);
     }
 
     public String toString(final int left, final int rightbound) {
-        return new String(buffer, offset + left, rightbound - left);
+        return new String(this.buffer, this.offset + left, rightbound - left);
     }
 
     public Properties propParser() {
         // extract a=b or a="b" - relations from the buffer
-        int pos = offset;
+        int pos = this.offset;
         int start;
         String key;
         final Properties p = new Properties();
         // eat up spaces at beginning
-        while ((pos < length) && (buffer[pos] <= 32)) pos++;
-        while (pos < length) {
+        while ((pos < this.length) && (this.buffer[pos] <= 32)) pos++;
+        while (pos < this.length) {
             // pos is at start of next key
             start = pos;
-            while ((pos < length) && (buffer[pos] != equal)) pos++;
-            if (pos >= length) break; // this is the case if we found no equal
-            key = new String(buffer, start, pos - start).trim().toLowerCase();
+            while ((pos < this.length) && (this.buffer[pos] != equal)) pos++;
+            if (pos >= this.length) break; // this is the case if we found no equal
+            key = new String(this.buffer, start, pos - start).trim().toLowerCase();
             // we have a key
             pos++;
             // find start of value
-            while ((pos < length) && (buffer[pos] <= 32)) pos++;
+            while ((pos < this.length) && (this.buffer[pos] <= 32)) pos++;
             // doublequotes are obligatory. However, we want to be fuzzy if they
             // are ommittet
-            if (pos >= length) {
+            if (pos >= this.length) {
                 // error case: input ended too early
                 break;
-            } else if (buffer[pos] == doublequote) {
+            } else if (this.buffer[pos] == doublequote) {
                 // search next doublequote
                 pos++;
                 start = pos;
-                while ((pos < length) && (buffer[pos] != doublequote)) pos++;
-                if (pos >= length) break; // this is the case if we found no parent doublequote
-                p.setProperty(key, new String(buffer, start, pos - start).trim());
+                while ((pos < this.length) && (this.buffer[pos] != doublequote)) pos++;
+                if (pos >= this.length) break; // this is the case if we found no parent doublequote
+                p.setProperty(key, new String(this.buffer, start, pos - start).trim());
                 pos++;
-            } else if (buffer[pos] == singlequote) {
+            } else if (this.buffer[pos] == singlequote) {
                 // search next singlequote
                 pos++;
                 start = pos;
-                while ((pos < length) && (buffer[pos] != singlequote)) pos++;
-                if (pos >= length) break; // this is the case if we found no parent singlequote
-                p.setProperty(key, new String(buffer, start, pos - start).trim());
+                while ((pos < this.length) && (this.buffer[pos] != singlequote)) pos++;
+                if (pos >= this.length) break; // this is the case if we found no parent singlequote
+                p.setProperty(key, new String(this.buffer, start, pos - start).trim());
                 pos++;
             } else {
                 // search next whitespace
                 start = pos;
-                while ((pos < length) && (buffer[pos] > 32)) pos++;
-                p.setProperty(key, new String(buffer, start, pos - start).trim());
+                while ((pos < this.length) && (this.buffer[pos] > 32)) pos++;
+                p.setProperty(key, new String(this.buffer, start, pos - start).trim());
             }
             // pos should point now to a whitespace: eat up spaces
-            while ((pos < length) && (buffer[pos] <= 32)) pos++;
+            while ((pos < this.length) && (this.buffer[pos] <= 32)) pos++;
             // go on with next loop
         }
         return p;
@@ -475,10 +488,12 @@ public final class CharBuffer extends Writer {
         return newbuf;
     }
 
+    @Override
     public void close() throws IOException {
-    	buffer = null; // assist with garbage collection 
+    	this.buffer = null; // assist with garbage collection 
     }
 
+    @Override
     public void flush() throws IOException {
         // TODO Auto-generated method stub        
     }    

@@ -36,7 +36,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.yacy.cora.ranking.ClusteredScoreMap;
+import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 
