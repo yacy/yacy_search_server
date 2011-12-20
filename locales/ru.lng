@@ -24,17 +24,17 @@
 # Contributors are in chronological order, not how much they did absolutely.
 # Спасибо за Вашу помощь!
 <!-- lang -->default\(english\)==Русский
-<!-- author -->==SEVEN
+<!-- author -->==SEVEN, translated.by/neos
 <!-- maintainer -->==&lt;webmaster@daburna.de&gt;
 #-----------------------------
 #File: AccessTracker_p.html
 #---------------------------
 Access Tracker==Zugriffe
-Server Access Overview==Server Zugriff Überblick
-This is a list of \#\[num\]\# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen HTTP Server innerhalb der letzten Stunde gestellt wurden.
+Server Access Overview==Обзор доступа к серверу
+This is a list of \#\[num\]\# requests to the local http server within the last hour.==Это список запросов #[num]# на локальный сервер http в течение последнего часа.
 This is a list of requests to the local http server within the last hour.==Dies ist eine Liste von Anfragen, die innerhalb der letzten Stunde an den lokalen HTTP Server gestellt wurden.
-Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
-#>Host<==>Host<
+Showing \#\[num\]\# requests.==Показать #[num]# запросы.
+#>Host<==>Хост<
 >Path<==>Путь<
 Date<==Дата<
 Access Count During==Erfasster Zugriff während der
@@ -42,30 +42,30 @@ last Second==последняя секунда
 last Minute==последняя минута
 last 10 Minutes==последние 10 минут
 last Hour==последний час
-The following hosts are registered as source for brute-force requests to protected pages==Die folgenden Hosts wurden als Quelle von Brute-Force Attacken auf geschützte Seiten erkannt
+The following hosts are registered as source for brute-force requests to protected pages==Следующие хостов зарегистрированы в качестве источника для грубой силы запросы к защищенным страницам
 #>Host==>Host
 Access Times==Время доступа
-Server Access Details==Server Zugriffs Details
-Local Search Log==Lokale Suche Log
+Server Access Details==Подробные сведения о сервере доступа
+Local Search Log==Лог локального поиска
 Local Search Host Tracker==Lokale Suche Host Tracker
 Remote Search Log==Remote Suche Log
 #Total:==Итого:
-Success:==Erfolgreich:
+Success:==Успешно:
 Remote Search Host Tracker==Remote Suche Host Tracker
 This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgeführt wurden.
 Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Es werden #[num]# Einträge von insgesamt #[total]# Anfragen angezeigt.
 Requesting Host==Anfragender Host
-Offset==Versatz
+Offset==Смещение
 Expected Results==Erwartete Ergebnisse
 Returned Results==Gefundene Ergebnisse
-Used Time \(ms\)==Gebrauchte Zeit (in ms)
-URL fetch \(ms\)==URL Abruf (in ms)
+Used Time \(ms\)==Иcпользованное время (в мс)
+URL fetch \(ms\)==URL выборки (мс)
 Snippet comp \(ms\)==Vorschau Erzeugung (in ms)
 Query==Suchwort
 #>User Agent<==>User Agent<
 Search Word Hashes==Suchwort Hash
 Count</td>==Количество</td>
-Queries Per Last Hour==Suchanfragen pro letzter Stunde
+Queries Per Last Hour==Запросов за последний час
 Access Dates==Время доступа
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
 #-----------------------------
@@ -88,14 +88,14 @@ Settings for this list==Einstellungen dieser Liste
 "Save"=="Сохранить"
 Share/don't share this list==Liste freigeben/nicht freigeben
 Delete this list==Удалить этот список
-Edit this list==Diese Liste bearbeiten
+Edit this list==Редактировать этот список
 These are the domain name/path patterns in==Dies sind die Domainnamen/-pfade in
-Blacklist Pattern==Blacklisteintrag
-Edit selected pattern\(s\)==Bearbeite gewählten Eintrag
-Delete selected pattern\(s\)==Lösche gewählten Eintrag
-Move selected pattern\(s\) to==Verschiebe gewählten Eintrag zu
+Blacklist Pattern==Шаблон черного списка
+Edit selected pattern\(s\)==Редактировать выбранный шаблон
+Delete selected pattern\(s\)==Удалить выбранный шаблон
+Move selected pattern\(s\) to==Переместить выбранный шаблон в
 #You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
-Add new pattern:==Neuen Eintrag hinzufügen:
+Add new pattern:==Добавить выбранный шаблон:
 "Add URL pattern"=="URL hinzufügen"
 The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Der rechte Asterisk '*', nach dem '/', kann durch einen <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regulären Ausdruck</a> ersetzt werden.
 domain.net\/fullpath<==domain.de/vollerpfad<
@@ -109,31 +109,31 @@ a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pat
 #was added to the blacklist==wurde zur Blacklist hinzugefügt
 Activate this list for==Diese Liste ist gültig für
 Show entries:==Zeige Einträge:
-Entries per page:==Einträge pro Seite:
+Entries per page:==Записи на страницу:
 "Go"=="Los"
-Edit existing pattern\(s\):==Bearbeite existierende Einträge:
-"Save URL pattern\(s\)"=="URL Einträge speichern"
+Edit existing pattern\(s\):==Изменить существующий шаблон:
+"Save URL pattern\(s\)"=="Сохранить URL шаблона"
 #-----------------------------
 #File: BlacklistCleaner_p.html
 #---------------------------
-Blacklist Cleaner==Blacklist aufräumen
-Here you can remove or edit illegal or double blacklist-entries.==Hier können Sie ungültige oder doppelte Einträge auf der Blacklist entfernen oder bearbeiten.
-Check list==Liste testen
-"Check"=="Teste"
-Allow regular expressions in host part of blacklist entries.==Erlaube reguläre Ausdrücke im Hostnamen Teil der Blacklist Einträge.
-The blacklist-cleaner only works for the following blacklist-engines up to now:==Der Blacklist-Cleaner arbeitet zur Zeit nur mit den folgenden Blacklist-Engines:
-Illegal Entries in \#\[blList\]\# for==Ungültige Einträge in #[blList]# für
-Deleted \#\[delCount\]\# entries==#[delCount]# Einträge gelöscht
-Altered \#\[alterCount\]\# entries!==#[alterCount]# Einträge geändert
-Two wildcards in host-part==Zwei Wildcards im Host-Teil
+Blacklist Cleaner==Черный список чист
+Here you can remove or edit illegal or double blacklist-entries.==Здесь вы можете удалить или редактировать ошибочные или двойные записи.
+Check list==Лист проверки
+"Check"=="Проверка"
+Allow regular expressions in host part of blacklist entries.==Разрешить регулярные выражения в черном списке.
+The blacklist-cleaner only works for the following blacklist-engines up to now:==The blacklist-cleaner only works for the following blacklist-engines up to now
+Illegal Entries in \#\[blList\]\# for==Неправильный ввод \#\[blList\]\# для
+Deleted \#\[delCount\]\# entries==Удалено \#\[delCount\]\# значений
+Altered \#\[alterCount\]\# entries!==Изменённые \#\[alterCount\]\# записи!
+Two wildcards in host-part==Две маски в хост-часть
 Either subdomain <u>or</u> wildcard==Entweder Subdomain <u>oder</u> Wildcard
 Path is invalid Regex==Pfad ist ungültige Regex
 Wildcard not on begin or end==Wildcard nicht am Beginn oder Ende
-Host contains illegal chars==Host enthält ungültige Zeichen
-Double==Doppelt
-"Change Selected"=="Markierte bearbeiten"
-"Delete Selected"=="Markierte löschen"
-No Blacklist selected==Es wurde keine Blacklist ausgewählt
+Host contains illegal chars==Хост содержит недопустимые символы
+Double==Двойной
+"Change Selected"=="Изменить выбранное"
+"Delete Selected"=="Удалить выбранное"
+No Blacklist selected==Не выбран черный список
 #-----------------------------
 #File: BlacklistImpExp_p.html
 #---------------------------
@@ -157,16 +157,16 @@ This file will not contain any additional information==Diese Datei enthält sons
 #-----------------------------
 #File: BlacklistTest_p.html
 #---------------------------
-Blacklist Test==Blacklist testen
-Used Blacklist engine:==Benutzte Blacklist Verwaltung:
-Test list:==Teste Liste:
+Blacklist Test==Проверка черного списка
+Used Blacklist engine:==Использовать черный список
+Test list:==Список тестов:
 "Test"=="Тест"
-The tested URL was==Die getestete URL war
-It is blocked for the following cases:==Sie wird in den folgenden Fällen geblockt:
+The tested URL was==Проверенный URL был
+It is blocked for the following cases:==Это блокируется в следующем случае:
 #Crawling==Crawling
 #DHT==DHT
-#News==News
-#Proxy==Proxy
+#News==Новости
+#Proxy==Прокси
 Search==Поиск
 Surftips==Surftipps
 #-----------------------------
@@ -177,159 +177,159 @@ Comments</a>==Комментарии</a>
 >edit==>редактировать
 >delete==>удалить
 Edit<==Редактировать<
-previous entries==vorherige Einträge
-next entries==nächste  Einträge
-new entry==Neuer Eintrag
-import XML-File==XML-Datei importieren
-export as XML==als XML exportieren
+previous entries==предыдущая запись
+next entries==следующая запись
+new entry==новая запись
+import XML-File==импорт XML-фаил
+export as XML==экспорт в XML
 Comments</a>==Комментарии</a>
 Blog-Home==Blog-Startseite
 Author:==Автор:
 Subject:==Тема:
-#Text:==Text:
-You can use==Sie können hier
+#Text:==Текст:
+You can use==Вы можете использовать
 Yacy-Wiki Code==YaCy-Wiki Befehle
-here.==benutzen.
+here.==здесь.
 Comments:==Комментарии:
-deactivated==deaktiviert
->activated==>aktiviert
-moderated==moderiert
-"Submit"=="Absenden"
+deactivated==отключить
+>activated==>активировать
+moderated==модератор
+"Submit"=="Послать"
 "Preview"=="Предварительный просмотр"
-"Discard"=="Verwerfen"
+"Discard"=="Отменить"
 >Preview==>Предварительный просмотр
-No changes have been submitted so far!==Es wurden noch keine Änderungen übertragen!
-Access denied==Zugriff verweigert
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Um Blogeinträge zu verändern oder zu erstellen müssen Sie als Admin oder User mit Blog-Rechten eingeloggt sein.
-Are you sure==Sind Sie sicher
-that you want to delete==dass Sie folgendes löschen wollen:
+No changes have been submitted so far!==Нет никаких изменений!
+Access denied==Доступ запрещен
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Чтобы изменить или создать блог, вы должны быть зарегистрированы в качестве администратора или пользователя, который имеет необходимые права .
+Are you sure==Вы уверены
+that you want to delete==что вы хотите удалить
 Confirm deletion==Bestätige Löschung
-Yes, delete it.==Ja, löschen.
+Yes, delete it.==Да, удалить это.
 No, leave it.==Нет, оставить это.
-Import was successful!==Import war erfolgreich!
-Import failed, maybe the supplied file was no valid blog-backup?==Import fehlgeschlagen, unter Umständen war die angegebene Datei keine gültige Blog-Sicherung?
-Please select the XML-file you want to import:==Bitte wählen Sie die XML-Datei die Sie importieren wollen:
+Import was successful!==Импорт завершен!
+Import failed, maybe the supplied file was no valid blog-backup?==Не удалось импортировать, может быть, поставляемый файл не был резервной копией?
+Please select the XML-file you want to import:== Пожалуйста выберете XML-фаил, который вы импортируете:
 #-----------------------------
 #File: BlogComments.html
 #---------------------------
 by==von
-Comments</a>==Kommentare</a>
-Login==Einloggen
+Comments</a>==Комментарий</a>
+Login==Логин
 Blog-Home==Blog-Startseite
-delete</a>==löschen</a>
-allow</a>==erlauben</a>
+delete</a>==удалить</a>
+allow</a>==разрешить
 Author:==Автор:
 Subject:==Тема:
 #Text:==Текст:
-You can use==Sie können hier
+You can use==Вы можете использовать
 Yacy-Wiki Code==YaCy-Wiki Befehle
-here.==benutzen.
-"Submit"=="Absenden"
-"Preview"=="Vorschau"
-"Discard"=="Verwerfen"
+here.==здесь.
+"Submit"=="Послать"
+"Preview"=="предварительный просмотр"
+"Discard"=="Отменить"
 #-----------------------------
 #File: Bookmarks.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
-The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Die Liste der Lesezeichen kann auch als RSS Feed abgerufen werden. Dies ist auch beim Auswählen eines bestimmten Tags möglich.
-Click the API icon to load the RSS from the current selection.==Klicken Sie auf die API Sprechblase, um einen RSS Feed der aktuellen Auswahl zu laden.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-<h3>Bookmarks==<h3>Lesezeichen
-Bookmarks \(==Lesezeichen \(
+YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Закладки
+The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Список закладок можно также получить как RSS поток. Это может быть сделано при выборе конкретного тега .
+Click the API icon to load the RSS from the current selection.==Нажмите на иконку API для загрузки RSS из текущего выделения.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Чтобы увидеть список всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.
+<h3>Bookmarks==<h3>Закладки
+Bookmarks \(==Закладки \(
 #Login==Логин
-List Bookmarks==Lesezeichen Liste
-Add Bookmark==Lesezeichen hinzufügen
-Import Bookmarks==Lesezeichen importieren
-Import XML Bookmarks==Importiere XML-Lesezeichen
-Import HTML Bookmarks==Importiere HTML-Lesezeichen
-"import"=="Importieren"
-Default Tags:==Standard Tag
-imported==importiert
-#Edit Bookmark==Lesezeichen bearbeiten
+List Bookmarks==Лист Закладок
+Add Bookmark==Добавить закладки
+Import Bookmarks==Импорт закладок
+Import XML Bookmarks==Импорт XML Закладок
+Import HTML Bookmarks==Импорт HTML закладок
+"import"=="импорт"
+Default Tags:==Тэг по умолчанию:
+imported==импортированно
+#Edit Bookmark==Редактировать Закладки
 #URL:==URL:
 Title:==Заголовок:
-Description:==Beschreibung:
-Folder \(/folder/subfolder\):==Ordner (/Ordner/Unterordner):
-Tags \(comma separated\):==Tags (durch Komma trennen):
->Public:==>Öffentlich:
+Description:==Описание:
+Folder \(/folder/subfolder\):==Каталог \(/каталог/подкаталог\):
+Tags \(comma separated\):==Тэги (разделенные запятой):
+>Public:==>Опубликовать:
 yes==да
 no==нет
-Bookmark is a newsfeed==Lesezeichen ist ein Newsfeed
+Bookmark is a newsfeed==Закладка как новостная лента
 "create"=="создать"
 "edit"=="редактировать"
 File:==Файл:
-import as Public==als öffentlich importieren
-"private bookmark"=="Privates Lesezeichen"
-"public bookmark"=="Öffentliches Lesezeichen"
-Tagged with==Stichworte:
-'Confirm deletion'=='Löschen bestätigen'
+import as Public==Импортировать как Опубликовано
+"private bookmark"=="личные закладки"
+"public bookmark"=="публичные закладки"
+Tagged with==Тэг с
+'Confirm deletion'=='Подтвердите удаление'
 Edit==Редактировать
 Delete==Удалить
 Folders==Папка
-Bookmark Folder==Lesezeichen Ordner
-#Tags==Tags
-Bookmark List==Liste der Lesezeichen
-previous page==vorherige Seite
+Bookmark Folder==Каталог Закладок
+#Tags==Тэги
+Bookmark List==Список Закладок
+previous page==предыдущую страницу
 next page==следующая страница
 All==Всё
 Show==Показать
-Bookmarks per page.==Lesezeichen pro Seite.
-#unsorted==unsortiert
+Bookmarks per page.==Закладки на странице.
+#unsorted==несортированный
 #-----------------------------
 #File: Collage.html
 #---------------------------
-Image Collage==Bilder Collage
-Private Queue==Privater Puffer
-Public Queue==Öffentlicher Puffer
+Image Collage==Коллаж изображений
+Private Queue==Частная Очередь
+Public Queue==Публичная Очередь
 #-----------------------------
 #File: compare_yacy.html
 #---------------------------
-Websearch Comparison==Сравнение Веб поиска
-Left Search Engine==Поисковый движок слева
-Right Search Engine==Поисковый движок справа
+Websearch Comparison==Сравнение веб-поиска
+Left Search Engine==Левый поисковый
+Right Search Engine==Правый поисковый
 Query==Запрос
 "Compare"=="Сравнить"
 Search Result==Результат поиска
 #-----------------------------
 #File: ConfigAccounts_p.html
 #---------------------------
-User Accounts==Benutzerkonten
-User Administration==Benutzerverwaltung
-User created:==Benutzer erstellt:
-User changed:==Benutzer geändert:
-Generic error.==Genereller Fehler.
-Passwords do not match.==Passwörter stimmen nicht überein.
-Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als vier Zeichen sein.
-No password is set for the administration account.==Für den Administrator Zugang ist kein Passwort gesetzt.
-Please define a password for the admin account.==Bitte setzen Sie ein Passwort für das admin Konto.
-Admin Account==Admin Konto
-Access from localhost without account==Zugriff von localhost ohne Konto
-Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Der Zugriff von Ihrem Computer (localhost Zugang) ist garantiert. Sie brauchen kein Administratorkonto erstellen.
-Access only with qualified account==Zugriff nur mit berechtigtem Konto
-You need this only if you want a remote access to your peer.==Sie benötigen dies nur, wenn Sie Fernzugriff auf Ihren Peer haben wollen.
-Peer User:==Peer Benutzer:
-New Peer Password:==Neues Peer Passwort:
-Repeat Peer Password:==Wiederhole Peer Passwort:
-"Define Administrator"=="Administrator festlegen"
-Select user==Benutzer wählen
+User Accounts==Аккаунт Пользователя
+User Administration==Администратор
+User created:==Пользователь создан:
+User changed:==Пользователь изменен:
+Generic error.==Общая ошибка.
+Passwords do not match.==Пароли не совпадают.
+Username too short. Username must be \>\= 4 Characters.==Имя пользователя слишком короткое. Имя пользователя должно быть не меньше \>\= 4 символов.
+No password is set for the administration account.==Пароль не установлен для административной учетной записи.
+Please define a password for the admin account.==Пожалуйста, определите пароль для учетной записи администратора .
+Admin Account==Admin, учетная запись
+Access from localhost without account==Для доступа с localhost не требуются права
+Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Доступ к пиру со своего компьютера \ (localhost access\) разрешен. Нет необходимости настраивать управление учетной записи.
+Access only with qualified account==Доступ только с квалифицированной учетной записи
+You need this only if you want a remote access to your peer.==Это нужно только если вам нужен доступ к пирам.
+Peer User:==Пир(юзер)
+New Peer Password:==Новый пароль Пира:
+Repeat Peer Password:==Повторите пароль Пира
+"Define Administrator"=="Определить Администратором"
+Select user==Выбранный пользователь
 New user==Новый пользователь
 Edit User==Редактировать пользователя
 Delete User==Удалить пользователя
-Edit current user:==Aktuellen Benutzer bearbeiten:
+Edit current user:==Редактировать текущего пользователя
 Username</label>==Имя пользователя</label>
 Password</label>==Пароль</label>
-Repeat password==Passwort wiederholen
+Repeat password==Повторите пароль
 First name==Имя
 Last name==Отчество
 Address==Адрес
-Rights==Rechte
+Rights==Права
 Timelimit==Лимит времени
 Time used==Время использования
 Save User==Сохранить пользователя
 #-----------------------------
 #File: ConfigAppearance_p.html
 #---------------------------
-Appearance and Integration==Erscheinungsbild und Integration
+Appearance and Integration==Внешний вид и интеграция
 You can change the appearance of the YaCy interface with skins.==Sie können hier das Aussehen der YaCy Oberfläche mit Skins verändern,
 #You can change the appearance of YaCy with skins==Sie können hier das Erscheinungsbild von YaCy mit Skins ändern
 The selected skin and language also affects the appearance of the search page.==das ausgewählte Design und die gewählte Sprache wirken sich auch auf das Erscheinungsbild der Suchseite aus.
@@ -3135,15 +3135,15 @@ Table Viewer==Tabellen Betrachter
 >Subject<==>Тема<
 #>Publisher<==>Veröffentlicher<
 #>Contributor<==>Beiträger<
->Date<==>Datum<
->Type<==>Typ<
+>Date<==>Дата<
+>Type<==>Тип<
 >Identifier<==>Identifizierer<
 >Language<==>Язык<
 >Load Date<==>Lade Datum<
 >Referrer Identifier<==>Referrer Identifizierer<
 #>Referrer URL<==>Referrer URL<
->Document size<==>Dokument Größe<
->Number of Words<==>Anzahl der Wörter<
+>Document size<==>Размер документа<
+>Number of Words<==>Количество слов<
 #-----------------------------
 ### Subdirectory env/templates ###
 #File: env/templates/header.template
