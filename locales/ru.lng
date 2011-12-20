@@ -1251,56 +1251,56 @@ RWI-DB-Cleaner - Clean up the database by deletion of words with reference to bl
 #-----------------------------
 #File: IndexControlRWIs_p.html
 #---------------------------
-Reverse Word Index Administration==Reverse Wort Indexverwaltung
-The local index currently contains \#\[wcount\]\# reverse word indexes==Der lokale Index enthält im Moment #[wcount]# inverse Wort Indexe
-RWI Retrieval \(= search for a single word\)==RWI Abfrage (= Suche nach einem einzelnen Wort)
-Select Segment:==Segment Auswahl:
-Retrieve by Word:<==Abfrage nach Wort:<
-"Show URL Entries for Word"=="URL Einträge für Wort zeigen"
-Retrieve by Word-Hash==Abfrage nach Wort-Hash
-"Show URL Entries for Word-Hash"=="URL Einträge für Wort-Hash zeigen"
-"Generate List"=="Liste erstellen"
-Cleanup==Aufräumen
->Index Deletion<==>Index Löschung<
->Delete Search Index<==>Lösche Suchindex<
-Stop Crawler and delete Crawl Queues==Crawler anhalten und Crawler Warteschlangen löschen
-Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
-Delete robots.txt Cache==Lösche robots.txt Cache
-Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-Holen Fehler während der Suche
-"Delete"=="Löschen"
-No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
-No entry for word hash==Keinen Eintrag zu Wort-Hash
-Search result==Suchergebnis
-total URLs</td>==insgesamte URLs</td>
+Reverse Word Index Administration==Обратное управление индексом слов
+The local index currently contains \#\[wcount\]\# reverse word indexes==Локальный индекс в настоящее время содержит #[wcount]# слов обратного индекса
+RWI Retrieval \(= search for a single word\)==RWI запрос (= поиск одного слова)
+Select Segment:==Выбрать сегмент:
+Retrieve by Word:<==Запрос по слову:<
+"Show URL Entries for Word"=="Показать URL адреса для слова"
+Retrieve by Word-Hash==Запросы по хэш слова
+"Show URL Entries for Word-Hash"=="Показать URL адреса для хэш слова"
+"Generate List"=="Генерировать список"
+Cleanup==Очистка
+>Index Deletion<==>Удаление индекса<
+>Delete Search Index<==>Удалить поисковый индекс<
+Stop Crawler and delete Crawl Queues==Остановить сканирование и удалить очередь запросов
+Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
+Delete robots.txt Cache==Удалить кеш robots.txt
+Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты полученные ошибки во время поиска
+"Delete"=="Удалить"
+No entry for word \'\#\[word\]\#\'==Не найдено для слова "#[word]#"
+No entry for word hash==Не найдено для хэш слова слова
+Search result==Результат поиска
+total URLs</td>==количество URL адресов</td>
 appearance in</td>==kommt vor in</td>
 in link type</td>==im Link-Typ</td>
-document type</td>==Dokumenten-Typ</td>
-<td>description</td>==<td>Beschreibung</td>
-<td>title</td>==<td>Titel</td>
-<td>creator</td>==<td>Erzeuger</td>
+document type</td>==тип документа</td>
+<td>description</td>==<td>описание</td>
+<td>title</td>==<td>заголовок</td>
+<td>creator</td>==<td>создатель</td>
 <td>subject</td>==<td>Тема</td>
 <td>url</td>==<td>URL</td>
-<td>emphasized</td>==<td>betont</td>
-<td>image</td>==<td>Bilder</td>
-<td>audio</td>==<td>Audio</td>
-<td>video</td>==<td>Video</td>
-<td>app</td>==<td>Anwendung</td>
-index of</td>==Index of</td>
->Selection</td>==>Auswahl</td>
-Display URL List==Anzeige der URL-Liste
-Number of lines==Zeilenanzahl
-all lines==alle Zeilen
+<td>emphasized</td>==<td>выделенный</td>
+<td>image</td>==<td>картинки</td>
+<td>audio</td>==<td>аудио</td>
+<td>video</td>==<td>видео</td>
+<td>app</td>==<td>приложения</td>
+index of</td>==Индекс</td>
+>Selection</td>==>Выбор</td>
+Display URL List==Отобразить список URL
+Number of lines==Количество линий
+all lines==все линии
 "List Selected URLs"=="Ausgewählte URLs anzeigen"
 Transfer RWI to other Peer==RWI Transfer an anderen Peer
 Transfer by Word-Hash==Transfer per Wort-Hash
 "Transfer to other peer"=="An anderen Peer senden"
 to Peer==an Peer
-<dd>select==<dd>auswählen
+<dd>select==<dd>выбрать
 or enter a hash==oder Hash eingeben
 Sequential List of Word-Hashes==aufeinanderfolgende Liste der URL-Hashes
 No URL entries related to this word hash==Keine URL Einträge zugehörig zu diesem Wort Hash
 \#\[count\]\# URL entries related to this word hash==#[count]# URL Einträge zugehörig zu diesem Wort Hash
-Resource</td>==Ressource</td>
+Resource</td>==Ресурс</td>
 Negative Ranking Factors==Negative Ranking Faktoren
 Positive Ranking Factors==Positive Ranking Faktoren
 Reverse Normalized Weighted Ranking Sum==Inverse normalisierte gewichtete Ranking Summe
@@ -1333,6 +1333,13 @@ the reference exists \(very extensive, but prevents further unresolved reference
 Blacklist Extension==Blacklist Erweiterung
 "Add selected URLs to blacklist"=="Markierte URLs zu Blacklist hinzufügen"
 "Add selected domains to blacklist"=="Markierte Domains zu Blacklist hinzufügen"
+Limitations==Ограничения
+Index Reference Size==Размер ссылки на индекс
+No reference size limitation==Нет ограничений размера на ссылки
+this may cause strong CPU load when words are searched that appear very often==это может привести к сильной нагрузке процессора, когда ищутся слова, которые появляются очень часто
+Limitation of number of references per word:==Ограничение количества ссылок на слово:
+this causes that old references als deleted if that limit is reached==это означает что старые ссылки будут удаляться, если этот предел достигнут
+Set References Limit==Установить лимит
 #-----------------------------
 #File: IndexControlURLs_p.html
 #---------------------------
@@ -1359,7 +1366,7 @@ Export File==Export-Datei
 #URL Filter==URL Filter
 #Export Format==Export Format
 #Only Domain <i>\(superfast\)==Nur Domains <i>(sehr schnell)
-Only Domain:==Liste mit nur Domainnamen:
+Only Domain:==Только домен:
 Full URL List:==Liste mit vollständiger URL:
 Plain Text List \(domains only\)==Einfache Text Liste (nur Domains)
 HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
@@ -1367,11 +1374,11 @@ HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
 Plain Text List \(URLs only\)==Einfache Text Liste (nur URLs)
 HTML \(URLs with title\)==HTML (URLs mit Titel)
 #XML (RSS)==XML (RSS)
-"Export URLs"=="URLs exportieren"
+"Export URLs"=="Экспортировать URL адреса"
 Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Export nach Datei #[exportfile]# läuft ..  #[urlcount]# URLs bisher
 Finished export of \#\[urlcount\]\# URLs to file==Export beendet und #[urlcount]# URLs gespeichert in Datei
 Export to file \#\[exportfile\]\# failed:==Export in Datei #[exportfile]# fehlgeschlagen:
-No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
+No entry found for URL-hash==Не найдено для хэш URL адреса
 #URL String</td>==URL Adresse</td>
 #Hash</td>==Hash</td>
 #Description</td>==Beschreibung</td>
@@ -3229,12 +3236,12 @@ Remote&nbsp;Search==Remote Suche
 #-----------------------------
 #File: env/templates/submenuBlacklist.template
 #---------------------------
-Filter &amp; Blacklists==Filter &amp; Sperrlisten
-Blacklist Administration==Blacklist Verwaltung
-Blacklist Cleaner==Blacklist aufräumen
-Blacklist Test==Blacklist testen
-Import/Export==Import / Export
-Index Cleaner==Index Aufräumer
+Filter &amp; Blacklists==Фильтр &amp; Черный список
+Blacklist Administration==Администрирование черного списка
+Blacklist Cleaner==Очистка черного списка
+Blacklist Test==Тест черного списка
+Import/Export==Импорт / Экспорт
+Index Cleaner==Очистка индекса
 #-----------------------------
 #File: env/templates/submenuConfig.template
 #---------------------------
@@ -3299,10 +3306,11 @@ User Profile==Benutzerprofil
 #-----------------------------
 #File: env/templates/submenuIndexControl.template
 #---------------------------
-Index Administration==Indexverwaltung
-Reverse Word Index Administration==Reverse Wort Indexverwaltung
-URL References Database==URL Referenzen Datenbank
-URL Viewer==URL Betrachter
+Index Administration==Администрирование индекса
+Reverse Word Index Administration==Администрирование индекса ссылок по слову
+URL References Database==База данных URL-ссылок
+URL Viewer==URL обозреватель
+Federated Index==Федеративный индекс
 #-----------------------------
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
@@ -3349,7 +3357,7 @@ Search Portal Integration==Интеграция портала поиска
 Live Search Anywhere==Живой поиск везде
 Generic Search Portal==Общий поисковый портал
 Search Box Anywhere==Поле поиска везде
-Appearance==Внешний вид
+Appearance<==Внешний вид<
 User Profile==Профиль пользователя
 Language<==Язык<
 Ranking Config==Конфигурация рейтинга
