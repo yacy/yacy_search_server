@@ -145,6 +145,7 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
@@ -2553,21 +2554,25 @@ public final class Switchboard extends serverSwitch {
                 }
 
                 final Map<MultiProtocolURI, String> links;
+                searchEvent.getRankingResult().oneFeederStarted();
                 try {
                     links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE);
-                } catch (final IOException e) {
-                    Log.logException(e);
-                    return;
-                }
-                final Iterator<MultiProtocolURI> i = links.keySet().iterator();
-                while (i.hasNext()) {
-                    if (!i.next().getHost().endsWith(host)) {
-                        i.remove();
-                    }
-                }
+                    if (links != null) {
+                        final Iterator<MultiProtocolURI> i = links.keySet().iterator();
+                        while (i.hasNext()) {
+                            if (!i.next().getHost().endsWith(host)) {
+                                i.remove();
+                            }
+                        }
 
-                // add all pages to the index
-                addAllToIndex(url, links, searchEvent, "site");
+                        // add all pages to the index
+                        addAllToIndex(url, links, searchEvent, "site");
+                    }
+                } catch (final Throwable e) {
+                    Log.logException(e);
+                } finally {
+                    searchEvent.getRankingResult().oneFeederTerminated();
+                }
             }
         }.start();
     }
@@ -2576,13 +2581,14 @@ public final class Switchboard extends serverSwitch {
         new Thread() {
             @Override
             public void run() {
-                String query = searchEvent.getQuery().queryString(true);
-                final int meta = query.indexOf("heuristic:",0);
+                QueryParams query = searchEvent.getQuery();
+                String queryString = query.queryString(true);
+                final int meta = queryString.indexOf("heuristic:",0);
                 if (meta >= 0) {
-                    final int q = query.indexOf(' ', meta);
-                    query = (q >= 0) ? query.substring(0, meta) + query.substring(q + 1) : query.substring(0, meta);
+                    final int q = queryString.indexOf(' ', meta);
+                    queryString = (q >= 0) ? queryString.substring(0, meta) + queryString.substring(q + 1) : queryString.substring(0, meta);
                 }
-                final String urlString = "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=" + query.trim().replaceAll(" ", "+") + "&n=2";
+                final String urlString = "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=" + queryString.trim().replaceAll(" ", "+") + "&n=2";
                 final DigestURI url;
                 try {
                     url = new DigestURI(MultiProtocolURI.unescape(urlString));
@@ -2592,21 +2598,25 @@ public final class Switchboard extends serverSwitch {
                 }
 
                 Map<MultiProtocolURI, String> links = null;
+                searchEvent.getRankingResult().oneFeederStarted();
                 try {
                     links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE);
-                } catch (final IOException e) {
-                    //Log.logException(e);
-                    return;
-                }
-                final Iterator<MultiProtocolURI> i = links.keySet().iterator();
-                while (i.hasNext()) {
-                    if (i.next().toNormalform(false, false).indexOf("scroogle",0) >= 0) {
-                        i.remove();
+                    if (links != null) {
+                        final Iterator<MultiProtocolURI> i = links.keySet().iterator();
+                        while (i.hasNext()) {
+                            if (i.next().toNormalform(false, false).indexOf("scroogle",0) >= 0) {
+                                i.remove();
+                            }
+                        }
+                        Switchboard.this.log.logInfo("Heuristic: adding " + links.size() + " links from scroogle");
+                        // add all pages to the index
+                        addAllToIndex(null, links, searchEvent, "scroogle");
                     }
+                } catch (final Throwable e) {
+                    //Log.logException(e);
+                } finally {
+                    searchEvent.getRankingResult().oneFeederTerminated();
                 }
-                Switchboard.this.log.logInfo("Heuristic: adding " + links.size() + " links from scroogle");
-                // add all pages to the index
-                addAllToIndex(null, links, searchEvent, "scroogle");
             }
         }.start();
     }
@@ -2618,14 +2628,15 @@ public final class Switchboard extends serverSwitch {
         new Thread() {
             @Override
             public void run() {
-                String query = searchEvent.getQuery().queryString(true);
-                final int meta = query.indexOf("heuristic:",0);
+                QueryParams query = searchEvent.getQuery();
+                String queryString = query.queryString(true);
+                final int meta = queryString.indexOf("heuristic:",0);
                 if (meta >= 0) {
-                    final int q = query.indexOf(' ', meta);
-                    if (q >= 0) query = query.substring(0, meta) + query.substring(q + 1); else query = query.substring(0, meta);
+                    final int q = queryString.indexOf(' ', meta);
+                    if (q >= 0) queryString = queryString.substring(0, meta) + queryString.substring(q + 1); else queryString = queryString.substring(0, meta);
                 }
 
-                final String urlString = urlpattern.substring(0, p) + query.trim().replaceAll(" ", "+") + urlpattern.substring(p + 1);
+                final String urlString = urlpattern.substring(0, p) + queryString.trim().replaceAll(" ", "+") + urlpattern.substring(p + 1);
                 final DigestURI url;
                 try {
                     url = new DigestURI(MultiProtocolURI.unescape(urlString));
@@ -2636,30 +2647,30 @@ public final class Switchboard extends serverSwitch {
 
                 // if we have an url then try to load the rss
                 RSSReader rss = null;
+                searchEvent.getRankingResult().oneFeederStarted();
                 try {
                     final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, true);
                     final byte[] resource = (response == null) ? null : response.getContent();
                     //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
-                } catch (final IOException e) {
-                    Log.logException(e);
-                }
-                if (rss == null) {
-                    Log.logInfo("heuristicRSS", "rss result not parsed from " + feedName);
-                    return;
-                }
+                    if (rss != null) {
+                        final Map<MultiProtocolURI, String> links = new TreeMap<MultiProtocolURI, String>();
+                        MultiProtocolURI uri;
+                        for (final RSSMessage message: rss.getFeed()) try {
+                            uri = new MultiProtocolURI(message.getLink());
+                            links.put(uri, message.getTitle());
+                        } catch (final MalformedURLException e) {
+                        }
 
-                final Map<MultiProtocolURI, String> links = new TreeMap<MultiProtocolURI, String>();
-                MultiProtocolURI uri;
-                for (final RSSMessage message: rss.getFeed()) try {
-                    uri = new MultiProtocolURI(message.getLink());
-                    links.put(uri, message.getTitle());
-                } catch (final MalformedURLException e) {
+                        Log.logInfo("heuristicRSS", "Heuristic: adding " + links.size() + " links from '" + feedName + "' rss feed");
+                        // add all pages to the index
+                        addAllToIndex(null, links, searchEvent, feedName);
+                    }
+                } catch (final Throwable e) {
+                    //Log.logException(e);
+                } finally {
+                    searchEvent.getRankingResult().oneFeederTerminated();
                 }
-
-                Log.logInfo("heuristicRSS", "Heuristic: adding " + links.size() + " links from '" + feedName + "' rss feed");
-                // add all pages to the index
-                addAllToIndex(null, links, searchEvent, feedName);
             }
         }.start();
     }

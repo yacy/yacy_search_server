@@ -218,7 +218,6 @@ public class Segment {
             final SearchEvent searchEvent,
             final String sourceName) {
         final RWIProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
-        if (rankingProcess != null) rankingProcess.moreFeeders(1);
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
@@ -264,7 +263,6 @@ public class Segment {
                 }
             }
         }
-        if (rankingProcess != null) rankingProcess.oneFeederTerminated();
         return wordCount;
     }
 
@@ -373,12 +371,11 @@ public class Segment {
                 condenser,                                    // document condenser
                 language,                                     // document language
                 Response.docType(document.dc_format()),       // document type
-                document.inboundLinkCount(),                      // inbound links
-                document.outboundLinkCount(),                     // outbound links
+                document.inboundLinkCount(),                  // inbound links
+                document.outboundLinkCount(),                 // outbound links
                 searchEvent,                                  // a search event that can have results directly
                 sourceName                                    // the name of the source where the index was created
         );
-
         final long indexingEndTime = System.currentTimeMillis();
 
         if (this.log.isInfo()) {

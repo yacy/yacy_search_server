@@ -169,7 +169,8 @@ public final class RWIProcess extends Thread
     @Override
     public void run() {
         // do a search
-
+        oneFeederStarted();
+        
         // sort the local containers and truncate it to a limited count,
         // so following sortings together with the global results will be fast
         try {
@@ -385,8 +386,8 @@ public final class RWIProcess extends Thread
         assert c >= 0 : "feeders = " + c;
     }
 
-    public void moreFeeders(final int countMoreFeeders) {
-        this.feeders.addAndGet(countMoreFeeders);
+    public void oneFeederStarted() {
+        this.feeders.addAndGet(1);
     }
 
     public boolean feedingIsFinished() {

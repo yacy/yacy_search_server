@@ -32,6 +32,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Hit;
@@ -119,7 +120,7 @@ public class NetworkGraph {
     public static RasterPlotter getSearchEventPicture(final SeedDB seedDB, final String eventID, final int coronaangle, final int cyc) {
         final SearchEvent event = SearchEventCache.getEvent(eventID);
         if (event == null) return null;
-        final RemoteSearch[] primarySearches = event.getPrimarySearchThreads();
+        final List<RemoteSearch> primarySearches = event.getPrimarySearchThreads();
         final RemoteSearch[] secondarySearches = event.getSecondarySearchThreads();
         if (primarySearches == null) return null; // this was a local search and there are no threads
 

@@ -25,6 +25,7 @@
 package net.yacy.peers;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 
@@ -113,6 +114,7 @@ public class RemoteSearch extends Thread {
 
     @Override
     public void run() {
+        this.containerCache.oneFeederStarted();
         try {
             this.urls = Protocol.search(
                         this.peers.mySeed(),
@@ -156,7 +158,8 @@ public class RemoteSearch extends Thread {
         return this.targetPeer;
     }
 
-    public static RemoteSearch[] primaryRemoteSearches(
+    public static void primaryRemoteSearches(
+            final List<RemoteSearch> searchThreads,
             final String wordhashes, final String excludehashes,
             final Pattern prefer, final Pattern filter, final Pattern snippet,
             final QueryParams.Modifier modifier,
@@ -189,25 +192,24 @@ public class RemoteSearch extends Thread {
                             burstRobinsonPercent,
                             burstMultiwordPercent)
                   : PeerSelection.selectClusterPeers(peers, clusterselection);
-        if (targetPeers == null) return new RemoteSearch[0];
+        if (targetPeers == null) return;
         final int targets = targetPeers.length;
-        if (targets == 0) return new RemoteSearch[0];
-        final RemoteSearch[] searchThreads = new RemoteSearch[targets];
+        if (targets == 0) return;
         for (int i = 0; i < targets; i++) {
             if (targetPeers[i] == null || targetPeers[i].hash == null) continue;
             try {
-                searchThreads[i] = new RemoteSearch(
+                RemoteSearch rs = new RemoteSearch(
                     wordhashes, excludehashes, "", prefer, filter, snippet, modifier,
                     language, sitehash, authorhash,
                     count, time, maxDist, true, targets, targetPeers[i],
                     indexSegment, peers, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
-                searchThreads[i].start();
+                rs.start();
+                searchThreads.add(rs);
             } catch (final OutOfMemoryError e) {
                 Log.logException(e);
                 break;
             }
         }
-        return searchThreads;
     }
 
     public static RemoteSearch secondaryRemoteSearch(

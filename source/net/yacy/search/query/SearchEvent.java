@@ -26,8 +26,10 @@
 
 package net.yacy.search.query;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -93,7 +95,8 @@ public final class SearchEvent
     private final SecondarySearchSuperviser secondarySearchSuperviser;
 
     // class variables for remote searches
-    private RemoteSearch[] primarySearchThreads, secondarySearchThreads;
+    private final List<RemoteSearch> primarySearchThreadsL;
+    private RemoteSearch[] secondarySearchThreads;
     private final SortedMap<byte[], String> preselectedPeerHashes;
     private final Thread localSearchThread;
     private final SortedMap<byte[], Integer> IACount;
@@ -126,7 +129,6 @@ public final class SearchEvent
         if ( this.secondarySearchSuperviser != null ) {
             this.secondarySearchSuperviser.start();
         }
-        this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
         this.IAResults = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
@@ -153,49 +155,61 @@ public final class SearchEvent
         if ( remote ) {
             // start global searches
             final long timer = System.currentTimeMillis();
-            this.primarySearchThreads =
-                (this.query.queryHashes.isEmpty()) ? null : RemoteSearch.primaryRemoteSearches(
-                    QueryParams.hashSet2hashString(this.query.queryHashes),
-                    QueryParams.hashSet2hashString(this.query.excludeHashes),
-                    this.query.prefer,
-                    this.query.urlMask,
-                    this.query.snippetMatcher,
-                    this.query.modifier,
-                    this.query.targetlang == null ? "" : this.query.targetlang,
-                    this.query.sitehash == null ? "" : this.query.sitehash,
-                    this.query.authorhash == null ? "" : this.query.authorhash,
-                    remote_maxcount,
-                    remote_maxtime,
-                    this.query.maxDistance,
-                    this.query.getSegment(),
-                    peers,
-                    this.rankingProcess,
-                    this.secondarySearchSuperviser,
-                    Switchboard.urlBlacklist,
-                    this.query.ranking,
-                    this.query.constraint,
-                    (this.query.domType == QueryParams.Searchdom.GLOBAL) ? null : preselectedPeerHashes,
-                    burstRobinsonPercent,
-                    burstMultiwordPercent);
-            if ( this.primarySearchThreads != null ) {
+            if (this.query.queryHashes.isEmpty()) {
+                this.primarySearchThreadsL = null;
+            } else {
+                this.primarySearchThreadsL = new ArrayList<RemoteSearch>();
+                // start this concurrently because the remote search needs an enumeration
+                // of the remote peers which may block in some cases when i.e. DHT is active
+                // at the same time.
+                new Thread() {
+                    @Override
+                    public void run() {
+                        RemoteSearch.primaryRemoteSearches(
+                            SearchEvent.this.primarySearchThreadsL,
+                            QueryParams.hashSet2hashString(SearchEvent.this.query.queryHashes),
+                            QueryParams.hashSet2hashString(SearchEvent.this.query.excludeHashes),
+                            SearchEvent.this.query.prefer,
+                            SearchEvent.this.query.urlMask,
+                            SearchEvent.this.query.snippetMatcher,
+                            SearchEvent.this.query.modifier,
+                            SearchEvent.this.query.targetlang == null ? "" : SearchEvent.this.query.targetlang,
+                            SearchEvent.this.query.sitehash == null ? "" : SearchEvent.this.query.sitehash,
+                            SearchEvent.this.query.authorhash == null ? "" : SearchEvent.this.query.authorhash,
+                            remote_maxcount,
+                            remote_maxtime,
+                            SearchEvent.this.query.maxDistance,
+                            SearchEvent.this.query.getSegment(),
+                            peers,
+                            SearchEvent.this.rankingProcess,
+                            SearchEvent.this.secondarySearchSuperviser,
+                            Switchboard.urlBlacklist,
+                            SearchEvent.this.query.ranking,
+                            SearchEvent.this.query.constraint,
+                            (SearchEvent.this.query.domType == QueryParams.Searchdom.GLOBAL) ? null : preselectedPeerHashes,
+                            burstRobinsonPercent,
+                            burstMultiwordPercent);
+                    }
+                }.start();
+            }
+            if ( this.primarySearchThreadsL != null ) {
                 Log.logFine("SEARCH_EVENT", "STARTING "
-                    + this.primarySearchThreads.length
+                    + this.primarySearchThreadsL.size()
                     + " THREADS TO CATCH EACH "
                     + remote_maxcount
                     + " URLs");
-                this.rankingProcess.moreFeeders(this.primarySearchThreads.length);
                 EventTracker.update(
                     EventTracker.EClass.SEARCH,
                     new ProfilingGraph.EventSearch(
                         this.query.id(true),
                         Type.REMOTESEARCH_START,
                         "",
-                        this.primarySearchThreads.length,
+                        this.primarySearchThreadsL.size(),
                         System.currentTimeMillis() - timer),
                     false);
                 // finished searching
                 Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO "
-                    + this.primarySearchThreads.length
+                    + this.primarySearchThreadsL.size()
                     + " PEERS: "
                     + ((System.currentTimeMillis() - start) / 1000)
                     + " seconds");
@@ -204,6 +218,7 @@ public final class SearchEvent
                 Log.logFine("SEARCH_EVENT", "NO SEARCH STARTED DUE TO EMPTY SEARCH REQUEST.");
             }
         } else {
+            this.primarySearchThreadsL = null;
             if ( generateAbstracts ) {
                 // we need the results now
                 try {
@@ -313,8 +328,8 @@ public final class SearchEvent
         this.resultFetcher.setCleanupState();
 
         // stop all threads
-        if ( this.primarySearchThreads != null ) {
-            for ( final RemoteSearch search : this.primarySearchThreads ) {
+        if ( this.primarySearchThreadsL != null ) {
+            for ( final RemoteSearch search : this.primarySearchThreadsL ) {
                 if ( search != null ) {
                     synchronized ( search ) {
                         if ( search.isAlive() ) {
@@ -400,8 +415,8 @@ public final class SearchEvent
 
     boolean anyRemoteSearchAlive() {
         // check primary search threads
-        if ( (this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0) ) {
-            for ( final RemoteSearch primarySearchThread : this.primarySearchThreads ) {
+        if ( (this.primarySearchThreadsL != null) && (this.primarySearchThreadsL.size() != 0) ) {
+            for ( final RemoteSearch primarySearchThread : this.primarySearchThreadsL ) {
                 if ( (primarySearchThread != null) && (primarySearchThread.isAlive()) ) {
                     return true;
                 }
@@ -418,8 +433,8 @@ public final class SearchEvent
         return false;
     }
 
-    public RemoteSearch[] getPrimarySearchThreads() {
-        return this.primarySearchThreads;
+    public List<RemoteSearch> getPrimarySearchThreads() {
+        return this.primarySearchThreadsL;
     }
 
     public RemoteSearch[] getSecondarySearchThreads() {
@@ -688,7 +703,6 @@ public final class SearchEvent
                 }
                 assert words.length() >= 12 : "words = " + words;
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls + " from words: " + words);
-                SearchEvent.this.rankingProcess.moreFeeders(1);
                 this.checkedPeers.add(peer);
                 SearchEvent.this.secondarySearchThreads[c++] =
                     RemoteSearch.secondaryRemoteSearch(

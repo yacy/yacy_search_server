@@ -172,9 +172,9 @@ public class SearchEventCache {
                 if (countAliveThreads() < allowedThreads) break throttling;
                 // finally we just wait some time until we get access
                 Log.logWarning("SearchEventCache", "throttling phase 3: " + SearchEventCache.lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
-                try { Thread.sleep(100); } catch (final InterruptedException e) { }
+                try { Thread.sleep(200); } catch (final InterruptedException e) { }
                 waitcount++;
-                if (waitcount >= 10) return getDummyEvent(workTables, loader, query.getSegment());
+                if (waitcount >= 100) return getDummyEvent(workTables, loader, query.getSegment());
             }
 
             if (waitcount > 0) {
