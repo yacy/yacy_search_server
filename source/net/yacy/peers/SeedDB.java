@@ -51,7 +51,6 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -675,13 +674,13 @@ public final class SeedDB implements AlternativeDomainNames {
 
     public Seed lookupByIP(
             final InetAddress peerIP,
+            final int port,
             final boolean lookupConnected,
             final boolean lookupDisconnected,
             final boolean lookupPotential
     ) {
 
         if (peerIP == null) return null;
-        Seed seed = null;
 
         // local peer?
         if (Domains.isThisHostIP(peerIP)) {
@@ -691,112 +690,85 @@ public final class SeedDB implements AlternativeDomainNames {
 
         // then try to use the cache
         final SoftReference<Seed> ref = this.ipLookupCache.get(peerIP);
+        Seed seed = null;
         if (ref != null) {
             seed = ref.get();
-            if (seed != null) return seed;
+            if (seed != null) {
+                //System.out.println("*** found lookupByIP in cache: " + peerIP.toString() + " -> " + this.mySeed.getName());
+                return seed;
+            }
         }
 
-        int pos = -1;
-        String addressStr = null;
-        InetAddress seedIPAddress = null;
-        final HandleSet badPeerHashes = new HandleSet(12, Base64Order.enhancedCoder, 0);
-
+        String ipString = peerIP.getHostAddress();
+        
         if (lookupConnected) {
-            // enumerate the cache and simultaneously insert values
-            final Iterator<Seed> e = seedsConnected(true, false, null, (float) 0.0);
-            while (e.hasNext()) {
-                seed = e.next();
-                if (seed != null) {
-                    addressStr = seed.getPublicAddress();
-                    if (addressStr == null) {
-                    	Log.logWarning("YACY","lookupByIP/Connected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
-                    	try {
-                            badPeerHashes.put(ASCII.getBytes(seed.hash));
-                        } catch (final RowSpaceExceededException e1) {
-                            Log.logException(e1);
-                            break;
-                        }
-                    	continue;
-                    }
-                    if ((pos = addressStr.indexOf(':'))!= -1) {
-                        addressStr = addressStr.substring(0,pos);
-                    }
-                    seedIPAddress = Domains.dnsResolve(addressStr);
-                    if (seedIPAddress == null) continue;
-                    if (seed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress, new SoftReference<Seed>(seed));
-                    if (seedIPAddress.equals(peerIP)) return seed;
+            try {
+                Iterator<Map.Entry<byte[], Map<String, String>>> mmap = this.seedActiveDB.entries(Seed.IP, ipString);
+                Map.Entry<byte[], Map<String, String>> entry;
+                while (mmap.hasNext()) {
+                    entry = mmap.next();
+                    if (entry == null) break;
+                    String p = entry.getValue().get(Seed.PORT);
+                    if (p == null) continue;
+                    if (port > 0 && Integer.parseInt(p) != port) continue;
+                    seed = this.getConnected(ASCII.String(entry.getKey()));
+                    if (seed == null) continue;
+                    this.ipLookupCache.put(peerIP, new SoftReference<Seed>(seed));
+                    //System.out.println("*** found lookupByIP in connected: " + peerIP.toString() + " -> " + seed.getName());
+                    return seed;
                 }
+            } catch ( IOException e ) {
             }
-            // delete bad peers
-            final Iterator<byte[]> i = badPeerHashes.iterator();
-            while (i.hasNext()) try {this.seedActiveDB.delete(i.next());} catch (final IOException e1) {Log.logException(e1);}
-            badPeerHashes.clear();
         }
 
         if (lookupDisconnected) {
-            // enumerate the cache and simultanous insert values
-            final Iterator<Seed>e = seedsDisconnected(true, false, null, (float) 0.0);
-
-            while (e.hasNext()) {
-                seed = e.next();
-                if (seed != null) {
-                    addressStr = seed.getPublicAddress();
-                    if (addressStr == null) {
-                        Log.logWarning("YACY","lookupByIPDisconnected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
-                        try {
-                            badPeerHashes.put(UTF8.getBytes(seed.hash));
-                        } catch (final RowSpaceExceededException e1) {
-                            Log.logException(e1);
-                            break;
-                        }
-                        continue;
-                    }
-                    if ((pos = addressStr.indexOf(':'))!= -1) {
-                        addressStr = addressStr.substring(0,pos);
-                    }
-                    seedIPAddress = Domains.dnsResolve(addressStr);
-                    if (seedIPAddress == null) continue;
-                    if (seed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress, new SoftReference<Seed>(seed));
-                    if (seedIPAddress.equals(peerIP)) return seed;
+            try {
+                Iterator<Map.Entry<byte[], Map<String, String>>> mmap = this.seedPassiveDB.entries(Seed.IP, ipString);
+                Map.Entry<byte[], Map<String, String>> entry;
+                while (mmap.hasNext()) {
+                    entry = mmap.next();
+                    if (entry == null) break;
+                    String p = entry.getValue().get(Seed.PORT);
+                    if (p == null) continue;
+                    if (port > 0 && Integer.parseInt(p) != port) continue;
+                    seed = this.getDisconnected(ASCII.String(entry.getKey()));
+                    if (seed == null) continue;
+                    this.ipLookupCache.put(peerIP, new SoftReference<Seed>(seed));
+                    //System.out.println("*** found lookupByIP in disconnected: " + peerIP.toString() + " -> " + seed.getName());
+                    return seed;
                 }
+            } catch ( IOException e ) {
             }
-            // delete bad peers
-            final Iterator<byte[]> i = badPeerHashes.iterator();
-            while (i.hasNext()) try {this.seedActiveDB.delete(i.next());} catch (final IOException e1) {Log.logException(e1);}
-            badPeerHashes.clear();
         }
 
         if (lookupPotential) {
-            // enumerate the cache and simultanous insert values
-            final Iterator<Seed> e = seedsPotential(true, false, null, (float) 0.0);
-
-            while (e.hasNext()) {
-                seed = e.next();
-                if ((seed != null) && ((addressStr = seed.getPublicAddress()) != null)) {
-                    if ((pos = addressStr.indexOf(':'))!= -1) {
-                        addressStr = addressStr.substring(0,pos);
-                    }
-                    seedIPAddress = Domains.dnsResolve(addressStr);
-                    if (seedIPAddress == null) continue;
-                    if (seed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress, new SoftReference<Seed>(seed));
-                    if (seedIPAddress.equals(peerIP)) return seed;
+            try {
+                Iterator<Map.Entry<byte[], Map<String, String>>> mmap = this.seedPotentialDB.entries(Seed.IP, ipString);
+                Map.Entry<byte[], Map<String, String>> entry;
+                while (mmap.hasNext()) {
+                    entry = mmap.next();
+                    if (entry == null) break;
+                    String p = entry.getValue().get(Seed.PORT);
+                    if (p == null) continue;
+                    if (port > 0 && Integer.parseInt(p) != port) continue;
+                    seed = this.getPotential(ASCII.String(entry.getKey()));
+                    if (seed == null) continue;
+                    this.ipLookupCache.put(peerIP, new SoftReference<Seed>(seed));
+                    //System.out.println("*** found lookupByIP in potential: " + peerIP.toString() + " -> " + seed.getName());
+                    return seed;
                 }
+            } catch ( IOException e ) {
             }
         }
 
         // check local seed
         if (this.mySeed == null) return null;
-        addressStr = this.mySeed.getPublicAddress();
-        if (addressStr == null) return null;
-        if ((pos = addressStr.indexOf(':'))!= -1) {
-            addressStr = addressStr.substring(0,pos);
-        }
-        seedIPAddress = Domains.dnsResolve(addressStr);
-        if (seedIPAddress == null) return null;
-        if (this.mySeed.isProper(false) == null) this.ipLookupCache.put(seedIPAddress,  new SoftReference<Seed>(this.mySeed));
-        if (seedIPAddress.equals(peerIP)) return this.mySeed;
-        // nothing found
-        return null;
+        String s = this.mySeed.getIP();
+        if (s == null || !ipString.equals(s)) return null;
+        int p = this.mySeed.getPort();
+        if (p != port) return null;
+        //System.out.println("*** found lookupByIP as my seed: " + peerIP.toString() + " -> " + this.mySeed.getName());
+        return this.mySeed;
     }
 
     private ArrayList<String> storeSeedList(final File seedFile, final boolean addMySeed) throws IOException {
