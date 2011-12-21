@@ -32,61 +32,61 @@
 Access Tracker==Zugriffe
 Server Access Overview==Обзор доступа к серверу
 This is a list of \#\[num\]\# requests to the local http server within the last hour.==Это список запросов #[num]# на локальный сервер http в течение последнего часа.
-This is a list of requests to the local http server within the last hour.==Dies ist eine Liste von Anfragen, die innerhalb der letzten Stunde an den lokalen HTTP Server gestellt wurden.
+This is a list of requests to the local http server within the last hour.==Это список запросов на локальный http сервер в течение часа.
 Showing \#\[num\]\# requests.==Показать #[num]# запросы.
 #>Host<==>Хост<
 >Path<==>Путь<
 Date<==Дата<
-Access Count During==Erfasster Zugriff während der
+Access Count During==Доступ выявлены в ходе
 last Second==последняя секунда
 last Minute==последняя минута
 last 10 Minutes==последние 10 минут
 last Hour==последний час
 The following hosts are registered as source for brute-force requests to protected pages==Следующие хостов зарегистрированы в качестве источника для грубой силы запросы к защищенным страницам
-#>Host==>Host
+#>Host==>Хост
 Access Times==Время доступа
 Server Access Details==Подробные сведения о сервере доступа
 Local Search Log==Лог локального поиска
-Local Search Host Tracker==Lokale Suche Host Tracker
-Remote Search Log==Remote Suche Log
+Local Search Host Tracker==Локальный поиск на трекере
+Remote Search Log==Лог внешнего поиска
 #Total:==Итого:
 Success:==Успешно:
-Remote Search Host Tracker==Remote Suche Host Tracker
-This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgeführt wurden.
-Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Es werden #[num]# Einträge von insgesamt #[total]# Anfragen angezeigt.
-Requesting Host==Anfragender Host
+Remote Search Host Tracker==Удаленный поиск на трекере
+This is a list of searches that had been requested from this\' peer search interface==Это список запросов полученный от других поисковых пиров
+Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Показаны \ # \ [num \] \ # из \ # \ [total \] \ # запросов .
+Requesting Host==Запрашиваемый Хост
 Offset==Смещение
-Expected Results==Erwartete Ergebnisse
-Returned Results==Gefundene Ergebnisse
+Expected Results==Ожидаемые результат
+Returned Results==Найденный результат
 Used Time \(ms\)==Иcпользованное время (в мс)
-URL fetch \(ms\)==URL выборки (мс)
-Snippet comp \(ms\)==Vorschau Erzeugung (in ms)
-Query==Suchwort
+URL fetch \(ms\)==URL выборки (в мс)
+Snippet comp \(ms\)==Фрагмент макета(в мс)
+Query==Запрос
 #>User Agent<==>User Agent<
-Search Word Hashes==Suchwort Hash
+Search Word Hashes==Поиск слова по хэшу
 Count</td>==Количество</td>
 Queries Per Last Hour==Запросов за последний час
 Access Dates==Время доступа
-This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
+This is a list of searches that had been requested from remote peer search interface==Это список запросов, которые были запрошены из отдаленных поисковых пиров
 #-----------------------------
 #File: Blacklist_p.html
 #---------------------------
-Blacklist Administration==Blacklist Verwaltung
-Used Blacklist engine:==Benutzte Blacklist Verwaltung:
-This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
-from being loaded. You can define several blacklists and activate them separately.==Sie können mehrere Blacklists anlegen und getrennt aktivieren.
-You may also provide your blacklist to other peers by sharing them; in return you may==Sie können ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
-collect blacklist entries from other peers.==Im Gegenzug können Sie sich selber von anderen Peers Blacklists runterladen.
-Active list:==Aktivierte Liste:
-No blacklist selected==Keine Blacklist gewählt
-Select list:==Liste auswählen:
-not shared::shared==nicht freigegeben::freigegeben
+Blacklist Administration==Черный список администрации
+Used Blacklist engine:==Используемый бан-лист:
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Эта функция позволяет фильтровать URL перед прокси-сервером.
+from being loaded. You can define several blacklists and activate them separately.==загрузку. Вы можете задать несколько черных списков и активировать их по отдельности .
+You may also provide your blacklist to other peers by sharing them; in return you may==Вы также можете обменяться своим черным списком с другими узлами.
+collect blacklist entries from other peers.==собирать черный список с других источников.
+Active list:==Активный список
+No blacklist selected==Не выбран черный список
+Select list:==Выбранный список:
+not shared::shared==без общего доступа::общий доступ
 "select"=="выбрать"
-Create new list:==Neue Liste anlegen:
+Create new list:==Создать новый список:
 "create"=="создать"
-Settings for this list==Einstellungen dieser Liste
+Settings for this list==Настройки для этого списка
 "Save"=="Сохранить"
-Share/don't share this list==Liste freigeben/nicht freigeben
+Share/don't share this list==Сделать/запретить общий доступ этому к списку
 Delete this list==Удалить этот список
 Edit this list==Редактировать этот список
 These are the domain name/path patterns in==Dies sind die Domainnamen/-pfade in
@@ -94,21 +94,21 @@ Blacklist Pattern==Шаблон черного списка
 Edit selected pattern\(s\)==Редактировать выбранный шаблон
 Delete selected pattern\(s\)==Удалить выбранный шаблон
 Move selected pattern\(s\) to==Переместить выбранный шаблон в
-#You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
-Add new pattern:==Добавить выбранный шаблон:
-"Add URL pattern"=="URL hinzufügen"
+#You can select them here for deletion==Вы можете удалить их по отдельности
+Add new pattern:==Добавить новый шаблон:
+"Add URL pattern"=="Добавить URL шаблон"
 The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Der rechte Asterisk '*', nach dem '/', kann durch einen <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regulären Ausdruck</a> ersetzt werden.
-domain.net\/fullpath<==domain.de/vollerpfad<
+domain.net\/fullpath<==domain.net/полный путь<
 >domain.net\/\*<==>domain.de/*<
 \*.domain.net\/\*<==*.domain.de/*<
 \*.sub.domain.net\/\*<==*.sub.domain.de/*<
 #sub.domain.\*\/\*<==sub.domain.*/*<
 #domain.\*\/\*<==domain.*/*<
-a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==ein ganzer <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Regulärer Ausdruck</a> (langsam)
-#was removed from blacklist==wurde aus Blacklist entfernt
-#was added to the blacklist==wurde zur Blacklist hinzugefügt
-Activate this list for==Diese Liste ist gültig für
-Show entries:==Zeige Einträge:
+a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==полный <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">регулярное выражение</a> \(медленный\)
+#was removed from blacklist==был удален из черного списка
+#was added to the blacklist==был добавлен в черный список
+Activate this list for==Активировать этот лист для
+Show entries:==Показать ввод:
 Entries per page:==Записи на страницу:
 "Go"=="Los"
 Edit existing pattern\(s\):==Изменить существующий шаблон:
@@ -126,9 +126,9 @@ Illegal Entries in \#\[blList\]\# for==Неправильный ввод \#\[blL
 Deleted \#\[delCount\]\# entries==Удалено \#\[delCount\]\# значений
 Altered \#\[alterCount\]\# entries!==Изменённые \#\[alterCount\]\# записи!
 Two wildcards in host-part==Две маски в хост-часть
-Either subdomain <u>or</u> wildcard==Entweder Subdomain <u>oder</u> Wildcard
-Path is invalid Regex==Pfad ist ungültige Regex
-Wildcard not on begin or end==Wildcard nicht am Beginn oder Ende
+Either subdomain <u>or</u> wildcard==Либо поддомен <u> или </u> шаблону
+Path is invalid Regex==Неверный путь Регулярное выражение
+Wildcard not on begin or end==Шаблон не начат или не закончен
 Host contains illegal chars==Хост содержит недопустимые символы
 Double==Двойной
 "Change Selected"=="Изменить выбранное"
@@ -138,15 +138,15 @@ No Blacklist selected==Не выбран черный список
 #File: BlacklistImpExp_p.html
 #---------------------------
 #Blacklist Import==Blacklist Import
-Used Blacklist engine:==Benutzte Blacklist Verwaltung:
-Import blacklist items from...==Importiere Blacklist von...
-other YaCy peers:==anderen YaCy Peers:
-"Load new blacklist items"=="Lade neue Blacklist"
+Used Blacklist engine:==Используется черный список:
+Import blacklist items from...==Импортировать значения черного списка из...
+other YaCy peers:==другой YaCy пир:
+"Load new blacklist items"=="Загрузка новых значений черного списка"
 #URL:==URL:
-plain text file:<==Einfache Textdatei:<
+plain text file:<==простой текстовый фаил:<
 XML file:==XML файл:
-Upload a regular text file which contains one blacklist entry per line.==Upload einer reguläre Testdatei mit jeweils einem Blacklisten Eintrag pro Zeile.
-Upload an XML file which contains one or more blacklists.==Upload einer XML Datei die eine oder mehrere Blacklisten enthält.
+Upload a regular text file which contains one blacklist entry per line.==Загрузить обычный текстовый файл, который содержит черный список по строчно.
+Upload an XML file which contains one or more blacklists.==Загрузить XML-файл, который содержит один или несколько черных списков .
 Export blacklist items to...==Exportiere Blacklist nach...
 Here you can export a blacklist as an XML file. This file will contain additional==Hier können Sie eine (oder alle) Blacklist(en) in eine XML Datei exportieren. Diese Datei enthält dann zusätzliche
 information about which cases a blacklist is activated for.==Informationen in welchen Fällen die Blacklist angewendet wird.
@@ -330,43 +330,43 @@ Save User==Сохранить пользователя
 #File: ConfigAppearance_p.html
 #---------------------------
 Appearance and Integration==Внешний вид и интеграция
-You can change the appearance of the YaCy interface with skins.==Sie können hier das Aussehen der YaCy Oberfläche mit Skins verändern,
-#You can change the appearance of YaCy with skins==Sie können hier das Erscheinungsbild von YaCy mit Skins ändern
-The selected skin and language also affects the appearance of the search page.==das ausgewählte Design und die gewählte Sprache wirken sich auch auf das Erscheinungsbild der Suchseite aus.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Wenn Sie <a href="ConfigPortal.html">ein Such-Portal mit Yacy erstellen möchten</a> können Sie
-change the appearance of the search page here.==das Erscheinungsbild der Suchseite <a href="ConfigPortal.html">hier</a> weitgehend ändern und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
+You can change the appearance of the YaCy interface with skins.==Вы можете изменить внешний вид YaCy, интерфейс со скинами .==
+#You can change the appearance of YaCy with skins==# Вы можете изменить внешний вид YaCy со скинами
+The selected skin and language also affects the appearance of the search page.==Выбранный скин и язык также влияет на внешний вид страницы поиска.
+If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Вы можете <a href="ConfigPortal.html">создать свой поисковый портал с  YaCy</a>
+change the appearance of the search page here.==изменить внешний вид страницы поиска.
 #and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
-Skin Selection==Skinauswahl
-Select one of the default skins, download new skins, or create your own skin.==Wählen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder erstellen Sie selbst einen neuen Skin.
-Current skin==Aktueller Skin
-Available Skins==Verfügbare Skins
-"Use"=="Benutzen"
-"Delete"=="Löschen"
->Skin Color Definition<==>Definition der Skin Farben<
-The generic skin \'generic_pd\' can be configured here with custom colors:==Der allgemeine Skin 'generic_pd' kann hier mit eigenen Farben angepasst werden:
->Background<==>Hintergrund<
-#>Text<==>Text<
+Skin Selection==Выбор скина
+Select one of the default skins, download new skins, or create your own skin.==Выберите один из стандартных скинов, загрузить новые скины, или создать свой собственный скин.
+Current skin==Текущий скин
+Available Skins==Доступные скины
+"Use"=="Использовать"
+"Delete"=="Удалить"
+>Skin Color Definition<==>Цвет скина<==
+The generic skin \'generic_pd\' can be configured here with custom colors:==Основной скин \ 'generic_pd \' может быть настроен с пользовательскими настройками цвета:
+>Background<==>Фон<
+#>Text<==>Текст<
 >Legend<==>Легенда<
->Table&nbsp;Header<==>Tabellen&nbsp;Kopf<
->Table&nbsp;Item<==>Tabellen&nbsp;Zelle&nbsp;1<
->Table&nbsp;Item&nbsp;2<==>Tabellen&nbsp;Zelle&nbsp;2<
->Table&nbsp;Bottom<==>Tabellen&nbsp;Unterseite<
->Border&nbsp;Line<==>Rand&nbsp;Linie<
->Sign&nbsp;\'bad\'<==>Zeichen&nbsp;'gut'<
->Sign&nbsp;\'good\'<==>Zeichen&nbsp;'schlecht'<
->Sign&nbsp;\'other\'<==>Zeichen&nbsp;'andere'<
->Search&nbsp;Headline<==>Suche&nbsp;Kopfzeile<
->Search&nbsp;URL==>Suche&nbsp;URL
-"Set Colors"=="Farben Anwenden"
-#>Skin Download<==>Skin Download<
-Skins can be installed from download locations==Skins können direkt von einer Download Quelle installiert werden
-Install new skin from URL==Installiere einen neuen Skin von folgender URL
+>Table&nbsp;Header<==>Таблица&nbsp;Заголовок<
+>Table&nbsp;Item<==>Таблица&nbsp;Значение;1<
+>Table&nbsp;Item&nbsp;2<==>Таблица&nbsp;Значение&nbsp;2<
+>Table&nbsp;Bottom<==>Таблица&nbsp;В низу<
+>Border&nbsp;Line<==>Граница&nbsp;Линия<
+>Sign&nbsp;\'bad\'<==>Вход&nbsp;'плохо'<
+>Sign&nbsp;\'good\'<==>Вход&nbsp;'хорошо'<
+>Sign&nbsp;\'other\'<==>Вход&nbsp;'другое'<
+>Search&nbsp;Headline<==>Поиск&nbsp;Заголовок<
+>Search&nbsp;URL==>Поиск&nbsp;URL
+"Set Colors"=="Настройка Цвета"
+#>Skin Download<==>Скачать Скин<
+Skins can be installed from download locations==Скин может быть установлен из источника на локальной машине
+Install new skin from URL==Установка нового скина по ссылке
 Use this skin==Использовать этот скин
-"Install"=="Installieren"
-Make sure that you only download data from trustworthy sources. The new Skin file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
-might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
->Unable to get URL:==>Die URL konnte nicht geladen werden:
-Error saving the skin.==Fehler beim Speichern des Skins.
+"Install"=="Установить"
+Make sure that you only download data from trustworthy sources. The new Skin file==Убедитесь, что вы загружаете данные из достоверного источника. Новый файл кожи
+might overwrite existing data if a file of the same name exists already.==может перезаписать существующий фаил, если с таким именем уже существует.
+>Unable to get URL:==>Неудалось получить по URL:
+Error saving the skin.==Ошибка сохранения файла скина.
 #-----------------------------
 #File: ConfigBasic.html
 #---------------------------
@@ -3105,9 +3105,9 @@ Images==Картинки
 Audio==Аудио
 Video==Видео
 Applications==Приложения
-The following words are stop-words and had been excluded from the search:==Folgende Wörter sind Stopwords und wurden von der Suche ausgeschlossen:
+The following words are stop-words and had been excluded from the search:==Следующие слова стоп-слов и были исключены из поиска:
 No Results.==Нет результата.
-length of search words must be at least 3 characters==Die Länge der Suchbegriffe muss mindestens 3 Zeichen betragen
+length of search words must be at least 3 characters==Длина искуемого слова должно быть не менее 3 символов
 > of==> из
 g> local,==g> локально,
 #g> remote),==g> удаленно),
@@ -3123,47 +3123,47 @@ Pictures==Картинка
 #-----------------------------
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "\#\[query\]\#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
-#>Domain Navigator==>Domain Navigator
->Name Space Navigator==>Namespace Navigator
->Author Navigator==>Autoren Navigator
+Show search results for "\#\[query\]\#" on map==Показать результат поиска "#[query]#" на карте
+#>Domain Navigator==>Навигатор домена
+>Name Space Navigator==>Навигатор пространства имен
+>Author Navigator==>Автор Навигатор
 #-----------------------------
 ### Subdirectory api ###
 #File: api/table_p.html
 #---------------------------
-Table Viewer==Tabellen Betrachter
-#>PK<==>Primärschlüssel<
-"Edit Table"=="Tabelle bearbeiten"
+Table Viewer==Таблица просмотра
+#>PK<==>Первичный ключ<
+"Edit Table"=="Редактировать таблицу"
 #-----------------------------
 #File: api/yacydoc.html
 #---------------------------
 >Author<==>Автор<
->Description<==>Beschreibung<
+>Description<==>Описание<
 >Subject<==>Тема<
-#>Publisher<==>Veröffentlicher<
-#>Contributor<==>Beiträger<
+#>Publisher<==>Издатель<
+#>Contributor<==>Корреспондента<
 >Date<==>Дата<
 >Type<==>Тип<
->Identifier<==>Identifizierer<
+>Identifier<==>Идентификатор<
 >Language<==>Язык<
->Load Date<==>Lade Datum<
->Referrer Identifier<==>Referrer Identifizierer<
-#>Referrer URL<==>Referrer URL<
+>Load Date<==>Дата загрузки<
+>Referrer Identifier<==>Ссылающаяся идентификатор<
+#>Referrer URL<==>Ссылка URL<
 >Document size<==>Размер документа<
 >Number of Words<==>Количество слов<
 #-----------------------------
 ### Subdirectory env/templates ###
 #File: env/templates/header.template
 #---------------------------
-YaCy - Distributed Search Engine==YaCy - Распределенный поисковый движок
+YaCy - Distributed Search Engine==YaCy - Система распределённого поиска
 ### SEARCH & BROWSE ###
 >Search==>Поиск
-Web Search==Веб-поиск
+Web Search==Веб поиск
 File Search==Поиск файла
-Search&nbsp;&amp;&nbsp;Browse==Настройка&nbsp;&amp;&nbsp;обзор
+Search&nbsp;&amp;&nbsp;Browse==Поиск&nbsp;&amp;&nbsp;Обзор
 Search Page==Страница поиска
-Rich Client Search==Rich Client Suche
-Interactive local Search==Interaktive lokale Suche
+Rich Client Search==Богатый Поиск Клиента
+Interactive local Search==Интерактивный локальный поиск
 Compare Search==Сравнить поиск
 Ranking Config==Ranking Einstellungen
 Browse==Обзор
@@ -3495,10 +3495,8 @@ Accounts==Konten
 'Delete'=='Löschen'
 'Rename'=='Umbenennen'
 'Help'=='Hilfe'
-
 #"public bookmark"=="öffentliches Lesezeichen"
 #"private bookmark"=="privates Lesezeichen"
-
 #"delete bookmark"=="Lesezeichen löschen"
 "YaCy Bookmarks"=="YaCy Lesezeichen"
 #>Title==>Titel
