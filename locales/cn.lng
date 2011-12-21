@@ -3007,8 +3007,8 @@ View this profile as==查看方式
 #---------------------------
 Crawler Queues==Crawler队列
 PPM \(Pages Per Minute\)==PPM (页面每分钟)
-#Traffic \(Crawler\)==RWI RAM (关键字缓存)
-RWI RAM \(Word Cache\)==RWI RAM (Wörter Zwischenspeicher)
+#Traffic \(Crawler\)==Traffic (Crawler)
+RWI RAM \(Word Cache\)==RWI RAM (关键字缓存)
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==资料管理出错. 请关闭YaCy, 并删除文件 DATA/PLASMADB/crawlProfiles0.db
 and restart.==后重启.
 Error:==错误:
