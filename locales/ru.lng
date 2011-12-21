@@ -72,7 +72,7 @@ This is a list of searches that had been requested from remote peer search inter
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Administration==Черный список администрации
-Used Blacklist engine:==Используемый бан-лист:
+Used Blacklist engine:==Используемый черный список:
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Эта функция позволяет фильтровать URL перед прокси-сервером.
 from being loaded. You can define several blacklists and activate them separately.==загрузку. Вы можете задать несколько черных списков и активировать их по отдельности .
 You may also provide your blacklist to other peers by sharing them; in return you may==Вы также можете обменяться своим черным списком с другими узлами.
@@ -86,10 +86,10 @@ Create new list:==Создать новый список:
 "create"=="создать"
 Settings for this list==Настройки для этого списка
 "Save"=="Сохранить"
-Share/don't share this list==Сделать/запретить общий доступ этому к списку
+Share/don't share this list==Открыть/закрыть общий доступ этому к списку
 Delete this list==Удалить этот список
 Edit this list==Редактировать этот список
-These are the domain name/path patterns in==Dies sind die Domainnamen/-pfade in
+These are the domain name/path patterns in==Это доменное имя/часть пути в 
 Blacklist Pattern==Шаблон черного списка
 Edit selected pattern\(s\)==Редактировать выбранный шаблон
 Delete selected pattern\(s\)==Удалить выбранный шаблон
@@ -97,11 +97,11 @@ Move selected pattern\(s\) to==Переместить выбранный шаб�
 #You can select them here for deletion==Вы можете удалить их по отдельности
 Add new pattern:==Добавить новый шаблон:
 "Add URL pattern"=="Добавить URL шаблон"
-The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Der rechte Asterisk '*', nach dem '/', kann durch einen <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regulären Ausdruck</a> ersetzt werden.
+The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Символом '*' (звездочка), после '/' может быть заменено <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярным выражением</a>.
 domain.net\/fullpath<==domain.net/полный путь<
->domain.net\/\*<==>domain.de/*<
-\*.domain.net\/\*<==*.domain.de/*<
-\*.sub.domain.net\/\*<==*.sub.domain.de/*<
+>domain.net\/\*<==>domain.net/*<
+\*.domain.net\/\*<==*.domain.net/*<
+\*.sub.domain.net\/\*<==*.sub.domain.net/*<
 #sub.domain.\*\/\*<==sub.domain.*/*<
 #domain.\*\/\*<==domain.*/*<
 a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==полный <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">регулярное выражение</a> \(медленный\)
@@ -110,9 +110,10 @@ a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pat
 Activate this list for==Активировать этот лист для
 Show entries:==Показать ввод:
 Entries per page:==Записи на страницу:
-"Go"=="Los"
+"Go"=="Вперед"
 Edit existing pattern\(s\):==Изменить существующий шаблон:
 "Save URL pattern\(s\)"=="Сохранить URL шаблона"
+proxy==прокси
 #-----------------------------
 #File: BlacklistCleaner_p.html
 #---------------------------
@@ -737,19 +738,21 @@ Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Mein
 #-----------------------------
 #File: ConfigUpdate_p.html
 #---------------------------
+>System Update==>Обновление системы
 Manual System Update==Ручное обновление системы
 Current installed Release==Текущая установленная версия
 Available Releases==Доступные версии
+changelog==история изменений
 "Download Release"=="Загрузить версию"
 "Check for new Release"=="Проверить на новые обновления"
 Downloaded Releases==Загрузить обновление
-No downloaded releases available for deployment.==Keine heruntergeladenen Releases zum Installieren verfügbar.
-no&nbsp;automated installation on development environments==Keine automatische Installation in Entwicklungsumgebungen
+No downloaded releases available for deployment.==Нет скачанных версий доступных для установки.
+no&nbsp;automated installation on development environments==без автоматической установки на средах разработки
 "Install Release"=="Установить версию"
 "Delete Release"=="Удалить версию"
 Automatic Update==Автоматическое обновление
-check for new releases, download if available and restart with downloaded release==suche nach neuer Version, lade sie herunter und starte neu mit dieser Version
-"Check \+ Download \+ Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
+check for new releases, download if available and restart with downloaded release==проверить наличие новых релизов, скачать если таковые имеются и перезапустить на новый релиз
+"Check \+ Download \+ Install Release Now"=="Проверить, загрузить и установить новый релиз сейчас"
 Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Der Download von Version #[downloadedRelease]# ist beendet. Ein Neustart ist eingeleitet.
 No more recent release found.==Kein neuere Version gefunden.
 Release will be installed. Please wait.==Das Release wird installiert. Bitte warten.
@@ -757,22 +760,22 @@ You installed YaCy with a package manager.==Sie haben YaCy mit einer Paketverwal
 To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Paketmanager.
 Omitting update because this is a development environment.==Update ausgelassen weil dies ein Entwicklersystem ist.
 Omitting update because download of release \#\[downloadedRelease\]\# failed.==Update ausgelassen weil der Download von Version #[downloadedRelease]# fehlschlug.
-Automated System Update==Automatische Systemaktualisierung
-manual update==ручное обновление
-no automatic look-up, updates can be made manually using this interface \(see options above\)==Keine automatische Aktualisierung. Updates können manuell gemacht werden (siehe die Optionen oben).
-automatic update==автоматическое обновление
-updates are made within fixed cycles:==Aktualisierungen werden nach festen Regeln gemacht:
+Automated System Update==Система автоматического обновления
+manual update==Ручное обновление
+no automatic look-up, updates can be made manually using this interface \(see options above\)==нет автоматического обновления. Обновления можно сделать вручную на этой странице (см. настройки выше).
+automatic update==Автоматическое обновление
+updates are made within fixed cycles:==обновления выполняются в установленные циклы:
 Time between lookup==Время между проверками
 hours==часов
-Release blacklist==Versionen Negativliste
-regex on release number strings==regex mit Versionsnummern
+Release blacklist==Черный список релизов
+regex on release number strings==список регулярных выражений с номерами выпусков
 Release type==Тип релиза
-only main releases==nur offizielle Versionen
-any release including developer releases==jede Version, auch Entwickler Versionen
-Signed autoupdate:==signierte Aktualisierung:
-only accept signed files==Nur signierte Dateien akzeptieren
+only main releases==только финальные релизы
+any release including developer releases==любые версии, включая релизы для разработчиков
+Signed autoupdate:==Подписанные автообновления:
+only accept signed files==принимать только подписанные файлы
 "Submit"=="Применить"
-Accepted Changes.==Änderungen akzeptiert.
+Accepted Changes.==Принятые изменения.
 System Update Statistics==Статистика обновления системы
 Last System Lookup==Последняя проверка системы
 never==никогда
@@ -1401,7 +1404,7 @@ Loader Queue==Lade-Puffer
 The loader set is empty==Der Lade-Puffer ist leer.
 There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Einträge in dem Lade-Puffer:
 Initiator==Initiator
-Depth==Tiefe
+Depth==Глубина
 #URL==URL
 #-----------------------------
 #File: IndexCreateParserErrors_p.html
@@ -1507,9 +1510,9 @@ There are <strong>\#\[num\]\#</strong> entries in the global crawler queue. Show
 Show last==Zeige die letzten
 </a> entries.==</a> Einträge.
 Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
-Modified Date==Änderungsdatum
+Profile==Профиль
+Depth==Глубина
+Modified Date==Дата изменения
 Anchor Name==Anker Name
 #URL==URL
 #-----------------------------
@@ -1522,16 +1525,16 @@ The local crawler queue is empty==Der lokale Crawler-Puffer ist leer.
 There are <strong>\#\[num\]\#</strong> entries in the local crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Einträge in dem lokalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
 Show last==Zeige die letzten
 </a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
+Initiator==Инициатор
+Profile==Профиль
+Depth==Глубина
 Modified Date==Änderungsdatum
 Anchor Name==Anker Name
 URL==URL
 \[Delete\]==[Löschen]
 Delete Entries:==Lösche Einträge:
-"Delete"=="Löschen"
-This may take a quite long time.==Dies wird vielleicht einige Zeit dauern.
+"Delete"=="Удалить"
+This may take a quite long time.==Это может занять некоторое время.
 #-----------------------------
 #File: IndexCreateWWWRemoteQueue_p.html
 #---------------------------
@@ -1543,13 +1546,13 @@ There are <strong>\#\[num\]\#</strong> entries in the remote crawler queue.==Es 
 Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
 Show last==Zeige die letzten
 </a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
-Modified Date==Änderungsdatum
+Initiator==Инициатор
+Profile==Профиль
+Depth==Глубина
+Modified Date==Дата изменения
 Anchor Name==Anker Name
 URL==URL
-Delete==Löschen
+Delete==Удалить
 #-----------------------------        
 #File: IndexImport_p.html
 #---------------------------
@@ -2988,19 +2991,19 @@ With a GET-property 'about' you get only reference relations about the host that
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
 Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
 To see a list of all APIs, please visit the <a href=\"http://www.yacy-websuche.de/wiki/index.php/Dev:API\">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-Web Structure==Netz Struktur
-host<==Host<
-depth<==Tiefe<
-nodes<==Knoten<
-time<==Zeit<
-size<==Größe<
->Background<==>Hintergrund<
-#>Text<==>Text<
->Line<==>Linie<
->Dot<==>Punkt<
->Dot-end<==>Punktende<
->Color <==>Farbe <
-"change"=="Ändern"
+Web Structure==Веб структура
+host<==Хост<
+depth<==Глубина<
+nodes<==Узлы<
+time<==Время<
+size<==Размер<
+>Background<==>Фон<
+>Text<==>Текст<
+>Line<==>Линия<
+>Dot<==>Точка<
+>Dot-end<==>Пунктир<
+>Color <==>Цвет <
+"change"=="Изменить"
 #-----------------------------
 #File: Wiki.html
 #---------------------------
@@ -3376,9 +3379,9 @@ Server Log Menu==Server Log Menü
 #-----------------------------
 #File: env/templates/submenuWebStructure.template
 #---------------------------
-Web Visualization==Internet Visualisierung
-Web Structure==Internet Struktur
-Image Collage==Bilder Collage
+Web Visualization==Веб визуализация
+Web Structure==Веб структура
+Image Collage==Коллаж изображений
 #-----------------------------
 #File: proxymsg/authfail.inc
 #---------------------------
