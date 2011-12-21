@@ -24,16 +24,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.text.SimpleDateFormat;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -42,11 +42,10 @@ import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
-
+import de.anomic.server.serverAccessTracker.Track;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverAccessTracker.Track;
 
 public class AccessTracker_p {
 	
@@ -267,7 +266,7 @@ public class AccessTracker_p {
                 prop.put("page_list_" + m + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.putHTML("page_list_" + m + "_host", host);
                 if (page == 5) {
-                    final Seed remotepeer = sb.peers.lookupByIP(Domains.dnsResolve(host), true, true, true);
+                    final Seed remotepeer = sb.peers.lookupByIP(Domains.dnsResolve(host), -1, true, true, true);
                     prop.putHTML("page_list_" + m + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
                 prop.putNum("page_list_" + m + "_count", handles.size());

@@ -83,7 +83,7 @@ public class PeerActions {
             return false;
         }
 
-        final Seed doubleSeed = this.seedDB.lookupByIP(seed.getInetAddress(), true, false, false);
+        final Seed doubleSeed = this.seedDB.lookupByIP(seed.getInetAddress(), seed.getPort(), true, false, false);
         if ((doubleSeed != null) && (doubleSeed.getPort() == seed.getPort()) && (!(doubleSeed.hash.equals(seed.hash)))) {
             // a user frauds with his peer different peer hashes
             if (Network.log.isFine()) Network.log.logFine("connect: rejecting FRAUD (double hashes " + doubleSeed.hash + "/" + seed.hash + " on same port " + seed.getPort() + ") peer " + seed.getName());

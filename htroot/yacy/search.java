@@ -417,7 +417,7 @@ public final class search {
         }
 
         // prepare search statistics
-        theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(Domains.dnsResolve(client), true, false, false);
+        theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(Domains.dnsResolve(client), -1, true, false, false);
         theQuery.resultcount = (theSearch == null) ? 0 : joincount;
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();

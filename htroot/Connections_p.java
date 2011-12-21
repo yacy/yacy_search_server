@@ -39,13 +39,10 @@ import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.peers.PeerActions;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-
-//import de.anomic.http.client.ConnectionInfo;
-//import de.anomic.http.client.Client;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverCore.Session;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverCore.Session;
 
 public final class Connections_p {    
     
@@ -98,7 +95,7 @@ public final class Connections_p {
             // determining if the source is a yacy host
             Seed seed = null;
             if (doNameLookup) {
-                seed = sb.peers.lookupByIP(userAddress,true,false,false);
+                seed = sb.peers.lookupByIP(userAddress, -1, true, false, false);
                 if (seed != null && (seed.hash.equals(sb.peers.mySeed().hash)) &&
                         (!seed.get(Seed.PORT,"").equals(Integer.toString(userPort)))) {
                     seed = null;
