@@ -122,8 +122,8 @@ Check list==校验名单
 Allow regular expressions in host part of blacklist entries.==允许黑名单中主机部分的正则表达式.
 The blacklist-cleaner only works for the following blacklist-engines up to now:==此整理目前只对以下黑名单引擎有效:
 Illegal Entries in \#\[blList\]\# for==非法条目在 #[blList]# 
-Deleted \#\[delCount\]\# entries==删除 #[delCount]# 个条目
-Altered \#\[alterCount\]\# entries!==修改 #[alterCount]# 个条目
+Deleted \#\[delCount\]\# entries==已删除 #[delCount]# 个条目
+Altered \#\[alterCount\]\# entries!==已修改 #[alterCount]# 个条目
 Two wildcards in host-part==主机部分中的两个通配符
 Either subdomain <u>or</u> wildcard==子域名<u>或者</u>通配符 
 Path is invalid Regex==无效正则表达式
@@ -238,7 +238,7 @@ YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': 书签
 
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==书签列表也能用作RSS订阅.当您选择某个标签时您也可执行这个操作.
 Click the API icon to load the RSS from the current selection.==点击API图标以从当前选择书签中载入RSS.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==获取所有API, 可以访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==获取所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
 <h3>Bookmarks==<h3>书签
 Bookmarks \(==书签\(
 #Login==登录
@@ -293,8 +293,8 @@ Public Queue==公共
 #File: compare_yacy.html
 #---------------------------
 Websearch Comparison==网页搜索对比
-Left Search Engine==左侧搜索引擎
-Right Search Engine==右侧搜索引擎
+Left Search Engine==左侧引擎
+Right Search Engine==右侧引擎
 Query==查询
 "Compare"=="比较"
 Search Result==结果
@@ -578,11 +578,11 @@ Your search engine will not contact any other peer, and will reject every reques
 #List of ip:port - addresses of the cluster: \(comma-separated\)
 >Public Cluster==>公共Cluster
 Your peer is part of a public cluster within the YaCy network==您的peer属于YaCy网络内的一个公共cluster
-Index data is not distributed, but remote crawl requests are distributed and accepted==索引数据没有被分发, 但是外部的crawl请求会被分发和接受
+Index data is not distributed, but remote crawl requests are distributed and accepted==索引数据不会被分发, 但是外部的crawl请求会被分发和接受
 Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==搜索请求在当前cluster内的所有peer中传播, 并且这些peer同样会作出回应
 List of .yacy or .yacyh - domains of the cluster: \(comma-separated\)==Cluster内 .yacy 或者 .yacyh 的域名列表 : (以逗号隔开)
 >Public Peer==>公共Peer
-You are visible to other peers and contact them to distribute your presence==对于其他peer您是可见的, 与他们联系以分发你的索引
+You are visible to other peers and contact them to distribute your presence==对于其他peer您是可见的, 可以与他们进行通信以分发你的索引
 Your peer does not accept any outside index data, but responds on all remote search requests==您的peer不接受任何外部索引数据, 但是会回应所有外部搜索请求
 #>Peer Tags==>Peer Tags
 When you allow access from the YaCy network, your data is recognized using keywords==当您允许YaCy网络的访问时, 您的数据会以关键字形式表示
@@ -1153,7 +1153,7 @@ A second crawl for a different host increases the throughput to a maximum of 240
 >High Speed Crawling<==>高速crawl<
 A \'shallow crawl\' which is not limited to a single host \(or site\)==当目标主机很多时, 用于多个主机(或站点)的'浅crawl'方式,
 can extend the pages per minute \(ppm\) rate to unlimited documents per minute when the number of target hosts is high.==会增加每秒页面数(ppm).
-This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==对应设置<a href="CrawlStartExpert_p.html">专家模式起始crawla>选项.
+This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==对应设置<a href="CrawlStartExpert_p.html">专家模式起始crawl</a>选项.
 >Scheduler Steering<==>定时器向导<
 The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==可以使用<a href="Table_API_p.html">API向导</a>改变或删除crawl定时器.
 #-----------------------------
@@ -1190,11 +1190,11 @@ DHT Distribution</a> is==DHT分发</a>被
 Index Receive</a> is==索引接收</a>被
 DHT Distribution and Index Receive</a> are==DHT分发和索引接受</a>被
 disabled.\#\(==禁用.#(
-URL mask==URL掩码
+URL mask==URL过滤
 restrict on==限制
 show all==显示所有
 #überarbeiten!!!
-Prefer mask==首选掩码
+Prefer mask==首选过滤
 Constraints==约束
 only index pages==仅索引页面
 "authentication required"=="需要认证"
@@ -1244,7 +1244,7 @@ for ajax developers: get the search rss feed and replace the '.rss' extension in
 
 #File: IndexCleaner_p.html
 #---------------------------
-Index Cleaner==索引清理
+Index Cleaner==索引整理
 >URL-DB-Cleaner==>URL-DB-清理
 #ThreadAlive:
 #ThreadToString:
@@ -1491,7 +1491,7 @@ With this file it is possible to find cities with a population > 1000 all over t
 >Download from<==>下载来源<
 >Storage location<==>存储位置<
 #>Status<==>Status<
->not loaded<==>为加载<
+>not loaded<==>未加载<
 >loaded<==>已加载<
 :deactivated==:已停用
 >Action<==>动作<
@@ -1526,7 +1526,7 @@ Initiator==发起者
 Profile==资料
 Depth==深度
 Modified Date==修改日期
-Anchor Name==anchor名
+Anchor Name==祖先名
 #URL==URL
 #-----------------------------
 
@@ -1543,7 +1543,7 @@ Initiator==发起者
 Profile==资料
 Depth==深度
 Modified Date==修改日期
-Anchor Name==anchor名
+Anchor Name==祖先名
 URL==URL
 \[Delete\]==[删除]
 Delete Entries:==已删除条目:
@@ -1565,7 +1565,7 @@ Initiator==发起者
 Profile==资料
 Depth==深度
 Modified Date==修改日期
-Anchor Name==anchor名
+Anchor Name==祖先名
 URL==URL
 Delete==删除
 #-----------------------------        
@@ -1862,7 +1862,7 @@ YaCy Search Network==YaCy搜索网络
 YaCy Network<==YaCy网络<
 The information that is presented on this page can also be retrieved as XML==此页信息也可表示为XML
 Click the API icon to see the XML.==点击API图标查看XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API列表, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki</a>.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==获取所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
 Network Overview==网络一览
 Active&nbsp;Peers==活动peer
 Passive&nbsp;Peers==被动peer
@@ -1924,7 +1924,7 @@ Queries Per Hour \(QPH\)==请求每小时(QPH)
 >Active<==>活动<
 >Passive<==>被动<
 >Potential<==>潜在<
->This Peer<==>此peer<
+>This Peer<==>本机peer<
 URLs for<br/>Remote Crawl==用于远端<br/>crawl的URL
 "The YaCy Network"=="YaCy网络"
 
@@ -1950,11 +1950,11 @@ Connects<br/>per hour==联系<br/>每小时
 >dark green font<==>深绿色字<
 senior/principal peers==高级/主要 peer
 >light green font<==>浅绿色字<
->passive peers<==>主动peer<
+>passive peers<==>被动peer<
 >pink font<==>粉色字<
 junior peers==次级peer
 red point==红点
-this peer==此peer
+this peer==本机peer
 >grey waves<==>灰色波浪<
 >crawling activity<==>crawl活动<
 >green radiation<==>绿色辐射圆<
@@ -2315,7 +2315,7 @@ Post-Ranking==二次排名
 #---------------------------
 Remote Crawl Configuration==远端crawl配置
 #>Remote Crawler<==>Remote Crawler<
-The remote crawler is a process that requests urls from other peers.==远端crawler是一个请求来自其他peer url的进程.
+The remote crawler is a process that requests urls from other peers.==远端crawler是一个处理来自其他peer链接请求的进程.
 Peers offer remote-crawl urls if the flag \'Do Remote Indexing\'==如果选中了'进行远程索引', 则peer在开始crawl时
 is switched on when a crawl is started.==能够进行远端crawl.
 Remote Crawler Configuration==远端crawler配置
@@ -2327,7 +2327,7 @@ pages per minute==个页面
 Crawl results will appear in the==crawl会出现在
 >Crawl Result Monitor<==>crawl结果监视<
 Peers offering remote crawl URLs==提供远端crawl的peer
-If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:==如果选中了远端crawl选项, 则此peer会从以下远端peer读取链接:
+If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:==如果选中了远端crawl选项, 则本机peer会从以下远端peer读取链接:
 #>Name<==>Name<
 #>Remote<br/>Crawl<==>Remote<br/>Crawl<
 #>Release/<br/>SVN<==>Version/<br/>SVN<
@@ -2396,7 +2396,7 @@ Send "Via" Header==发送"Via"头
 Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via</a>==选此指定代理是否发送<a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">"Via"HTTP头</a>
 http header according to RFC 2616 Sect 14.45.==根据RFC 2616 Sect14.45.
 Send "X-Forwarded-For" Header== 发送"X-Forward-For"头
-Specifies if the proxy should send the X-Forwarded-For http header.==指定代理是偶发送"X-Forward-For"头.
+Specifies if the proxy should send the X-Forwarded-For http header.==指定代理是否发送"X-Forward-For"头.
 "Submit"=="提交"
 Changes will take effect immediately.==改变立即生效.
 #-----------------------------
@@ -2461,7 +2461,7 @@ Seed Upload Settings==seed上传设置
 With these settings you can configure if you have an account on a public accessible==如果您有一个公共服务器的账户, 可在此设置
 server where you can host a seed-list file.==seed列表文件相关选项.
 General Settings:==通用设置:
-If you enable one of the available uploading methods, you will become a principal peer.==如果peer使用了以下某种上传方式, 则此peer会成为主要peer.
+If you enable one of the available uploading methods, you will become a principal peer.==如果peer使用了以下某种上传方式, 则本机peer会成为主要peer.
 Your peer will then upload the seed-bootstrap information periodically,==您的peer会定期上传seed启动信息,
 but only if there have been changes to the seed-list.==前提是seed列表有变更.
 Upload Method==上传方式
@@ -2665,7 +2665,7 @@ You can download a more recent version of YaCy. Click here to install this updat
 #"Update YaCy"=="Update YaCy"
 Install YaCy==安装YaCy
 You are running a server in senior mode and you support the global internet index,==服务器运行在高级模式, 并支持全球索引,
-which you can also <a href="index.html">search yourself</a>.==在其中您也能进行<a href="index.html">本地搜索</a>.
+which you can also <a href="index.html">search yourself</a>.==您也能进行<a href="index.html">本地搜索</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==您拥有一个主要peer, 因为您向公共服务器公布了您的seed列表,
 where it can be retrieved using the URL==可使用此URL进行接收:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==网页索引器当前空闲. 可以点击<a href="CrawlStartSite_p.html">这里</a>开始网页crawl
@@ -2765,7 +2765,7 @@ Supporter are switched off for users without authorization==未授权用户不�
 "Give positive vote"=="给予好评"
 "negative vote"=="差评"
 "Give negative vote"=="给予差评"
-provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==由各peer提供. 仅显示peer中当前在线的URL.
+provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==由各peer提供. 仅显示所有peer中当前在线链接.
 #-----------------------------
 
 #File: Surftips.html
@@ -2780,7 +2780,7 @@ alt="Give positive vote"==alt="给予好评"
 title="negative vote"==title="差评"
 alt="Give negative vote"==alt="给予差评"
 YaCy Supporters<==YaCy参与者<
->a list of home pages of yacy users<==>YaCy用户的主页<
+>a list of home pages of yacy users<==>显示YaCy用户<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==由使用公共书签, 链接评价和crawl起始点的peer提供
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="输入推荐链接备注. (可留空.)"
 "authentication required"=="需要认证"
@@ -2793,7 +2793,7 @@ Show surftips to everyone==所有人均可使用建议
 : Peer Steering==: Peer向导
 Steering of API Actions<==API动作向导<
 This table shows actions that had been issued on the YaCy interface==此表显示YaCy用于
-to change the configuration or to request crawl actions.==改变配置或者请求crawl的动作接口函数.
+to change the configuration or to request crawl actions.==改变配置或者处理crawl请求的动作接口函数.
 These recorded actions can be used to repeat specific actions and to send them==它们用于重复执行某一指定动作,
 to a scheduler for a periodic execution.==或者用于周期执行一系列动作.
 >Recorded Actions<==>已记录动作<
@@ -2829,7 +2829,7 @@ Scheduled actions are executed after the next execution date has arrived within 
 Table Viewer==表格查看
 The information that is presented on this page can also be retrieved as XML==此页信息也可表示为XML
 Click the API icon to see the XML.==点击API图标查看XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API列表, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki</a>.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
 >robots.txt table<==>robots.txt 列表<
 #-----------------------------
 
@@ -2942,52 +2942,52 @@ New Password is empty.==新密码为空.
 
 #File: ViewFile.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': Zeige URL Inhalte
-View URL Content==Zeige URL Inhalte
->Get URL Viewer<==>URL Betrachter<
->URL Metadata<==>URL Metadaten<
+YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': 查看文件内容
+View URL Content==查看链接内容
+>Get URL Viewer<==>获取链接浏览器<
+>URL Metadata<==>链接元数据<
 #URL==URL
 #Hash==Hash
-Word Count==Anzahl Wörter
-Description==Beschreibung
-Size==Größe
-View as==Zeige als
+Word Count==字数
+Description==描述
+Size==大小
+View as==查看形式
 #Original==Original
-Plain Text==Quelltext
-Parsed Text==Geparster Text
-Parsed Sentences==Geparste Sätze
-Parsed Tokens/Words==Geparste Zeichen/Wörter
-Link List==Linkliste
-"Show"=="Anzeigen"
-Unable to find URL Entry in DB==Es war nicht möglich den URL Eintrag in der DB zu finden.
-Invalid URL==Ungültige URL
-Unable to download resource content.==Es war nicht möglich den Inhalt der Quelle runterzuladen.
-Unable to parse resource content.==Es war nicht möglich den Inhalt der Quelle zu parsen.
-Unsupported protocol.==Nicht unterstütztes Protokoll.
->Original Content from Web<==>Quelltext aus dem Web<
-Parsed Content==Geparster Quellen Inhalt
->Original from Web<==>Original aus dem Web<
->Original from Cache<==>Original aus dem Cache<
->Parsed Tokens<==>Geparste Zeichen/Wörter<
+Plain Text==文本
+Parsed Text==解析文本
+Parsed Sentences==解析句子
+Parsed Tokens/Words==解析令牌/字
+Link List==链接列表
+"Show"=="显示"
+Unable to find URL Entry in DB==无法找到数据库中的链接.
+Invalid URL==无效链接
+Unable to download resource content.==无法下载资源内容.
+Unable to parse resource content.==无法解析资源内容.
+Unsupported protocol.==不支持的协议.
+>Original Content from Web<==>网页原始内容<
+Parsed Content==解析内容
+>Original from Web<==>网页原始内容<
+>Original from Cache<==>缓存原始内容<
+>Parsed Tokens<==>解析令牌<
 #-----------------------------
 
 #File: ViewLog_p.html
 #---------------------------
-Lines==Zeilen
-reversed order==umgekehrte Reihenfolge
-"refresh"=="Aktualisieren"
+Lines==行
+reversed order==倒序排列
+"refresh"=="刷新"
 #-----------------------------
 
 #File: ViewProfile.html
 #---------------------------
-Local Peer Profile:==Lokales Peer Profil:
-Remote Peer Profile==Remote Peer Profil
-Wrong access of this page==Falscher Zugriff auf diese Seite
-The requested peer is unknown or a potential peer.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer.
-The profile can't be fetched.==Das Profil kann nicht geladen werden.
-The peer==Der Peer
-is not online.==ist nicht online.
-This is the Profile of==Dies ist das Profil von
+Local Peer Profile:==本地peer资料:
+Remote Peer Profile==远端peer资料
+Wrong access of this page==页面权限错误
+The requested peer is unknown or a potential peer.==所请求peer未知或者是潜在peer.
+The profile can't be fetched.==无法获取资料.
+The peer==peer
+is not online.==当前不在线.
+This is the Profile of==资料
 #Name==Name
 #Nick Name==Nick Name
 #Homepage==Homepage
@@ -2997,246 +2997,246 @@ This is the Profile of==Dies ist das Profil von
 #Yahoo!==Yahoo!
 #MSN==MSN
 #Skype==Skype
-Comment==Kommentar
-View this profile as==Zeige dieses Profil als 
-> or==> oder
+Comment==注释
+View this profile as==查看方式
+> or==> 或者
 #vCard==vCard
 #-----------------------------
 
 #File: Crawler_p.html
 #---------------------------
-Crawler Queues==Crawler Puffer
-PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
+Crawler Queues==crawler队列
+PPM \(Pages Per Minute\)==PPM (页面每分钟)
 #Traffic \(Crawler\)==Traffic (Crawler)
-RWI RAM \(Word Cache\)==RWI RAM (Wörter Zwischenspeicher)
-Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Fehler im Profil Management. Bitte stoppen Sie YaCy, löschen Sie die Datei DATA/PLASMADB/crawlProfiles0.db
-and restart.==und starten Sie YaCy neu.
-Error:==Fehler:
-Application not yet initialized. Sorry. Please wait some seconds and repeat==Anwendung noch nicht initialisiert. Bitte warten Sie noch ein paar Sekunden und versuchen 
-ERROR: Crawl filter==FEHLER: Crawl Maske
-does not match with==stimmt nicht überein mit
-crawl root==dem Crawlstart
-Please try again with different==Bitte probieren Sie es erneut mit einer anderen
-filter. ::==Maske. ::
-Crawling of==Crawling von
-failed. Reason:==schlug fehl. Grund:
-Error with URL input==Fehler mit URL Eingabe
-Error with file input==Fehler mit Datei Eingabe
-started.==gestartet.
-Please wait some seconds,==Bitte warten Sie einige Sekunden, 
-it may take some seconds until the first result appears there.==es kann einige Sekunden dauern, bis hier die ersten Ergebnisse zu sehen sind.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Ihr Crawl Seiten indexiert, die Sie nicht indexiert haben wollen, können Sie diese <a href="IndexCreateWWWLocalQueue_p.html">hier</a> löschen.
-Crawl Queue:==Crawler Puffer:
-Queue</th>==Puffer</th>
-Profile</th>==Profil</th>
-Initiator==Auftraggeber
-Depth</th>==Tiefe</th>
-Modified Date==Änderungsdatum
-Anchor Name==Linktitel
+RWI RAM \(Word Cache\)==RWI RAM (关键字缓存)
+Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==资料管理出错. 请关闭YaCy, 并在删除文件 DATA/PLASMADB/crawlProfiles0.db
+and restart.==后重启.
+Error:==错误:
+Application not yet initialized. Sorry. Please wait some seconds and repeat==抱歉, 程序未初始化, 请稍候并重复
+ERROR: Crawl filter==错误: crawl过滤
+does not match with==与crawl根
+crawl root==不匹配
+Please try again with different==请使用不同的过滤字再试一次.
+filter. ::== ::
+Crawling of==crawl
+failed. Reason:==失败. 原因:
+Error with URL input==URL输入错误
+Error with file input==文件输入错误
+started.==已开始.
+Please wait some seconds,==请稍等,
+it may take some seconds until the first result appears there.==在出现第一个搜索结果前需要几秒钟时间.
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==如果您crawl了不需要的页面, 您可以 <a href="IndexCreateWWWLocalQueue_p.html">点这</a> 删除它们.
+Crawl Queue:==crawl队列:
+Queue</th>==队列</th>
+Profile</th>==资料</th>
+Initiator==发起者
+Depth</th>==深度</th>
+Modified Date==修改日期
+Anchor Name==祖先名
 #URL==URL
 Delete==删除
-Next update in==Nächste Aktualisierung in
-/> seconds.==/> Sekunden.
-See a access timing <a href="/api/latency_p.xml">here</a>==<a href="/api/latency_p.xml">Hier</a> gibt es eine Tabelle mit Latenz- und Zugriffszeiten
-Queue</th>==Puffer</th>
->Size==>Größe
+Next update in==下次更新将在
+/> seconds.==/> 妙后.
+See a access timing <a href="/api/latency_p.xml">here</a>==<a href="/api/latency_p.xml">点这</a> 查看访问时间
+Queue</th>==队列</th>
+>Size==>大小
 #Max==Max
 #Indexing</td>==Indexieren</td>
-Loader==Lader
-Local Crawler==Lokaler Crawler
-unlimited==uneingeschränkt
+Loader==加载器
+Local Crawler==本地crawler
+unlimited==无限制
 #Remote Crawler==Remote Crawler
-Speed==Geschwindigkeit
-"minimum"=="Minimum"
-"custom"=="benutzerdefiniert"
-"maximum"=="Maximum"
-Database==Datenbank
-Entries==Einträge
-Pages \(URLs\)==Seiten (URLs)
-RWIs \(Words\)==RWIs (Wörter)
-Indicator==Indikator
-Level==Stufe
+Speed==速度
+"minimum"=="最小"
+"custom"=="修改"
+"maximum"=="最大"
+Database==数据库
+Entries==条目数
+Pages \(URLs\)==页面(链接)
+RWIs \(Words\)==RWIs (字)
+Indicator==指示器
+Level==级别
 #-----------------------------
 
 #File: WatchWebStructure_p.html
 #---------------------------
-The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Die Daten die hier visualisiert werden können auch in einer XML geladen werden, die die verweisenden Relationen zwischen den Domains auflistet.
-With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
-With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
-Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
-To see a list of all APIs, please visit the <a href=\"http://www.yacy-websuche.de/wiki/index.php/Dev:API\">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==此页面数据显示域之间的关联关系, 能以XML文件形式查看.
+With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==使用GET属性'about'仅能获得带有'about'参数的域关联关系.
+With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==使用GET属性'latest'能获得当前的关联关系列表, 并且每一次调用都只能更新下一级关联关系列表.
+Click the API icon to see the XML file.==点击API图标查看XML文件.
+To see a list of all APIs, please visit the <a href=\"http://www.yacy-websuche.de/wiki/index.php/Dev:API\">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
 
-Web Structure==Netz Struktur
-host<==Host<
-depth<==Tiefe<
-nodes<==Knoten<
-time<==Zeit<
-size<==Größe<
->Background<==>Hintergrund<
+Web Structure==网页结构
+host<==主机<
+depth<==深度<
+nodes<==节点<
+time<==时间<
+size<==大小<
+>Background<==>背景<
 #>Text<==>Text<
->Line<==>Linie<
->Dot<==>Punkt<
->Dot-end<==>Punktende<
->Color <==>Farbe <
-"change"=="Ändern"
+>Line<==>线<
+>Dot<==>点<
+>Dot-end<==>末点<
+>Color <==>颜色<
+"change"=="改变"
 #-----------------------------
 
 #File: Wiki.html
 #---------------------------
-YaCyWiki page:==YaCyWiki Seite:
-last edited by==zuletzt bearbeitet von
-change date==Änderungsdatum
+YaCyWiki page:==YaCyWiki:
+last edited by==最后编辑由
+change date==改变日期
 Edit<==编辑<
-only granted to admin==nur als Admin erlaubt
-Grant Write Access to==Erlaube es folgenden Benutzern das Wiki zu bearbeiten 
+only granted to admin==只授权给管理员
+Grant Write Access to==授予写权限
 # !!! Do not translate the input buttons because that breaks the function to switch rights !!!
 #"all"=="Allen"
 #"admin"=="Administrator"
-Start Page==Startseite
+Start Page==开始页面
 #Index==Index
-Versions==Versionen
-Author:==Autor:
+Versions==版本
+Author:==作者:
 #Text:==Text:
-You can use==Sie können hier
-Wiki Code</a> here.==Wiki Befehle</a> benutzen.
-"edit"=="bearbeiten"
-"Submit"=="Absenden"
-"Preview"=="Vorschau"
-"Discard"=="Verwerfen"
->Preview==>Vorschau
-No changes have been submitted so far!==Es wurden noch keine Änderungen übertragen!
-Subject==Titel
-Change Date==Änderungsdatum
-Last Author==Letzter Autor
-IO Error reading wiki database:==I0 Fehler beim Lesen der Wiki Datenbank:
-Select versions of page==Wähle Versionen der Seite
-Compare version from==Vergleiche Version vom
-"Show"=="Anzeigen"
-with version from==mit Version vom
-"current"=="aktuelle"
-"Compare"=="Vergleichen"
-Return to==Kehre zurück zu
-Changes will be published as announcement on YaCyNews==Änderungen werden über den YaCy News Service bekannt gegeben.
+You can use==您可以在这使用
+Wiki Code</a> here.==wiki代码</a>.
+"edit"=="编辑"
+"Submit"=="提交"
+"Preview"=="预览"
+"Discard"=="取消"
+>Preview==>预览
+No changes have been submitted so far!==未提交任何改变!
+Subject==主题
+Change Date==改变日期
+Last Author==最后作者
+IO Error reading wiki database:==读取wiki数据库时出现IO错误:
+Select versions of page==选择页面版本
+Compare version from==原始版本
+"Show"=="显示"
+with version from==对比版本
+"current"=="当前"
+"Compare"=="对比"
+Return to==返回
+Changes will be published as announcement on YaCyNews==改变会被发布在YaCy新闻中.
 #-----------------------------
 
 #File: WikiHelp.html
 #---------------------------
-Wiki Help==Wiki Hilfe
-Wiki-Code==Wiki-Befehle
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==Diese Tabelle enthält eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen
-of YaCy. For a more detailed description visit the==in YaCy benutzt werden können. Für eine detailliertere Beschreibung besuchen Sie bitte das
+Wiki Help==Wiki帮助
+Wiki-Code==Wiki代码
+This table contains a short description of the tags that can be used in the Wiki and several other servlets==此表列出了用于Wiki和几个插件代码标签简述,
+of YaCy. For a more detailed description visit the==详情请见
 #YaCy Wiki==YaCy Wiki
-Description==Beschreibung
-\=headline===Überschrift
-These tags create headlines. If a page has three or more headlines, a table of content will be created automatically.==Diese Tags erzeugen Überschriften. Wenn die Seite drei oder mehr Überschriften enthält, wird automatisch ein Inhaltsverzeichnis erstellt.
-Headlines of level 1 will be ignored in the table of content.==Überschriften im ersten Level werden beim Erstellen des Inhaltsverzeichnisses ignoriert.
+Description==描述
+\=headline===headline
+These tags create headlines. If a page has three or more headlines, a table of content will be created automatically.==此标记标识标题内容. 如果页面有多于三个标题, 则会自动创建一个表格.
+Headlines of level 1 will be ignored in the table of content.==一级标题.
 #text==Text
-These tags create stressed texts. The first pair emphasizes the text \(most browsers will display it in italics\),==Diese Tags erzeugen hervorgehobenen Text. Das erste Paar betont den Text (die meisten Browser zeigen die Texte kursiv),
-the second one emphazises it more strongly \(i.e. bold\) and the last tags create a combination of both.==das Zweite betont den Text stärker (z.B. fett) und der letzte Tag erzeugt eine Mischung aus beidem.
-Text will be displayed <span class=\"strike\">stricken through</span>.==Text wird <span class="strike">durchgestrichen</span> angezeigt.
-Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Der Text erscheint eingerückt. Dieser Tag eignet sich, um Zitate zu markieren, wird aber auch zum Designen benutzt.
-point==Punkt
-These tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
-something<==etwas<
-another thing==was anderes
-and yet another==und wieder was anderes
-something else==irgendwas
-These tags create an unnumbered list.==Diese Tags erstellen eine unnummerierte Liste.
-word==Wort
-\:definition==:Definition
-These tags create a definition list.==Diese Tags erstellen eine definierte Liste.
-This tag creates a horizontal line.==Dieser Tag erzeugt eine horizontale Linie.
-pagename==Seitenname
-description\]\]==Beschreibung]]
-This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
-This tag displays an image, it can be aligned left, right or center.==Dieser Tag fügt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
-These tags create a table, whereas the first marks the beginning of the table, the second starts==Diese Tags erstellen eine Tabelle, wobei der erste den Anfang der Tabelle markiert, der zweite beginnt 
-a new line, the third and fourth each create a new cell in the line. The last displayed tag==eine neue Zeile, der dritte und vierte erzeugen eine neue Zelle in der Zeile. Der zuletzt dargestellte Tag
-closes the table.==schließt die Tabelle.
+These tags create stressed texts. The first pair emphasizes the text \(most browsers will display it in italics\),==这些标记标识文本内容. 第一对中为强调内容(多数浏览器用斜体表示),
+the second one emphazises it more strongly \(i.e. bold\) and the last tags create a combination of both.==第二对用粗体表示, 第三对为两者的联合.
+Text will be displayed <span class=\"strike\">stricken through</span>.==文本内容以<span class="strike">删除线</span>表示.
+Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==缩进内容, 此标记主要用于引用, 也能用于标识样式.
+point==point
+These tags create a numbered list.==此标记用于有序列表.
+something<==something<
+another thing==another thing
+and yet another==and yet another
+something else==something else
+These tags create an unnumbered list.==用于创建无序列表.
+word==word
+\:definition==:definition
+These tags create a definition list.==用于创建定义列表.
+This tag creates a horizontal line.==创建水平线.
+pagename==pagename
+description\]\]==description]]
+This tag creates links to other pages of the wiki.==创建到其他wiki页面的链接.
+This tag displays an image, it can be aligned left, right or center.==显示图片, 可设置左对齐, 右对齐和居中.
+These tags create a table, whereas the first marks the beginning of the table, the second starts==用于创建表格, 第一个标记为表格开头, 第二个为换行,
+a new line, the third and fourth each create a new cell in the line. The last displayed tag==第三个与第四个创建列.
+closes the table.==最后一个为表格结尾.
 #The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as wiki-code.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben.
-A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbrüche beinhalten. Gut geeignet für ASCII-Kunst und Programm Code.
-If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anfängt, wird diese als nicht-proportionale Schriftart dargestellt.
-url description==URL Beschreibung
-This tag creates links to external websites.==Dieser Tag erstellt einen Link zu einer externen Internetseite.
-alt text==alt Beschreibung
+A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==此标记之间的文本会保留所有空格和换行, 主要用于ASCII艺术图片和编程代码.
+If a line starts with a space, it will be displayed in a non-proportional font.==如果一行以空格开头, 则会以非比例形式显示.
+url description==URL描述
+This tag creates links to external websites.==此标记创建外部网站链接.
+alt text==文本备案
 #-----------------------------
 
 #File: yacyinteractive.html
 #---------------------------
-YaCy Interactive Search==YaCy interaktive Suche
-This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\">opensearch</a> output.==Das Suchergebnis kann auch als RSS/<a href="http://www.opensearch.org">opensearch</a> Ausgabe abgerufen werden.
-The query format is similar to <a href=\"http://www.loc.gov/standards/sru/\">SRU</a>.==Das Abfrageformat ist ähnlich dem <a href="http://www.loc.gov/standards/sru/">SRU</a>.
-Click the API icon to see an example call to the search rss API.==Klicken Sie auf das API Symbol, um einen Beispielaufruf der RSS Such API zu sehen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+YaCy Interactive Search==YaCy交互搜索
+This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\">opensearch</a> output.==此搜索结果能以RSS/<a href="http://www.opensearch.org">opensearch</a>形式表示.
+The query format is similar to <a href=\"http://www.loc.gov/standards/sru/\">SRU</a>.==请求的格式与<a href="http://www.loc.gov/standards/sru/">SRU</a>相似.
+Click the API icon to see an example call to the search rss API.==点击API图标查看示例.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
 #-----------------------------
 
 #File: yacysearch.html
 #---------------------------
-Search Page==Suchseite
-This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==Diese Suchergebnisse können auch als RSS/<a href="http://www.opensearch.org">opensearch</a> abgerufen werden.
-The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Das Abfrageformat ist so ähnlich wie <a href="http://www.loc.gov/standards/sru/">SRU</a>.
-Click the API icon to see an example call to the search rss API.==Klicken Sie auf den API Button, um ein Beispiel zu sehen, wie das Such-RSS-API aufgerufen werden kann.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-Did you mean:==Meinten Sie vielleicht:
-"Search"=="Suchen"
-'Search'=='Suchen'
-"search again"=="Erneut suchen" 
-more options==Mehr Optionen
+Search Page==搜索网页
+This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==此搜索结果能以RSS/<a href="http://www.opensearch.org">opensearch</a>形式表示.
+The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==请求的格式<a href="http://www.loc.gov/standards/sru/">SRU</a>相似.
+Click the API icon to see an example call to the search rss API.==点击API图标查看示例.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
+Did you mean:==是否搜索:
+"Search"=="搜索"
+'Search'=='搜索'
+"search again"=="再次搜索" 
+more options==更多选项
 #Text==Text
-Images==Bilder
+Images==图片
 #Audio==Audio
-Video==Videos
-Applications==Anwendungen
-The following words are stop-words and had been excluded from the search:==Folgende Wörter sind Stopwords und wurden von der Suche ausgeschlossen:
-No Results.==Keine Ergebnisse.
-length of search words must be at least 3 characters==Die Länge der Suchbegriffe muss mindestens 3 Zeichen betragen
-> of==> aus 
-g> local,==g> lokal,
+Video==视频
+Applications==程序
+The following words are stop-words and had been excluded from the search:==以下关键字是休止符, 已从搜索中排除:
+No Results.==未找到.
+length of search words must be at least 3 characters==搜索关键字至少为3个字符
+> of==> 共
+g> local,==g> 本地,
 #g> remote),==g> remote),
-> from==> von
-remote YaCy peers.==remote YaCy Peers.
+> from==> 来自
+remote YaCy peers.==远端YaCy peer.
 #-----------------------------
 
 #File: yacysearchitem.html
 #---------------------------
-"bookmark"=="Lesezeichen"
-"recommend"=="empfehlen"
-"delete"=="löschen"
-Pictures==Bilder
+"bookmark"=="书签"
+"recommend"=="推荐"
+"delete"=="删除"
+Pictures==图像
 #-----------------------------
 
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "\#\[query\]\#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
+Show search results for "\#\[query\]\#" on map==显示 "#[query]#" 的搜索结果
 #>Domain Navigator==>Domain Navigator
->Name Space Navigator==>Namespace Navigator
->Author Navigator==>Autoren Navigator
+>Name Space Navigator==>命名空间导航
+>Author Navigator==>作者导航
 #-----------------------------
 
 ### Subdirectory api ###
 #File: api/table_p.html
 #---------------------------
-Table Viewer==Tabellen Betrachter
+Table Viewer==查看表格
 #>PK<==>Primärschlüssel<
-"Edit Table"=="Tabelle bearbeiten"
+"Edit Table"=="编辑表格"
 #-----------------------------
 
 #File: api/yacydoc.html
 #---------------------------
->Author<==>Autor<
->Description<==>Beschreibung<
->Subject<==>Betreff<
+>Author<==>作者<
+>Description<==>描述<
+>Subject<==>主题<
 #>Publisher<==>Veröffentlicher<
 #>Contributor<==>Beiträger<
->Date<==>Datum<
->Type<==>Typ<
->Identifier<==>Identifizierer<
->Language<==>Sprache<
->Load Date<==>Lade Datum<
->Referrer Identifier<==>Referrer Identifizierer<
+>Date<==>日期<
+>Type<==>类型<
+>Identifier<==>标识符<
+>Language<==>语言<
+>Load Date<==>加载日期<
+>Referrer Identifier<==>关联标识符<
 #>Referrer URL<==>Referrer URL<
->Document size<==>Dokument Größe<
->Number of Words<==>Anzahl der Wörter<
+>Document size<==>文件大小<
+>Number of Words<==>关键字数目<
 #-----------------------------
 
 ### Subdirectory env/templates ###
@@ -3244,90 +3244,90 @@ Table Viewer==Tabellen Betrachter
 #---------------------------
 YaCy - Distributed Search Engine==YaCy - 分布式搜索引擎
 ### SEARCH & BROWSE ###
->Search==>Suche
+>Search==>搜索
 Web Search==搜索网页
-File Search==Datei-Suche
-Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
-Search Page==Suchseite
-Rich Client Search==Rich Client Suche
-Interactive local Search==Interaktive lokale Suche
-Compare Search==Vergleichs-Suche
-Ranking Config==Ranking Einstellungen
->Surftips==>Surftipps
-Local Peer Wiki==Lokales Wiki
->Bookmarks==>Lesezeichen
->Help==>Hilfe
+File Search==搜索文件
+Search&nbsp;&amp;&nbsp;Browse==搜索&nbsp;&amp;&nbsp;浏览
+Search Page==搜索网页
+Rich Client Search==客户端搜索
+Interactive local Search==本地交互搜索
+Compare Search==对比搜索
+Ranking Config==排名设置
+>Surftips==>建议
+Local Peer Wiki==本地Wiki
+>Bookmarks==>书签
+>Help==>帮助
 ### INDEX CONTROL ###
-Index&nbsp;Production==Indexerzeugung
-Index&nbsp;Control==Index&nbsp;Kontrolle
-Index Creation==Indexerzeugung
-Crawler Monitor==Crawler Überwachung
-Crawl Results==Crawl Ergebnisse
-Index Administration==Indexverwaltung
-Filter &amp; Blacklists==Filter &amp; Sperrlisten
+Index&nbsp;Production==索引
+Index&nbsp;Control==索引&nbsp;控制
+Index Creation==索引创建
+Crawler Monitor==crawler监视
+Crawl Results==crawl结果
+Index Administration==索引管理
+Filter &amp; Blacklists==过滤 &amp; 黑名单
 ### SEARCH INTEGRATION ###
-Search Integration==Suchintegration
-Search Portals==Such Portale
-Customization==Anpassungen
+Search Integration==搜索集成
+Search Portals==搜索主页
+Customization==自定义
 ### MONITORING ###
-Monitoring==Kontrolle
-YaCy Network==YaCy Netzwerk
-Web Visualization==Internet Visualisierung
-Access Tracker==Zugriffe
+Monitoring==监视
+YaCy Network==YaCy网络
+Web Visualization==网页元素外观
+Access Tracker==访问跟踪
 #Server Log==Server Log
->Messages==>Nachrichten
+>Messages==>消息
 #>Terminal==>Terminal
-"New Messages"=="Neue Nachrichten"
+"New Messages"=="新消息"
 ### PEER CONTROL
-Peer Control==Peer Kontrolle
-Admin Console==Admin Konsole
->API Action Steering<==>API Aktionen Steuerung<
-Confirm Restart==Bestätige Neustart
-Re-Start</a>==Neustarten</a>
-Confirm Shutdown==Bestätige Herunterfahren
->Shutdown==>Herunterfahren
+Peer Control==peer控制
+Admin Console==管理控制台
+>API Action Steering<==>API动作向导<
+Confirm Restart==确认重启
+Re-Start</a>==重启</a>
+Confirm Shutdown==确认关闭
+>Shutdown==>关闭
 ### THE PROJECT ###
-The Project==Das Projekt
-Project Home==Projektseite
+The Project==项目
+Project Home==项目主页
 #Deutsches Forum==Deutsches Forum
-English Forum==Englisches Forum
-YaCy Project Wiki==YaCy Projekt Wiki
+English Forum==论坛
+YaCy Project Wiki==YaCy项目Wiki
 # Development Change Log==Entwicklung Änderungshistorie
-amp;language=en==amp;language=de
-Development Change Log==Entwicklung Changelog
-Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
+amp;language=en==amp;language=cn
+Development Change Log==变更日志
+Peer Statistics::YaCy Statistics==peer统计数据::YaCy数据
 #-----------------------------
 
 #File: env/templates/simpleheader.template
 #---------------------------
 #Administration<==Administration<
->Web Search<==>Web Suche<
->Search Network<==>Suche Netzwerk<
-Peer Owner Profile==Impressum dieses Peers
-Help / YaCy Wiki==Hilfe / YaCy Wiki
+>Web Search<==>网页搜索<
+>Search Network<==>搜索网络<
+Peer Owner Profile==peer所有者资料
+Help / YaCy Wiki==帮助 / YaCy Wiki
 #-----------------------------
 
 #File: env/templates/submenuAccessTracker.template
 #---------------------------
-Access Tracker==Zugriffe
-Server Access==Server-Zugriff
-Overview==Überblick
+Access Tracker==访问跟踪
+Server Access==服务器访问
+Overview==概述
 #Details==Details
-Connections</a>==Verbindungen</a>
-Local Search==Lokale Suche
+Connections</a>==连接</a>
+Local Search==本地搜索
 #Log==Log
 #Host Tracker==Host Tracker
-Remote&nbsp;Search==Remote Suche
+Remote&nbsp;Search==远程搜索
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
 #---------------------------
-Filter &amp; Blacklists==Filter &amp; Sperrlisten
-Blacklist Administration==Blacklist Verwaltung
-Blacklist Cleaner==Blacklist aufräumen
-Blacklist Test==Blacklist testen
-Import/Export==Import / Export
-Index Cleaner==Index Aufräumer
+Filter &amp; Blacklists==过滤 &amp; 黑名单
+Blacklist Administration==黑名单管理
+Blacklist Cleaner==黑名单整理
+Blacklist Test==黑名单测试
+Import/Export==导入 / 导出
+Index Cleaner==索引整理
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
@@ -3337,61 +3337,61 @@ Peer Administration Console==控制台
 Basic Configuration==基本设置
 >Accounts==>账户
 Network Configuration==网络设置
->Heuristics<==>Heuristik<
-Dictionary Loader==Wörterbuch Download
-System Update==System Aktualisierung
->Performance==>Leistung
-Advanced Settings==Erweiterte Einstellungen
-Parser Configuration==Parser Einstellungen
-Local robots.txt==Lokale robots.txt
+>Heuristics<==>触发式<
+Dictionary Loader==功能扩展
+System Update==系统升级
+>Performance==>性能
+Advanced Settings==高级设置
+Parser Configuration==解析配置
+Local robots.txt==本地robots.txt
 #Web Cache==Web Cache
-Advanced Properties==Erweiterte Konfiguration
+Advanced Properties==高级属性
 #-----------------------------
 
 #File: env/templates/submenuContentIntegration.template
 #---------------------------
-External Content Integration==Integration von externen Inhalten
-Import phpBB3 forum==Importiere phpBB3 Forum
-Import Mediawiki dumps==Importiere Mediawiki Dumps
-Import OAI-PMH Sources==Importiere OAI-PMH Quellen
+External Content Integration==外部内容集成
+Import phpBB3 forum==导入phpBB3论坛内容
+Import Mediawiki dumps==导入Mediawiki数据
+Import OAI-PMH Sources==导入OAI-PMH源
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
 #---------------------------
-Cookie Menu==Cookie Menü
-Incoming&nbsp;Cookies==Eingehende Cookies
-Outgoing&nbsp;Cookies==Ausgehende Cookies
+Cookie Menu==Cookie菜单
+Incoming&nbsp;Cookies==进入cookie
+Outgoing&nbsp;Cookies==外出cookie
 #-----------------------------
 
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
-Processing Monitor==Prozess Monitor
-Crawler Queues==Crawler Puffer
-Loader<==Lade Puffer<
-Rejected URLs==Abgelehnte URLs
->Queues<==>Warteschlangen<
-Local<==Lokal<
+Processing Monitor==进程监视
+Crawler Queues==crawler队列
+Loader<==加载器<
+Rejected URLs==已拒绝URL
+>Queues<==>队列<
+Local<==本地<
 #Global==Global
 #Remote==Remote
-Crawler Steering==Crawl Steuerung
-Scheduler and Profile Editor<==Scheduler und Profil Editor<
+Crawler Steering==crawl向导
+Scheduler and Profile Editor<==定时器与资料编辑器<
 #robots.txt Monitor==robots.txt Monitor
 #-----------------------------
 
 #File: env/templates/submenuCustomization.template
 #---------------------------
-Customization==Anpassung
->Appearance==>Erscheinungsbild
-User Profile==Benutzerprofil
->Language==>Sprache
+Customization==自定义
+>Appearance==>外观
+User Profile==用户资料
+>Language==>语言
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
-Index Administration==Indexverwaltung
-Reverse Word Index Administration==Reverse Wort Indexverwaltung
-URL References Database==URL Referenzen Datenbank
-URL Viewer==URL Betrachter
+Index Administration==索引管理
+Reverse Word Index Administration==详细关键字索引管理
+URL References Database==URL关联关系数据库
+URL Viewer==URL浏览
 #-----------------------------
 
 #File: env/templates/submenuIndexCreate.template
@@ -3414,170 +3414,170 @@ URL Viewer==URL Betrachter
 #>Movies==>Filme
 #>Music==>Musik
 #--- New menu items ---
-Index Creation==Indexerzeugung
+Index Creation==索引创建
 #Crawler/Spider<==Crawler/Spider<
-Full Site Crawl==Vollständiger Seiten Crawl
-Sitemap Loader==Sitemap Lader
-Crawl Start<br/>\(Expert\)==Crawl Start<br/>(Experte)
-Network<br/>Scanner==Netzwerk<br/>Scanner
+Full Site Crawl==全站crawl
+Sitemap Loader==网站地图加载
+Crawl Start<br/>\(Expert\)==开始crawl<br/>(专家模式)
+Network<br/>Scanner==网络<br/>扫描仪
 #>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
-Crawling of==Crawlen von
+Crawling of==正在crawl
 #MediaWikis==MediaWikis
->phpBB3 Forums<==>phpBB3 Foren<
-Content Import<==Content Importer<
-Network Harvesting<==Netzwerk Harvesting<
+>phpBB3 Forums<==>phpBB3论坛<
+Content Import<==导入内容<
+Network Harvesting<==网络采集<
 #Remote<br/>Crawling==Remote<br/>Crawling
 #Scraping<br/>Proxy==Scraping<br/>Proxy
-Database Reader<==Datenbank Leser<
-for phpBB3 Forums==für phpBB3 Foren
-Dump Reader for==Dump Leser für
+Database Reader<==数据库读取<
+for phpBB3 Forums==对于phpBB3论坛
+Dump Reader for==Dump阅读器为
 #MediaWiki dumps==MediaWiki dumps
 #-----------------------------
 
 #File: env/templates/submenuPortalIntegration.template
 #---------------------------
-Search Portal Integration==Suchportal Integration
-Live Search Anywhere==Live Suche Überall
-Generic Search Portal==Generisches Suchportal
-Search Box Anywhere==Such-Box Überall
+Search Portal Integration==搜索门户集成
+Live Search Anywhere==任意位置即时搜索
+Generic Search Portal==一般搜索门户
+Search Box Anywhere==任意位置搜索框
 #-----------------------------
 
 #File: env/templates/submenuPublication.template
 #---------------------------
-Publication==Veröffentlichung
+Publication==发布
 #Wiki==Wiki
 #Blog==Blog
-File Hosting==Datei Freigabe
+File Hosting==文件共享
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template
 #---------------------------
-Server Log Menu==Server Log Menü
+Server Log Menu==服务器日志菜单
 #Server Log==Server Log
 #-----------------------------
 
 #File: env/templates/submenuWebStructure.template
 #---------------------------
-Web Visualization==Internet Visualisierung
-Web Structure==Internet Struktur
-Image Collage==Bilder Collage
+Web Visualization==网页元素外观
+Web Structure==网页结构
+Image Collage==图像拼贴
 #-----------------------------
 
 #File: proxymsg/authfail.inc
 #---------------------------
-Your Username/Password is wrong.==Benutzername/Passwort waren falsch.
-Username</label>==Benutzername</label>
-Password</label>==Passwort</label>
-"login"=="Anmelden"
+Your Username/Password is wrong.==用户名/密码输入错误.
+Username</label>==用户名</label>
+Password</label>==密码</label>
+"login"=="登录"
 #-----------------------------
 
 #File: proxymsg/error.html
 #---------------------------
-YaCy: Error Message==YaCy: Fehlermeldung
-request:==Anfrage:
-unspecified error==unspezifizierter Fehler
-not-yet-assigned error==noch nicht vergebener Fehler
-You don't have an active internet connection. Please go online.==Sie haben keine aktive Internetverbindung. Bitte gehen Sie online.
-Could not load resource. The file is not available.==Datei konnte nicht geladen werden. Die Datei ist nicht vorhanden.
-Exception occurred==Dieser Fehler trat auf 
-Generated \#\[date\]\# by==Erstellt am #[date]# von
+YaCy: Error Message==YaCy: 错误消息
+request:==请求:
+unspecified error==未定义错误
+not-yet-assigned error==未定义错误
+You don't have an active internet connection. Please go online.==无网络链接, 请上线.
+Could not load resource. The file is not available.==无效文件, 加载资源失败.
+Exception occurred==异常发生
+Generated \#\[date\]\# by==生成日期 #[date]# 由
 #-----------------------------
 
 #File: proxymsg/proxylimits.inc
 #---------------------------
-Your Account is disabled for surfing.==Ihr Account ist deaktivert zum surfen.
-Your Timelimit \(\#\[timelimit\]\# Minutes per Day\) is reached.==Ihr Zeitlimit (#[timelimit]# Minuten am Tag) wurde erreicht. 
+Your Account is disabled for surfing.==您的账户没有浏览权限.
+Your Timelimit \(\#\[timelimit\]\# Minutes per Day\) is reached.==您的账户时限(#[timelimit]# 分钟每天)已到. 
 #-----------------------------
 
 #File: proxymsg/unknownHost.inc
 #---------------------------
-The server==Der Server
-could not be found.==wurde nicht gefunden.
-Did you mean:==Meinten Sie vielleicht:
+The server==服务器
+could not be found.==未找到.
+Did you mean:==是不是:
 #-----------------------------
 
 #File: www/welcome.html
 #---------------------------
-YaCy: Default Page for Individual Peer Content==YACY: Standardseite für eigene Peer-Inhalte
-Individual&nbsp;Web&nbsp;Page==eigene Webseite
-Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <strong>YaCy-Netzwerk
-THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE FÜR IHREN EIGENEN WEB SERVER!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
-&lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
+YaCy: Default Page for Individual Peer Content==YaCy: 每个peer的默认页面
+Individual&nbsp;Web&nbsp;Page==每个网页
+Welcome to your own web page<br />in the <strong>YaCy Network==欢迎来到<br /><strong>YaCy网络
+THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==这是网页服务器演示页面!
+PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==请用index.html替换以下路径中的文件
+&lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy程序主页&gt;<strong>#[wwwpath]#</strong>.
 #-----------------------------
 
 #File: js/Crawler.js
 #---------------------------
-"Continue this queue"=="Diese Queue weiter abarbeiten"
-"Pause this queue"=="Diese Queue anhalten"
+"Continue this queue"=="继续队列"
+"Pause this queue"=="暂停队列"
 #-----------------------------
 
 #File: js/yacyinteractive.js
 #---------------------------
->total results==>Ergebnisse insgesamt
-&nbsp;topwords:==&nbsp;Topwörter:
->Name==>Name
->Size==>Größe
->Date==>Datum
+>total results==>全部结果
+&nbsp;topwords:==&nbsp;顶部:
+>Name==>名称
+>Size==>大小
+>Date==>日期
 #-----------------------------
 
 #File: yacy/ui/js/jquery-flexigrid.js
 #---------------------------
-'Displaying \{from\} to \{to\} of \{total}\ items'=='Zeige {from} bis {to} von {total} Elementen'
-'Processing, please wait ...'=='In Bearbeitung. Bitte warten ...'
-'No items'=='Keine Elemente'
+'Displaying \{from\} to \{to\} of \{total}\ items'=='显示 {from} 到 {to}, 总共 {total} 个条目'
+'Processing, please wait ...'=='正在处理, 请稍候...'
+'No items'=='无条目'
 #-----------------------------
 
 #File: yacy/ui/js/jquery-ui-1.7.2.min.js
 #---------------------------
-Loading&#8230;==Lade&#8230;
+Loading&#8230;==正在加载&#8230;
 #-----------------------------
 
 #File: yacy/ui/js/jquery.ui.all.min.js
 #---------------------------
-Loading&#8230;==Lade&#8230;
+Loading&#8230;==正在加载&#8230;
 #-----------------------------
 
 #File: yacy/ui/index.html
 #---------------------------
-About YaCy-UI==Über YaCy-UI
-Admin Console==Admin Konsole
-"Bookmarks"=="Lesezeichen"
->Bookmarks==>Lesezeichen
+About YaCy-UI==关于YaCy-UI
+Admin Console==管理控制台
+"Bookmarks"=="书签"
+>Bookmarks==>书签
 #Server Log==Server Log
 #-----------------------------
 
 #File: yacy/ui/yacyui-admin.html
 #---------------------------
-Peer Control==Peer
-"Login"=="Login"
+Peer Control==peer控制
+"Login"=="登录"
 #Login==Anmelden
-Themes==Aussehen
-Messages==Nachrichten
-Re-Start==Neustart
-Shutdown==Beenden
-Web Indexing==Web Indexierung
-Crawl Start==Crawl starten
-Monitoring==Überwachung
-YaCy Network==YaCy Netzwerk
->Settings==>Einstellungen
-"Basic Settings"=="Eingangskonfiguration"
-\tBasic==Basis
-Accounts==Konten
-"Network"=="Netzwerk"
-\tNetwork==Netzwerk
-"Advanced Settings"=="Erweiterte Einstellungen"
-\tAdvanced==Erweitert
-"Update Settings"=="System Aktualisierung"
-\tUpdate==Aktualisierung
->YaCy Project==>YaCy Projekt
-"YaCy Project Home"=="YaCy Projekt Homepage"
-\tProject==Projekt
-"YaCy Statistics"=="YaCy Statistiken"
-\tStatistics==Statistiken
-"YaCy Forum"=="YaCy Forum"
+Themes==主题
+Messages==消息
+Re-Start==重启
+Shutdown==关闭
+Web Indexing==网页索引
+Crawl Start==开始crawl
+Monitoring==监视
+YaCy Network==YaCy网络
+>Settings==>设置
+"Basic Settings"=="基本设置"
+\tBasic==基本
+Accounts==账户
+"Network"=="网络"
+\tNetwork==网络
+"Advanced Settings"=="高级设置"
+\tAdvanced==高级
+"Update Settings"=="升级设置"
+\tUpdate==升级
+>YaCy Project==>YaCy项目
+"YaCy Project Home"=="YaCy项目主页"
+\tProject==项目
+"YaCy Statistics"=="YaCy数据"
+\tStatistics==数据
+"YaCy Forum"=="YaCy论坛"
 #Forum==Forum
-"Help"=="Hilfe"
+"Help"=="帮助"
 #"YaCy Wiki"=="YaCy Wiki"
 #Wiki==Wiki
 #-----------------------------
@@ -3585,71 +3585,71 @@ Accounts==Konten
 #File: yacy/ui/yacyui-bookmarks.html
 #---------------------------
 'Add'=='添加'
-'Crawl'=='Crawlen'
+'Crawl'=='crawl'
 'Edit'=='编辑'
 'Delete'=='删除'
-'Rename'=='Umbenennen'
-'Help'=='Hilfe'
+'Rename'=='重命名'
+'Help'=='帮助'
 
 #"public bookmark"=="öffentliches Lesezeichen"
 #"private bookmark"=="privates Lesezeichen"
 
 #"delete bookmark"=="Lesezeichen löschen"
-"YaCy Bookmarks"=="YaCy Lesezeichen"
+"YaCy Bookmarks"=="YaCy书签"
 #>Title==>Titel
 #>Tags==>Tags
 #>Date==>Datum
 #'Hash'=='Hash'
-'Public'=='Öffentlich'
-'Title'=='Titel'
+'Public'=='公有'
+'Title'=='题目'
 #'Tags'=='Tags'
-'Folders'=='Ordner'
-'Date'=='Datum'
+'Folders'=='目录'
+'Date'=='日期'
 #-----------------------------
 
 #File: yacy/ui/sidebar/sidebar_1.html
 #---------------------------
-YaCy P2P Websearch==YaCy P2P Websuche
-"Search"=="Suchen"
->Text==>Text
->Images==>Bilder
->Audio==>Audio
->Video==>Videos
->Applications==>Anwendungen
-Search term:==Suchbegriff:
-"help"=="Hilfe"
-Resource/Network:==Ressource/Netzwerk:
-freeworld==freeworld
-local peer==lokaler Peer
->bookmarks==>Lesezeichen
+YaCy P2P Websearch==YaCy P2P搜索
+"Search"=="搜索"
+>Text==>文本
+>Images==>图像
+>Audio==>音频
+>Video==>视频
+>Applications==>程序
+Search term:==搜索条目:
+"help"=="帮助"
+Resource/Network:==资源/网络:
+freeworld==自由世界
+local peer==本地peer
+>bookmarks==>书签
 sciencenet==ScienceNet
->Language:==>Sprache:
-any language==jede Sprache
-Bookmark Folders==Lesezeichen Ordner
+>Language:==>语言:
+any language==任意语言
+Bookmark Folders==书签目录
 #-----------------------------
 
 #File: yacy/ui/sidebar/sidebar_2.html
 #---------------------------
-Bookmark Tags<==Lesezeichen Tags<
-Search Options==Suchoptionen
-Constraint:==Einschränkungen:
-all pages==alle Seiten
-index pages==Index Seiten
-URL mask:==URL Filter:
-Prefer mask:==Vorzugsmaske:
-Bookmark TagCloud==Lesezeichen TagWolke
-Topwords<==Top Wörter<
-alt="help"==alt="Hilfe"
-title="help"==title="Hilfe"
+Bookmark Tags<==标签<
+Search Options==搜索设置
+Constraint:==约束:
+all pages==所有页面
+index pages==索引页面
+URL mask:==URL过滤:
+Prefer mask:==首选过滤:
+Bookmark TagCloud==标签云
+Topwords<==顶部<
+alt="help"==alt="帮助"
+title="help"==title="帮助"
 #-----------------------------
 
 #File: yacy/ui/yacyui-welcome.html
 #---------------------------
->Overview==>Übersicht
-YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI wird ein in JavaScript geschriebener Client für YaCy, der auf der existierenden XML und JSON API aufbaut.
-YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI ist bestenfalls im Alpha Stadium, da es immer noch Probleme beim Abholen der Suchergebnisse gibt.
-I am currently changing the backend to a more application friendly format and getting good results with it \(I will check that in some time after the stable release 0.7\).==Ich ändere gerade das Backend in ein andwendungsfreundlicheres Format und bekomme gute Ergebnisse damit (Ich werde die Änderungen einige Zeit nach der Veröffentlichung der stabilen Version 0.7 einchecken).
-For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
+>Overview==>概述
+YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI 是基于JavaScript的YaCy客户端, 它使用当前的XML和JSON API.
+YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI 尚在测试阶段, 所以在搜索时会有部分问题出现.
+I am currently changing the backend to a more application friendly format and getting good results with it \(I will check that in some time after the stable release 0.7\).==目前我正在修改程序后台, 以让其更加友善和搜索到更合适的结果(我会在稳定版0.7后改善此类问题).
+For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==就目前来说, 由于使用JSON和Flexigrid, 性能已获得显著提升!
 #-----------------------------
 
 # EOF
