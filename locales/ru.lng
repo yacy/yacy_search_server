@@ -2727,30 +2727,29 @@ Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
 #File: Table_API_p.html
 #---------------------------
-: Peer Steering==: Peer Steuerung
-Steering of API Actions<==Steuerung der API Aktionen<
-This table shows actions that had been issued on the YaCy interface==Diese Tabelle zeigt Aktionen, die auf dem YaCy Interface ausgelöst wurden, 
-to change the configuration or to request crawl actions.==um Konfigurationen zu ändern oder Crawl Aktionen anzufordern.
-These recorded actions can be used to repeat specific actions and to send them==Diese aufgezeichneten Aktionen können dazu verwendet werden, bestimmte Aktionen wiederholt auszuführen und um sie
-to a scheduler for a periodic execution.==einem Scheduler für periodische Ausführung zu übergeben.
->Recorded Actions<==>Aufgezeichnete Aktionen<
+: Peer Steering==: Управление пира
+Steering of API Actions<==Руководство по действиям API<
+This table shows actions that had been issued on the YaCy interface==Эта таблица показывает какие действия были выполнены на YaCy интерфейсе,
+to change the configuration or to request crawl actions.==для изменения настроек или подачи запроса на выполнение сканирования.
+These recorded actions can be used to repeat specific actions and to send them==Эти сохраненые действия могут быть использованы, чтобы повторить некоторые и направить их
+to a scheduler for a periodic execution.==в планировщик для периодического выполнения.
+>Recorded Actions<==>Записанные действия<
 "previous page"=="предыдущая страница"
 "next page"=="следующая страница"
- of \#\[of\]\#== von #[of]#
->Date==>Дата
+ of \#\[of\]\#== по #[of]#
 >Type==>Тип
 >Comment==>Комментарий
-Call<br/>Count<==Aufruf<br/>Zähler<
-Recording<==Aufzeichnungs<
-Last&nbsp;Exec==Последний &nbsp;запуск
-Next&nbsp;Exec==Следующий&nbsp;запуск
->Scheduler<==>Планировщик<
+Call<br/>Count<==Количество<br/>вызовов<
+Recording<br/>Date<==Дата<br/>записи<
+Last&nbsp;Exec<br/>Date==Дата последнего запуска
+Next&nbsp;Exec<br/>Date==Дата следующего запуска
+>Scheduler<==>Рассписание<
 #>URL<==>URL
->no repetition<==>keine Wiederholung<
->activate scheduler<==>Ausführung planen<
-"Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
-"Delete Selected Actions"=="Lösche ausgewählte Aktionen"
->Result of API execution==>Ergebnis der API Ausführung
+>no repetition<==>нет повторений<
+>activate scheduler<==>активировать рассписание<
+"Execute Selected Actions"=="Выполнить выбранные действия"
+"Delete Selected Actions"=="Удалить выбранные действия"
+>Result of API execution==>Результат выполнения API
 #>Status<==>Status>
 #>URL<==>URL<
 >minutes<==>минут<
@@ -2822,20 +2821,20 @@ search rows for==Suche Reihen mit
 #-----------------------------
 #File: terminal_p.html
 #---------------------------
-#YaCy System Monitor==YaCy System Monitor
-Search Form==Suchformular
-Crawl Start==Crawl starten
-Status Page==Status Seite
-Confirm Shutdown==Bestätige Herunterfahren
->&lt;Shutdown==>&lt;Herunterfahren
-Event Terminal==Ereignis Terminal
-Image Terminal==Bilder Terminal
+YaCy System Monitor==Монитор системы YaCy
+Search Form==Форма поиска
+Crawl Start==Запуск сканирования
+Status Page==Страница статуса
+Confirm Shutdown==Подтвердить выключение
+>&lt;Shutdown==>&lt;Выключить
+Event Terminal==Терминал событий
+Image Terminal==Терминал изображений
 #Domain Monitor==Domain Monitor
-"Loading Processing software..."=="Verarbeitungs Software wird geladen..."
-This browser does not have a Java Plug-in.==Dieser Browser besitzt kein Java Plug-In.
-Get the latest Java Plug-in here.==Holen Sie sich das neueste Java Plug-In hier.
-Resource Monitor==Ressourcen Monitor
-Network Monitor==Netzwerk Monitor
+"Loading Processing software..."=="Процесс загрузки програмы..."
+This browser does not have a Java Plug-in.==Этот браузер не поддерживает плагин Java.
+Get the latest Java Plug-in here.==последний Java плагин доступен здесь.
+Resource Monitor==Монитор ресурсов
+Network Monitor==Монитор сети
 #-----------------------------
 #File: Threaddump_p.html
 #---------------------------
