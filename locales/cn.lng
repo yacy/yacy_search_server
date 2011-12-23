@@ -762,7 +762,7 @@ Omitting update because this is a development environment.==因当前为开发�
 Omitting update because download of release \#\[downloadedRelease\]\# failed.==下载 #[downloadedRelease]# 失败, 忽略安装升级.
 Automated System Update==系统自动升级
 manual update==手动升级
-no automatic look-up, updates can be made manually using this interface \(see options above\)==无自动检查更新时, 可以使用这个接口安装更新(参见上述).
+no automatic look-up, updates can be made manually using this interface \(see options above\)==无自动检查更新时, 可以使用此功能安装更新(参见上述).
 automatic update==自动更新
 updates are made within fixed cycles:==每隔一定时间自动检查更新:
 Time between lookup==检查周期
@@ -848,7 +848,7 @@ Crawl Thread==Crawl线程
 >Depth</strong>==>深度</strong>
 Must Match==必须匹配
 Must Not Match==必须不符
-MaxAge</strong>==最大寿命</strong>
+MaxAge</strong>==最长寿命</strong>
 #Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
 #Auto Filter Content</strong>==Auto Inhalts Filter</strong>
 Max Page Per Domain</strong>==每个域中拥有最大页面</strong>
@@ -1273,9 +1273,9 @@ The local index currently contains \#\[wcount\]\# reverse word indexes==本地�
 RWI Retrieval \(= search for a single word\)==RWI接收(= 搜索单个单词)
 Select Segment:==选择片段:
 Retrieve by Word:<==输入单词:<
-"Show URL Entries for Word"=="显示单词的入口URL"
+"Show URL Entries for Word"=="显示关键字相关的URL"
 Retrieve by Word-Hash==输入单词Hash值
-"Show URL Entries for Word-Hash"=="显示单词Hash值的入口URL"
+"Show URL Entries for Word-Hash"=="显示关键字Hash值相关的URL"
 "Generate List"=="生成列表"
 Cleanup==清理
 >Index Deletion<==>删除索引<
@@ -3005,19 +3005,19 @@ View this profile as==查看方式
 
 #File: Crawler_p.html
 #---------------------------
-Crawler Queues==crawler队列
+Crawler Queues==Crawler队列
 PPM \(Pages Per Minute\)==PPM (页面每分钟)
 #Traffic \(Crawler\)==Traffic (Crawler)
 RWI RAM \(Word Cache\)==RWI RAM (关键字缓存)
-Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==资料管理出错. 请关闭YaCy, 并在删除文件 DATA/PLASMADB/crawlProfiles0.db
+Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==资料管理出错. 请关闭YaCy, 并删除文件 DATA/PLASMADB/crawlProfiles0.db
 and restart.==后重启.
 Error:==错误:
 Application not yet initialized. Sorry. Please wait some seconds and repeat==抱歉, 程序未初始化, 请稍候并重复
 ERROR: Crawl filter==错误: crawl过滤
 does not match with==与crawl根
 crawl root==不匹配
-Please try again with different==请使用不同的过滤字再试一次.
-filter. ::== ::
+Please try again with different==请使用不同的过滤字再试一次
+filter. ::==. ::
 Crawling of==crawl
 failed. Reason:==失败. 原因:
 Error with URL input==URL输入错误
@@ -3036,7 +3036,7 @@ Anchor Name==祖先名
 #URL==URL
 Delete==删除
 Next update in==下次更新将在
-/> seconds.==/> 妙后.
+/> seconds.==/> 秒后.
 See a access timing <a href="/api/latency_p.xml">here</a>==<a href="/api/latency_p.xml">点这</a> 查看访问时间
 Queue</th>==队列</th>
 >Size==>大小
@@ -3046,9 +3046,9 @@ Loader==加载器
 Local Crawler==本地crawler
 unlimited==无限制
 #Remote Crawler==Remote Crawler
-Speed==速度
+#Speed==速度
 "minimum"=="最小"
-"custom"=="修改"
+"custom"=="自定义"
 "maximum"=="最大"
 Database==数据库
 Entries==条目数
@@ -3345,7 +3345,7 @@ Advanced Settings==高级设置
 Parser Configuration==解析配置
 Local robots.txt==本地robots.txt
 #Web Cache==Web Cache
-Advanced Properties==高级属性
+Advanced Properties==高级设置
 #-----------------------------
 
 #File: env/templates/submenuContentIntegration.template
