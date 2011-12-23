@@ -9,11 +9,11 @@
 #
 # Testing the new SVN Properties http://forum.yacy-websuche.de/viewtopic.php?f=15&t=2906
 #
-# $Revision::                                                $
-# $Date::                                                    $
-# $Tag::                                                     $
-# $Author::                                                  $
-# 
+# $Revision:: $
+# $Date:: $
+# $Tag:: $
+# $Author:: $
+#
 # This file is maintained by Oliver Wunder <webmaster@daburna.de>
 # This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink,
 # Thomas Süß <th-suess@gmx.de>
@@ -148,13 +148,13 @@ plain text file:<==простой текстовый фаил:<
 XML file:==XML файл:
 Upload a regular text file which contains one blacklist entry per line.==Загрузить обычный текстовый файл, который содержит черный список по строчно.
 Upload an XML file which contains one or more blacklists.==Загрузить XML-файл, который содержит один или несколько черных списков .
-Export blacklist items to...==Exportiere Blacklist nach...
-Here you can export a blacklist as an XML file. This file will contain additional==Hier können Sie eine (oder alle) Blacklist(en) in eine XML Datei exportieren. Diese Datei enthält dann zusätzliche
-information about which cases a blacklist is activated for.==Informationen in welchen Fällen die Blacklist angewendet wird.
-"Export list as XML"=="Exportiere Liste(n) als XML Datei"
-Here you can export a blacklist as a regular text file with one blacklist entry per line.==Hier können Sie eine (oder alle) Blacklist(en) in eine reguläre Textdatei exportieren die jeweils einen Eintrag pro Zeile enthält.
-This file will not contain any additional information==Diese Datei enthält sonst keine zusätzlichen Informationen
-"Export list as text"=="Exportiere Liste(n) als Textdatei"
+Export blacklist items to...==Экспорт значений черного списка в...
+Here you can export a blacklist as an XML file. This file will contain additional==Здесь вы можете экспортировать черный список как файл XML. Этот файл будет содержать дополнительную
+information about which cases a blacklist is activated for.==информацию о том, в каком случае черный список будет активен.
+"Export list as XML"=="Экспортировать как XML"
+Here you can export a blacklist as a regular text file with one blacklist entry per line.==Здесь вы можете экспортировать черный список, как обычный текстовый файл с одним значением на строку .
+This file will not contain any additional information==Этот файл не будет содержать какой-либо дополнительной информации
+"Export list as text"=="Экспортировать как текст"
 #-----------------------------
 #File: BlacklistTest_p.html
 #---------------------------
@@ -169,11 +169,11 @@ It is blocked for the following cases:==Это блокируется в сле�
 #News==Новости
 #Proxy==Прокси
 Search==Поиск
-Surftips==Surftipps
+Surftips==Советы
 #-----------------------------
 #File: Blog.html
 #---------------------------
-by==von
+by==по
 Comments</a>==Комментарии</a>
 >edit==>редактировать
 >delete==>удалить
@@ -184,7 +184,7 @@ new entry==новая запись
 import XML-File==импорт XML-фаил
 export as XML==экспорт в XML
 Comments</a>==Комментарии</a>
-Blog-Home==Blog-Startseite
+Blog-Home==Блог
 Author:==Автор:
 Subject:==Тема:
 #Text:==Текст:
@@ -373,83 +373,83 @@ Error saving the skin.==Ошибка сохранения файла скина.
 #---------------------------
 Access Configuration==Конфигурация доступа
 Basic Configuration==Основная конфигурация
-Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer benötigt einige Grundinformationen um korrekt zu funktionieren
-Select a language for the interface==Wählen Sie eine Sprache für das Interface
-Use Case: what do you want to do with YaCy:==Anwendungsfall: Was Sie mit YaCy tun wollen:
-Community-based web search==Gemeinschafts-basierte Web Suche
-Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Treten Sie dem globalen Netzwerk 'freeworld' bei und unterstützen Sie es, durchsuchen Sie das Internet mit einem unzensierten, von den Benutzern gestalteten Suchnetzwerk
-Search portal for your own web pages==Suchportal für Ihre eigene Internetseiten
-Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ihre YaCy Installation verhält sich unabhängig von den anderen Peers und Sie können Ihren eigenen Index bestimmen, indem Sie einen eigenen Web-Crawl starten. Dies kann benutzt werden, um Ihre eigenen Internetseiten zu durchsuchen oder ein Themen-basiertes Portal aufzubauen.
-Files may also be shared with the YaCy server, assign a path here:==Dateien können auch mit dem YaCy Server unter folgendem Pfad zugänglich gemacht werden:
-This path can be accessed at ==Der Pfad ist erreichbar unter 
-Use that path as crawl start point.==Verwenden Sie diesen Pfad als den Startpunkt für den Crawl.
-Intranet Indexing==Intranet Indexierung
-Create a search portal for your intranet or web pages or your \(shared\) file system.==Ein Suchportal für Ihre Intranet oder öffentlichen Webseiten oder ihr (verteiltes) Dateisystem.
-URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URLs mit folgenden Protokollen (HTTP/HTPPS/FTP) und einem lokalen Domainnamen oder einer IP oder folgende URLs können verwendet werden
-or smb:==oder smb:
-Your peer name has not been customized; please set your own peer name==Ihr Peername wurde noch nicht angepasst; bitte setzen Sie einen eigenen Peernamen ein
-You may change your peer name==Sie können Ihren Peernamen ändern
+Your YaCy Peer needs some basic information to operate properly==Ваш YaCy пир нуждается в некоторой информации для правильной работы
+Select a language for the interface==Выберите язык интерфейса
+Use Case: what do you want to do with YaCy:==Вариант использования: что вы хотите сделать с YaCy:
+Community-based web search==Групповой веб-поиск
+Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Регистрация и поддержка глобальной сети \ 'FreeWorld \', поиск в интернете без цензуры пользовательской поисковой сети
+Search portal for your own web pages==Поиск в интернете и для собственных веб-страниц
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ваш YaCy ведет себя независимо от других участников сети, и вы имеете свой собственный веб-индекс, начав самостоятельно сканировать веб. Это может быть использовано для поиска на собственном сайте или для создания тематического поискового портала.
+Files may also be shared with the YaCy server, assign a path here:==Файлы могут также доступны YaCy серверу, назначьте путь здесь:
+This path can be accessed at ==Этот путь можно получить по адресу
+Use that path as crawl start point.==Используйте этот путь в качестве начальной точки сканирования.
+Intranet Indexing==Интранет индексирование
+Create a search portal for your intranet or web pages or your \(shared\) file system.==Портал для интрасети или общественные веб-сайты или их (распределенной) файловой системы.
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URL-адреса могут быть использованы с HTTP / HTTPS / FTP и локальное имя домена или IP-адрес, или URL формы 
+or smb:==или smb:
+Your peer name has not been customized; please set your own peer name==Ваше имя пира не должно меняться, пожалуйста, установите ваше собственное имя пира
+You may change your peer name==Вы можете поменять имя пира
 Peer Name:==Имя пира:
 Your peer cannot be reached from outside==Ваш пир недоступен извне
 which is not fatal, but would be good for the YaCy network==это не критично, но это не хорошо для сети YaCy
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==пожалуйста откройте настройки Вашего брендмауэра и/или настройки виртуального сервера на Вашем роуторе для открытия подключений на этот порт
 Your peer can be reached by other peers==Ваш пир не может быть доступен с других пиров
 Peer Port:==Порт пира:
-Configure your router for YaCy:==Ihren Router für YaCy konfigurieren:
-Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
-Set Configuration==Konfiguration speichern
-What you should do next:==Was Sie als Nächstes tun können:
-Your basic configuration is complete! You can now \(for example\)==Ihre Grundeinstellungen sind vollständig! Sie können jetzt (beispielsweise)
-just <==Einfach <
-start an uncensored search==eine unzensierte Suche beginnen
-start your own crawl</a> and contribute to the global index, or create your own private web index==einen eigenen Crawl starten</a> und zum globalen Index beitragen, oder einen eigenen privaten Webindex aufbauen
-set a personal peer profile</a> \(optional settings\)==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe)
-monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a>, was andere Peers gerade machen
-Your Peer name is a default name; please set an individual peer name.==Ihr Peer-Name ist ein Standardname; bitte stellen Sie einen individuellen Namen ein.
-You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein Passwort gesetzt.
-Some pages are protected by passwords.==Einige Seiten sind passwortgeschützt.
-You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Sie sollten ein Password in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> setzen, um Ihren YaCy Peer abzusichern.</p>::
-You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall geöffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
-This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich, wenn Sie vollständig am YaCy-Netzwerk teilhaben möchten.
-You can also use your peer without opening it, but this is not recomended.==Sie können Ihren Peer auch nutzen ohne ihn zu öffnen, dies wird jedoch nicht empfohlen.
+Configure your router for YaCy:==Настройте ваш роутер для YaCy:
+Configuration was not successful. This may take a moment.==Настройки не были применены. Попробуйте через некоторое время .
+Set Configuration==Установка настроек
+What you should do next:==Что вы должны сделать следующее:
+Your basic configuration is complete! You can now \(for example\)==Ваша основная настройка завершена! Теперь вы можете \ (например, \)
+just <==только <
+start an uncensored search==начать не централизованный поиск
+start your own crawl</a> and contribute to the global index, or create your own private web index==начать свой собственное сканирование(crawl) </> и внести вклад в глобальный индекс, или создать свой собственный веб-индекс
+set a personal peer profile</a> \(optional settings\)==установите персональный профиль пира</a> \(дополнительные настройки\)
+monitor at the network page</a> what the other peers are doing==страница мониторинга сети </> что другие пиры делают 
+Your Peer name is a default name; please set an individual peer name.==Ваше имя пира является по умолчанию, пожалуйста установите другое имя пира.
+You did not set a user name and/or a password.==Вы не установили имя пользователя и / или пароль .
+Some pages are protected by passwords.==Некоторые страницы защищены паролем .
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a  href="ConfigAccounts_p.html"> Учетные записи </>, чтобы защитить YaCy пир. </p >::
+You did not open a port in your firewall or your router does not forward the server port to your peer.==Вы не открыли порт в фаерволе или ваш роутер не перенаправляет запросы на порт  сервера
+This is needed if you want to fully participate in the YaCy network.==Это необходимо, если вы хотите полноценно участвовать в YaCy сети.
+You can also use your peer without opening it, but this is not recomended.==Вы можете использовать без открытия порта, но это не рекомендуется.
 #-----------------------------
 #File: ConfigHeuristics_p.html
 #---------------------------
-Heuristics Configuration==Heuristik Konfiguration
-A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="http://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
+Heuristics Configuration==Конфигурация Эвристики
+A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==Эвристика <a href=\"http://ru.wikipedia.org/wiki/Эвристика\"> </a> специальные методы, которые помогают в анализе и поиска лучшего результата.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Эвристический поиск использует методы, которые помогают улучшить результат поиска по основным ссылкам и другим запросам в поисковой системе. 
 Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
-When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Wenn eine Such Heuristik verwendet wird, werden die gefunden Links nicht direkt als Suchergebnisse angezeigt aber dafür die geladenen Seiten indexiert und mit dem anderen Inhalt abgespeichert.
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Когда используется эвристический поиск, непосредственно ссылки не используются в выдаче результата, но загруженные и индексированные страницы храняться как обычный контент.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Damit wird sichergestellt dass die Sperrlisten verwendet werden können und dass die Suchbegriffe auch wirklich auf den Seiten auftauchen, die mithilfe der Heuristik gefunden wurden.
 The success of heuristics are marked with an image==Der Erfolg der Heuristik wird mit einem Bild markiert
 heuristic:&lt;name&gt;==Heuristik:&lt;Name&gt;
-#\(redundant\)==(redundant)
-\(new link\)==(neuer Link)
-below the favicon left from the search result entry:==unter dem Favicon links vom Eintrag des Suchergebnisses:
-The search result was discovered by a heuristic, but the link was already known by YaCy==Das Suchergebnis wurde durch eine Heuristik gefunden, aber der Link war YaCy schon bekannt
+#\(redundant\)==\(избыточный\)
+\(new link\)==\(новый линк\)
+below the favicon left from the search result entry:==ниже значок слева от результата поиска:
+The search result was discovered by a heuristic, but the link was already known by YaCy==Результат поиска был обнаружен при помощи эвристики, но линк был уже известен YaCy
 The search result was discovered by a heuristic, not previously known by YaCy==Das Suchergebnis wurde durch eine Heuristik gefunden, aber YaCy vorher noch nicht bekannt.
 \'site\'-operator: instant shallow crawl=='site'-Operator: Sofortiger oberflächlicher Crawl
 When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Wenn eine Suche mit dem 'site'-Operator gestartet wird (z.B.: 'download site:yacy.net') dann wird der Host des 'site'-Operator sofort gecrawlt mit einer auf den Host beschränkten Suchtiefe von 1.
 That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Das bedeutet: Gleich nach der Suchanfrage wird die Portalseite des Hosts geladen und jede verlinkte Seite die auf eine Seite auf demselben Host verweist.
 Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Weil dieser 'Sofort Crawl' auch die robots.txt und eine minimale Zugriffszeit für folgende Seiten berücksichtigen muss, ist diese Heuristik sehr langsam - aber kann alle gewünschten Suchergebniss finden indem eine zweite Suche (nach einigen Sekunden Pause) gestartet wird. 
-scroogle: load external search result list==scroogle: externe Suchergebnis Listen laden
-When using this heuristic, then every search request line is used for a call to scroogle.==Diese Heuristik verwendet jede Zeile der Suchanfrage für einen Aufruf von Scroogle.
-20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 Ergebnisse werden von Scroogle geholt und simultan geladen, geparst und sofort indexiert.	  
+scroogle: load external search result list==scroogle: загрузка внешних результатов поиска
+When using this heuristic, then every search request line is used for a call to scroogle.==При использовании эвристически,  каждая строка поискового запроса используется для вызова scroogle .
+20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 результаты взяты из scroogle и загружаются одновременно, анализируются и индексируются сразу.
 #-----------------------------
 #File: ConfigHTCache_p.html
 #---------------------------
-Hypertext Cache Configuration==Hypertext Cache Konfiguration
-The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Der Hypertext Cache speichert Inhalte die per HTTP und FTP Protokoll geholt wurden. Dokumente von smb:// und file:// Umgebungen werden nicht gecached.
-The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Der Cache ist ein rotierender Cache: Wenn er voll ist werden die ältesten Einträge gelöscht und neue werden am selben Speicherplatz abgelegt.
-HTCache Configuration==HTCache Konfiguration
-The path where the cache is stored==Der Pfad an dem der Cache gespeichert wird
-The current size of the cache==Die aktuelle Größe des Caches
-The maximum size of the cache==Die maximale Größe des Caches
+Hypertext Cache Configuration==Настройка кэша гипертекста
+The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Кэш храненит данные полученные по HTTP и FTP протоколу. Документы из smb:// and file:// не кэшируются.
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Ротация кэша: если она заполнена, то старые записи будут удалены и заменены на новые.
+HTCache Configuration==HT Настройка кэша
+The path where the cache is stored==Путь, где сохраняется кэш
+The current size of the cache==Текущий размер кэша
+The maximum size of the cache==Максимальный размер кэша
 "Set"=="Установить"
 Cleanup==Очистить
-Cache Deletion==Cache Löschen
-Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
-Delete robots.txt Cache==Lösche robots.txt Cache
+Cache Deletion==Очистить кэш
+Delete HTTP &amp; FTP Cache==Очистить HTTP &amp; FTP кэш
+Delete robots.txt Cache==Очистить robots.txt кэш
 "Delete"=="Удалить"
 #-----------------------------
 #File: ConfigLanguage_p.html
@@ -457,8 +457,8 @@ Delete robots.txt Cache==Lösche robots.txt Cache
 Language selection==Выбор языка
 You can change the language of the YaCy-webinterface with translation files.==Вы можете изменить язык интерфейса YaCy
 Current language</label>==Текущий язык</label>
-#default\(english\)==Deutsch
-Author\(s\) \(chronological\)</label>==Автор (chronologisch)</label>
+#default\(english\)==Русский
+Author\(s\) \(chronological\)</label>==Автор (хронология)</label>
 Send additions to maintainer</em>==Отправьте замечания координатору перевода</em>
 Available Languages</label>==Доступные языки</label>
 Install new language from URL==Установить новый язык по адресу URL
@@ -466,26 +466,26 @@ Use this language==Использовать этот язык
 "Use"=="Использовать"
 "Delete"=="Удалить"
 "Install"=="Установить"
-Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu installieren:
-Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
-Make sure that you only download data from trustworthy sources. The new language file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
-might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+Unable to get URL:==Не удалось получить URL:
+Error saving the language file.==Ошибка сохранения языковой файл.
+Make sure that you only download data from trustworthy sources. The new language file==Убедитесь, что вы загружаете новый языковой файл из из достоверных источников.
+might overwrite existing data if a file of the same name exists already.==может перезаписать существующие данные, если файл с таким именем уже существует .
 #-----------------------------
 #File: ConfigLiveSearch.html
 #---------------------------
-Integration of a Search Field for Live Search==Integration eines Suchfeldes für die Live Suche
+Integration of a Search Field for Live Search==Интеграция поискового модуля для живого поиска
 A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
 This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
 Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
 Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
-Code Snippet:==Code Ausschnitt:
-YaCy Portal Search==YaCy Portal Suche
-"Search"=="Suche"
+Code Snippet:==Фрагмент кода:
+YaCy Portal Search==YaCy Поисковый Портал
+"Search"=="Поиск"
 Configuration options and defaults for \'yconf\':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
-Defaults<==Standardeinstellungen<
+Defaults<==По умолчанию<
 url<==URL<
 is a mandatory property - no default<==muss angegeben werden<
-YaCy P2P Web Search==YaCy P2P Web Suche
+YaCy P2P Web Search==YaCy P2P Веб поиск
 Size and position \(width \| height \| position\)==Größe und Position (Breite | Höhe | Position)
 Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
 Animation effects \(show | hide\)==Animationseffekte (show | hide)
@@ -2602,8 +2602,8 @@ Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
 Install YaCy==Установка YaCy
-You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterstützen den globalen Index,
-which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> können.
+You are running a server in senior mode and you support the global internet index,==Сервер запущен в старшем режиме и Вы поддерживаете глобальный индекс Интернет,
+which you can also <a href="index.html">search yourself</a>.==которые вы также можете <a href="index.html">найти себя</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ваш индексатор веб сайтов простаивает. Вы можете начать сканирование сайта <a href="CrawlStartSite_p.html">по ссылке</a>
@@ -2727,30 +2727,29 @@ Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
 #File: Table_API_p.html
 #---------------------------
-: Peer Steering==: Peer Steuerung
-Steering of API Actions<==Steuerung der API Aktionen<
-This table shows actions that had been issued on the YaCy interface==Diese Tabelle zeigt Aktionen, die auf dem YaCy Interface ausgelöst wurden, 
-to change the configuration or to request crawl actions.==um Konfigurationen zu ändern oder Crawl Aktionen anzufordern.
-These recorded actions can be used to repeat specific actions and to send them==Diese aufgezeichneten Aktionen können dazu verwendet werden, bestimmte Aktionen wiederholt auszuführen und um sie
-to a scheduler for a periodic execution.==einem Scheduler für periodische Ausführung zu übergeben.
->Recorded Actions<==>Aufgezeichnete Aktionen<
+: Peer Steering==: Управление пира
+Steering of API Actions<==Руководство по действиям API<
+This table shows actions that had been issued on the YaCy interface==Эта таблица показывает какие действия были выполнены на YaCy интерфейсе,
+to change the configuration or to request crawl actions.==для изменения настроек или подачи запроса на выполнение сканирования.
+These recorded actions can be used to repeat specific actions and to send them==Эти сохраненые действия могут быть использованы, чтобы повторить некоторые и направить их
+to a scheduler for a periodic execution.==в планировщик для периодического выполнения.
+>Recorded Actions<==>Записанные действия<
 "previous page"=="предыдущая страница"
 "next page"=="следующая страница"
- of \#\[of\]\#== von #[of]#
->Date==>Дата
+ of \#\[of\]\#== по #[of]#
 >Type==>Тип
 >Comment==>Комментарий
-Call<br/>Count<==Aufruf<br/>Zähler<
-Recording<==Aufzeichnungs<
-Last&nbsp;Exec==Последний &nbsp;запуск
-Next&nbsp;Exec==Следующий&nbsp;запуск
->Scheduler<==>Планировщик<
+Call<br/>Count<==Количество<br/>вызовов<
+Recording<br/>Date<==Дата<br/>записи<
+Last&nbsp;Exec<br/>Date==Дата последнего запуска
+Next&nbsp;Exec<br/>Date==Дата следующего запуска
+>Scheduler<==>Рассписание<
 #>URL<==>URL
->no repetition<==>keine Wiederholung<
->activate scheduler<==>Ausführung planen<
-"Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
-"Delete Selected Actions"=="Lösche ausgewählte Aktionen"
->Result of API execution==>Ergebnis der API Ausführung
+>no repetition<==>нет повторений<
+>activate scheduler<==>активировать рассписание<
+"Execute Selected Actions"=="Выполнить выбранные действия"
+"Delete Selected Actions"=="Удалить выбранные действия"
+>Result of API execution==>Результат выполнения API
 #>Status<==>Status>
 #>URL<==>URL<
 >minutes<==>минут<
@@ -2822,20 +2821,20 @@ search rows for==Suche Reihen mit
 #-----------------------------
 #File: terminal_p.html
 #---------------------------
-#YaCy System Monitor==YaCy System Monitor
-Search Form==Suchformular
-Crawl Start==Crawl starten
-Status Page==Status Seite
-Confirm Shutdown==Bestätige Herunterfahren
->&lt;Shutdown==>&lt;Herunterfahren
-Event Terminal==Ereignis Terminal
-Image Terminal==Bilder Terminal
+YaCy System Monitor==Монитор системы YaCy
+Search Form==Форма поиска
+Crawl Start==Запуск сканирования
+Status Page==Страница статуса
+Confirm Shutdown==Подтвердить выключение
+>&lt;Shutdown==>&lt;Выключить
+Event Terminal==Терминал событий
+Image Terminal==Терминал изображений
 #Domain Monitor==Domain Monitor
-"Loading Processing software..."=="Verarbeitungs Software wird geladen..."
-This browser does not have a Java Plug-in.==Dieser Browser besitzt kein Java Plug-In.
-Get the latest Java Plug-in here.==Holen Sie sich das neueste Java Plug-In hier.
-Resource Monitor==Ressourcen Monitor
-Network Monitor==Netzwerk Monitor
+"Loading Processing software..."=="Процесс загрузки програмы..."
+This browser does not have a Java Plug-in.==Этот браузер не поддерживает плагин Java.
+Get the latest Java Plug-in here.==последний Java плагин доступен здесь.
+Resource Monitor==Монитор ресурсов
+Network Monitor==Монитор сети
 #-----------------------------
 #File: Threaddump_p.html
 #---------------------------
@@ -2912,7 +2911,7 @@ Wrong access of this page==Неверный доступ на эту стран�
 The requested peer is unknown or a potential peer.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer.
 The profile can't be fetched.==Этот профиль не может быть выбран
 The peer==Пир
-is not online.==не на свящи.
+is not online.==не на связи.
 This is the Profile of==Профиль
 >Name<==>Имя<
 Nick Name==Ник
@@ -3265,14 +3264,14 @@ Advanced Properties==Расширенные настройки
 #-----------------------------
 #File: env/templates/submenuContentIntegration.template
 #---------------------------
-External Content Integration==Integration von externen Inhalten
-Import phpBB3 forum==Importiere phpBB3 Forum
-Import Mediawiki dumps==Importiere Mediawiki Dumps
-Import OAI-PMH Sources==Importiere OAI-PMH Quellen
+External Content Integration==Интеграция внешнего контента
+Import phpBB3 forum==Импорт phpBB3 форум
+Import Mediawiki dumps==Импорт Mediawiki дамп
+Import OAI-PMH Sources==Импорт OAI-PMH источника
 #-----------------------------
 #File: env/templates/submenuCookie.template
 #---------------------------
-Cookie Menu==Меню куки
+Cookie Menu==Меню куков
 Incoming&nbsp;Cookies==Входящие куки
 Outgoing&nbsp;Cookies==Исходящие куки
 #-----------------------------
@@ -3302,9 +3301,9 @@ robots.txt Monitor==Монитор robots.txt
 #-----------------------------
 #File: env/templates/submenuCustomization.template
 #---------------------------
-Customization==Anpassung
->Appearance==>Erscheinungsbild
-User Profile==Benutzerprofil
+Customization==Настройка
+>Appearance==>Внешний вид
+User Profile==Профиль пользователя
 >Language==>Язык
 #-----------------------------
 #File: env/templates/submenuIndexControl.template
@@ -3335,13 +3334,13 @@ Federated Index==Федеративный индекс
 #>Movies==>Фильмы
 #>Music==>Музыка
 #--- New menu items ---
-Index Creation==Индексирование
+Index Creation==Создание индекса
 Crawler/Spider<==Сбор/Паук<
 Full Site Crawl==Полное сканирование сайта
-Sitemap Loader==Sitemap Lader
+Sitemap Loader==Загрузка карты сайта
 Crawl Start<br/>\(Expert\)==Запуск сканирования<br/>(Эксперт)
 Network<br/>Scanner==Сетевой<br/>сканер
-#>Intranet<br/>Scanner<==>Интернет<br/>сканер<
+#>Intranet<br/>Scanner<==>Интранет<br/>сканер<
 Crawling of==Сканирование
 #MediaWikis==MediaWikis
 >phpBB3 Forums<==>phpBB3 форумы<
@@ -3356,7 +3355,7 @@ Dump Reader for==Dump Leser für
 #-----------------------------
 #File: env/templates/submenuPortalIntegration.template
 #---------------------------
-Search Portal Integration==Интеграция портала поиска
+Search Portal Integration==Интеграция Поискового Портала
 Live Search Anywhere==Живой поиск везде
 Generic Search Portal==Общий поисковый портал
 Search Box Anywhere==Поле поиска везде
