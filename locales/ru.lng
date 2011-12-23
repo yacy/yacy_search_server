@@ -416,40 +416,40 @@ You can also use your peer without opening it, but this is not recomended.==Вы
 #File: ConfigHeuristics_p.html
 #---------------------------
 Heuristics Configuration==Конфигурация Эвристики
-A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="http://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
+A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==Эвристика <a href=\"http://ru.wikipedia.org/wiki/Эвристика\"> </a> специальные методы, которые помогают в анализе и поиска лучшего результата.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Эвристический поиск использует методы, которые помогают улучшить результат поиска по основным ссылкам и другим запросам в поисковой системе. 
 Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
-When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Wenn eine Such Heuristik verwendet wird, werden die gefunden Links nicht direkt als Suchergebnisse angezeigt aber dafür die geladenen Seiten indexiert und mit dem anderen Inhalt abgespeichert.
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Когда используется эвристический поиск, непосредственно ссылки не используются в выдаче результата, но загруженные и индексированные страницы храняться как обычный контент.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Damit wird sichergestellt dass die Sperrlisten verwendet werden können und dass die Suchbegriffe auch wirklich auf den Seiten auftauchen, die mithilfe der Heuristik gefunden wurden.
 The success of heuristics are marked with an image==Der Erfolg der Heuristik wird mit einem Bild markiert
 heuristic:&lt;name&gt;==Heuristik:&lt;Name&gt;
-#\(redundant\)==(redundant)
-\(new link\)==(neuer Link)
-below the favicon left from the search result entry:==unter dem Favicon links vom Eintrag des Suchergebnisses:
-The search result was discovered by a heuristic, but the link was already known by YaCy==Das Suchergebnis wurde durch eine Heuristik gefunden, aber der Link war YaCy schon bekannt
+#\(redundant\)==\(избыточный\)
+\(new link\)==\(новый линк\)
+below the favicon left from the search result entry:==ниже значок слева от результата поиска:
+The search result was discovered by a heuristic, but the link was already known by YaCy==Результат поиска был обнаружен при помощи эвристики, но линк был уже известен YaCy
 The search result was discovered by a heuristic, not previously known by YaCy==Das Suchergebnis wurde durch eine Heuristik gefunden, aber YaCy vorher noch nicht bekannt.
 \'site\'-operator: instant shallow crawl=='site'-Operator: Sofortiger oberflächlicher Crawl
 When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Wenn eine Suche mit dem 'site'-Operator gestartet wird (z.B.: 'download site:yacy.net') dann wird der Host des 'site'-Operator sofort gecrawlt mit einer auf den Host beschränkten Suchtiefe von 1.
 That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Das bedeutet: Gleich nach der Suchanfrage wird die Portalseite des Hosts geladen und jede verlinkte Seite die auf eine Seite auf demselben Host verweist.
 Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Weil dieser 'Sofort Crawl' auch die robots.txt und eine minimale Zugriffszeit für folgende Seiten berücksichtigen muss, ist diese Heuristik sehr langsam - aber kann alle gewünschten Suchergebniss finden indem eine zweite Suche (nach einigen Sekunden Pause) gestartet wird. 
-scroogle: load external search result list==scroogle: externe Suchergebnis Listen laden
-When using this heuristic, then every search request line is used for a call to scroogle.==Diese Heuristik verwendet jede Zeile der Suchanfrage für einen Aufruf von Scroogle.
-20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 Ergebnisse werden von Scroogle geholt und simultan geladen, geparst und sofort indexiert.	  
+scroogle: load external search result list==scroogle: загрузка внешних результатов поиска
+When using this heuristic, then every search request line is used for a call to scroogle.==При использовании эвристически,  каждая строка поискового запроса используется для вызова scroogle .
+20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 результаты взяты из scroogle и загружаются одновременно, анализируются и индексируются сразу.
 #-----------------------------
 #File: ConfigHTCache_p.html
 #---------------------------
-Hypertext Cache Configuration==Hypertext Cache Konfiguration
-The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Der Hypertext Cache speichert Inhalte die per HTTP und FTP Protokoll geholt wurden. Dokumente von smb:// und file:// Umgebungen werden nicht gecached.
-The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Der Cache ist ein rotierender Cache: Wenn er voll ist werden die ältesten Einträge gelöscht und neue werden am selben Speicherplatz abgelegt.
-HTCache Configuration==HTCache Konfiguration
-The path where the cache is stored==Der Pfad an dem der Cache gespeichert wird
-The current size of the cache==Die aktuelle Größe des Caches
-The maximum size of the cache==Die maximale Größe des Caches
+Hypertext Cache Configuration==Настройка кэша гипертекста
+The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Кэш храненит данные полученные по HTTP и FTP протоколу. Документы из smb:// and file:// не кэшируются.
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Ротация кэша: если она заполнена, то старые записи будут удалены и заменены на новые.
+HTCache Configuration==HT Настройка кэша
+The path where the cache is stored==Путь, где сохраняется кэш
+The current size of the cache==Текущий размер кэша
+The maximum size of the cache==Максимальный размер кэша
 "Set"=="Установить"
 Cleanup==Очистить
-Cache Deletion==Cache Löschen
-Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
-Delete robots.txt Cache==Lösche robots.txt Cache
+Cache Deletion==Очистить кэш
+Delete HTTP &amp; FTP Cache==Очистить HTTP &amp; FTP кэш
+Delete robots.txt Cache==Очистить robots.txt кэш
 "Delete"=="Удалить"
 #-----------------------------
 #File: ConfigLanguage_p.html
@@ -457,8 +457,8 @@ Delete robots.txt Cache==Lösche robots.txt Cache
 Language selection==Выбор языка
 You can change the language of the YaCy-webinterface with translation files.==Вы можете изменить язык интерфейса YaCy
 Current language</label>==Текущий язык</label>
-#default\(english\)==Deutsch
-Author\(s\) \(chronological\)</label>==Автор (chronologisch)</label>
+#default\(english\)==Русский
+Author\(s\) \(chronological\)</label>==Автор (хронология)</label>
 Send additions to maintainer</em>==Отправьте замечания координатору перевода</em>
 Available Languages</label>==Доступные языки</label>
 Install new language from URL==Установить новый язык по адресу URL
@@ -466,26 +466,26 @@ Use this language==Использовать этот язык
 "Use"=="Использовать"
 "Delete"=="Удалить"
 "Install"=="Установить"
-Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu installieren:
-Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
-Make sure that you only download data from trustworthy sources. The new language file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
-might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+Unable to get URL:==Не удалось получить URL:
+Error saving the language file.==Ошибка сохранения языковой файл.
+Make sure that you only download data from trustworthy sources. The new language file==Убедитесь, что вы загружаете новый языковой файл из из достоверных источников.
+might overwrite existing data if a file of the same name exists already.==может перезаписать существующие данные, если файл с таким именем уже существует .
 #-----------------------------
 #File: ConfigLiveSearch.html
 #---------------------------
-Integration of a Search Field for Live Search==Integration eines Suchfeldes für die Live Suche
+Integration of a Search Field for Live Search==Интеграция поискового модуля для живого поиска
 A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
 This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
 Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
 Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
-Code Snippet:==Code Ausschnitt:
-YaCy Portal Search==YaCy Portal Suche
-"Search"=="Suche"
+Code Snippet:==Фрагмент кода:
+YaCy Portal Search==YaCy Поисковый Портал
+"Search"=="Поиск"
 Configuration options and defaults for \'yconf\':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
-Defaults<==Standardeinstellungen<
+Defaults<==По умолчанию<
 url<==URL<
 is a mandatory property - no default<==muss angegeben werden<
-YaCy P2P Web Search==YaCy P2P Web Suche
+YaCy P2P Web Search==YaCy P2P Веб поиск
 Size and position \(width \| height \| position\)==Größe und Position (Breite | Höhe | Position)
 Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
 Animation effects \(show | hide\)==Animationseffekte (show | hide)
@@ -2602,8 +2602,8 @@ Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
 Install YaCy==Установка YaCy
-You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterstützen den globalen Index,
-which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> können.
+You are running a server in senior mode and you support the global internet index,==Сервер запущен в старшем режиме и Вы поддерживаете глобальный индекс Интернет,
+which you can also <a href="index.html">search yourself</a>.==которые вы также можете <a href="index.html">найти себя</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ваш индексатор веб сайтов простаивает. Вы можете начать сканирование сайта <a href="CrawlStartSite_p.html">по ссылке</a>
@@ -2911,7 +2911,7 @@ Wrong access of this page==Неверный доступ на эту стран�
 The requested peer is unknown or a potential peer.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer.
 The profile can't be fetched.==Этот профиль не может быть выбран
 The peer==Пир
-is not online.==не на свящи.
+is not online.==не на связи.
 This is the Profile of==Профиль
 >Name<==>Имя<
 Nick Name==Ник
@@ -3264,14 +3264,14 @@ Advanced Properties==Расширенные настройки
 #-----------------------------
 #File: env/templates/submenuContentIntegration.template
 #---------------------------
-External Content Integration==Integration von externen Inhalten
-Import phpBB3 forum==Importiere phpBB3 Forum
-Import Mediawiki dumps==Importiere Mediawiki Dumps
-Import OAI-PMH Sources==Importiere OAI-PMH Quellen
+External Content Integration==Интеграция внешнего контента
+Import phpBB3 forum==Импорт phpBB3 форум
+Import Mediawiki dumps==Импорт Mediawiki дамп
+Import OAI-PMH Sources==Импорт OAI-PMH источника
 #-----------------------------
 #File: env/templates/submenuCookie.template
 #---------------------------
-Cookie Menu==Меню куки
+Cookie Menu==Меню куков
 Incoming&nbsp;Cookies==Входящие куки
 Outgoing&nbsp;Cookies==Исходящие куки
 #-----------------------------
@@ -3301,9 +3301,9 @@ robots.txt Monitor==Монитор robots.txt
 #-----------------------------
 #File: env/templates/submenuCustomization.template
 #---------------------------
-Customization==Anpassung
->Appearance==>Erscheinungsbild
-User Profile==Benutzerprofil
+Customization==Настройка
+>Appearance==>Внешний вид
+User Profile==Профиль пользователя
 >Language==>Язык
 #-----------------------------
 #File: env/templates/submenuIndexControl.template
@@ -3334,13 +3334,13 @@ Federated Index==Федеративный индекс
 #>Movies==>Фильмы
 #>Music==>Музыка
 #--- New menu items ---
-Index Creation==Индексирование
+Index Creation==Создание индекса
 Crawler/Spider<==Сбор/Паук<
 Full Site Crawl==Полное сканирование сайта
-Sitemap Loader==Sitemap Lader
+Sitemap Loader==Загрузка карты сайта
 Crawl Start<br/>\(Expert\)==Запуск сканирования<br/>(Эксперт)
 Network<br/>Scanner==Сетевой<br/>сканер
-#>Intranet<br/>Scanner<==>Интернет<br/>сканер<
+#>Intranet<br/>Scanner<==>Интранет<br/>сканер<
 Crawling of==Сканирование
 #MediaWikis==MediaWikis
 >phpBB3 Forums<==>phpBB3 форумы<
@@ -3355,7 +3355,7 @@ Dump Reader for==Dump Leser für
 #-----------------------------
 #File: env/templates/submenuPortalIntegration.template
 #---------------------------
-Search Portal Integration==Интеграция портала поиска
+Search Portal Integration==Интеграция Поискового Портала
 Live Search Anywhere==Живой поиск везде
 Generic Search Portal==Общий поисковый портал
 Search Box Anywhere==Поле поиска везде
