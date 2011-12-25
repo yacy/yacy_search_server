@@ -126,6 +126,7 @@ public class IndexControlRWIs_p
 
             final String keystring = post.get("keystring", "").trim();
             byte[] keyhash = post.get("keyhash", "").trim().getBytes();
+            if (keyhash == null || keyhash.length == 0) keyhash = Word.word2hash(keystring);
             prop.putHTML("keystring", keystring);
             prop.putHTML("keyhash", ASCII.String(keyhash));
 
@@ -149,7 +150,6 @@ public class IndexControlRWIs_p
             final boolean delurlref = post.containsKey("delurlref");
 
             if ( post.containsKey("keystringsearch") ) {
-                keyhash = Word.word2hash(keystring);
                 prop.put("keyhash", keyhash);
                 final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
                 if ( ranking.filteredCount() == 0 ) {

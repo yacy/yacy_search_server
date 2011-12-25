@@ -247,7 +247,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
      * @return a checked name without "<" and ">"
      */
     private final static Pattern tp = Pattern.compile("<|>");
-    private static String checkPeerName(String name) {
+    public static String checkPeerName(String name) {
         name = tp.matcher(name).replaceAll("_");
         return name;
     }

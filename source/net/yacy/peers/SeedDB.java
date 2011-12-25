@@ -438,11 +438,6 @@ public final class SeedDB implements AlternativeDomainNames {
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, this.seedPassiveDB, minVersion);
     }
 
-    private Iterator<Seed> seedsPotential(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
-        // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, this.seedPotentialDB, minVersion);
-    }
-
     public Seed anySeedVersion(final float minVersion) {
         // return just any seed that has a specific minimum version number
         final Iterator<Seed> e = seedsConnected(true, true, Seed.randomHash(), minVersion);
@@ -643,26 +638,47 @@ public final class SeedDB implements AlternativeDomainNames {
         }
 
         // then try to use the cache
+        peerName = peerName.toLowerCase();
         final String seedhash = this.nameLookupCache.get(peerName);
         Seed seed;
         if (seedhash != null) {
         	seed = this.get(seedhash);
-        	if (seed != null) return seed;
-        }
-
-        // enumerate the cache and simultanous insert values
-        String name;
-    	for (int table = 0; table < 2; table++) {
-            final Iterator<Seed> e = (table == 0) ? seedsConnected(true, false, null, (float) 0.0) : seedsDisconnected(true, false, null, (float) 0.0);
-        	while (e.hasNext()) {
-        		seed = e.next();
-        		if (seed != null) {
-        			name = seed.getName().toLowerCase();
-        			if (seed.isProper(false) == null) this.nameLookupCache.put(name, seed.hash);
-        			if (name.equals(peerName)) return seed;
-        		}
+        	if (seed != null) {
+                //System.out.println("*** found lookupByName in cache: " + peerName);
+        	    return seed;
         	}
         }
+
+        // enumerate the cache
+        String name = Seed.checkPeerName(peerName);
+        Map.Entry<byte[], Map<String, String>> entry;
+        try {
+            Iterator<Map.Entry<byte[], Map<String, String>>> mmap = this.seedActiveDB.entries(Seed.NAME, name);
+            while (mmap.hasNext()) {
+                entry = mmap.next();
+                if (entry == null) break;
+                seed = this.getConnected(ASCII.String(entry.getKey()));
+                if (seed == null) continue;
+                if (seed.isProper(false) == null) this.nameLookupCache.put(seed.getName().toLowerCase(), seed.hash);
+                //System.out.println("*** found lookupByName in seedActiveDB: " + peerName);
+                return seed;
+            }
+        } catch ( IOException e ) {
+        }
+        try {
+            Iterator<Map.Entry<byte[], Map<String, String>>> mmap = this.seedPassiveDB.entries(Seed.NAME, name);
+            while (mmap.hasNext()) {
+                entry = mmap.next();
+                if (entry == null) break;
+                seed = this.getConnected(ASCII.String(entry.getKey()));
+                if (seed == null) continue;
+                if (seed.isProper(false) == null) this.nameLookupCache.put(seed.getName().toLowerCase(), seed.hash);
+                //System.out.println("*** found lookupByName in seedPassiveDB: " + peerName);
+                return seed;
+            }
+        } catch ( IOException e ) {
+        }    	
+    	
         // check local seed
         if (this.mySeed == null) initMySeed();
         name = this.mySeed.getName().toLowerCase();
@@ -700,11 +716,11 @@ public final class SeedDB implements AlternativeDomainNames {
         }
 
         String ipString = peerIP.getHostAddress();
-        
+
+        Map.Entry<byte[], Map<String, String>> entry;
         if (lookupConnected) {
             try {
                 Iterator<Map.Entry<byte[], Map<String, String>>> mmap = this.seedActiveDB.entries(Seed.IP, ipString);
-                Map.Entry<byte[], Map<String, String>> entry;
                 while (mmap.hasNext()) {
                     entry = mmap.next();
                     if (entry == null) break;
@@ -724,7 +740,6 @@ public final class SeedDB implements AlternativeDomainNames {
         if (lookupDisconnected) {
             try {
                 Iterator<Map.Entry<byte[], Map<String, String>>> mmap = this.seedPassiveDB.entries(Seed.IP, ipString);
-                Map.Entry<byte[], Map<String, String>> entry;
                 while (mmap.hasNext()) {
                     entry = mmap.next();
                     if (entry == null) break;
@@ -744,7 +759,6 @@ public final class SeedDB implements AlternativeDomainNames {
         if (lookupPotential) {
             try {
                 Iterator<Map.Entry<byte[], Map<String, String>>> mmap = this.seedPotentialDB.entries(Seed.IP, ipString);
-                Map.Entry<byte[], Map<String, String>> entry;
                 while (mmap.hasNext()) {
                     entry = mmap.next();
                     if (entry == null) break;
