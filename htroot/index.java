@@ -89,7 +89,7 @@ public class index {
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-        prop.putHTML(SwitchboardConstants.GREETING, promoteSearchPageGreeting);
+        prop.put(SwitchboardConstants.GREETING, promoteSearchPageGreeting);
         prop.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.put(SwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
         prop.putHTML("former", former);
