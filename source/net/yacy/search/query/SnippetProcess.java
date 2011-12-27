@@ -166,7 +166,9 @@ public class SnippetProcess {
         // finally wait until enough results are there produced from the snippet fetch process
         WeakPriorityBlockingQueue.Element<ResultEntry> entry = null;
         while (System.currentTimeMillis() < finishTime) {
-
+            
+            //Log.logInfo("SnippetProcess", "item = " + item + "; anyWorkerAlive=" + anyWorkerAlive() + "; this.rankingProcess.isAlive() = " + this.rankingProcess.isAlive() + "; this.rankingProcess.feedingIsFinished() = " + this.rankingProcess.feedingIsFinished() + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.sizeQueue());
+            
             if (!anyWorkerAlive() && !this.rankingProcess.isAlive() && this.result.sizeAvailable() + this.rankingProcess.sizeQueue() <= item && this.rankingProcess.feedingIsFinished()) {
                 //Log.logInfo("SnippetProcess", "interrupted result fetching; item = " + item + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.sizeQueue());
                 break; // the fail case

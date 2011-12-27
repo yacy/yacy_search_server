@@ -131,7 +131,7 @@ public final class RWIProcess extends Thread
         this.protocolNavigator = new ConcurrentScoreMap<String>();
         this.filetypeNavigator = new ConcurrentScoreMap<String>();
         this.ref = new ConcurrentScoreMap<String>();
-        this.feeders = new AtomicInteger(1);
+        this.feeders = new AtomicInteger(0);
         this.startTime = System.currentTimeMillis();
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
