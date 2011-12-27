@@ -100,6 +100,13 @@ http://<remote-server-address>:8090/ConfigAccounts_p.html
 and set an administration account.
 
 
+== PORT 8090 IS BAD, PEOPLE ARE NOT ALLOWED TO ACCESS THAT PORT ==
+You can forward port 80 to 8090 with iptables:
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8090
+On some operation systems, you must first enable access to the ports you are using like:
+iptables -I INPUT -m tcp -p tcp --dport 8090 -j ACCEPT
+
+
 == HOW CAN I SCALE THIS; HOW MUCH RAM IS NEEDED; DISK SPACE? ==
 YaCy can scale up to many millions of web pages in your own search index.
 The default assignment of RAM is 600MB which is assigned to the java
