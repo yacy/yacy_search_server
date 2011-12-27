@@ -9,11 +9,11 @@
 #
 # Testing the new SVN Properties http://forum.yacy-websuche.de/viewtopic.php?f=15&t=2906
 #
-# $Revision::                                                $
-# $Date::                                                    $
-# $Tag::                                                     $
-# $Author::                                                  $
-# 
+# $Revision:: $
+# $Date:: $
+# $Tag:: $
+# $Author:: $
+#
 # This file is maintained by Oliver Wunder <webmaster@daburna.de>
 # This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink,
 # Thomas Süß <th-suess@gmx.de>
@@ -24,431 +24,432 @@
 # Contributors are in chronological order, not how much they did absolutely.
 # Спасибо за Вашу помощь!
 <!-- lang -->default\(english\)==Русский
-<!-- author -->==SEVEN
+<!-- author -->==SEVEN, translated.by/neos
 <!-- maintainer -->==&lt;webmaster@daburna.de&gt;
 #-----------------------------
 #File: AccessTracker_p.html
 #---------------------------
 Access Tracker==Zugriffe
-Server Access Overview==Server Zugriff Überblick
-This is a list of \#\[num\]\# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen HTTP Server innerhalb der letzten Stunde gestellt wurden.
-This is a list of requests to the local http server within the last hour.==Dies ist eine Liste von Anfragen, die innerhalb der letzten Stunde an den lokalen HTTP Server gestellt wurden.
-Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
-#>Host<==>Host<
+Server Access Overview==Обзор доступа к серверу
+This is a list of \#\[num\]\# requests to the local http server within the last hour.==Это список запросов #[num]# на локальный сервер http в течение последнего часа.
+This is a list of requests to the local http server within the last hour.==Это список запросов на локальный http сервер в течение часа.
+Showing \#\[num\]\# requests.==Показать #[num]# запросы.
+#>Host<==>Хост<
 >Path<==>Путь<
 Date<==Дата<
-Access Count During==Erfasster Zugriff während der
+Access Count During==Доступ выявлены в ходе
 last Second==последняя секунда
 last Minute==последняя минута
 last 10 Minutes==последние 10 минут
 last Hour==последний час
-The following hosts are registered as source for brute-force requests to protected pages==Die folgenden Hosts wurden als Quelle von Brute-Force Attacken auf geschützte Seiten erkannt
-#>Host==>Host
+The following hosts are registered as source for brute-force requests to protected pages==Следующие хостов зарегистрированы в качестве источника для грубой силы запросы к защищенным страницам
+#>Host==>Хост
 Access Times==Время доступа
-Server Access Details==Server Zugriffs Details
-Local Search Log==Lokale Suche Log
-Local Search Host Tracker==Lokale Suche Host Tracker
-Remote Search Log==Remote Suche Log
+Server Access Details==Подробные сведения о сервере доступа
+Local Search Log==Лог локального поиска
+Local Search Host Tracker==Локальный поиск на трекере
+Remote Search Log==Лог внешнего поиска
 #Total:==Итого:
-Success:==Erfolgreich:
-Remote Search Host Tracker==Remote Suche Host Tracker
-This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgeführt wurden.
-Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Es werden #[num]# Einträge von insgesamt #[total]# Anfragen angezeigt.
-Requesting Host==Anfragender Host
-Offset==Versatz
-Expected Results==Erwartete Ergebnisse
-Returned Results==Gefundene Ergebnisse
-Used Time \(ms\)==Gebrauchte Zeit (in ms)
-URL fetch \(ms\)==URL Abruf (in ms)
-Snippet comp \(ms\)==Vorschau Erzeugung (in ms)
-Query==Suchwort
+Success:==Успешно:
+Remote Search Host Tracker==Удаленный поиск на трекере
+This is a list of searches that had been requested from this\' peer search interface==Это список запросов полученный от других поисковых пиров
+Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Показаны \ # \ [num \] \ # из \ # \ [total \] \ # запросов .
+Requesting Host==Запрашиваемый Хост
+Offset==Смещение
+Expected Results==Ожидаемые результат
+Returned Results==Найденный результат
+Used Time \(ms\)==Иcпользованное время (в мс)
+URL fetch \(ms\)==URL выборки (в мс)
+Snippet comp \(ms\)==Фрагмент макета(в мс)
+Query==Запрос
 #>User Agent<==>User Agent<
-Search Word Hashes==Suchwort Hash
+Search Word Hashes==Поиск слова по хэшу
 Count</td>==Количество</td>
-Queries Per Last Hour==Suchanfragen pro letzter Stunde
+Queries Per Last Hour==Запросов за последний час
 Access Dates==Время доступа
-This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
+This is a list of searches that had been requested from remote peer search interface==Это список запросов, которые были запрошены из отдаленных поисковых пиров
 #-----------------------------
 #File: Blacklist_p.html
 #---------------------------
-Blacklist Administration==Blacklist Verwaltung
-Used Blacklist engine:==Benutzte Blacklist Verwaltung:
-This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
-from being loaded. You can define several blacklists and activate them separately.==Sie können mehrere Blacklists anlegen und getrennt aktivieren.
-You may also provide your blacklist to other peers by sharing them; in return you may==Sie können ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
-collect blacklist entries from other peers.==Im Gegenzug können Sie sich selber von anderen Peers Blacklists runterladen.
-Active list:==Aktivierte Liste:
-No blacklist selected==Keine Blacklist gewählt
-Select list:==Liste auswählen:
-not shared::shared==nicht freigegeben::freigegeben
+Blacklist Administration==Черный список администрации
+Used Blacklist engine:==Используемый черный список:
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Эта функция позволяет фильтровать URL перед прокси-сервером.
+from being loaded. You can define several blacklists and activate them separately.==загрузку. Вы можете задать несколько черных списков и активировать их по отдельности .
+You may also provide your blacklist to other peers by sharing them; in return you may==Вы также можете обменяться своим черным списком с другими узлами.
+collect blacklist entries from other peers.==собирать черный список с других источников.
+Active list:==Активный список
+No blacklist selected==Не выбран черный список
+Select list:==Выбранный список:
+not shared::shared==без общего доступа::общий доступ
 "select"=="выбрать"
-Create new list:==Neue Liste anlegen:
+Create new list:==Создать новый список:
 "create"=="создать"
-Settings for this list==Einstellungen dieser Liste
+Settings for this list==Настройки для этого списка
 "Save"=="Сохранить"
-Share/don't share this list==Liste freigeben/nicht freigeben
+Share/don't share this list==Открыть/закрыть общий доступ этому к списку
 Delete this list==Удалить этот список
-Edit this list==Diese Liste bearbeiten
-These are the domain name/path patterns in==Dies sind die Domainnamen/-pfade in
-Blacklist Pattern==Blacklisteintrag
-Edit selected pattern\(s\)==Bearbeite gewählten Eintrag
-Delete selected pattern\(s\)==Lösche gewählten Eintrag
-Move selected pattern\(s\) to==Verschiebe gewählten Eintrag zu
-#You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
-Add new pattern:==Neuen Eintrag hinzufügen:
-"Add URL pattern"=="URL hinzufügen"
-The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Der rechte Asterisk '*', nach dem '/', kann durch einen <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regulären Ausdruck</a> ersetzt werden.
-domain.net\/fullpath<==domain.de/vollerpfad<
->domain.net\/\*<==>domain.de/*<
-\*.domain.net\/\*<==*.domain.de/*<
-\*.sub.domain.net\/\*<==*.sub.domain.de/*<
+Edit this list==Редактировать этот список
+These are the domain name/path patterns in==Это доменное имя/часть пути в 
+Blacklist Pattern==Шаблон черного списка
+Edit selected pattern\(s\)==Редактировать выбранный шаблон
+Delete selected pattern\(s\)==Удалить выбранный шаблон
+Move selected pattern\(s\) to==Переместить выбранный шаблон в
+#You can select them here for deletion==Вы можете удалить их по отдельности
+Add new pattern:==Добавить новый шаблон:
+"Add URL pattern"=="Добавить URL шаблон"
+The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Символом '*' (звездочка), после '/' может быть заменено <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярным выражением</a>.
+domain.net\/fullpath<==domain.net/полный путь<
+>domain.net\/\*<==>domain.net/*<
+\*.domain.net\/\*<==*.domain.net/*<
+\*.sub.domain.net\/\*<==*.sub.domain.net/*<
 #sub.domain.\*\/\*<==sub.domain.*/*<
 #domain.\*\/\*<==domain.*/*<
-a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==ein ganzer <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Regulärer Ausdruck</a> (langsam)
-#was removed from blacklist==wurde aus Blacklist entfernt
-#was added to the blacklist==wurde zur Blacklist hinzugefügt
-Activate this list for==Diese Liste ist gültig für
-Show entries:==Zeige Einträge:
-Entries per page:==Einträge pro Seite:
-"Go"=="Los"
-Edit existing pattern\(s\):==Bearbeite existierende Einträge:
-"Save URL pattern\(s\)"=="URL Einträge speichern"
+a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==полный <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">регулярное выражение</a> \(медленный\)
+#was removed from blacklist==был удален из черного списка
+#was added to the blacklist==был добавлен в черный список
+Activate this list for==Активировать этот лист для
+Show entries:==Показать ввод:
+Entries per page:==Записи на страницу:
+"Go"=="Вперед"
+Edit existing pattern\(s\):==Изменить существующий шаблон:
+"Save URL pattern\(s\)"=="Сохранить URL шаблона"
+proxy==прокси
 #-----------------------------
 #File: BlacklistCleaner_p.html
 #---------------------------
-Blacklist Cleaner==Blacklist aufräumen
-Here you can remove or edit illegal or double blacklist-entries.==Hier können Sie ungültige oder doppelte Einträge auf der Blacklist entfernen oder bearbeiten.
-Check list==Liste testen
-"Check"=="Teste"
-Allow regular expressions in host part of blacklist entries.==Erlaube reguläre Ausdrücke im Hostnamen Teil der Blacklist Einträge.
-The blacklist-cleaner only works for the following blacklist-engines up to now:==Der Blacklist-Cleaner arbeitet zur Zeit nur mit den folgenden Blacklist-Engines:
-Illegal Entries in \#\[blList\]\# for==Ungültige Einträge in #[blList]# für
-Deleted \#\[delCount\]\# entries==#[delCount]# Einträge gelöscht
-Altered \#\[alterCount\]\# entries!==#[alterCount]# Einträge geändert
-Two wildcards in host-part==Zwei Wildcards im Host-Teil
-Either subdomain <u>or</u> wildcard==Entweder Subdomain <u>oder</u> Wildcard
-Path is invalid Regex==Pfad ist ungültige Regex
-Wildcard not on begin or end==Wildcard nicht am Beginn oder Ende
-Host contains illegal chars==Host enthält ungültige Zeichen
-Double==Doppelt
-"Change Selected"=="Markierte bearbeiten"
-"Delete Selected"=="Markierte löschen"
-No Blacklist selected==Es wurde keine Blacklist ausgewählt
+Blacklist Cleaner==Черный список чист
+Here you can remove or edit illegal or double blacklist-entries.==Здесь вы можете удалить или редактировать ошибочные или двойные записи.
+Check list==Лист проверки
+"Check"=="Проверка"
+Allow regular expressions in host part of blacklist entries.==Разрешить регулярные выражения в черном списке.
+The blacklist-cleaner only works for the following blacklist-engines up to now:==The blacklist-cleaner only works for the following blacklist-engines up to now
+Illegal Entries in \#\[blList\]\# for==Неправильный ввод \#\[blList\]\# для
+Deleted \#\[delCount\]\# entries==Удалено \#\[delCount\]\# значений
+Altered \#\[alterCount\]\# entries!==Изменённые \#\[alterCount\]\# записи!
+Two wildcards in host-part==Две маски в хост-часть
+Either subdomain <u>or</u> wildcard==Либо поддомен <u> или </u> шаблону
+Path is invalid Regex==Неверный путь Регулярное выражение
+Wildcard not on begin or end==Шаблон не начат или не закончен
+Host contains illegal chars==Хост содержит недопустимые символы
+Double==Двойной
+"Change Selected"=="Изменить выбранное"
+"Delete Selected"=="Удалить выбранное"
+No Blacklist selected==Не выбран черный список
 #-----------------------------
 #File: BlacklistImpExp_p.html
 #---------------------------
 #Blacklist Import==Blacklist Import
-Used Blacklist engine:==Benutzte Blacklist Verwaltung:
-Import blacklist items from...==Importiere Blacklist von...
-other YaCy peers:==anderen YaCy Peers:
-"Load new blacklist items"=="Lade neue Blacklist"
+Used Blacklist engine:==Используется черный список:
+Import blacklist items from...==Импортировать значения черного списка из...
+other YaCy peers:==другой YaCy пир:
+"Load new blacklist items"=="Загрузка новых значений черного списка"
 #URL:==URL:
-plain text file:<==Einfache Textdatei:<
+plain text file:<==простой текстовый фаил:<
 XML file:==XML файл:
-Upload a regular text file which contains one blacklist entry per line.==Upload einer reguläre Testdatei mit jeweils einem Blacklisten Eintrag pro Zeile.
-Upload an XML file which contains one or more blacklists.==Upload einer XML Datei die eine oder mehrere Blacklisten enthält.
-Export blacklist items to...==Exportiere Blacklist nach...
-Here you can export a blacklist as an XML file. This file will contain additional==Hier können Sie eine (oder alle) Blacklist(en) in eine XML Datei exportieren. Diese Datei enthält dann zusätzliche
-information about which cases a blacklist is activated for.==Informationen in welchen Fällen die Blacklist angewendet wird.
-"Export list as XML"=="Exportiere Liste(n) als XML Datei"
-Here you can export a blacklist as a regular text file with one blacklist entry per line.==Hier können Sie eine (oder alle) Blacklist(en) in eine reguläre Textdatei exportieren die jeweils einen Eintrag pro Zeile enthält.
-This file will not contain any additional information==Diese Datei enthält sonst keine zusätzlichen Informationen
-"Export list as text"=="Exportiere Liste(n) als Textdatei"
+Upload a regular text file which contains one blacklist entry per line.==Загрузить обычный текстовый файл, который содержит черный список по строчно.
+Upload an XML file which contains one or more blacklists.==Загрузить XML-файл, который содержит один или несколько черных списков .
+Export blacklist items to...==Экспорт значений черного списка в...
+Here you can export a blacklist as an XML file. This file will contain additional==Здесь вы можете экспортировать черный список как файл XML. Этот файл будет содержать дополнительную
+information about which cases a blacklist is activated for.==информацию о том, в каком случае черный список будет активен.
+"Export list as XML"=="Экспортировать как XML"
+Here you can export a blacklist as a regular text file with one blacklist entry per line.==Здесь вы можете экспортировать черный список, как обычный текстовый файл с одним значением на строку .
+This file will not contain any additional information==Этот файл не будет содержать какой-либо дополнительной информации
+"Export list as text"=="Экспортировать как текст"
 #-----------------------------
 #File: BlacklistTest_p.html
 #---------------------------
-Blacklist Test==Blacklist testen
-Used Blacklist engine:==Benutzte Blacklist Verwaltung:
-Test list:==Teste Liste:
+Blacklist Test==Проверка черного списка
+Used Blacklist engine:==Использовать черный список
+Test list:==Список тестов:
 "Test"=="Тест"
-The tested URL was==Die getestete URL war
-It is blocked for the following cases:==Sie wird in den folgenden Fällen geblockt:
+The tested URL was==Проверенный URL был
+It is blocked for the following cases:==Это блокируется в следующем случае:
 #Crawling==Crawling
 #DHT==DHT
-#News==News
-#Proxy==Proxy
+#News==Новости
+#Proxy==Прокси
 Search==Поиск
-Surftips==Surftipps
+Surftips==Советы
 #-----------------------------
 #File: Blog.html
 #---------------------------
-by==von
+by==по
 Comments</a>==Комментарии</a>
 >edit==>редактировать
 >delete==>удалить
 Edit<==Редактировать<
-previous entries==vorherige Einträge
-next entries==nächste  Einträge
-new entry==Neuer Eintrag
-import XML-File==XML-Datei importieren
-export as XML==als XML exportieren
+previous entries==предыдущая запись
+next entries==следующая запись
+new entry==новая запись
+import XML-File==импорт XML-фаил
+export as XML==экспорт в XML
 Comments</a>==Комментарии</a>
-Blog-Home==Blog-Startseite
+Blog-Home==Блог
 Author:==Автор:
 Subject:==Тема:
-#Text:==Text:
-You can use==Sie können hier
+#Text:==Текст:
+You can use==Вы можете использовать
 Yacy-Wiki Code==YaCy-Wiki Befehle
-here.==benutzen.
+here.==здесь.
 Comments:==Комментарии:
-deactivated==deaktiviert
->activated==>aktiviert
-moderated==moderiert
-"Submit"=="Absenden"
+deactivated==отключить
+>activated==>активировать
+moderated==модератор
+"Submit"=="Послать"
 "Preview"=="Предварительный просмотр"
-"Discard"=="Verwerfen"
+"Discard"=="Отменить"
 >Preview==>Предварительный просмотр
-No changes have been submitted so far!==Es wurden noch keine Änderungen übertragen!
-Access denied==Zugriff verweigert
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Um Blogeinträge zu verändern oder zu erstellen müssen Sie als Admin oder User mit Blog-Rechten eingeloggt sein.
-Are you sure==Sind Sie sicher
-that you want to delete==dass Sie folgendes löschen wollen:
+No changes have been submitted so far!==Нет никаких изменений!
+Access denied==Доступ запрещен
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Чтобы изменить или создать блог, вы должны быть зарегистрированы в качестве администратора или пользователя, который имеет необходимые права .
+Are you sure==Вы уверены
+that you want to delete==что вы хотите удалить
 Confirm deletion==Bestätige Löschung
-Yes, delete it.==Ja, löschen.
+Yes, delete it.==Да, удалить это.
 No, leave it.==Нет, оставить это.
-Import was successful!==Import war erfolgreich!
-Import failed, maybe the supplied file was no valid blog-backup?==Import fehlgeschlagen, unter Umständen war die angegebene Datei keine gültige Blog-Sicherung?
-Please select the XML-file you want to import:==Bitte wählen Sie die XML-Datei die Sie importieren wollen:
+Import was successful!==Импорт завершен!
+Import failed, maybe the supplied file was no valid blog-backup?==Не удалось импортировать, может быть, поставляемый файл не был резервной копией?
+Please select the XML-file you want to import:== Пожалуйста выберете XML-фаил, который вы импортируете:
 #-----------------------------
 #File: BlogComments.html
 #---------------------------
 by==von
-Comments</a>==Kommentare</a>
-Login==Einloggen
+Comments</a>==Комментарий</a>
+Login==Логин
 Blog-Home==Blog-Startseite
-delete</a>==löschen</a>
-allow</a>==erlauben</a>
+delete</a>==удалить</a>
+allow</a>==разрешить
 Author:==Автор:
 Subject:==Тема:
 #Text:==Текст:
-You can use==Sie können hier
+You can use==Вы можете использовать
 Yacy-Wiki Code==YaCy-Wiki Befehle
-here.==benutzen.
-"Submit"=="Absenden"
-"Preview"=="Vorschau"
-"Discard"=="Verwerfen"
+here.==здесь.
+"Submit"=="Послать"
+"Preview"=="предварительный просмотр"
+"Discard"=="Отменить"
 #-----------------------------
 #File: Bookmarks.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
-The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Die Liste der Lesezeichen kann auch als RSS Feed abgerufen werden. Dies ist auch beim Auswählen eines bestimmten Tags möglich.
-Click the API icon to load the RSS from the current selection.==Klicken Sie auf die API Sprechblase, um einen RSS Feed der aktuellen Auswahl zu laden.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-<h3>Bookmarks==<h3>Lesezeichen
-Bookmarks \(==Lesezeichen \(
+YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Закладки
+The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Список закладок можно также получить как RSS поток. Это может быть сделано при выборе конкретного тега .
+Click the API icon to load the RSS from the current selection.==Нажмите на иконку API для загрузки RSS из текущего выделения.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Чтобы увидеть список всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.
+<h3>Bookmarks==<h3>Закладки
+Bookmarks \(==Закладки \(
 #Login==Логин
-List Bookmarks==Lesezeichen Liste
-Add Bookmark==Lesezeichen hinzufügen
-Import Bookmarks==Lesezeichen importieren
-Import XML Bookmarks==Importiere XML-Lesezeichen
-Import HTML Bookmarks==Importiere HTML-Lesezeichen
-"import"=="Importieren"
-Default Tags:==Standard Tag
-imported==importiert
-#Edit Bookmark==Lesezeichen bearbeiten
+List Bookmarks==Лист Закладок
+Add Bookmark==Добавить закладки
+Import Bookmarks==Импорт закладок
+Import XML Bookmarks==Импорт XML Закладок
+Import HTML Bookmarks==Импорт HTML закладок
+"import"=="импорт"
+Default Tags:==Тэг по умолчанию:
+imported==импортированно
+#Edit Bookmark==Редактировать Закладки
 #URL:==URL:
 Title:==Заголовок:
-Description:==Beschreibung:
-Folder \(/folder/subfolder\):==Ordner (/Ordner/Unterordner):
-Tags \(comma separated\):==Tags (durch Komma trennen):
->Public:==>Öffentlich:
+Description:==Описание:
+Folder \(/folder/subfolder\):==Каталог \(/каталог/подкаталог\):
+Tags \(comma separated\):==Тэги (разделенные запятой):
+>Public:==>Опубликовать:
 yes==да
 no==нет
-Bookmark is a newsfeed==Lesezeichen ist ein Newsfeed
+Bookmark is a newsfeed==Закладка как новостная лента
 "create"=="создать"
 "edit"=="редактировать"
 File:==Файл:
-import as Public==als öffentlich importieren
-"private bookmark"=="Privates Lesezeichen"
-"public bookmark"=="Öffentliches Lesezeichen"
-Tagged with==Stichworte:
-'Confirm deletion'=='Löschen bestätigen'
+import as Public==Импортировать как Опубликовано
+"private bookmark"=="личные закладки"
+"public bookmark"=="публичные закладки"
+Tagged with==Тэг с
+'Confirm deletion'=='Подтвердите удаление'
 Edit==Редактировать
 Delete==Удалить
 Folders==Папка
-Bookmark Folder==Lesezeichen Ordner
-#Tags==Tags
-Bookmark List==Liste der Lesezeichen
-previous page==vorherige Seite
+Bookmark Folder==Каталог Закладок
+#Tags==Тэги
+Bookmark List==Список Закладок
+previous page==предыдущую страницу
 next page==следующая страница
 All==Всё
 Show==Показать
-Bookmarks per page.==Lesezeichen pro Seite.
-#unsorted==unsortiert
+Bookmarks per page.==Закладки на странице.
+#unsorted==несортированный
 #-----------------------------
 #File: Collage.html
 #---------------------------
-Image Collage==Bilder Collage
-Private Queue==Privater Puffer
-Public Queue==Öffentlicher Puffer
+Image Collage==Коллаж изображений
+Private Queue==Частная Очередь
+Public Queue==Публичная Очередь
 #-----------------------------
 #File: compare_yacy.html
 #---------------------------
-Websearch Comparison==Сравнение Веб поиска
-Left Search Engine==Поисковый движок слева
-Right Search Engine==Поисковый движок справа
+Websearch Comparison==Сравнение веб-поиска
+Left Search Engine==Левый поисковый
+Right Search Engine==Правый поисковый
 Query==Запрос
 "Compare"=="Сравнить"
 Search Result==Результат поиска
 #-----------------------------
 #File: ConfigAccounts_p.html
 #---------------------------
-User Accounts==Benutzerkonten
-User Administration==Benutzerverwaltung
-User created:==Benutzer erstellt:
-User changed:==Benutzer geändert:
-Generic error.==Genereller Fehler.
-Passwords do not match.==Passwörter stimmen nicht überein.
-Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als vier Zeichen sein.
-No password is set for the administration account.==Für den Administrator Zugang ist kein Passwort gesetzt.
-Please define a password for the admin account.==Bitte setzen Sie ein Passwort für das admin Konto.
-Admin Account==Admin Konto
-Access from localhost without account==Zugriff von localhost ohne Konto
-Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Der Zugriff von Ihrem Computer (localhost Zugang) ist garantiert. Sie brauchen kein Administratorkonto erstellen.
-Access only with qualified account==Zugriff nur mit berechtigtem Konto
-You need this only if you want a remote access to your peer.==Sie benötigen dies nur, wenn Sie Fernzugriff auf Ihren Peer haben wollen.
-Peer User:==Peer Benutzer:
-New Peer Password:==Neues Peer Passwort:
-Repeat Peer Password:==Wiederhole Peer Passwort:
-"Define Administrator"=="Administrator festlegen"
-Select user==Benutzer wählen
+User Accounts==Аккаунт Пользователя
+User Administration==Администратор
+User created:==Пользователь создан:
+User changed:==Пользователь изменен:
+Generic error.==Общая ошибка.
+Passwords do not match.==Пароли не совпадают.
+Username too short. Username must be \>\= 4 Characters.==Имя пользователя слишком короткое. Имя пользователя должно быть не меньше \>\= 4 символов.
+No password is set for the administration account.==Пароль не установлен для административной учетной записи.
+Please define a password for the admin account.==Пожалуйста, определите пароль для учетной записи администратора .
+Admin Account==Admin, учетная запись
+Access from localhost without account==Для доступа с localhost не требуются права
+Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Доступ к пиру со своего компьютера \ (localhost access\) разрешен. Нет необходимости настраивать управление учетной записи.
+Access only with qualified account==Доступ только с квалифицированной учетной записи
+You need this only if you want a remote access to your peer.==Это нужно только если вам нужен доступ к пирам.
+Peer User:==Пир(юзер)
+New Peer Password:==Новый пароль Пира:
+Repeat Peer Password:==Повторите пароль Пира
+"Define Administrator"=="Определить Администратором"
+Select user==Выбранный пользователь
 New user==Новый пользователь
 Edit User==Редактировать пользователя
 Delete User==Удалить пользователя
-Edit current user:==Aktuellen Benutzer bearbeiten:
+Edit current user:==Редактировать текущего пользователя
 Username</label>==Имя пользователя</label>
 Password</label>==Пароль</label>
-Repeat password==Passwort wiederholen
+Repeat password==Повторите пароль
 First name==Имя
 Last name==Отчество
 Address==Адрес
-Rights==Rechte
+Rights==Права
 Timelimit==Лимит времени
 Time used==Время использования
 Save User==Сохранить пользователя
 #-----------------------------
 #File: ConfigAppearance_p.html
 #---------------------------
-Appearance and Integration==Erscheinungsbild und Integration
-You can change the appearance of the YaCy interface with skins.==Sie können hier das Aussehen der YaCy Oberfläche mit Skins verändern,
-#You can change the appearance of YaCy with skins==Sie können hier das Erscheinungsbild von YaCy mit Skins ändern
-The selected skin and language also affects the appearance of the search page.==das ausgewählte Design und die gewählte Sprache wirken sich auch auf das Erscheinungsbild der Suchseite aus.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Wenn Sie <a href="ConfigPortal.html">ein Such-Portal mit Yacy erstellen möchten</a> können Sie
-change the appearance of the search page here.==das Erscheinungsbild der Suchseite <a href="ConfigPortal.html">hier</a> weitgehend ändern und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
+Appearance and Integration==Внешний вид и интеграция
+You can change the appearance of the YaCy interface with skins.==Вы можете изменить внешний вид YaCy, интерфейс со скинами .==
+#You can change the appearance of YaCy with skins==# Вы можете изменить внешний вид YaCy со скинами
+The selected skin and language also affects the appearance of the search page.==Выбранный скин и язык также влияет на внешний вид страницы поиска.
+If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Вы можете <a href="ConfigPortal.html">создать свой поисковый портал с  YaCy</a>
+change the appearance of the search page here.==изменить внешний вид страницы поиска.
 #and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
-Skin Selection==Skinauswahl
-Select one of the default skins, download new skins, or create your own skin.==Wählen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder erstellen Sie selbst einen neuen Skin.
-Current skin==Aktueller Skin
-Available Skins==Verfügbare Skins
-"Use"=="Benutzen"
-"Delete"=="Löschen"
->Skin Color Definition<==>Definition der Skin Farben<
-The generic skin \'generic_pd\' can be configured here with custom colors:==Der allgemeine Skin 'generic_pd' kann hier mit eigenen Farben angepasst werden:
->Background<==>Hintergrund<
-#>Text<==>Text<
+Skin Selection==Выбор скина
+Select one of the default skins, download new skins, or create your own skin.==Выберите один из стандартных скинов, загрузить новые скины, или создать свой собственный скин.
+Current skin==Текущий скин
+Available Skins==Доступные скины
+"Use"=="Использовать"
+"Delete"=="Удалить"
+>Skin Color Definition<==>Цвет скина<==
+The generic skin \'generic_pd\' can be configured here with custom colors:==Основной скин \ 'generic_pd \' может быть настроен с пользовательскими настройками цвета:
+>Background<==>Фон<
+#>Text<==>Текст<
 >Legend<==>Легенда<
->Table&nbsp;Header<==>Tabellen&nbsp;Kopf<
->Table&nbsp;Item<==>Tabellen&nbsp;Zelle&nbsp;1<
->Table&nbsp;Item&nbsp;2<==>Tabellen&nbsp;Zelle&nbsp;2<
->Table&nbsp;Bottom<==>Tabellen&nbsp;Unterseite<
->Border&nbsp;Line<==>Rand&nbsp;Linie<
->Sign&nbsp;\'bad\'<==>Zeichen&nbsp;'gut'<
->Sign&nbsp;\'good\'<==>Zeichen&nbsp;'schlecht'<
->Sign&nbsp;\'other\'<==>Zeichen&nbsp;'andere'<
->Search&nbsp;Headline<==>Suche&nbsp;Kopfzeile<
->Search&nbsp;URL==>Suche&nbsp;URL
-"Set Colors"=="Farben Anwenden"
-#>Skin Download<==>Skin Download<
-Skins can be installed from download locations==Skins können direkt von einer Download Quelle installiert werden
-Install new skin from URL==Installiere einen neuen Skin von folgender URL
+>Table&nbsp;Header<==>Таблица&nbsp;Заголовок<
+>Table&nbsp;Item<==>Таблица&nbsp;Значение;1<
+>Table&nbsp;Item&nbsp;2<==>Таблица&nbsp;Значение&nbsp;2<
+>Table&nbsp;Bottom<==>Таблица&nbsp;В низу<
+>Border&nbsp;Line<==>Граница&nbsp;Линия<
+>Sign&nbsp;\'bad\'<==>Вход&nbsp;'плохо'<
+>Sign&nbsp;\'good\'<==>Вход&nbsp;'хорошо'<
+>Sign&nbsp;\'other\'<==>Вход&nbsp;'другое'<
+>Search&nbsp;Headline<==>Поиск&nbsp;Заголовок<
+>Search&nbsp;URL==>Поиск&nbsp;URL
+"Set Colors"=="Настройка Цвета"
+#>Skin Download<==>Скачать Скин<
+Skins can be installed from download locations==Скин может быть установлен из источника на локальной машине
+Install new skin from URL==Установка нового скина по ссылке
 Use this skin==Использовать этот скин
-"Install"=="Installieren"
-Make sure that you only download data from trustworthy sources. The new Skin file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
-might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
->Unable to get URL:==>Die URL konnte nicht geladen werden:
-Error saving the skin.==Fehler beim Speichern des Skins.
+"Install"=="Установить"
+Make sure that you only download data from trustworthy sources. The new Skin file==Убедитесь, что вы загружаете данные из достоверного источника. Новый файл кожи
+might overwrite existing data if a file of the same name exists already.==может перезаписать существующий фаил, если с таким именем уже существует.
+>Unable to get URL:==>Неудалось получить по URL:
+Error saving the skin.==Ошибка сохранения файла скина.
 #-----------------------------
 #File: ConfigBasic.html
 #---------------------------
 Access Configuration==Конфигурация доступа
 Basic Configuration==Основная конфигурация
-Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer benötigt einige Grundinformationen um korrekt zu funktionieren
-Select a language for the interface==Wählen Sie eine Sprache für das Interface
-Use Case: what do you want to do with YaCy:==Anwendungsfall: Was Sie mit YaCy tun wollen:
-Community-based web search==Gemeinschafts-basierte Web Suche
-Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Treten Sie dem globalen Netzwerk 'freeworld' bei und unterstützen Sie es, durchsuchen Sie das Internet mit einem unzensierten, von den Benutzern gestalteten Suchnetzwerk
-Search portal for your own web pages==Suchportal für Ihre eigene Internetseiten
-Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ihre YaCy Installation verhält sich unabhängig von den anderen Peers und Sie können Ihren eigenen Index bestimmen, indem Sie einen eigenen Web-Crawl starten. Dies kann benutzt werden, um Ihre eigenen Internetseiten zu durchsuchen oder ein Themen-basiertes Portal aufzubauen.
-Files may also be shared with the YaCy server, assign a path here:==Dateien können auch mit dem YaCy Server unter folgendem Pfad zugänglich gemacht werden:
-This path can be accessed at ==Der Pfad ist erreichbar unter 
-Use that path as crawl start point.==Verwenden Sie diesen Pfad als den Startpunkt für den Crawl.
-Intranet Indexing==Intranet Indexierung
-Create a search portal for your intranet or web pages or your \(shared\) file system.==Ein Suchportal für Ihre Intranet oder öffentlichen Webseiten oder ihr (verteiltes) Dateisystem.
-URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URLs mit folgenden Protokollen (HTTP/HTPPS/FTP) und einem lokalen Domainnamen oder einer IP oder folgende URLs können verwendet werden
-or smb:==oder smb:
-Your peer name has not been customized; please set your own peer name==Ihr Peername wurde noch nicht angepasst; bitte setzen Sie einen eigenen Peernamen ein
-You may change your peer name==Sie können Ihren Peernamen ändern
+Your YaCy Peer needs some basic information to operate properly==Ваш YaCy пир нуждается в некоторой информации для правильной работы
+Select a language for the interface==Выберите язык интерфейса
+Use Case: what do you want to do with YaCy:==Вариант использования: что вы хотите сделать с YaCy:
+Community-based web search==Групповой веб-поиск
+Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Регистрация и поддержка глобальной сети \ 'FreeWorld \', поиск в интернете без цензуры пользовательской поисковой сети
+Search portal for your own web pages==Поиск в интернете и для собственных веб-страниц
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ваш YaCy ведет себя независимо от других участников сети, и вы имеете свой собственный веб-индекс, начав самостоятельно сканировать веб. Это может быть использовано для поиска на собственном сайте или для создания тематического поискового портала.
+Files may also be shared with the YaCy server, assign a path here:==Файлы могут также доступны YaCy серверу, назначьте путь здесь:
+This path can be accessed at ==Этот путь можно получить по адресу
+Use that path as crawl start point.==Используйте этот путь в качестве начальной точки сканирования.
+Intranet Indexing==Интранет индексирование
+Create a search portal for your intranet or web pages or your \(shared\) file system.==Портал для интрасети или общественные веб-сайты или их (распределенной) файловой системы.
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URL-адреса могут быть использованы с HTTP / HTTPS / FTP и локальное имя домена или IP-адрес, или URL формы 
+or smb:==или smb:
+Your peer name has not been customized; please set your own peer name==Ваше имя пира не должно меняться, пожалуйста, установите ваше собственное имя пира
+You may change your peer name==Вы можете поменять имя пира
 Peer Name:==Имя пира:
 Your peer cannot be reached from outside==Ваш пир недоступен извне
 which is not fatal, but would be good for the YaCy network==это не критично, но это не хорошо для сети YaCy
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==пожалуйста откройте настройки Вашего брендмауэра и/или настройки виртуального сервера на Вашем роуторе для открытия подключений на этот порт
 Your peer can be reached by other peers==Ваш пир не может быть доступен с других пиров
 Peer Port:==Порт пира:
-Configure your router for YaCy:==Ihren Router für YaCy konfigurieren:
-Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
-Set Configuration==Konfiguration speichern
-What you should do next:==Was Sie als Nächstes tun können:
-Your basic configuration is complete! You can now \(for example\)==Ihre Grundeinstellungen sind vollständig! Sie können jetzt (beispielsweise)
-just <==Einfach <
-start an uncensored search==eine unzensierte Suche beginnen
-start your own crawl</a> and contribute to the global index, or create your own private web index==einen eigenen Crawl starten</a> und zum globalen Index beitragen, oder einen eigenen privaten Webindex aufbauen
-set a personal peer profile</a> \(optional settings\)==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe)
-monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a>, was andere Peers gerade machen
-Your Peer name is a default name; please set an individual peer name.==Ihr Peer-Name ist ein Standardname; bitte stellen Sie einen individuellen Namen ein.
-You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein Passwort gesetzt.
-Some pages are protected by passwords.==Einige Seiten sind passwortgeschützt.
-You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Sie sollten ein Password in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> setzen, um Ihren YaCy Peer abzusichern.</p>::
-You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall geöffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
-This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich, wenn Sie vollständig am YaCy-Netzwerk teilhaben möchten.
-You can also use your peer without opening it, but this is not recomended.==Sie können Ihren Peer auch nutzen ohne ihn zu öffnen, dies wird jedoch nicht empfohlen.
+Configure your router for YaCy:==Настройте ваш роутер для YaCy:
+Configuration was not successful. This may take a moment.==Настройки не были применены. Попробуйте через некоторое время .
+Set Configuration==Установка настроек
+What you should do next:==Что вы должны сделать следующее:
+Your basic configuration is complete! You can now \(for example\)==Ваша основная настройка завершена! Теперь вы можете \ (например, \)
+just <==только <
+start an uncensored search==начать не централизованный поиск
+start your own crawl</a> and contribute to the global index, or create your own private web index==начать свой собственное сканирование(crawl) </> и внести вклад в глобальный индекс, или создать свой собственный веб-индекс
+set a personal peer profile</a> \(optional settings\)==установите персональный профиль пира</a> \(дополнительные настройки\)
+monitor at the network page</a> what the other peers are doing==страница мониторинга сети </> что другие пиры делают 
+Your Peer name is a default name; please set an individual peer name.==Ваше имя пира является по умолчанию, пожалуйста установите другое имя пира.
+You did not set a user name and/or a password.==Вы не установили имя пользователя и / или пароль .
+Some pages are protected by passwords.==Некоторые страницы защищены паролем .
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a  href="ConfigAccounts_p.html"> Учетные записи </>, чтобы защитить YaCy пир. </p >::
+You did not open a port in your firewall or your router does not forward the server port to your peer.==Вы не открыли порт в фаерволе или ваш роутер не перенаправляет запросы на порт  сервера
+This is needed if you want to fully participate in the YaCy network.==Это необходимо, если вы хотите полноценно участвовать в YaCy сети.
+You can also use your peer without opening it, but this is not recomended.==Вы можете использовать без открытия порта, но это не рекомендуется.
 #-----------------------------
 #File: ConfigHeuristics_p.html
 #---------------------------
-Heuristics Configuration==Heuristik Konfiguration
-A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="http://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==
+Heuristics Configuration==Конфигурация Эвристики
+A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==Эвристика <a href=\"http://ru.wikipedia.org/wiki/Эвристика\"> </a> специальные методы, которые помогают в анализе и поиска лучшего результата.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Эвристический поиск использует методы, которые помогают улучшить результат поиска по основным ссылкам и другим запросам в поисковой системе. 
 Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
-When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Wenn eine Such Heuristik verwendet wird, werden die gefunden Links nicht direkt als Suchergebnisse angezeigt aber dafür die geladenen Seiten indexiert und mit dem anderen Inhalt abgespeichert.
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Когда используется эвристический поиск, непосредственно ссылки не используются в выдаче результата, но загруженные и индексированные страницы храняться как обычный контент.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Damit wird sichergestellt dass die Sperrlisten verwendet werden können und dass die Suchbegriffe auch wirklich auf den Seiten auftauchen, die mithilfe der Heuristik gefunden wurden.
 The success of heuristics are marked with an image==Der Erfolg der Heuristik wird mit einem Bild markiert
 heuristic:&lt;name&gt;==Heuristik:&lt;Name&gt;
-#\(redundant\)==(redundant)
-\(new link\)==(neuer Link)
-below the favicon left from the search result entry:==unter dem Favicon links vom Eintrag des Suchergebnisses:
-The search result was discovered by a heuristic, but the link was already known by YaCy==Das Suchergebnis wurde durch eine Heuristik gefunden, aber der Link war YaCy schon bekannt
+#\(redundant\)==\(избыточный\)
+\(new link\)==\(новый линк\)
+below the favicon left from the search result entry:==ниже значок слева от результата поиска:
+The search result was discovered by a heuristic, but the link was already known by YaCy==Результат поиска был обнаружен при помощи эвристики, но линк был уже известен YaCy
 The search result was discovered by a heuristic, not previously known by YaCy==Das Suchergebnis wurde durch eine Heuristik gefunden, aber YaCy vorher noch nicht bekannt.
 \'site\'-operator: instant shallow crawl=='site'-Operator: Sofortiger oberflächlicher Crawl
 When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Wenn eine Suche mit dem 'site'-Operator gestartet wird (z.B.: 'download site:yacy.net') dann wird der Host des 'site'-Operator sofort gecrawlt mit einer auf den Host beschränkten Suchtiefe von 1.
 That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Das bedeutet: Gleich nach der Suchanfrage wird die Portalseite des Hosts geladen und jede verlinkte Seite die auf eine Seite auf demselben Host verweist.
 Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Weil dieser 'Sofort Crawl' auch die robots.txt und eine minimale Zugriffszeit für folgende Seiten berücksichtigen muss, ist diese Heuristik sehr langsam - aber kann alle gewünschten Suchergebniss finden indem eine zweite Suche (nach einigen Sekunden Pause) gestartet wird. 
-scroogle: load external search result list==scroogle: externe Suchergebnis Listen laden
-When using this heuristic, then every search request line is used for a call to scroogle.==Diese Heuristik verwendet jede Zeile der Suchanfrage für einen Aufruf von Scroogle.
-20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 Ergebnisse werden von Scroogle geholt und simultan geladen, geparst und sofort indexiert.	  
+scroogle: load external search result list==scroogle: загрузка внешних результатов поиска
+When using this heuristic, then every search request line is used for a call to scroogle.==При использовании эвристически,  каждая строка поискового запроса используется для вызова scroogle .
+20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 результаты взяты из scroogle и загружаются одновременно, анализируются и индексируются сразу.
 #-----------------------------
 #File: ConfigHTCache_p.html
 #---------------------------
-Hypertext Cache Configuration==Hypertext Cache Konfiguration
-The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Der Hypertext Cache speichert Inhalte die per HTTP und FTP Protokoll geholt wurden. Dokumente von smb:// und file:// Umgebungen werden nicht gecached.
-The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Der Cache ist ein rotierender Cache: Wenn er voll ist werden die ältesten Einträge gelöscht und neue werden am selben Speicherplatz abgelegt.
-HTCache Configuration==HTCache Konfiguration
-The path where the cache is stored==Der Pfad an dem der Cache gespeichert wird
-The current size of the cache==Die aktuelle Größe des Caches
-The maximum size of the cache==Die maximale Größe des Caches
+Hypertext Cache Configuration==Настройка кэша гипертекста
+The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Кэш храненит данные полученные по HTTP и FTP протоколу. Документы из smb:// and file:// не кэшируются.
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Ротация кэша: если она заполнена, то старые записи будут удалены и заменены на новые.
+HTCache Configuration==HT Настройка кэша
+The path where the cache is stored==Путь, где сохраняется кэш
+The current size of the cache==Текущий размер кэша
+The maximum size of the cache==Максимальный размер кэша
 "Set"=="Установить"
 Cleanup==Очистить
-Cache Deletion==Cache Löschen
-Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
-Delete robots.txt Cache==Lösche robots.txt Cache
+Cache Deletion==Очистить кэш
+Delete HTTP &amp; FTP Cache==Очистить HTTP &amp; FTP кэш
+Delete robots.txt Cache==Очистить robots.txt кэш
 "Delete"=="Удалить"
 #-----------------------------
 #File: ConfigLanguage_p.html
@@ -456,8 +457,8 @@ Delete robots.txt Cache==Lösche robots.txt Cache
 Language selection==Выбор языка
 You can change the language of the YaCy-webinterface with translation files.==Вы можете изменить язык интерфейса YaCy
 Current language</label>==Текущий язык</label>
-#default\(english\)==Deutsch
-Author\(s\) \(chronological\)</label>==Автор (chronologisch)</label>
+#default\(english\)==Русский
+Author\(s\) \(chronological\)</label>==Автор (хронология)</label>
 Send additions to maintainer</em>==Отправьте замечания координатору перевода</em>
 Available Languages</label>==Доступные языки</label>
 Install new language from URL==Установить новый язык по адресу URL
@@ -465,26 +466,26 @@ Use this language==Использовать этот язык
 "Use"=="Использовать"
 "Delete"=="Удалить"
 "Install"=="Установить"
-Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu installieren:
-Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
-Make sure that you only download data from trustworthy sources. The new language file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
-might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+Unable to get URL:==Не удалось получить URL:
+Error saving the language file.==Ошибка сохранения языковой файл.
+Make sure that you only download data from trustworthy sources. The new language file==Убедитесь, что вы загружаете новый языковой файл из из достоверных источников.
+might overwrite existing data if a file of the same name exists already.==может перезаписать существующие данные, если файл с таким именем уже существует .
 #-----------------------------
 #File: ConfigLiveSearch.html
 #---------------------------
-Integration of a Search Field for Live Search==Integration eines Suchfeldes für die Live Suche
+Integration of a Search Field for Live Search==Интеграция поискового модуля для живого поиска
 A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
 This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
 Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
 Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
-Code Snippet:==Code Ausschnitt:
-YaCy Portal Search==YaCy Portal Suche
-"Search"=="Suche"
+Code Snippet:==Фрагмент кода:
+YaCy Portal Search==YaCy Поисковый Портал
+"Search"=="Поиск"
 Configuration options and defaults for \'yconf\':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
-Defaults<==Standardeinstellungen<
+Defaults<==По умолчанию<
 url<==URL<
 is a mandatory property - no default<==muss angegeben werden<
-YaCy P2P Web Search==YaCy P2P Web Suche
+YaCy P2P Web Search==YaCy P2P Веб поиск
 Size and position \(width \| height \| position\)==Größe und Position (Breite | Höhe | Position)
 Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
 Animation effects \(show | hide\)==Animationseffekte (show | hide)
@@ -737,19 +738,21 @@ Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Mein
 #-----------------------------
 #File: ConfigUpdate_p.html
 #---------------------------
+>System Update==>Обновление системы
 Manual System Update==Ручное обновление системы
 Current installed Release==Текущая установленная версия
 Available Releases==Доступные версии
+changelog==история изменений
 "Download Release"=="Загрузить версию"
 "Check for new Release"=="Проверить на новые обновления"
 Downloaded Releases==Загрузить обновление
-No downloaded releases available for deployment.==Keine heruntergeladenen Releases zum Installieren verfügbar.
-no&nbsp;automated installation on development environments==Keine automatische Installation in Entwicklungsumgebungen
+No downloaded releases available for deployment.==Нет скачанных версий доступных для установки.
+no&nbsp;automated installation on development environments==без автоматической установки на средах разработки
 "Install Release"=="Установить версию"
 "Delete Release"=="Удалить версию"
 Automatic Update==Автоматическое обновление
-check for new releases, download if available and restart with downloaded release==suche nach neuer Version, lade sie herunter und starte neu mit dieser Version
-"Check \+ Download \+ Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
+check for new releases, download if available and restart with downloaded release==проверить наличие новых релизов, скачать если таковые имеются и перезапустить на новый релиз
+"Check \+ Download \+ Install Release Now"=="Проверить, загрузить и установить новый релиз сейчас"
 Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Der Download von Version #[downloadedRelease]# ist beendet. Ein Neustart ist eingeleitet.
 No more recent release found.==Kein neuere Version gefunden.
 Release will be installed. Please wait.==Das Release wird installiert. Bitte warten.
@@ -757,22 +760,22 @@ You installed YaCy with a package manager.==Sie haben YaCy mit einer Paketverwal
 To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Paketmanager.
 Omitting update because this is a development environment.==Update ausgelassen weil dies ein Entwicklersystem ist.
 Omitting update because download of release \#\[downloadedRelease\]\# failed.==Update ausgelassen weil der Download von Version #[downloadedRelease]# fehlschlug.
-Automated System Update==Automatische Systemaktualisierung
-manual update==ручное обновление
-no automatic look-up, updates can be made manually using this interface \(see options above\)==Keine automatische Aktualisierung. Updates können manuell gemacht werden (siehe die Optionen oben).
-automatic update==автоматическое обновление
-updates are made within fixed cycles:==Aktualisierungen werden nach festen Regeln gemacht:
+Automated System Update==Система автоматического обновления
+manual update==Ручное обновление
+no automatic look-up, updates can be made manually using this interface \(see options above\)==нет автоматического обновления. Обновления можно сделать вручную на этой странице (см. настройки выше).
+automatic update==Автоматическое обновление
+updates are made within fixed cycles:==обновления выполняются в установленные циклы:
 Time between lookup==Время между проверками
 hours==часов
-Release blacklist==Versionen Negativliste
-regex on release number strings==regex mit Versionsnummern
+Release blacklist==Черный список релизов
+regex on release number strings==список регулярных выражений с номерами выпусков
 Release type==Тип релиза
-only main releases==nur offizielle Versionen
-any release including developer releases==jede Version, auch Entwickler Versionen
-Signed autoupdate:==signierte Aktualisierung:
-only accept signed files==Nur signierte Dateien akzeptieren
+only main releases==только финальные релизы
+any release including developer releases==любые версии, включая релизы для разработчиков
+Signed autoupdate:==Подписанные автообновления:
+only accept signed files==принимать только подписанные файлы
 "Submit"=="Применить"
-Accepted Changes.==Änderungen akzeptiert.
+Accepted Changes.==Принятые изменения.
 System Update Statistics==Статистика обновления системы
 Last System Lookup==Последняя проверка системы
 never==никогда
@@ -1251,56 +1254,56 @@ RWI-DB-Cleaner - Clean up the database by deletion of words with reference to bl
 #-----------------------------
 #File: IndexControlRWIs_p.html
 #---------------------------
-Reverse Word Index Administration==Reverse Wort Indexverwaltung
-The local index currently contains \#\[wcount\]\# reverse word indexes==Der lokale Index enthält im Moment #[wcount]# inverse Wort Indexe
-RWI Retrieval \(= search for a single word\)==RWI Abfrage (= Suche nach einem einzelnen Wort)
-Select Segment:==Segment Auswahl:
-Retrieve by Word:<==Abfrage nach Wort:<
-"Show URL Entries for Word"=="URL Einträge für Wort zeigen"
-Retrieve by Word-Hash==Abfrage nach Wort-Hash
-"Show URL Entries for Word-Hash"=="URL Einträge für Wort-Hash zeigen"
-"Generate List"=="Liste erstellen"
-Cleanup==Aufräumen
->Index Deletion<==>Index Löschung<
->Delete Search Index<==>Lösche Suchindex<
-Stop Crawler and delete Crawl Queues==Crawler anhalten und Crawler Warteschlangen löschen
-Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
-Delete robots.txt Cache==Lösche robots.txt Cache
-Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-Holen Fehler während der Suche
-"Delete"=="Löschen"
-No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
-No entry for word hash==Keinen Eintrag zu Wort-Hash
-Search result==Suchergebnis
-total URLs</td>==insgesamte URLs</td>
+Reverse Word Index Administration==Обратное управление индексом слов
+The local index currently contains \#\[wcount\]\# reverse word indexes==Локальный индекс в настоящее время содержит #[wcount]# слов обратного индекса
+RWI Retrieval \(= search for a single word\)==RWI запрос (= поиск одного слова)
+Select Segment:==Выбрать сегмент:
+Retrieve by Word:<==Запрос по слову:<
+"Show URL Entries for Word"=="Показать URL адреса для слова"
+Retrieve by Word-Hash==Запросы по хэш слова
+"Show URL Entries for Word-Hash"=="Показать URL адреса для хэш слова"
+"Generate List"=="Генерировать список"
+Cleanup==Очистка
+>Index Deletion<==>Удаление индекса<
+>Delete Search Index<==>Удалить поисковый индекс<
+Stop Crawler and delete Crawl Queues==Остановить сканирование и удалить очередь запросов
+Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
+Delete robots.txt Cache==Удалить кеш robots.txt
+Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты полученные ошибки во время поиска
+"Delete"=="Удалить"
+No entry for word \'\#\[word\]\#\'==Не найдено для слова "#[word]#"
+No entry for word hash==Не найдено для хэш слова слова
+Search result==Результат поиска
+total URLs</td>==количество URL адресов</td>
 appearance in</td>==kommt vor in</td>
 in link type</td>==im Link-Typ</td>
-document type</td>==Dokumenten-Typ</td>
-<td>description</td>==<td>Beschreibung</td>
-<td>title</td>==<td>Titel</td>
-<td>creator</td>==<td>Erzeuger</td>
+document type</td>==тип документа</td>
+<td>description</td>==<td>описание</td>
+<td>title</td>==<td>заголовок</td>
+<td>creator</td>==<td>создатель</td>
 <td>subject</td>==<td>Тема</td>
 <td>url</td>==<td>URL</td>
-<td>emphasized</td>==<td>betont</td>
-<td>image</td>==<td>Bilder</td>
-<td>audio</td>==<td>Audio</td>
-<td>video</td>==<td>Video</td>
-<td>app</td>==<td>Anwendung</td>
-index of</td>==Index of</td>
->Selection</td>==>Auswahl</td>
-Display URL List==Anzeige der URL-Liste
-Number of lines==Zeilenanzahl
-all lines==alle Zeilen
+<td>emphasized</td>==<td>выделенный</td>
+<td>image</td>==<td>картинки</td>
+<td>audio</td>==<td>аудио</td>
+<td>video</td>==<td>видео</td>
+<td>app</td>==<td>приложения</td>
+index of</td>==Индекс</td>
+>Selection</td>==>Выбор</td>
+Display URL List==Отобразить список URL
+Number of lines==Количество линий
+all lines==все линии
 "List Selected URLs"=="Ausgewählte URLs anzeigen"
 Transfer RWI to other Peer==RWI Transfer an anderen Peer
 Transfer by Word-Hash==Transfer per Wort-Hash
 "Transfer to other peer"=="An anderen Peer senden"
 to Peer==an Peer
-<dd>select==<dd>auswählen
+<dd>select==<dd>выбрать
 or enter a hash==oder Hash eingeben
 Sequential List of Word-Hashes==aufeinanderfolgende Liste der URL-Hashes
 No URL entries related to this word hash==Keine URL Einträge zugehörig zu diesem Wort Hash
 \#\[count\]\# URL entries related to this word hash==#[count]# URL Einträge zugehörig zu diesem Wort Hash
-Resource</td>==Ressource</td>
+Resource</td>==Ресурс</td>
 Negative Ranking Factors==Negative Ranking Faktoren
 Positive Ranking Factors==Positive Ranking Faktoren
 Reverse Normalized Weighted Ranking Sum==Inverse normalisierte gewichtete Ranking Summe
@@ -1333,6 +1336,13 @@ the reference exists \(very extensive, but prevents further unresolved reference
 Blacklist Extension==Blacklist Erweiterung
 "Add selected URLs to blacklist"=="Markierte URLs zu Blacklist hinzufügen"
 "Add selected domains to blacklist"=="Markierte Domains zu Blacklist hinzufügen"
+Limitations==Ограничения
+Index Reference Size==Размер ссылки на индекс
+No reference size limitation==Нет ограничений размера на ссылки
+this may cause strong CPU load when words are searched that appear very often==это может привести к сильной нагрузке процессора, когда ищутся слова, которые появляются очень часто
+Limitation of number of references per word:==Ограничение количества ссылок на слово:
+this causes that old references als deleted if that limit is reached==это означает что старые ссылки будут удаляться, если этот предел достигнут
+Set References Limit==Установить лимит
 #-----------------------------
 #File: IndexControlURLs_p.html
 #---------------------------
@@ -1359,7 +1369,7 @@ Export File==Export-Datei
 #URL Filter==URL Filter
 #Export Format==Export Format
 #Only Domain <i>\(superfast\)==Nur Domains <i>(sehr schnell)
-Only Domain:==Liste mit nur Domainnamen:
+Only Domain:==Только домен:
 Full URL List:==Liste mit vollständiger URL:
 Plain Text List \(domains only\)==Einfache Text Liste (nur Domains)
 HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
@@ -1367,11 +1377,11 @@ HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
 Plain Text List \(URLs only\)==Einfache Text Liste (nur URLs)
 HTML \(URLs with title\)==HTML (URLs mit Titel)
 #XML (RSS)==XML (RSS)
-"Export URLs"=="URLs exportieren"
+"Export URLs"=="Экспортировать URL адреса"
 Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Export nach Datei #[exportfile]# läuft ..  #[urlcount]# URLs bisher
 Finished export of \#\[urlcount\]\# URLs to file==Export beendet und #[urlcount]# URLs gespeichert in Datei
 Export to file \#\[exportfile\]\# failed:==Export in Datei #[exportfile]# fehlgeschlagen:
-No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
+No entry found for URL-hash==Не найдено для хэш URL адреса
 #URL String</td>==URL Adresse</td>
 #Hash</td>==Hash</td>
 #Description</td>==Beschreibung</td>
@@ -1394,7 +1404,7 @@ Loader Queue==Lade-Puffer
 The loader set is empty==Der Lade-Puffer ist leer.
 There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Einträge in dem Lade-Puffer:
 Initiator==Initiator
-Depth==Tiefe
+Depth==Глубина
 #URL==URL
 #-----------------------------
 #File: IndexCreateParserErrors_p.html
@@ -1500,9 +1510,9 @@ There are <strong>\#\[num\]\#</strong> entries in the global crawler queue. Show
 Show last==Zeige die letzten
 </a> entries.==</a> Einträge.
 Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
-Modified Date==Änderungsdatum
+Profile==Профиль
+Depth==Глубина
+Modified Date==Дата изменения
 Anchor Name==Anker Name
 #URL==URL
 #-----------------------------
@@ -1515,16 +1525,16 @@ The local crawler queue is empty==Der lokale Crawler-Puffer ist leer.
 There are <strong>\#\[num\]\#</strong> entries in the local crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Einträge in dem lokalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
 Show last==Zeige die letzten
 </a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
+Initiator==Инициатор
+Profile==Профиль
+Depth==Глубина
 Modified Date==Änderungsdatum
 Anchor Name==Anker Name
 URL==URL
 \[Delete\]==[Löschen]
 Delete Entries:==Lösche Einträge:
-"Delete"=="Löschen"
-This may take a quite long time.==Dies wird vielleicht einige Zeit dauern.
+"Delete"=="Удалить"
+This may take a quite long time.==Это может занять некоторое время.
 #-----------------------------
 #File: IndexCreateWWWRemoteQueue_p.html
 #---------------------------
@@ -1536,13 +1546,13 @@ There are <strong>\#\[num\]\#</strong> entries in the remote crawler queue.==Es 
 Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Gezeigt werden die <strong>#[show-num]#</strong> neuesten Einträge.
 Show last==Zeige die letzten
 </a> entries.==</a> Einträge.
-Initiator==Initiator
-Profile==Profil
-Depth==Tiefe
-Modified Date==Änderungsdatum
+Initiator==Инициатор
+Profile==Профиль
+Depth==Глубина
+Modified Date==Дата изменения
 Anchor Name==Anker Name
 URL==URL
-Delete==Löschen
+Delete==Удалить
 #-----------------------------        
 #File: IndexImport_p.html
 #---------------------------
@@ -2592,8 +2602,8 @@ Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
 Install YaCy==Установка YaCy
-You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterstützen den globalen Index,
-which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> können.
+You are running a server in senior mode and you support the global internet index,==Сервер запущен в старшем режиме и Вы поддерживаете глобальный индекс Интернет,
+which you can also <a href="index.html">search yourself</a>.==которые вы также можете <a href="index.html">найти себя</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ваш индексатор веб сайтов простаивает. Вы можете начать сканирование сайта <a href="CrawlStartSite_p.html">по ссылке</a>
@@ -2717,30 +2727,29 @@ Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
 #File: Table_API_p.html
 #---------------------------
-: Peer Steering==: Peer Steuerung
-Steering of API Actions<==Steuerung der API Aktionen<
-This table shows actions that had been issued on the YaCy interface==Diese Tabelle zeigt Aktionen, die auf dem YaCy Interface ausgelöst wurden, 
-to change the configuration or to request crawl actions.==um Konfigurationen zu ändern oder Crawl Aktionen anzufordern.
-These recorded actions can be used to repeat specific actions and to send them==Diese aufgezeichneten Aktionen können dazu verwendet werden, bestimmte Aktionen wiederholt auszuführen und um sie
-to a scheduler for a periodic execution.==einem Scheduler für periodische Ausführung zu übergeben.
->Recorded Actions<==>Aufgezeichnete Aktionen<
+: Peer Steering==: Управление пира
+Steering of API Actions<==Руководство по действиям API<
+This table shows actions that had been issued on the YaCy interface==Эта таблица показывает какие действия были выполнены на YaCy интерфейсе,
+to change the configuration or to request crawl actions.==для изменения настроек или подачи запроса на выполнение сканирования.
+These recorded actions can be used to repeat specific actions and to send them==Эти сохраненые действия могут быть использованы, чтобы повторить некоторые и направить их
+to a scheduler for a periodic execution.==в планировщик для периодического выполнения.
+>Recorded Actions<==>Записанные действия<
 "previous page"=="предыдущая страница"
 "next page"=="следующая страница"
- of \#\[of\]\#== von #[of]#
->Date==>Дата
+ of \#\[of\]\#== по #[of]#
 >Type==>Тип
 >Comment==>Комментарий
-Call<br/>Count<==Aufruf<br/>Zähler<
-Recording<==Aufzeichnungs<
-Last&nbsp;Exec==Последний &nbsp;запуск
-Next&nbsp;Exec==Следующий&nbsp;запуск
->Scheduler<==>Планировщик<
+Call<br/>Count<==Количество<br/>вызовов<
+Recording<br/>Date<==Дата<br/>записи<
+Last&nbsp;Exec<br/>Date==Дата последнего запуска
+Next&nbsp;Exec<br/>Date==Дата следующего запуска
+>Scheduler<==>Рассписание<
 #>URL<==>URL
->no repetition<==>keine Wiederholung<
->activate scheduler<==>Ausführung planen<
-"Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
-"Delete Selected Actions"=="Lösche ausgewählte Aktionen"
->Result of API execution==>Ergebnis der API Ausführung
+>no repetition<==>нет повторений<
+>activate scheduler<==>активировать рассписание<
+"Execute Selected Actions"=="Выполнить выбранные действия"
+"Delete Selected Actions"=="Удалить выбранные действия"
+>Result of API execution==>Результат выполнения API
 #>Status<==>Status>
 #>URL<==>URL<
 >minutes<==>минут<
@@ -2812,20 +2821,20 @@ search rows for==Suche Reihen mit
 #-----------------------------
 #File: terminal_p.html
 #---------------------------
-#YaCy System Monitor==YaCy System Monitor
-Search Form==Suchformular
-Crawl Start==Crawl starten
-Status Page==Status Seite
-Confirm Shutdown==Bestätige Herunterfahren
->&lt;Shutdown==>&lt;Herunterfahren
-Event Terminal==Ereignis Terminal
-Image Terminal==Bilder Terminal
+YaCy System Monitor==Монитор системы YaCy
+Search Form==Форма поиска
+Crawl Start==Запуск сканирования
+Status Page==Страница статуса
+Confirm Shutdown==Подтвердить выключение
+>&lt;Shutdown==>&lt;Выключить
+Event Terminal==Терминал событий
+Image Terminal==Терминал изображений
 #Domain Monitor==Domain Monitor
-"Loading Processing software..."=="Verarbeitungs Software wird geladen..."
-This browser does not have a Java Plug-in.==Dieser Browser besitzt kein Java Plug-In.
-Get the latest Java Plug-in here.==Holen Sie sich das neueste Java Plug-In hier.
-Resource Monitor==Ressourcen Monitor
-Network Monitor==Netzwerk Monitor
+"Loading Processing software..."=="Процесс загрузки програмы..."
+This browser does not have a Java Plug-in.==Этот браузер не поддерживает плагин Java.
+Get the latest Java Plug-in here.==последний Java плагин доступен здесь.
+Resource Monitor==Монитор ресурсов
+Network Monitor==Монитор сети
 #-----------------------------
 #File: Threaddump_p.html
 #---------------------------
@@ -2902,7 +2911,7 @@ Wrong access of this page==Неверный доступ на эту стран�
 The requested peer is unknown or a potential peer.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer.
 The profile can't be fetched.==Этот профиль не может быть выбран
 The peer==Пир
-is not online.==не на свящи.
+is not online.==не на связи.
 This is the Profile of==Профиль
 >Name<==>Имя<
 Nick Name==Ник
@@ -2981,19 +2990,19 @@ With a GET-property 'about' you get only reference relations about the host that
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
 Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
 To see a list of all APIs, please visit the <a href=\"http://www.yacy-websuche.de/wiki/index.php/Dev:API\">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-Web Structure==Netz Struktur
-host<==Host<
-depth<==Tiefe<
-nodes<==Knoten<
-time<==Zeit<
-size<==Größe<
->Background<==>Hintergrund<
-#>Text<==>Text<
->Line<==>Linie<
->Dot<==>Punkt<
->Dot-end<==>Punktende<
->Color <==>Farbe <
-"change"=="Ändern"
+Web Structure==Веб структура
+host<==Хост<
+depth<==Глубина<
+nodes<==Узлы<
+time<==Время<
+size<==Размер<
+>Background<==>Фон<
+>Text<==>Текст<
+>Line<==>Линия<
+>Dot<==>Точка<
+>Dot-end<==>Пунктир<
+>Color <==>Цвет <
+"change"=="Изменить"
 #-----------------------------
 #File: Wiki.html
 #---------------------------
@@ -3098,9 +3107,9 @@ Images==Картинки
 Audio==Аудио
 Video==Видео
 Applications==Приложения
-The following words are stop-words and had been excluded from the search:==Folgende Wörter sind Stopwords und wurden von der Suche ausgeschlossen:
+The following words are stop-words and had been excluded from the search:==Следующие слова стоп-слов и были исключены из поиска:
 No Results.==Нет результата.
-length of search words must be at least 3 characters==Die Länge der Suchbegriffe muss mindestens 3 Zeichen betragen
+length of search words must be at least 3 characters==Длина искуемого слова должно быть не менее 3 символов
 > of==> из
 g> local,==g> локально,
 #g> remote),==g> удаленно),
@@ -3116,47 +3125,47 @@ Pictures==Картинка
 #-----------------------------
 #File: yacysearchtrailer.html
 #---------------------------
-Show search results for "\#\[query\]\#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
-#>Domain Navigator==>Domain Navigator
->Name Space Navigator==>Namespace Navigator
->Author Navigator==>Autoren Navigator
+Show search results for "\#\[query\]\#" on map==Показать результат поиска "#[query]#" на карте
+#>Domain Navigator==>Навигатор домена
+>Name Space Navigator==>Навигатор пространства имен
+>Author Navigator==>Автор Навигатор
 #-----------------------------
 ### Subdirectory api ###
 #File: api/table_p.html
 #---------------------------
-Table Viewer==Tabellen Betrachter
-#>PK<==>Primärschlüssel<
-"Edit Table"=="Tabelle bearbeiten"
+Table Viewer==Таблица просмотра
+#>PK<==>Первичный ключ<
+"Edit Table"=="Редактировать таблицу"
 #-----------------------------
 #File: api/yacydoc.html
 #---------------------------
 >Author<==>Автор<
->Description<==>Beschreibung<
+>Description<==>Описание<
 >Subject<==>Тема<
-#>Publisher<==>Veröffentlicher<
-#>Contributor<==>Beiträger<
->Date<==>Datum<
->Type<==>Typ<
->Identifier<==>Identifizierer<
+#>Publisher<==>Издатель<
+#>Contributor<==>Корреспондента<
+>Date<==>Дата<
+>Type<==>Тип<
+>Identifier<==>Идентификатор<
 >Language<==>Язык<
->Load Date<==>Lade Datum<
->Referrer Identifier<==>Referrer Identifizierer<
-#>Referrer URL<==>Referrer URL<
->Document size<==>Dokument Größe<
->Number of Words<==>Anzahl der Wörter<
+>Load Date<==>Дата загрузки<
+>Referrer Identifier<==>Ссылающаяся идентификатор<
+#>Referrer URL<==>Ссылка URL<
+>Document size<==>Размер документа<
+>Number of Words<==>Количество слов<
 #-----------------------------
 ### Subdirectory env/templates ###
 #File: env/templates/header.template
 #---------------------------
-YaCy - Distributed Search Engine==YaCy - Распределенный поисковый движок
+YaCy - Distributed Search Engine==YaCy - Система распределённого поиска
 ### SEARCH & BROWSE ###
 >Search==>Поиск
-Web Search==Веб-поиск
+Web Search==Веб поиск
 File Search==Поиск файла
-Search&nbsp;&amp;&nbsp;Browse==Настройка&nbsp;&amp;&nbsp;обзор
+Search&nbsp;&amp;&nbsp;Browse==Поиск&nbsp;&amp;&nbsp;Обзор
 Search Page==Страница поиска
-Rich Client Search==Rich Client Suche
-Interactive local Search==Interaktive lokale Suche
+Rich Client Search==Богатый Поиск Клиента
+Interactive local Search==Интерактивный локальный поиск
 Compare Search==Сравнить поиск
 Ranking Config==Ranking Einstellungen
 Browse==Обзор
@@ -3229,12 +3238,12 @@ Remote&nbsp;Search==Remote Suche
 #-----------------------------
 #File: env/templates/submenuBlacklist.template
 #---------------------------
-Filter &amp; Blacklists==Filter &amp; Sperrlisten
-Blacklist Administration==Blacklist Verwaltung
-Blacklist Cleaner==Blacklist aufräumen
-Blacklist Test==Blacklist testen
-Import/Export==Import / Export
-Index Cleaner==Index Aufräumer
+Filter &amp; Blacklists==Фильтр &amp; Черный список
+Blacklist Administration==Администрирование черного списка
+Blacklist Cleaner==Очистка черного списка
+Blacklist Test==Тест черного списка
+Import/Export==Импорт / Экспорт
+Index Cleaner==Очистка индекса
 #-----------------------------
 #File: env/templates/submenuConfig.template
 #---------------------------
@@ -3255,14 +3264,14 @@ Advanced Properties==Расширенные настройки
 #-----------------------------
 #File: env/templates/submenuContentIntegration.template
 #---------------------------
-External Content Integration==Integration von externen Inhalten
-Import phpBB3 forum==Importiere phpBB3 Forum
-Import Mediawiki dumps==Importiere Mediawiki Dumps
-Import OAI-PMH Sources==Importiere OAI-PMH Quellen
+External Content Integration==Интеграция внешнего контента
+Import phpBB3 forum==Импорт phpBB3 форум
+Import Mediawiki dumps==Импорт Mediawiki дамп
+Import OAI-PMH Sources==Импорт OAI-PMH источника
 #-----------------------------
 #File: env/templates/submenuCookie.template
 #---------------------------
-Cookie Menu==Меню куки
+Cookie Menu==Меню куков
 Incoming&nbsp;Cookies==Входящие куки
 Outgoing&nbsp;Cookies==Исходящие куки
 #-----------------------------
@@ -3292,17 +3301,18 @@ robots.txt Monitor==Монитор robots.txt
 #-----------------------------
 #File: env/templates/submenuCustomization.template
 #---------------------------
-Customization==Anpassung
->Appearance==>Erscheinungsbild
-User Profile==Benutzerprofil
+Customization==Настройка
+>Appearance==>Внешний вид
+User Profile==Профиль пользователя
 >Language==>Язык
 #-----------------------------
 #File: env/templates/submenuIndexControl.template
 #---------------------------
-Index Administration==Indexverwaltung
-Reverse Word Index Administration==Reverse Wort Indexverwaltung
-URL References Database==URL Referenzen Datenbank
-URL Viewer==URL Betrachter
+Index Administration==Администрирование индекса
+Reverse Word Index Administration==Администрирование индекса ссылок по слову
+URL References Database==База данных URL-ссылок
+URL Viewer==URL обозреватель
+Federated Index==Федеративный индекс
 #-----------------------------
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
@@ -3324,13 +3334,13 @@ URL Viewer==URL Betrachter
 #>Movies==>Фильмы
 #>Music==>Музыка
 #--- New menu items ---
-Index Creation==Индексирование
+Index Creation==Создание индекса
 Crawler/Spider<==Сбор/Паук<
 Full Site Crawl==Полное сканирование сайта
-Sitemap Loader==Sitemap Lader
+Sitemap Loader==Загрузка карты сайта
 Crawl Start<br/>\(Expert\)==Запуск сканирования<br/>(Эксперт)
 Network<br/>Scanner==Сетевой<br/>сканер
-#>Intranet<br/>Scanner<==>Интернет<br/>сканер<
+#>Intranet<br/>Scanner<==>Интранет<br/>сканер<
 Crawling of==Сканирование
 #MediaWikis==MediaWikis
 >phpBB3 Forums<==>phpBB3 форумы<
@@ -3345,11 +3355,11 @@ Dump Reader for==Dump Leser für
 #-----------------------------
 #File: env/templates/submenuPortalIntegration.template
 #---------------------------
-Search Portal Integration==Интеграция портала поиска
+Search Portal Integration==Интеграция Поискового Портала
 Live Search Anywhere==Живой поиск везде
 Generic Search Portal==Общий поисковый портал
 Search Box Anywhere==Поле поиска везде
-Appearance==Внешний вид
+Appearance<==Внешний вид<
 User Profile==Профиль пользователя
 Language<==Язык<
 Ranking Config==Конфигурация рейтинга
@@ -3368,9 +3378,9 @@ Server Log Menu==Server Log Menü
 #-----------------------------
 #File: env/templates/submenuWebStructure.template
 #---------------------------
-Web Visualization==Internet Visualisierung
-Web Structure==Internet Struktur
-Image Collage==Bilder Collage
+Web Visualization==Веб визуализация
+Web Structure==Веб структура
+Image Collage==Коллаж изображений
 #-----------------------------
 #File: proxymsg/authfail.inc
 #---------------------------
@@ -3487,10 +3497,8 @@ Accounts==Konten
 'Delete'=='Löschen'
 'Rename'=='Umbenennen'
 'Help'=='Hilfe'
-
 #"public bookmark"=="öffentliches Lesezeichen"
 #"private bookmark"=="privates Lesezeichen"
-
 #"delete bookmark"=="Lesezeichen löschen"
 "YaCy Bookmarks"=="YaCy Lesezeichen"
 #>Title==>Titel
