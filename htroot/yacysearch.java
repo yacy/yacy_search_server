@@ -229,7 +229,7 @@ public class yacysearch {
 
         // patch until better search profiles are available
         if (contentdom == ContentDomain.TEXT) {
-            if (maximumRecords > 50) maximumRecords = 10;
+            if (maximumRecords > 50 && maximumRecords < 100) maximumRecords = 10;
         } else {
             if (maximumRecords <= 32) maximumRecords = 64;
         }
