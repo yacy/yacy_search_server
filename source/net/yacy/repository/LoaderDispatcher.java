@@ -64,6 +64,7 @@ import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.crawler.retrieval.SMBLoader;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.http.client.Cache;
 
 public final class LoaderDispatcher {
@@ -137,7 +138,7 @@ public final class LoaderDispatcher {
 
     public void load(final DigestURI url, final CacheStrategy cacheStratgy, final int maxFileSize, final File targetFile) throws IOException {
 
-        final byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize, false).getContent();
+        final byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize, true).getContent();
         if (b == null) throw new IOException("load == null");
         final File tmp = new File(targetFile.getAbsolutePath() + ".tmp");
 
@@ -189,6 +190,12 @@ public final class LoaderDispatcher {
         if (url.isFile() || url.isSMB()) cacheStrategy = CacheStrategy.NOCACHE; // load just from the file system
         final String protocol = url.getProtocol();
         final String host = url.getHost();
+
+        // check if url is in blacklist
+        if (checkBlacklist && Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, host.toLowerCase(), url.getFile())) {
+            this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
+        }
 
         // check if we have the page in the cache
         final CrawlProfile crawlProfile = this.sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
@@ -314,7 +321,7 @@ public final class LoaderDispatcher {
      */
     public byte[] loadContent(final Request request, final CacheStrategy cacheStrategy) throws IOException {
         // try to download the resource using the loader
-        final Response entry = load(request, cacheStrategy, false);
+        final Response entry = load(request, cacheStrategy, true);
         if (entry == null) return null; // not found in web
 
         // read resource body (if it is there)
@@ -324,7 +331,7 @@ public final class LoaderDispatcher {
     public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int timeout, final int maxFileSize) throws IOException, Parser.Failure {
 
         // load resource
-        final Response response = load(request, cacheStrategy, maxFileSize, false);
+        final Response response = load(request, cacheStrategy, maxFileSize, true);
         final DigestURI url = request.url();
         if (response == null) throw new IOException("no Response for url " + url);
 
@@ -337,7 +344,7 @@ public final class LoaderDispatcher {
 
     public ContentScraper parseResource(final DigestURI location, final CacheStrategy cachePolicy) throws IOException {
         // load page
-        final Response r = this.load(request(location, true, false), cachePolicy, false);
+        final Response r = this.load(request(location, true, false), cachePolicy, true);
         final byte[] page = (r == null) ? null : r.getContent();
         if (page == null) throw new IOException("no response from url " + location.toString());
 
@@ -356,7 +363,7 @@ public final class LoaderDispatcher {
      * @throws IOException
      */
     public final Map<MultiProtocolURI, String> loadLinks(final DigestURI url, final CacheStrategy cacheStrategy) throws IOException {
-        final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, false);
+        final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, true);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();
         if (response.getContent() == null) throw new IOException("resource == null");
