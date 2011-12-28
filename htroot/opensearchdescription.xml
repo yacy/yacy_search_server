@@ -13,8 +13,8 @@
   <AdultContent>true</AdultContent>
   <Description>YaCy is an open-source GPL-licensed software that can be used for stand-alone search engine installations or as a client for a multi-user P2P-based web indexing cluster. This is the access to peer '#[clientname]#'.</Description>
   #(compareyacy)#
-  <Url type="text/html" method="GET" template="http://#[thisaddress]#/yacysearch.html?verify=true&amp;resource=global&amp;nav=all&amp;query={searchTerms}" />
-  <Url type="application/rss+xml" method="GET" template="http://#[thisaddress]#/yacysearch.rss?verify=true&amp;resource=global&amp;nav=all&amp;query={searchTerms}&amp;maximumRecords=10&amp;verify=false" />
+  <Url type="text/html" method="GET" template="http://#[thisaddress]#/yacysearch.html?query={searchTerms}&amp;startRecord={startIndex?}&amp;maximumRecords={count?}&amp;nav=all" />
+  <Url type="application/rss+xml" method="GET" template="http://#[thisaddress]#/yacysearch.rss?nav=&amp;query={searchTerms}&amp;startRecord={startIndex?}&amp;maximumRecords={count?}&amp;verify=false" />
   ::
   <Url type="text/html" method="GET" template="http://#[thisaddress]#/compare_yacy.html?verify=true&amp;resource=global&amp;nav=all&amp;query={searchTerms}" />
   #(/compareyacy)#
@@ -25,6 +25,6 @@
   <Query role="example" searchTerms="yacy+open+source" />
   <Tags>YaCy Open Source P2P Web Search</Tags>
   <Contact>See http://#[thisaddress]#/ViewProfile.html?hash=localhash</Contact>
-  <Attribution>YaCy Software &amp;copy; 2004-2011 by Michael Christen et al., YaCy.net; Content: ask peer owner</Attribution>
+  <Attribution>YaCy Software &amp;copy; 2004-2012 by Michael Christen et al., YaCy.net; Content: ask peer owner</Attribution>
   <SyndicationRight>open</SyndicationRight>
 </OpenSearchDescription>
