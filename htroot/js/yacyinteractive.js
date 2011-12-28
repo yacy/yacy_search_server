@@ -215,7 +215,7 @@ function resultLine(type, item, linenumber) {
     html += "<td align=\"left\">" + linenumber + "</td>";
     html += "<td align=\"left\">" + protocol + "</td>";
     html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>";
-    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + path + "</a></td>";
+    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + path + "/\">" + path + "</a></td>";
     html += "<td align=\"left\"><a href=\"" + item.link + "\">" + title + "</a></td>";
     if (item.sizename == "-1 bytes") html += "<td></td>"; else html += "<td align=\"right\">" + item.sizename + "</td>";
     //html += "<td>" + item.description + "</td>";
