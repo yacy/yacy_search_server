@@ -659,7 +659,7 @@ public class CrawlQueues {
         // Debug message
         Log.logInfo(LoggerNames.LOGGER_CRAWL_QUEUES,
                 "isLocalRemoteRatioReached: local.size() = " + localCrawlJobSize() +
-                ", global.size() = " + globalCrawlJobSize() +
+                ", limit.size() = " + limitCrawlJobSize() +
                 ", remoteTriggered.size() = " + remoteTriggeredCrawlJobSize() +
                 ", ratio = " + new Float(ratio).toString()
         );
