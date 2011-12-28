@@ -657,7 +657,7 @@ public class CrawlQueues {
         float ratio = (coreCrawlJobSize() / remoteTriggeredCrawlJobSize());
 
         // Debug message
-        Log.logInfo(LoggerNames.LOGGER_CRAWL_QUEUES,
+        Log.logInfo("CrawlQueues",
                 "isLocalRemoteRatioReached: core.size() = " + coreCrawlJobSize() +
                 ", limit.size() = " + limitCrawlJobSize() +
                 ", remoteTriggered.size() = " + remoteTriggeredCrawlJobSize() +
