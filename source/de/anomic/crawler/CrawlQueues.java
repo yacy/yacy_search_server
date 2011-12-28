@@ -198,11 +198,7 @@ public class CrawlQueues {
 
     public boolean coreCrawlJob() {
 
-        final boolean robinsonPrivateCase = (this.sb.isRobinsonMode() &&
-                !this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER) &&
-                !this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER));
-
-        if ((robinsonPrivateCase || coreCrawlJobSize() <= 20) && limitCrawlJobSize() > 0) {
+        if (coreCrawlJobSize() <= 20 && limitCrawlJobSize() > 0) {
             // move some tasks to the core crawl job so we have something to do
             final int toshift = Math.min(10, limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             for (int i = 0; i < toshift; i++) {
@@ -402,7 +398,8 @@ public class CrawlQueues {
             return false;
         }
 
-        if (coreCrawlJobSize() > 0 /*&& sb.indexingStorageProcessor.queueSize() > 0*/) {
+        // Determine ratio local/remote, if lower than 1000 do not do any remote jobs
+        if (!isLocalRemoteRatioReached()) {
             if (this.log.isFine()) this.log.logFine("remoteCrawlLoaderJob: a local crawl is running, omitting processing");
             return false;
         }
@@ -643,6 +640,32 @@ public class CrawlQueues {
             }
         }
 
+    }
+
+    /**
+     * To determine wether remote-crawling is omitted because of to many local crawls
+     *
+     * @return Wether remote-crawling is omitted
+     */
+    private boolean isLocalRemoteRatioReached () {
+        if (remoteTriggeredCrawlJobSize() == 0) {
+            // No entries in remote queue
+            return true;
+        }
+
+        // Determine ratio
+        float ratio = (coreCrawlJobSize() / remoteTriggeredCrawlJobSize());
+
+        // Debug message
+        Log.logInfo(LoggerNames.LOGGER_CRAWL_QUEUES,
+                "isLocalRemoteRatioReached: local.size() = " + localCrawlJobSize() +
+                ", global.size() = " + globalCrawlJobSize() +
+                ", remoteTriggered.size() = " + remoteTriggeredCrawlJobSize() +
+                ", ratio = " + new Float(ratio).toString()
+        );
+
+        // Check for local/remote ratio is below 1,000
+        return (ratio <= sb.getConfigLong("crawler.localRemoteRatio", 1000));
     }
 
 }
