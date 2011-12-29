@@ -266,32 +266,42 @@ public final class LoaderDispatcher {
 
         // load resource from the internet
         Response response = null;
-        if ((protocol.equals("http") || (protocol.equals("https")))) response = this.httpLoader.load(request, maxFileSize, checkBlacklist);
-        if (protocol.equals("ftp")) response = this.ftpLoader.load(request, true);
-        if (protocol.equals("smb")) response = this.smbLoader.load(request, true);
-        if (protocol.equals("file")) response = this.fileLoader.load(request, true);
-        if (response != null && response.getContent() != null) {
-            // we got something. Now check if we want to store that to the cache
-            // first check looks if we want to store the content to the cache
-            if (crawlProfile == null || !crawlProfile.storeHTCache()) {
-                // no caching wanted. Thats ok, do not write any message
-                return response;
-            }
-            // second check tells us if the protocoll tells us something about caching
-            final String storeError = response.shallStoreCacheForCrawler();
-            if (storeError == null) {
-                try {
-                    Cache.store(url, response.getResponseHeader(), response.getContent());
-                } catch (final IOException e) {
-                    this.log.logWarning("cannot write " + response.url() + " to Cache (3): " + e.getMessage(), e);
-                }
-            } else {
-                this.log.logWarning("cannot write " + response.url() + " to Cache (4): " + storeError);
-            }
+        if (protocol.equals("http") || protocol.equals("https")) {
+            response = this.httpLoader.load(request, maxFileSize, checkBlacklist);
+        } else if (protocol.equals("ftp")) {
+            response = this.ftpLoader.load(request, true);
+        } else if (protocol.equals("smb")) {
+            response = this.smbLoader.load(request, true);
+        } else if (protocol.equals("file")) {
+            response = this.fileLoader.load(request, true);
+        } else {
+            throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
+        }
+        if (response == null) {
+            throw new IOException("no response (NULL) for url " + url);
+        }
+        if (response.getContent() == null) {
+            throw new IOException("empty response (code " + response.getStatus() + ") for url " + url);
+        }
+        
+        // we got something. Now check if we want to store that to the cache
+        // first check looks if we want to store the content to the cache
+        if (crawlProfile == null || !crawlProfile.storeHTCache()) {
+            // no caching wanted. Thats ok, do not write any message
             return response;
         }
-
-        throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
+        // second check tells us if the protocoll tells us something about caching
+        final String storeError = response.shallStoreCacheForCrawler();
+        if (storeError == null) {
+            try {
+                Cache.store(url, response.getResponseHeader(), response.getContent());
+            } catch (final IOException e) {
+                this.log.logWarning("cannot write " + response.url() + " to Cache (3): " + e.getMessage(), e);
+            }
+        } else {
+            this.log.logWarning("cannot write " + response.url() + " to Cache (4): " + storeError);
+        }
+        return response;
     }
 
     private int protocolMaxFileSize(final DigestURI url) {
@@ -407,6 +417,7 @@ public final class LoaderDispatcher {
             this.cacheStrategy = cacheStrategy;
         }
 
+        @Override
         public void run() {
             if (this.cache != null && this.cache.exists()) return;
             try {
