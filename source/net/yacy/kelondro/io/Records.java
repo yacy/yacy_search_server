@@ -157,7 +157,16 @@ public final class Records {
      * @throws IOException
      */
     private final long filesize() throws IOException {
-        return raf.length() / recordsize;
+        long records = 0;
+
+        try {
+            records = raf.length() / recordsize;
+        } catch (NullPointerException e) {
+            // This may happen on shutdown while still something is moving on
+            Log.logException(e);
+        }
+
+        return records;
     }
     
     /**

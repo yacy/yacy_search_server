@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -94,8 +93,8 @@ public class Blacklist {
     public static final String BLACKLIST_TYPES_STRING = "proxy,crawler,dht,search,surftips,news";
     private File blacklistRootPath = null;
     private final ConcurrentMap<String, HandleSet> cachedUrlHashs;
-    private final ConcurrentMap<String, Map<String, List<String>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
-    private final ConcurrentMap<String, Map<String, List<String>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
+    private final ConcurrentMap<String, ConcurrentMap<String, List<String>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
+    private final ConcurrentMap<String, ConcurrentMap<String, List<String>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
 
     public Blacklist(final File rootPath) {
 
@@ -107,8 +106,8 @@ public class Blacklist {
         this.cachedUrlHashs = new ConcurrentHashMap<String, HandleSet>();
 
         for (final String blacklistType : BLACKLIST_TYPES) {
-            this.hostpaths_matchable.put(blacklistType, new HashMap<String, List<String>>());
-            this.hostpaths_notmatchable.put(blacklistType, new HashMap<String, List<String>>());
+            this.hostpaths_matchable.put(blacklistType, new ConcurrentHashMap<String, List<String>>());
+            this.hostpaths_notmatchable.put(blacklistType, new ConcurrentHashMap<String, List<String>>());
             this.cachedUrlHashs.put(blacklistType, new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
         }
     }
