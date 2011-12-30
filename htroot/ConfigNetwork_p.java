@@ -74,6 +74,12 @@ public class ConfigNetwork_p {
                 // DHT control
                 boolean indexDistribute = "on".equals(post.get("indexDistribute", ""));
                 boolean indexReceive = "on".equals(post.get("indexReceive", ""));
+                if (!indexReceive) {
+                    // remove heuristics
+                    sb.setConfig("heuristic.site", false);
+                    sb.setConfig("heuristic.scroogle", false);
+                    sb.setConfig("heuristic.blekko", false);
+                }
                 final boolean robinsonmode = "robinson".equals(post.get("network", ""));
                 if (robinsonmode) {
                     indexDistribute = false;
