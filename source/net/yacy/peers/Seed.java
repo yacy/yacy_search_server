@@ -99,6 +99,10 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
      */
     public static final String URL_IN  = "rU";
     /**
+     * <b>substance</b> "private"
+     */
+    public static final String PEERTYPE_PRIVATE = "private";
+    /**
      * <b>substance</b> "virgin"
      */
     public static final String PEERTYPE_VIRGIN = "virgin";
