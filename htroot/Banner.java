@@ -41,18 +41,22 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 /** draw a banner with information about the peer */
-public class Banner {
+public class Banner
+{
 
-    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
+    public static RasterPlotter respond(
+        final RequestHeader header,
+        final serverObjects post,
+        final serverSwitch env) throws IOException {
         final Switchboard sb = (Switchboard) env;
         final String IMAGE = "htroot/env/grafics/yacy.png";
         int width = 468;
         int height = 60;
-        String bgcolor     = "e7effc";
-        String textcolor   = "000000";
+        String bgcolor = "e7effc";
+        String textcolor = "000000";
         String bordercolor = "5090d0";
 
-        if (post != null) {
+        if ( post != null ) {
             bgcolor = post.get("bgcolor", bgcolor);
             textcolor = post.get("textcolor", textcolor);
             bordercolor = post.get("bordercolor", bordercolor);
@@ -60,41 +64,41 @@ public class Banner {
             height = post.getInt("heigth", height);
         }
 
-        String name    = "";
-        long   links   = 0;
-        long   words   = 0;
-        int    myppm   = 0;
-        double myqph   = 0;
-        String type    = "";
+        String name = "";
+        long links = 0;
+        long words = 0;
+        int myppm = 0;
+        double myqph = 0;
+        String type = "";
         final String network = env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified").toUpperCase();
-        final int    peers   = sb.peers.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
-        long   nlinks  = sb.peers.countActiveURL();
-        long   nwords  = sb.peers.countActiveRWI();
-        final double nqpm    = sb.peers.countActiveQPM();
-        long   nppm    = sb.peers.countActivePPM();
-        double nqph    = 0;
+        final int peers = sb.peers.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
+        long nlinks = sb.peers.countActiveURL();
+        long nwords = sb.peers.countActiveRWI();
+        final double nqpm = sb.peers.countActiveQPM();
+        long nppm = sb.peers.countActivePPM();
+        double nqph = 0;
 
         final Seed seed = sb.peers.mySeed();
-        if (seed != null){
-            name    = seed.get(Seed.NAME, "-").toUpperCase();
-            links   = seed.getLinkCount();
-            words   = seed.getWordCount();
-            myppm   = seed.getPPM();
-            myqph   = 60d * seed.getQPM();
+        if ( seed != null ) {
+            name = seed.get(Seed.NAME, "-").toUpperCase();
+            links = seed.getLinkCount();
+            words = seed.getWordCount();
+            myppm = seed.getPPM();
+            myqph = 60d * seed.getQPM();
 
-            if (sb.peers.mySeed().isVirgin()) {
+            if ( sb.peers.mySeed().isVirgin() ) {
                 type = "VIRGIN";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(sb.peers.mySeed().isJunior()) {
+            } else if ( sb.peers.mySeed().isJunior() ) {
                 type = "JUNIOR";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(sb.peers.mySeed().isSenior()) {
+            } else if ( sb.peers.mySeed().isSenior() ) {
                 type = "SENIOR";
                 nlinks = nlinks + links;
                 nwords = nwords + words;
                 nqph = Math.round(6000d * nqpm + 100d * myqph) / 100d;
                 nppm = nppm + myppm;
-            } else if(sb.peers.mySeed().isPrincipal()) {
+            } else if ( sb.peers.mySeed().isPrincipal() ) {
                 type = "PRINCIPAL";
                 nlinks = nlinks + links;
                 nwords = nwords + words;
@@ -103,13 +107,48 @@ public class Banner {
             }
         }
 
-        if (!NetworkGraph.logoIsLoaded()) {
+        if ( !NetworkGraph.logoIsLoaded() ) {
             ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
             final BufferedImage logo = ImageIO.read(new File(IMAGE));
-            return NetworkGraph.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm, logo);
+            return NetworkGraph.getBannerPicture(
+                1000,
+                width,
+                height,
+                bgcolor,
+                textcolor,
+                bordercolor,
+                name,
+                links,
+                words,
+                type,
+                myppm,
+                network,
+                peers,
+                nlinks,
+                nwords,
+                nqph,
+                nppm,
+                logo);
         }
 
-        return NetworkGraph.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm);
+        return NetworkGraph.getBannerPicture(
+            1000,
+            width,
+            height,
+            bgcolor,
+            textcolor,
+            bordercolor,
+            name,
+            links,
+            words,
+            type,
+            myppm,
+            network,
+            peers,
+            nlinks,
+            nwords,
+            nqph,
+            nppm);
     }
 
 }

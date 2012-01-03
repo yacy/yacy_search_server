@@ -77,7 +77,8 @@ import net.yacy.search.Switchboard;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 
-public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
+public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
+{
 
     public static String ANON_PREFIX = "_anon";
 
@@ -89,7 +90,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     /**
      * <b>substance</b> "rI" (received index/words)
      */
-    public static final String INDEX_IN  = "rI";
+    public static final String INDEX_IN = "rI";
     /**
      * <b>substance</b> "sU" (send URLs)
      */
@@ -97,11 +98,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     /**
      * <b>substance</b> "rU" (received URLs)
      */
-    public static final String URL_IN  = "rU";
-    /**
-     * <b>substance</b> "private"
-     */
-    public static final String PEERTYPE_PRIVATE = "private";
+    public static final String URL_IN = "rU";
     /**
      * <b>substance</b> "virgin"
      */
@@ -124,52 +121,52 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     public static final String PEERTYPE = "PeerType";
 
     /** static/dynamic (if the IP changes often for any reason) */
-    private static final String IPTYPE    = "IPType";
-    private static final String FLAGS     = "Flags";
+    private static final String IPTYPE = "IPType";
+    private static final String FLAGS = "Flags";
     private static final String FLAGSZERO = "____";
     /** the applications version */
-    public  static final String VERSION   = "Version";
+    public static final String VERSION = "Version";
 
-    public  static final String YOURTYPE  = "yourtype";
-    public  static final String LASTSEEN  = "LastSeen";
-    private static final String USPEED    = "USpeed";
+    public static final String YOURTYPE = "yourtype";
+    public static final String LASTSEEN = "LastSeen";
+    private static final String USPEED = "USpeed";
 
     /** the name of the peer (user-set) */
-    public  static final String NAME      = "Name";
-    private static final String HASH      = "Hash";
+    public static final String NAME = "Name";
+    private static final String HASH = "Hash";
     /** Birthday - first startup */
-    private static final String BDATE     = "BDate";
+    private static final String BDATE = "BDate";
     /** UTC-Offset */
-    public  static final String UTC       = "UTC";
-    private static final String PEERTAGS  = "Tags";
+    public static final String UTC = "UTC";
+    private static final String PEERTAGS = "Tags";
 
     /** the speed of indexing (pages/minute) of the peer */
-    public static final String ISPEED    = "ISpeed";
+    public static final String ISPEED = "ISpeed";
     /** the speed of retrieval (queries/minute) of the peer */
-    public static final String RSPEED    = "RSpeed";
+    public static final String RSPEED = "RSpeed";
     /** the number of minutes that the peer is up in minutes/day (moving average MA30) */
-    public static final String UPTIME    = "Uptime";
+    public static final String UPTIME = "Uptime";
     /** the number of links that the peer has stored (LURL's) */
-    public static final String LCOUNT    = "LCount";
+    public static final String LCOUNT = "LCount";
     /** the number of links that the peer has noticed, but not loaded (NURL's) */
-    public static final String NCOUNT    = "NCount";
+    public static final String NCOUNT = "NCount";
     /** the number of links that the peer provides for remote crawls (ZURL's) */
-    public static final String RCOUNT    = "RCount";
+    public static final String RCOUNT = "RCount";
     /** the number of different words the peer has indexed */
-    public static final String ICOUNT    = "ICount";
+    public static final String ICOUNT = "ICount";
     /** the number of seeds that the peer has stored */
-    public static final String SCOUNT    = "SCount";
+    public static final String SCOUNT = "SCount";
     /** the number of clients that the peer connects (connects/hour as double) */
-    public static final String CCOUNT    = "CCount";
-    public static final String IP        = "IP";
-    public static final String PORT      = "Port";
+    public static final String CCOUNT = "CCount";
+    public static final String IP = "IP";
+    public static final String PORT = "Port";
     public static final String SEEDLISTURL = "seedURL";
     /** zero-value */
-    private static final String ZERO      = "0";
+    private static final String ZERO = "0";
 
-    private static final int FLAG_DIRECT_CONNECT            = 0;
-    private static final int FLAG_ACCEPT_REMOTE_CRAWL       = 1;
-    private static final int FLAG_ACCEPT_REMOTE_INDEX       = 2;
+    private static final int FLAG_DIRECT_CONNECT = 0;
+    private static final int FLAG_ACCEPT_REMOTE_CRAWL = 1;
+    private static final int FLAG_ACCEPT_REMOTE_INDEX = 2;
 
     public static final String DFLT_NETWORK_UNIT = "freeworld";
     public static final String DFLT_NETWORK_GROUP = "";
@@ -179,7 +176,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     // class variables
     /** the peer-hash */
     public String hash;
-    /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
+    /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ... */
     private final ConcurrentMap<String, String> dna;
     private String alternativeIP = null;
     private long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
@@ -190,7 +187,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
         this.hash = theHash;
         this.dna = theDna;
         final String flags = this.dna.get(Seed.FLAGS);
-        if ((flags == null) || (flags.length() != 4)) { this.dna.put(Seed.FLAGS, Seed.FLAGSZERO); }
+        if ( (flags == null) || (flags.length() != 4) ) {
+            this.dna.put(Seed.FLAGS, Seed.FLAGSZERO);
+        }
         this.dna.put(Seed.NAME, checkPeerName(get(Seed.NAME, "&empty;")));
         this.birthdate = -1; // this means 'not yet parsed', parse that later when it is used
     }
@@ -216,12 +215,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
         this.dna.put(Seed.VERSION, Seed.ZERO);
 
         // settings that is created during the 'hello' phase - in first contact
-        this.dna.put(Seed.IP, "");                 // 123.234.345.456
+        this.dna.put(Seed.IP, ""); // 123.234.345.456
         this.dna.put(Seed.PORT, "&empty;");
         this.dna.put(Seed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
-        this.dna.put(Seed.USPEED, Seed.ZERO);  // the computated uplink speed of the peer
+        this.dna.put(Seed.USPEED, Seed.ZERO); // the computated uplink speed of the peer
 
         // settings that are needed to organize the seed round-trip
         this.dna.put(Seed.FLAGS, Seed.FLAGSZERO);
@@ -232,9 +231,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
         // index transfer
         this.dna.put(Seed.INDEX_OUT, Seed.ZERO); // send index
-        this.dna.put(Seed.INDEX_IN, Seed.ZERO);  // received index
-        this.dna.put(Seed.URL_OUT, Seed.ZERO);   // send URLs
-        this.dna.put(Seed.URL_IN, Seed.ZERO);    // received URLs
+        this.dna.put(Seed.INDEX_IN, Seed.ZERO); // received index
+        this.dna.put(Seed.URL_OUT, Seed.ZERO); // send URLs
+        this.dna.put(Seed.URL_IN, Seed.ZERO); // received URLs
 
         // default first filling
         this.dna.put(Seed.BDATE, GenericFormatter.SHORT_SECOND_FORMATTER.format());
@@ -247,10 +246,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     /**
      * check the peer name: protect against usage as XSS hack
+     * 
      * @param id
      * @return a checked name without "<" and ">"
      */
     private final static Pattern tp = Pattern.compile("<|>");
+
     public static String checkPeerName(String name) {
         name = tp.matcher(name).replaceAll("_");
         return name;
@@ -258,14 +259,21 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     /**
      * generate a default peer name
+     * 
      * @return
      */
     private static String defaultPeerName() {
-        return ANON_PREFIX + OS.infoKey() + "-" + (System.currentTimeMillis() % 77777777L) + "-" + Network.speedKey;
+        return ANON_PREFIX
+            + OS.infoKey()
+            + "-"
+            + (System.currentTimeMillis() % 77777777L)
+            + "-"
+            + Network.speedKey;
     }
 
     /**
      * Checks for the static fragments of a generated default peer name, such as the string 'dpn'
+     * 
      * @see #makeDefaultPeerName()
      * @param name the peer name to check for default peer name compliance
      * @return whether the given peer name may be a default generated peer name
@@ -275,95 +283,154 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     }
 
     /**
-     * used when doing routing within a cluster; this can assign a ip and a port
-     * that is used instead the address stored in the seed DNA
+     * used when doing routing within a cluster; this can assign a ip and a port that is used instead the
+     * address stored in the seed DNA
      */
     public void setAlternativeAddress(final String ipport) {
-        if (ipport == null) return;
+        if ( ipport == null ) {
+            return;
+        }
         final int p = ipport.indexOf(':');
-        if (p < 0) this.alternativeIP = ipport; else this.alternativeIP = ipport.substring(0, p);
+        if ( p < 0 ) {
+            this.alternativeIP = ipport;
+        } else {
+            this.alternativeIP = ipport.substring(0, p);
+        }
     }
 
     /**
      * try to get the IP<br>
+     * 
      * @return the IP or null
      */
     public final String getIP() {
         final String ip = get(Seed.IP, "127.0.0.1");
         return (ip == null || ip.length() == 0) ? "127.0.0.1" : ip;
     }
+
     /**
      * try to get the peertype<br>
+     * 
      * @return the peertype or null
      */
-    public final String getPeerType() { return get(Seed.PEERTYPE, ""); }
+    public final String getPeerType() {
+        return get(Seed.PEERTYPE, "");
+    }
+
     /**
      * try to get the peertype<br>
+     * 
      * @return the peertype or "virgin"
      */
-    public final String orVirgin() { return get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); }
+    public final String orVirgin() {
+        return get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN);
+    }
+
     /**
      * try to get the peertype<br>
+     * 
      * @return the peertype or "junior"
      */
-    public final String orJunior() { return get(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR); }
+    public final String orJunior() {
+        return get(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR);
+    }
+
     /**
      * try to get the peertype<br>
+     * 
      * @return the peertype or "senior"
      */
-    public final String orSenior() { return get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR); }
+    public final String orSenior() {
+        return get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR);
+    }
+
     /**
      * try to get the peertype<br>
+     * 
      * @return the peertype or "principal"
      */
-    public final String orPrincipal() { return get(Seed.PEERTYPE, Seed.PEERTYPE_PRINCIPAL); }
+    public final String orPrincipal() {
+        return get(Seed.PEERTYPE, Seed.PEERTYPE_PRINCIPAL);
+    }
 
     /**
      * Get a value from the peer's DNA (its set of peer defining values, e.g. IP, name, version, ...)
+     * 
      * @param key the key for the value to fetch
      * @param dflt the default value
      */
     public final String get(final String key, final String dflt) {
         final Object o = this.dna.get(key);
-        if (o == null) { return dflt; }
+        if ( o == null ) {
+            return dflt;
+        }
         return (String) o;
     }
 
     public final float getFloat(final String key, final float dflt) {
         final Object o = this.dna.get(key);
-        if (o == null) { return dflt; }
-        if (o instanceof String) try {
-        	return Float.parseFloat((String) o);
-        } catch (final NumberFormatException e) {
-        	return dflt;
-        } else if (o instanceof Float) {
+        if ( o == null ) {
+            return dflt;
+        }
+        if ( o instanceof String ) {
+            try {
+                return Float.parseFloat((String) o);
+            } catch ( final NumberFormatException e ) {
+                return dflt;
+            }
+        } else if ( o instanceof Float ) {
             return ((Float) o).floatValue();
-        } else return dflt;
+        } else {
+            return dflt;
+        }
     }
 
     public final long getLong(final String key, final long dflt) {
         final Object o = this.dna.get(key);
-        if (o == null) { return dflt; }
-        if (o instanceof String) try {
-        	return Long.parseLong((String) o);
-        } catch (final NumberFormatException e) {
-        	return dflt;
-        } else if (o instanceof Long) {
+        if ( o == null ) {
+            return dflt;
+        }
+        if ( o instanceof String ) {
+            try {
+                return Long.parseLong((String) o);
+            } catch ( final NumberFormatException e ) {
+                return dflt;
+            }
+        } else if ( o instanceof Long ) {
             return ((Long) o).longValue();
-        } else if (o instanceof Integer) {
+        } else if ( o instanceof Integer ) {
             return ((Integer) o).intValue();
-        } else return dflt;
+        } else {
+            return dflt;
+        }
     }
 
-    public final void setIP(final String ip)     { this.dna.put(Seed.IP, ip); }
-    public final void setPort(final String port) { this.dna.put(Seed.PORT, port); }
-    public final void setType(final String type) { this.dna.put(Seed.PEERTYPE, type); }
-    public final void setJunior()          { this.dna.put(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR); }
-    public final void setSenior()          { this.dna.put(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR); }
-    public final void setPrincipal()       { this.dna.put(Seed.PEERTYPE, Seed.PEERTYPE_PRINCIPAL); }
+    public final void setIP(final String ip) {
+        this.dna.put(Seed.IP, ip);
+    }
+
+    public final void setPort(final String port) {
+        this.dna.put(Seed.PORT, port);
+    }
+
+    public final void setType(final String type) {
+        this.dna.put(Seed.PEERTYPE, type);
+    }
+
+    public final void setJunior() {
+        this.dna.put(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR);
+    }
+
+    public final void setSenior() {
+        this.dna.put(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR);
+    }
+
+    public final void setPrincipal() {
+        this.dna.put(Seed.PEERTYPE, Seed.PEERTYPE_PRINCIPAL);
+    }
 
     public final void put(final String key, final String value) {
-        synchronized (this.dna) {
+        synchronized ( this.dna ) {
             this.dna.put(key, value);
         }
     }
@@ -374,7 +441,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     }
 
     public final void setName(final String name) {
-        synchronized (this.dna) {
+        synchronized ( this.dna ) {
             this.dna.put(Seed.NAME, checkPeerName(name));
         }
     }
@@ -389,42 +456,53 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     public final void incSI(final int count) {
         String v = this.dna.get(Seed.INDEX_OUT);
-        if (v == null) { v = Seed.ZERO; }
+        if ( v == null ) {
+            v = Seed.ZERO;
+        }
         this.dna.put(Seed.INDEX_OUT, Long.toString(Long.parseLong(v) + count));
     }
 
     public final void incRI(final int count) {
         String v = this.dna.get(Seed.INDEX_IN);
-        if (v == null) { v = Seed.ZERO; }
+        if ( v == null ) {
+            v = Seed.ZERO;
+        }
         this.dna.put(Seed.INDEX_IN, Long.toString(Long.parseLong(v) + count));
     }
 
     public final void incSU(final int count) {
         String v = this.dna.get(Seed.URL_OUT);
-        if (v == null) { v = Seed.ZERO; }
+        if ( v == null ) {
+            v = Seed.ZERO;
+        }
         this.dna.put(Seed.URL_OUT, Long.toString(Long.parseLong(v) + count));
     }
 
     public final void incRU(final int count) {
         String v = this.dna.get(Seed.URL_IN);
-        if (v == null) { v = Seed.ZERO; }
+        if ( v == null ) {
+            v = Seed.ZERO;
+        }
         this.dna.put(Seed.URL_IN, Long.toString(Long.parseLong(v) + count));
     }
 
-    public final void resetCounters(){
-    	this.dna.put(Seed.INDEX_OUT, Seed.ZERO);
-    	this.dna.put(Seed.INDEX_IN, Seed.ZERO);
-    	this.dna.put(Seed.URL_OUT, Seed.ZERO);
-    	this.dna.put(Seed.URL_IN, Seed.ZERO);
+    public final void resetCounters() {
+        this.dna.put(Seed.INDEX_OUT, Seed.ZERO);
+        this.dna.put(Seed.INDEX_IN, Seed.ZERO);
+        this.dna.put(Seed.URL_OUT, Seed.ZERO);
+        this.dna.put(Seed.URL_IN, Seed.ZERO);
     }
 
     /**
      * <code>12 * 6 bit = 72 bit = 24</code> characters octal-hash
-     * <p>Octal hashes are used for cache-dumps that are DHT-ready</p>
      * <p>
-     *   Cause: the natural order of octal hashes are the same as the b64-order of b64Hashes.
-     *   a hexhash cannot be used in such cases, and b64Hashes are not appropriate for file names
+     * Octal hashes are used for cache-dumps that are DHT-ready
      * </p>
+     * <p>
+     * Cause: the natural order of octal hashes are the same as the b64-order of b64Hashes. a hexhash cannot
+     * be used in such cases, and b64Hashes are not appropriate for file names
+     * </p>
+     * 
      * @param b64Hash a base64 hash
      * @return the octal representation of the given base64 hash
      */
@@ -434,11 +512,14 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     /**
      * <code>12 * 6 bit = 72 bit = 18</code> characters hex-hash
+     * 
      * @param b64Hash a base64 hash
      * @return the hexadecimal representation of the given base64 hash
      */
     public static String b64Hash2hexHash(final String b64Hash) {
-        if (b64Hash.length() > 12) return "";
+        if ( b64Hash.length() > 12 ) {
+            return "";
+        }
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
         return Digest.encodeHex(Base64Order.enhancedCoder.decode(b64Hash));
     }
@@ -453,19 +534,21 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     /**
      * The returned version follows this pattern: <code>MAJORVERSION . MINORVERSION 0 SVN REVISION</code>
+     * 
      * @return the YaCy version of this peer as a float or <code>0</code> if no valid value could be retrieved
-     * from this yacySeed object
+     *         from this yacySeed object
      */
     public final float getVersion() {
         try {
             return Float.parseFloat(get(Seed.VERSION, Seed.ZERO));
-        } catch (final NumberFormatException e) {
+        } catch ( final NumberFormatException e ) {
             return 0;
         }
     }
 
     /**
      * get the SVN version of the peer
+     * 
      * @return
      */
     public final int getRevision() {
@@ -474,14 +557,18 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     /**
      * @return the public address of the peer as IP:port string or <code>null</code> if no valid values for
-     * either the IP or the port could be retrieved from this yacySeed object
+     *         either the IP or the port could be retrieved from this yacySeed object
      */
     public final String getPublicAddress() {
         String ip = getIP();
-        if (ip == null || ip.length() < 8 || ip.length() > 60) ip = "127.0.0.1";
+        if ( ip == null || ip.length() < 8 || ip.length() > 60 ) {
+            ip = "127.0.0.1";
+        }
 
         final String port = this.dna.get(Seed.PORT);
-        if (port == null || port.length() < 2 || port.length() > 5) return null;
+        if ( port == null || port.length() < 2 || port.length() > 5 ) {
+            return null;
+        }
 
         final StringBuilder sb = new StringBuilder(ip.length() + port.length() + 1);
         sb.append(ip);
@@ -492,16 +579,21 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     /**
      * If this seed is part of a cluster, the peer has probably the {@linkplain #alternativeIP} object set to
-     * a local IP. If this is present and the public IP of this peer is identical to the public IP of the own seed,
-     * construct an address using this IP; otherwise return the public address
+     * a local IP. If this is present and the public IP of this peer is identical to the public IP of the own
+     * seed, construct an address using this IP; otherwise return the public address
+     * 
      * @see #getPublicAddress()
      * @return the alternative IP:port if present, else the public address
      */
     public final String getClusterAddress() {
-    	if (this.alternativeIP == null) return getPublicAddress();
+        if ( this.alternativeIP == null ) {
+            return getPublicAddress();
+        }
 
         final String port = this.dna.get(Seed.PORT);
-        if ((port == null) || (port.length() < 2)) return null;
+        if ( (port == null) || (port.length() < 2) ) {
+            return null;
+        }
 
         return this.alternativeIP + ":" + port;
     }
@@ -516,7 +608,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     /** @return the portnumber of this seed or <code>-1</code> if not present */
     public final int getPort() {
         final String port = this.dna.get(Seed.PORT);
-        if (port == null) return -1;
+        if ( port == null ) {
+            return -1;
+        }
         /*if (port.length() < 2) return -1; It is possible to use port 0-9*/
         return Integer.parseInt(port);
     }
@@ -526,10 +620,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        final GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
-        final String ls = my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
+        final GenericFormatter my_SHORT_SECOND_FORMATTER =
+            new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+        final String ls =
+            my_SHORT_SECOND_FORMATTER
+                .format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
         //System.out.println("SETTING LAST-SEEN of " + this.getName() + " to " + ls);
-        this.dna.put(Seed.LASTSEEN, ls );
+        this.dna.put(Seed.LASTSEEN, ls);
     }
 
     /**
@@ -537,7 +634,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
      */
     public final long getLastSeenUTC() {
         try {
-            final GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+            final GenericFormatter my_SHORT_SECOND_FORMATTER =
+                new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
             final long t = my_SHORT_SECOND_FORMATTER.parse(get(Seed.LASTSEEN, "20040101000000")).getTime();
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
@@ -546,15 +644,16 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
             // of the local UTC offset is wrong. We correct this here by adding the local UTC
             // offset again.
             return t /*+ DateFormatter.UTCDiff()*/;
-        } catch (final java.text.ParseException e) { // in case of an error make seed look old!!!
+        } catch ( final java.text.ParseException e ) { // in case of an error make seed look old!!!
             return System.currentTimeMillis() - AbstractFormatter.dayMillis;
-        } catch (final java.lang.NumberFormatException e) {
+        } catch ( final java.lang.NumberFormatException e ) {
             return System.currentTimeMillis() - AbstractFormatter.dayMillis;
         }
     }
 
     /**
      * test if the lastSeen time of the seed has a time-out
+     * 
      * @param milliseconds the maximum age of the last-seen value
      * @return true, if the time between the last-seen time and now is greater then the given time-out
      */
@@ -564,12 +663,15 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     }
 
     public final long getBirthdate() {
-        if (this.birthdate > 0) return this.birthdate;
+        if ( this.birthdate > 0 ) {
+            return this.birthdate;
+        }
         long b;
         try {
-            final GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+            final GenericFormatter my_SHORT_SECOND_FORMATTER =
+                new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
             b = my_SHORT_SECOND_FORMATTER.parse(get(Seed.BDATE, "20040101000000")).getTime();
-        } catch (final ParseException e) {
+        } catch ( final ParseException e ) {
             b = System.currentTimeMillis();
         }
         this.birthdate = b;
@@ -591,11 +693,15 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     public boolean matchPeerTags(final HandleSet searchHashes) {
         final String peertags = get(PEERTAGS, "");
-        if (peertags.equals("*")) return true;
+        if ( peertags.equals("*") ) {
+            return true;
+        }
         final Set<String> tags = MapTools.string2set(peertags, "|");
         final Iterator<String> i = tags.iterator();
-        while (i.hasNext()) {
-        	if (searchHashes.has(Word.word2hash(i.next()))) return true;
+        while ( i.hasNext() ) {
+            if ( searchHashes.has(Word.word2hash(i.next())) ) {
+                return true;
+            }
         }
         return false;
     }
@@ -603,7 +709,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     public int getPPM() {
         try {
             return Integer.parseInt(get(Seed.ISPEED, Seed.ZERO));
-        } catch (final NumberFormatException e) {
+        } catch ( final NumberFormatException e ) {
             return 0;
         }
     }
@@ -611,7 +717,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     public float getQPM() {
         try {
             return Float.parseFloat(get(Seed.RSPEED, Seed.ZERO));
-        } catch (final NumberFormatException e) {
+        } catch ( final NumberFormatException e ) {
             return 0f;
         }
     }
@@ -619,7 +725,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     public final long getLinkCount() {
         try {
             return getLong(Seed.LCOUNT, 0);
-        } catch (final NumberFormatException e) {
+        } catch ( final NumberFormatException e ) {
             return 0;
         }
     }
@@ -627,7 +733,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     public final long getWordCount() {
         try {
             return getLong(Seed.ICOUNT, 0);
-        } catch (final NumberFormatException e) {
+        } catch ( final NumberFormatException e ) {
             return 0;
         }
     }
@@ -639,52 +745,79 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     private void setFlag(final int flag, final boolean value) {
         String flags = get(Seed.FLAGS, Seed.FLAGSZERO);
-        if (flags.length() != 4) { flags = Seed.FLAGSZERO; }
+        if ( flags.length() != 4 ) {
+            flags = Seed.FLAGSZERO;
+        }
         final bitfield f = new bitfield(UTF8.getBytes(flags));
         f.set(flag, value);
         this.dna.put(Seed.FLAGS, UTF8.String(f.getBytes()));
     }
 
-    public final void setFlagDirectConnect(final boolean value) { setFlag(FLAG_DIRECT_CONNECT, value); }
-    public final void setFlagAcceptRemoteCrawl(final boolean value) { setFlag(FLAG_ACCEPT_REMOTE_CRAWL, value); }
-    public final void setFlagAcceptRemoteIndex(final boolean value) { setFlag(FLAG_ACCEPT_REMOTE_INDEX, value); }
-    public final boolean getFlagDirectConnect() { return getFlag(0); }
+    public final void setFlagDirectConnect(final boolean value) {
+        setFlag(FLAG_DIRECT_CONNECT, value);
+    }
+
+    public final void setFlagAcceptRemoteCrawl(final boolean value) {
+        setFlag(FLAG_ACCEPT_REMOTE_CRAWL, value);
+    }
+
+    public final void setFlagAcceptRemoteIndex(final boolean value) {
+        setFlag(FLAG_ACCEPT_REMOTE_INDEX, value);
+    }
+
+    public final boolean getFlagDirectConnect() {
+        return getFlag(0);
+    }
+
     public final boolean getFlagAcceptRemoteCrawl() {
         //if (getVersion() < 0.300) return false;
         //if (getVersion() < 0.334) return true;
         return getFlag(1);
     }
+
     public final boolean getFlagAcceptRemoteIndex() {
         //if (getVersion() < 0.335) return false;
         return getFlag(2);
     }
+
     public final void setUnusedFlags() {
-        for (int i = 4; i < 24; i++) { setFlag(i, true); }
+        for ( int i = 4; i < 24; i++ ) {
+            setFlag(i, true);
+        }
     }
+
     public final boolean isType(final String type) {
         return get(Seed.PEERTYPE, "").equals(type);
     }
+
     public final boolean isVirgin() {
         return get(Seed.PEERTYPE, "").equals(Seed.PEERTYPE_VIRGIN);
     }
+
     public final boolean isJunior() {
         return get(Seed.PEERTYPE, "").equals(Seed.PEERTYPE_JUNIOR);
     }
+
     public final boolean isSenior() {
         return get(Seed.PEERTYPE, "").equals(Seed.PEERTYPE_SENIOR);
     }
+
     public final boolean isPrincipal() {
         return get(Seed.PEERTYPE, "").equals(Seed.PEERTYPE_PRINCIPAL);
     }
+
     public final boolean isPotential() {
         return isVirgin() || isJunior();
     }
+
     public final boolean isActive() {
         return isSenior() || isPrincipal();
     }
+
     public final boolean isOnline() {
         return isSenior() || isPrincipal();
     }
+
     public final boolean isOnline(final String type) {
         return type.equals(Seed.PEERTYPE_SENIOR) || type.equals(Seed.PEERTYPE_PRINCIPAL);
     }
@@ -695,7 +828,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     private static byte[] bestGap(final SeedDB seedDB) {
         final byte[] randomHash = randomHash();
-        if (seedDB == null || seedDB.sizeConnected() <= 2) {
+        if ( seedDB == null || seedDB.sizeConnected() <= 2 ) {
             // use random hash
             return randomHash;
         }
@@ -704,15 +837,21 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
         // take one gap; prefer biggest but take also another smaller by chance
         String interval = null;
-        while (!gaps.isEmpty()) {
+        while ( !gaps.isEmpty() ) {
             interval = gaps.remove(gaps.lastKey());
-            if (random.nextBoolean()) break;
+            if ( random.nextBoolean() ) {
+                break;
+            }
         }
-        if (interval == null) return randomHash();
+        if ( interval == null ) {
+            return randomHash();
+        }
 
         // find dht position and size of gap
-        final long left = FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(0, 12)), null);
-        final long right = FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(12)), null);
+        final long left =
+            FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(0, 12)), null);
+        final long right =
+            FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(12)), null);
         final long gap8 = FlatWordPartitionScheme.dhtDistance(left, right) >> 3; //  1/8 of a gap
         final long gapx = gap8 + (Math.abs(random.nextLong()) % (6 * gap8));
         final long gappos = (Long.MAX_VALUE - left >= gapx) ? left + gapx : (left - Long.MAX_VALUE) + gapx;
@@ -725,11 +864,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
         System.arraycopy(computedHash, 0, combined, 0, 2);
         System.arraycopy(randomHash, 2, combined, 2, 10);
         // patch for the 'first sector' problem
-        if (combined[0] == 'A' || combined[1] == 'D') { // for some strange reason there are too many of them
+        if ( combined[0] == 'A' || combined[1] == 'D' ) { // for some strange reason there are too many of them
             combined[1] = randomHash[1];
         }
         // finally check if the hash is already known
-        while (seedDB.hasConnected(combined) || seedDB.hasDisconnected(combined) || seedDB.hasPotential(combined)) {
+        while ( seedDB.hasConnected(combined)
+            || seedDB.hasDisconnected(combined)
+            || seedDB.hasPotential(combined) ) {
             // if we are lucky then this loop will never run
             combined = randomHash();
         }
@@ -737,28 +878,32 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     }
 
     private static TreeMap<Long, String> hashGaps(final SeedDB seedDB) {
-        final TreeMap<Long, String>gaps = new TreeMap<Long, String>();
-        if (seedDB == null) return gaps;
+        final TreeMap<Long, String> gaps = new TreeMap<Long, String>();
+        if ( seedDB == null ) {
+            return gaps;
+        }
 
         final Iterator<Seed> i = seedDB.seedsConnected(true, false, null, (float) 0.0);
         long l;
         Seed s0 = null, s1, first = null;
-        while (i.hasNext()) {
+        while ( i.hasNext() ) {
             s1 = i.next();
-            if (s0 == null) {
+            if ( s0 == null ) {
                 s0 = s1;
                 first = s0;
                 continue;
             }
-            l = FlatWordPartitionScheme.dhtDistance(
+            l =
+                FlatWordPartitionScheme.dhtDistance(
                     FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s0.hash), null),
                     FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s1.hash), null));
             gaps.put(l, s0.hash + s1.hash);
             s0 = s1;
         }
         // compute also the last gap
-        if ((first != null) && (s0 != null)) {
-            l = FlatWordPartitionScheme.dhtDistance(
+        if ( (first != null) && (s0 != null) ) {
+            l =
+                FlatWordPartitionScheme.dhtDistance(
                     FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s0.hash), null),
                     FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(first.hash), null));
             gaps.put(l, s0.hash + first.hash);
@@ -789,38 +934,58 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     public static byte[] randomHash() {
         final String hash =
-            Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6) +
-            Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6);
+            Base64Order.enhancedCoder
+                .encode(Digest.encodeMD5Raw(Long.toString(random.nextLong())))
+                .substring(0, 6)
+                + Base64Order.enhancedCoder
+                    .encode(Digest.encodeMD5Raw(Long.toString(random.nextLong())))
+                    .substring(0, 6);
         return ASCII.getBytes(hash);
     }
 
-    public static Seed genRemoteSeed(final String seedStr, final String key, final boolean ownSeed, final String patchIP) throws IOException {
+    public static Seed genRemoteSeed(
+        final String seedStr,
+        final String key,
+        final boolean ownSeed,
+        final String patchIP) throws IOException {
         // this method is used to convert the external representation of a seed into a seed object
         // yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
 
         // check protocol and syntax of seed
-        if (seedStr == null) throw new IOException("seedStr == null");
-        if (seedStr.length() == 0) throw new IOException("seedStr.length() == 0");
+        if ( seedStr == null ) {
+            throw new IOException("seedStr == null");
+        }
+        if ( seedStr.length() == 0 ) {
+            throw new IOException("seedStr.length() == 0");
+        }
         final String seed = crypt.simpleDecode(seedStr, key);
-        if (seed == null) throw new IOException("seed == null");
-        if (seed.length() == 0) throw new IOException("seed.length() == 0");
+        if ( seed == null ) {
+            throw new IOException("seed == null");
+        }
+        if ( seed.length() == 0 ) {
+            throw new IOException("seed.length() == 0");
+        }
 
         // extract hash
         final ConcurrentHashMap<String, String> dna = MapTools.string2map(seed, ",");
         final String hash = dna.remove(Seed.HASH);
-        if (hash == null) throw new IOException("hash == null");
+        if ( hash == null ) {
+            throw new IOException("hash == null");
+        }
         final Seed resultSeed = new Seed(hash, dna);
 
         // check semantics of content
         String testResult = resultSeed.isProper(ownSeed);
-        if (testResult != null && patchIP != null) {
+        if ( testResult != null && patchIP != null ) {
             // in case that this proper-Test fails and a patchIP is given
             // then replace the given IP in the resultSeed with given patchIP
             // this is done if a remote peer reports its IP in a wrong way (maybe fraud attempt)
             resultSeed.setIP(patchIP);
             testResult = resultSeed.isProper(ownSeed);
         }
-        if (testResult != null) throw new IOException("seed is not proper (" + testResult + "): " + resultSeed);
+        if ( testResult != null ) {
+            throw new IOException("seed is not proper (" + testResult + "): " + resultSeed);
+        }
 
         // seed ok
         return resultSeed;
@@ -831,37 +996,53 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
         // checks if everything is ok with that seed
 
         // check hash
-        if (this.hash == null) return "hash is null";
-        if (this.hash.length() != Word.commonHashLength) return "wrong hash length (" + this.hash.length() + ")";
+        if ( this.hash == null ) {
+            return "hash is null";
+        }
+        if ( this.hash.length() != Word.commonHashLength ) {
+            return "wrong hash length (" + this.hash.length() + ")";
+        }
 
         // name
         final String peerName = this.dna.get(Seed.NAME);
-        if (peerName == null) return "no peer name given";
+        if ( peerName == null ) {
+            return "no peer name given";
+        }
         this.dna.put(Seed.NAME, checkPeerName(peerName));
 
         // type
         final String peerType = getPeerType();
-        if ((peerType == null) ||
-            !(peerType.equals(Seed.PEERTYPE_VIRGIN) || peerType.equals(Seed.PEERTYPE_JUNIOR)
-              || peerType.equals(Seed.PEERTYPE_SENIOR) || peerType.equals(Seed.PEERTYPE_PRINCIPAL)))
+        if ( (peerType == null)
+            || !(peerType.equals(Seed.PEERTYPE_VIRGIN)
+                || peerType.equals(Seed.PEERTYPE_JUNIOR)
+                || peerType.equals(Seed.PEERTYPE_SENIOR) || peerType.equals(Seed.PEERTYPE_PRINCIPAL)) ) {
             return "invalid peerType '" + peerType + "'";
+        }
 
         // check IP
-        if (!checkOwnIP) {
+        if ( !checkOwnIP ) {
             // checking of IP is omitted if we read the own seed file
             final String ipCheck = isProperIP(getIP());
-            if (ipCheck != null) return ipCheck;
+            if ( ipCheck != null ) {
+                return ipCheck;
+            }
         }
 
         // seedURL
         final String seedURL = this.dna.get(SEEDLISTURL);
-        if (seedURL != null && seedURL.length() > 0) {
-            if (!seedURL.startsWith("http://") && !seedURL.startsWith("https://")) return "wrong protocol for seedURL";
+        if ( seedURL != null && seedURL.length() > 0 ) {
+            if ( !seedURL.startsWith("http://") && !seedURL.startsWith("https://") ) {
+                return "wrong protocol for seedURL";
+            }
             try {
                 final URL url = new URL(seedURL);
                 final String host = url.getHost();
-                if (host.equals("localhost") || host.startsWith("127.") || (host.startsWith("0:0:0:0:0:0:0:1"))) return "seedURL in localhost rejected";
-            } catch (final MalformedURLException e) {
+                if ( host.equals("localhost")
+                    || host.startsWith("127.")
+                    || (host.startsWith("0:0:0:0:0:0:0:1")) ) {
+                    return "seedURL in localhost rejected";
+                }
+            } catch ( final MalformedURLException e ) {
                 return "seedURL malformed";
             }
         }
@@ -870,12 +1051,20 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     public static final String isProperIP(final String ipString) {
         // returns null if ipString is proper, a string with the cause otherwise
-        if (ipString == null) return ipString + " -> IP is null";
-        if (ipString.length() > 0 && ipString.length() < 8) return ipString + " -> IP is too short: ";
-        if (Switchboard.getSwitchboard().isAllIPMode()) return null;
+        if ( ipString == null ) {
+            return ipString + " -> IP is null";
+        }
+        if ( ipString.length() > 0 && ipString.length() < 8 ) {
+            return ipString + " -> IP is too short: ";
+        }
+        if ( Switchboard.getSwitchboard().isAllIPMode() ) {
+            return null;
+        }
         final boolean islocal = Domains.isLocal(ipString, null);
         //if (islocal && Switchboard.getSwitchboard().isGlobalMode()) return ipString + " - local IP for global mode rejected";
-        if (!islocal && Switchboard.getSwitchboard().isIntranetMode()) return ipString + " - global IP for intranet mode rejected";
+        if ( !islocal && Switchboard.getSwitchboard().isIntranetMode() ) {
+            return ipString + " - global IP for intranet mode rejected";
+        }
         return null;
     }
 
@@ -883,7 +1072,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
     public final String toString() {
         final ConcurrentMap<String, String> copymap = new ConcurrentHashMap<String, String>();
         copymap.putAll(this.dna);
-        copymap.put(Seed.HASH, this.hash);          // set hash into seed code structure
+        copymap.put(Seed.HASH, this.hash); // set hash into seed code structure
         return MapTools.map2string(copymap, ",", true); // generate string representation
     }
 
@@ -894,7 +1083,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
         final String b = crypt.simpleEncode(r, key, 'b');
         // the compressed string may be longer that the uncompressed if there is too much overhead for compression meta-info
         // take simply that string that is shorter
-        if (b.length() < z.length()) return b; else return z;
+        if ( b.length() < z.length() ) {
+            return b;
+        } else {
+            return z;
+        }
     }
 
     public final void save(final File f) throws IOException {
@@ -927,8 +1120,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
         // TODO Auto-generated method stub
         final int o1 = hashCode();
         final int o2 = arg0.hashCode();
-        if (o1 > o2) return 1;
-        if (o2 > o1) return -1;
+        if ( o1 > o2 ) {
+            return 1;
+        }
+        if ( o2 > o1 ) {
+            return -1;
+        }
         return 0;
     }
 
@@ -944,13 +1141,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed> {
 
     public static void main(final String[] args) {
         final ScoreMap<Integer> s = new ClusteredScoreMap<Integer>();
-        for (int i = 0; i < 10000; i++) {
+        for ( int i = 0; i < 10000; i++ ) {
             final byte[] b = randomHash();
             s.inc(0xff & Base64Order.enhancedCoder.decodeByte(b[0]));
             //System.out.println(ASCII.String(b));
         }
         final Iterator<Integer> i = s.keys(false);
-        while (i.hasNext()) {
+        while ( i.hasNext() ) {
             System.out.println(i.next());
         }
     }

@@ -278,8 +278,8 @@ public final class SwitchboardConstants {
 
     public static final String CLUSTER_MODE                     = "cluster.mode";
     public static final String CLUSTER_MODE_PUBLIC_CLUSTER      = "publiccluster";
-    public static final String CLUSTER_MODE_PRIVATE_CLUSTER     = "privatecluster";
     public static final String CLUSTER_MODE_PUBLIC_PEER         = "publicpeer";
+    public static final String CLUSTER_MODE_PRIVATE_PEER        = "privatepeer";
     public static final String CLUSTER_PEERS_IPPORT             = "cluster.peers.ipport";
 
     public static final String DHT_BURST_ROBINSON               = "network.unit.dht.burst.robinson";

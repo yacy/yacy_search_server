@@ -163,23 +163,9 @@
         </dt>
         <dd>Your search engine will not contact any other peer, and will reject every request.
         </dd>
-        <!-- not yet implemented
         <dt>
-          <label for="cluster.modePrivatecluster">Private Cluster</label>
-          <input type="radio" value="privatecluster" id="cluster.modePrivatecluster" name="cluster.mode"
-                 #(privateclusterChecked)#::checked="checked" #(/privateclusterChecked)#/>
-        </dt>
-        <dd>
-          Your peer is part of a private cluster without public visibility.<br />
-          Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster.<br />
-          Search requests are spread over all peers of the cluster, and answered from all peers of the cluster.<br />
-          List of ip:port - addresses of the cluster: (comma-separated)<br />
-          <input type="text" name="cluster.peers.ipport" value="#[cluster.peers.ipport]#" size="80" maxlength="800" />
-        </dd>
-        -->
-        <dt>
-          <label for="cluster.modePublicpeer">Public Peer</label>
-          <input type="radio" value="publicpeer" id="cluster.modePublicpeer" name="cluster.mode"
+          <label for="publicpeer">Public Peer</label>
+          <input type="radio" value="publicpeer" id="publicpeer" name="cluster.mode"
                  #(publicpeerChecked)#::checked="checked" #(/publicpeerChecked)#/>
         </dt>
         <dd>
@@ -187,8 +173,8 @@
           Your peer does not accept any outside index data, but responds on all remote search requests.
         </dd>
         <dt>
-          <label for="cluster.modePubliccluster">Public Cluster</label>
-          <input type="radio" value="publiccluster" id="cluster.modePubliccluster" name="cluster.mode"
+          <label for="publiccluster">Public Cluster</label>
+          <input type="radio" value="publiccluster" id="publiccluster" name="cluster.mode"
                  #(publicclusterChecked)#::checked="checked" #(/publicclusterChecked)#/>
         </dt>
         <dd>

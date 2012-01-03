@@ -142,11 +142,19 @@ public class CrawlQueues {
      * @return if the hash exists, the name of the database is returned, otherwise null is returned
      */
     public String urlExists(final byte[] hash) {
-        if (this.delegatedURL.exists(hash)) return "delegated";
-        if (this.errorURL.exists(hash)) return "errors";
-        if (this.noticeURL.existsInStack(hash)) return "crawler";
+        if (this.delegatedURL.exists(hash)) {
+            return "delegated";
+        }
+        if (this.errorURL.exists(hash)) {
+            return "errors";
+        }
+        if (this.noticeURL.existsInStack(hash)) {
+            return "crawler";
+        }
         for (final Loader worker: this.workers.values()) {
-            if (Base64Order.enhancedCoder.equal(worker.request.url().hash(), hash)) return "worker";
+            if (Base64Order.enhancedCoder.equal(worker.request.url().hash(), hash)) {
+                return "worker";
+            }
         }
         return null;
     }
@@ -159,16 +167,26 @@ public class CrawlQueues {
 
     public DigestURI getURL(final byte[] urlhash) {
         assert urlhash != null;
-        if (urlhash == null || urlhash.length == 0) return null;
+        if (urlhash == null || urlhash.length == 0) {
+            return null;
+        }
         ZURL.Entry ee = this.delegatedURL.get(urlhash);
-        if (ee != null) return ee.url();
+        if (ee != null) {
+            return ee.url();
+        }
         ee = this.errorURL.get(urlhash);
-        if (ee != null) return ee.url();
+        if (ee != null) {
+            return ee.url();
+        }
         for (final Loader w: this.workers.values()) {
-            if (Base64Order.enhancedCoder.equal(w.request.url().hash(), urlhash)) return w.request.url();
+            if (Base64Order.enhancedCoder.equal(w.request.url().hash(), urlhash)) {
+                return w.request.url();
+            }
         }
         final Request ne = this.noticeURL.get(urlhash);
-        if (ne != null) return ne.url();
+        if (ne != null) {
+            return ne.url();
+        }
         return null;
     }
 
@@ -176,7 +194,9 @@ public class CrawlQueues {
         // wait for all workers to finish
         final int timeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
         for (final Loader w: this.workers.values()) {
-            if (w.age() > timeout) w.interrupt();
+            if (w.age() > timeout) {
+                w.interrupt();
+            }
         }
     }
 
@@ -185,7 +205,9 @@ public class CrawlQueues {
             final Request[] e = new Request[this.workers.size()];
             int i = 0;
             for (final Loader w: this.workers.values()) {
-                if (i >= e.length) break;
+                if (i >= e.length) {
+                    break;
+                }
                 e[i++] = w.request;
             }
             return e;
@@ -199,8 +221,7 @@ public class CrawlQueues {
     public boolean coreCrawlJob() {
 
         final boolean robinsonPrivateCase = (this.sb.isRobinsonMode() &&
-                !this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER) &&
-                !this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER));
+                !this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER));
 
         if ((robinsonPrivateCase || coreCrawlJobSize() <= 20) && limitCrawlJobSize() > 0) {
             // move some tasks to the core crawl job so we have something to do
@@ -216,12 +237,16 @@ public class CrawlQueues {
         final String queueCheckCore = loadIsPossible(NoticedURL.StackType.CORE);
         final String queueCheckNoload = loadIsPossible(NoticedURL.StackType.NOLOAD);
         if (queueCheckCore != null && queueCheckNoload != null) {
-            if (this.log.isFine()) this.log.logFine("omitting de-queue/local: " + queueCheckCore + ":" + queueCheckNoload);
+            if (this.log.isFine()) {
+                this.log.logFine("omitting de-queue/local: " + queueCheckCore + ":" + queueCheckNoload);
+            }
             return false;
         }
 
         if (isPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-            if (this.log.isFine()) this.log.logFine("omitting de-queue/local: paused");
+            if (this.log.isFine()) {
+                this.log.logFine("omitting de-queue/local: paused");
+            }
             return false;
         }
 
@@ -238,7 +263,9 @@ public class CrawlQueues {
                 if (this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) > 0) {
                     // get one entry that will not be loaded, just indexed
                     urlEntry = this.noticeURL.pop(NoticedURL.StackType.NOLOAD, true, this.sb.crawler);
-                    if (urlEntry == null) continue;
+                    if (urlEntry == null) {
+                        continue;
+                    }
                     final String profileHandle = urlEntry.profileHandle();
                     if (profileHandle == null) {
                         this.log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
@@ -259,7 +286,9 @@ public class CrawlQueues {
                 }
 
                 urlEntry = this.noticeURL.pop(NoticedURL.StackType.CORE, true, this.sb.crawler);
-                if (urlEntry == null) continue;
+                if (urlEntry == null) {
+                    continue;
+                }
                 final String profileHandle = urlEntry.profileHandle();
                 // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
                 // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
@@ -271,7 +300,9 @@ public class CrawlQueues {
                 return true;
             } catch (final IOException e) {
                 this.log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
-                if (e.getMessage().indexOf("hash is null",0) > 0) this.noticeURL.clear(NoticedURL.StackType.CORE);
+                if (e.getMessage().indexOf("hash is null",0) > 0) {
+                    this.noticeURL.clear(NoticedURL.StackType.CORE);
+                }
             }
         }
         return true;
@@ -293,7 +324,7 @@ public class CrawlQueues {
             final DigestURI url = urlEntry.url();
             final String urlProtocol = url.getProtocol();
             if (this.sb.loader.isSupportedProtocol(urlProtocol)) {
-                if (this.log.isFine())
+                if (this.log.isFine()) {
                     this.log.logFine(stats + ": URL=" + urlEntry.url()
                             + ", initiator=" + ((urlEntry.initiator() == null) ? "" : ASCII.String(urlEntry.initiator()))
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
@@ -302,6 +333,7 @@ public class CrawlQueues {
                             + ", must-match=" + profile.urlMustMatchPattern().toString()
                             + ", must-not-match=" + profile.urlMustNotMatchPattern().toString()
                             + ", permission=" + ((this.sb.peers == null) ? "undefined" : (((this.sb.peers.mySeed().isSenior()) || (this.sb.peers.mySeed().isPrincipal())) ? "true" : "false")));
+                }
 
                 // work off one Crawl stack entry
                 if (urlEntry == null || urlEntry.url() == null) {
@@ -387,23 +419,31 @@ public class CrawlQueues {
         }
         // check again
         if (this.workers.size() >= this.sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 20)) {
-            if (this.log.isFine()) this.log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.workers.size() + "), httpClients = " + ConnectionInfo.getCount());
+            if (this.log.isFine()) {
+                this.log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.workers.size() + "), httpClients = " + ConnectionInfo.getCount());
+            }
             return false;
         }
 
         final String cautionCause = this.sb.onlineCaution();
         if (cautionCause != null) {
-            if (this.log.isFine()) this.log.logFine("remoteCrawlLoaderJob: online caution for " + cautionCause + ", omitting processing");
+            if (this.log.isFine()) {
+                this.log.logFine("remoteCrawlLoaderJob: online caution for " + cautionCause + ", omitting processing");
+            }
             return false;
         }
 
         if (remoteTriggeredCrawlJobSize() > 200) {
-            if (this.log.isFine()) this.log.logFine("remoteCrawlLoaderJob: the remote-triggered crawl job queue is filled, omitting processing");
+            if (this.log.isFine()) {
+                this.log.logFine("remoteCrawlLoaderJob: the remote-triggered crawl job queue is filled, omitting processing");
+            }
             return false;
         }
 
         if (coreCrawlJobSize() > 0 /*&& sb.indexingStorageProcessor.queueSize() > 0*/) {
-            if (this.log.isFine()) this.log.logFine("remoteCrawlLoaderJob: a local crawl is running, omitting processing");
+            if (this.log.isFine()) {
+                this.log.logFine("remoteCrawlLoaderJob: a local crawl is running, omitting processing");
+            }
             return false;
         }
 
@@ -414,27 +454,37 @@ public class CrawlQueues {
                 final Iterator<Seed> e = PeerSelection.getProvidesRemoteCrawlURLs(this.sb.peers);
                 while (e.hasNext()) {
                     seed = e.next();
-                    if (seed != null) this.remoteCrawlProviderHashes.add(seed.hash);
+                    if (seed != null) {
+                        this.remoteCrawlProviderHashes.add(seed.hash);
+                    }
                 }
             }
         }
-        if (this.remoteCrawlProviderHashes.isEmpty()) return false;
+        if (this.remoteCrawlProviderHashes.isEmpty()) {
+            return false;
+        }
 
         // take one entry from the provider list and load the entries from the remote peer
         seed = null;
         String hash = null;
         while (seed == null && !this.remoteCrawlProviderHashes.isEmpty()) {
             hash = this.remoteCrawlProviderHashes.remove(this.remoteCrawlProviderHashes.size() - 1);
-            if (hash == null) continue;
+            if (hash == null) {
+                continue;
+            }
             seed = this.sb.peers.get(hash);
-            if (seed == null) continue;
+            if (seed == null) {
+                continue;
+            }
             // check if the peer is inside our cluster
             if ((this.sb.isRobinsonMode()) && (!this.sb.isInMyCluster(seed))) {
                 seed = null;
                 continue;
             }
         }
-        if (seed == null) return false;
+        if (seed == null) {
+            return false;
+        }
 
         // we know a peer which should provide remote crawl entries. load them now.
         final RSSFeed feed = Protocol.queryRemoteCrawlURLs(this.sb.peers, seed, 60, 8000);
@@ -467,7 +517,9 @@ public class CrawlQueues {
             final String urlRejectReason = this.sb.crawlStacker.urlInAcceptedDomain(url);
             if (urlRejectReason == null) {
                 // stack url
-                if (this.sb.getLog().isFinest()) this.sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
+                if (this.sb.getLog().isFinest()) {
+                    this.sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
+                }
                 this.sb.crawlStacker.enqueueEntry(new Request(
                         ASCII.getBytes(hash),
                         url,
@@ -510,12 +562,16 @@ public class CrawlQueues {
         // or there is no global crawl on the stack
         final String queueCheck = loadIsPossible(NoticedURL.StackType.REMOTE);
         if (queueCheck != null) {
-            if (this.log.isFinest()) this.log.logFinest("omitting de-queue/remote: " + queueCheck);
+            if (this.log.isFinest()) {
+                this.log.logFinest("omitting de-queue/remote: " + queueCheck);
+            }
             return false;
         }
 
         if (isPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
-            if (this.log.isFinest()) this.log.logFinest("omitting de-queue/remote: paused");
+            if (this.log.isFinest()) {
+                this.log.logFinest("omitting de-queue/remote: paused");
+            }
             return false;
         }
 
@@ -532,7 +588,9 @@ public class CrawlQueues {
             return true;
         } catch (final IOException e) {
             this.log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
-            if (e.getMessage().indexOf("hash is null",0) > 0) this.noticeURL.clear(NoticedURL.StackType.REMOTE);
+            if (e.getMessage().indexOf("hash is null",0) > 0) {
+                this.noticeURL.clear(NoticedURL.StackType.REMOTE);
+            }
             return true;
         }
     }
@@ -599,7 +657,9 @@ public class CrawlQueues {
                         final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), true);
                         if (response == null) {
                             this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
-                            if (CrawlQueues.this.log.isFine()) CrawlQueues.this.log.logFine("problem loading " + this.request.url().toString() + ": no content (possibly caused by cache policy)");
+                            if (CrawlQueues.this.log.isFine()) {
+                                CrawlQueues.this.log.logFine("problem loading " + this.request.url().toString() + ": no content (possibly caused by cache policy)");
+                            }
                             result = "no content (possibly caused by cache policy)";
                         } else {
                             this.request.setStatus("loaded", WorkflowJob.STATUS_RUNNING);
@@ -609,7 +669,9 @@ public class CrawlQueues {
                         }
                     } catch (final IOException e) {
                         this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
-                        if (CrawlQueues.this.log.isFine()) CrawlQueues.this.log.logFine("problem loading " + this.request.url().toString() + ": " + e.getMessage());
+                        if (CrawlQueues.this.log.isFine()) {
+                            CrawlQueues.this.log.logFine("problem loading " + this.request.url().toString() + ": " + e.getMessage());
+                        }
                         result = "load error - " + e.getMessage();
                     }
 
