@@ -35,10 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -93,8 +93,8 @@ public class Blacklist {
     public static final String BLACKLIST_TYPES_STRING = "proxy,crawler,dht,search,surftips,news";
     private File blacklistRootPath = null;
     private final ConcurrentMap<String, HandleSet> cachedUrlHashs;
-    private final ConcurrentMap<String, ConcurrentMap<String, List<String>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
-    private final ConcurrentMap<String, ConcurrentMap<String, List<String>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
+    private final ConcurrentMap<String, Map<String, List<String>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
+    private final ConcurrentMap<String, Map<String, List<String>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
 
     public Blacklist(final File rootPath) {
 
