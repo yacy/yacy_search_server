@@ -219,7 +219,6 @@ public class CrawlQueues {
     }
 
     public boolean coreCrawlJob() {
-
         final boolean robinsonPrivateCase = (this.sb.isRobinsonMode() &&
                 !this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER));
 
@@ -704,6 +703,5 @@ public class CrawlQueues {
                 assert w != null;
             }
         }
-
     }
 }
