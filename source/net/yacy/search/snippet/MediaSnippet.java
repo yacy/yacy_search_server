@@ -27,6 +27,7 @@ package net.yacy.search.snippet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,10 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
+import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
+import de.anomic.crawler.retrieval.Request;
+import de.anomic.crawler.ZURL.FailCategory;
 
 
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
@@ -165,6 +169,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             entry = i.next();
             url = new DigestURI(entry.getKey());
             desc = entry.getValue();
+            if (isUrlBlacklisted(url, Blacklist.BLACKLIST_SEARCH)) continue;
             final int ranking = removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
                            removeAppearanceHashes(desc, queryhashes).size();
             if (ranking < 2 * queryhashes.size()) {
@@ -189,6 +194,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             ientry = i.next();
             url = new DigestURI(ientry.url());
             final String u = url.toString();
+            if (isUrlBlacklisted(url, Blacklist.BLACKLIST_SEARCH)) continue;
             if (u.indexOf(".ico",0) >= 0 || u.indexOf("favicon",0) >= 0) continue;
             if (ientry.height() > 0 && ientry.height() < 32) continue;
             if (ientry.width() > 0 && ientry.width() < 32) continue;
@@ -230,4 +236,27 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return remaininghashes;
     }
 
+    /**
+     * Checks wether given URL is in blacklist for given blacklist type
+     *
+     * @param   url     The URL to check
+     * @param   blacklistType   Type of blacklist (see class Blacklist, BLACKLIST_FOO)
+     * @return  isBlacklisted   Wether the given URL is blacklisted
+     */
+    private static boolean isUrlBlacklisted (DigestURI url, String blacklistType) {
+        // Default is not blacklisted
+        boolean isBlacklisted = false;
+
+        // check if url is in blacklist
+        if (Switchboard.urlBlacklist.isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
+            Switchboard.getSwitchboard().crawlQueues.errorURL.push(new Request(url, null), Switchboard.getSwitchboard().peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            Log.logFine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
+            isBlacklisted = true;
+        }
+
+        // Return result
+        return isBlacklisted;
+    }
+
 }
+
