@@ -93,6 +93,7 @@ public final class RWIProcess extends Thread
     private final ReferenceOrder order;
     private final long startTime;
     private boolean addRunning;
+    private boolean fresh;
 
     // navigation scores
     private final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
@@ -136,6 +137,7 @@ public final class RWIProcess extends Thread
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.receivedRemoteReferences = new AtomicInteger(0);
+        this.fresh = true;
     }
 
     public void addExpectedRemoteReferences(int x) {
@@ -388,10 +390,11 @@ public final class RWIProcess extends Thread
 
     public void oneFeederStarted() {
         this.feeders.addAndGet(1);
+        this.fresh = false;
     }
 
     public boolean feedingIsFinished() {
-        return this.feeders.get() <= 0;
+        return !this.fresh && this.feeders.get() <= 0;
     }
 
     private boolean testFlags(final WordReference ientry) {
