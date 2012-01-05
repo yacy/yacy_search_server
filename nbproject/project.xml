@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.java.j2seproject</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
+            <name>yacy</name>
+            <source-roots>
+                <root id="src.dir" name="source"/>
+                <root id="htroot.dir"/>
+                <root id="api.dir"/>
+                <root id="env.dir"/>
+                <root id="yacy.dir"/>
+                <root id="bookmarks.dir"/>
+                <root id="ymarks.dir"/>
+                <root id="posts.dir"/>
+                <root id="tags.dir"/>
+                <root id="xbel.dir"/>
+            </source-roots>
+            <test-roots/>
+        </data>
+    </configuration>
+</project>

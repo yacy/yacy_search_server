@@ -7,3 +7,6 @@ DATA/
 classes/
 RELEASE/
 /yacy.pid
+/nbproject/private/
+/build/
+/dist/
