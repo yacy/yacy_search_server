@@ -32,10 +32,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -54,11 +52,8 @@ import de.anomic.server.serverSwitch;
 
 public class BlogComments {
 
-    private final static SimpleDateFormat SIMPLE_FORMATTER = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
-    // TODO: make userdefined date/time-strings (localisation)
-
     public static String dateString(final Date date) {
-        return SIMPLE_FORMATTER.format(date);
+        return Blog.dateString(date);
     }
 
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
