@@ -1284,6 +1284,7 @@ public final class Switchboard extends serverSwitch {
             this.crawlQueues.coreCrawlJobSize() > 0 ||
             this.crawlQueues.limitCrawlJobSize() > 0 ||
             this.crawlQueues.remoteTriggeredCrawlJobSize() > 0 ||
+            this.crawlQueues.noloadCrawlJobSize() > 0 ||
             (this.crawlStacker != null && !this.crawlStacker.isEmpty()) ||
             this.crawlQueues.noticeURL.notEmpty())
             return false;

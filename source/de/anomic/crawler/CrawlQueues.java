@@ -499,6 +499,10 @@ public class CrawlQueues {
         return this.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
     }
 
+    public int noloadCrawlJobSize() {
+        return this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD);
+    }
+
     public int remoteTriggeredCrawlJobSize() {
         return this.noticeURL.stackSize(NoticedURL.StackType.REMOTE);
     }

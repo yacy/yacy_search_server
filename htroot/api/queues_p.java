@@ -79,7 +79,7 @@ public class queues_p {
         prop.put("limitCrawlState", STATE_RUNNING);
         stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
 
-        //global crawl queue
+        //remote crawl queue
         prop.putNum("remoteCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
         prop.put("remoteCrawlState", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
         stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
@@ -89,6 +89,12 @@ public class queues_p {
         } else {
             addNTable(sb, prop, "list-remote", sb.crawlQueues.noticeURL.top(NoticedURL.StackType.LIMIT, Math.min(10, stackSize)));
         }
+        
+        //noload crawl queue
+        prop.putNum("noloadCrawlSize", sb.crawlQueues.noloadCrawlJobSize());
+        prop.put("noloadCrawlState", STATE_RUNNING);
+        //stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.NOLOAD);
+
 
         // return rewrite properties
         return prop;

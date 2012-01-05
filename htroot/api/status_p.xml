@@ -17,6 +17,9 @@
   <remotecrawlerqueue>
     <size>#[remoteCrawlSize]#</size>
   </remotecrawlerqueue>
+  <noloadcrawlerqueue>
+    <size>#[noloadCrawlSize]#</size>
+  </noloadcrawlerqueue>
 
   <memory>
     <free>#[freeMemory]#</free>

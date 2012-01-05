@@ -64,4 +64,8 @@
   </entry>
 #{/list-remote}#
 </remotecrawlerqueue>
+<noloadcrawlerqueue>
+  <size>#[noloadCrawlSize]#</size>
+  <state>#[noloadCrawlState]#</state>
+</noloadcrawlerqueue>
 </queues>
