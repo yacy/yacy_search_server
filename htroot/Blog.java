@@ -30,8 +30,8 @@
 // javac -classpath .:../classes Blog.java
 // if the shell's current path is HTROOT
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,9 +52,13 @@ public class Blog {
 
     private static final String DEFAULT_PAGE = "blog_default";
 
-        private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
-        // TODO: make userdefined date/time-strings (localisation)
-
+        private static DateFormat SimpleFormatter = DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT, Locale.getDefault());
+        
+    /**
+     * print localized date/time "yyyy/mm/dd HH:mm:ss"
+     * @param date
+     * @return 
+     */    
     public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
