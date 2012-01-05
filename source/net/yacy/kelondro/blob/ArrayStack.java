@@ -215,12 +215,14 @@ public class ArrayStack implements BLOB {
         }
     }
 
+    @Override
     public long mem() {
         long m = 0;
         if (this.blobs != null) for (final blobItem b: this.blobs) m += b.blob.mem();
         return m;
     }
 
+    @Override
     public void trim() {
         // trim shall not be called for ArrayStacks because the characteristics of an ArrayStack is that the 'topmost' BLOB on the stack
         // is used for write operations and all other shall be trimmed automatically since they are not used for writing. And the
@@ -374,6 +376,7 @@ public class ArrayStack implements BLOB {
         return new File(this.heapLocation, this.prefix + "." + my_SHORT_MILSEC_FORMATTER.format(creation) + ".blob");
     }
 
+    @Override
     public String name() {
         return this.heapLocation.getName();
     }
@@ -414,12 +417,14 @@ public class ArrayStack implements BLOB {
     /*
      * return the size of the repository (in bytes)
      */
+    @Override
     public synchronized long length() {
         long s = 0;
         for (int i = 0; i < this.blobs.size(); i++) s += this.blobs.get(i).location.length();
         return s;
     }
 
+    @Override
     public ByteOrder ordering() {
         return this.ordering;
     }
@@ -446,6 +451,7 @@ public class ArrayStack implements BLOB {
      * ask for the length of the primary key
      * @return the length of the key
      */
+    @Override
     public int keylength() {
         return this.keylength;
     }
@@ -454,6 +460,7 @@ public class ArrayStack implements BLOB {
      * clears the content of the database
      * @throws IOException
      */
+    @Override
     public synchronized void clear() throws IOException {
         for (final blobItem bi: this.blobs) {
             bi.blob.clear();
@@ -467,12 +474,14 @@ public class ArrayStack implements BLOB {
      * ask for the number of blob entries
      * @return the number of entries in the table
      */
+    @Override
     public synchronized int size() {
         int s = 0;
         for (final blobItem bi: this.blobs) s += bi.blob.size();
         return s;
     }
 
+    @Override
     public synchronized boolean isEmpty() {
         for (final blobItem bi: this.blobs) if (!bi.blob.isEmpty()) return false;
         return true;
@@ -497,6 +506,7 @@ public class ArrayStack implements BLOB {
      * @return
      * @throws IOException
      */
+    @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         assert rotating == false;
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(this.blobs.size());
@@ -514,6 +524,7 @@ public class ArrayStack implements BLOB {
      * @return
      * @throws IOException
      */
+    @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(this.blobs.size());
         final Iterator<blobItem> i = this.blobs.iterator();
@@ -529,6 +540,7 @@ public class ArrayStack implements BLOB {
      * @return
      * @throws IOException
      */
+    @Override
     public synchronized boolean containsKey(final byte[] key) {
     	final blobItem bi = keeperOf(key);
     	return bi != null;
@@ -549,15 +561,28 @@ public class ArrayStack implements BLOB {
             if (bi.blob.containsKey(key)) return bi;
             return null;
         }
-
+        
+        // first check the current blob only because that has most probably the key if any has that key
+        int bs1 = this.blobs.size() - 1;
+        blobItem bi = this.blobs.get(bs1);
+        if (bi.blob.containsKey(key)) return bi;
+        if (this.blobs.size() == 2) {
+            // this should not be done concurrently
+            bi = this.blobs.get(0);
+            if (bi.blob.containsKey(key)) return bi;
+            return null;
+        }
+            
         // start a concurrent query to database tables
         final CompletionService<blobItem> cs = new ExecutorCompletionService<blobItem>(this.executor);
         int accepted = 0;
-        for (final blobItem bi : this.blobs) {
+        for (int i = 0; i < bs1; i++) {
+            final blobItem b = this.blobs.get(i);
             try {
                 cs.submit(new Callable<blobItem>() {
+                    @Override
                     public blobItem call() {
-                        if (bi.blob.containsKey(key)) return bi;
+                        if (b.blob.containsKey(key)) return b;
                         return null;
                     }
                 });
@@ -565,7 +590,7 @@ public class ArrayStack implements BLOB {
             } catch (final RejectedExecutionException e) {
                 // the executor is either shutting down or the blocking queue is full
                 // execute the search direct here without concurrency
-                if (bi.blob.containsKey(key)) return bi;
+                if (b.blob.containsKey(key)) return b;
             }
         }
 
@@ -599,6 +624,7 @@ public class ArrayStack implements BLOB {
      * @return
      * @throws IOException
      */
+    @Override
     public byte[] get(final byte[] key) throws IOException, RowSpaceExceededException {
         if (this.blobs.size() == 0) return null;
         if (this.blobs.size() == 1) {
@@ -619,6 +645,7 @@ public class ArrayStack implements BLOB {
         */
     }
 
+    @Override
     public byte[] get(final Object key) {
         if (!(key instanceof byte[])) return null;
         try {
@@ -652,6 +679,7 @@ public class ArrayStack implements BLOB {
             this.key = key;
         }
 
+        @Override
         protected byte[] next0() {
             while (this.bii.hasNext()) {
                 final BLOB b = this.bii.next().blob;
@@ -677,6 +705,7 @@ public class ArrayStack implements BLOB {
      * @return the size of the BLOB or -1 if the BLOB does not exist
      * @throws IOException
      */
+    @Override
     public synchronized long length(final byte[] key) throws IOException {
         long l;
         for (final blobItem bi: this.blobs) {
@@ -707,6 +736,7 @@ public class ArrayStack implements BLOB {
             this.key = key;
         }
 
+        @Override
         protected Long next0() {
             while (this.bii.hasNext()) {
                 final BLOB b = this.bii.next().blob;
@@ -744,6 +774,7 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public synchronized void insert(final byte[] key, final byte[] b) throws IOException {
         blobItem bi = (this.blobs.isEmpty()) ? null : this.blobs.get(this.blobs.size() - 1);
         /*
@@ -770,6 +801,7 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public synchronized int replace(final byte[] key, final Rewriter rewriter) throws IOException, RowSpaceExceededException {
         int d = 0;
         for (final blobItem bi: this.blobs) {
@@ -784,6 +816,7 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public synchronized int reduce(final byte[] key, final Reducer reduce) throws IOException, RowSpaceExceededException {
         int d = 0;
         for (final blobItem bi: this.blobs) {
@@ -797,6 +830,7 @@ public class ArrayStack implements BLOB {
      * @param key the primary key
      * @throws IOException
      */
+    @Override
     public synchronized void delete(final byte[] key) throws IOException {
         final long m = mem();
         if (this.blobs.size() == 0) {
@@ -812,6 +846,7 @@ public class ArrayStack implements BLOB {
                     // run this in a concurrent thread
                     final blobItem bi0 = bi;
                     t[i] = new Thread() {
+                        @Override
                         public void run() {
                             try { bi0.blob.delete(key); } catch (final IOException e) {}
                         }
@@ -831,6 +866,7 @@ public class ArrayStack implements BLOB {
     /**
      * close the BLOB
      */
+    @Override
     public synchronized void close(final boolean writeIDX) {
         for (final blobItem bi: this.blobs) bi.blob.close(writeIDX);
         this.blobs.clear();

@@ -46,67 +46,73 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class Status {
+public class Status
+{
 
     private static final String SEEDSERVER = "seedServer";
     private static final String PEERSTATUS = "peerStatus";
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(
+        final RequestHeader header,
+        final serverObjects post,
+        final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
         // check if the basic configuration was accessed before and forward
         prop.put("forwardToConfigBasic", 0);
-        if ((post == null || !post.containsKey("noforward")) &&
-            sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic.html",0) < 0 &&
-            Seed.isDefaultPeerName(sb.peers.mySeed().getName())) {
+        if ( (post == null || !post.containsKey("noforward"))
+            && sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic.html", 0) < 0
+            && Seed.isDefaultPeerName(sb.peers.mySeed().getName()) ) {
             // forward to ConfigBasic
             prop.put("forwardToConfigBasic", 1);
         }
-        if (post != null) post.remove("noforward");
+        if ( post != null ) {
+            post.remove("noforward");
+        }
 
-        if (post != null && post.size() > 0) {
-            if (sb.adminAuthenticated(header) < 2) {
-                prop.put("AUTHENTICATE","admin log-in");
+        if ( post != null && post.size() > 0 ) {
+            if ( sb.adminAuthenticated(header) < 2 ) {
+                prop.put("AUTHENTICATE", "admin log-in");
                 return prop;
             }
             boolean redirect = false;
-            if (post.containsKey("login")) {
-                prop.put("LOCATION","");
+            if ( post.containsKey("login") ) {
+                prop.put("LOCATION", "");
                 return prop;
-            } else if (post.containsKey("pauseCrawlJob")) {
+            } else if ( post.containsKey("pauseCrawlJob") ) {
                 final String jobType = post.get("jobType");
-                if ("localCrawl".equals(jobType)) {
+                if ( "localCrawl".equals(jobType) ) {
                     sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                } else if ("remoteTriggeredCrawl".equals(jobType)) {
+                } else if ( "remoteTriggeredCrawl".equals(jobType) ) {
                     sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 }
                 redirect = true;
-            } else if (post.containsKey("continueCrawlJob")) {
+            } else if ( post.containsKey("continueCrawlJob") ) {
                 final String jobType = post.get("jobType");
-                if ("localCrawl".equals(jobType)) {
+                if ( "localCrawl".equals(jobType) ) {
                     sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-        	} else if ("remoteTriggeredCrawl".equals(jobType)) {
+                } else if ( "remoteTriggeredCrawl".equals(jobType) ) {
                     sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 }
                 redirect = true;
-            } else if (post.containsKey("ResetTraffic")) {
+            } else if ( post.containsKey("ResetTraffic") ) {
                 ByteCount.resetCount();
                 redirect = true;
-            } else if (post.containsKey("popup")) {
+            } else if ( post.containsKey("popup") ) {
                 final boolean trigger_enabled = post.getBoolean("popup", false);
                 sb.setConfig("browserPopUpTrigger", trigger_enabled);
                 redirect = true;
-            } else if (post.containsKey("tray")) {
+            } else if ( post.containsKey("tray") ) {
                 final boolean trigger_enabled = post.getBoolean("tray", false);
                 sb.setConfig("trayIcon", trigger_enabled);
                 redirect = true;
             }
 
-            if (redirect) {
-                    prop.put("LOCATION","");
-                    return prop;
+            if ( redirect ) {
+                prop.put("LOCATION", "");
+                return prop;
             }
         }
 
@@ -114,7 +120,7 @@ public class Status {
         sb.updateMySeed();
 
         final boolean adminaccess = sb.adminAuthenticated(header) >= 2;
-        if (adminaccess) {
+        if ( adminaccess ) {
             prop.put("showPrivateTable", "1");
             prop.put("privateStatusTable", "Status_p.inc");
         } else {
@@ -123,26 +129,28 @@ public class Status {
         }
 
         // password protection
-        if ((sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0) && (!sb.getConfigBool("adminAccountForLocalhost", false))) {
+        if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0)
+            && (!sb.getConfigBool("adminAccountForLocalhost", false)) ) {
             prop.put("protection", "0"); // not protected
             prop.put("urgentSetPassword", "1");
         } else {
             prop.put("protection", "1"); // protected
         }
 
-        if (sb.getConfigBool("adminAccountForLocalhost", false)) {
+        if ( sb.getConfigBool("adminAccountForLocalhost", false) ) {
             prop.put("unrestrictedLocalAccess", 1);
         }
 
         // resource observer status
-        if (adminaccess) {
-            if (!sb.observer.getDiskAvailable()){
+        if ( adminaccess ) {
+            if ( !sb.observer.getDiskAvailable() ) {
                 final String minFree = Formatter.bytesToString(sb.observer.getMinFreeDiskSpace());
                 prop.put("warningDiskSpaceLow", "1");
                 prop.put("warningDiskSpaceLow_minSpace", minFree);
             }
-            if (!sb.observer.getMemoryAvailable()){
-                final String minFree = Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L * 1024L);
+            if ( !sb.observer.getMemoryAvailable() ) {
+                final String minFree =
+                    Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L * 1024L);
                 prop.put("warningMemoryLow", "1");
                 prop.put("warningMemoryLow_minSpace", minFree);
             }
@@ -151,25 +159,26 @@ public class Status {
 
         // version information
         //final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
-        final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
+        final String versionstring =
+            yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
         prop.put("versionpp", versionstring);
 
         // place some more hints
-        if ((adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0)) {
+        if ( (adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) ) {
             prop.put("hintCrawlStart", "1");
         }
 
-        if ((adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500)) {
+        if ( (adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500) ) {
             prop.put("hintCrawlMonitor", "1");
         }
 
         // hostname and port
         final String extendedPortString = sb.getConfig("port", "8090");
-        final int pos = extendedPortString.indexOf(':',0);
-        prop.put("port",serverCore.getPortNr(extendedPortString));
-        if (pos != -1) {
+        final int pos = extendedPortString.indexOf(':', 0);
+        prop.put("port", serverCore.getPortNr(extendedPortString));
+        if ( pos != -1 ) {
             prop.put("extPortFormat", "1");
-            prop.putHTML("extPortFormat_extPort",extendedPortString);
+            prop.putHTML("extPortFormat_extPort", extendedPortString);
         } else {
             prop.put("extPortFormat", "0");
         }
@@ -177,9 +186,9 @@ public class Status {
         prop.put("host", hostIP != null ? hostIP.getHostAddress() : "Unkown IP");
 
         // ssl support
-        prop.put("sslSupport",sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
+        prop.put("sslSupport", sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
 
-        if (sb.getConfigBool("remoteProxyUse", false)) {
+        if ( sb.getConfigBool("remoteProxyUse", false) ) {
             prop.put("remoteProxy", "1");
             prop.putXML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"));
             prop.putXML("remoteProxy_port", sb.getConfig("remoteProxyPort", "<unknown>"));
@@ -191,22 +200,24 @@ public class Status {
         // peer information
         String thisHash = "";
         final String thisName = sb.peers.mySeed().getName();
-        if (sb.peers.mySeed() == null)  {
+        if ( sb.peers.mySeed() == null ) {
             thisHash = "not assigned";
-            prop.put("peerAddress", "0");    // not assigned
+            prop.put("peerAddress", "0"); // not assigned
             prop.put("peerStatistics", "0"); // unknown
         } else {
             final long uptime = 60000 * sb.peers.mySeed().getLong(Seed.UPTIME, 0L);
             prop.put("peerStatistics", "1");
             prop.put("peerStatistics_uptime", PeerActions.formatInterval(uptime));
             prop.putNum("peerStatistics_pagesperminute", sb.peers.mySeed().getPPM());
-            prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.peers.mySeed().getQPM()) / 100d);
+            prop.putNum(
+                "peerStatistics_queriesperhour",
+                Math.round(6000d * sb.peers.mySeed().getQPM()) / 100d);
             prop.putNum("peerStatistics_links", sb.peers.mySeed().getLinkCount());
             prop.put("peerStatistics_words", Formatter.number(sb.peers.mySeed().getWordCount()));
             prop.putNum("peerStatistics_disconnects", sb.peers.peerActions.disconnects);
             prop.put("peerStatistics_connects", Formatter.number(sb.peers.mySeed().get(Seed.CCOUNT, "0")));
             thisHash = sb.peers.mySeed().hash;
-            if (sb.peers.mySeed().getPublicAddress() == null) {
+            if ( sb.peers.mySeed().getPublicAddress() == null ) {
                 prop.put("peerAddress", "0"); // not assigned + instructions
                 prop.put("warningGoOnline", "1");
             } else {
@@ -215,17 +226,25 @@ public class Status {
                 prop.putXML("peerAddress_peername", sb.peers.mySeed().getName().toLowerCase());
             }
         }
-        final String peerStatus = ((sb.peers.mySeed() == null) ? Seed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN));
-        if (Seed.PEERTYPE_VIRGIN.equals(peerStatus) && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))) {
+        final String peerStatus =
+            ((sb.peers.mySeed() == null) ? Seed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(
+                Seed.PEERTYPE,
+                Seed.PEERTYPE_VIRGIN));
+
+        if ( Seed.PEERTYPE_VIRGIN.equals(peerStatus)
+            && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))
+            && !SwitchboardConstants.CLUSTER_MODE_PRIVATE_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, ""))) {
             prop.put(PEERSTATUS, "0");
             prop.put("urgentStatusVirgin", "1");
-        } else if (Seed.PEERTYPE_JUNIOR.equals(peerStatus) && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))) {
+        } else if ( Seed.PEERTYPE_JUNIOR.equals(peerStatus)
+            && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))
+            && !SwitchboardConstants.CLUSTER_MODE_PRIVATE_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, ""))) {
             prop.put(PEERSTATUS, "1");
             prop.put("warningStatusJunior", "1");
-        } else if (Seed.PEERTYPE_SENIOR.equals(peerStatus)) {
+        } else if ( Seed.PEERTYPE_SENIOR.equals(peerStatus) ) {
             prop.put(PEERSTATUS, "2");
             prop.put("hintStatusSenior", "1");
-        } else if (Seed.PEERTYPE_PRINCIPAL.equals(peerStatus)) {
+        } else if ( Seed.PEERTYPE_PRINCIPAL.equals(peerStatus) ) {
             prop.put(PEERSTATUS, "3");
             prop.put("hintStatusPrincipal", "1");
             prop.put("hintStatusPrincipal_seedURL", sb.peers.mySeed().get(Seed.SEEDLISTURL, "?"));
@@ -234,50 +253,52 @@ public class Status {
         prop.put("hash", thisHash);
 
         final String seedUploadMethod = sb.getConfig("seedUploadMethod", "");
-        if (!"none".equalsIgnoreCase(seedUploadMethod) ||
-            ("".equals(seedUploadMethod) && (sb.getConfig("seedFTPPassword", "").length() > 0 ||
-            sb.getConfig("seedFilePath", "").length() > 0))) {
-            if ("".equals(seedUploadMethod)) {
-                if (sb.getConfig("seedFTPPassword", "").length() > 0) {
-                    sb.setConfig("seedUploadMethod","Ftp");
+        if ( !"none".equalsIgnoreCase(seedUploadMethod)
+            || ("".equals(seedUploadMethod) && (sb.getConfig("seedFTPPassword", "").length() > 0 || sb
+                .getConfig("seedFilePath", "")
+                .length() > 0)) ) {
+            if ( "".equals(seedUploadMethod) ) {
+                if ( sb.getConfig("seedFTPPassword", "").length() > 0 ) {
+                    sb.setConfig("seedUploadMethod", "Ftp");
                 }
-                if (sb.getConfig("seedFilePath", "").length() > 0) {
-                    sb.setConfig("seedUploadMethod","File");
+                if ( sb.getConfig("seedFilePath", "").length() > 0 ) {
+                    sb.setConfig("seedUploadMethod", "File");
                 }
             }
 
-            if ("ftp".equalsIgnoreCase(seedUploadMethod)) {
+            if ( "ftp".equalsIgnoreCase(seedUploadMethod) ) {
                 prop.put(SEEDSERVER, "1"); // enabled
                 prop.putHTML("seedServer_seedServer", sb.getConfig("seedFTPServer", ""));
-            } else if ("scp".equalsIgnoreCase(seedUploadMethod)) {
+            } else if ( "scp".equalsIgnoreCase(seedUploadMethod) ) {
                 prop.put(SEEDSERVER, "1"); // enabled
                 prop.putHTML("seedServer_seedServer", sb.getConfig("seedScpServer", ""));
-            } else if ("file".equalsIgnoreCase(seedUploadMethod)) {
+            } else if ( "file".equalsIgnoreCase(seedUploadMethod) ) {
                 prop.put(SEEDSERVER, "2"); // enabled
                 prop.putHTML("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
-            prop.put("seedServer_lastUpload",
-                    PeerActions.formatInterval(System.currentTimeMillis() - sb.peers.lastSeedUpload_timeStamp));
+            prop.put(
+                "seedServer_lastUpload",
+                PeerActions.formatInterval(System.currentTimeMillis() - sb.peers.lastSeedUpload_timeStamp));
         } else {
             prop.put(SEEDSERVER, "0"); // disabled
         }
 
-        if (sb.peers != null && sb.peers.sizeConnected() > 0){
+        if ( sb.peers != null && sb.peers.sizeConnected() > 0 ) {
             prop.put("otherPeers", "1");
             prop.putNum("otherPeers_num", sb.peers.sizeConnected());
-        }else{
+        } else {
             prop.put("otherPeers", "0"); // not online
         }
 
-        if (!sb.getConfigBool("browserPopUpTrigger", false)) {
+        if ( !sb.getConfigBool("browserPopUpTrigger", false) ) {
             prop.put("popup", "0");
         } else {
             prop.put("popup", "1");
         }
 
-        if (!OS.isWindows) {
-        	prop.put("tray", "2");
-        } else if (!sb.getConfigBool("trayIcon", false)) {
+        if ( !OS.isWindows ) {
+            prop.put("tray", "2");
+        } else if ( !sb.getConfigBool("trayIcon", false) ) {
             prop.put("tray", "0");
         } else {
             prop.put("tray", "1");
@@ -305,18 +326,26 @@ public class Status {
         final int loaderPercent = (loaderMaxCount == 0) ? 0 : loaderJobCount * 100 / loaderMaxCount;
         prop.putNum("loaderQueueSize", loaderJobCount);
         prop.putNum("loaderQueueMax", loaderMaxCount);
-        prop.put("loaderQueuePercent", (loaderPercent>100) ? 100 : loaderPercent);
+        prop.put("loaderQueuePercent", (loaderPercent > 100) ? 100 : loaderPercent);
 
-        prop.putNum("localCrawlQueueSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
-        prop.put("localCrawlPaused",sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? "1" : "0");
+        prop.putNum("localCrawlQueueSize", sb
+            .getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)
+            .getJobCount());
+        prop.put("localCrawlPaused", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)
+            ? "1"
+            : "0");
 
-        prop.putNum("remoteTriggeredCrawlQueueSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
-        prop.put("remoteTriggeredCrawlPaused",sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? "1" : "0");
+        prop.putNum(
+            "remoteTriggeredCrawlQueueSize",
+            sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
+        prop.put(
+            "remoteTriggeredCrawlPaused",
+            sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? "1" : "0");
 
         prop.putNum("stackCrawlQueueSize", sb.crawlStacker.size());
 
         // return rewrite properties
-        prop.put("date",(new Date()).toString());
+        prop.put("date", (new Date()).toString());
         return prop;
     }
 }
