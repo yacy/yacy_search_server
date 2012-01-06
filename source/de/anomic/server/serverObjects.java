@@ -418,10 +418,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         if (isEmpty()) return "";
         final StringBuilder param = new StringBuilder(size() * 40);
         for (final Map.Entry<String, String> entry: entrySet()) {
-            param.append(MultiProtocolURI.escape(entry.getKey()));
-            param.append('=');
-            param.append(MultiProtocolURI.escape(entry.getValue()));
-            param.append('&');
+            param.append(MultiProtocolURI.escape(entry.getKey()))
+                .append('=')
+                .append(MultiProtocolURI.escape(entry.getValue()))
+                .append('&');
         }
         param.setLength(param.length() - 1);
         return param.toString();
