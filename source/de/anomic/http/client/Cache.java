@@ -222,7 +222,6 @@ public final class Cache {
      * @return the resource content as byte[]. If no data
      * is available or the cached file is not readable, <code>null</code>
      * is returned.
-     * @throws IOException
      */
     public static byte[] getContent(final byte[] hash) {
         // load the url as resource from the cache
