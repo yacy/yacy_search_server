@@ -165,18 +165,18 @@ public class serverSwitch
                 (int) getConfigLong("server.maxTrackingHostCount", 100));
     }
 
+    /**
+     * get my public IP, either set statically or figure out dynamic
+     * @return 
+     */
     public String myPublicIP() {
         // if a static IP was configured, we have to return it here ...
         final String staticIP = getConfig("staticIP", "");
-        if ( staticIP.length() > 0 ) {
-            return staticIP;
-        }
+        if ( !"".equals(staticIP) ) return staticIP;
 
         // otherwise we return the real IP address of this host
         final InetAddress pLIP = Domains.myPublicLocalIP();
-        if ( pLIP != null ) {
-            return pLIP.getHostAddress();
-        }
+        if ( pLIP != null ) return pLIP.getHostAddress();
         return null;
     }
 
@@ -189,6 +189,10 @@ public class serverSwitch
         return this.log;
     }
 
+    /**
+     * add whole map of key-value pairs to config
+     * @param otherConfigs 
+     */
     public void setConfig(final Map<String, String> otherConfigs) {
         final Iterator<Map.Entry<String, String>> i = otherConfigs.entrySet().iterator();
         Map.Entry<String, String> entry;
@@ -326,6 +330,9 @@ public class serverSwitch
         return this.configProps.keySet().iterator();
     }
 
+    /**
+     * write the changes to permanent storage (File)
+     */
     private void saveConfig() {
         ConcurrentMap<String, String> configPropsCopy = new ConcurrentHashMap<String, String>();
         configPropsCopy.putAll(this.configProps); // avoid concurrency problems
