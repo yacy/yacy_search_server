@@ -107,11 +107,8 @@ public final class FileUtils
             dest.flush();
             total += c;
 
-            if ( count > 0 ) {
-                chunkSize = (int) Math.min(count - total, DEFAULT_BUFFER_SIZE);
-                if ( chunkSize == 0 ) {
-                    break;
-                }
+            if ( count > 0 && count == total) {
+                break;
             }
 
         }
@@ -130,7 +127,7 @@ public final class FileUtils
             if ( fis != null ) {
                 try {
                     fis.close();
-                } catch ( final Exception e ) {
+                } catch (Exception e ) {
                 }
             }
         }
