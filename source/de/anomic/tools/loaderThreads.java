@@ -24,7 +24,9 @@
 
 package de.anomic.tools;
 
-import java.util.Hashtable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.ProxySettings;
@@ -39,8 +41,8 @@ public class loaderThreads {
     protected ProxySettings remoteProxyConfig;
 
     // management objects for collection of threads
-    Hashtable<String, Thread> threads;
-    int completed, failed;
+    private Map<String, Thread> threads;
+    private int completed, failed;
     
     public loaderThreads() {
        this(10000, null, null);
@@ -54,7 +56,7 @@ public class loaderThreads {
         this.timeout = timeout;
         this.user = user;
         this.password = password;
-        this.threads = new Hashtable<String, Thread>();
+        this.threads = new HashMap<String, Thread>();
         this.completed = 0;
         this.failed = 0;
     }

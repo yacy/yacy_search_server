@@ -118,6 +118,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         return (int) (1000L * ((long) count()) / runningTime());
     }
     
+    @Override
     public void run() {
         while (runningJobs.size() > 50) {
             try {Thread.sleep(10000 + 3000 * (System.currentTimeMillis() % 6));} catch (InterruptedException e) {}

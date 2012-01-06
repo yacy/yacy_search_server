@@ -33,6 +33,7 @@
   Properties - setProperty would be needed, but only available in 1.2
   HashMap, TreeMap - only in 1.2
   Hashtable - available in 1.0, but 'put' does not accept null values
+//FIXME: it's 2012, do we still need support for Java 1.0?!
 
   So this class was created as a convenience.
   It will also contain special methods that read data from internet-resources

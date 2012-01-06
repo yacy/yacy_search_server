@@ -37,6 +37,8 @@ import net.yacy.cora.order.ByteOrder;
  * a byte[] in a Hashtable does not work because the hash computation does not
  * work for byte[]. This class extends byte[] with a cached hashing function,
  * so it can be used in hashtables.
+ * //FIXME: so does storing byte[] in HashMap help? as I'm moving use of Hashtable to
+ * //FIXME: HashMap, if so, please remove this class- or notify me
  */
 
 public class ByteArray {

@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
@@ -35,6 +34,7 @@ import java.util.Vector;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.server.serverCore;
+import java.util.*;
 
 
 public final class OS {
@@ -63,8 +63,8 @@ public final class OS {
 	public static int maxPathLength = 65535;
 
 	// Macintosh-specific statics
-	public  static final Hashtable<String, String> macFSTypeCache = new Hashtable<String, String>();
-	public  static final Hashtable<String, String> macFSCreatorCache = new Hashtable<String, String>();
+	public  static final Map<String, String> macFSTypeCache = new HashMap<String, String>();
+	public  static final Map<String, String> macFSCreatorCache = new HashMap<String, String>();
 
 	// static initialization
 	static {

@@ -87,10 +87,10 @@ import net.yacy.kelondro.util.FileUtils;
  * &lt;/body&gt;&lt;/html&gt;
  * </pre>
  * <p>
- * The corresponding Hashtable to use this Template:<br>
+ * The corresponding HashMap to use this Template:<br>
  * <b>Java Example</b><br>
  * <pre>
- * Hashtable pattern;
+ * HashMap pattern;
  * pattern.put("times", 10); //10 greetings
  * for(int i=0;i<=9;i++){
  * 	pattern.put("times_"+i+"_daytime", 1); //index: 1, second Entry, evening
@@ -112,7 +112,7 @@ import net.yacy.kelondro.util.FileUtils;
  * <li>Multi templates: multitemplatename_index_</li>
  * <li>Alterantives: alternativename_</li>
  * </ul>
- * So the Names in the Hashtable are:
+ * So the Names in the HashMap are:
  * <ul>
  * <li>Multi templates: multitemplatename_index_templatename</li>
  * <li>Alterantives: alternativename_templatename</li>
