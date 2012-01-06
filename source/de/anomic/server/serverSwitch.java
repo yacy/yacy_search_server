@@ -311,19 +311,23 @@ public class serverSwitch
      *         the relative path setting.
      */
     public File getDataPath(final String key, final String dflt) {
-        File ret;
-        final String path = getConfig(key, dflt).replace('\\', '/');
-        final File f = new File(path);
-        ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.dataPath, path));
-        return ret;
+        return getFileByPath(key, dflt, dataPath);
     }
 
+    /**
+     * return file at path from config entry "key", or fallback to default dflt
+     * @param key
+     * @param dflt
+     * @return 
+     */
     public File getAppPath(final String key, final String dflt) {
-        File ret;
+        return getFileByPath(key, dflt, appPath);
+    }
+    
+    private File getFileByPath(String key, String dflt, File prefix) {
         final String path = getConfig(key, dflt).replace('\\', '/');
         final File f = new File(path);
-        ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.appPath, path));
-        return ret;
+        return (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(prefix, path));
     }
 
     public Iterator<String> configKeys() {
