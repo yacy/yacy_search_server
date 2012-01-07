@@ -57,7 +57,9 @@ public class DictionaryLoader_p {
             prop.put(dictionary.nickname + "ActionDeactivated", 0);
         }
 
-        if (post == null) return prop;
+        if (post == null) {
+            return prop;
+        }
 
         // GEON0
         if (post.containsKey("geon0Load")) {
@@ -67,6 +69,7 @@ public class DictionaryLoader_p {
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON0.file());
                 LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocalization(LibraryProvider.Dictionary.GEON0.file()));
+                LibraryProvider.autotagging.addLocalization(LibraryProvider.geoLoc);
                 prop.put("geon0Status", LibraryProvider.Dictionary.GEON0.file().exists() ? 1 : 0);
                 prop.put("geon0ActionLoaded", 1);
             } catch (final MalformedURLException e) {
@@ -96,6 +99,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geon0Activate")) {
             LibraryProvider.Dictionary.GEON0.fileDisabled().renameTo(LibraryProvider.Dictionary.GEON0.file());
             LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocalization(LibraryProvider.Dictionary.GEON0.file()));
+            LibraryProvider.autotagging.addLocalization(LibraryProvider.geoLoc);
             prop.put("geon0ActionActivated", 1);
         }
 
@@ -108,6 +112,7 @@ public class DictionaryLoader_p {
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEODB1.file());
                 LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEODB0.nickname);
                 LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocalization(LibraryProvider.Dictionary.GEODB1.file(), false));
+                LibraryProvider.autotagging.addLocalization(LibraryProvider.geoLoc);
                 prop.put("geo1Status", LibraryProvider.Dictionary.GEODB1.file().exists() ? 1 : 0);
                 prop.put("geo1ActionLoaded", 1);
             } catch (final MalformedURLException e) {
@@ -137,6 +142,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geo1Activate")) {
             LibraryProvider.Dictionary.GEODB1.fileDisabled().renameTo(LibraryProvider.Dictionary.GEODB1.file());
             LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocalization(LibraryProvider.Dictionary.GEODB1.file(), false));
+            LibraryProvider.autotagging.addLocalization(LibraryProvider.geoLoc);
             prop.put("geo1ActionActivated", 1);
         }
 
