@@ -770,7 +770,7 @@
     </exec>
     <replaceregexp file="debian/changelog"
                   match="yacy \(.*\) unstable; urgency=low"
-                  replace="yacy (*auto-svn-version*) unstable; urgency=low" />
+                  replace="yacy (*auto-git-version*) unstable; urgency=low" />
   </target>
 	
   <target name="sign" depends="readBuildProperties" description="sign current release file in RELEASE/ with ${privateKeyFile}">
