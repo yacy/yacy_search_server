@@ -48,11 +48,18 @@ public interface Localization {
     public TreeSet<Location> find(String anyname, boolean locationexact);
 
     /**
+     * produce a set of location names
+     * @return a set of names
+     */
+    public Set<String> locationNames();
+
+    /**
      * recommend a set of names according to a given name
      * @param s a possibly partially matching name
      * @return a set of names that match with the given name using the local dictionary of names
      */
     public Set<String> recommend(String s);
+
     /**
      * recommend a set of names according to a given name
      * @param s a possibly partially matching name
@@ -70,6 +77,7 @@ public interface Localization {
      * hashCode that must be used to distinguish localization services in hash sets
      * @return the hash code, may be derived from the nickname
      */
+    @Override
     public int hashCode();
 
     /**
@@ -77,5 +85,6 @@ public interface Localization {
      * @param other
      * @return true if both objects are localization services and have the same nickname
      */
+    @Override
     public boolean equals(Object other);
 }

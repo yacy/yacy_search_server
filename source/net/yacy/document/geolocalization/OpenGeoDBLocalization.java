@@ -195,7 +195,7 @@ public class OpenGeoDBLocalization implements Localization
     /**
      * check database tables against occurrences of this entity the anyname - String may be one of: - name of
      * a town, villa, region etc - zip code - telephone prefix - kfz sign
-     * 
+     *
      * @param anyname
      * @return
      */
@@ -242,8 +242,22 @@ public class OpenGeoDBLocalization implements Localization
     }
 
     /**
+     * produce a set of location names
+     * @return a set of names
+     */
+    @Override
+    public Set<String> locationNames() {
+        Set<String> locations = new HashSet<String>();
+        Set<StringBuilder> l = this.name2ids.keySet();
+        for (StringBuilder s: l) {
+            locations.add(s.toString());
+        }
+        return locations;
+    }
+
+    /**
      * read the dictionary and construct a set of recommendations to a given string
-     * 
+     *
      * @param s input value that is used to match recommendations
      * @return a set that contains all words that start with the input value
      */

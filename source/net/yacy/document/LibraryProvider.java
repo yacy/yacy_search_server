@@ -48,12 +48,15 @@ import net.yacy.kelondro.util.FileUtils;
 public class LibraryProvider
 {
 
-    private static final String path_to_source_dictionaries = "source";
-    private static final String path_to_did_you_mean_dictionaries = "didyoumean";
+    public static final char tagPrefix = '$';
+    public static final String path_to_source_dictionaries = "source";
+    public static final String path_to_did_you_mean_dictionaries = "didyoumean";
+    public static final String path_to_autotagging_dictionaries = "autotagging";
 
     public static final String disabledExtension = ".disabled";
 
     public static WordCache dymLib = new WordCache(null);
+    public static Autotagging autotagging = new Autotagging(null, tagPrefix);
     public static OverarchingLocalization geoLoc = new OverarchingLocalization();
     private static File dictSource = null;
     private static File dictRoot = null;
@@ -91,7 +94,7 @@ public class LibraryProvider
      * initialize the LibraryProvider as static class. This assigns default paths, and initializes the
      * dictionary classes Additionally, if default dictionaries are given in the source path, they are
      * translated into the input format inside the DATA/DICTIONARIES directory
-     * 
+     *
      * @param pathToSource
      * @param pathToDICTIONARIES
      */
@@ -107,6 +110,8 @@ public class LibraryProvider
         initDidYouMean();
         integrateOpenGeoDB();
         integrateGeonames();
+        initAutotagging(tagPrefix);
+        autotagging.addLocalization(geoLoc);
     }
 
     public static void integrateOpenGeoDB() {
@@ -139,6 +144,14 @@ public class LibraryProvider
             dymDict.mkdirs();
         }
         dymLib = new WordCache(dymDict);
+    }
+
+    public static void initAutotagging(char prefix) {
+        final File autotaggingPath = new File(dictRoot, path_to_autotagging_dictionaries);
+        if ( !autotaggingPath.exists() ) {
+            autotaggingPath.mkdirs();
+        }
+        autotagging = new Autotagging(autotaggingPath, prefix);
     }
 
     public static void removeDeReWo() {

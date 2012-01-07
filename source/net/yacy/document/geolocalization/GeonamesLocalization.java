@@ -165,6 +165,20 @@ public class GeonamesLocalization implements Localization
         return a;
     }
 
+    /**
+     * produce a set of location names
+     * @return a set of names
+     */
+    @Override
+    public Set<String> locationNames() {
+        Set<String> locations = new HashSet<String>();
+        Set<StringBuilder> l = this.name2ids.keySet();
+        for (StringBuilder s: l) {
+            locations.add(s.toString());
+        }
+        return locations;
+    }
+
     @Override
     public Set<String> recommend(final String s) {
         final Set<String> a = new HashSet<String>();
