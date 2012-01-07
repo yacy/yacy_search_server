@@ -27,4 +27,4 @@ The Debian packaging is (C) 2008, Florian Richter <Florian_Richter@gmx.de> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 
 
-Some libraries of yacy have different licenses. Please have a look at lib/ and libx/
+Some libraries of yacy have different licenses. Please have a look at lib/
