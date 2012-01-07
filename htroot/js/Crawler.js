@@ -168,6 +168,13 @@ function handleQueues(){
 		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
 		putQueueState("remotecrawler", remotecrawlerqueue_state);
 		updateTable(remotecrawlerqueue, "remote crawler");
+		
+		noloadcrawlerqueue=getFirstChild(xml, "noloadcrawlerqueue");
+		noloadcrawlerqueue_size=getValue(getFirstChild(noloadcrawlerqueue, "size"));
+		noloadcrawlerqueue_state=getValue(getFirstChild(noloadcrawlerqueue, "state"));
+		document.getElementById("noloadcrawlerqueuesize").firstChild.nodeValue=noloadcrawlerqueue_size;
+		putQueueState("noloadcrawler", noloadcrawlerqueue_state);
+
 	}
 	queueLoaded=true;
 }
