@@ -220,6 +220,12 @@ public class WordCache {
         }
     }
 
+    public static void learn(Set<String> wordset) {
+        for (String s: wordset) {
+            learn(new StringBuilder(s));
+        }
+    }
+
     /**
      * scan the input directory and load all dictionaries (again)
      */

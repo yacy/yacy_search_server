@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -111,8 +112,11 @@ public class LibraryProvider
         integrateOpenGeoDB();
         integrateGeonames();
         initAutotagging(tagPrefix);
+        Set<String> allTags = new HashSet<String>() ;
+        allTags.addAll(autotagging.allTags()); // we must copy this into a clone to prevent circularity
         autotagging.addLocalization(geoLoc);
         autotagging.addDictionaries(dymLib.getDictionaries());
+        WordCache.learn(allTags);
     }
 
     public static void integrateOpenGeoDB() {

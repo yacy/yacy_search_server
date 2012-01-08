@@ -89,6 +89,10 @@ public class Autotagging {
         }
     }
 
+    public Set<String> allTags() {
+        return this.allTags.keySet();
+    }
+
     public void addDictionaries(Map<String, Dictionary> dictionaries) {
         for (Map.Entry<String, Dictionary> entry: dictionaries.entrySet()) {
             Vocabulary voc = new Vocabulary(entry.getKey(), entry.getValue());
