@@ -58,9 +58,9 @@ public class WordCache {
 
     public static class Dictionary {
 
-        private TreeSet<StringBuilder> dict; // the word dictionary
-        private TreeSet<StringBuilder> tcid; // the dictionary of reverse words
-        
+        private final TreeSet<StringBuilder> dict; // the word dictionary
+        private final TreeSet<StringBuilder> tcid; // the dictionary of reverse words
+
         public Dictionary(final File file) throws IOException {
             this.dict = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
             this.tcid = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
@@ -74,9 +74,13 @@ public class WordCache {
             StringBuilder sb;
             try {
                 while ((l = reader.readLine()) != null) {
-                    if (l.length() == 0 || l.charAt(0) == '#') continue;
+                    if (l.length() == 0 || l.charAt(0) == '#') {
+                        continue;
+                    }
                     l = l.trim().toLowerCase();
-                    if (l.length() < 4) continue;
+                    if (l.length() < 4) {
+                        continue;
+                    }
                     sb = new StringBuilder(l);
                     this.dict.add(sb);
                     this.tcid.add(reverse(sb));
@@ -85,7 +89,7 @@ public class WordCache {
                 // finish
             }
         }
-        
+
         /**
          * read the dictionary and construct a set of recommendations to a given string
          * @param s input value that is used to match recommendations
@@ -95,12 +99,20 @@ public class WordCache {
             final Set<StringBuilder> ret = new HashSet<StringBuilder>();
             SortedSet<StringBuilder> t = this.dict.tailSet(string);
             for (final StringBuilder r: t) {
-                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, string) && r.length() > string.length()) ret.add(r); else break;
+                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, string) && r.length() > string.length()) {
+                    ret.add(r);
+                } else {
+                    break;
+                }
             }
             string = reverse(string);
             t = this.tcid.tailSet(string);
             for (final StringBuilder r: t) {
-                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, string) && r.length() > string.length()) ret.add(reverse(r)); else break;
+                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, string) && r.length() > string.length()) {
+                    ret.add(reverse(r));
+                } else {
+                    break;
+                }
             }
             return ret;
         }
@@ -126,12 +138,20 @@ public class WordCache {
         public boolean supports(StringBuilder string) {
             SortedSet<StringBuilder> t = this.dict.tailSet(string);
             for (final StringBuilder r: t) {
-                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) return true; else break;
+                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) {
+                    return true;
+                } else {
+                    break;
+                }
             }
             string = reverse(string);
             t = this.tcid.tailSet(string);
             for (final StringBuilder r: t) {
-                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) return true; else break;
+                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) {
+                    return true;
+                } else {
+                    break;
+                }
             }
             return false;
         }
@@ -157,8 +177,16 @@ public class WordCache {
             return this.dict.size() >= minimumWords;
         }
 
+        public Set<StringBuilder> getWords() {
+            return this.dict;
+        }
+
     }
-    
+
+    public Map<String, Dictionary> getDictionaries() {
+        return this.dictionaries;
+    }
+
     /**
      * create a new dictionary
      * This loads all files that ends with '.words'
@@ -177,9 +205,15 @@ public class WordCache {
      * @param word
      */
     public static void learn(final StringBuilder word) {
-        if (word == null) return;
-        if (word.length() < commonWordsMinLength) return;
-        if (MemoryControl.shortStatus()) commonWords.clear();
+        if (word == null) {
+            return;
+        }
+        if (word.length() < commonWordsMinLength) {
+            return;
+        }
+        if (MemoryControl.shortStatus()) {
+            commonWords.clear();
+        }
         commonWords.inc(word);
         if (!(commonWords.sizeSmaller(commonWordsMaxSize))) {
             commonWords.shrinkToMaxSize(commonWordsMaxSize / 2);
@@ -190,14 +224,18 @@ public class WordCache {
      * scan the input directory and load all dictionaries (again)
      */
     public void reload() {
-        if (this.dictionaryPath == null || !this.dictionaryPath.exists()) return;
+        if (this.dictionaryPath == null || !this.dictionaryPath.exists()) {
+            return;
+        }
         final String[] files = this.dictionaryPath.list();
         for (final String f: files) {
-            if (f.endsWith(".words")) try {
-                Dictionary dict = new Dictionary(new File(this.dictionaryPath, f));
-                this.dictionaries.put(f.substring(0, f.length() - 6), dict);
-            } catch (final IOException e) {
-                Log.logException(e);
+            if (f.endsWith(".words")) {
+                try {
+                    Dictionary dict = new Dictionary(new File(this.dictionaryPath, f));
+                    this.dictionaries.put(f.substring(0, f.length() - 6), dict);
+                } catch (final IOException e) {
+                    Log.logException(e);
+                }
             }
         }
     }
@@ -226,7 +264,11 @@ public class WordCache {
         try {
             for (final Map.Entry<StringBuilder, AtomicInteger> v: u.entrySet()) {
                 vv = v.getKey();
-                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(vv, string) && vv.length() > string.length()) ret.add(vv); else break;
+                if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(vv, string) && vv.length() > string.length()) {
+                    ret.add(vv);
+                } else {
+                    break;
+                }
             }
         } catch (final ConcurrentModificationException e) {}
         return ret;
@@ -239,7 +281,9 @@ public class WordCache {
      */
     public boolean contains(final StringBuilder s) {
         for (Dictionary dict: this.dictionaries.values()) {
-            if (dict.contains(s)) return true;
+            if (dict.contains(s)) {
+                return true;
+            }
         }
         return false;
     }
@@ -253,7 +297,9 @@ public class WordCache {
      */
     public boolean supports(StringBuilder string) {
         for (Dictionary dict: this.dictionaries.values()) {
-            if (dict.supports(string)) return true;
+            if (dict.supports(string)) {
+                return true;
+            }
         }
         return false;
     }
@@ -280,7 +326,9 @@ public class WordCache {
      */
     public boolean isRelevant(final int minimumWords) {
         for (Dictionary dict: this.dictionaries.values()) {
-            if (dict.isRelevant(minimumWords)) return true;
+            if (dict.isRelevant(minimumWords)) {
+                return true;
+            }
         }
         return false;
     }

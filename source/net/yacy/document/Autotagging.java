@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.document.WordCache.Dictionary;
 import net.yacy.document.geolocalization.Localization;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -88,11 +89,15 @@ public class Autotagging {
         }
     }
 
-    /*
-    public void addDidYouMean(WordCache wordCache) {
-
+    public void addDictionaries(Map<String, Dictionary> dictionaries) {
+        for (Map.Entry<String, Dictionary> entry: dictionaries.entrySet()) {
+            Vocabulary voc = new Vocabulary(entry.getKey(), entry.getValue());
+            this.vocabularies.put(entry.getKey(), voc);
+            for (String t: voc.tags()) {
+                this.allTags.put(t, PRESENT);
+            }
+        }
     }
-     */
 
     public void addLocalization(Localization localization) {
         Vocabulary voc = new Vocabulary("Locale", localization);
@@ -170,6 +175,17 @@ public class Autotagging {
             for (String loc: locNames) {
                 this.tag2print.put(loc.toLowerCase(), loc);
                 this.print2tag.put(loc, loc.toLowerCase());
+            }
+        }
+
+        public Vocabulary(String name, Dictionary dictionary) {
+            this(name);
+            Set<StringBuilder> words = dictionary.getWords();
+            String s;
+            for (StringBuilder word: words) {
+                s = word.toString();
+                this.tag2print.put(s.toLowerCase(), s);
+                this.print2tag.put(s, s.toLowerCase());
             }
         }
 

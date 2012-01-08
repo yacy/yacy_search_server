@@ -112,6 +112,7 @@ public class LibraryProvider
         integrateGeonames();
         initAutotagging(tagPrefix);
         autotagging.addLocalization(geoLoc);
+        autotagging.addDictionaries(dymLib.getDictionaries());
     }
 
     public static void integrateOpenGeoDB() {
