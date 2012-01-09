@@ -79,7 +79,7 @@
 
   <target name="buildGitRevTask">
     <delete file="${libbuild}/GitRevTask.jar" failonerror="false" />
-    <javac srcdir="${libbuild}/GitRevTask">
+    <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true">
     	<classpath>
     		<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
     	</classpath>
@@ -199,7 +199,7 @@
   	
     <!-- compile yacyBuildProperties.java -->
     <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
-           debug="true" debuglevel="lines,vars,source"
+           debug="true" debuglevel="lines,vars,source" includeantruntime="false"
            includes="net/yacy/peers/operation/yacyBuildProperties.java"
            source="${javacSource}" target="${javacTarget}">
       <classpath refid="project.class.path" />
@@ -209,7 +209,7 @@
 
     <!-- compile the core sources -->
     <javac srcdir="${src}/" destdir="${build}"
-           debug="true" debuglevel="lines,vars,source"
+           debug="true" debuglevel="lines,vars,source" includeantruntime="false"
            excludes="net/yacy/peers/operation/yacyBuildProperties.java"
            source="${javacSource}" target="${javacTarget}">
       <classpath refid="project.class.path" />
@@ -251,7 +251,7 @@
     <javac srcdir="${htroot}/"
     	   excludes="processing/**"
            source="${javacSource}" target="${javacTarget}"
-           debug="true" debuglevel="lines,vars,source">
+           debug="true" debuglevel="lines,vars,source" includeantruntime="false">
       <classpath refid="project.class.path" />
       <compilerarg value="-Xlint"/>
     </javac>
