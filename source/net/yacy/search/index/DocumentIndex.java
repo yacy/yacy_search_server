@@ -51,7 +51,7 @@ import net.yacy.search.snippet.ContentDomain;
 
 /**
  * convenience class to access the yacycore library from outside of yacy to put files into the index
- * 
+ *
  * @author Michael Christen
  */
 public class DocumentIndex extends Segment
@@ -177,7 +177,7 @@ public class DocumentIndex extends Segment
     /**
      * add a file or a directory of files to the index If the given file is a path to a directory, the
      * complete sub-tree is indexed
-     * 
+     *
      * @param start
      */
     public void addConcurrent(final DigestURI start) throws IOException {
@@ -213,7 +213,7 @@ public class DocumentIndex extends Segment
 
     /**
      * do a full-text search of a given string and return a specific number of results
-     * 
+     *
      * @param querystring
      * @param count
      * @return a list of files that contain the given string
@@ -223,7 +223,7 @@ public class DocumentIndex extends Segment
         final QueryParams query =
             new QueryParams(querystring, count, null, this, textRankingDefault, "DocumentIndex");
         final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
-        final RWIProcess rankedCache = new RWIProcess(query, order, SearchEvent.max_results_preparation);
+        final RWIProcess rankedCache = new RWIProcess(query, order, SearchEvent.max_results_preparation, false);
         rankedCache.start();
 
         // search is running; retrieve results

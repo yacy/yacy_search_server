@@ -147,7 +147,7 @@ public final class SearchEvent
 
         // initialize a ranking process that is the target for data
         // that is generated concurrently from local and global search threads
-        this.rankingProcess = new RWIProcess(this.query, this.order, max_results_preparation);
+        this.rankingProcess = new RWIProcess(this.query, this.order, max_results_preparation, remote);
 
         // start a local search concurrently
         this.rankingProcess.start();
@@ -539,7 +539,7 @@ public final class SearchEvent
 
         /**
          * add a single abstract to the existing set of abstracts
-         * 
+         *
          * @param wordhash
          * @param singleAbstract // a mapping from url-hashes to a string of peer-hashes
          */

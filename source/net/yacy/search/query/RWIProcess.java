@@ -84,7 +84,7 @@ public final class RWIProcess extends Thread
     private final AtomicInteger maxExpectedRemoteReferences, expectedRemoteReferences,
         receivedRemoteReferences;
     private final WeakPriorityBlockingQueue<WordReferenceVars> stack;
-    private final AtomicInteger feeders;
+    private final AtomicInteger feedersAlive, feedersTerminated;
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
 
@@ -93,7 +93,7 @@ public final class RWIProcess extends Thread
     private final ReferenceOrder order;
     private final long startTime;
     private boolean addRunning;
-    private boolean fresh;
+    private final boolean remote;
 
     // navigation scores
     private final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
@@ -102,7 +102,7 @@ public final class RWIProcess extends Thread
     private final ScoreMap<String> protocolNavigator; // a counter for protocol types
     private final ScoreMap<String> filetypeNavigator; // a counter for file types
 
-    public RWIProcess(final QueryParams query, final ReferenceOrder order, final int maxentries) {
+    public RWIProcess(final QueryParams query, final ReferenceOrder order, final int maxentries, final boolean remote) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -112,6 +112,7 @@ public final class RWIProcess extends Thread
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
         this.query = query;
         this.order = order;
+        this.remote = remote;
         this.remote_peerCount = 0;
         this.remote_resourceSize = 0;
         this.remote_indexCount = 0;
@@ -132,12 +133,12 @@ public final class RWIProcess extends Thread
         this.protocolNavigator = new ConcurrentScoreMap<String>();
         this.filetypeNavigator = new ConcurrentScoreMap<String>();
         this.ref = new ConcurrentScoreMap<String>();
-        this.feeders = new AtomicInteger(0);
+        this.feedersAlive = new AtomicInteger(0);
+        this.feedersTerminated = new AtomicInteger(0);
         this.startTime = System.currentTimeMillis();
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.receivedRemoteReferences = new AtomicInteger(0);
-        this.fresh = true;
     }
 
     public void addExpectedRemoteReferences(int x) {
@@ -150,7 +151,7 @@ public final class RWIProcess extends Thread
     public boolean expectMoreRemoteReferences() {
         return this.expectedRemoteReferences.get() > 0;
     }
-    
+
     public long waitTimeRecommendation() {
         return
             this.maxExpectedRemoteReferences.get() == 0 ? 0 :
@@ -159,7 +160,7 @@ public final class RWIProcess extends Thread
                         maxWaitPerResult * this.expectedRemoteReferences.get() / this.maxExpectedRemoteReferences.get(),
                         maxWaitPerResult * (100 - Math.min(100, this.receivedRemoteReferences.get())) / 100));
     }
-    
+
     public QueryParams getQuery() {
         return this.query;
     }
@@ -172,7 +173,7 @@ public final class RWIProcess extends Thread
     public void run() {
         // do a search
         oneFeederStarted();
-        
+
         // sort the local containers and truncate it to a limited count,
         // so following sortings together with the global results will be fast
         try {
@@ -242,7 +243,9 @@ public final class RWIProcess extends Thread
             resourceName,
             is,
             System.currentTimeMillis() - timer), false);
-        if (!local) this.receivedRemoteReferences.addAndGet(is);
+        if (!local) {
+            this.receivedRemoteReferences.addAndGet(is);
+        }
 
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
@@ -384,17 +387,20 @@ public final class RWIProcess extends Thread
      * method to signal the incoming stack that one feeder has terminated
      */
     public void oneFeederTerminated() {
-        final int c = this.feeders.decrementAndGet();
+        this.feedersTerminated.incrementAndGet();
+        final int c = this.feedersAlive.decrementAndGet();
         assert c >= 0 : "feeders = " + c;
     }
 
     public void oneFeederStarted() {
-        this.feeders.addAndGet(1);
-        this.fresh = false;
+        this.feedersAlive.addAndGet(1);
     }
 
     public boolean feedingIsFinished() {
-        return !this.fresh && this.feeders.get() <= 0;
+        return
+            this.feedersTerminated.intValue() > (this.remote ? 1 : 0) &&
+            this.feedersAlive.get() > 0 &&
+            (!this.remote || this.remote_indexCount > 0);
     }
 
     private boolean testFlags(final WordReference ientry) {
