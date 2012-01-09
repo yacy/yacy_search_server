@@ -36,7 +36,7 @@ import java.util.Set;
  * @author daniel
  * @author sixcooler
  */
-public class ConnectionInfo {
+public class ConnectionInfo implements Comparable<ConnectionInfo> {
     /**
      * a list of all current connections to be shown in Connections_p
      */
@@ -269,5 +269,12 @@ public class ConnectionInfo {
         if (getClass() != obj.getClass()) return false;
         final ConnectionInfo other = (ConnectionInfo) obj;
         return this.id == other.id;
+    }
+
+    public int compareTo(ConnectionInfo o) {
+        if(o==null) throw new NullPointerException("ConnectionInfo: compare() : passed argument is null \n");
+        if(this.initTime>o.initTime) return 1;
+        else if(this.initTime<o.initTime) return -1;
+        else return 0;
     }
 }

@@ -33,6 +33,7 @@
   Properties - setProperty would be needed, but only available in 1.2
   HashMap, TreeMap - only in 1.2
   Hashtable - available in 1.0, but 'put' does not accept null values
+//FIXME: it's 2012, do we still need support for Java 1.0?!
 
   So this class was created as a convenience.
   It will also contain special methods that read data from internet-resources
@@ -418,10 +419,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         if (isEmpty()) return "";
         final StringBuilder param = new StringBuilder(size() * 40);
         for (final Map.Entry<String, String> entry: entrySet()) {
-            param.append(MultiProtocolURI.escape(entry.getKey()));
-            param.append('=');
-            param.append(MultiProtocolURI.escape(entry.getValue()));
-            param.append('&');
+            param.append(MultiProtocolURI.escape(entry.getKey()))
+                .append('=')
+                .append(MultiProtocolURI.escape(entry.getValue()))
+                .append('&');
         }
         param.setLength(param.length() - 1);
         return param.toString();

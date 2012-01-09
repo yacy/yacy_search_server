@@ -53,8 +53,7 @@ public class CacheResource_p {
             return prop;
         }
         
-        byte[] resource = null;
-        resource = Cache.getContent(url.hash());
+        byte[] resource = Cache.getContent(url.hash());
         if (resource == null) return prop;
         
         // check request type

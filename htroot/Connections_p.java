@@ -43,6 +43,9 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverCore.Session;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public final class Connections_p {    
     
@@ -141,11 +144,14 @@ public final class Connections_p {
         
         // client sessions
         final Set<ConnectionInfo> allConnections = ConnectionInfo.getAllConnections();
-        // TODO sorting
-//        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
+        // sorting: sort by initTime, decending
+        List<ConnectionInfo> allConnectionsSorted = new LinkedList<ConnectionInfo>(allConnections);
+        Collections.sort(allConnectionsSorted);
+        Collections.reverse(allConnectionsSorted); // toggle ascending/descending
+        
         int c = 0;
-        synchronized (allConnections) {
-        for (final ConnectionInfo conInfo: allConnections) {
+        synchronized (allConnectionsSorted) {
+        for (final ConnectionInfo conInfo: allConnectionsSorted) {
             prop.put("clientList_" + c + "_clientProtocol", conInfo.getProtocol());
             prop.putNum("clientList_" + c + "_clientLifetime", conInfo.getLifetime());
             prop.putNum("clientList_" + c + "_clientUpbytes", conInfo.getUpbytes());

@@ -165,18 +165,18 @@ public class serverSwitch
                 (int) getConfigLong("server.maxTrackingHostCount", 100));
     }
 
+    /**
+     * get my public IP, either set statically or figure out dynamic
+     * @return 
+     */
     public String myPublicIP() {
         // if a static IP was configured, we have to return it here ...
         final String staticIP = getConfig("staticIP", "");
-        if ( staticIP.length() > 0 ) {
-            return staticIP;
-        }
+        if ( !"".equals(staticIP) ) return staticIP;
 
         // otherwise we return the real IP address of this host
         final InetAddress pLIP = Domains.myPublicLocalIP();
-        if ( pLIP != null ) {
-            return pLIP.getHostAddress();
-        }
+        if ( pLIP != null ) return pLIP.getHostAddress();
         return null;
     }
 
@@ -189,6 +189,10 @@ public class serverSwitch
         return this.log;
     }
 
+    /**
+     * add whole map of key-value pairs to config
+     * @param otherConfigs 
+     */
     public void setConfig(final Map<String, String> otherConfigs) {
         final Iterator<Map.Entry<String, String>> i = otherConfigs.entrySet().iterator();
         Map.Entry<String, String> entry;
@@ -307,25 +311,32 @@ public class serverSwitch
      *         the relative path setting.
      */
     public File getDataPath(final String key, final String dflt) {
-        File ret;
-        final String path = getConfig(key, dflt).replace('\\', '/');
-        final File f = new File(path);
-        ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.dataPath, path));
-        return ret;
+        return getFileByPath(key, dflt, dataPath);
     }
 
+    /**
+     * return file at path from config entry "key", or fallback to default dflt
+     * @param key
+     * @param dflt
+     * @return 
+     */
     public File getAppPath(final String key, final String dflt) {
-        File ret;
+        return getFileByPath(key, dflt, appPath);
+    }
+    
+    private File getFileByPath(String key, String dflt, File prefix) {
         final String path = getConfig(key, dflt).replace('\\', '/');
         final File f = new File(path);
-        ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.appPath, path));
-        return ret;
+        return (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(prefix, path));
     }
 
     public Iterator<String> configKeys() {
         return this.configProps.keySet().iterator();
     }
 
+    /**
+     * write the changes to permanent storage (File)
+     */
     private void saveConfig() {
         ConcurrentMap<String, String> configPropsCopy = new ConcurrentHashMap<String, String>();
         configPropsCopy.putAll(this.configProps); // avoid concurrency problems

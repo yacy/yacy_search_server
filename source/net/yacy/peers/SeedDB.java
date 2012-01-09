@@ -33,7 +33,7 @@ import java.lang.ref.SoftReference;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -98,8 +98,8 @@ public final class SeedDB implements AlternativeDomainNames {
 
     private Seed mySeed; // my own seed
     private final Set<String> myBotIDs; // list of id's that this bot accepts as robots.txt identification
-    private final Hashtable<String, String> nameLookupCache; // a name-to-hash relation
-    private final Hashtable<InetAddress, SoftReference<Seed>> ipLookupCache;
+    private final Map<String, String> nameLookupCache; // a name-to-hash relation
+    private final Map<InetAddress, SoftReference<Seed>> ipLookupCache;
 
     public SeedDB(
             final File networkRoot,
@@ -129,10 +129,10 @@ public final class SeedDB implements AlternativeDomainNames {
         this.seedPotentialDB = openSeedTable(this.seedPotentialDBFile);
 
         // start our virtual DNS service for yacy peers with empty cache
-        this.nameLookupCache = new Hashtable<String, String>();
+        this.nameLookupCache = new HashMap<String, String>();
 
         // cache for reverse name lookup
-        this.ipLookupCache = new Hashtable<InetAddress, SoftReference<Seed>>();
+        this.ipLookupCache = new HashMap<InetAddress, SoftReference<Seed>>();
 
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();

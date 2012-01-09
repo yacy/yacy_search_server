@@ -181,6 +181,12 @@ public class Blacklist {
         }
     }
 
+    /**
+     * create a blacklist from file, entries separated by 'sep'
+     * duplicit entries are removed
+     * @param blFile
+     * @param sep 
+     */
     private void loadList(final BlacklistFile blFile, final String sep) {
         final Map<String, List<String>> blacklistMapMatch = getBlacklistMap(blFile.getType(), true);
         final Map<String, List<String>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(), false);
@@ -213,8 +219,8 @@ public class Blacklist {
                         blacklistMapNotMatch.put(loadedEntry.getKey(), loadedPaths);
                     }
                 } else {
-                    // TODO check for duplicates? (refactor List -> Set)
-                    paths.addAll(loadedPaths);
+                    // check for duplicates? (refactor List -> Set)
+                    paths.addAll(new HashSet<String>(loadedPaths));
                 }
             }
         }

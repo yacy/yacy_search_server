@@ -32,10 +32,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -54,11 +52,10 @@ import de.anomic.server.serverSwitch;
 
 public class BlogComments {
 
-    private final static SimpleDateFormat SIMPLE_FORMATTER = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
-    // TODO: make userdefined date/time-strings (localisation)
-
+    private static final String DEFAULT_PAGE = "blog_default";
+    
     public static String dateString(final Date date) {
-        return SIMPLE_FORMATTER.format(date);
+        return Blog.dateString(date);
     }
 
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
@@ -77,32 +74,31 @@ public class BlogComments {
             final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
             if (userentry != null && userentry.hasRight(UserDB.AccessRight.BLOG_RIGHT)) {
                 hasRights = true;
-            }
-            //opens login window if login link is clicked
-            else if (post.containsKey("login")) {
+            } else if (post.containsKey("login")) {
+                //opens login window if login link is clicked
                 prop.put("AUTHENTICATE","admin log-in");
             }
         }
 
-        final String pagename = post.get("page", "blog_default");
+        String pagename = post.get("page", DEFAULT_PAGE);
         final String ip = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
-        String StrAuthor = post.get("author", "anonymous");
+        String strAuthor = post.get("author", "anonymous");
 
-        if ("anonymous".equals(StrAuthor)) {
-            StrAuthor = sb.blogDB.guessAuthor(ip);
+        if ("anonymous".equals(strAuthor)) {
+            strAuthor = sb.blogDB.guessAuthor(ip);
 
-            if (StrAuthor == null || StrAuthor.length() == 0) {
+            if (strAuthor == null || strAuthor.length() == 0) {
                 if (sb.peers.mySeed() == null) {
-                    StrAuthor = "anonymous";
+                    strAuthor = "anonymous";
                 } else {
-                    StrAuthor = sb.peers.mySeed().get("Name", "anonymous");
+                    strAuthor = sb.peers.mySeed().get("Name", "anonymous");
                 }
             }
         }
 
         byte[] author;
-        author = UTF8.getBytes(StrAuthor);
+        author = UTF8.getBytes(strAuthor);
 
         final BlogBoard.BlogEntry page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
         final boolean pageExists = sb.blogDB.contains(pagename);
@@ -132,13 +128,13 @@ public class BlogComments {
                 sb.blogCommentDB.write(sb.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
                 prop.putHTML("LOCATION","BlogComments.html?page=" + pagename);
 
-                MessageBoard.entry msgEntry = null;
-                sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
+                MessageBoard.entry msgEntry = sb.messageDB.newEntry(
                         "blogComment",
-                        StrAuthor,
+                        strAuthor,
                         sb.peers.mySeed().hash,
                         sb.peers.mySeed().getName(), sb.peers.mySeed().hash,
-                        "new blog comment: " + UTF8.String(blogEntry.getSubject()), content));
+                        "new blog comment: " + UTF8.String(blogEntry.getSubject()), content);
+                sb.messageDB.write(msgEntry);
 
                 messageForwardingViaEmail(sb, msgEntry);
 

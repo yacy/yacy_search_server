@@ -80,7 +80,7 @@ public class Translator {
     /**
      * Load multiple translationLists from one File. Each List starts with #File: relative/path/to/file
      * @param translationFile the File, which contains the Lists
-     * @return a Hashtable, which contains for each File a Hashtable with translations.
+     * @return a HashMap, which contains for each File a HashMap with translations.
      */
     public static Map<String, Map<String, String>> loadTranslationsLists(final File translationFile){
         final Map<String, Map<String, String>> lists = new HashMap<String, Map<String, String>>(); //list of translationLists for different files.

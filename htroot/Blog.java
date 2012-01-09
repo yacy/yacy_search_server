@@ -30,8 +30,8 @@
 // javac -classpath .:../classes Blog.java
 // if the shell's current path is HTROOT
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,9 +52,13 @@ public class Blog {
 
     private static final String DEFAULT_PAGE = "blog_default";
 
-        private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
-        // TODO: make userdefined date/time-strings (localisation)
-
+        private static DateFormat SimpleFormatter = DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT, Locale.getDefault());
+        
+    /**
+     * print localized date/time "yyyy/mm/dd HH:mm:ss"
+     * @param date
+     * @return 
+     */    
     public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
@@ -74,11 +78,7 @@ public class Blog {
         final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
         final String address = sb.peers.mySeed().getPublicAddress();
 
-        if(hasRights) {
-            prop.put("mode_admin", "1");
-        } else {
-            prop.put("mode_admin", "0");
-        }
+        prop.put("mode_admin", hasRights ? "1" : "0");
 
         if (post == null) {
             prop.putHTML("peername", sb.peers.mySeed().getName());
@@ -102,22 +102,22 @@ public class Blog {
         String pagename = post.get("page", DEFAULT_PAGE);
         final String ip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
-        String StrAuthor = post.get("author", "");
+        String strAuthor = post.get("author", "anonymous");
 
-        if ("anonymous".equals(StrAuthor)) {
-            StrAuthor = sb.blogDB.guessAuthor(ip);
+        if ("anonymous".equals(strAuthor)) {
+            strAuthor = sb.blogDB.guessAuthor(ip);
 
-            if (StrAuthor == null || StrAuthor.length() == 0) {
+            if (strAuthor == null || strAuthor.length() == 0) {
                 if (sb.peers.mySeed() == null) {
-                    StrAuthor = "anonymous";
+                    strAuthor = "anonymous";
                 } else {
-                    StrAuthor = sb.peers.mySeed().get("Name", "anonymous");
+                    strAuthor = sb.peers.mySeed().get("Name", "anonymous");
                 }
             }
         }
 
         byte[] author;
-        author = UTF8.getBytes(StrAuthor);
+        author = UTF8.getBytes(strAuthor);
 
         if (hasRights && post.containsKey("delete") && "sure".equals(post.get("delete"))) {
             page = sb.blogDB.readBlogEntry(pagename);
@@ -161,7 +161,7 @@ public class Blog {
                 final Map<String, String> map = new HashMap<String, String>();
                 map.put("page", pagename);
                 map.put("subject", StrSubject.replace(',', ' '));
-                map.put("author", StrAuthor.replace(',', ' '));
+                map.put("author", strAuthor.replace(',', ' '));
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_BLOG_ADD, map);
             }
         }

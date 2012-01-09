@@ -1,4 +1,5 @@
 *.class
+*.*~
 lib/yacycore.jar
 libbuild/svnRevNr.jar
 libbuild/GitRevTask.jar
@@ -7,3 +8,6 @@ DATA/
 classes/
 RELEASE/
 /yacy.pid
+/nbproject/private/
+/build/
+/dist/

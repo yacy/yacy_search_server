@@ -56,7 +56,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -260,7 +259,7 @@ public final class Switchboard extends serverSwitch
     //private Object  crawlingPausedSync = new Object();
     //private boolean crawlingIsPaused = false;
 
-    public Hashtable<String, Object[]> crawlJobsStatus = new Hashtable<String, Object[]>();
+    public HashMap<String, Object[]> crawlJobsStatus = new HashMap<String, Object[]>();
 
     private static Switchboard sb = null;
 

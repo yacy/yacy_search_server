@@ -624,7 +624,11 @@ public class Blacklist_p {
             String newEntry,
             final String[] supportedBlacklistTypes) {
 
-        // TODO: ignore empty entries
+        // ignore empty entries
+        if(newEntry == null || newEntry.isEmpty()) {
+            Log.logWarning("Blacklist", "skipped adding an empty entry");
+            return;
+        }
 
         if (newEntry.startsWith("http://") ){
             newEntry = newEntry.substring(7);
