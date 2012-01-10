@@ -97,7 +97,9 @@ public class WorkflowProcessor<J extends WorkflowJob> {
 
     public J take() throws InterruptedException {
         // read from the input queue
-        if (this.input == null) return null;
+        if (this.input == null) {
+            return null;
+        }
         final long t = System.currentTimeMillis();
         final J j = this.input.take();
         this.blockTime += System.currentTimeMillis() - t;
@@ -107,24 +109,34 @@ public class WorkflowProcessor<J extends WorkflowJob> {
     public void passOn(final J next) throws InterruptedException {
         // don't mix this method up with enQueue()!
         // this method enqueues into the _next_ queue, not this queue!
-        if (this.output == null) return;
+        if (this.output == null) {
+            return;
+        }
         final long t = System.currentTimeMillis();
         this.output.enQueue(next);
         this.passOnTime += System.currentTimeMillis() - t;
     }
 
     public void clear() {
-        if (this.input != null) this.input.clear();
+        if (this.input != null) {
+            this.input.clear();
+        }
     }
 
     public synchronized void relaxCapacity() {
-        if (this.input.isEmpty()) return;
-        if (this.input.remainingCapacity() > 1000) return;
+        if (this.input.isEmpty()) {
+            return;
+        }
+        if (this.input.remainingCapacity() > 1000) {
+            return;
+        }
         final BlockingQueue<J> i = new LinkedBlockingQueue<J>();
         J e;
         while (!this.input.isEmpty()) {
             e = this.input.poll();
-            if (e == null) break;
+            if (e == null) {
+                break;
+            }
             i.add(e);
         }
         this.input = i;
@@ -138,7 +150,9 @@ public class WorkflowProcessor<J extends WorkflowJob> {
             //Log.logWarning("PROCESSOR", "executing job " + environment.getClass().getName() + "." + methodName + " serialized");
             try {
                 final J out = (J) InstantBlockingThread.execMethod(this.environment, this.methodName).invoke(this.environment, new Object[]{in});
-                if (out != null && this.output != null) this.output.enQueue(out);
+                if (out != null && this.output != null) {
+                    this.output.enQueue(out);
+                }
             } catch (final IllegalArgumentException e) {
                 Log.logException(e);
             } catch (final IllegalAccessException e) {
@@ -161,8 +175,12 @@ public class WorkflowProcessor<J extends WorkflowJob> {
 
     @SuppressWarnings("unchecked")
     public void announceShutdown() {
-        if (this.executor == null) return;
-        if (this.executor.isShutdown()) return;
+        if (this.executor == null) {
+            return;
+        }
+        if (this.executor.isShutdown()) {
+            return;
+        }
         // before we put pills into the queue, make sure that they will take them
         relaxCapacity();
         // put poison pills into the queue

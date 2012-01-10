@@ -262,6 +262,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public long mem() {
         return this.index.mem() + ((this.table == null) ? 0 : this.table.mem());
     }
@@ -271,10 +272,12 @@ public class Table implements Index, Iterable<Row.Entry> {
         return MemoryControl.shortStatus() || MemoryControl.available() < this.minmemremaining;
     }
 
+    @Override
     public byte[] smallestKey() {
         return this.index.smallestKey();
     }
 
+    @Override
     public byte[] largestKey() {
         return this.index.largestKey();
     }
@@ -348,6 +351,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public synchronized void addUnique(final Entry row) throws IOException, RowSpaceExceededException {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
@@ -395,6 +399,7 @@ public class Table implements Index, Iterable<Row.Entry> {
      * and
      * @throws
      */
+    @Override
     public synchronized List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         final List<RowCollection> report = new ArrayList<RowCollection>();
@@ -447,6 +452,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return report;
     }
 
+    @Override
     public void close() {
         if (this.file != null) this.file.close();
         this.file = null;
@@ -461,10 +467,12 @@ public class Table implements Index, Iterable<Row.Entry> {
         if (this.file != null) close();
     }
 
+    @Override
     public String filename() {
         return this.file.filename().toString();
     }
 
+    @Override
     public Entry get(final byte[] key, final boolean _forcecopy) throws IOException {
         if (this.file == null || this.index == null) return null;
         Entry e = get0(key);
@@ -506,6 +514,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return this.rowdef.newEntry(b);
     }
 
+    @Override
     public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
         Row.Entry entry;
@@ -516,15 +525,18 @@ public class Table implements Index, Iterable<Row.Entry> {
         return map;
     }
 
+    @Override
     public boolean has(final byte[] key) {
         if (this.index == null) return false;
         return this.index.has(key);
     }
 
+    @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return this.index.keys(up, firstKey);
     }
 
+    @Override
     public Entry replace(final Entry row) throws IOException, RowSpaceExceededException {
         assert row != null;
         if (this.file == null || row == null) return null;

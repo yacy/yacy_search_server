@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,10 +31,12 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
 
     private WorkflowProcessor<J> manager = null;
     private final static Log log = new Log("BlockingThread");
-    
+
+    @Override
     public void setManager(final WorkflowProcessor<J> manager) {
         this.manager = manager;
     }
+    @Override
     public WorkflowProcessor<J> getManager() {
         return this.manager;
     }
@@ -48,9 +50,19 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
         long timestamp;
         long memstamp0, memstamp1;
         long busyCycles = 0;
-        
-        while (running) {
+
+        while (this.running) {
             try {
+                // check memory status
+                if (!shutdownInProgress() && MemoryControl.shortStatus()) {
+                    // try to idle a bit to get out of that problem somehow without making it worse
+                    for (int i = 0; i < 5; i++) {
+                        try {Thread.sleep(200);} catch (final InterruptedException e) {break;}
+                        if (shutdownInProgress() || !MemoryControl.shortStatus()) {
+                            break;
+                        }
+                    }
+                }
                 // do job
                 timestamp = System.currentTimeMillis();
                 memstamp0 = MemoryControl.used();
@@ -64,17 +76,21 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
                     break;
                 }
                 final J out = this.job(in);
-                if (out != null) this.manager.passOn(out);
+                if (out != null) {
+                    this.manager.passOn(out);
+                }
                 // do memory and busy/idle-count/time monitoring
                 memstamp1 = MemoryControl.used();
                 if (memstamp1 >= memstamp0) {
-                    // no GC in between. this is not shure but most probable
-                    memuse += memstamp1 - memstamp0;
+                    // no GC in between. this is not sure but most probable
+                    this.memuse += memstamp1 - memstamp0;
                 } else {
                     // GC was obviously in between. Add an average as simple heuristic
-                    if (busyCycles > 0) memuse += memuse / busyCycles;
+                    if (busyCycles > 0) {
+                        this.memuse += this.memuse / busyCycles;
+                    }
                 }
-                busytime += System.currentTimeMillis() - timestamp;
+                this.busytime += System.currentTimeMillis() - timestamp;
             } catch (final InterruptedException e) {
                 // don't ignore this: shut down
                 this.running = false;
@@ -91,9 +107,12 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
         this.close();
         logSystem("thread '" + this.getName() + "' terminated.");
     }
-    
+
     private void logSystem(final String text) {
-        if (log == null) Log.logConfig("THREAD-CONTROL", text);
-        else log.logConfig(text);
+        if (log == null) {
+            Log.logConfig("THREAD-CONTROL", text);
+        } else {
+            log.logConfig(text);
+        }
     }
 }

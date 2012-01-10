@@ -40,12 +40,17 @@ import net.yacy.kelondro.logging.Log;
 public abstract class AbstractThread extends Thread implements WorkflowThread {
 
     private static Log log = new Log("WorkflowThread");
-    protected boolean running = true;
+    protected boolean running = true, announcedShutdown = false;
     protected long busytime = 0, memuse = 0;
     private   long blockPause = 0;
     private   String shortDescr = "", longDescr = "";
     private   String monitorURL = null;
     private   long threadBlockTimestamp = System.currentTimeMillis();
+
+
+    protected final boolean announceShutdown() {
+        return this.announcedShutdown;
+    }
 
     protected final void announceThreadBlockApply() {
         // shall only be used, if a thread blocks for an important reason
@@ -67,6 +72,7 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
         this.busytime += millis;
     }
 
+    @Override
     public final void setDescription(final String shortText, final String longText, final String monitorURL) {
         // sets a visible description string
         this.shortDescr = shortText;
@@ -74,37 +80,45 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
         this.monitorURL = monitorURL;
     }
 
+    @Override
     public final String getShortDescription() {
         return this.shortDescr;
     }
 
+    @Override
     public final String getLongDescription() {
         return this.longDescr;
     }
 
+    @Override
     public String getMonitorURL() {
         return this.monitorURL;
     }
 
+    @Override
     public final long getBlockTime() {
         // returns the total time that this thread has been blocked so far
         return this.blockPause;
     }
 
+    @Override
     public final long getExecTime() {
         // returns the total time that this thread has worked so far
         return this.busytime;
     }
 
+    @Override
     public long getMemoryUse() {
         // returns the sum of all memory usage differences before and after one busy job
         return this.memuse;
     }
 
+    @Override
     public boolean shutdownInProgress() {
-        return !this.running || Thread.currentThread().isInterrupted();
+        return !this.running || this.announcedShutdown || Thread.currentThread().isInterrupted();
     }
 
+    @Override
     public void terminate(final boolean waitFor) {
         // after calling this method, the thread shall terminate
         this.running = false;
@@ -121,10 +135,14 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
     }
 
     private final void logError(final String text,final Throwable thrown) {
-        if (log == null) Log.logSevere("THREAD-CONTROL", text, thrown);
-        else log.logSevere(text,thrown);
+        if (log == null) {
+            Log.logSevere("THREAD-CONTROL", text, thrown);
+        } else {
+            log.logSevere(text,thrown);
+        }
     }
 
+    @Override
     public void jobExceptionHandler(final Exception e) {
         if (!(e instanceof ClosedByInterruptException)) {
             // default handler for job exceptions. shall be overridden for own handler
@@ -132,7 +150,9 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
         }
     }
 
+    @Override
     public void open() {}; // dummy definition; should be overriden
+    @Override
     public void close() {}; // dummy definition; should be overriden
 
 }
