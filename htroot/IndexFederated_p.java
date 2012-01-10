@@ -65,11 +65,15 @@ public class IndexFederated_p {
             try {
                 while ((s0 = r.readLine()) != null) {
                     s0 = s0.trim();
-                    if (s0.length() > 0) s.append(s0).append(',');
+                    if (s0.length() > 0) {
+                        s.append(s0).append(',');
+                    }
                 }
             } catch (final IOException e1) {
             }
-            if (s.length() > 0) s.setLength(s.length() - 1);
+            if (s.length() > 0) {
+                s.setLength(s.length() - 1);
+            }
             solrurls = s.toString().trim();
             env.setConfig("federated.service.solr.indexing.url", solrurls);
             env.setConfig("federated.service.solr.indexing.sharding", post.get("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5")));
@@ -104,9 +108,13 @@ public class IndexFederated_p {
                 final boolean c = v != null && v.equals("checked");
                 try {
                     if (entry.enabled()) {
-                        if (!c) scheme.disable(entry.key());
+                        if (!c) {
+                            scheme.disable(entry.key());
+                        }
                     } else {
-                        if (c) scheme.enable(entry.key());
+                        if (c) {
+                            scheme.enable(entry.key());
+                        }
                     }
                 } catch (final IOException e) {}
             }
@@ -136,6 +144,7 @@ public class IndexFederated_p {
             scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
         }
         final Iterator<ConfigurationSet.Entry> i = scheme.allIterator();
+
         int c = 0;
         boolean dark = false;
         ConfigurationSet.Entry entry;

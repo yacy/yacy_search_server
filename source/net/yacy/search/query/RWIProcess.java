@@ -399,7 +399,7 @@ public final class RWIProcess extends Thread
     public boolean feedingIsFinished() {
         return
             this.feedersTerminated.intValue() > (this.remote ? 1 : 0) &&
-            this.feedersAlive.get() > 0 &&
+            this.feedersAlive.get() == 0 &&
             (!this.remote || this.remote_indexCount > 0);
     }
 
