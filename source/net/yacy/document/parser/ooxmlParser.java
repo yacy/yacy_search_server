@@ -1,4 +1,4 @@
-//odtParser.java 
+//odtParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -53,61 +53,61 @@ import net.yacy.kelondro.util.FileUtils;
 
 public class ooxmlParser extends AbstractParser implements Parser {
 
-    public ooxmlParser() {        
-        super("Open Office XML Document Parser"); 
-        SUPPORTED_EXTENSIONS.add("docx");
-        SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        SUPPORTED_EXTENSIONS.add("dotx");
-        SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.wordprocessingml.template");
-        SUPPORTED_EXTENSIONS.add("potx");
-        SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.presentationml.template");
-        SUPPORTED_EXTENSIONS.add("ppsx");
-        SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.presentationml.slideshow");
-        SUPPORTED_EXTENSIONS.add("pptx");
-        SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.presentationml.presentation");
-        SUPPORTED_EXTENSIONS.add("xlsx");
-        SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        SUPPORTED_EXTENSIONS.add("xltx");
-        SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.spreadsheetml.template");
+    public ooxmlParser() {
+        super("Open Office XML Document Parser");
+        this.SUPPORTED_EXTENSIONS.add("docx");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        this.SUPPORTED_EXTENSIONS.add("dotx");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.wordprocessingml.template");
+        this.SUPPORTED_EXTENSIONS.add("potx");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.presentationml.template");
+        this.SUPPORTED_EXTENSIONS.add("ppsx");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.presentationml.slideshow");
+        this.SUPPORTED_EXTENSIONS.add("pptx");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.presentationml.presentation");
+        this.SUPPORTED_EXTENSIONS.add("xlsx");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        this.SUPPORTED_EXTENSIONS.add("xltx");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.spreadsheetml.template");
     }
-    
+
     private Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final File dest) throws Parser.Failure, InterruptedException {
-        
+
         CharBuffer writer = null;
-        try {          
+        try {
             String docDescription = null;
             String docKeywordStr  = null;
             String docShortTitle  = null;
             String docLongTitle   = null;
             String docAuthor      = null;
             String docLanguage    = null;
-            
+
             // opening the file as zip file
             final ZipFile zipFile= new ZipFile(dest);
             final Enumeration<? extends ZipEntry> zipEnum = zipFile.entries();
             final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-            
+
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {
-                
+
                 // get next zip file entry
                 final ZipEntry zipEntry= zipEnum.nextElement();
                 final String entryName = zipEntry.getName();
-                
+
                 // content.xml contains the document content in xml format
                 if (entryName.equals("word/document.xml")
                 	|| entryName.startsWith("ppt/slides/slide")
                 	|| entryName.startsWith("xl/worksheets/sheet")) {
-                    
+
                     // create a writer for output
-                    writer = new CharBuffer((int)zipEntry.getSize());
+                    writer = new CharBuffer(odtParser.MAX_DOCSIZE, (int)zipEntry.getSize());
                     try {
 	                    // extract data
 	                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
 	                    try {
 		                    final SAXParser saxParser = saxParserFactory.newSAXParser();
 		                    saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
-		                
+
 		                    // close readers and writers
 	                    } finally {
 	                    	zipFileEntryStream.close();
@@ -129,21 +129,21 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     docLanguage    = metaData.getLanguage();
                 }
             }
-            
+
             // make the languages set
             final Set<String> languages = new HashSet<String>(1);
             if (docLanguage != null && docLanguage.length() == 0)
         	languages.add(docLanguage);
-            
+
             // if there is no title availabe we generate one
             if ((docLongTitle == null || docLongTitle.length() == 0) && (docShortTitle != null)) {
                     docLongTitle = docShortTitle;
-            }            
-         
+            }
+
             // split the keywords
             String[] docKeywords = null;
             if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
-            
+
             // create the parser document
             Document[] docs = null;
             final byte[] contentBytes = UTF8.getBytes(writer.toString());
@@ -159,44 +159,45 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     "",
                     null,
                     docDescription,
-                    0.0f, 0.0f, 
+                    0.0f, 0.0f,
                     contentBytes,
                     null,
                     null,
                     null,
                     false)};
             return docs;
-        } catch (final Exception e) {            
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
-            
+
             // close the writer
             if (writer != null) try {
                 writer.close();
             } catch (final Exception ex) {/* ignore this */}
 
             Log.logException(e);
-            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location); 
+            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location);
         }
     }
-    
+
+    @Override
     public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile
             dest = File.createTempFile("OpenDocument", ".odt");
             dest.deleteOnExit();
-            
+
             // copying the stream into a file
             FileUtils.copy(source, dest);
-            
+
             // parsing the content
             return parse(location, mimeType, charset, dest);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
-            
-            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location); 
+
+            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location);
         } finally {
             if (dest != null) FileUtils.deletedelete(dest);
         }

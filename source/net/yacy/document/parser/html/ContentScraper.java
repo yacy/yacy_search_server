@@ -59,7 +59,8 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class ContentScraper extends AbstractScraper implements Scraper {
 	private static final String EMPTY_STRING = new String();
-	
+	public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
+
     private final char degree = '\u00B0';
     private final char[] minuteCharsHTML = "&#039;".toCharArray();
 
@@ -166,7 +167,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.bold = new ClusteredScoreMap<String>();
         this.italic = new ClusteredScoreMap<String>();
         this.li = new ArrayList<String>();
-        this.content = new CharBuffer(1024);
+        this.content = new CharBuffer(MAX_DOCSIZE, 1024);
         this.htmlFilterEventListeners = new EventListenerList();
         this.lon = 0.0f;
         this.lat = 0.0f;

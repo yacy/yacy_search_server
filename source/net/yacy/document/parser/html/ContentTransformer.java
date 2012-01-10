@@ -37,7 +37,7 @@ import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 
 public class ContentTransformer extends AbstractTransformer implements Transformer {
-    
+
     // statics: for initialization of the HTMLFilterAbstractTransformer
     private static final TreeSet<String> linkTags0 = new TreeSet<String>(ASCII.insensitiveASCIIComparator);
     private static final TreeSet<String> linkTags1 = new TreeSet<String>(ASCII.insensitiveASCIIComparator);
@@ -82,7 +82,7 @@ public class ContentTransformer extends AbstractTransformer implements Transform
     }
 
     private static char[] genBlueLetters(int length) {
-            final CharBuffer bb = new CharBuffer(" <FONT COLOR=#0000FF>".toCharArray());
+            final CharBuffer bb = new CharBuffer(ContentScraper.MAX_DOCSIZE, " <FONT COLOR=#0000FF>".toCharArray());
             length = length / 2;
             if (length > 10) length = 7;
             while (length-- > 0) {
@@ -106,7 +106,7 @@ public class ContentTransformer extends AbstractTransformer implements Transform
         }
         return false;
     }
-    
+
     @Override
     public char[] transformText(final char[] text) {
         if (this.bluelist != null) {

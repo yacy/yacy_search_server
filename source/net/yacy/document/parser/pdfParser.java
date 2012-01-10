@@ -67,6 +67,7 @@ public class pdfParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("text/x-pdf");
     }
 
+    @Override
     public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         // check memory for parser
@@ -125,12 +126,13 @@ public class pdfParser extends AbstractParser implements Parser {
         if (docTitle == null || docTitle.length() == 0) {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
         }
-        final CharBuffer writer = new CharBuffer();
+        final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
         try {
             // create a writer for output
             final PDFTextStripper  stripper = new PDFTextStripper();
             // we start the pdf parsing in a separate thread to ensure that it can be terminated
             final Thread t = new Thread() {
+                @Override
                 public void run() {
                     try {
                         stripper.writeText(pdfDoc, writer); // may throw a NPE

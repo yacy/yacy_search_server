@@ -96,7 +96,7 @@ public final class TransformerWriter extends Writer {
         this.outStream     = outStream;
         this.scraper       = scraper;
         this.transformer   = transformer;
-        this.buffer        = new CharBuffer(initialBufferSize);
+        this.buffer        = new CharBuffer(ContentScraper.MAX_DOCSIZE, initialBufferSize);
         this.filterTag     = null;
         this.filterOpts    = null;
         this.filterCont    = null;
@@ -114,7 +114,7 @@ public final class TransformerWriter extends Writer {
     }
 
     public static char[] genTag0raw(final String tagname, final boolean opening, final char[] tagopts) {
-            final CharBuffer bb = new CharBuffer(tagname.length() + tagopts.length + 3);
+            final CharBuffer bb = new CharBuffer(ContentScraper.MAX_DOCSIZE, tagname.length() + tagopts.length + 3);
             bb.append('<');
             if (!opening) {
                 bb.append('/');
@@ -136,7 +136,7 @@ public final class TransformerWriter extends Writer {
     }
 
     public static char[] genTag1raw(final String tagname, final char[] tagopts, final char[] text) {
-            final CharBuffer bb = new CharBuffer(2 * tagname.length() + tagopts.length + text.length + 5);
+            final CharBuffer bb = new CharBuffer(ContentScraper.MAX_DOCSIZE, 2 * tagname.length() + tagopts.length + text.length + 5);
             bb.append('<').append(tagname);
             if (tagopts.length > 0) {
 //              if (tagopts[0] == (byte) 32)
@@ -157,7 +157,7 @@ public final class TransformerWriter extends Writer {
 
     public static char[] genTag0(final String tagname, final Properties tagopts, final char quotechar) {
             final char[] tagoptsx = (tagopts.isEmpty()) ? null : genOpts(tagopts, quotechar);
-            final CharBuffer bb = new CharBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
+            final CharBuffer bb = new CharBuffer(ContentScraper.MAX_DOCSIZE, tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
             bb.append('<').append(tagname);
             if (tagoptsx != null) {
                 bb.appendSpace();
@@ -175,7 +175,7 @@ public final class TransformerWriter extends Writer {
 
     public static char[] genTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
             final char[] gt0 = genTag0(tagname, tagopts, quotechar);
-            final CharBuffer cb = new CharBuffer(gt0, gt0.length + text.length + tagname.length() + 3);
+            final CharBuffer cb = new CharBuffer(ContentScraper.MAX_DOCSIZE, gt0, gt0.length + text.length + tagname.length() + 3);
             cb.append(text).append('<').append('/').append(tagname).append('>');
             final char[] result = cb.getChars();
             try {
@@ -189,7 +189,7 @@ public final class TransformerWriter extends Writer {
     // a helper method for pretty-printing of properties for html tags
     public static char[] genOpts(final Properties prop, final char quotechar) {
             final Enumeration<?> e = prop.propertyNames();
-            final CharBuffer bb = new CharBuffer(prop.size() * 40);
+            final CharBuffer bb = new CharBuffer(ContentScraper.MAX_DOCSIZE, prop.size() * 40);
             String key;
             while (e.hasMoreElements()) {
                 key = (String) e.nextElement();
@@ -225,7 +225,7 @@ public final class TransformerWriter extends Writer {
             if (opening) {
                 if ((this.scraper != null) && (this.scraper.isTag0(tag))) {
                     // this single tag is collected at once here
-                    final CharBuffer charBuffer = new CharBuffer(content);
+                    final CharBuffer charBuffer = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
                     this.scraper.scrapeTag0(tag, charBuffer.propParser());
                     try {
                         charBuffer.close();
@@ -236,7 +236,7 @@ public final class TransformerWriter extends Writer {
                 }
                 if ((this.transformer != null) && (this.transformer.isTag0(tag))) {
                     // this single tag is collected at once here
-                    final CharBuffer scb = new CharBuffer(content);
+                    final CharBuffer scb = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
                     try {
                         return this.transformer.transformTag0(tag, scb.propParser(), quotechar);
                     } finally {
@@ -250,14 +250,14 @@ public final class TransformerWriter extends Writer {
                            ((this.transformer != null) && (this.transformer.isTag1(tag)))) {
                     // ok, start collecting
                     this.filterTag = tag;
-                    final CharBuffer scb = new CharBuffer(content);
+                    final CharBuffer scb = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
                     this.filterOpts = scb.propParser();
                     try {
                         scb.close();
                     } catch (final IOException e) {
                         Log.logException(e);
                     }
-                    if (this.filterCont == null) this.filterCont = new CharBuffer(Math.max(100, content.length)); else this.filterCont.reset();
+                    if (this.filterCont == null) this.filterCont = new CharBuffer(ContentScraper.MAX_DOCSIZE, Math.max(100, content.length)); else this.filterCont.reset();
                     return new char[0];
                 } else {
                      // we ignore that thing and return it again

@@ -1,4 +1,4 @@
-// serverCharBuffer.java 
+// serverCharBuffer.java
 // ---------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -34,42 +34,46 @@ import java.util.Properties;
 import net.yacy.cora.document.UTF8;
 
 public final class CharBuffer extends Writer {
-    
+
     public static final char singlequote = '\'';
     public static final char doublequote = '"';
     public static final char equal       = '=';
-    
+
     private char[] buffer;
     private int offset;
     private int length;
+    private final int maximumLength;
 
-    
-    public CharBuffer() {
+    public CharBuffer(final int maximumLength) {
         this.buffer = new char[10];
         this.length = 0;
         this.offset = 0;
+        this.maximumLength = maximumLength;
     }
-    
-    public CharBuffer(final int initLength) {
+
+    public CharBuffer(final int maximumLength, final int initLength) {
         this.buffer = new char[initLength];
         this.length = 0;
         this.offset = 0;
-    }        
-    
-    public CharBuffer(final char[] bb) {
+        this.maximumLength = maximumLength;
+    }
+
+    public CharBuffer(final int maximumLength, final char[] bb) {
         this.buffer = bb;
         this.length = bb.length;
         this.offset = 0;
+        this.maximumLength = maximumLength;
     }
 
-    public CharBuffer(final char[] bb, final int initLength) {
+    public CharBuffer(final int maximumLength, final char[] bb, final int initLength) {
         this.buffer = new char[initLength];
         System.arraycopy(bb, 0, this.buffer, 0, bb.length);
         this.length = bb.length;
         this.offset = 0;
+        this.maximumLength = maximumLength;
     }
-    
-    public CharBuffer(final char[] bb, final int of, final int le) {
+
+    public CharBuffer(final int maximumLength, final char[] bb, final int of, final int le) {
         if (of * 2 > bb.length) {
             this.buffer = new char[le];
             System.arraycopy(bb, of, this.buffer, 0, le);
@@ -80,17 +84,20 @@ public final class CharBuffer extends Writer {
             this.length = le;
             this.offset = of;
         }
+        this.maximumLength = maximumLength;
     }
 
     public CharBuffer(final CharBuffer bb) {
         this.buffer = bb.buffer;
         this.length = bb.length;
         this.offset = bb.offset;
+        this.maximumLength = bb.maximumLength;
     }
 
     public CharBuffer(final File f) throws IOException {
         // initially fill the buffer with the content of a file
         if (f.length() > Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
+        this.maximumLength = Integer.MAX_VALUE;
 
         this.length = 0;
         this.buffer = new char[(int) f.length()*2];
@@ -117,7 +124,7 @@ public final class CharBuffer extends Writer {
         this.length = 0;
         this.offset = 0;
     }
-    
+
     public int length() {
         return this.length;
     }
@@ -135,19 +142,21 @@ public final class CharBuffer extends Writer {
     public void write(final int b) {
         write((char)b);
     }
-    
+
     public void write(final char b) {
+        if (this.buffer.length > this.maximumLength) return;
         if (this.offset + this.length + 1 > this.buffer.length) grow(this.offset + this.length + 1);
         this.buffer[this.offset + this.length++] = b;
     }
-    
+
     @Override
     public void write(final char[] bb) {
         write(bb, 0, bb.length);
     }
-    
+
     @Override
     public void write(final char[] bb, final int of, final int le) {
+        if (this.buffer.length > this.maximumLength) return;
         if (this.offset + this.length + le > this.buffer.length) grow(this.offset + this.length + le);
         System.arraycopy(bb, of, this.buffer, this.offset + this.length, le);
         this.length += le;
@@ -156,7 +165,7 @@ public final class CharBuffer extends Writer {
     private static final char SPACE = ' ';
     private static final char CR = (char) 13;
     private static final char LF = (char) 10;
-    
+
     public CharBuffer appendSpace() {
         write(SPACE);
         return this;
@@ -189,29 +198,29 @@ public final class CharBuffer extends Writer {
 
     @Override
     public CharBuffer append(final char c) {
-        write(c);     
+        write(c);
         return this;
     }
-    
+
     public CharBuffer append(final String s) {
         final char[] temp = new char[s.length()];
         s.getChars(0, temp.length, temp, 0);
         write(temp);
         return this;
-    }    
-    
+    }
+
     public CharBuffer append(final String s, final int off, final int len) {
         final char[] temp = new char[len];
         s.getChars(off, (off + len), temp, 0);
         write(temp);
         return this;
     }
-    
+
     public CharBuffer append(final CharBuffer bb) {
         write(bb.buffer, bb.offset, bb.length);
         return this;
     }
-    
+
     public char charAt(final int pos) {
         if (pos < 0) throw new IndexOutOfBoundsException();
         if (pos > this.length) throw new IndexOutOfBoundsException();
@@ -227,7 +236,7 @@ public final class CharBuffer extends Writer {
             System.arraycopy(this.buffer, this.offset + pos + 1, this.buffer, this.offset + pos, this.length - pos - 1);
         }
     }
-    
+
     public int indexOf(final char b) {
         return indexOf(b, 0);
     }
@@ -247,18 +256,18 @@ public final class CharBuffer extends Writer {
         loop: for (int i = start; i <= this.length - bs.length; i++) {
             // first test only first char
             if (this.buffer[this.offset + i] != bs[0]) continue loop;
-            
+
             // then test all remaining char
             for (int j = 1; j < bs.length; j++) {
                 if (this.buffer[this.offset + i + j] != bs[j]) continue loop;
             }
-            
+
             // found hit
             return i;
         }
         return -1;
     }
-    
+
     public static int indexOf(final char[] b, final char c) {
         return indexOf(b, 0, c);
     }
@@ -267,7 +276,7 @@ public final class CharBuffer extends Writer {
         for (int i = offset; i < b.length; i++) if (b[i] == c) return i;
         return -1;
     }
-    
+
     public static int indexOf(final char[] b, final char[] s) {
         return indexOf(b, 0, s);
     }
@@ -277,12 +286,12 @@ public final class CharBuffer extends Writer {
         loop: for (int i = start; i <= b.length - bs.length; i++) {
             // first test only first char
             if (b[i] != bs[0]) continue loop;
-            
+
             // then test all remaining char
             for (int j = 1; j < bs.length; j++) {
                 if (b[i + j] != bs[j]) continue loop;
             }
-            
+
             // found hit
             return i;
         }
@@ -301,7 +310,7 @@ public final class CharBuffer extends Writer {
         }
         return true;
     }
-    
+
     public char[] getChars() {
         return getChars(0);
     }
@@ -318,7 +327,7 @@ public final class CharBuffer extends Writer {
         System.arraycopy(this.buffer, this.offset + start, tmp, 0, end - start);
         return tmp;
     }
-    
+
     public byte[] getBytes() {
         return UTF8.getBytes(new String(this.buffer, this.offset, this.length));
     }
@@ -363,7 +372,7 @@ public final class CharBuffer extends Writer {
         }
         return true;
     }
-    
+
     public int whitespaceStart(final boolean includeNonLetterBytes) {
         // returns number of whitespace char at the beginning of text
         if (includeNonLetterBytes) {
@@ -377,7 +386,7 @@ public final class CharBuffer extends Writer {
         }
         return this.length;
     }
-    
+
     public int whitespaceEnd(final boolean includeNonLetterBytes) {
         // returns position of whitespace at the end of text
         if (includeNonLetterBytes) {
@@ -391,8 +400,8 @@ public final class CharBuffer extends Writer {
         }
         return 0;
     }
-    
-    
+
+
     @Override
     public String toString() {
         return new String(this.buffer, this.offset, this.length);
@@ -453,11 +462,11 @@ public final class CharBuffer extends Writer {
         }
         return p;
     }
-    
+
     public static boolean equals(final char[] buffer, final char[] pattern) {
         return equals(buffer, 0, pattern);
     }
-    
+
     public static boolean equals(final char[] buffer, final int offset, final char[] pattern) {
         // compares two char arrays: true, if pattern appears completely at offset position
         if (buffer.length < offset + pattern.length) return false;
@@ -468,20 +477,20 @@ public final class CharBuffer extends Writer {
     public void reset() {
         this.length = 0;
         this.offset = 0;
-    }        
-    
-    public void reset(final int newSize) {  
+    }
+
+    public void reset(final int newSize) {
         this.resize(newSize);
         this.reset();
-    }         
-     
+    }
+
     public void resize(final int newSize) {
         if(newSize < 0) throw new IllegalArgumentException("Illegal array size: " + newSize);
         final char[] v = new char[newSize];
         System.arraycopy(this.buffer,0,v,0,newSize > this.buffer.length ? this.buffer.length : newSize);
-        this.buffer = v;          
+        this.buffer = v;
     }
-    
+
     public char toCharArray()[] {
         final char[] newbuf = new char[this.length];
         System.arraycopy(this.buffer, 0, newbuf, 0, this.length);
@@ -490,12 +499,12 @@ public final class CharBuffer extends Writer {
 
     @Override
     public void close() throws IOException {
-    	this.buffer = null; // assist with garbage collection 
+    	this.buffer = null; // assist with garbage collection
     }
 
     @Override
     public void flush() throws IOException {
-        // TODO Auto-generated method stub        
-    }    
-        
+        // TODO Auto-generated method stub
+    }
+
 }

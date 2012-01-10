@@ -188,7 +188,7 @@ public class URIMetadataRow implements URIMetadata {
             final String dc_publisher,
             final float lat,
             final float lon) {
-        final CharBuffer s = new CharBuffer(360);
+        final CharBuffer s = new CharBuffer(20000, 360);
         s.append(url.toNormalform(false, true)).appendLF();
         s.append(dc_title).appendLF();
         if (dc_creator.length() > 80) s.append(dc_creator, 0, 80); else s.append(dc_creator);
@@ -381,23 +381,23 @@ public class URIMetadataRow implements URIMetadata {
     public boolean matches(final Pattern matcher) {
         return this.metadata().matches(matcher);
     }
-    
+
     public DigestURI url() {
         return this.metadata().url();
     }
-    
+
     public String  dc_title()  {
         return this.metadata().dc_title();
     }
-    
+
     public String  dc_creator() {
         return this.metadata().dc_creator();
     }
-    
+
     public String  dc_publisher() {
         return this.metadata().dc_publisher();
     }
-    
+
     public String  dc_subject()   {
         return this.metadata().dc_subject();
     }
@@ -409,7 +409,7 @@ public class URIMetadataRow implements URIMetadata {
     public float lon() {
         return this.metadata().lon();
     }
-    
+
     private Components metadata() {
         // avoid double computation of metadata elements
         if (this.comp != null) return this.comp;

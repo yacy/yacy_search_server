@@ -1,4 +1,4 @@
-//odtParser.java 
+//odtParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -50,71 +50,73 @@ import net.yacy.kelondro.util.FileUtils;
 
 public class odtParser extends AbstractParser implements Parser {
 
-    public odtParser() {        
+    public final static int MAX_DOCSIZE = 200 * 1024 * 1024;
+
+    public odtParser() {
         super("OASIS OpenDocument V2 Text Document Parser");
-        SUPPORTED_EXTENSIONS.add("odt");
-        SUPPORTED_EXTENSIONS.add("ods");
-        SUPPORTED_EXTENSIONS.add("odp");
-        SUPPORTED_EXTENSIONS.add("odg");
-        SUPPORTED_EXTENSIONS.add("odc");
-        SUPPORTED_EXTENSIONS.add("odf");
-        SUPPORTED_EXTENSIONS.add("odb");
-        SUPPORTED_EXTENSIONS.add("odi");
-        SUPPORTED_EXTENSIONS.add("odm");
-        SUPPORTED_EXTENSIONS.add("ott");
-        SUPPORTED_EXTENSIONS.add("ots");
-        SUPPORTED_EXTENSIONS.add("otp");
-        SUPPORTED_EXTENSIONS.add("otg");
-        SUPPORTED_EXTENSIONS.add("sxw"); // Star Office Writer file format
-        SUPPORTED_EXTENSIONS.add("sxc"); // Star Office Calc file format
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.spreadsheet");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.presentation");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.graphics");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.chart");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.formula");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.database");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.image");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text-master");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text-template");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.spreadsheet-template");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.presentation-template");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.graphics-template");
-        SUPPORTED_MIME_TYPES.add("application/x-vnd.oasis.opendocument.text");
-        SUPPORTED_MIME_TYPES.add("application/OOo-calc");
-        SUPPORTED_MIME_TYPES.add("application/OOo-writer");
+        this.SUPPORTED_EXTENSIONS.add("odt");
+        this.SUPPORTED_EXTENSIONS.add("ods");
+        this.SUPPORTED_EXTENSIONS.add("odp");
+        this.SUPPORTED_EXTENSIONS.add("odg");
+        this.SUPPORTED_EXTENSIONS.add("odc");
+        this.SUPPORTED_EXTENSIONS.add("odf");
+        this.SUPPORTED_EXTENSIONS.add("odb");
+        this.SUPPORTED_EXTENSIONS.add("odi");
+        this.SUPPORTED_EXTENSIONS.add("odm");
+        this.SUPPORTED_EXTENSIONS.add("ott");
+        this.SUPPORTED_EXTENSIONS.add("ots");
+        this.SUPPORTED_EXTENSIONS.add("otp");
+        this.SUPPORTED_EXTENSIONS.add("otg");
+        this.SUPPORTED_EXTENSIONS.add("sxw"); // Star Office Writer file format
+        this.SUPPORTED_EXTENSIONS.add("sxc"); // Star Office Calc file format
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.spreadsheet");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.presentation");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.graphics");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.chart");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.formula");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.database");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.image");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text-master");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text-template");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.spreadsheet-template");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.presentation-template");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.graphics-template");
+        this.SUPPORTED_MIME_TYPES.add("application/x-vnd.oasis.opendocument.text");
+        this.SUPPORTED_MIME_TYPES.add("application/OOo-calc");
+        this.SUPPORTED_MIME_TYPES.add("application/OOo-writer");
     }
-    
+
     private Document[] parse(final MultiProtocolURI location, final String mimeType,
             final String charset, final File dest)
             throws Parser.Failure, InterruptedException {
-        
+
         CharBuffer writer = null;
-        try {          
+        try {
             String docDescription = null;
             String docKeywordStr  = null;
             String docShortTitle  = null;
             String docLongTitle   = null;
             String docAuthor      = null;
             String docLanguage    = null;
-            
+
             // opening the file as zip file
             final ZipFile zipFile = new ZipFile(dest);
             final Enumeration<? extends ZipEntry> zipEnum = zipFile.entries();
             final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-            
+
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {
-                
+
                 // getting the next zip file entry
                 final ZipEntry zipEntry= zipEnum.nextElement();
                 final String entryName = zipEntry.getName();
-                
+
                 // content.xml contains the document content in xml format
                 if (entryName.equals("content.xml")) {
-                    
+
                     // create a writer for output
-                    writer = new CharBuffer((int)zipEntry.getSize());
+                    writer = new CharBuffer(MAX_DOCSIZE, (int)zipEntry.getSize());
                     try {
 	                    // extract data
 	                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
@@ -142,22 +144,22 @@ public class odtParser extends AbstractParser implements Parser {
                     docLanguage    = metaData.getLanguage();
                 }
             }
-            
+
             // make the languages set
             final Set<String> languages = new HashSet<String>(1);
             if (docLanguage != null) languages.add(docLanguage);
-            
+
             // if there is no title availabe we generate one
             if (docLongTitle == null) {
                 if (docShortTitle != null) {
                     docLongTitle = docShortTitle;
-                } 
-            }            
-         
+                }
+            }
+
             // split the keywords
             String[] docKeywords = null;
             if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
-            
+
             // create the parser document
             Document[] docs = null;
             final byte[] contentBytes = UTF8.getBytes(writer.toString());
@@ -173,41 +175,42 @@ public class odtParser extends AbstractParser implements Parser {
                     "",
                     null,
                     docDescription,
-                    0.0f, 0.0f, 
+                    0.0f, 0.0f,
                     contentBytes,
                     null,
                     null,
                     null,
                     false)};
             return docs;
-        } catch (final Exception e) {            
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
-            
+
             // close the writer
             if (writer != null) try { writer.close(); } catch (final Exception ex) {/* ignore this */}
-            
-            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location); 
+
+            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location);
         }
     }
-    
+
+    @Override
     public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile
             dest = File.createTempFile("OpenDocument", ".odt");
             dest.deleteOnExit();
-            
+
             // copying the stream into a file
             FileUtils.copy(source, dest);
-            
+
             // parsing the content
             return parse(location, mimeType, charset, dest);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
-            
-            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location); 
+
+            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location);
         } finally {
             if (dest != null) FileUtils.deletedelete(dest);
         }
