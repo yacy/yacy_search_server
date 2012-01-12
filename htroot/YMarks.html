@@ -305,44 +305,40 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 		     <table cellspacing="10" cellpadding="20">
 			     <tr id="ymarks_crawlstart_msg"></tr>
 			     <tr>
-				     <td>Site</td>
+				     <td>Bookmark</td>
 				     <td>
 				     	<input type="hidden" name="crawlingMode" id="crawlingMode" value="url" />
 				     	<input name="crawlingURL" id="crawlingURL" type="text" size="35" maxlength="256" />
-				     	<input type="hidden" name="crawlingDepth" id="crawlingDepth" value="99" />
+				     	
 				     </td>
-				 <tr>
-				     <td>Scheduler</td>
-				     <td>
-			            <input type="radio" name="recrawl" value="nodoubles" checked="checked"/>run this crawl once<br/>
-						<input type="radio" name="recrawl" value="scheduler"/>scheduled, look every
-						<select name="repeat_time">			
-			              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-			              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-			              <option value="7" selected="selected">7</option>
-			              <option value="8">8</option><option value="9">9</option><option value="10">10</option>			
-			              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
-			              <option value="28">28</option><option value="30">30</option>
-						</select>
-						<select name="repeat_unit">
-			              <option value="selminutes">minutes</option>
-			              <option value="selhours">hours</option>			
-			              <option value="seldays" selected="selected">days</option>
-			            </select>
-			            <br />
-			            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for new documents automatically.
-				     </td>					     
-			     </tr>
+				 </tr>
 			     <tr>
-				     <td>Path</td>
+				     <td>Filter</td>
 				     <td>
-			            <input type="radio" name="range" id="rangeDomain" value="domain" checked="checked"/>load all files in domain<br />
-						<input type="radio" name="range" id="rangeSubpath" value="subpath" />load only files in a sub-path of given url
+			            <input type="radio" name="range" id="rangeWide" value="wide" >No filter<br />
+			            <input type="hidden" id="mustmatch" type="text" value=".*" maxlength="100" size="60" name="mustmatch">
+			            
+ 
+			            <input type="radio" name="range" id="rangeDomain" value="domain" checked="checked"/>Restrict to start domain<br />
+						<input type="radio" name="range" id="rangeSubpath" value="subpath" />Restrict to sub-path of given url
+						
 						<input type="hidden" name="mustnotmatch" id="mustnotmatch" value="" />			
 						<input type="hidden" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" value="off" />
 						<input type="hidden" name="crawlingDomFilterDepth" id="crawlingDomFilterDepth" value="1" />
 				     </td>
-				 <tr>			     
+				 <tr>
+				 <tr>
+				 	<td>Crawling Depth</td>
+				 	<td>
+				 		<select name="crawlingDepth">
+				 			<option value="0">bookmark only (0)</option>
+				 			<option value="4" selected="selected">shallow crawl (4)</option>
+				 			<option value="8">deep crawl (8)</option>
+				 			<option value="16">deeper crawl (16)</option>
+				 			<option value="99">indefinite (99)</option>
+				 		</select>
+				 	</td>
+				 </tr>			     
 			     <tr>
 				     <td>Limitations</td>
 				     <td>
@@ -366,6 +362,28 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 				        <input type="hidden" name="xpstopw" id="xpstopw" value="off" />
 				     </td>
 				 <tr>
+				 <tr>
+				     <td>Scheduler</td>
+				     <td>
+			            <input type="radio" name="recrawl" value="nodoubles" checked="checked"/>run this crawl once<br/>
+						<input type="radio" name="recrawl" value="scheduler"/>scheduled, look every
+						<select name="repeat_time">			
+			              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+			              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+			              <option value="7" selected="selected">7</option>
+			              <option value="8">8</option><option value="9">9</option><option value="10">10</option>			
+			              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
+			              <option value="28">28</option><option value="30">30</option>
+						</select>
+						<select name="repeat_unit">
+			              <option value="selminutes">minutes</option>
+			              <option value="selhours">hours</option>			
+			              <option value="seldays" selected="selected">days</option>
+			            </select>
+			            <br />
+			            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for new documents automatically.
+				     </td>					     
+			     </tr>
 		     </table>
 		     <input type="hidden" value="Start New Crawl" name="crawlingstart">      
     		</form>
