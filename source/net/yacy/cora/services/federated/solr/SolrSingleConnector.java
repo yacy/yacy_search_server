@@ -143,6 +143,7 @@ public class SolrSingleConnector implements SolrConnector {
         public void pleaseStop() {
             this.shallRun = false;
         }
+        @Override
         public void run() {
             while (this.shallRun) {
                 if (SolrSingleConnector.this.transmissionQueue[this.idx].size() > 0) {
@@ -165,6 +166,7 @@ public class SolrSingleConnector implements SolrConnector {
         }
     }
 
+    @Override
     public void close() {
         for (int i = 0; i < transmissionQueueCount; i++) {
             if (this.transmissionWorker[i].isAlive()) {
@@ -204,6 +206,7 @@ public class SolrSingleConnector implements SolrConnector {
      * delete everything in the solr index
      * @throws IOException
      */
+    @Override
     public void clear() throws IOException {
         try {
             this.server.deleteByQuery("*:*");
@@ -213,6 +216,7 @@ public class SolrSingleConnector implements SolrConnector {
         }
     }
 
+    @Override
     public void delete(final String id) throws IOException {
         try {
             this.server.deleteById(id);
@@ -221,6 +225,7 @@ public class SolrSingleConnector implements SolrConnector {
         }
     }
 
+    @Override
     public void delete(final List<String> ids) throws IOException {
         try {
             this.server.deleteById(ids);
@@ -229,6 +234,7 @@ public class SolrSingleConnector implements SolrConnector {
         }
     }
 
+    @Override
     public boolean exists(final String id) throws IOException {
         try {
             final SolrDocumentList list = get("id:" + id, 0, 1);
@@ -254,10 +260,12 @@ public class SolrSingleConnector implements SolrConnector {
         }
     }
 
+    @Override
     public void add(final String id, final ResponseHeader header, final Document doc) throws IOException, SolrException {
         add(this.scheme.yacy2solr(id, header, doc));
     }
 
+    @Override
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         int thisrrc = this.transmissionRoundRobinCounter;
         int nextrrc = thisrrc++;
@@ -284,11 +292,15 @@ public class SolrSingleConnector implements SolrConnector {
                   req.add( docs );
                   UpdateResponse rsp = req.process( server );
              */
+        } catch (final SolrException e) {
+            // the field is probably not known
+            Log.logWarning("SolrConnector", e.getMessage());
         } catch (final Throwable e) {
             throw new IOException(e);
         }
     }
 
+    @Override
     public void err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
 
             final SolrInputDocument solrdoc = new SolrInputDocument();
@@ -330,6 +342,7 @@ public class SolrSingleConnector implements SolrConnector {
      * @param querystring
      * @throws IOException
      */
+    @Override
     public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException {
         // construct query
         final SolrQuery query = new SolrQuery();

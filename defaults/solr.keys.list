@@ -46,16 +46,16 @@ keywords
 charset_s
 
 ## tags of css entries, normalized with absolute URL, textgen
-attr_css_tag
+css_tag_txt
 
 ## urls of css entries, normalized with absolute URL, textgen
-attr_css_url
+css_url_txt
 
 ## number of css entries, int
 csscount_i
 
 ## urls of script entries, normalized with absolute URL, textgen
-attr_scripts
+scripts_txt
 
 ## number of script entries, int
 scriptscount_i
@@ -86,25 +86,25 @@ text_t
 wordcount_i
 
 ## internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
-attr_inboundlinks_tag
+inboundlinks_tag_txt
 
 ## internal links, only the protocol
-#attr_inboundlinks_protocol
+#inboundlinks_protocol_txt
 
 ## internal links, the url only without the protocol
-#attr_inboundlinks_urlstub
+#inboundlinks_urlstub_txt
 
 ## internal links, the name property of the a-tag
-#attr_inboundlinks_name
+#inboundlinks_name_txt
 
 ## internal links, the rel property of the a-tag
-#attr_inboundlinks_rel
+#inboundlinks_rel_txt
 
 ## internal links, the rel property of the a-tag, coded binary
-#attr_inboundlinks_relflags
+#inboundlinks_relflags_txt
 
 ## internal links, the text content of the a-tag
-#attr_inboundlinks_text
+#inboundlinks_text_txt
 
 ## total number of inbound links, int
 inboundlinkscount_i
@@ -113,70 +113,70 @@ inboundlinkscount_i
 inboundlinksnoindexcount_i
 
 ## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
-attr_outboundlinks_tag
+outboundlinks_tag_txt
 
 ## external links, only the protocol
-#attr_outboundlinks_protocol
+#outboundlinks_protocol_txt
 
 ## external links, the url only without the protocol
-#attr_outboundlinks_urlstub
+#outboundlinks_urlstub_txt
 
 ## external links, the name property of the a-tag
-#attr_outboundlinks_name
+#outboundlinks_name_txt
 
 ## external links, the rel property of the a-tag
-#attr_outboundlinks_rel
+#outboundlinks_rel_txt
 
 ## external links, the rel property of the a-tag, coded binary
-#attr_outboundlinks_relflags
+#outboundlinks_relflags_txt
 
 ## external links, the text content of the a-tag
-#attr_outboundlinks_text
+#outboundlinks_text_txt
 
 ## external number of inbound links, int
-outboundlinks_i
+outboundlinkscount_i
 
 ## number of external links with noindex tag, int
 outboundlinksnoindexcount_i
 
 ## all image tags, encoded as <img> tag inclusive alt- and title property, textgen
-attr_images_tag
+images_tag_txt
 
 ## all image links without the protocol and '://'
-#attr_images_urlstub
+#images_urlstub_txt
 
 ## all image link protocols
-#attr_images_protocol
+#images_protocol_txt
 
 ## all image link alt tag
-#attr_images_alt
+#images_alt_txt
 
 ## number of images, int
 imagescount_i
 
 ## h1 header, textgen
-attr_h1
+h1_txt
 
 ## h2 header, textgen
-attr_h2
+h2_txt
 
 ## h3 header, textgen
-attr_h3
+h3_txt
 
 ## h4 header, textgen
-attr_h4
+h4_txt
 
 ## h5 header, textgen
-attr_h5
+h5_txt
 
 ## h6 header, textgen
-attr_h6
+h6_txt
 
 ## binary pattern for the existance of h1..h6 headlines, int
 htags_i
 
 ## all path elements in the url, textgen
-attr_paths
+paths_txt
 
 ## host of the url, string
 host_s
@@ -185,79 +185,80 @@ host_s
 canonical_s
 
 ## all texts in <li> tags, textgen
-attr_li
+li_txt
 
 ## number of <li> tags, int
 licount_i
 
 ## all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order, textgen
-attr_bold
+bold_txt
 
-## number of occurrences of texts in attr_bold, textgen
-attr_boldcount
+## number of occurrences of texts in bold_txt, textgen
+#bold_val
 
 ## total number of occurrences of <b> or <strong>, int
-bold_i
+boldcount_i
 
 ## all texts inside of <i> tags. no doubles. listed in the order of number of occurrences in decreasing order, textgen
-attr_italic
+italic_txt
 
-## number of occurrences of texts in attr_italic, textgen
-attr_italiccount
+## number of occurrences of texts in italic_txt, textgen
+#italic_val
 
 ## total number of occurrences of <i>, int
-italic_i
+italiccount_i
 
 ## flag that shows if a swf file is linked, boolean
 flash_b
 
 ## list of all links to frames, textgen
-attr_frames
+frames_txt
 
 ## number of attr_frames, int
 framesscount_i
 
 ## list of all links to iframes, textgen
-attr_iframes
+iframes_txt
 
 ## number of attr_iframes, int
 iframesscount_i
 
 ## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias, textgen
-attr_cms
+#ext_cms_txt
 
 ##number of attributes that count for a specific cms in attr_cms, textgen
-attr_cmscount
+#ext_cms_val
 
 ## names of ad-servers/ad-services, textgen
-attr_ads
+#ext_ads_txt
 
 ## number of attributes counts in attr_ads, textgen
-attr_adscount
+#ext_ads_val
 
 ## names of recognized community functions, textgen
-attr_community
+#ext_community_txt
 
 ## number of attribute counts in attr_community, textgen
-attr_communitycount
+#ext_community_val
 
 ## names of map services, textgen
-attr_maps
+#ext_maps_txt
 
 ## number of attribute counts in attr_maps, textgen
-attr_mapscount
+#ext_maps_val
 
 ## names of tracker server, textgen
-attr_tracker
+#ext_tracker_txt
 
 ## number of attribute counts in attr_tracker, textgen
-attr_trackercount
+#ext_tracker_val
 
 ## names matching title expressions, textgen
-attr_title
+#ext_title_txt
 
 ## number of matching title expressions, textgen
-attr_titlecount
+#ext_title_val
+
 
 ## fail reason if a page was not loaded. if the page was loaded then this field is empty, text
 failreason_t
