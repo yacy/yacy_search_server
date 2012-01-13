@@ -122,7 +122,6 @@ public final class Condenser {
 
         Map.Entry<MultiProtocolURI, String> entry;
         if (indexText) {
-            assert document.getText() != null : document.dc_identifier();
             createCondensement(document.getText(), meaningLib);
             // the phrase counter:
             // phrase   0 are words taken from the URL
@@ -304,7 +303,7 @@ public final class Condenser {
 	            word = wordenum.nextElement().toString().toLowerCase(Locale.ENGLISH);
 	            if (this.languageIdentificator != null) this.languageIdentificator.add(word);
 	            if (word.length() < wordminsize) continue;
-	
+
 	            // distinguish punctuation and words
 	            wordlen = word.length();
 	            if (wordlen == 1 && SentenceReader.punctuation(word.charAt(0))) {
@@ -320,7 +319,7 @@ public final class Condenser {
 	                if (last_index && (wordminsize > 2 || word.equals("of"))) comb_indexof = true;
 	                last_last = word.equals("last");
 	                last_index = word.equals("index");
-	
+
 	                // store word
 	                allwordcounter++;
 	                currsentwords.add(word);

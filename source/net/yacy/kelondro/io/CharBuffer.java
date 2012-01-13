@@ -329,7 +329,7 @@ public final class CharBuffer extends Writer {
     }
 
     public byte[] getBytes() {
-        return UTF8.getBytes(new String(this.buffer, this.offset, this.length));
+        return UTF8.getBytes(this.toString());
     }
 
     public CharBuffer trim(final int start) {

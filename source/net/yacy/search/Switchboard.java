@@ -2418,7 +2418,7 @@ public final class Switchboard extends serverSwitch
                     final String id = UTF8.String(new DigestURI(doc.dc_identifier(), null).hash());
                     final String iquh = UTF8.String(in.queueEntry.url().hash());
                     if ( !id.equals(iquh) ) {
-                        this.log.logWarning("doc="
+                        this.log.logWarning("condenseDocument consistency check doc="
                             + id
                             + ":"
                             + doc.dc_identifier()
