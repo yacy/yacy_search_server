@@ -163,7 +163,7 @@ function bm_dialog() {
 	/* Initialize Crawl Start Dialog */		
 	$("#ymarks_crawlstart").dialog({			
 		autoOpen: false,
-		height: 390,
+		height: 450,
 		width: 470,
 		position: ['top',100],
 		modal: true,			
