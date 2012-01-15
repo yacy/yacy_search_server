@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,18 +56,19 @@ import net.yacy.kelondro.util.MemoryControl;
 public class HeapReader {
 
     //public final static long keepFreeMem = 20 * 1024 * 1024;
-    
+
     // input values
     protected int                keylength;  // the length of the primary key
     protected File               heapFile;   // the file of the heap
     protected final ByteOrder    ordering;   // the ordering on keys
-    
+
     // computed values
     protected Writer             file;       // a random access to the file
     protected HandleMap          index;      // key/seek relation for used records
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
     private   File               fingerprintFileIdx, fingerprintFileGap; // files with dumped indexes. Will be deleted if file is written
-    
+    private   Date               closeDate;  // records a time when the file was closed; used for debugging
+
     public HeapReader(
             final File heapFile,
             final int keylength,
@@ -78,7 +80,8 @@ public class HeapReader {
         this.free = null; // will be initialized later depending on existing idx/gap file
         this.heapFile.getParentFile().mkdirs();
         this.file = new CachedFileWriter(this.heapFile);
-        
+        this.closeDate = null;
+
         // read or initialize the index
         this.fingerprintFileIdx = null;
         this.fingerprintFileGap = null;
@@ -110,17 +113,17 @@ public class HeapReader {
             // if we did not have a dump, create a new index
             initIndexReadFromHeap();
         }
-        
+
         // merge gaps that follow directly
         mergeFreeEntries();
-        
+
         // after the initial initialization of the heap, we close the file again
         // to make more room to file pointers which may run out if the number
         // of file descriptors is too low and the number of files is too high
         this.file.close();
         // the file will be opened again automatically when the next access to it comes.
     }
-    
+
     public long mem() {
         return this.index.mem(); // don't add the memory for free here since then the asserts for memory management don't work
     }
@@ -128,16 +131,16 @@ public class HeapReader {
     public void trim() {
         this.index.trim();
     }
-    
+
     protected byte[] normalizeKey(byte[] key) {
         // check size of key: zero-filled keys are only possible of the ordering is
         // an instance of the natural ordering. Base64-orderings cannot use zeros in keys.
         assert key.length >= this.keylength || this.ordering instanceof NaturalOrder;
         return normalizeKey(key, this.keylength);
     }
-    
+
     private static final byte zero = 0;
-    
+
     protected static byte[] normalizeKey(byte[] key, int keylength) {
         if (key.length == keylength) return key;
         byte[] k = new byte[keylength];
@@ -149,7 +152,7 @@ public class HeapReader {
         }
         return k;
     }
-    
+
     private boolean initIndexReadDump() {
         // look for an index dump and read it if it exist
         // if this is successful, return true; otherwise false
@@ -166,7 +169,7 @@ public class HeapReader {
             deleteAllFingerprints(this.heapFile, this.fingerprintFileIdx.getName(), this.fingerprintFileGap.getName());
             return false;
         }
-        
+
         // there is an index and a gap file:
         // read the index file:
         try {
@@ -182,7 +185,7 @@ public class HeapReader {
         // check saturation
         int[] saturation = this.index.saturation();
         Log.logInfo("HeapReader", "saturation of " + this.fingerprintFileIdx.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", possible saving: " + ((this.keylength - saturation[0] + 8 - saturation[1]) * this.index.size() / 1024 / 1024) + " MB");
-        
+
         // read the gap file:
         try {
             this.free = new Gap(this.fingerprintFileGap);
@@ -190,11 +193,11 @@ public class HeapReader {
             Log.logException(e);
             return false;
         }
-        
+
         // everything is fine now
         return !this.index.isEmpty();
     }
-    
+
     /**
      * deletion of the fingerprint: this should happen if the heap is written or entries are deleted
      * if the files are not deleted then it may be possible that they are not used anyway because the
@@ -211,7 +214,7 @@ public class HeapReader {
             this.fingerprintFileGap = null;
         }
     }
-    
+
     protected static String fingerprintFileHash(File f) {
         assert f != null;
         assert f.exists() : "file = " + f.toString();
@@ -220,7 +223,7 @@ public class HeapReader {
         if (fp == null) return null;
         return fp.substring(0, 12);
     }
-    
+
     private static void deleteAllFingerprints(File f, String exception1, String exception2) {
         File d = f.getParentFile();
         String n = f.getName();
@@ -236,11 +239,11 @@ public class HeapReader {
                ) FileUtils.deletedelete(new File(d, l[i]));
         }
     }
-    
+
     private void initIndexReadFromHeap() throws IOException {
         // this initializes the this.index object by reading positions from the heap file
         Log.logInfo("HeapReader", "generating index for " + this.heapFile.toString() + ", " + (this.file.length() / 1024 / 1024) + " MB. Please wait.");
-        
+
         this.free = new Gap();
         HandleMap.initDataConsumer indexready = HandleMap.asynchronusInitializer(this.name() + ".initializer", this.keylength, this.ordering, 8, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
         byte[] key = new byte[this.keylength];
@@ -248,11 +251,11 @@ public class HeapReader {
         long seek = 0;
         if (this.file.length() > 0) {
         loop: while (true) { // don't test available() here because this does not work for files > 2GB
-            
+
             try {
                 // go to seek position
                 this.file.seek(seek);
-            
+
                 // read length of the following record without the length of the record size bytes
                 reclen = this.file.readInt();
                 //assert reclen > 0 : " reclen == 0 at seek pos " + seek;
@@ -262,15 +265,15 @@ public class HeapReader {
                     this.file.setLength(seek); // delete everything else at the remaining of the file :-(
                     break loop;
                 }
-                
+
                 // read key
                 this.file.readFully(key, 0, key.length);
-                
+
             } catch (final IOException e) {
                 // EOF reached
                 break loop; // terminate loop
             }
-            
+
             // check if this record is empty
             if (key == null || key[0] == 0) {
                 // it is an empty record, store to free list
@@ -287,13 +290,13 @@ public class HeapReader {
                     this.file.write(key); // mark the place as empty record
                     Log.logWarning("HeapReader", "BLOB " + this.heapFile.getName() + ": skiped not wellformed key " + UTF8.String(key) + " at seek pos " + seek);
                 }
-            }            
+            }
             // new seek position
             seek += 4L + reclen;
         }
         }
         indexready.finish();
-        
+
         // finish the index generation
         try {
             this.index = indexready.result();
@@ -304,7 +307,7 @@ public class HeapReader {
         }
         Log.logInfo("HeapReader", "finished index generation for " + this.heapFile.toString() + ", " + this.index.size() + " entries, " + this.free.size() + " gaps.");
     }
-    
+
     private void mergeFreeEntries() throws IOException {
 
         // try to merge free entries
@@ -334,42 +337,54 @@ public class HeapReader {
             if (merged > 0) deleteFingerprint();
         }
     }
-    
+
     public String name() {
         return this.heapFile.toString();
     }
-    
+
     public File location() {
         return this.heapFile;
     }
-    
+
     /**
      * the number of BLOBs in the heap
      * @return the number of BLOBs in the heap
      */
     public int size() {
-        if (this.index == null) return 0;
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in size(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return 0;
+        }
         synchronized (this.index) {
             return (this.index == null) ? 0 : this.index.size();
         }
     }
-    
+
     public boolean isEmpty() {
-        if (this.index == null) return true;
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in isEmpty(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return true;
+        }
         synchronized (this.index) {
             return this.index.isEmpty();
         }
     }
-    
+
     /**
      * test if a key is in the heap file. This does not need any IO, because it uses only the ram index
      * @param key
      * @return true if the key exists, false otherwise
      */
     public boolean containsKey(byte[] key) {
-        assert this.index != null;
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in containsKey(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return false;
+        }
         key = normalizeKey(key);
-        
+
         synchronized (this.index) {
             // check if the file index contains the key
             return this.index.get(key) >= 0;
@@ -379,7 +394,7 @@ public class HeapReader {
     public ByteOrder ordering() {
         return this.ordering;
     }
-    
+
     /**
      * find a special key in the heap: the one with the smallest key
      * this method is useful if the entries are ordered using their keys.
@@ -388,11 +403,16 @@ public class HeapReader {
      * @throws IOException
      */
     protected synchronized byte[] firstKey() throws IOException {
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in firstKey(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return null;
+        }
         synchronized (this.index) {
             return this.index.smallestKey();
         }
     }
-    
+
     /**
      * find a special blob in the heap: one that has the smallest key
      * this method is useful if the entries are ordered using their keys.
@@ -401,13 +421,18 @@ public class HeapReader {
      * @throws IOException
      */
     protected byte[] first() throws IOException, RowSpaceExceededException {
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in first(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return null;
+        }
         synchronized (this.index) {
             byte[] key = this.index.smallestKey();
             if (key == null) return null;
             return get(key);
         }
     }
-    
+
     /**
      * find a special key in the heap: the one with the largest key
      * this method is useful if the entries are ordered using their keys.
@@ -416,11 +441,17 @@ public class HeapReader {
      * @throws IOException
      */
     protected byte[] lastKey() throws IOException {
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in lastKey(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return null;
+        }
+        if (this.index == null) return null;
         synchronized (this.index) {
             return this.index.largestKey();
         }
     }
-    
+
     /**
      * find a special blob in the heap: one that has the largest key
      * this method is useful if the entries are ordered using their keys.
@@ -429,13 +460,18 @@ public class HeapReader {
      * @throws IOException
      */
     protected byte[] last() throws IOException, RowSpaceExceededException {
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in last(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return null;
+        }
         synchronized (this.index) {
             byte[] key = this.index.largestKey();
             if (key == null) return null;
             return get(key);
         }
     }
-    
+
     /**
      * read a blob from the heap
      * @param key
@@ -443,14 +479,18 @@ public class HeapReader {
      * @throws IOException
      */
     public byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
-        if (this.index == null) return null;
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in get(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return null;
+        }
         key = normalizeKey(key);
-       
+
         synchronized (this.index) {
             // check if the index contains the key
             final long pos = this.index.get(key);
             if (pos < 0) return null;
-            
+
             // access the file and read the container
             this.file.seek(pos);
             final int len = this.file.readInt() - this.index.row().primaryKeyLength;
@@ -465,7 +505,7 @@ public class HeapReader {
             if (MemoryControl.available() < memr) {
                 if (!MemoryControl.request(memr, true)) throw new RowSpaceExceededException(memr, "HeapReader.get()/check"); // not enough memory available for this blob
             }
-            
+
             // read the key
             byte[] keyf;
             try {
@@ -486,7 +526,7 @@ public class HeapReader {
                 // if the index is not rebuild now at once
                 //initIndexReadFromHeap();
             }
-            
+
             // read the blob
             byte[] blob;
             try {
@@ -495,7 +535,7 @@ public class HeapReader {
                 throw new RowSpaceExceededException(len, "HeapReader.get()/blob");
             }
             this.file.readFully(blob, 0, blob.length);
-            
+
             return blob;
         }
     }
@@ -511,12 +551,12 @@ public class HeapReader {
         }
         return null;
     }
-    
+
     protected boolean checkKey(byte[] key, final long pos) throws IOException {
         key = normalizeKey(key);
         this.file.seek(pos);
         this.file.readInt(); // skip the size value
-        
+
         // read the key
         final byte[] keyf = new byte[this.index.row().primaryKeyLength];
         this.file.readFully(keyf, 0, keyf.length);
@@ -530,23 +570,29 @@ public class HeapReader {
      * @throws IOException
      */
     public long length(byte[] key) throws IOException {
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in length(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return 0;
+        }
         key = normalizeKey(key);
-        
+
         synchronized (this.index) {
             // check if the index contains the key
             final long pos = this.index.get(key);
             if (pos < 0) return -1;
-            
+
             // access the file and read the size of the container
             this.file.seek(pos);
             return this.file.readInt() - this.index.row().primaryKeyLength;
         }
     }
-    
+
     /**
      * close the BLOB table
      */
     public void close(boolean writeIDX) {
+        if (this.index == null) return;
         synchronized (this.index) {
             if (this.file != null)
     			try {
@@ -598,26 +644,34 @@ public class HeapReader {
             this.free = null;
             if (this.index != null) this.index.close();
             this.index = null;
+            this.closeDate = new Date();
+            Log.logInfo("HeapReader", "close HeapFile " + this.heapFile.getName() + "; trace:" + Log.stackTrace());
         }
     }
-    
+
     public synchronized void close() {
         close(true);
     }
-    
+
     @Override
     public void finalize() {
         this.close();
     }
-    
+
     /**
      * ask for the length of the primary key
      * @return the length of the key
      */
     public int keylength() {
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in keylength(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return 0;
+        }
+        if (this.index == null) return 0;
         return this.index.row().primaryKeyLength;
     }
-    
+
     /**
      * iterator over all keys
      * @param up
@@ -626,6 +680,11 @@ public class HeapReader {
      * @throws IOException
      */
     public CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in keys(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return null;
+        }
         synchronized (this.index) {
             return new RotateIterator<byte[]>(this.index.keys(up, null), null, this.index.size());
         }
@@ -639,17 +698,27 @@ public class HeapReader {
      * @throws IOException
      */
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in keys(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return null;
+        }
         synchronized (this.index) {
             return this.index.keys(up, firstKey);
         }
     }
 
     public long length() {
+        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
+        if (this.index == null) {
+            Log.logSevere("HeapReader", "this.index == null in length(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            return 0;
+        }
         synchronized (this.index) {
             return this.heapFile.length();
         }
     }
-    
+
     /**
      * static iterator of entries in BLOBHeap files:
      * this is used to import heap dumps into a write-enabled index heap
@@ -658,11 +727,11 @@ public class HeapReader {
         CloneableIterator<Map.Entry<byte[], byte[]>>,
         Iterator<Map.Entry<byte[], byte[]>>,
         Iterable<Map.Entry<byte[], byte[]>> {
-        
+
         DataInputStream is;
         int keylen;
         private final File blobFile;
-        
+
         public entries(final File blobFile, final int keylen) throws IOException {
             if (!(blobFile.exists())) throw new IOException("file " + blobFile + " does not exist");
             try {
@@ -686,7 +755,7 @@ public class HeapReader {
                 return null;
             }
         }
-        
+
         @Override
         public Map.Entry<byte[], byte[]> next0() {
             try {
@@ -733,12 +802,12 @@ public class HeapReader {
                 return null;
             }
         }
-        
+
         public void close() {
             if (this.is != null) try { this.is.close(); } catch (final IOException e) {}
             this.is = null;
         }
-        
+
         @Override
         protected void finalize() {
             this.close();
@@ -748,12 +817,12 @@ public class HeapReader {
     public static class entry implements Map.Entry<byte[], byte[]> {
         private final byte[] s;
         private byte[] b;
-        
+
         public entry(final byte[] s, final byte[] b) {
             this.s = s;
             this.b = b;
         }
-    
+
         @Override
         public byte[] getKey() {
             return this.s;
@@ -771,7 +840,7 @@ public class HeapReader {
             return b1;
         }
     }
-    
+
     public static void main(final String args[]) {
         File f = new File(args[0]);
         try {
@@ -784,7 +853,7 @@ public class HeapReader {
         } catch (IOException e) {
             Log.logException(e);
         }
-        
+
     }
-    
+
 }

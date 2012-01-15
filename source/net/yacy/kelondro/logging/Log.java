@@ -383,6 +383,7 @@ public final class Log {
             // redirect uncaught exceptions to logging
             final Log exceptionLog = new Log("UNCAUGHT-EXCEPTION");
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
+                @Override
                 public void uncaughtException(final Thread t, final Throwable e) {
                     final String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
                     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -423,5 +424,16 @@ public final class Log {
     public final static boolean allZero(final byte[] a, final int astart, final int alength) {
         for (int i = 0; i < alength; i++) if (a[astart + i] != 0) return false;
         return true;
+    }
+
+    public static String stackTrace() {
+        Throwable t = new Throwable();
+        StackTraceElement[] e = t.getStackTrace();
+        StringBuilder sb = new StringBuilder(80);
+        for (int i = 2; i < e.length - 1; i++) {
+            sb.append(e[i].toString()).append(" -> ");
+        }
+        sb.append(e[e.length - 1].toString());
+        return sb.toString();
     }
 }
