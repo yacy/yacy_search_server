@@ -32,7 +32,7 @@ public class MemoryControl {
 
     private static boolean shortStatus = false, simulatedShortStatus = false, usingStandardStrategy = true;
     private static MemoryStrategy strategy;
-    
+
     private static MemoryStrategy getStrategy() {
     	if (strategy == null || strategy.hasError()) {
     		if (!usingStandardStrategy) {
@@ -48,14 +48,16 @@ public class MemoryControl {
     	}
     	return strategy;
     }
-    
+
     public final static void setStandardStrategy(final boolean std) {
+        /*
     	if (usingStandardStrategy != std) {
     		usingStandardStrategy = std;
     		strategy = null;
     	}
+    	*/
     }
-    
+
     /**
      * @return the name of the used strategy
      */
@@ -108,12 +110,13 @@ public class MemoryControl {
 
 	/**
      * check for a specified amount of bytes
-     * 
+     *
      * @param size the requested amount of free memory in bytes
      * @param force specifies whether risk an expensive GC
      * @return whether enough memory could be freed (or is free) or not
      */
     public static boolean request(final long size, final boolean force) {
+        if (size < 1024) return true; // to speed up things. If this would fail, it would be much too late to check this.
         return getStrategy().request(size, force, shortStatus);
     }
 
@@ -187,7 +190,7 @@ public class MemoryControl {
         System.out.println("computed max = " + (maxMemory() / mb) + " mb");
         System.out.println("using " + getStrategyName());
         final byte[][] x = new byte[100000][];
-        
+
         for (int i = 0; i < 100000; i++) {
         	if (request(mb, force))
         	{

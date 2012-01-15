@@ -645,7 +645,7 @@ public class HeapReader {
             if (this.index != null) this.index.close();
             this.index = null;
             this.closeDate = new Date();
-            Log.logInfo("HeapReader", "close HeapFile " + this.heapFile.getName() + "; trace:" + Log.stackTrace());
+            Log.logInfo("HeapReader", "close HeapFile " + this.heapFile.getName() + "; trace: " + Log.stackTrace());
         }
     }
 
