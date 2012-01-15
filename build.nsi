@@ -207,7 +207,9 @@ SectionEnd
 ; UNINSTALLER
 
 Section "Uninstall"
-	IfFileExists "$INSTDIR\DATA\yacy.running" 0 uninstall
+	ClearErrors
+	Delete "$INSTDIR\DATA\yacy.running"
+	IfErrors 0 uninstall
 	MessageBox MB_ICONSTOP "$(stillRunning)" /SD IDOK
 	Goto nouninstall
 

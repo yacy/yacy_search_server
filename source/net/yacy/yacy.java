@@ -36,6 +36,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -200,6 +203,12 @@ public final class yacy {
                 Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
             try { new FileOutputStream(f).write(Integer.toString(OS.getPID()).getBytes()); } catch (final Exception e) { } // write PID
             f.deleteOnExit();
+            FileChannel channel = null;
+            FileLock lock = null;
+            try {
+            	channel = new RandomAccessFile(f,"rw").getChannel();
+            	lock = channel.tryLock(); // lock yacy.running
+            } catch (final Exception e) { };
 
             final String oldconf = "DATA/SETTINGS/httpProxy.conf".replace("/", File.separator);
             final String newconf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
@@ -403,6 +412,8 @@ public final class yacy {
                 Log.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
                 //System.exit(1);
             }
+            if(lock != null) lock.release();
+            if(channel != null) channel.close();
         } catch (final Exception ee) {
             Log.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
