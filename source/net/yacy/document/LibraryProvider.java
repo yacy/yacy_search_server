@@ -115,7 +115,7 @@ public class LibraryProvider
         Set<String> allTags = new HashSet<String>() ;
         allTags.addAll(autotagging.allTags()); // we must copy this into a clone to prevent circularity
         autotagging.addLocalization(geoLoc);
-        autotagging.addDictionaries(dymLib.getDictionaries());
+        //autotagging.addDictionaries(dymLib.getDictionaries()); // strange results with this: normal word lists are 'too full'
         WordCache.learn(allTags);
     }
 

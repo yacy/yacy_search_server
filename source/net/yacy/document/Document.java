@@ -103,7 +103,8 @@ public class Document {
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
         this.parserObject = parserObject;
-        this.keywords = (keywords == null) ? new LinkedList<String>() : Arrays.asList(keywords);
+        this.keywords = new LinkedList<String>();
+        if (keywords != null) this.keywords.addAll(Arrays.asList(keywords));
         this.title = (title == null) ? new StringBuilder(0) : new StringBuilder(title);
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
@@ -188,6 +189,20 @@ dc_rights
         return (this.creator == null) ? "" : this.creator.toString();
     }
 
+    /**
+     * add the given words to the set of keywords.
+     * These keywords will appear in dc_subject
+     * @param tags
+     */
+    public void addTags(Set<String> tags) {
+        for (String s: this.keywords) {
+            tags.remove(s);
+        }
+        for (String s: tags) {
+            this.keywords.add(s);
+        }
+    }
+
     public String[] dc_subject() {
         // sort out doubles and empty words
         final TreeSet<String> hs = new TreeSet<String>();
@@ -195,7 +210,7 @@ dc_rights
         for (int i = 0; i < this.keywords.size(); i++) {
             if (this.keywords.get(i) == null) continue;
             s = (this.keywords.get(i)).trim();
-            if (s.length() > 0) hs.add(s.toLowerCase());
+            if (s.length() > 0) hs.add(s);
         }
         final String[] t = new String[hs.size()];
         int i = 0;

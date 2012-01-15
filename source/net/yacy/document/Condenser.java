@@ -86,6 +86,7 @@ public final class Condenser {
 
     //private Properties analysis;
     private final Map<String, Word> words; // a string (the words) to (indexWord) - relation
+    private final Set<String> tags = new HashSet<String>(); // a set of tags, discovered from Autotagging
 
     //public int RESULT_NUMB_TEXT_BYTES = -1;
     public int RESULT_NUMB_WORDS = -1;
@@ -222,6 +223,11 @@ public final class Condenser {
                 }
             }
         }
+
+        // extend the tags in the document object with autotagging tags
+        if (!this.tags.isEmpty()) {
+            document.addTags(this.tags);
+        }
     }
 
     private void insertTextToWords(
@@ -283,7 +289,7 @@ public final class Condenser {
         assert is != null;
         final Set<String> currsentwords = new HashSet<String>();
         String word = "";
-        String k;
+        String k, tag;
         int wordlen;
         Word wsp;
         final Word wsp1;
@@ -303,6 +309,10 @@ public final class Condenser {
 	            word = wordenum.nextElement().toString().toLowerCase(Locale.ENGLISH);
 	            if (this.languageIdentificator != null) this.languageIdentificator.add(word);
 	            if (word.length() < wordminsize) continue;
+
+	            // get tags from autotagging
+	            tag = LibraryProvider.autotagging.getPrintTagFromWord(word);
+	            if (tag != null) this.tags.add(tag);
 
 	            // distinguish punctuation and words
 	            wordlen = word.length();

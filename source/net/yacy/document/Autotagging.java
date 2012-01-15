@@ -20,6 +20,7 @@
 
 package net.yacy.document;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +28,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.WordCache.Dictionary;
 import net.yacy.document.geolocalization.Localization;
 import net.yacy.kelondro.logging.Log;
@@ -117,13 +120,30 @@ public class Autotagging {
      * @param text
      * @return
      */
-    public Set<String> tags(String text) {
+    public Set<String> getPrintTagsFromText(String text) {
         Set<String> as = new HashSet<String>();
-
+        if (this.vocabularies.isEmpty()) return as;
+        final WordTokenizer tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(text)), LibraryProvider.dymLib);
+        String tag;
+        while (tokens.hasMoreElements()) {
+            tag = getPrintTagFromWord(tokens.nextElement().toString());
+            if (tag != null) as.add(tag);
+        }
         return as;
     }
 
-    public static class Vocabulary {
+    public String getPrintTagFromWord(String word) {
+        if (this.vocabularies.isEmpty()) return null;
+        Metatag tag;
+        word = normalizeWord(word);
+        for (Map.Entry<String, Vocabulary> v: this.vocabularies.entrySet()) {
+            tag = v.getValue().getMetatag(word);
+            if (tag != null) return tag.getMetatag();
+        }
+        return null;
+    }
+
+    public class Vocabulary {
 
         final String navigatorName;
         final Map<String, String> tag2print, print2tag;
@@ -137,7 +157,7 @@ public class Autotagging {
         public Vocabulary(String name, File propFile) throws IOException {
             this(name);
             ArrayList<String> list = FileUtils.getListArray(propFile);
-            String k, v;
+            String k, kn, v;
             String[] tags;
             int p;
             vocloop: for (String line: list) {
@@ -161,15 +181,16 @@ public class Autotagging {
                 v = line.substring(p + 1);
                 tags = v.split(",");
                 tagloop: for (String t: tags) {
-                    t = t.trim().toLowerCase();
+                    t = normalizeWord(t);
                     if (t.length() == 0) {
                         continue tagloop;
                     }
                     this.tag2print.put(t, k);
                     this.print2tag.put(k, t);
                 }
-                this.tag2print.put(k.toLowerCase(), k);
-                this.print2tag.put(k, k.toLowerCase());
+                kn = normalizeWord(k);
+                this.tag2print.put(kn, k);
+                this.print2tag.put(k, kn);
             }
         }
 
@@ -197,12 +218,10 @@ public class Autotagging {
             return this.navigatorName;
         }
 
-        public String getPrint(final String tag) {
-            return this.tag2print.get(tag);
-        }
-
-        public String getTag(final String print) {
-            return this.print2tag.get(print);
+        public Metatag getMetatag(final String word) {
+            String printname = this.tag2print.get(word);
+            if (printname == null) return null;
+            return metatag(this.navigatorName, printname);
         }
 
         public Set<String> tags() {
@@ -213,6 +232,20 @@ public class Autotagging {
         public String toString() {
             return this.print2tag.toString();
         }
+    }
+
+    private final static Pattern PATTERN_AE = Pattern.compile("\u00E4"); // german umlaute hack for better matching
+    private final static Pattern PATTERN_OE = Pattern.compile("\u00F6");
+    private final static Pattern PATTERN_UE = Pattern.compile("\u00FC");
+    private final static Pattern PATTERN_SZ = Pattern.compile("\u00DF");
+
+    private static final String normalizeWord(String word) {
+        word = word.trim().toLowerCase();
+        word = PATTERN_AE.matcher(word).replaceAll("ae");
+        word = PATTERN_OE.matcher(word).replaceAll("oe");
+        word = PATTERN_UE.matcher(word).replaceAll("ue");
+        word = PATTERN_SZ.matcher(word).replaceAll("ss");
+        return word;
     }
 
     public class Metatag {
@@ -253,6 +286,8 @@ public class Autotagging {
         for (Map.Entry<String, Vocabulary> entry: a.vocabularies.entrySet()) {
             System.out.println(entry);
         }
+        Set<String> tags = a.getPrintTagsFromText("In die Tueren und Fluchttueren muessen noch Schloesser eingebaut werden");
+        System.out.println(tags);
     }
 
 }
