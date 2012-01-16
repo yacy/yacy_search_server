@@ -58,7 +58,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return bytes
      */
     protected final long available() {
-    	return available(false);
+    	return available(true);
     }
     
     /**
@@ -67,7 +67,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @return bytes
      */
     private final long available(final boolean force) {
-    	return force & properState() ? Math.max(youngAvailable(), oldAvailable()) : Math.min(youngAvailable(), Math.max(M, oldAvailable()));
+    	return force & properState(force) ? Math.max(youngAvailable(), oldAvailable()) : Math.min(youngAvailable(), Math.max(M, oldAvailable()));
     }
     
     /**
@@ -93,14 +93,6 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
     protected final long maxMemory() {
 		return heap.getHeapMemoryUsage().getMax();
     }
-    
-    /**
-     * currently not reserved memory
-     * @return bytes
-     */
-    private final long unreserved() {
-    	return Math.max(0, maxMemory() - total());
-    }
 
 	/**
      * checks if a specified amount of bytes are available
@@ -113,7 +105,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
     protected final boolean request(final long size, final boolean force, boolean shortStatus) {
     	if (size == 0l) return true; // does not make sense to check - returning true without setting shortStatus (which also doesn't make sense to me)
     	final boolean unknown = size < 0l; // size < 0 indicate an unknown size - maybe from gziped streams
-    	final boolean r = unknown? properState(true) : size < available(force);
+    	final boolean r = unknown? properState(force) : size < available(force);
         shortStatus = !r;
         return r;
     }
@@ -132,7 +124,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      */
     private final long oldAvailable() {
     	final MemoryUsage usage = getUsage(old, true);
-    	return unreserved() + usage.getCommitted() - usage.getUsed();
+    	return Math.max(usage.getMax(), usage.getCommitted()) - usage.getUsed();
     }
     
     /**
