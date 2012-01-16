@@ -18,6 +18,12 @@
     }
     -->
     </script>
+    <script type="text/javascript">
+    function submitchange(from) {
+    	document.getElementById("apilist").action = "Table_API_p.html#" + from;
+    	document.getElementById("apilist").submit();
+    }
+    </script>
     <script type="text/javascript" src="/js/sorttable.js"></script>
   </head>
   <body id="Tables">
@@ -74,7 +80,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           #(inline)#<th class="sorttable_nosort">URL</th>::#(/inline)#
         </tr>
         #{list}#
-        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" id="#[pk]#">
           <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
           <td>#[type]#</td>
           <td>#[comment]#</td>
@@ -85,7 +91,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <td>
           #(scheduler)#
            <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="modify_repeat">
-            <select name="repeat_select" onchange='this.form.submit()'>
+            <select name="repeat_select" onchange='submitchange("#[pk]#")'>
               <option value="off" selected="selected">no repetition</option>
               <option value="on">activate scheduler</option>
             </select>
@@ -99,13 +105,13 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
          <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="modify_repeat">
             <table>
                 <tr><td>
-                    <select name="repeat_time" onchange='this.form.submit()'>
+                    <select name="repeat_time" onchange='submitchange("#[pk]#")'>
                     #{scale}#
                       <option value="#[time]#" #(selected)#::selected="selected"#(/selected)#>#[time]#</option>
                     #{/scale}#
                     </select>
                 </td><td>
-                    <select name="repeat_unit" onchange='this.form.submit()'>
+                    <select name="repeat_unit" onchange='submitchange("#[pk]#")'>
                       <option value="selminutes" #(selectedMinutes)#::selected="selected"#(/selectedMinutes)#>minutes</option>
                       <option value="selhours" #(selectedHours)#::selected="selected"#(/selectedHours)#>hours</option>
                       <option value="seldays" #(selectedDays)#::selected="selected"#(/selectedDays)#>days</option>
