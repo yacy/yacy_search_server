@@ -37,6 +37,9 @@ public class MemoryControl {
     	if (strategy == null || strategy.hasError()) {
     		if (!usingStandardStrategy) {
     			strategy = new GenerationMemoryStrategy();
+//    			if (strategy.hasError()) { // perhaps we do have a G1
+//    				strategy = new G1MemoryStrategy();
+//    			}
     	    	// fall back if error detected
     	    	if (strategy.hasError()) {
     	    		usingStandardStrategy = true;
@@ -50,12 +53,10 @@ public class MemoryControl {
     }
 
     public final static void setStandardStrategy(final boolean std) {
-        /*
-    	if (usingStandardStrategy != std) {
+        if (usingStandardStrategy != std) {
     		usingStandardStrategy = std;
     		strategy = null;
     	}
-    	*/
     }
 
     /**

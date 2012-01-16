@@ -93,6 +93,14 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
     protected final long maxMemory() {
 		return heap.getHeapMemoryUsage().getMax();
     }
+    
+    /**
+     * currently not reserved memory
+     * @return bytes
+     */
+    private final long unreserved() {
+    	return Math.max(0, maxMemory() - total());
+    }
 
 	/**
      * checks if a specified amount of bytes are available
@@ -124,7 +132,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      */
     private final long oldAvailable() {
     	final MemoryUsage usage = getUsage(old, true);
-    	return usage.getCommitted() - usage.getUsed();
+    	return unreserved() + usage.getCommitted() - usage.getUsed();
     }
     
     /**
