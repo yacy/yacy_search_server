@@ -472,7 +472,7 @@ public class SnippetProcess {
                     }
 
                     // check if we have enough; we stop only if we can fetch online; otherwise its better to run this to get better navigation
-                    if (this.cacheStrategy.isAllowedToFetchOnline() && SnippetProcess.this.result.sizeAvailable() >= this.neededResults) {
+                    if ((this.cacheStrategy == null || this.cacheStrategy.isAllowedToFetchOnline()) && SnippetProcess.this.result.sizeAvailable() >= this.neededResults) {
                         //Log.logWarning("ResultFetcher", SnippetProcess.this.result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
                         break;
                     }
