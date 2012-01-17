@@ -380,6 +380,13 @@ public final class TextParser {
 
         return idioms;
     }
+
+    /**
+     * checks if the parser supports the given mime type. It is not only checked if the parser can parse such types,
+     * it is also checked if the mime type is not included in the mimetype-deny list.
+     * @param mimeType
+     * @return an error if the mime type is not supported, null otherwise
+     */
     public static String supportsMime(String mimeType) {
         if (mimeType == null) return null;
         mimeType = normalizeMimeType(mimeType);
@@ -388,8 +395,13 @@ public final class TextParser {
         return null;
     }
 
-    public static String supportsExtension(final MultiProtocolURI url) {
-        final String ext = url.getFileExtension().toLowerCase();
+    /**
+     * checks if the parser supports the given extension. It is not only checked if the parser can parse such files,
+     * it is also checked if the extension is not included in the extension-deny list.
+     * @param extention
+     * @return an error if the extension is not supported, null otherwise
+     */
+    public static String supportsExtension(final String ext) {
         if (ext == null || ext.length() == 0) return null;
         if (denyExtensionx.containsKey(ext)) return "file extension '" + ext + "' is denied (2)";
         final String mimeType = ext2mime.get(ext);
@@ -398,6 +410,16 @@ public final class TextParser {
         assert idiom != null;
         if (idiom == null) return "no parser available (internal error!)";
         return null;
+    }
+
+    /**
+     * checks if the parser supports the given extension. It is not only checked if the parser can parse such files,
+     * it is also checked if the extension is not included in the extension-deny list.
+     * @param extention
+     * @return an error if the extension is not supported, null otherwise
+     */
+    public static String supportsExtension(final MultiProtocolURI url) {
+        return supportsExtension(url.getFileExtension().toLowerCase());
     }
 
     public static String mimeOf(final MultiProtocolURI url) {

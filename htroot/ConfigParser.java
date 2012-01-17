@@ -53,6 +53,9 @@ public class ConfigParser {
                 post.remove("parserSettings");
 
                 for (final Parser parser: TextParser.parsers()) {
+                    for (final String ext: parser.supportedExtensions()) {
+                        TextParser.grantExtension(ext, "on".equals(post.get("extension_" + ext, "")));
+                    }
                     for (final String mimeType: parser.supportedMimeTypes()) {
                         TextParser.grantMime(mimeType, "on".equals(post.get("mimename_" + mimeType, "")));
                     }
@@ -64,6 +67,14 @@ public class ConfigParser {
         int i = 0;
         for (final Parser parser: TextParser.parsers()) {
             prop.put("parser_" + i + "_name", parser.getName());
+
+            int extIdx = 0;
+            for (final String ext: parser.supportedExtensions()) {
+                prop.put("parser_" + i + "_ext_" + extIdx + "_extension", ext);
+                prop.put("parser_" + i + "_ext_" + extIdx + "_status", (TextParser.supportsExtension(ext) == null) ? 1 : 0);
+                extIdx++;
+            }
+            prop.put("parser_" + i + "_ext", extIdx);
 
             int mimeIdx = 0;
             for (final String mimeType: parser.supportedMimeTypes()) {

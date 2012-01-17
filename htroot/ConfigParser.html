@@ -3,6 +3,16 @@
   <head>
     <title>YaCy '#[clientname]#': Advanced Settings</title>
     #%env/templates/metas.template%#
+	<script type="text/javascript">
+    <!--
+	function checkAll(formToCheckAll, checkStatus) {
+		var inputs=document.getElementById(formToCheckAll);	
+		for (var i =0; i < inputs.elements.length; i++) {
+			inputs.elements[i].checked = checkStatus;
+		}
+    }
+    -->
+    </script>
   </head>
   <body id="Settings">
     #%env/templates/header.template%#
@@ -18,14 +28,21 @@
 </p>
 <table border="0" cellpadding="2" cellspacing="1">
   <tr class="TableHeader" valign="bottom">
-    <td class="small" >enable/disable Parser</td>
+    <td class="small" ><input type="checkbox" id="allswitch" onclick="checkAll(this.form.id, this.checked);" /> enable/disable</td>
+    <td class="small" >Extension</td>
     <td class="small" >Mime-Type</td>
   </tr>#{parser}#
   <tr class="TableCellDark">
     <td colspan="2">#[name]#</td>
-  </tr>#{mime}#
+  </tr>#{ext}#
+  <tr id="#[name]#" class="TableCellLight">
+    <td class="small" align="center"><input type="checkbox" name="extension_#[extension]#" #(status)#::checked="checked" #(/status)#/></td>
+    <td class="small">#[extension]#</td>
+    <td class="small"></td>
+  </tr>#{/ext}##{mime}#
   <tr class="TableCellLight">
     <td class="small" align="center"><input type="checkbox" name="mimename_#[mimetype]#" #(status)#::checked="checked" #(/status)#/></td>
+    <td class="small"></td>
     <td class="small">#[mimetype]#</td>
   </tr>#{/mime}#
   #{/parser}#
