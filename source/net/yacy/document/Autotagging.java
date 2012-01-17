@@ -319,6 +319,19 @@ public class Autotagging {
         return false;
     }
 
+    public String cleanTagFromAutotagging(final String tagString) {
+        if (tagString == null || tagString.length() == 0) return "";
+        String[] tags = PATTERN_SP.split(tagString);
+        StringBuilder sb = new StringBuilder(tagString.length());
+        for (String tag : tags) {
+            if (tag.length() > 0 && tag.charAt(0) != this.prefixChar) {
+                sb.append(tag).append(' ');
+            }
+        }
+        if (sb.length() == 0) return "";
+        return sb.substring(0, sb.length() - 1);
+    }
+
     public static void main(String[] args) {
         Autotagging a = new Autotagging(new File("DATA/DICTIONARIES/" + LibraryProvider.path_to_autotagging_dictionaries), '$');
         for (Map.Entry<String, Vocabulary> entry: a.vocabularies.entrySet()) {
