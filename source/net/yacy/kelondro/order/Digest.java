@@ -390,5 +390,8 @@ public class Digest {
         }
 
         System.out.println("time: " + (System.currentTimeMillis() - start) + " ms");
+        
+        // without this this method would never end
+        Log.shutdown();
     }
 }
