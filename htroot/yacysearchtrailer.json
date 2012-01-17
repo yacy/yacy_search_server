@@ -63,7 +63,20 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-authors)##(nav-topics)#::
+    },#(/nav-authors)##{nav-vocabulary}#
+    {
+      "facetname": "#[navname]#",
+      "displayname": "#[navname]#",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#{nav-vocabulary}##(nav-topics)#::
     {
       "facetname": "topics",
       "displayname": "Topics",

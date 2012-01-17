@@ -28,6 +28,8 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -44,6 +46,8 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.document.Autotagging.Metatag;
+import net.yacy.document.Autotagging.Vocabulary;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -81,8 +85,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
-public class yacysearch
-{
+public class yacysearch {
 
     public static serverObjects respond(
         final RequestHeader header,
@@ -114,6 +117,15 @@ public class yacysearch
             (post == null) ? null : CacheStrategy.parse(post.get("verify", "cacheonly"));
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
+
+        // produce vocabulary navigation sidebars
+        Collection<Vocabulary> vocabularies = LibraryProvider.autotagging.getVocabularies();
+        int j = 0;
+        for (Vocabulary v: vocabularies) {
+            prop.put("sidebarVocabulary_" + j + "_vocabulary", v.getName());
+            j++;
+        }
+        prop.put("sidebarVocabulary", j);
 
         // get segment
         Segment indexSegment = null;
@@ -386,11 +398,13 @@ public class yacysearch
                 urlmask = "smb://.*";
                 modifier.append("/smb ");
             }
+
             if ( querystring.indexOf("/file", 0) >= 0 ) {
                 querystring = querystring.replace("/file", "");
                 urlmask = "file://.*";
                 modifier.append("/file ");
             }
+
             if ( querystring.indexOf("/location", 0) >= 0 ) {
                 querystring = querystring.replace("/location", "");
                 if ( constraint == null ) {
@@ -399,6 +413,7 @@ public class yacysearch
                 constraint.set(Condenser.flag_cat_haslocation, true);
                 modifier.append("/location ");
             }
+
             final int lrp = querystring.indexOf("/language/", 0);
             String language = "";
             if ( lrp >= 0 ) {
@@ -407,8 +422,9 @@ public class yacysearch
                 }
                 querystring = querystring.replace("/language/" + language, "");
                 language = language.toLowerCase();
-                modifier.append("/language/").append(language).append(" ");
+                modifier.append("/language/").append(language).append(' ');
             }
+
             final int inurl = querystring.indexOf("inurl:", 0);
             if ( inurl >= 0 ) {
                 int ftb = querystring.indexOf(' ', inurl);
@@ -420,8 +436,9 @@ public class yacysearch
                 if ( !urlstr.isEmpty() ) {
                     urlmask = urlmask == null ? ".*" + urlstr + ".*" : urlmask + urlstr + ".*";
                 }
-                modifier.append("inurl:").append(urlstr).append(" ");
+                modifier.append("inurl:").append(urlstr).append(' ');
             }
+
             final int filetype = querystring.indexOf("filetype:", 0);
             if ( filetype >= 0 ) {
                 int ftb = querystring.indexOf(' ', filetype);
@@ -440,8 +457,31 @@ public class yacysearch
                         urlmask = urlmask + ".*\\." + ft;
                     }
                 }
-                modifier.append("filetype:").append(ft).append(" ");
+                modifier.append("filetype:").append(ft).append(' ');
             }
+
+            int voc = 0;
+            Collection<Metatag> metatags = new ArrayList<Metatag>(1);
+            while ((voc = querystring.indexOf("/vocabulary/", 0)) >= 0) {
+                String vocabulary = "";
+                int ve = querystring.indexOf(' ', voc + 12);
+                if (ve < 0) {
+                    vocabulary = querystring.substring(voc);
+                    querystring = querystring.substring(0, voc).trim();
+                } else {
+                    vocabulary = querystring.substring(voc + 1, ve);
+                    querystring = querystring.substring(0, voc) + querystring.substring(ve);
+                }
+                modifier.append(vocabulary).append(' ');
+                vocabulary = vocabulary.substring(12);
+                int p = vocabulary.indexOf('/');
+                if (p > 0) {
+                    String k = vocabulary.substring(0, p);
+                    String v = vocabulary.substring(p + 1);
+                    metatags.add(LibraryProvider.autotagging.metatag(LibraryProvider.autotagging.prefixChar + k + ":" + v));
+                }
+            }
+
             String tenant = null;
             if ( post.containsKey("tenant") ) {
                 tenant = post.get("tenant");
@@ -456,6 +496,7 @@ public class yacysearch
                     }
                 }
             }
+
             final int site = querystring.indexOf("site:", 0);
             String sitehash = null;
             String sitehost = null;
@@ -473,7 +514,7 @@ public class yacysearch
                     sitehost = sitehost.substring(0, sitehost.length() - 1);
                 }
                 sitehash = DigestURI.hosthash(sitehost);
-                modifier.append("site:").append(sitehost).append(" ");
+                modifier.append("site:").append(sitehost).append(' ');
             }
 
             final int heuristicScroogle = querystring.indexOf("/heuristic/scroogle", 0);
@@ -509,10 +550,11 @@ public class yacysearch
                     }
                     author = querystring.substring(authori + 7, ftb);
                     querystring = querystring.replace("author:" + author, "");
-                    modifier.append("author:").append(author).append(" ");
+                    modifier.append("author:").append(author).append(' ');
                 }
                 authorhash = ASCII.String(Word.word2hash(author));
             }
+
             final int tld = querystring.indexOf("tld:", 0);
             if ( tld >= 0 ) {
                 int ftb = querystring.indexOf(' ', tld);
@@ -521,7 +563,7 @@ public class yacysearch
                 }
                 String domain = querystring.substring(tld + 4, ftb);
                 querystring = querystring.replace("tld:" + domain, "");
-                modifier.append("tld:").append(domain).append(" ");
+                modifier.append("tld:").append(domain).append(' ');
                 while ( domain.length() > 0 && domain.charAt(0) == '.' ) {
                     domain = domain.substring(1);
                 }
@@ -695,6 +737,7 @@ public class yacysearch
                     prefermask,
                     contentdom,
                     language,
+                    metatags,
                     navigation,
                     snippetFetchStrategy,
                     maximumRecords,

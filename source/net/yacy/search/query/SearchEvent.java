@@ -472,6 +472,10 @@ public final class SearchEvent
         return this.rankingProcess.getFiletypeNavigator();
     }
 
+    public Map<String,ScoreMap<String>> getVocabularyNavigators() {
+        return this.rankingProcess.getVocabularyNavigators();
+    }
+
     public void addHeuristic(final byte[] urlhash, final String heuristicName, final boolean redundant) {
         synchronized ( this.heuristics ) {
             this.heuristics.put(urlhash, new HeuristicResult(urlhash, heuristicName, redundant));

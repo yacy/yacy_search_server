@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -43,12 +44,12 @@ import net.yacy.kelondro.util.FileUtils;
  */
 public class Autotagging {
 
-    final static Object PRESENT = new Object();
+    private final static Object PRESENT = new Object();
 
-    final char prefixChar;
-    final File autotaggingPath;
-    final Map<String, Vocabulary> vocabularies;
-    final Map<String, Object> allTags;
+    public final char prefixChar;
+    private final File autotaggingPath;
+    private final Map<String, Vocabulary> vocabularies;
+    private final Map<String, Object> allTags;
 
     public Autotagging(final File autotaggingPath, char prefixChar) {
         this.vocabularies = new ConcurrentHashMap<String, Vocabulary>();
@@ -90,6 +91,10 @@ public class Autotagging {
                 }
             }
         }
+    }
+
+    public Collection<Vocabulary> getVocabularies() {
+        return this.vocabularies.values();
     }
 
     public Set<String> allTags() {
@@ -138,7 +143,7 @@ public class Autotagging {
         word = normalizeWord(word);
         for (Map.Entry<String, Vocabulary> v: this.vocabularies.entrySet()) {
             tag = v.getValue().getMetatag(word);
-            if (tag != null) return tag.getMetatag();
+            if (tag != null) return tag.toString();
         }
         return null;
     }
@@ -178,6 +183,11 @@ public class Autotagging {
                     continue vocloop;
                 }
                 k = line.substring(0, p).trim();
+                k = k.replaceAll(" \\+", ", "); // remove symbols that are bad in a query attribute
+                k = k.replaceAll(" /", ", ");
+                k = k.replaceAll("\\+", ",");
+                k = k.replaceAll("/", ",");
+                k = k.replaceAll("  ", " ");
                 v = line.substring(p + 1);
                 tags = v.split(",");
                 tagloop: for (String t: tags) {
@@ -238,6 +248,8 @@ public class Autotagging {
     private final static Pattern PATTERN_OE = Pattern.compile("\u00F6");
     private final static Pattern PATTERN_UE = Pattern.compile("\u00FC");
     private final static Pattern PATTERN_SZ = Pattern.compile("\u00DF");
+    private final static Pattern PATTERN_UL = Pattern.compile("_");
+    private final static Pattern PATTERN_SP = Pattern.compile(" ");
 
     private static final String normalizeWord(String word) {
         word = word.trim().toLowerCase();
@@ -255,12 +267,12 @@ public class Autotagging {
             this.vocName = vocName;
             this.print = print;
         }
-        public Metatag(String metatag) {
+        public Metatag(String metatag) throws RuntimeException {
             assert metatag.charAt(0) == Autotagging.this.prefixChar;
             int p = metatag.indexOf(':');
-            assert p > 0;
+            if (p < 0) throw new RuntimeException("bad metatag: metatag = " + metatag);
             this.vocName = metatag.substring(1, p);
-            this.print = metatag.substring(p + 1);
+            this.print = decodeMaskname(metatag.substring(p + 1));
         }
         public String getVocabularyName() {
             return this.vocName;
@@ -268,17 +280,43 @@ public class Autotagging {
         public String getPrintName() {
             return this.print;
         }
-        public String getMetatag() {
-            return Autotagging.this.prefixChar + this.vocName + ":" + this.print.replaceAll(" ", "_");
+        @Override
+        public String toString() {
+            return Autotagging.this.prefixChar + this.vocName + ":" + encodePrintname(this.print);
         }
+        @Override
+        public boolean equals(Object m) {
+            Metatag m0 = (Metatag) m;
+            return this.vocName.equals(m0.vocName) && this.print.equals(m0.print);
+        }
+        @Override
+        public int hashCode() {
+            return this.vocName.hashCode() + this.print.hashCode();
+        }
+    }
+
+    public static final String encodePrintname(String printname) {
+        return PATTERN_SP.matcher(printname).replaceAll("_");
+    }
+
+    public static final String decodeMaskname(String maskname) {
+        return PATTERN_UL.matcher(maskname).replaceAll(" ");
     }
 
     public Metatag metatag(String vocName, String print) {
         return new Metatag(vocName, print);
     }
 
-    public Metatag metatag(String metatag) {
+    public Metatag metatag(String metatag) throws RuntimeException {
         return new Metatag(metatag);
+    }
+
+    public static boolean metatagAppearIn(final Metatag metatag, final String[] tags) {
+        String tag = metatag.toString();
+        for (String s: tags) {
+            if (tag.equals(s)) return true;
+        }
+        return false;
     }
 
     public static void main(String[] args) {

@@ -481,7 +481,7 @@ public class SnippetProcess {
                     }
 
                     // get next entry
-                    page = SnippetProcess.this.rankingProcess.takeURL(true, Math.min(100, this.timeout - System.currentTimeMillis()));
+                    page = SnippetProcess.this.rankingProcess.takeURL(true, Math.min(500, Math.max(100, this.timeout - System.currentTimeMillis())));
                     //if (page != null) Log.logInfo("ResultFetcher", "got one page: " + page.metadata().url().toNormalform(true, false));
                     //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
                     if (page == null) {

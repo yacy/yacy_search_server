@@ -25,9 +25,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.Iterator;
+import java.util.Map;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.document.Autotagging;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;
@@ -218,6 +220,77 @@ public class yacysearchtrailer {
             i--;
             prop.put("nav-filetypes_element_" + i + "_nl", 0);
         }
+
+        // vocabulary navigators
+        final Map<String, ScoreMap<String>> vocabularyNavigators = theSearch.getVocabularyNavigators();
+        if (vocabularyNavigators != null && vocabularyNavigators.size() > 0) {
+            int navvoccount = 0;
+            vocnav: for (Map.Entry<String, ScoreMap<String>> ve: vocabularyNavigators.entrySet()) {
+                String navname = ve.getKey();
+                if (ve.getValue() == null || ve.getValue().isEmpty()) {
+                    continue vocnav;
+                }
+                prop.put(fileType, "nav-vocabulary_" + navvoccount + "_navname", navname);
+                navigatorIterator = ve.getValue().keys(false);
+                int i = 0;
+                String anav;
+                while (i < 20 && navigatorIterator.hasNext()) {
+                    name = navigatorIterator.next();
+                    count = ve.getValue().get(name);
+                    anav = "/vocabulary/" + navname + "/" + Autotagging.encodePrintname(name);
+                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
+                    prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
+                    prop.putJSON("nav-vocabulary_" + navvoccount + "_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators).toString());
+                    prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
+                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", anav);
+                    prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
+                    i++;
+                }
+                prop.put("nav-vocabulary_" + navvoccount + "_element", i);
+                i--;
+                prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 0);
+                navvoccount++;
+            }
+            prop.put("nav-vocabulary", navvoccount);
+        } else {
+            prop.put("nav-vocabulary", 0);
+        }
+/*
+html
+#{nav-vocabulary}#
+<div id="sidebar#[navname]#" style="float: right; margin-top:5px; width: 220px;">
+<h3 style="padding-left:25px;">#[navname]# Navigator</h3>
+<div><ul style="padding-left: 0px;">#{element}#
+<li>#[url]#</li>
+#{/element}#</ul></div>
+</div>
+#{/nav-vocabulary}#
+
+xml
+#{nav-vocabulary}#
+<yacy:facet name="#[navname]#" displayname="#[navname]#" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" />
+#{/element}#
+</yacy:facet>
+#{/nav-vocabulary}#
+
+json
+#{nav-vocabulary}#
+    {
+      "facetname": "#[navname]#",
+      "displayname": "#[navname]#",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#{nav-vocabulary}#
+ */
 
         // about box
         final String aboutBody = env.getConfig("about.body", "");

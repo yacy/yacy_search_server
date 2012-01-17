@@ -30,6 +30,7 @@
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -44,6 +45,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
+import net.yacy.document.Autotagging.Metatag;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -234,6 +236,7 @@ public final class search {
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
+                    new HashSet<Metatag>(),
                     "", // no navigation
                     CacheStrategy.CACHEONLY,
                     count,
@@ -296,6 +299,7 @@ public final class search {
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
+                    new HashSet<Metatag>(),
                     "", // no navigation
                     CacheStrategy.CACHEONLY,
                     count,

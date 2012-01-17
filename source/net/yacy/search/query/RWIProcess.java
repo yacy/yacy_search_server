@@ -46,7 +46,10 @@ import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
+import net.yacy.document.Autotagging;
+import net.yacy.document.Autotagging.Metatag;
 import net.yacy.document.Condenser;
+import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -101,6 +104,7 @@ public final class RWIProcess extends Thread
     private final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     private final ScoreMap<String> protocolNavigator; // a counter for protocol types
     private final ScoreMap<String> filetypeNavigator; // a counter for file types
+    private final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies
 
     public RWIProcess(final QueryParams query, final ReferenceOrder order, final int maxentries, final boolean remote) {
         // we collect the urlhashes and construct a list with urlEntry objects
@@ -132,6 +136,7 @@ public final class RWIProcess extends Thread
         this.namespaceNavigator = new ConcurrentScoreMap<String>();
         this.protocolNavigator = new ConcurrentScoreMap<String>();
         this.filetypeNavigator = new ConcurrentScoreMap<String>();
+        this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
         this.ref = new ConcurrentScoreMap<String>();
         this.feedersAlive = new AtomicInteger(0);
         this.feedersTerminated = new AtomicInteger(0);
@@ -349,8 +354,7 @@ public final class RWIProcess extends Thread
                 this.urlhashes.putUnique(iEntry.urlhash());
                 rankingtryloop: while ( true ) {
                     try {
-                        this.stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order
-                            .cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+                        this.stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch ( final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
@@ -482,8 +486,7 @@ public final class RWIProcess extends Thread
                     m = this.doubleDomCache.get(hosthash);
                     if ( m == null ) {
                         // first appearance of dom. we create an entry to signal that one of that domain was already returned
-                        m =
-                            new WeakPriorityBlockingQueue<WordReferenceVars>((this.query.specialRights)
+                        m = new WeakPriorityBlockingQueue<WordReferenceVars>((this.query.specialRights)
                                 ? maxDoubleDomSpecial
                                 : maxDoubleDomAll);
                         this.doubleDomCache.put(hosthash, m);
@@ -504,8 +507,7 @@ public final class RWIProcess extends Thread
         WeakPriorityBlockingQueue.Element<WordReferenceVars> bestEntry = null;
         WeakPriorityBlockingQueue.Element<WordReferenceVars> o;
         synchronized ( this.doubleDomCache ) {
-            final Iterator<WeakPriorityBlockingQueue<WordReferenceVars>> i =
-                this.doubleDomCache.values().iterator();
+            final Iterator<WeakPriorityBlockingQueue<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
             while ( i.hasNext() ) {
                 try {
                     m = i.next();
@@ -557,10 +559,9 @@ public final class RWIProcess extends Thread
         final long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
         int p = -1;
         long timeleft;
-        while ( (timeleft = timeout - System.currentTimeMillis()) > 0 ) {
+        takeloop: while ( (timeleft = timeout - System.currentTimeMillis()) > 0 ) {
             //System.out.println("timeleft = " + timeleft);
-            final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi =
-                takeRWI(skipDoubleDom, timeleft);
+            final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi = takeRWI(skipDoubleDom, timeleft);
             if ( obrwi == null ) {
                 return null; // all time was already wasted in takeRWI to get another element
             }
@@ -635,6 +636,20 @@ public final class RWIProcess extends Thread
                 continue;
             }
 
+            // check vocabulary constraint
+            final String tags = page.dc_subject();
+            final String[] taglist = tags == null || tags.length() == 0 ? new String[0] : SPACE_PATTERN.split(page.dc_subject());
+            if (this.query.metatags != null && this.query.metatags.size() > 0) {
+                // all metatags must appear in the tags list
+                for (Metatag metatag: this.query.metatags) {
+                    if (!Autotagging.metatagAppearIn(metatag, taglist)) {
+                        this.sortout++;
+                        Log.logInfo("RWIProcess", "sorted out " + page.url());
+                        continue takeloop;
+                    }
+                }
+            }
+
             // evaluate information of metadata for navigation
             // author navigation:
             if ( pageauthor != null && pageauthor.length() > 0 ) {
@@ -650,6 +665,12 @@ public final class RWIProcess extends Thread
                 // add author to the author navigator
                 this.authorNavigator.inc(pageauthor);
             } else if ( this.query.authorhash != null ) {
+                this.sortout++;
+                continue;
+            }
+
+            // check Scanner
+            if ( !Scanner.acceptURL(page.url()) ) {
                 this.sortout++;
                 continue;
             }
@@ -675,10 +696,20 @@ public final class RWIProcess extends Thread
                 this.filetypeNavigator.inc(fileext);
             }
 
-            // check Scanner
-            if ( !Scanner.acceptURL(page.url()) ) {
-                this.sortout++;
-                continue;
+            // vocabulary navigation
+            tagharvest: for (String tag: taglist) {
+                if (tag.length() < 1 || tag.charAt(0) != LibraryProvider.tagPrefix) continue tagharvest;
+                try {
+                    Metatag metatag = LibraryProvider.autotagging.metatag(tag);
+                    ScoreMap<String> voc = this.vocabularyNavigator.get(metatag.getVocabularyName());
+                    if (voc == null) {
+                        voc = new ConcurrentScoreMap<String>();
+                        this.vocabularyNavigator.put(metatag.getVocabularyName(), voc);
+                    }
+                    voc.inc(metatag.getPrintName());
+                } catch (RuntimeException e) {
+                    // tag may not be well-formed
+                }
             }
 
             // accept url
@@ -686,6 +717,8 @@ public final class RWIProcess extends Thread
         }
         return null;
     }
+
+    final static Pattern SPACE_PATTERN = Pattern.compile(" ");
 
     public int sizeQueue() {
         int c = this.stack.sizeQueue();
@@ -816,6 +849,10 @@ public final class RWIProcess extends Thread
             this.filetypeNavigator.clear(); // navigators with one entry are not useful
         }
         return this.filetypeNavigator;
+    }
+
+    public Map<String,ScoreMap<String>> getVocabularyNavigators() {
+        return this.vocabularyNavigator;
     }
 
     public static final Comparator<Map.Entry<String, Integer>> mecomp =
