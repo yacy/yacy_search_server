@@ -157,15 +157,17 @@ public class SnippetProcess {
             //Log.logInfo("SnippetProcess", "SLEEP = " + sleep);
             try { Thread.sleep(sleep); } catch (final InterruptedException e1) { Log.logException(e1); }
         }
-        if (item < 5) {
+        int thisRankingQueueSize, lastRankingQueueSize = 0;
+        if (item < 10) {
             while (
-              (!this.rankingProcess.feedingIsFinished() || this.rankingProcess.sizeQueue() > 0) &&
-               this.result.sizeAvailable() < item + 1 &&
+              ((thisRankingQueueSize = this.rankingProcess.sizeQueue()) > 0 || !this.rankingProcess.feedingIsFinished()) &&
+               (thisRankingQueueSize > lastRankingQueueSize || this.result.sizeAvailable() < item + 1) &&
                System.currentTimeMillis() < waittimeout &&
                anyWorkerAlive()
               ) {
                 // wait a little time to get first results in the search
-                try { Thread.sleep(10); } catch (final InterruptedException e1) {}
+                lastRankingQueueSize = thisRankingQueueSize;
+                try { Thread.sleep(20); } catch (final InterruptedException e1) {}
             }
         }
 
@@ -462,14 +464,15 @@ public class SnippetProcess {
                 //System.out.println("DEPLOYED WORKER " + id + " FOR " + this.neededResults + " RESULTS, timeoutd = " + (this.timeout - System.currentTimeMillis()));
                 int loops = 0;
                 while (this.shallrun && System.currentTimeMillis() < this.timeout) {
+                    //Log.logInfo("SnippetProcess", "***** timeleft = " + (this.timeout - System.currentTimeMillis()));
                     this.lastLifeSign = System.currentTimeMillis();
 
                     if (MemoryControl.shortStatus()) {
                     	break;
                     }
 
-                    // check if we have enough
-                    if (SnippetProcess.this.result.sizeAvailable() >= this.neededResults) {
+                    // check if we have enough; we stop only if we can fetch online; otherwise its better to run this to get better navigation
+                    if (this.cacheStrategy.isAllowedToFetchOnline() && SnippetProcess.this.result.sizeAvailable() >= this.neededResults) {
                         //Log.logWarning("ResultFetcher", SnippetProcess.this.result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
                         break;
                     }
@@ -481,7 +484,7 @@ public class SnippetProcess {
                     }
 
                     // get next entry
-                    page = SnippetProcess.this.rankingProcess.takeURL(true, Math.min(500, Math.max(100, this.timeout - System.currentTimeMillis())));
+                    page = SnippetProcess.this.rankingProcess.takeURL(true, Math.min(500, Math.max(20, this.timeout - System.currentTimeMillis())));
                     //if (page != null) Log.logInfo("ResultFetcher", "got one page: " + page.metadata().url().toNormalform(true, false));
                     //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
                     if (page == null) {

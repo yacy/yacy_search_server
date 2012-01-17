@@ -644,7 +644,7 @@ public final class RWIProcess extends Thread
                 for (Metatag metatag: this.query.metatags) {
                     if (!Autotagging.metatagAppearIn(metatag, taglist)) {
                         this.sortout++;
-                        Log.logInfo("RWIProcess", "sorted out " + page.url());
+                        //Log.logInfo("RWIProcess", "sorted out " + page.url());
                         continue takeloop;
                     }
                 }
