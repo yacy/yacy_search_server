@@ -469,7 +469,7 @@ public class yacysearch {
                     vocabulary = querystring.substring(voc);
                     querystring = querystring.substring(0, voc).trim();
                 } else {
-                    vocabulary = querystring.substring(voc + 1, ve);
+                    vocabulary = querystring.substring(voc, ve);
                     querystring = querystring.substring(0, voc) + querystring.substring(ve);
                 }
                 modifier.append(vocabulary).append(' ');
