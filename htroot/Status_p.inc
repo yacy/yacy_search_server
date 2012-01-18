@@ -62,7 +62,7 @@
     ::
     Enabled <a href="Status.html?tray=false">[Disable]</a>
     ::
-    <a href="ConfigProperties_p.html" onclick="alert('Set\ntrayIcon.force = true\n\nWARNING:\nYou do this on your own risk. If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup. In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf');">Experimental</a>
+    <a href="ConfigProperties_p.html" onclick="alert('Set\ntray.icon.force = true\n\nWARNING:\nYou do this on your own risk. If you do this without YaCy running on a desktop-pc, this will possibly break startup. In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf');">Experimental</a>
     #(/tray)#
     </dd>
       

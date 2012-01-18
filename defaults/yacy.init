@@ -464,9 +464,10 @@ browserPopUpPage=index.html
 indexForward =
 
 # defines if the YaCy icon appears in the system tray on supported platforms
-trayIcon=true
-trayIcon.force=false
-tray.label=YaCy
+tray.icon.enabled=true
+tray.icon.force=false
+tray.icon.label=YaCy
+tray.menu.enabled=true
 
 # index sharing attributes: by default, sharing is on.
 # If you want to use YaCy only for local indexing (robinson mode),
@@ -973,9 +974,6 @@ memory.standardStrategy = true
 # setting if execution of CGI files is allowed or not
 cgi.allow = false
 cgi.suffixes = cgi,pl
-
-# whether this is a version for a web browser
-browserintegration = false
 
 # content integration settings
 content.phpbb3.urlstub = http://<mydomain>/

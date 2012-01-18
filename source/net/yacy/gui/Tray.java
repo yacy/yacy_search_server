@@ -1,5 +1,5 @@
-// yacyTray.java
-// (C) 2008 by David Wieditz; d.wieditz@gmx.de
+// Tray.java
+// (C) 2008-2012 by David Wieditz; d.wieditz@gmx.de
 // (C) 2008 by Florian Richter; Florian_Richter@gmx.de
 // first published 13.07.2008 on http://yacy.net
 //
@@ -30,15 +30,14 @@ package net.yacy.gui;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
+import java.awt.SystemTray;
 import java.awt.Toolkit;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 
 import net.yacy.gui.framework.Browser;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.OS;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -46,38 +45,42 @@ import net.yacy.search.SwitchboardConstants;
 
 
 public final class Tray {
-    protected static Switchboard sb;
-	
-	private static nativeTrayIcon ti;
-	private static boolean isIntegrated; // browser integration
-	private static boolean isShown = false;
+	private Switchboard sb;
+
+	private TrayIcon ti;
+	private String trayLabel;
+
 	final private static boolean deutsch = System.getProperty("user.language","").equals("de");
 	final private static boolean french = System.getProperty("user.language","").equals("fr");
-	
-	public static String trayLabel;
-	
-	public static boolean lockBrowserPopup = true;
-	
-	
-	public static void init(final Switchboard par_sb) {
-		sb = par_sb;
-		isIntegrated = sb.getConfigBool(SwitchboardConstants.BROWSERINTEGRATION, false);
-		trayLabel = sb.getConfig(SwitchboardConstants.TRAY_LABEL, "YaCy");
-		try {
-			final boolean trayIcon = sb.getConfigBool(SwitchboardConstants.TRAY_ICON_ENABLED, false);
-			if (trayIcon && (OS.isWindows || sb.getConfigBool(SwitchboardConstants.TRAY_ICON_FORCED, false))) {
-				System.setProperty("java.awt.headless", "false");
 
-				if(nativeTrayIcon.isSupported()) {
-					final String iconpath = sb.getAppPath().toString() + "/addon/YaCy_TrayIcon.png".replace("/", File.separator);
+	// states
+	private boolean isShown = false;
+	private boolean appIsReady = false;
+	private boolean menuEnabled = true;
+
+	public Tray(final Switchboard sb_par) {
+		sb = sb_par;
+		menuEnabled = sb.getConfigBool(SwitchboardConstants.TRAY_MENU_ENABLED, true);
+		trayLabel = sb.getConfig(SwitchboardConstants.TRAY_ICON_LABEL, "YaCy");
+		try {
+			final boolean trayIconEnabled = sb.getConfigBool(SwitchboardConstants.TRAY_ICON_ENABLED, false);
+			final boolean trayIconForced = sb.getConfigBool(SwitchboardConstants.TRAY_ICON_FORCED, false);
+			if (trayIconEnabled && (OS.isWindows || trayIconForced)) {
+				System.setProperty("java.awt.headless", "false"); // we have to switch off headless mode, else all will fail
+
+				if(SystemTray.isSupported()) {
+					final String iconPath = sb.getAppPath().toString() + "/addon/YaCy_TrayIcon.png".replace("/", File.separator);
 					ActionListener al = new ActionListener() {
 						public void actionPerformed(final ActionEvent e) {
-							trayClickAction();
+							doubleClickAction();
 						}
 					};
-					ti = new nativeTrayIcon(iconpath, al, setupPopupMenu());
-
-					ti.addToSystemTray();
+					final Image i = Toolkit.getDefaultToolkit().getImage(iconPath);
+					final PopupMenu menu = (menuEnabled) ? getPopupMenu() : null;
+					ti = new TrayIcon(i, trayLabel, menu);
+					ti.setImageAutoSize(true);
+					ti.addActionListener(al);
+					SystemTray.getSystemTray().add(ti);
 					isShown = true;
 				} else {
 					System.setProperty("java.awt.headless", "true");
@@ -88,38 +91,77 @@ public final class Tray {
 		}
 	}
 
-	public static PopupMenu setupPopupMenu() {
+	/**
+	 * set all functions available
+	 */
+	public void setReady() {
+		appIsReady = true;
+	}
+
+	public void remove() {
+		if (isShown){
+			SystemTray.getSystemTray().remove(ti);
+			ti = null;
+			isShown = false;
+		}
+	}
+
+	private void doubleClickAction() {
+		if (!appIsReady) {
+			String label;
+			if (deutsch)
+				label = "Bitte warten bis YaCy gestartet ist.";
+			else if (french)
+				label = "S'il vous plaît attendre jusqu'à YaCy est démarré.";
+			else
+				label = "Please wait until YaCy is started.";
+			//ti.displayMessage("YaCy",label);
+			ti.displayMessage("YaCy", label, TrayIcon.MessageType.INFO);
+		} else {
+			openBrowserPage("");
+		}
+	}
+
+	/**
+	 * 
+	 * @param browserPopUpPage relative path to the webserver root
+	 */
+	private void openBrowserPage(final String browserPopUpPage) {
+		if(!menuEnabled) return;
+		// no need for https, because we are on localhost
+		Browser.openBrowser("http://localhost:" + sb.getConfig("port", "8090") + "/" + browserPopUpPage);
+	}
+
+	private PopupMenu getPopupMenu() {
 		String label;
-		// this is the popup menu
+
 		PopupMenu menu = new PopupMenu();
 		MenuItem menuItem;
-		
-		if(isIntegrated) return menu;
-		
+
 		// YaCy Search
 		if (deutsch)
-                    label = "YaCy Suche";
-                else if (french)
-                    label = "YaCy Recherche";
-                else
-                    label = "YaCy Search";
+			label = "YaCy Suche";
+		else if (french)
+			label = "YaCy Recherche";
+		else
+			label = "YaCy Search";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				openBrowser("");
+				openBrowserPage("");
 			}
 		});
 		menu.add(menuItem);
-		
-		/*
-		 *  no prominent compare since google can not be displayed in a frame anymore
+
+
+		/*  no prominent compare since google can not be displayed in a frame anymore
 		// Compare YaCy
 		if (deutsch)
-                    label = "Vergleichs-Suche";
-                else if (french)
-                    label = "Comparer YaCy";
-                else
-                    label = "Compare YaCy";
+			label = "Vergleichs-Suche";
+		else if (french)
+			label = "Comparer YaCy";
+		else
+			label = "Compare YaCy";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
@@ -127,33 +169,33 @@ public final class Tray {
 			}
 		});
 		menu.add(menuItem);
-		*/
-		
+		 */
+
 		// Peer Administration
 		if (deutsch)
-                    label = "Peer Administration";
-                else if (french)
-                    label = "Peer Administration";
-                else
-                    label = "Peer Administration";
+			label = "Peer Administration";
+		else if (french)
+			label = "Peer Administration";
+		else
+			label = "Peer Administration";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				openBrowser("Status.html");
+				openBrowserPage("Status.html");
 			}
 		});
 		menu.add(menuItem);
-		
+
 		// Separator
 		menu.addSeparator();
 
 		// Quit
 		if(deutsch) 
-                    label = "YaCy Beenden";
-                else if(french)
-                    label = "Arrêt YaCy";
-                else
-                    label = "Shutdown YaCy";
+			label = "YaCy Beenden";
+		else if(french)
+			label = "Arrêt YaCy";
+		else
+			label = "Shutdown YaCy";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
@@ -163,154 +205,5 @@ public final class Tray {
 		menu.add(menuItem);
 		return menu;
 	}
-    
-	
-	protected static void trayClickAction(){	//doubleclick
-		if (lockBrowserPopup) {
-			String label;
-			if (deutsch)
-                            label = "Bitte warten bis YaCy gestartet ist.";
-                        else if (french)
-                            label = "S'il vous plaît attendre jusqu'à YaCy est démarré.";
-                        else
-                            label = "Please wait until YaCy is started.";
-			ti.displayBalloonMessage("YaCy",label);
-		} else {
-			openBrowser("");
-		}
-	}
-	
-	protected static void openBrowser(final String browserPopUpPage){
-		if(isIntegrated) return;
-		// no need for https, because we are on localhost
-		Browser.openBrowser("http://localhost:" + sb.getConfig("port", "8090") + "/" + browserPopUpPage);
-	}
-	
-	public static void removeTray(){
-		if (isShown){
-		ti.removeFromSystemTray();
-		isShown = false;
-		}
-	}
-	
-}
 
-class nativeTrayIcon {
-	private Object SystemTray;
-	private Object TrayIcon;
-	private Class<?> SystemTrayClass;
-	private Class<?> TrayIconClass;
-
-	public static boolean isSupported() {
-		try {
-			Class<?> l_SystemTrayClass = Class.forName("java.awt.SystemTray");
-			//Object SystemTray = SystemTrayClass.newInsta
-			Method isSupportedMethod = l_SystemTrayClass.getMethod("isSupported", (Class[])null);
-			Boolean isSupported = (Boolean)isSupportedMethod.invoke(null, (Object[])null);
-			return isSupported;
-		} catch (Throwable e) {
-			return false;
-		}
-
-	}
-
-	public nativeTrayIcon(String IconPath, ActionListener al, PopupMenu menu) {
-		if(!isSupported()) return;
-
-		final Image i = Toolkit.getDefaultToolkit().getImage(IconPath);
-		
-		try {
-			this.TrayIconClass = Class.forName("java.awt.TrayIcon");
-			this.SystemTrayClass = Class.forName("java.awt.SystemTray");
-
-			// with reflections: this.TrayIcon = new TrayIcon(i, "YaCy");
-			Class<?> partypes1[] = new Class[3];
-			partypes1[0] = Image.class;
-			partypes1[1] = String.class;
-			partypes1[2] = PopupMenu.class;
-			Constructor<?> TrayIconConstructor = TrayIconClass.getConstructor(partypes1);
-
-			Object arglist1[] = new Object[3];
-			arglist1[0] = i;
-			arglist1[1] = Tray.trayLabel;
-			arglist1[2] = menu;
-			this.TrayIcon = TrayIconConstructor.newInstance(arglist1);
-
-			// with reflections: this.TrayIcon.setImageAutoSize(true)
-			Class<?> partypes2[] = new Class[1];
-			partypes2[0] = Boolean.TYPE;
-			Method setImageAutoSizeMethod = TrayIconClass.getMethod("setImageAutoSize", partypes2);
-
-			Object arglist2[] = new Object[1];
-			arglist2[0] = Boolean.TRUE;
-			setImageAutoSizeMethod.invoke(this.TrayIcon, arglist2);
-
-			// with reflections: this.TrayIcon.addActionListener(al)
-			Class<?> partypes3[] = new Class[1];
-			partypes3[0] = ActionListener.class;
-			Method addActionListenerMethod = TrayIconClass.getMethod("addActionListener", partypes3);
-
-			Object arglist3[] = new Object[1];
-			arglist3[0] = al;
-			addActionListenerMethod.invoke(this.TrayIcon, arglist3);
-
-			// with reflections: nativSystemTray = SystemTray.getDefaultSystemTray()
-			Method getDefaultSystemTrayMethod = SystemTrayClass.getMethod("getSystemTray", (Class[])null);
-
-			this.SystemTray = getDefaultSystemTrayMethod.invoke(null, (Object[])null);
-
-		} catch (Throwable e) {
-		    Log.logException(e);
-			this.TrayIcon = null;
-		}
-	}
-
-    public void addToSystemTray() {
-		try {
-			// with reflections: this.SystemTray.add(this.TrayIcon)
-			Class<?> partypes1[] = new Class[1];
-			partypes1[0] = TrayIconClass;
-			Method addMethod = SystemTrayClass.getMethod("add", partypes1);
-
-			Object arglist1[] = new Object[1];
-			arglist1[0] = this.TrayIcon;
-			addMethod.invoke(this.SystemTray, arglist1);
-		} catch (Throwable e) {
-		    Log.logException(e);
-		}
-	}
-
-    public void removeFromSystemTray() {
-		try {
-			// with reflections: this.SystemTray.remove(this.TrayIcon)
-			Class<?> partypes1[] = new Class[1];
-			partypes1[0] = TrayIconClass;
-			Method removeMethod = SystemTrayClass.getMethod("remove", partypes1);
-
-			Object arglist1[] = new Object[1];
-			arglist1[0] = this.TrayIcon;
-			removeMethod.invoke(this.SystemTray, arglist1);
-		} catch (Throwable e) {
-		    Log.logException(e);
-		}
-	}
-
-    public void displayBalloonMessage(final String title, final String message) {
-		try {
-			// with reflections: this.TrayIcon.displayBalloonMessage(title, message, TrayIcon.MessageType.NONE)
-			Class<?> partypes1[] = new Class[3];
-			partypes1[0] = String.class;
-			partypes1[1] = String.class;
-			partypes1[2] = Class.forName("java.awt.TrayIcon.MessageType");
-			Method displayBalloonMessageMethod = TrayIconClass.getMethod("displayBalloonMessage", partypes1);
-
-			Object arglist1[] = new Object[1];
-			arglist1[0] = title;
-			arglist1[1] = message;
-			arglist1[2] = null;
-			displayBalloonMessageMethod.invoke(this.TrayIcon, arglist1);
-		} catch (Throwable e) {
-		    Log.logException(e);
-		}
-	}
 }

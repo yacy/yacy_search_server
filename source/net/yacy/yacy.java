@@ -330,8 +330,8 @@ public final class yacy {
                     //Log.logException(e);
                 }
 
-                // unlock yacyTray browser popup
-                Tray.lockBrowserPopup = false;
+                // enable browser popup, http server is ready now
+                sb.tray.setReady();
 
                 //regenerate Locales from Translationlist, if needed
                 final File locale_source = sb.getAppPath("locale.source", "locales");

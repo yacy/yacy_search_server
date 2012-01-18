@@ -243,6 +243,7 @@ public final class Switchboard extends serverSwitch
     public LinkedBlockingQueue<String> trail;
     public SeedDB peers;
     public WorkTables tables;
+    public Tray tray;
 
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -294,7 +295,7 @@ public final class Switchboard extends serverSwitch
         }
 
         // init TrayIcon if possible
-        Tray.init(this);
+        tray = new Tray(this);
 
         // remote proxy configuration
         initRemoteProxy();
@@ -1597,7 +1598,7 @@ public final class Switchboard extends serverSwitch
         Domains.close();
         AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
         UPnP.deletePortMapping();
-        Tray.removeTray();
+        tray.remove();
         try {
             HTTPClient.closeConnectionManager();
         } catch ( final InterruptedException e ) {

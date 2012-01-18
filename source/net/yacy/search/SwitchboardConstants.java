@@ -443,10 +443,10 @@ public final class SwitchboardConstants {
     /**
      * system tray
      */
-	public static final String TRAY_ICON_ENABLED	 = "trayIcon";
-	public static final String TRAY_ICON_FORCED		 = "trayIcon.force";
-	public static final String TRAY_LABEL			 = "tray.label";
-	public static final String BROWSERINTEGRATION	 = "browserintegration";
+	public static final String TRAY_ICON_ENABLED	 = "tray.icon.enabled";
+	public static final String TRAY_ICON_FORCED		 = "tray.icon.force";
+	public static final String TRAY_ICON_LABEL		 = "tray.icon.label";
+	public static final String TRAY_MENU_ENABLED	 = "tray.menu.enabled";
 
 	/**
 	 * Segments
