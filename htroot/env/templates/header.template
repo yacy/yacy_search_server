@@ -23,6 +23,12 @@
       <li><a href="/Wiki.html?display=1" class="MenuItemLink">Local Peer Wiki</a></li>
     </ul>
   </li>
+  <li class="menugroup" id="menugroupInteraction">
+    <h3>Interaction</h3>
+    <ul class="menu">
+      <li><a href="/AugmentedBrowsing_p.html" class="MenuItemLink">Augmented Browsing</a></li>
+    </ul>
+  </li>
   <li class="menugroup" id="menugroupCrawlerControl">
     <h3>Index&nbsp;Production</h3>
     <ul class="menu">
