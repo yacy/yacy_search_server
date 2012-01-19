@@ -130,7 +130,7 @@ public class getpageinfo_p {
                         Log.logException(e);
                     }
                 	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
-                    prop.putHTML("robotsInfo", robotsEntry.getInfo());
+                    prop.putHTML("robotsInfo", robotsEntry == null ? "" : robotsEntry.getInfo());
 
                     // get the sitemap URL of the domain
                     final MultiProtocolURI sitemapURL = robotsEntry == null ? null : robotsEntry.getSitemap();
