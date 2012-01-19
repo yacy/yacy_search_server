@@ -39,7 +39,7 @@ InstallDir "$PROFILE\YaCy"
 InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString"
 
 ;recommend free space in GB for YaCy
-!define RecommendSpace "30"
+!define RecommendSpace "4"
 
 ; commands for firewall config, see http://support.microsoft.com/kb/947709/en-us
 !define WinXPAddFwRulePort 'netsh firewall add allowedprogram name="YaCy" program="%SystemRoot%\System32\javaw.exe"'
