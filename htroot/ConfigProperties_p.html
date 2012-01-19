@@ -3,6 +3,9 @@
   <head>
     <title>YaCy '#[clientname]#': Advanced Config</title>
     #%env/templates/metas.template%#
+    <style type="text/css"> <!--
+    	.filtered { display:none; }
+    //--> </style>
     <script type="text/javascript">
       <!--
       function element_clicked(element){
@@ -16,7 +19,7 @@
 			  while(node!=null){
 					  if(node.nodeType==1 && node.nodeName.toLowerCase()=="option"){
 							  if(key!="" && node.firstChild.nodeValue.indexOf(key)==-1){
-									  node.setAttribute("class", "hidden");
+									  node.setAttribute("class", "filtered");
 							  }else{
 									  node.setAttribute("class", "");
 							  }
@@ -24,7 +27,7 @@
 					  node=node.nextSibling;
 			  }
 	  }
-      -->
+      //-->
     </script>
   </head>
   <body id="ConfigAdvanced">
