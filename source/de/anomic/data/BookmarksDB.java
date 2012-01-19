@@ -81,9 +81,14 @@ public class BookmarksDB {
         Bookmark bookmark;
         Tag tag;
         String[] tagArray;
-        while(it.hasNext()){
-            bookmark = it.next();
-//            if (bookmark == null) continue;
+        while (it.hasNext()) {
+            try {
+                bookmark = it.next();
+            } catch (Throwable e) {
+                Log.logException(e);
+                continue;
+            }
+            if (bookmark == null) continue;
             tagArray = BookmarkHelper.cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
             tag = null;
             for (final String element : tagArray) {
@@ -153,6 +158,9 @@ public class BookmarksDB {
         try {
             final Map<String, String> map = this.bookmarks.get(ASCII.getBytes(urlHash));
             return (map == null) ? null : new Bookmark(map);
+        } catch (MalformedURLException e) {
+            Log.logException(e);
+            return null;            
         } catch (final IOException e) {
             Log.logException(e);
             return null;
