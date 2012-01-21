@@ -127,22 +127,31 @@ public class pdfParser extends AbstractParser implements Parser {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
         }
         final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
+        byte[] contentBytes = UTF8.getBytes("");
         try {
             // create a writer for output
             final PDFTextStripper  stripper = new PDFTextStripper();
+             
+            stripper.setEndPage(3); // get first 3 pages (always)
+            writer.append(stripper.getText(pdfDoc));
+            contentBytes = UTF8.getBytes(writer.toString()); // remember text in case of interrupting thread
+            
+            stripper.setStartPage(4); // continue with page 4 (terminated, resulting in no text)
+            stripper.setEndPage(Integer.MAX_VALUE); // set to default
             // we start the pdf parsing in a separate thread to ensure that it can be terminated
             final Thread t = new Thread() {
                 @Override
                 public void run() {
                     try {
-                        stripper.writeText(pdfDoc, writer); // may throw a NPE
+                        writer.append(stripper.getText(pdfDoc)); 
                     } catch (final Throwable e) {}
-                }
-            };
+                } 
+            }; 
             t.start();
             t.join(3000);
             if (t.isAlive()) t.interrupt();
-            pdfDoc.close();
+            pdfDoc.close();      
+            contentBytes = UTF8.getBytes(writer.toString()); // get final text before closing writer
             writer.close();
         } catch (final IOException e) {
             // close the writer
@@ -168,9 +177,7 @@ public class pdfParser extends AbstractParser implements Parser {
             docTitle = docSubject;
         }
 
-        byte[] contentBytes;
-        contentBytes = UTF8.getBytes(writer.toString());
-
+        
         // clear resources in pdfbox. they say that is resolved but it's not. see:
         // https://issues.apache.org/jira/browse/PDFBOX-313
         // https://issues.apache.org/jira/browse/PDFBOX-351
