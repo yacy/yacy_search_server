@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -127,15 +126,15 @@ public class pdfParser extends AbstractParser implements Parser {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
         }
         final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
-        byte[] contentBytes = UTF8.getBytes("");
+        byte[] contentBytes = new byte[0];
         try {
             // create a writer for output
             final PDFTextStripper  stripper = new PDFTextStripper();
-             
+
             stripper.setEndPage(3); // get first 3 pages (always)
             writer.append(stripper.getText(pdfDoc));
-            contentBytes = UTF8.getBytes(writer.toString()); // remember text in case of interrupting thread
-            
+            contentBytes = writer.getBytes(); // remember text in case of interrupting thread
+
             stripper.setStartPage(4); // continue with page 4 (terminated, resulting in no text)
             stripper.setEndPage(Integer.MAX_VALUE); // set to default
             // we start the pdf parsing in a separate thread to ensure that it can be terminated
@@ -143,15 +142,15 @@ public class pdfParser extends AbstractParser implements Parser {
                 @Override
                 public void run() {
                     try {
-                        writer.append(stripper.getText(pdfDoc)); 
+                        writer.append(stripper.getText(pdfDoc));
                     } catch (final Throwable e) {}
-                } 
-            }; 
+                }
+            };
             t.start();
             t.join(3000);
             if (t.isAlive()) t.interrupt();
-            pdfDoc.close();      
-            contentBytes = UTF8.getBytes(writer.toString()); // get final text before closing writer
+            pdfDoc.close();
+            contentBytes = writer.getBytes(); // get final text before closing writer
             writer.close();
         } catch (final IOException e) {
             // close the writer
@@ -177,7 +176,7 @@ public class pdfParser extends AbstractParser implements Parser {
             docTitle = docSubject;
         }
 
-        
+
         // clear resources in pdfbox. they say that is resolved but it's not. see:
         // https://issues.apache.org/jira/browse/PDFBOX-313
         // https://issues.apache.org/jira/browse/PDFBOX-351
