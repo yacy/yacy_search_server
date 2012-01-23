@@ -70,3 +70,4 @@ net.yacy.kelondro.logging.LogalizerHandler.parserPackage = net.yacy.kelondro.log
 
 org.apache.http.level = OFF
 org.apache.http.wire.level = OFF
+org.apache.pdfbox.level = INFO
