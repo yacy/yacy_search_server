@@ -1,3 +1,28 @@
+// getpageinfo_p
+// (C) 2011 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 11.11.2011 on http://yacy.net
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
+// LICENSE
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -10,7 +35,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
-import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
@@ -68,9 +92,9 @@ public class getpageinfo_p {
                 } catch (final MalformedURLException e) {
                     Log.logException(e);
                 }
-                ContentScraper scraper = null;
+                net.yacy.document.Document scraper = null;
                 if (u != null) try {
-                    scraper = sb.loader.parseResource(u, CacheStrategy.IFEXIST);
+                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST);
                 } catch (final IOException e) {
                     Log.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"
@@ -78,13 +102,13 @@ public class getpageinfo_p {
                 }
                 if (scraper != null) {
                     // put the document title
-                    prop.putXML("title", scraper.getTitle());
+                    prop.putXML("title", scraper.dc_title());
 
                     // put the favicon that belongs to the document
                     prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
 
                     // put keywords
-                    final String list[] = scraper.getKeywords();
+                    final String list[] = scraper.dc_subject();
                     int count = 0;
                     for (final String element: list) {
                         final String tag = element;
@@ -95,7 +119,7 @@ public class getpageinfo_p {
                     }
                     prop.put("tags", count);
                     // put description
-                    prop.putXML("desc", scraper.getDescription());
+                    prop.putXML("desc", scraper.dc_description());
                     // put language
                     final Set<String> languages = scraper.getContentLanguages();
                     prop.putXML("lang", (languages == null) ? "unknown" : languages.iterator().next());
