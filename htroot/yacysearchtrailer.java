@@ -27,6 +27,7 @@
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.document.Autotagging;
@@ -230,17 +231,26 @@ public class yacysearchtrailer {
                 }
                 prop.put(fileType, "nav-vocabulary_" + navvoccount + "_navname", navname);
                 navigatorIterator = ve.getValue().keys(false);
-                int i = 0;
-                String anav;
+                int i = 0, p;
+                String anav, queryStringForUrl;
                 while (i < 20 && navigatorIterator.hasNext()) {
                     name = navigatorIterator.next();
                     count = ve.getValue().get(name);
-                    anav = "/vocabulary/" + navname + "/" + Autotagging.encodePrintname(name);
-                    prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 1);
+                    anav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURI.escape(Autotagging.encodePrintname(name)).toString();
+                    queryStringForUrl = theQuery.queryStringForUrl();
+                    p = queryStringForUrl.indexOf(anav);
+                    if (p < 0) {
+                        queryStringForUrl += "+" + anav;
+                        prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 1);
+                        prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", anav);
+                    } else {
+                        queryStringForUrl = (queryStringForUrl.substring(0, p) + queryStringForUrl.substring(p + anav.length())).trim();
+                        prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 0);
+                        prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", "-" + anav);
+                    }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators).toString());
+                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theQuery, queryStringForUrl, theQuery.urlMask.toString(), theQuery.navigators).toString());
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
-                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", anav);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
                     i++;
                 }
@@ -253,42 +263,6 @@ public class yacysearchtrailer {
         } else {
             prop.put("nav-vocabulary", 0);
         }
-/*
-html
-#{nav-vocabulary}#
-<div id="sidebar#[navname]#" style="float: right; margin-top:5px; width: 220px;">
-<h3 style="padding-left:25px;">#[navname]# Navigator</h3>
-<div><ul style="padding-left: 0px;">#{element}#
-<li>#[url]#</li>
-#{/element}#</ul></div>
-</div>
-#{/nav-vocabulary}#
-
-xml
-#{nav-vocabulary}#
-<yacy:facet name="#[navname]#" displayname="#[navname]#" type="String" min="0" max="0" mean="0">
-#{element}#
-<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" />
-#{/element}#
-</yacy:facet>
-#{/nav-vocabulary}#
-
-json
-#{nav-vocabulary}#
-    {
-      "facetname": "#[navname]#",
-      "displayname": "#[navname]#",
-      "type": "String",
-      "min": "0",
-      "max": "0",
-      "mean": "0",
-      "elements": [
-#{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
-#{/element}#
-      ]
-    },#{nav-vocabulary}#
- */
 
         // about box
         final String aboutBody = env.getConfig("about.body", "");
