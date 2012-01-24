@@ -441,7 +441,7 @@ form.search.small h2 {
   margin-bottom:5px;
 }
 
-li.menugroup h3{
+li.menugroup h3 {
 	font-size: 1em; font-weight: bold;
 	margin: 0; padding: 1px 10px;
 }
@@ -629,6 +629,31 @@ dt.hintIcon {
 
 dd.hint {
 	padding-bottom: 10px;
+}
+
+dl.bplike
+{
+	float: left;
+	margin: 0 0;
+	width: 184px;
+	padding: 0;
+}
+
+.bplike dt
+{
+	clear: left;
+	float: left;
+	width: 20px;
+	margin: 0;
+	padding: 0px;
+}
+
+.bplike dd
+{
+	float: left;
+	width: 155px;
+	margin: 0px;
+	padding: 0px;
 }
 
 /*----------

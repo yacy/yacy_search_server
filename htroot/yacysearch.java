@@ -533,16 +533,16 @@ public class yacysearch {
             String authorhash = null;
             if ( authori >= 0 ) {
                 // check if the author was given with single quotes or without
-                final boolean quotes = (querystring.charAt(authori + 7) == (char) 39);
+                final boolean quotes = (querystring.charAt(authori + 7) == '%');
                 String author;
                 if ( quotes ) {
-                    int ftb = querystring.indexOf((char) 39, authori + 8);
+                    int ftb = querystring.indexOf('%', authori + 8);
                     if ( ftb == -1 ) {
                         ftb = querystring.length() + 1;
                     }
                     author = querystring.substring(authori + 8, ftb);
-                    querystring = querystring.replace("author:'" + author + "'", "");
-                    modifier.append("author:'").append(author).append("' ");
+                    querystring = querystring.replace("author:%" + author + "%", "");
+                    modifier.append("author:%").append(author).append("% ");
                 } else {
                     int ftb = querystring.indexOf(' ', authori);
                     if ( ftb == -1 ) {

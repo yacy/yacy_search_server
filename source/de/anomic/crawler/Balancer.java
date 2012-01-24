@@ -29,6 +29,8 @@ package de.anomic.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -293,6 +295,72 @@ public class Balancer {
         }
     }
 
+    /**
+     * get a list of domains that are currently maintained as domain stacks
+     * @return a map of clear text strings of host names to the size of the domain stack
+     */
+    public Map<String, Integer> getDomainStackHosts() {
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        for (Map.Entry<String, HandleSet> entry: this.domainStacks.entrySet()) {
+            map.put(entry.getKey(), entry.getValue().size());
+        }
+        return map;
+    }
+    
+    /**
+     * compute the current sleep time for a given crawl entry
+     * @param cs
+     * @param crawlEntry
+     * @return
+     */
+    public long getDomainSleepTime(final CrawlSwitchboard cs, Request crawlEntry) {
+        final CrawlProfile profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
+        return getDomainSleepTime(cs, profileEntry, crawlEntry);
+    }
+    
+    private long getDomainSleepTime(final CrawlSwitchboard cs, final CrawlProfile profileEntry, Request crawlEntry) {
+        if (profileEntry == null) {
+            return 0;
+        }
+        long sleeptime = (
+            profileEntry.cacheStrategy() == CacheStrategy.CACHEONLY ||
+            (profileEntry.cacheStrategy() == CacheStrategy.IFEXIST && Cache.has(crawlEntry.url()))
+            ) ? 0 : Latency.waitingRemaining(crawlEntry.url(), this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+        return sleeptime;
+    }
+    
+    /**
+     * get lists of crawl request entries for a specific host
+     * @param host
+     * @param maxcount
+     * @return a list of crawl loader requests
+     */
+    public List<Request> getDomainStackReferences(String host, int maxcount) {
+        HandleSet domainList = this.domainStacks.get(host);
+        if (domainList == null || domainList.isEmpty()) return new ArrayList<Request>(0);
+        ArrayList<Request> cel = new ArrayList<Request>(maxcount);
+        for (int i = 0; i < maxcount; i++) {
+            if (domainList.size() <= i) break;
+            final byte[] urlhash = domainList.getOne(i);
+            if (urlhash == null) continue;
+            Row.Entry rowEntry;
+            try {
+                rowEntry = this.urlFileIndex.get(urlhash, true);
+            } catch (IOException e) {
+                continue;
+            }
+            if (rowEntry == null) continue;
+            Request crawlEntry;
+            try {
+                crawlEntry = new Request(rowEntry);
+            } catch (IOException e) {
+                continue;
+            }
+            cel.add(crawlEntry);
+        }
+        return cel;
+    }
+    
     private void pushHashToDomainStacks(String host, final byte[] urlhash) throws RowSpaceExceededException {
         // extend domain stack
         if (host == null) host = localhost;
@@ -417,11 +485,8 @@ public class Balancer {
 		        	return null;
 		        }
 		        // depending on the caching policy we need sleep time to avoid DoS-like situations
-		        sleeptime = (
-		                profileEntry.cacheStrategy() == CacheStrategy.CACHEONLY ||
-		                (profileEntry.cacheStrategy() == CacheStrategy.IFEXIST && Cache.has(crawlEntry.url()))
-		                ) ? 0 : Latency.waitingRemaining(crawlEntry.url(), this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
-
+		        sleeptime = getDomainSleepTime(cs, profileEntry, crawlEntry); 		        
+		        
 		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + ASCII.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + ASCII.String(rowEntry.getPrimaryKeyBytes());
 		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + ASCII.String(nexthash) + ", crawlEntry.url().hash() = " + ASCII.String(crawlEntry.url().hash());
 

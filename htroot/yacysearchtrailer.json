@@ -8,7 +8,7 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     },#(/nav-filetypes)##(nav-protocols)#::
@@ -21,7 +21,7 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     },#(/nav-protocols)##(nav-domains)#::
@@ -34,7 +34,7 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     },#(/nav-domains)##(nav-namespace)#::
@@ -47,7 +47,7 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     },#(/nav-namespace)##(nav-authors)#::
@@ -60,7 +60,7 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     },#(/nav-authors)##{nav-vocabulary}#
@@ -73,7 +73,7 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     },#{/nav-vocabulary}##(nav-topics)#::
@@ -86,7 +86,7 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     }#(/nav-topics)#

@@ -35,7 +35,7 @@
 	<classpathentry kind="lib" path="lib/json-simple-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/fontbox-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/jempbox-1.6.0.jar"/>
-	<classpathentry kind="lib" path="lib/pdfbox-1.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-1.6.0.jar" sourcepath="/Users/admin/.m2/repository/org/apache/pdfbox/pdfbox/1.6.0/pdfbox-1.6.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>

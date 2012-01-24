@@ -42,6 +42,7 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -312,9 +313,9 @@ public class Crawler_p {
                         sb.crawlQueues.errorURL.remove(urlhash);
 
                         // get a scraper to get the title
-                        final ContentScraper scraper = sb.loader.parseResource(url, CacheStrategy.IFFRESH);
-                        final String title = scraper == null ? url.toNormalform(true, true) : scraper.getTitle();
-                        final String description = scraper.getDescription();
+                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH);
+                        final String title = scraper == null ? url.toNormalform(true, true) : scraper.dc_title();
+                        final String description = scraper.dc_description();
 
                         // stack url
                         sb.crawler.removePassive(crawlingStartURL.hash()); // if there is an old entry, delete it
@@ -357,7 +358,7 @@ public class Crawler_p {
                             //final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
                             final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString("/crawlStart"));
                             tags.add("crawlStart");
-                            final String[] keywords = scraper.getKeywords();
+                            final String[] keywords = scraper.dc_subject();
                             if (keywords != null) {
                                 for (final String k: keywords) {
                                     final String kk = BookmarkHelper.cleanTagsString(k);
@@ -534,8 +535,7 @@ public class Crawler_p {
                     try {
                         final DigestURI sitelistURL = new DigestURI(crawlingStart);
                         // download document
-                        ContentScraper scraper = null;
-                        scraper = sb.loader.parseResource(sitelistURL, CacheStrategy.IFFRESH);
+                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH);
                         // String title = scraper.getTitle();
                         // String description = scraper.getDescription();
 

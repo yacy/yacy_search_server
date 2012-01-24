@@ -26,7 +26,6 @@
 
 package net.yacy.repository;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -50,21 +49,19 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.parser.htmlParser;
-import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.FTPLoader;
 import de.anomic.crawler.retrieval.FileLoader;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.crawler.retrieval.SMBLoader;
-import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.http.client.Cache;
 
 public final class LoaderDispatcher {
@@ -192,7 +189,7 @@ public final class LoaderDispatcher {
         final String host = url.getHost();
 
         // check if url is in blacklist
-        if (checkBlacklist && Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, host.toLowerCase(), url.getFile())) {
+        if (checkBlacklist && host != null && Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, host.toLowerCase(), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
@@ -290,7 +287,7 @@ public final class LoaderDispatcher {
         if (response.getContent() == null) {
             throw new IOException("empty response (code " + response.getStatus() + ") for url " + url);
         }
-        
+
         // we got something. Now check if we want to store that to the cache
         // first check looks if we want to store the content to the cache
         if (crawlProfile == null || !crawlProfile.storeHTCache()) {
@@ -352,16 +349,22 @@ public final class LoaderDispatcher {
         return response.parse();
     }
 
-    public ContentScraper parseResource(final DigestURI location, final CacheStrategy cachePolicy) throws IOException {
-        // load page
-        final Response r = this.load(request(location, true, false), cachePolicy, true);
-        final byte[] page = (r == null) ? null : r.getContent();
-        if (page == null) throw new IOException("no response from url " + location.toString());
+    public Document loadDocument(final DigestURI location, final CacheStrategy cachePolicy) throws IOException {
+        // load resource
+        Request request = request(location, true, false);
+        final Response response = this.load(request, cachePolicy, 10000, true);
+        final DigestURI url = request.url();
+        if (response == null) throw new IOException("no Response for url " + url);
 
+        // if it is still not available, report an error
+        if (response.getContent() == null || response.getResponseHeader() == null) throw new IOException("no Content available for url " + url);
+
+        // parse resource
         try {
-        	return htmlParser.parseToScraper(location, r.getCharacterEncoding(), new ByteArrayInputStream(page));
+            Document[] documents = response.parse();
+            return Document.mergeDocuments(location, response.getMimeType(), documents);
         } catch(final Parser.Failure e) {
-        	throw new IOException(e.getMessage());
+            throw new IOException(e.getMessage());
         }
     }
 

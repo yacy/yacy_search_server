@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.yacy.kelondro.index.HandleSet;
@@ -228,6 +229,50 @@ public class NoticedURL {
         return removed;
     }
 
+    /**
+     * get a list of domains that are currently maintained as domain stacks
+     * @return a map of clear text strings of host names to the size of the domain stacks
+     */
+    public Map<String, Integer> getDomainStackHosts(final StackType stackType) {
+        switch (stackType) {
+            case CORE:     return this.coreStack.getDomainStackHosts();
+            case LIMIT:    return this.limitStack.getDomainStackHosts();
+            case REMOTE:   return this.remoteStack.getDomainStackHosts();
+            case NOLOAD:   return this.noloadStack.getDomainStackHosts();
+            default: return null;
+        }
+    }
+    
+    /**
+     * get a list of domains that are currently maintained as domain stacks
+     * @return a collection of clear text strings of host names
+     */
+    public long getDomainSleepTime(final StackType stackType, final CrawlSwitchboard cs, Request crawlEntry) {
+        switch (stackType) {
+            case CORE:     return this.coreStack.getDomainSleepTime(cs, crawlEntry);
+            case LIMIT:    return this.limitStack.getDomainSleepTime(cs, crawlEntry);
+            case REMOTE:   return this.remoteStack.getDomainSleepTime(cs, crawlEntry);
+            case NOLOAD:   return this.noloadStack.getDomainSleepTime(cs, crawlEntry);
+            default: return 0;
+        }
+    }
+        
+    /**
+     * get lists of crawl request entries for a specific host
+     * @param host
+     * @param maxcount
+     * @return a list of crawl loader requests
+     */
+    public List<Request> getDomainStackReferences(final StackType stackType, String host, int maxcount) {
+        switch (stackType) {
+            case CORE:     return this.coreStack.getDomainStackReferences(host, maxcount);
+            case LIMIT:    return this.limitStack.getDomainStackReferences(host, maxcount);
+            case REMOTE:   return this.remoteStack.getDomainStackReferences(host, maxcount);
+            case NOLOAD:   return this.noloadStack.getDomainStackReferences(host, maxcount);
+            default: return null;
+        }
+    }
+    
     public List<Request> top(final StackType stackType, final int count) {
         switch (stackType) {
             case CORE:     return top(this.coreStack, count);
@@ -295,7 +340,7 @@ public class NoticedURL {
         return null;
     }
 
-    private List<Request> top(final Balancer balancer, int count) {
+    private static List<Request> top(final Balancer balancer, int count) {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
         return balancer.top(count);

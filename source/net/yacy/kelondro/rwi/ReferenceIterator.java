@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.kelondro.blob.HeapReader;
 import net.yacy.kelondro.index.RowSet;
@@ -55,6 +56,7 @@ public class ReferenceIterator <ReferenceType extends Reference> extends LookAhe
      * return an index container
      * because they may get very large, it is wise to deallocate some memory before calling next()
      */
+    @Override
     public ReferenceContainer<ReferenceType> next0() {
         if (this.blobs == null) return null;
         RowSet row;
@@ -65,15 +67,15 @@ public class ReferenceIterator <ReferenceType extends Reference> extends LookAhe
             try {
                 row = RowSet.importRowSet(entry.getValue(), this.factory.getRow());
                 if (row == null) {
-                    Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because importRowSet returned null");
+                    Log.logSevere("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because importRowSet returned null");
                     continue; // thats a fail but not as REALLY bad if the whole method would crash here
                 }
                 return new ReferenceContainer<ReferenceType>(this.factory, entry.getKey(), row);
             } catch (final RowSpaceExceededException e) {
-                Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because of too low memory: " + e.toString());
+                Log.logSevere("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because of too low memory: " + e.toString());
                 continue;
             } catch (final Throwable e) {
-                Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because of too error: " + e.toString());
+                Log.logSevere("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because of error: " + e.toString());
                 continue;
             }
         }
@@ -86,6 +88,7 @@ public class ReferenceIterator <ReferenceType extends Reference> extends LookAhe
         this.blobs = null;
     }
 
+    @Override
     public CloneableIterator<ReferenceContainer<ReferenceType>> clone(final Object modifier) {
         if (this.blobs != null) this.blobs.close();
         this.blobs = null;

@@ -44,6 +44,8 @@ import net.yacy.kelondro.logging.Log;
 
 public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
+    private final static long METHOD_MAXRUNTIME = 5000L;
+
     protected final ReferenceFactory<ReferenceType> factory;
     protected final ArrayStack array;
 
@@ -295,21 +297,21 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @throws RowSpaceExceededException
      */
     public ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException, RowSpaceExceededException {
-        final long timeout = System.currentTimeMillis() + 3000;
+        final long timeout = System.currentTimeMillis() + METHOD_MAXRUNTIME;
         final Iterator<byte[]> entries = this.array.getAll(termHash).iterator();
     	if (entries == null || !entries.hasNext()) return null;
     	final byte[] a = entries.next();
     	int k = 1;
     	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, this.factory.getRow()));
     	if (System.currentTimeMillis() > timeout) {
-    	    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
+    	    Log.logWarning("ReferenceContainerArray", "timout in get() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
     	    return c;
     	}
     	while (entries.hasNext()) {
     		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), this.factory.getRow())));
     		k++;
     		if (System.currentTimeMillis() > timeout) {
-    		    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 3000");
+    		    Log.logWarning("ReferenceContainerArray", "timout in get() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
     		    return c;
             }
     	}
@@ -317,7 +319,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     }
 
     public int count(final byte[] termHash) throws IOException {
-        final long timeout = System.currentTimeMillis() + 3000;
+        final long timeout = System.currentTimeMillis() + METHOD_MAXRUNTIME;
         final Iterator<Long> entries = this.array.lengthAll(termHash).iterator();
         if (entries == null || !entries.hasNext()) return 0;
         final Long a = entries.next();
@@ -325,7 +327,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         int c = RowSet.importRowCount(a, this.factory.getRow());
         assert c >= 0;
         if (System.currentTimeMillis() > timeout) {
-            Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
+            Log.logWarning("ReferenceContainerArray", "timout in count() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
             return c;
         }
         while (entries.hasNext()) {
@@ -333,7 +335,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             assert c >= 0;
             k++;
             if (System.currentTimeMillis() > timeout) {
-                Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 3000");
+                Log.logWarning("ReferenceContainerArray", "timout in count() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
                 return c;
             }
         }

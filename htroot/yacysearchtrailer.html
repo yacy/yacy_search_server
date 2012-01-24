@@ -1,7 +1,7 @@
 <div style="float:right;width:25%;">
 
 #(cat-location)#::
-<div style="float: right; margin-top:5px; width: 220px;">
+<div style="float:right; margin-top:5px; width:220px;">
 <a href="yacysearch_location.html?query=#[queryenc]#">
 <img src="/env/grafics/earthsearch.png" width="215" height="159" alt="earthsearchlogo" /></a>
 <a href="yacysearch_location.html?query=#[queryenc]#">Show search results for "#[query]#" on map</a>
@@ -11,62 +11,68 @@
 #(nav-topics)#::
 <div style="float: right; margin-top:5px; width: 220px; height: 80px">
 <div><ul id="sidebarTopics" style="padding-left: 0px;">#{element}#
-<li value="#[count]#">#[url]#</li>
+<li value="#[count]#"><a href="#[url]#">#[name]#</a></li>
 #{/element}#</ul></div>
 </div>
 #(/nav-topics)#
 
 #(nav-protocols)#::
-<div id="sidebarProtocols" style="float: right; margin-top:5px; width: 220px;">
+<div id="sidebarProtocols" style="float:right; margin-top:5px; width:220px;">
 <h3 style="padding-left:25px;">Protocol Navigator</h3>
-<div><ul style="padding-left: 0px;">#{element}#
-<li>#[url]#</li>
-#{/element}#</ul></div>
+<dl class="bplike" style="padding-left:5px;">#{element}#
+<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
+<dd>#[name]# (#[count]#)</dd>
+#{/element}#</dl>
 </div>
 #(/nav-protocols)#
 
 #(nav-filetypes)#::
-<div id="sidebarFiletypes" style="float: right; margin-top:5px; width: 220px;">
+<div id="sidebarFiletypes" style="float:right; margin-top:5px; width:220px;">
 <h3 style="padding-left:25px;">Filetype Navigator</h3>
-<div><ul style="padding-left: 0px;">#{element}#
-<li>#[url]#</li>
-#{/element}#</ul></div>
+<dl class="bplike" style="padding-left:5px;">#{element}#
+<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
+<dd>#[name]# (#[count]#)</dd>
+#{/element}#</dl>
 </div>
 #(/nav-filetypes)#
 
 #(nav-domains)#::
-<div id="sidebarDomains" style="float: right; margin-top:5px; width: 220px;">
+<div id="sidebarDomains" style="float:right; margin-top:5px; width:220px;">
 <h3 style="padding-left:25px;">Domain Navigator</h3>
-<div><ul style="padding-left: 0px;">#{element}#
-<li>#[url]#</li>
-#{/element}#</ul></div>
+<dl class="bplike" style="padding-left:5px;">#{element}#
+<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
+<dd>#[name]# (#[count]#)</dd>
+#{/element}#</dl>
 </div>
 #(/nav-domains)#
 
 #(nav-namespace)#::
-<div id="sidebarNameSpace" style="float: right; margin-top:5px; width: 220px;">
+<div id="sidebarNameSpace" style="float:right; margin-top:5px; width:220px;">
 <h3 style="padding-left:25px;">Name Space Navigator</h3>
-<div><ul style="padding-left: 0px;">#{element}#
-<li>#[url]#</li>
-#{/element}#</ul></div>
+<dl class="bplike" style="padding-left:5px;">#{element}#
+<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
+<dd>#[name]# (#[count]#)</dd>
+#{/element}#</dl>
 </div>
 #(/nav-namespace)#
 
 #(nav-authors)#::
-<div id="sidebarAuthors" style="float: right; margin-top:5px; width: 220px;">
+<div id="sidebarAuthors" style="float:right; margin-top:5px; width:220px;">
 <h3 style="padding-left:25px;">Author Navigator</h3>
-<div><ul style="padding-left: 0px;">#{element}#
-<li>#[url]#</li>
-#{/element}#</ul></div>
+<dl class="bplike" style="padding-left:5px;">#{element}#
+<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
+<dd>#[name]# (#[count]#)</dd>
+#{/element}#</dl>
 </div>
 #(/nav-authors)#
 
 #{nav-vocabulary}#
-<div id="sidebar#[navname]#" style="float: right; margin-top:5px; width: 220px;">
+<div id="sidebar#[navname]#" style="float:right; margin-top:5px; width:220px;">
 <h3 style="padding-left:25px;">#[navname]# Navigator</h3>
-<div><ul style="padding-left: 0px;">#{element}#
-<li>#[url]#</li>
-#{/element}#</ul></div>
+<dl class="bplike" style="padding-left:5px;">#{element}#
+<dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
+<dd>#[name]# (#[count]#)</dd>
+#{/element}#</dl>
 </div>
 #{/nav-vocabulary}#
 
