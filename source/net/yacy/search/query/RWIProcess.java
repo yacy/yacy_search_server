@@ -835,9 +835,6 @@ public final class RWIProcess extends Thread
         if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("protocol", 0) < 0 ) {
             return new ClusteredScoreMap<String>();
         }
-        if ( this.protocolNavigator.sizeSmaller(2) ) {
-            this.protocolNavigator.clear(); // navigators with one entry are not useful
-        }
         return this.protocolNavigator;
     }
 

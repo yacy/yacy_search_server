@@ -190,13 +190,20 @@ public class yacysearchtrailer {
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = protocolNavigator.get(name);
-                nav = "/" + name;
+                nav = "%2F" + name;
                 queryStringForUrl = theQuery.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
-                prop.put("nav-protocols_element_" + i + "_on", 1);
-                prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
+                if (p < 0) {
+                    queryStringForUrl += "+" + nav;
+                    prop.put("nav-protocols_element_" + i + "_on", 1);
+                    prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
+                } else {
+                    queryStringForUrl = (queryStringForUrl.substring(0, p) + queryStringForUrl.substring(p + nav.length())).trim();
+                    prop.put("nav-protocols_element_" + i + "_on", 0);
+                    prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
+                }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
-                prop.put(fileType, "nav-protocols_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theQuery, queryStringForUrl + "+" + nav, theQuery.urlMask.toString(), theQuery.navigators).toString());
+                prop.put(fileType, "nav-protocols_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theQuery, queryStringForUrl, theQuery.urlMask.toString(), theQuery.navigators).toString());
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
