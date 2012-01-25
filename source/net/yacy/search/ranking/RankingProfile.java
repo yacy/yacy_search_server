@@ -190,8 +190,11 @@ public class RankingProfile {
         return (coeff.get(attr)).intValue();
     }
 
+    private String externalStringCache = null;
     public String toExternalString() {
-        return toExternalMap("").toString();
+        if (this.externalStringCache != null) return this.externalStringCache;
+        this.externalStringCache = toExternalMap("").toString();
+        return this.externalStringCache;
     }
 
     public Map<String, String> toExternalMap(final String prefix) {
@@ -202,43 +205,81 @@ public class RankingProfile {
 
     public Map<String, String> preToExternalMap(final String prefix) {
         final Map<String, String> ext = new LinkedHashMap<String, String>(40);
-        ext.put(prefix + APPEMPH, Integer.toString(this.coeff_appemph));
-        ext.put(prefix + APPURL, Integer.toString(this.coeff_appurl));
-        ext.put(prefix + APP_DC_CREATOR, Integer.toString(this.coeff_app_dc_creator));
-        ext.put(prefix + APP_DC_DESCRIPTION, Integer.toString(this.coeff_app_dc_description));
-        ext.put(prefix + APP_DC_SUBJECT, Integer.toString(this.coeff_app_dc_subject));
-        ext.put(prefix + APP_DC_TITLE, Integer.toString(this.coeff_app_dc_title));
-        ext.put(prefix + AUTHORITY, Integer.toString(this.coeff_authority));
-        ext.put(prefix + CATHASAPP, Integer.toString(this.coeff_cathasapp));
-        ext.put(prefix + CATHASAUDIO, Integer.toString(this.coeff_cathasaudio));
-        ext.put(prefix + CATHASIMAGE, Integer.toString(this.coeff_cathasimage));
-        ext.put(prefix + CATHASVIDEO, Integer.toString(this.coeff_cathasvideo));
-        ext.put(prefix + CATINDEXOF, Integer.toString(this.coeff_catindexof));
-        ext.put(prefix + DATE, Integer.toString(this.coeff_date));
-        ext.put(prefix + DOMLENGTH, Integer.toString(this.coeff_domlength));
-        ext.put(prefix + HITCOUNT, Integer.toString(this.coeff_hitcount));
-        ext.put(prefix + LANGUAGE, Integer.toString(this.coeff_language));
-        ext.put(prefix + LLOCAL, Integer.toString(this.coeff_llocal));
-        ext.put(prefix + LOTHER, Integer.toString(this.coeff_lother));
-        ext.put(prefix + PHRASESINTEXT, Integer.toString(this.coeff_phrasesintext));
-        ext.put(prefix + POSINPHRASE, Integer.toString(this.coeff_posinphrase));
-        ext.put(prefix + POSINTEXT, Integer.toString(this.coeff_posintext));
-        ext.put(prefix + POSOFPHRASE, Integer.toString(this.coeff_posofphrase));
-        ext.put(prefix + TERMFREQUENCY, Integer.toString(this.coeff_termfrequency));
-        ext.put(prefix + URLCOMPS, Integer.toString(this.coeff_urlcomps));
-        ext.put(prefix + URLLENGTH, Integer.toString(this.coeff_urllength));
-        ext.put(prefix + WORDDISTANCE, Integer.toString(this.coeff_worddistance));
-        ext.put(prefix + WORDSINTEXT, Integer.toString(this.coeff_wordsintext));
-        ext.put(prefix + WORDSINTITLE, Integer.toString(this.coeff_wordsintitle));
-        ext.put(prefix + YBR, Integer.toString(this.coeff_ybr));
+        if (prefix.length() == 0) {
+            ext.put(APPEMPH, Integer.toString(this.coeff_appemph));
+            ext.put(APPURL, Integer.toString(this.coeff_appurl));
+            ext.put(APP_DC_CREATOR, Integer.toString(this.coeff_app_dc_creator));
+            ext.put(APP_DC_DESCRIPTION, Integer.toString(this.coeff_app_dc_description));
+            ext.put(APP_DC_SUBJECT, Integer.toString(this.coeff_app_dc_subject));
+            ext.put(APP_DC_TITLE, Integer.toString(this.coeff_app_dc_title));
+            ext.put(AUTHORITY, Integer.toString(this.coeff_authority));
+            ext.put(CATHASAPP, Integer.toString(this.coeff_cathasapp));
+            ext.put(CATHASAUDIO, Integer.toString(this.coeff_cathasaudio));
+            ext.put(CATHASIMAGE, Integer.toString(this.coeff_cathasimage));
+            ext.put(CATHASVIDEO, Integer.toString(this.coeff_cathasvideo));
+            ext.put(CATINDEXOF, Integer.toString(this.coeff_catindexof));
+            ext.put(DATE, Integer.toString(this.coeff_date));
+            ext.put(DOMLENGTH, Integer.toString(this.coeff_domlength));
+            ext.put(HITCOUNT, Integer.toString(this.coeff_hitcount));
+            ext.put(LANGUAGE, Integer.toString(this.coeff_language));
+            ext.put(LLOCAL, Integer.toString(this.coeff_llocal));
+            ext.put(LOTHER, Integer.toString(this.coeff_lother));
+            ext.put(PHRASESINTEXT, Integer.toString(this.coeff_phrasesintext));
+            ext.put(POSINPHRASE, Integer.toString(this.coeff_posinphrase));
+            ext.put(POSINTEXT, Integer.toString(this.coeff_posintext));
+            ext.put(POSOFPHRASE, Integer.toString(this.coeff_posofphrase));
+            ext.put(TERMFREQUENCY, Integer.toString(this.coeff_termfrequency));
+            ext.put(URLCOMPS, Integer.toString(this.coeff_urlcomps));
+            ext.put(URLLENGTH, Integer.toString(this.coeff_urllength));
+            ext.put(WORDDISTANCE, Integer.toString(this.coeff_worddistance));
+            ext.put(WORDSINTEXT, Integer.toString(this.coeff_wordsintext));
+            ext.put(WORDSINTITLE, Integer.toString(this.coeff_wordsintitle));
+            ext.put(YBR, Integer.toString(this.coeff_ybr));
+        } else {
+            ext.put(prefix + APPEMPH, Integer.toString(this.coeff_appemph));
+            ext.put(prefix + APPURL, Integer.toString(this.coeff_appurl));
+            ext.put(prefix + APP_DC_CREATOR, Integer.toString(this.coeff_app_dc_creator));
+            ext.put(prefix + APP_DC_DESCRIPTION, Integer.toString(this.coeff_app_dc_description));
+            ext.put(prefix + APP_DC_SUBJECT, Integer.toString(this.coeff_app_dc_subject));
+            ext.put(prefix + APP_DC_TITLE, Integer.toString(this.coeff_app_dc_title));
+            ext.put(prefix + AUTHORITY, Integer.toString(this.coeff_authority));
+            ext.put(prefix + CATHASAPP, Integer.toString(this.coeff_cathasapp));
+            ext.put(prefix + CATHASAUDIO, Integer.toString(this.coeff_cathasaudio));
+            ext.put(prefix + CATHASIMAGE, Integer.toString(this.coeff_cathasimage));
+            ext.put(prefix + CATHASVIDEO, Integer.toString(this.coeff_cathasvideo));
+            ext.put(prefix + CATINDEXOF, Integer.toString(this.coeff_catindexof));
+            ext.put(prefix + DATE, Integer.toString(this.coeff_date));
+            ext.put(prefix + DOMLENGTH, Integer.toString(this.coeff_domlength));
+            ext.put(prefix + HITCOUNT, Integer.toString(this.coeff_hitcount));
+            ext.put(prefix + LANGUAGE, Integer.toString(this.coeff_language));
+            ext.put(prefix + LLOCAL, Integer.toString(this.coeff_llocal));
+            ext.put(prefix + LOTHER, Integer.toString(this.coeff_lother));
+            ext.put(prefix + PHRASESINTEXT, Integer.toString(this.coeff_phrasesintext));
+            ext.put(prefix + POSINPHRASE, Integer.toString(this.coeff_posinphrase));
+            ext.put(prefix + POSINTEXT, Integer.toString(this.coeff_posintext));
+            ext.put(prefix + POSOFPHRASE, Integer.toString(this.coeff_posofphrase));
+            ext.put(prefix + TERMFREQUENCY, Integer.toString(this.coeff_termfrequency));
+            ext.put(prefix + URLCOMPS, Integer.toString(this.coeff_urlcomps));
+            ext.put(prefix + URLLENGTH, Integer.toString(this.coeff_urllength));
+            ext.put(prefix + WORDDISTANCE, Integer.toString(this.coeff_worddistance));
+            ext.put(prefix + WORDSINTEXT, Integer.toString(this.coeff_wordsintext));
+            ext.put(prefix + WORDSINTITLE, Integer.toString(this.coeff_wordsintitle));
+            ext.put(prefix + YBR, Integer.toString(this.coeff_ybr));
+        }
         return ext;
     }
 
     public Map<String, String> postToExternalMap(final String prefix) {
     	final Map<String, String> ext = new LinkedHashMap<String, String>();
-        ext.put(prefix + URLCOMPINTOPLIST, Integer.toString(this.coeff_urlcompintoplist));
-        ext.put(prefix + DESCRCOMPINTOPLIST, Integer.toString(this.coeff_descrcompintoplist));
-        ext.put(prefix + PREFER, Integer.toString(this.coeff_prefer));
+        if (prefix.length() == 0) {
+            ext.put(URLCOMPINTOPLIST, Integer.toString(this.coeff_urlcompintoplist));
+            ext.put(DESCRCOMPINTOPLIST, Integer.toString(this.coeff_descrcompintoplist));
+            ext.put(PREFER, Integer.toString(this.coeff_prefer));
+        } else {
+            ext.put(prefix + URLCOMPINTOPLIST, Integer.toString(this.coeff_urlcompintoplist));
+            ext.put(prefix + DESCRCOMPINTOPLIST, Integer.toString(this.coeff_descrcompintoplist));
+            ext.put(prefix + PREFER, Integer.toString(this.coeff_prefer));
+        }
         return ext;
     }
 

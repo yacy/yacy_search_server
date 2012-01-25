@@ -516,12 +516,13 @@ public final class QueryParams {
         context.append(this.modifier.s);
         context.append(asterisk);
         context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
+        String result = context.toString();
         if (anonymized) {
-            this.idCacheAnon = context.toString();
+            this.idCacheAnon = result;
         } else {
-            this.idCache = context.toString();
+            this.idCache = result;
         }
-        return context.toString();
+        return result;
     }
 
     /**
