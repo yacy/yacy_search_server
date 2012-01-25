@@ -45,6 +45,8 @@ import de.anomic.server.serverSwitch;
 public class yacysearchtrailer {
 
     private static final int MAX_TOPWORDS = 12;
+    private static final int MAXLIMIT_NAV_LOW = 5;
+    private static final int MAXLIMIT_NAV_HIGH = 20;
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
@@ -72,7 +74,7 @@ public class yacysearchtrailer {
         } else {
             prop.put("nav-namespace", 1);
             navigatorIterator = namespaceNavigator.keys(false);
-            int i = 0, p;
+            int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
             while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
@@ -81,11 +83,14 @@ public class yacysearchtrailer {
                 queryStringForUrl = theQuery.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
+                    pos++;
                     queryStringForUrl += "+" + nav;
                     prop.put("nav-namespace_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-namespace_element_" + i + "_modifier", nav);
                 } else {
+                    neg++;
                     prop.put("nav-namespace_element_" + i + "_on", 0);
+                    prop.put(fileType, "nav-namespace_element_" + i + "_modifier", "-" + nav);
                     queryStringForUrl = (queryStringForUrl.substring(0, p) + queryStringForUrl.substring(p + nav.length())).trim();
                 }
                 prop.put(fileType, "nav-namespace_element_" + i + "_name", name);
@@ -95,6 +100,7 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-namespace_element", i);
+            prop.put("nav-namespace_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-namespace_element_" + i + "_nl", 0);
         }
@@ -106,7 +112,7 @@ public class yacysearchtrailer {
         } else {
             prop.put("nav-domains", 1);
             navigatorIterator = hostNavigator.keys(false);
-            int i = 0, p;
+            int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
@@ -115,10 +121,12 @@ public class yacysearchtrailer {
                 queryStringForUrl = theQuery.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
+                    pos++;
                     queryStringForUrl += "+" + nav;
                     prop.put("nav-domains_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-domains_element_" + i + "_modifier", nav);
                 } else {
+                    neg++;
                     queryStringForUrl = (queryStringForUrl.substring(0, p) + queryStringForUrl.substring(p + nav.length())).trim();
                     prop.put("nav-authors_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", "-" + nav);
@@ -130,6 +138,7 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-domains_element", i);
+            prop.put("nav-domains_activate", on(pos, neg, MAXLIMIT_NAV_HIGH) ? 1 : 0);
             i--;
             prop.put("nav-domains_element_" + i + "_nl", 0);
         }
@@ -141,7 +150,7 @@ public class yacysearchtrailer {
         } else {
             prop.put("nav-authors", 1);
             navigatorIterator = authorNavigator.keys(false);
-            int i = 0, p;
+            int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
@@ -150,10 +159,12 @@ public class yacysearchtrailer {
                 queryStringForUrl = theQuery.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
+                    pos++;
                     queryStringForUrl += "+" + nav;
                     prop.put("nav-authors_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", nav);
                 } else {
+                    neg++;
                     queryStringForUrl = (queryStringForUrl.substring(0, p) + queryStringForUrl.substring(p + nav.length())).trim();
                     prop.put("nav-authors_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", "-" + nav);
@@ -165,6 +176,7 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-authors_element", i);
+            prop.put("nav-authors_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-authors_element_" + i + "_nl", 0);
         }
@@ -205,7 +217,7 @@ public class yacysearchtrailer {
         } else {
             prop.put("nav-protocols", 1);
             navigatorIterator = protocolNavigator.keys(false);
-            int i = 0, p;
+            int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
@@ -214,10 +226,12 @@ public class yacysearchtrailer {
                 queryStringForUrl = theQuery.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
+                    pos++;
                     queryStringForUrl += "+" + nav;
                     prop.put("nav-protocols_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
                 } else {
+                    neg++;
                     queryStringForUrl = (queryStringForUrl.substring(0, p) + queryStringForUrl.substring(p + nav.length())).trim();
                     prop.put("nav-protocols_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", "-" + nav);
@@ -229,6 +243,7 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-protocols_element", i);
+            prop.put("nav-protocols_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-protocols_element_" + i + "_nl", 0);
         }
@@ -240,7 +255,7 @@ public class yacysearchtrailer {
         } else {
             prop.put("nav-filetypes", 1);
             navigatorIterator = filetypeNavigator.keys(false);
-            int i = 0, p;
+            int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
@@ -249,10 +264,12 @@ public class yacysearchtrailer {
                 queryStringForUrl = theQuery.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
+                    pos++;
                     queryStringForUrl += "+" + nav;
                     prop.put("nav-filetypes_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", nav);
                 } else {
+                    neg++;
                     queryStringForUrl = (queryStringForUrl.substring(0, p) + queryStringForUrl.substring(p + nav.length())).trim();
                     prop.put("nav-filetypes_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", "-" + nav);
@@ -264,6 +281,7 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-filetypes_element", i);
+            prop.put("nav-filetypes_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-filetypes_element_" + i + "_nl", 0);
         }
@@ -341,6 +359,10 @@ public class yacysearchtrailer {
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.FINALIZATION, "bottomline", 0, 0), false);
 
         return prop;
+    }
+
+    private final static boolean on(int pos, int neg, int maxlimit) {
+        return neg > 0 || (pos > 1 && pos <= maxlimit);
     }
 
 }
