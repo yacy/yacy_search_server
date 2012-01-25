@@ -103,6 +103,7 @@ public class yacysearchtrailer {
             prop.put("nav-namespace_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-namespace_element_" + i + "_nl", 0);
+            if (pos == 1 && neg == 0) prop.put("nav-namespace", 0); // this navigation is not usefull
         }
 
         // host navigators
@@ -141,6 +142,7 @@ public class yacysearchtrailer {
             prop.put("nav-domains_activate", on(pos, neg, MAXLIMIT_NAV_HIGH) ? 1 : 0);
             i--;
             prop.put("nav-domains_element_" + i + "_nl", 0);
+            if (pos == 1 && neg == 0) prop.put("nav-domains", 0); // this navigation is not usefull
         }
 
         // author navigators
@@ -179,6 +181,7 @@ public class yacysearchtrailer {
             prop.put("nav-authors_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-authors_element_" + i + "_nl", 0);
+            if (pos == 1 && neg == 0) prop.put("nav-authors", 0); // this navigation is not usefull
         }
 
         // topics navigator
@@ -246,6 +249,7 @@ public class yacysearchtrailer {
             prop.put("nav-protocols_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-protocols_element_" + i + "_nl", 0);
+            if (pos == 1 && neg == 0) prop.put("nav-protocols", 0); // this navigation is not usefull
         }
 
         // filetype navigators
@@ -284,6 +288,7 @@ public class yacysearchtrailer {
             prop.put("nav-filetypes_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-filetypes_element_" + i + "_nl", 0);
+            if (pos == 1 && neg == 0) prop.put("nav-filetypes", 0); // this navigation is not usefull
         }
 
         // vocabulary navigators
