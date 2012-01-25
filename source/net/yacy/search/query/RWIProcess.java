@@ -845,9 +845,6 @@ public final class RWIProcess extends Thread
         if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("filetype", 0) < 0 ) {
             return new ClusteredScoreMap<String>();
         }
-        if ( this.filetypeNavigator.sizeSmaller(2) ) {
-            this.filetypeNavigator.clear(); // navigators with one entry are not useful
-        }
         return this.filetypeNavigator;
     }
 
