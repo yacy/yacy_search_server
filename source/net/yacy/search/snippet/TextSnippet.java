@@ -497,8 +497,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
     private static boolean containsAllHashes(
             final String sentence, final HandleSet queryhashes) {
-        final SortedMap<byte[], Integer> m =
-                WordTokenizer.hashSentence(sentence, null);
+        final SortedMap<byte[], Integer> m = WordTokenizer.hashSentence(sentence, null, 100);
         for (final byte[] b : queryhashes) {
             if (!(m.containsKey(b))) {
                 return false;

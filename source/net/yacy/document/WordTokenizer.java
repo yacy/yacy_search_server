@@ -68,10 +68,12 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         return null;
     }
 
+    @Override
     public boolean hasMoreElements() {
         return this.buffer != null;
     }
 
+    @Override
     public StringBuilder nextElement() {
         final StringBuilder r = (this.buffer == null) ? null : this.buffer;
         this.buffer = nextElement0();
@@ -79,9 +81,9 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         if (this.meaningLib != null) WordCache.learn(r);
         return r;
     }
-    
+
     public void close() {
-    	e.close();
+    	this.e.close();
     }
 
     private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
@@ -139,10 +141,12 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
             return r;
         }
 
+        @Override
         public boolean hasMoreElements() {
             return this.buffer != null;
         }
 
+        @Override
         public StringBuilder nextElement() {
             final StringBuilder r = this.buffer;
             this.buffer = nextElement0();
@@ -150,7 +154,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         }
 
         public void close() {
-        	e.close();
+        	this.e.close();
         }
     }
 
@@ -177,7 +181,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
      * @param sentence the sentence to be tokenized
      * @return a ordered map containing word hashes as key and positions as value. The map is orderd by the hash ordering
      */
-    public static SortedMap<byte[], Integer> hashSentence(final String sentence, final WordCache meaningLib) {
+    public static SortedMap<byte[], Integer> hashSentence(final String sentence, final WordCache meaningLib, int maxlength) {
         final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
         final WordTokenizer words = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), meaningLib);
         try {
@@ -185,16 +189,16 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
 	        StringBuilder word;
 	        byte[] hash;
 	        Integer oldpos;
-	        while (words.hasMoreElements()) {
+	        while (words.hasMoreElements() && maxlength-- > 0) {
 	            word = words.nextElement();
 	            hash = Word.word2hash(word);
-	
+
 	            // don't overwrite old values, that leads to too far word distances
 	            oldpos = map.put(hash, LargeNumberCache.valueOf(pos));
 	            if (oldpos != null) {
 	                map.put(hash, oldpos);
 	            }
-	
+
 	            pos += word.length() + 1;
 	        }
 	        return map;
