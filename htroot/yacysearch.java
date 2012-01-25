@@ -248,6 +248,7 @@ public class yacysearch {
                 || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
                 || clustersearch;
         global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global searchnn
+        final boolean intranetMode = sb.isIntranetMode() || sb.isAllIPMode();
 
         // increase search statistic counter
         if ( !global ) {
@@ -298,7 +299,7 @@ public class yacysearch {
             Log.logInfo("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM "
                 + client
                 + " gets no search restrictions");
-        } else if ( !authenticated && !localhostAccess ) {
+        } else if ( !authenticated && !localhostAccess && !intranetMode ) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             synchronized ( trackerHandles ) {
                 final int accInThreeSeconds =
