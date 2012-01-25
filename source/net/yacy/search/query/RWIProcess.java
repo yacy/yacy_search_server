@@ -795,9 +795,6 @@ public final class RWIProcess extends Thread
         if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace", 0) < 0 ) {
             return new ClusteredScoreMap<String>();
         }
-        if ( this.namespaceNavigator.sizeSmaller(2) ) {
-            this.namespaceNavigator.clear(); // navigators with one entry are not useful
-        }
         return this.namespaceNavigator;
     }
 
@@ -824,9 +821,6 @@ public final class RWIProcess extends Thread
                     result.set(hostname, this.hostNavigator.get(hosthash));
                 }
             }
-        }
-        if ( result.sizeSmaller(2) ) {
-            result.clear(); // navigators with one entry are not useful
         }
         return result;
     }
@@ -938,9 +932,6 @@ public final class RWIProcess extends Thread
         // words that appeared in the url or the description of all urls
         if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("authors", 0) < 0 ) {
             return new ConcurrentScoreMap<String>();
-        }
-        if ( this.authorNavigator.sizeSmaller(2) ) {
-            this.authorNavigator.clear(); // navigators with one entry are not useful
         }
         return this.authorNavigator;
     }
