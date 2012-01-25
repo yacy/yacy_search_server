@@ -325,16 +325,16 @@ public final class RWIProcess extends Thread
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
                         continue pollloop;
                     }
-                    // no site constraint there; maybe collect host navigation information
-                    if ( nav_hosts && this.query.urlMask_isCatchall ) {
-                        this.hostNavigator.inc(hosthash);
-                        this.hostResolver.put(hosthash, iEntry.urlhash());
-                    }
                 } else {
                     if ( !hosthash.equals(this.query.sitehash) ) {
                         // filter out all domains that do not match with the site constraint
                         continue pollloop;
                     }
+                }
+                // collect host navigation information (even if we have only one; this is to provide a switch-off button)
+                if ( nav_hosts || this.query.urlMask_isCatchall ) {
+                    this.hostNavigator.inc(hosthash);
+                    this.hostResolver.put(hosthash, iEntry.urlhash());
                 }
 
                 // check protocol
