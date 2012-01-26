@@ -376,6 +376,13 @@ public class URIMetadataRow implements URIMetadata {
         return this.entry.getPrimaryKeyBytes();
     }
 
+    private String hostHash = null;
+    public String hosthash() {
+        if (this.hostHash != null) return this.hostHash;
+        this.hostHash = ASCII.String(this.entry.getPrimaryKeyBytes(), 6, 6);
+        return this.hostHash;
+    }
+
     public long ranking() {
     	return this.ranking;
     }

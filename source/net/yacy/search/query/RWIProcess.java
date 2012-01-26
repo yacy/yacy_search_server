@@ -307,15 +307,6 @@ public final class RWIProcess extends Thread
                     }
                 }
 
-                // check tld domain
-                /*
-                if ((DigestURI.domDomain(iEntry.metadataHash()) & this.query.zonecode) == 0) {
-                    // filter out all tld that do not match with wanted tld domain
-                    this.sortout++;
-                    continue;
-                }
-                */
-
                 // count domZones
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
 
@@ -331,8 +322,9 @@ public final class RWIProcess extends Thread
                         continue pollloop;
                     }
                 }
+
                 // collect host navigation information (even if we have only one; this is to provide a switch-off button)
-                if ( nav_hosts || this.query.urlMask_isCatchall ) {
+                if (this.query.navigators.isEmpty() && (nav_hosts || this.query.urlMask_isCatchall)) {
                     this.hostNavigator.inc(hosthash);
                     this.hostResolver.put(hosthash, iEntry.urlhash());
                 }
@@ -673,6 +665,15 @@ public final class RWIProcess extends Thread
             if ( !Scanner.acceptURL(page.url()) ) {
                 this.sortout++;
                 continue;
+            }
+
+            // from here: collect navigation information
+
+            // collect host navigation information (even if we have only one; this is to provide a switch-off button)
+            if (!this.query.navigators.isEmpty() && (this.query.urlMask_isCatchall || this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts", 0) >= 0)) {
+                final String hosthash = page.hosthash();
+                this.hostNavigator.inc(hosthash);
+                this.hostResolver.put(hosthash, page.hash());
             }
 
             // namespace navigation
