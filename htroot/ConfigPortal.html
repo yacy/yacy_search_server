@@ -101,12 +101,24 @@
           <dt>Target for Click on Search Results</dt>
           <dd>
           <select name="target">
-            <option value="_blank" #(selected_blank)#::selected="selected"#(/selected_blank)#>"_blank" (new window)</option>
-            <option value="_self" #(selected_self)#::selected="selected"#(/selected_self)#>"_self" (same window)</option>
-            <option value="_parent" #(selected_parent)#::selected="selected"#(/selected_parent)#>"_parent" (the parent frame of a frameset)</option>
-            <option value="_top" #(selected_top)#::selected="selected"#(/selected_top)#>"_top" (top of all frames)</option>
-            <option value="searchresult" #(selected_searchresult)#::selected="selected"#(/selected_searchresult)#>"searchresult" (a default custom page name for search results)</option>
+            <option value="_blank" #(target_selected_blank)#::selected="selected"#(/target_selected_blank)#>"_blank" (new window)</option>
+            <option value="_self" #(target_selected_self)#::selected="selected"#(/target_selected_self)#>"_self" (same window)</option>
+            <option value="_parent" #(target_selected_parent)#::selected="selected"#(/target_selected_parent)#>"_parent" (the parent frame of a frameset)</option>
+            <option value="_top" #(target_selected_top)#::selected="selected"#(/target_selected_top)#>"_top" (top of all frames)</option>
+            <option value="searchresult" #(target_selected_searchresult)#::selected="selected"#(/target_selected_searchresult)#>"searchresult" (a default custom page name for search results)</option>
           </select>
+          </dd>
+          
+          <dt>Special Target as Exception for an URL-Pattern</dt>
+          <dd>
+          <select name="target_special">
+            <option value="_blank" #(target_selected_special_blank)#::selected="selected"#(/target_selected_special_blank)#>"_blank" (new window)</option>
+            <option value="_self" #(target_selected_special_self)#::selected="selected"#(/target_selected_special_self)#>"_self" (same window)</option>
+            <option value="_parent" #(target_selected_special_parent)#::selected="selected"#(/target_selected_special_parent)#>"_parent" (the parent frame of a frameset)</option>
+            <option value="_top" #(target_selected_special_top)#::selected="selected"#(/target_selected_special_top)#>"_top" (top of all frames)</option>
+            <option value="searchresult" #(target_selected_special_searchresult)#::selected="selected"#(/target_selected_special_searchresult)#>"searchresult" (a default custom page name for search results)</option>
+          </select>
+          &nbsp;Pattern:<input type="text" name="target_special_pattern" value="#[target_special_pattern]#" size="30" />
           </dd>
           
           <dt>Exclude Hosts</dt>

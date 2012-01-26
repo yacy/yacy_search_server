@@ -734,7 +734,10 @@ search.items = 10
 # possible values:
 # "_blank" (new window), "_self" (same window), "_parent" (the parent frame of a frameset),
 # "_top" (top of all frames), "searchresult" (a default custom page name for search results)
+# a special pattern can be given for exceptions to the default target according to urls
 search.target = _self
+search.target.special = _self
+search.target.special.pattern =
 
 # search result lines may show additional information for each search hit
 # these information pieces may be switched on or off

@@ -102,16 +102,18 @@ public class yacysearchitem {
         prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
         prop.put("navurlBase", QueryParams.navurlBase("html", theQuery, null, theQuery.urlMask.toString(), theQuery.navigators).toString());
+        final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
-        final String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
         if (theQuery.contentdom == ContentDomain.TEXT) {
             // text search
 
             // generate result object
             final ResultEntry result = theSearch.oneResult(item, theQuery.isLocal() ? 1000 : 5000);
             if (result == null) return prop; // no content
-
+            final String resultUrlstring = result.urlstring();
             final DigestURI resultURL = result.url();
+            final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
+
             final int port = resultURL.getPort();
             DigestURI faviconURL = null;
             if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode() && !resultURL.isLocal()) try {
@@ -131,7 +133,7 @@ public class yacysearchitem {
             final String urlhash = ASCII.String(result.hash());
             prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
             prop.putHTML("content_authorized_bookmark_bookmarklink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=" + resource + "&time=3&bookmarkref=" + urlhash + "&urlmaskfilter=.*");
-            prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
+            prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
             prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=" + resource + "&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
             prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=" + resource + "&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", urlhash);
@@ -139,8 +141,8 @@ public class yacysearchitem {
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
-            prop.putHTML("content_link", result.urlstring());
-            prop.putHTML("content_showPictures_link", result.urlstring());
+            prop.putHTML("content_link", resultUrlstring);
+            prop.putHTML("content_showPictures_link", resultUrlstring);
             prop.putHTML("content_target", target);
             if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading
@@ -216,10 +218,13 @@ public class yacysearchitem {
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
+                final String resultUrlstring = ms.href.toNormalform(true, false);
+                final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
+
                 final String license = sb.licensedURLs.aquireLicense(ms.href);
                 sb.loader.loadIfNotExistBackground(ms.href, 1024 * 1024 * 10);
-                prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
-                prop.putHTML("content_item_href", ms.href.toNormalform(true, false));
+                prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + resultUrlstring : resultUrlstring);
+                prop.putHTML("content_item_href", resultUrlstring);
                 prop.putHTML("content_item_target", target);
                 prop.put("content_item_code", license);
                 prop.putHTML("content_item_name", shorten(ms.name, MAX_NAME_LENGTH));
@@ -254,8 +259,11 @@ public class yacysearchitem {
             if (media != null) {
                 int c = 0;
                 for (final MediaSnippet ms : media) {
-                    prop.putHTML("content_items_" + c + "_href", ms.href.toNormalform(true, false));
-                    prop.putHTML("content_items_" + c + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), MAX_URL_LENGTH));
+                    final String resultUrlstring = ms.href.toNormalform(true, false);
+                    final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
+
+                    prop.putHTML("content_items_" + c + "_href", resultUrlstring);
+                    prop.putHTML("content_items_" + c + "_hrefshort", nxTools.shortenURLString(resultUrlstring, MAX_URL_LENGTH));
                     prop.putHTML("content_items_" + c + "_target", target);
                     prop.putHTML("content_items_" + c + "_name", shorten(ms.name, MAX_NAME_LENGTH));
                     prop.put("content_items_" + c + "_col", (col) ? "0" : "1");
