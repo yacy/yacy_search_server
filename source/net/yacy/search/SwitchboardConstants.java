@@ -436,7 +436,9 @@ public final class SwitchboardConstants {
     public static final String UPNP_REMOTEHOST		= "upnp.remoteHost";
 
     public static final String SEARCH_ITEMS   = "search.items";
-    public static final String SEARCH_TARGET  = "search.target";
+    public static final String SEARCH_TARGET_DEFAULT  = "search.target";
+    public static final String SEARCH_TARGET_SPECIAL          = "search.target.special"; // exceptions to the search target
+    public static final String SEARCH_TARGET_SPECIAL_PATTERN  = "search.target.special.pattern"; // ie 'own' addresses in topframe, 'other' in iframe
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
 
