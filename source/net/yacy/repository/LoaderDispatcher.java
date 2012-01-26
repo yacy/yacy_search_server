@@ -352,7 +352,7 @@ public final class LoaderDispatcher {
     public Document loadDocument(final DigestURI location, final CacheStrategy cachePolicy) throws IOException {
         // load resource
         Request request = request(location, true, false);
-        final Response response = this.load(request, cachePolicy, 10000, true);
+        final Response response = this.load(request, cachePolicy, true);
         final DigestURI url = request.url();
         if (response == null) throw new IOException("no Response for url " + url);
 
