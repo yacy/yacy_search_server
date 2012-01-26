@@ -65,7 +65,7 @@ public class Digest {
             md5Cache = new ConcurrentARC<String, byte[]>(1000, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
         }
     }
-    
+
     public static String encodeHex(final long in, final int length) {
         String s = Long.toHexString(in);
         while (s.length() < length) s = "0" + s;
@@ -119,7 +119,7 @@ public class Digest {
 
         byte[] h = md5Cache.get(key);
         if (h != null) return h;
-        
+
     	MessageDigest digest = digestPool.poll();
     	if (digest == null) {
     	    // if there are no digest objects left, create some on the fly
@@ -129,12 +129,14 @@ public class Digest {
                 digest.reset();
             } catch (final NoSuchAlgorithmException e) {
             }
+    	} else {
+    	    digest.reset(); // they should all be reseted but anyway; this is safe
     	}
         byte[] keyBytes;
         keyBytes = UTF8.getBytes(key);
         digest.update(keyBytes);
         final byte[] result = digest.digest();
-        digest.reset();
+        digest.reset(); // to be prepared for next
         try {
             digestPool.put(digest);
             //System.out.println("Digest Pool size = " + digestPool.size());
@@ -390,7 +392,7 @@ public class Digest {
         }
 
         System.out.println("time: " + (System.currentTimeMillis() - start) + " ms");
-        
+
         // without this this method would never end
         Log.shutdown();
     }

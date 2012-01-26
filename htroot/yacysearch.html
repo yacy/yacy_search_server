@@ -28,10 +28,10 @@
             case 9:
             case 33:
                 window.location.href = document.getElementById("nextpage").href;
-                break;    
+                break;
             case 34:
                 window.location.href = document.getElementById("prevpage").href;
-                break;   
+                break;
             case 40:
          }
     }
@@ -48,13 +48,13 @@
         function opensearch(data) {
             var parsed = [];
             data = eval('({"suggest":' + data + '})');
-            for (var i = 0; i < data.suggest[1].length; i++) {  
+            for (var i = 0; i < data.suggest[1].length; i++) {
                 var row = data.suggest[1][i];
-                if (row) {  
-                    parsed[parsed.length] = {  
-                        data: [row],  
-                        value: row,  
-                        result: row  
+                if (row) {
+                    parsed[parsed.length] = {
+                        data: [row],
+                        value: row,
+                        result: row
                     };  
                 };
             };
@@ -93,13 +93,9 @@ $(function() {
 	#{/sidebarVocabulary}#
 	$("#sidebarDomains").accordion({});
 	$("#sidebarProtocols").accordion({});
-	$("#sidebarProtocols").accordion('activate', false);
 	$("#sidebarFiletypes").accordion({});
-	$("#sidebarFiletypes").accordion('activate', false);
 	$("#sidebarAuthors").accordion({});
-	$("#sidebarAuthors").accordion('activate', false);
 	$("#sidebarNameSpace").accordion({});
-	$("#sidebarNameSpace").accordion('activate', false);
     $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();
     $("#sidebarAbout").accordion({});
 	$("#search").focus();

@@ -68,7 +68,9 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, post.get(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, post.get(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, post.get(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-                sb.setConfig(SwitchboardConstants.SEARCH_TARGET, post.get("target", "_self"));
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_DEFAULT, post.get("target", "_self"));
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL, post.get("target_special", "_self"));
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, post.get("target_special_pattern", "_self"));
                 sb.setConfig(SwitchboardConstants.SEARCH_ITEMS, post.getInt("maximumRecords", 10));
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
                 HTTPDFileHandler.indexForward = post.get(SwitchboardConstants.INDEX_FORWARD, "");
@@ -87,17 +89,17 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false));
                 sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
-                    
+
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete", false));
 
                 sb.setConfig("about.headline", post.get("about.headline", ""));
                 sb.setConfig("about.body", post.get("about.body", ""));
-                
+
                 String excludehosts = post.get("search.excludehosts", "");
                 sb.setConfig("search.excludehosts", excludehosts);
                 sb.setConfig("search.excludehosth", DigestURI.hosthashes(excludehosts));
-                
+
                 // construct navigation String
                 String nav = "";
                 if (post.getBoolean("search.navigation.hosts", false)) nav += "hosts,";
@@ -114,7 +116,9 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, "");
                 HTTPDFileHandler.indexForward = "";
-                sb.setConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL, "_self");
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
                 sb.setConfig("publicTopmenu", true);
                 sb.setConfig("publicSearchpage", true);
                 sb.setConfig("search.navigation", "hosts,authors,namespace,topics");
@@ -194,12 +198,20 @@ public class ConfigPortal {
 
         prop.put("maximumRecords", sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10));
 
-        final String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
-        prop.put("selected_blank", "_blank".equals(target) ? 1 : 0);
-        prop.put("selected_self", "_self".equals(target) ? 1 : 0);
-        prop.put("selected_parent", "_parent".equals(target) ? 1 : 0);
-        prop.put("selected_top", "_top".equals(target) ? 1 : 0);
-        prop.put("selected_searchresult", "searchresult".equals(target) ? 1 : 0);
+        final String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
+        prop.put("target_selected_blank", "_blank".equals(target) ? 1 : 0);
+        prop.put("target_selected_self", "_self".equals(target) ? 1 : 0);
+        prop.put("target_selected_parent", "_parent".equals(target) ? 1 : 0);
+        prop.put("target_selected_top", "_top".equals(target) ? 1 : 0);
+        prop.put("target_selected_searchresult", "searchresult".equals(target) ? 1 : 0);
+
+        final String target_special = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL, "_self");
+        prop.put("target_selected_special_blank", "_blank".equals(target_special) ? 1 : 0);
+        prop.put("target_selected_special_self", "_self".equals(target_special) ? 1 : 0);
+        prop.put("target_selected_special_parent", "_parent".equals(target_special) ? 1 : 0);
+        prop.put("target_selected_special_top", "_top".equals(target_special) ? 1 : 0);
+        prop.put("target_selected_special_searchresult", "searchresult".equals(target_special) ? 1 : 0);
+        prop.put("target_special_pattern", sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, ""));
 
         String myaddress = (sb.peers == null) ? null : sb.peers.mySeed() == null ? null : sb.peers.mySeed().getPublicAddress();
         if (myaddress == null) {

@@ -153,6 +153,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      * it can be reused for further connections
      * @see de.anomic.server.serverHandler#reset()
      */
+    @Override
     public void reset()  {
         this.proxyAccounts_init = false;
 
@@ -197,12 +198,14 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return false;
     }
 
+    @Override
     public String greeting() { // OBLIGATORIC FUNCTION
         // a response line upon connection is send to client
         // if no response line is wanted, return "" or null
         return null;
     }
 
+    @Override
     public String error(final Throwable e) { // OBLIGATORIC FUNCTION
         // return string in case of any error that occurs during communication
         // is always (but not only) called if an IO-dependent exception occurrs.
@@ -348,11 +351,13 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return true;
     }
 
+    @Override
     public Boolean EMPTY(final String arg, final Session session) throws IOException {
         //System.out.println("EMPTY " + arg);
         return (++this.emptyRequestCount > 10) ? serverCore.TERMINATE_CONNECTION : serverCore.RESUME_CONNECTION;
     }
 
+    @Override
     public Boolean UNKNOWN(final String arg, final Session session) throws IOException {
         //System.out.println("UNKNOWN " + arg);
 
@@ -695,12 +700,23 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         while (argsString.length() > 0) {
             eqp = argsString.indexOf('=');
             if (eqp <= 0) break;
+            sep = argsString.indexOf("&amp;", eqp + 1);
+            if (sep > 0) {
+                // resulting equations are inserted into the property args with leading '&amp;'
+                args.put(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
+                argsString = argsString.substring(sep + 5);
+                argc++;
+                continue;
+            }
             sep = argsString.indexOf('&', eqp + 1);
-            if (sep <= 0) break;
-            // resulting equations are inserted into the property args with leading '&'
-            args.put(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
-            argsString = argsString.substring(sep + 1);
-            argc++;
+            if (sep > 0) {
+                // resulting equations are inserted into the property args with leading '&'
+                args.put(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
+                argsString = argsString.substring(sep + 1);
+                argc++;
+                continue;
+            }
+            break;
         }
         // we return the number of parsed arguments
         return argc;

@@ -307,15 +307,6 @@ public final class RWIProcess extends Thread
                     }
                 }
 
-                // check tld domain
-                /*
-                if ((DigestURI.domDomain(iEntry.metadataHash()) & this.query.zonecode) == 0) {
-                    // filter out all tld that do not match with wanted tld domain
-                    this.sortout++;
-                    continue;
-                }
-                */
-
                 // count domZones
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
 
@@ -325,16 +316,17 @@ public final class RWIProcess extends Thread
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
                         continue pollloop;
                     }
-                    // no site constraint there; maybe collect host navigation information
-                    if ( nav_hosts && this.query.urlMask_isCatchall ) {
-                        this.hostNavigator.inc(hosthash);
-                        this.hostResolver.put(hosthash, iEntry.urlhash());
-                    }
                 } else {
                     if ( !hosthash.equals(this.query.sitehash) ) {
                         // filter out all domains that do not match with the site constraint
                         continue pollloop;
                     }
+                }
+
+                // collect host navigation information (even if we have only one; this is to provide a switch-off button)
+                if (this.query.navigators.isEmpty() && (nav_hosts || this.query.urlMask_isCatchall)) {
+                    this.hostNavigator.inc(hosthash);
+                    this.hostResolver.put(hosthash, iEntry.urlhash());
                 }
 
                 // check protocol
@@ -675,6 +667,15 @@ public final class RWIProcess extends Thread
                 continue;
             }
 
+            // from here: collect navigation information
+
+            // collect host navigation information (even if we have only one; this is to provide a switch-off button)
+            if (!this.query.navigators.isEmpty() && (this.query.urlMask_isCatchall || this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts", 0) >= 0)) {
+                final String hosthash = page.hosthash();
+                this.hostNavigator.inc(hosthash);
+                this.hostResolver.put(hosthash, page.hash());
+            }
+
             // namespace navigation
             String pagepath = page.url().getPath();
             if ( (p = pagepath.indexOf(':')) >= 0 ) {
@@ -795,9 +796,6 @@ public final class RWIProcess extends Thread
         if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace", 0) < 0 ) {
             return new ClusteredScoreMap<String>();
         }
-        if ( this.namespaceNavigator.sizeSmaller(2) ) {
-            this.namespaceNavigator.clear(); // navigators with one entry are not useful
-        }
         return this.namespaceNavigator;
     }
 
@@ -825,9 +823,6 @@ public final class RWIProcess extends Thread
                 }
             }
         }
-        if ( result.sizeSmaller(2) ) {
-            result.clear(); // navigators with one entry are not useful
-        }
         return result;
     }
 
@@ -835,18 +830,12 @@ public final class RWIProcess extends Thread
         if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("protocol", 0) < 0 ) {
             return new ClusteredScoreMap<String>();
         }
-        if ( this.protocolNavigator.sizeSmaller(2) ) {
-            this.protocolNavigator.clear(); // navigators with one entry are not useful
-        }
         return this.protocolNavigator;
     }
 
     public ScoreMap<String> getFiletypeNavigator() {
         if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("filetype", 0) < 0 ) {
             return new ClusteredScoreMap<String>();
-        }
-        if ( this.filetypeNavigator.sizeSmaller(2) ) {
-            this.filetypeNavigator.clear(); // navigators with one entry are not useful
         }
         return this.filetypeNavigator;
     }
@@ -944,9 +933,6 @@ public final class RWIProcess extends Thread
         // words that appeared in the url or the description of all urls
         if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("authors", 0) < 0 ) {
             return new ConcurrentScoreMap<String>();
-        }
-        if ( this.authorNavigator.sizeSmaller(2) ) {
-            this.authorNavigator.clear(); // navigators with one entry are not useful
         }
         return this.authorNavigator;
     }

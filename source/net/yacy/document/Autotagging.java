@@ -178,16 +178,13 @@ public class Autotagging {
                     p = line.indexOf('\t');
                 }
                 if (p < 0) {
-                    this.tag2print.put(line, line);
-                    this.print2tag.put(line, line);
+                    k = normalizeKey(line);
+                    v = normalizeWord(line);
+                    this.tag2print.put(v, k);
+                    this.print2tag.put(k, v);
                     continue vocloop;
                 }
-                k = line.substring(0, p).trim();
-                k = k.replaceAll(" \\+", ", "); // remove symbols that are bad in a query attribute
-                k = k.replaceAll(" /", ", ");
-                k = k.replaceAll("\\+", ",");
-                k = k.replaceAll("/", ",");
-                k = k.replaceAll("  ", " ");
+                k = normalizeKey(line.substring(0, p));
                 v = line.substring(p + 1);
                 tags = v.split(",");
                 tagloop: for (String t: tags) {
@@ -204,6 +201,16 @@ public class Autotagging {
             }
         }
 
+        private final String normalizeKey(String k) {
+            k = k.trim();
+            k = k.replaceAll(" \\+", ", "); // remove symbols that are bad in a query attribute
+            k = k.replaceAll(" /", ", ");
+            k = k.replaceAll("\\+", ",");
+            k = k.replaceAll("/", ",");
+            k = k.replaceAll("  ", " ");
+            return k;
+        }
+        
         public Vocabulary(String name, Localization localization) {
             this(name);
             Set<String> locNames = localization.locationNames();

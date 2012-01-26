@@ -144,8 +144,8 @@ public class pdfParser extends AbstractParser implements Parser {
                     try {
                         writer.append(stripper.getText(pdfDoc));
                     } catch (final Throwable e) {}
-                }
-            };
+                } 
+            }; 
             t.start();
             t.join(3000);
             if (t.isAlive()) t.interrupt();
@@ -175,8 +175,7 @@ public class pdfParser extends AbstractParser implements Parser {
         if (docTitle == null) {
             docTitle = docSubject;
         }
-
-
+        
         // clear resources in pdfbox. they say that is resolved but it's not. see:
         // https://issues.apache.org/jira/browse/PDFBOX-313
         // https://issues.apache.org/jira/browse/PDFBOX-351

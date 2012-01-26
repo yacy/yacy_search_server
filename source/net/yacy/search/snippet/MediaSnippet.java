@@ -51,8 +51,8 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.ZURL.FailCategory;
+import de.anomic.crawler.retrieval.Request;
 
 
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
@@ -117,10 +117,12 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return Base64Order.enhancedCoder.equal(this.href.hash(), other.href.hash());
     }
 
+    @Override
     public int compareTo(final MediaSnippet o) {
         return Base64Order.enhancedCoder.compare(this.href.hash(), o.href.hash());
     }
 
+    @Override
     public int compare(final MediaSnippet o1, final MediaSnippet o2) {
         return o1.compareTo(o2);
     }
@@ -217,7 +219,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     private static HandleSet removeAppearanceHashes(final String sentence, final HandleSet queryhashes) {
         // remove all hashes that appear in the sentence
         if (sentence == null) return queryhashes;
-        final SortedMap<byte[], Integer> hs = WordTokenizer.hashSentence(sentence, null);
+        final SortedMap<byte[], Integer> hs = WordTokenizer.hashSentence(sentence, null, 100);
         final Iterator<byte[]> j = queryhashes.iterator();
         byte[] hash;
         Integer pos;
