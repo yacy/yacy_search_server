@@ -74,7 +74,7 @@ public class feed {
                 prop.putXML("item_" + messageCount + "_description", message.getDescription());
                 prop.putXML("item_" + messageCount + "_link", message.getLink());
                 prop.put("item_" + messageCount + "_pubDate", message.getPubDate());
-                prop.put("item_" + messageCount + "_guid", message.getGuid());
+                prop.putXML("item_" + messageCount + "_guid", message.getGuid());
                 messageCount++;
                 messageMaxCount--;
             }
