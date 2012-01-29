@@ -42,7 +42,6 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.document.Autotagging.Metatag;
@@ -238,7 +237,7 @@ public final class search {
                     language,
                     new HashSet<Metatag>(),
                     "", // no navigation
-                    CacheStrategy.CACHEONLY,
+                    null, // no snippet computation
                     count,
                     0,
                     filter,
@@ -301,7 +300,7 @@ public final class search {
                     language,
                     new HashSet<Metatag>(),
                     "", // no navigation
-                    CacheStrategy.CACHEONLY,
+                    null, // no snippet computation
                     count,
                     0,
                     filter,
