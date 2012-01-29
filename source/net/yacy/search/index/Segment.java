@@ -73,7 +73,7 @@ public class Segment {
     public static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
     public static final int  wCacheMaxChunk  =  800;           // maximum number of references for each urlhash
     public static final int  lowcachedivisor =  900;
-    public static final long targetFileSize  = 256 * 1024 * 1024; // 256 MB
+    public static final long targetFileSize  = 64 * 1024 * 1024; // 256 MB
     public static final int  writeBufferSize = 4 * 1024 * 1024;
 
     // the reference factory
