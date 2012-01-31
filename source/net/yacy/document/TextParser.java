@@ -472,6 +472,7 @@ public final class TextParser {
     }
 
     public static void grantExtension(final String ext, final boolean grant) {
+        if (ext == null || ext.length() == 0) return;
         if (grant) denyExtensionx.remove(ext); else denyExtensionx.put(ext, v);
     }
 

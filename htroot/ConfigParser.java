@@ -61,6 +61,7 @@ public class ConfigParser {
                     }
                 }
                 env.setConfig(SwitchboardConstants.PARSER_MIME_DENY, TextParser.getDenyMime());
+                env.setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, TextParser.getDenyExtension());
             }
         }
 

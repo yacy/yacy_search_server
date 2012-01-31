@@ -636,6 +636,7 @@ public final class Switchboard extends serverSwitch
         // define a realtime parsable mimetype list
         this.log.logConfig("Parser: Initializing Mime Type deny list");
         TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
+        TextParser.setDenyExtension(getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
 
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
