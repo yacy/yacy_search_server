@@ -148,7 +148,7 @@ public class SolrScheme extends ConfigurationSet {
         wordcount_i(Types.integer, true, true),
         paths_txt(Types.text_general, true, true, true),
         inboundlinkscount_i(Types.integer, true, true),
-        inboundlinksnoindexcount_i(Types.integer, true, true),
+        inboundlinksnofollowcount_i(Types.integer, true, true),
         inboundlinks_tag_txt(Types.text_general, true, true, true),
         inboundlinks_protocol_txt(Types.text_general, true, true, true),
         inboundlinks_urlstub_txt(Types.text_general, true, true, true),
@@ -157,7 +157,7 @@ public class SolrScheme extends ConfigurationSet {
         inboundlinks_relflags_txt(Types.text_general, true, true, true),
         inboundlinks_text_txt(Types.text_general, true, true, true),
         outboundlinkscount_i(Types.integer, true, true),
-        outboundlinksnoindexcount_i(Types.integer, true, true),
+        outboundlinksnofollowcount_i(Types.integer, true, true),
         outboundlinks_tag_txt(Types.text_general, true, true, true),
         outboundlinks_protocol_txt(Types.text_general, true, true, true),
         outboundlinks_urlstub_txt(Types.text_general, true, true, true),
@@ -297,7 +297,7 @@ public class SolrScheme extends ConfigurationSet {
         final Map<MultiProtocolURI, Properties> alllinks = yacydoc.getAnchors();
         int c = 0;
         if (isEmpty() || contains(Field.inboundlinkscount_i.name())) addSolr(solrdoc, Field.inboundlinkscount_i, yacydoc.inboundLinkCount());
-        if (isEmpty() || contains(Field.inboundlinksnoindexcount_i.name())) addSolr(solrdoc, Field.inboundlinksnoindexcount_i, yacydoc.inboundLinkNoindexCount());
+        if (isEmpty() || contains(Field.inboundlinksnofollowcount_i.name())) addSolr(solrdoc, Field.inboundlinksnofollowcount_i, yacydoc.inboundLinkNofollowCount());
         final String[] inboundlinksTag = new String[yacydoc.inboundLinkCount()];
         final String[] inboundlinksURLProtocol = new String[yacydoc.inboundLinkCount()];
         final String[] inboundlinksURLStub = new String[yacydoc.inboundLinkCount()];
@@ -334,7 +334,7 @@ public class SolrScheme extends ConfigurationSet {
 
         c = 0;
         if (isEmpty() || contains(Field.outboundlinkscount_i.name())) addSolr(solrdoc, Field.outboundlinkscount_i, yacydoc.outboundLinkCount());
-        if (isEmpty() || contains(Field.outboundlinksnoindexcount_i.name())) addSolr(solrdoc, Field.outboundlinksnoindexcount_i, yacydoc.outboundLinkNoindexCount());
+        if (isEmpty() || contains(Field.outboundlinksnofollowcount_i.name())) addSolr(solrdoc, Field.outboundlinksnofollowcount_i, yacydoc.outboundLinkNofollowCount());
         final String[] outboundlinksTag = new String[yacydoc.outboundLinkCount()];
         final String[] outboundlinksURLProtocol = new String[yacydoc.outboundLinkCount()];
         final String[] outboundlinksURLStub = new String[yacydoc.outboundLinkCount()];

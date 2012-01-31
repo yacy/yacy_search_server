@@ -634,22 +634,22 @@ dc_rights
         return (this.outboundlinks == null) ? 0 : this.outboundlinks.size();
     }
 
-    public int inboundLinkNoindexCount() {
+    public int inboundLinkNofollowCount() {
         if (this.inboundlinks == null) resortLinks();
         if (this.inboundlinks == null) return 0;
         int c = 0;
         for (final String tag: this.inboundlinks.values()) {
-            if (tag.contains("noindex")) c++;
+            if (tag.contains("nofollow")) c++;
         }
         return c;
     }
 
-    public int outboundLinkNoindexCount() {
+    public int outboundLinkNofollowCount() {
         if (this.outboundlinks == null) resortLinks();
         if (this.outboundlinks == null) return 0;
         int c = 0;
         for (final String tag: this.outboundlinks.values()) {
-            if (tag.contains("noindex")) c++;
+            if (tag.contains("nofollow")) c++;
         }
         return c;
     }
