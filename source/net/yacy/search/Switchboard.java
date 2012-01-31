@@ -295,7 +295,7 @@ public final class Switchboard extends serverSwitch
         }
 
         // init TrayIcon if possible
-        tray = new Tray(this);
+        this.tray = new Tray(this);
 
         // remote proxy configuration
         initRemoteProxy();
@@ -650,7 +650,7 @@ public final class Switchboard extends serverSwitch
 
         // update the working scheme with the backup scheme. This is necessary to include new features.
         // new features are always activated by default
-        workingScheme.fill(backupScheme);
+        workingScheme.fill(backupScheme, false);
 
         // set up the solr interface
         final String solrurls =
@@ -1598,7 +1598,7 @@ public final class Switchboard extends serverSwitch
         Domains.close();
         AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
         UPnP.deletePortMapping();
-        tray.remove();
+        this.tray.remove();
         try {
             HTTPClient.closeConnectionManager();
         } catch ( final InterruptedException e ) {
