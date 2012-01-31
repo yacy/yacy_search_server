@@ -388,6 +388,7 @@
     <copy todir="${release_main}/bin">
       <fileset dir="bin">
         <include name="apicall.sh"/>
+        <include name="apicat.sh"/>
         <include name="clearall.sh"/>
         <include name="clearcache.sh"/>
         <include name="clearindex.sh"/>
