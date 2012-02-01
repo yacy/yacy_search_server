@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -56,7 +55,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
@@ -162,7 +160,7 @@ public final class QueryParams {
             }
     	} else {
     		this.queryString = queryString;
-    		final TreeSet<String>[] cq = cleanQuery(queryString);
+    		final Collection<String>[] cq = cleanQuery(queryString);
     		this.queryHashes = Word.words2hashesHandles(cq[0]);
     		this.excludeHashes = Word.words2hashesHandles(cq[1]);
     		this.fullqueryHashes = Word.words2hashesHandles(cq[2]);
@@ -378,11 +376,11 @@ public final class QueryParams {
     private static String seps = "'.,/&_"; static {seps += '"';}
 
     @SuppressWarnings("unchecked")
-    public static TreeSet<String>[] cleanQuery(String querystring) {
+    public static Collection<String>[] cleanQuery(String querystring) {
         // returns three sets: a query set, a exclude set and a full query set
-        final TreeSet<String> query = new TreeSet<String>(NaturalOrder.naturalComparator);
-        final TreeSet<String> exclude = new TreeSet<String>(NaturalOrder.naturalComparator);
-        final TreeSet<String> fullquery = new TreeSet<String>(NaturalOrder.naturalComparator);
+        final Collection<String> query = new ArrayList<String>();
+        final Collection<String> exclude = new ArrayList<String>();
+        final Collection<String> fullquery = new ArrayList<String>();
 
         if ((querystring != null) && (!querystring.isEmpty())) {
 
@@ -401,22 +399,23 @@ public final class QueryParams {
             final String[] queries = querystring.split(" ");
             for (String quer : queries) {
                 if (quer.startsWith("-")) {
-                    exclude.add(quer.substring(1));
+                    String x = quer.substring(1);
+                    if (!exclude.contains(x)) exclude.add(x);
                 } else {
                     while ((c = quer.indexOf('-')) >= 0) {
                         s = quer.substring(0, c);
                         l = s.length();
-                        if (l >= Condenser.wordminsize) {query.add(s);}
-                        if (l > 0) {fullquery.add(s);}
+                        if (l >= Condenser.wordminsize && !query.contains(s)) {query.add(s);}
+                        if (l > 0 && !fullquery.contains(s)) {fullquery.add(s);}
                         quer = quer.substring(c + 1);
                     }
                     l = quer.length();
-                    if (l >= Condenser.wordminsize) {query.add(quer);}
-                    if (l > 0) {fullquery.add(quer);}
+                    if (l >= Condenser.wordminsize && !query.contains(quer)) {query.add(quer);}
+                    if (l > 0 && !fullquery.contains(quer)) {fullquery.add(quer);}
                 }
             }
         }
-        return new TreeSet[]{query, exclude, fullquery};
+        return new Collection[]{query, exclude, fullquery};
     }
 
     public String queryString(final boolean encodeHTML) {
@@ -438,7 +437,7 @@ public final class QueryParams {
         }
     }
 
-    public TreeSet<String>[] queryWords() {
+    public Collection<String>[] queryWords() {
         return cleanQuery(this.queryString);
     }
 

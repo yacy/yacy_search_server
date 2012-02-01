@@ -26,6 +26,7 @@
 
 package net.yacy.kelondro.data.word;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
@@ -118,11 +119,11 @@ public class Word {
 
     private final static byte lowByte = Base64Order.alpha_enhanced[0];
     private final static byte highByte = Base64Order.alpha_enhanced[Base64Order.alpha_enhanced.length - 1];
-    
+
     public static boolean isPrivate(byte[] hash) {
         return hash[0] == highByte && hash[1] == highByte && hash[2] == highByte && hash[3] == highByte && hash[4] == highByte;
     }
-    
+
     // create a word hash
     public static final byte[] word2hash(final String word) {
     	final String wordlc = word.toLowerCase(Locale.ENGLISH);
@@ -148,7 +149,7 @@ public class Word {
 
     public final static byte PRIVATE_TYPE_COPY = 'C';     // used for a private local copy of the index
     public final static byte PRIVATE_TYPE_PHONETIC = 'K'; // used for ColognePhonetics
-    
+
     public static final byte[] hash2private(final byte[] hash, byte privateType) {
         byte[] p = new byte[commonHashLength];
         p[0] = highByte; p[1] = highByte; p[2] = highByte; ; p[3] = highByte; ; p[4] = highByte; p[5] = privateType;
@@ -156,7 +157,7 @@ public class Word {
         return p;
     }
 
-    public static final HandleSet words2hashesHandles(final Set<String> words) {
+    public static final HandleSet words2hashesHandles(final Collection<String> words) {
         final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.size());
         for (final String word: words)
             try {
