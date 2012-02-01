@@ -560,7 +560,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     private void identPort(final String inputURL, final int dflt) throws MalformedURLException {
         // identify ref in file
-        final int r = this.host.indexOf(':');
+        int pss = 0;
+        int ip6 = this.host.indexOf('[');
+        if (ip6 >= 0 && ((ip6 = this.host.indexOf("]", ip6)) > 0)) {
+            pss = ip6 + 1;
+        }
+        final int r = this.host.indexOf(":", pss);
         if (r < 0) {
             this.port = dflt;
         } else {
@@ -1164,13 +1169,14 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
 
+    /*
     public static void main(final String[] args) {
         for (final String s: args) System.out.println(toTokens(s));
     }
-
-    /*
+     */
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
+          new String[]{null, "http://[2a00:1450:400c:c01::69]/"},
           new String[]{null, "C:WINDOWS\\CMD0.EXE"},
           new String[]{null, "file://C:WINDOWS\\CMD0.EXE"},
           new String[]{null, "file:/bin/yacy1"}, // file://<host>/<path> may have many '/' if the host is omitted and the path starts with '/'
@@ -1221,9 +1227,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         String environment, url;
         MultiProtocolURI aURL, aURL1;
         java.net.URL jURL;
-        for (int i = 0; i < test.length; i++) {
-            environment = test[i][0];
-            url = test[i][1];
+        for (String[] element : test) {
+            environment = element[0];
+            url = element[1];
             try {aURL = MultiProtocolURI.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}
@@ -1255,6 +1261,5 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             }
         }
     }
-    */
 
 }
