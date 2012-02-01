@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -325,7 +326,7 @@ public class SolrScheme extends ConfigurationSet {
             c++;
         }
         if (isEmpty() || contains(Field.inboundlinks_tag_txt.name())) addSolr(solrdoc, Field.inboundlinks_tag_txt, inboundlinksTag);
-        if (isEmpty() || contains(Field.inboundlinks_protocol_txt.name())) addSolr(solrdoc, Field.inboundlinks_protocol_txt, inboundlinksURLProtocol);
+        if (isEmpty() || contains(Field.inboundlinks_protocol_txt.name())) addSolr(solrdoc, Field.inboundlinks_protocol_txt, protocolList2indexedList(inboundlinksURLProtocol));
         if (isEmpty() || contains(Field.inboundlinks_urlstub_txt.name())) addSolr(solrdoc, Field.inboundlinks_urlstub_txt, inboundlinksURLStub);
         if (isEmpty() || contains(Field.inboundlinks_name_txt.name())) addSolr(solrdoc, Field.inboundlinks_name_txt, inboundlinksName);
         if (isEmpty() || contains(Field.inboundlinks_rel_txt.name())) addSolr(solrdoc, Field.inboundlinks_rel_txt, inboundlinksRel);
@@ -362,7 +363,7 @@ public class SolrScheme extends ConfigurationSet {
             c++;
         }
         if (isEmpty() || contains(Field.outboundlinks_tag_txt.name())) addSolr(solrdoc, Field.outboundlinks_tag_txt, outboundlinksTag);
-        if (isEmpty() || contains(Field.outboundlinks_protocol_txt.name())) addSolr(solrdoc, Field.outboundlinks_protocol_txt, outboundlinksURLProtocol);
+        if (isEmpty() || contains(Field.outboundlinks_protocol_txt.name())) addSolr(solrdoc, Field.outboundlinks_protocol_txt, protocolList2indexedList(outboundlinksURLProtocol));
         if (isEmpty() || contains(Field.outboundlinks_urlstub_txt.name())) addSolr(solrdoc, Field.outboundlinks_urlstub_txt, outboundlinksURLStub);
         if (isEmpty() || contains(Field.outboundlinks_name_txt.name())) addSolr(solrdoc, Field.outboundlinks_name_txt, outboundlinksName);
         if (isEmpty() || contains(Field.outboundlinks_rel_txt.name())) addSolr(solrdoc, Field.outboundlinks_rel_txt, outboundlinksRel);
@@ -476,7 +477,7 @@ public class SolrScheme extends ConfigurationSet {
             }
             addSolr(solrdoc, Field.imagescount_i, imgtags.length);
             if (isEmpty() || contains(Field.images_tag_txt.name())) addSolr(solrdoc, Field.images_tag_txt, imgtags);
-            if (isEmpty() || contains(Field.images_protocol_txt.name())) addSolr(solrdoc, Field.images_protocol_txt, imgprots);
+            if (isEmpty() || contains(Field.images_protocol_txt.name())) addSolr(solrdoc, Field.images_protocol_txt, protocolList2indexedList(imgprots));
             if (isEmpty() || contains(Field.images_urlstub_txt.name())) addSolr(solrdoc, Field.images_urlstub_txt, imgstubs);
             if (isEmpty() || contains(Field.images_alt_txt.name())) addSolr(solrdoc, Field.images_alt_txt, imgalts);
 
@@ -556,6 +557,18 @@ public class SolrScheme extends ConfigurationSet {
         return solrdoc;
     }
 
+    private static String[] protocolList2indexedList(String[] protocol) {
+        List<String> a = new ArrayList<String>();
+        for (int i = 0; i < protocol.length; i++) {
+            if (!protocol[i].equals("http")) {
+                String c = Integer.toString(i);
+                while (c.length() < 3) c = "0" + c;
+                a.add(c + "-" + protocol[i]);
+            }
+        }
+        return a.toArray(new String[a.size()]);
+    }
+
     /**
      * encode a string containing attributes from anchor rel properties binary:
      * bit 0: "me" contained in rel
@@ -615,7 +628,7 @@ public class SolrScheme extends ConfigurationSet {
     }
 
     /*
-     * standard solr scheme
+   standard solr schema
 
    <field name="name" type="textgen" indexed="true" stored="true"/>
    <field name="cat" type="string" indexed="true" stored="true" multiValued="true"/>
@@ -641,6 +654,5 @@ public class SolrScheme extends ConfigurationSet {
    <field name="content_type" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="last_modified" type="date" indexed="true" stored="true"/>
    <field name="links" type="string" indexed="true" stored="true" multiValued="true"/>
-
      */
 }
