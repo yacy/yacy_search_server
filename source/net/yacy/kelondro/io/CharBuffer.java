@@ -130,8 +130,7 @@ public final class CharBuffer extends Writer {
     }
 
     private void grow(int minSize) {
-        int newsize = this.buffer.length + 1024;
-        if (newsize < minSize) newsize = minSize+1;
+        int newsize = 2 * Math.max(this.buffer.length, minSize);
         char[] tmp = new char[newsize];
         System.arraycopy(this.buffer, this.offset, tmp, 0, this.length);
         this.buffer = tmp;
@@ -187,7 +186,7 @@ public final class CharBuffer extends Writer {
     }
 
     public CharBuffer append(final char[] bb) {
-        write(bb);
+        write(bb, 0, bb.length);
         return this;
     }
 
@@ -205,14 +204,14 @@ public final class CharBuffer extends Writer {
     public CharBuffer append(final String s) {
         final char[] temp = new char[s.length()];
         s.getChars(0, temp.length, temp, 0);
-        write(temp);
+        write(temp, 0, temp.length);
         return this;
     }
 
     public CharBuffer append(final String s, final int off, final int len) {
         final char[] temp = new char[len];
         s.getChars(off, (off + len), temp, 0);
-        write(temp);
+        write(temp, 0, len);
         return this;
     }
 
