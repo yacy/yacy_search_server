@@ -83,6 +83,14 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
     }
 
     /**
+     * get the ordering of the primary keys
+     * @return
+     */
+    public ByteOrder ordering() {
+        return this.blob.ordering();
+    }
+
+    /**
      * clears the content of the database
      * @throws IOException
      */
@@ -366,6 +374,10 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         return new KeyIterator(up, rotating, firstKey, secondKey);
     }
 
+    public synchronized CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+        return this.blob.keys(up, firstKey);
+    }
+
     public class KeyIterator implements CloneableIterator<byte[]>, Iterator<byte[]> {
 
         final boolean up, rotating;
@@ -406,17 +418,13 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         }
 
     }
-    
-    public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final String whereKey, final String isValue) throws IOException {
-        return new MapIterator(this.blob.keys(true, null), whereKey, isValue);
-    }
 
     public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final boolean rotating) throws IOException {
-        return new MapIterator(keys(up, rotating), null, null);
+        return new FullMapIterator(keys(up, rotating));
     }
 
     public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
-        return new MapIterator(keys(up, rotating, firstKey, secondKey), null, null);
+        return new FullMapIterator(keys(up, rotating, firstKey, secondKey));
     }
 
     /**
@@ -448,18 +456,15 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
     public void finalize() {
         close();
     }
-    
-    public class MapIterator extends LookAheadIterator<Map.Entry<byte[], Map<String, String>>> implements Iterator<Map.Entry<byte[], Map<String, String>>> {
+
+    protected class FullMapIterator extends LookAheadIterator<Map.Entry<byte[], Map<String, String>>> implements Iterator<Map.Entry<byte[], Map<String, String>>> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
         private final Iterator<byte[]> keyIterator;
-        private final String whereKey, isValue;
 
-        MapIterator(final Iterator<byte[]> keyIterator, final String whereKey, final String isValue) {
+        FullMapIterator(final Iterator<byte[]> keyIterator) {
             this.keyIterator = keyIterator;
-            this.whereKey = whereKey;
-            this.isValue = isValue;
         }
 
         @Override
@@ -479,19 +484,14 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                     continue;
                 }
                 if (map == null) continue; // circumvention of a modified exception
-                // check if the where case holds
-                if (this.whereKey != null && this.isValue != null) {
-                    String v = map.get(this.whereKey);
-                    if (v == null) continue;
-                    if (!v.equals(this.isValue)) continue;
-                }
                 // produce entry
                 Map.Entry<byte[], Map<String, String>> entry = new AbstractMap.SimpleImmutableEntry<byte[], Map<String, String>>(nextKey, map);
                 return entry;
             }
             return null;
         }
-    } // class mapIterator
+    } // class FullMapIterator
+
 
     @Override
     public void putAll(final Map<? extends byte[], ? extends Map<String, String>> map) {

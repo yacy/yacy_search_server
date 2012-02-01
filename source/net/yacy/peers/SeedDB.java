@@ -29,10 +29,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.ref.SoftReference;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -98,8 +96,6 @@ public final class SeedDB implements AlternativeDomainNames {
 
     private Seed mySeed; // my own seed
     private final Set<String> myBotIDs; // list of id's that this bot accepts as robots.txt identification
-    private final Map<String, String> nameLookupCache; // a name-to-hash relation
-    private final Map<InetAddress, SoftReference<Seed>> ipLookupCache;
 
     public SeedDB(
             final File networkRoot,
@@ -127,12 +123,6 @@ public final class SeedDB implements AlternativeDomainNames {
         this.seedActiveDB = openSeedTable(this.seedActiveDBFile);
         this.seedPassiveDB = openSeedTable(this.seedPassiveDBFile);
         this.seedPotentialDB = openSeedTable(this.seedPotentialDBFile);
-
-        // start our virtual DNS service for yacy peers with empty cache
-        this.nameLookupCache = new HashMap<String, String>();
-
-        // cache for reverse name lookup
-        this.ipLookupCache = new HashMap<InetAddress, SoftReference<Seed>>();
 
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
@@ -183,12 +173,6 @@ public final class SeedDB implements AlternativeDomainNames {
         this.seedActiveDB = openSeedTable(this.seedActiveDBFile);
         this.seedPassiveDB = openSeedTable(this.seedPassiveDBFile);
         this.seedPotentialDB = openSeedTable(this.seedPotentialDBFile);
-
-        // start our virtual DNS service for yacy peers with empty cache
-        this.nameLookupCache.clear();
-
-        // cache for reverse name lookup
-        this.ipLookupCache.clear();
 
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
@@ -497,7 +481,6 @@ public final class SeedDB implements AlternativeDomainNames {
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         synchronized (this) {
             try {
-                this.nameLookupCache.put(seed.getName(), seed.hash);
                 final ConcurrentMap<String, String> seedPropMap = seed.getMap();
                 this.seedActiveDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
                 this.seedPassiveDB.delete(ASCII.getBytes(seed.hash));
@@ -513,7 +496,6 @@ public final class SeedDB implements AlternativeDomainNames {
         if (seed.isProper(false) != null) return;
         synchronized (this) {
             try {
-                this.nameLookupCache.remove(seed.getName());
                 this.seedActiveDB.delete(ASCII.getBytes(seed.hash));
                 this.seedPotentialDB.delete(ASCII.getBytes(seed.hash));
             } catch (final Exception e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
@@ -532,7 +514,6 @@ public final class SeedDB implements AlternativeDomainNames {
         if (seed.isProper(false) != null) return;
         synchronized (this) {
             try {
-                this.nameLookupCache.remove(seed.getName());
                 this.seedActiveDB.delete(ASCII.getBytes(seed.hash));
                 this.seedPassiveDB.delete(ASCII.getBytes(seed.hash));
             } catch (final Exception e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
@@ -637,17 +618,8 @@ public final class SeedDB implements AlternativeDomainNames {
             return this.mySeed;
         }
 
-        // then try to use the cache
         peerName = peerName.toLowerCase();
-        final String seedhash = this.nameLookupCache.get(peerName);
         Seed seed;
-        if (seedhash != null) {
-        	seed = this.get(seedhash);
-        	if (seed != null) {
-                //System.out.println("*** found lookupByName in cache: " + peerName);
-        	    return seed;
-        	}
-        }
 
         // enumerate the cache
         String name = Seed.checkPeerName(peerName);
@@ -659,7 +631,6 @@ public final class SeedDB implements AlternativeDomainNames {
                 if (entry == null) break;
                 seed = this.getConnected(ASCII.String(entry.getKey()));
                 if (seed == null) continue;
-                if (seed.isProper(false) == null) this.nameLookupCache.put(seed.getName().toLowerCase(), seed.hash);
                 //System.out.println("*** found lookupByName in seedActiveDB: " + peerName);
                 return seed;
             }
@@ -672,7 +643,6 @@ public final class SeedDB implements AlternativeDomainNames {
                 if (entry == null) break;
                 seed = this.getConnected(ASCII.String(entry.getKey()));
                 if (seed == null) continue;
-                if (seed.isProper(false) == null) this.nameLookupCache.put(seed.getName().toLowerCase(), seed.hash);
                 //System.out.println("*** found lookupByName in seedPassiveDB: " + peerName);
                 return seed;
             }
@@ -682,7 +652,6 @@ public final class SeedDB implements AlternativeDomainNames {
         // check local seed
         if (this.mySeed == null) initMySeed();
         name = this.mySeed.getName().toLowerCase();
-        if (this.mySeed.isProper(false) == null) this.nameLookupCache.put(name, this.mySeed.hash);
         if (name.equals(peerName)) return this.mySeed;
         // nothing found
         return null;
@@ -705,16 +674,7 @@ public final class SeedDB implements AlternativeDomainNames {
         }
 
         // then try to use the cache
-        final SoftReference<Seed> ref = this.ipLookupCache.get(peerIP);
         Seed seed = null;
-        if (ref != null) {
-            seed = ref.get();
-            if (seed != null) {
-                //System.out.println("*** found lookupByIP in cache: " + peerIP.toString() + " -> " + this.mySeed.getName());
-                return seed;
-            }
-        }
-
         String ipString = peerIP.getHostAddress();
 
         Map.Entry<byte[], Map<String, String>> entry;
@@ -729,7 +689,6 @@ public final class SeedDB implements AlternativeDomainNames {
                     if (port > 0 && Integer.parseInt(p) != port) continue;
                     seed = this.getConnected(ASCII.String(entry.getKey()));
                     if (seed == null) continue;
-                    this.ipLookupCache.put(peerIP, new SoftReference<Seed>(seed));
                     //System.out.println("*** found lookupByIP in connected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
@@ -748,7 +707,6 @@ public final class SeedDB implements AlternativeDomainNames {
                     if (port > 0 && Integer.parseInt(p) != port) continue;
                     seed = this.getDisconnected(ASCII.String(entry.getKey()));
                     if (seed == null) continue;
-                    this.ipLookupCache.put(peerIP, new SoftReference<Seed>(seed));
                     //System.out.println("*** found lookupByIP in disconnected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
@@ -767,7 +725,6 @@ public final class SeedDB implements AlternativeDomainNames {
                     if (port > 0 && Integer.parseInt(p) != port) continue;
                     seed = this.getPotential(ASCII.String(entry.getKey()));
                     if (seed == null) continue;
-                    this.ipLookupCache.put(peerIP, new SoftReference<Seed>(seed));
                     //System.out.println("*** found lookupByIP in potential: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }

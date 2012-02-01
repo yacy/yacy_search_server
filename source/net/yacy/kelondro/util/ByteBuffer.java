@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -140,6 +141,7 @@ public final class ByteBuffer extends OutputStream {
         this.offset = 0;
     }
 
+    @Override
     public void write(final int b) {
         write((byte) (b & 0xff));
     }
@@ -516,6 +518,20 @@ public final class ByteBuffer extends OutputStream {
             if (equals(v, key)) return true;
         }
         return false;
+    }
+
+    public static int remove(final Collection<byte[]> collection, final byte[] key) {
+        Iterator<byte[]> i = collection.iterator();
+        byte[] v;
+        int c = 0;
+        while (i.hasNext()) {
+            v = i.next();
+            if (equals(v, key)) {
+                i.remove();
+                c++;
+            }
+        }
+        return c;
     }
 
     public static List<byte[]> split(final byte[] b, final byte s) {
