@@ -44,7 +44,7 @@ import de.anomic.crawler.retrieval.Request;
 public class NoticedURL {
 
     public enum StackType {
-        NULL, CORE, LIMIT, OVERHANG, REMOTE, NOLOAD, IMAGE, MOVIE, MUSIC;
+        LOCAL, GLOBAL, OVERHANG, REMOTE, NOLOAD;
     }
 
     public static final long minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
@@ -146,8 +146,8 @@ public class NoticedURL {
     public int stackSize(final StackType stackType) {
         switch (stackType) {
             case NOLOAD:    return (this.noloadStack == null) ? 0 : this.noloadStack.size();
-            case CORE:     return (this.coreStack == null) ? 0 : this.coreStack.size();
-            case LIMIT:    return (this.limitStack == null) ? 0 : this.limitStack.size();
+            case LOCAL:     return (this.coreStack == null) ? 0 : this.coreStack.size();
+            case GLOBAL:    return (this.limitStack == null) ? 0 : this.limitStack.size();
             case OVERHANG: return 0;
             case REMOTE:   return (this.remoteStack == null) ? 0 : this.remoteStack.size();
             default: return -1;
@@ -172,9 +172,9 @@ public class NoticedURL {
     public String push(final StackType stackType, final Request entry) {
         try {
             switch (stackType) {
-                case CORE:
+                case LOCAL:
                     return this.coreStack.push(entry);
-                case LIMIT:
+                case GLOBAL:
                     return this.limitStack.push(entry);
                 case REMOTE:
                     return this.remoteStack.push(entry);
@@ -233,30 +233,30 @@ public class NoticedURL {
      * get a list of domains that are currently maintained as domain stacks
      * @return a map of clear text strings of host names to the size of the domain stacks
      */
-    public Map<String, Integer> getDomainStackHosts(final StackType stackType) {
+    public Map<String, Integer[]> getDomainStackHosts(final StackType stackType) {
         switch (stackType) {
-            case CORE:     return this.coreStack.getDomainStackHosts();
-            case LIMIT:    return this.limitStack.getDomainStackHosts();
+            case LOCAL:     return this.coreStack.getDomainStackHosts();
+            case GLOBAL:    return this.limitStack.getDomainStackHosts();
             case REMOTE:   return this.remoteStack.getDomainStackHosts();
             case NOLOAD:   return this.noloadStack.getDomainStackHosts();
             default: return null;
         }
     }
-    
+
     /**
      * get a list of domains that are currently maintained as domain stacks
      * @return a collection of clear text strings of host names
      */
     public long getDomainSleepTime(final StackType stackType, final CrawlSwitchboard cs, Request crawlEntry) {
         switch (stackType) {
-            case CORE:     return this.coreStack.getDomainSleepTime(cs, crawlEntry);
-            case LIMIT:    return this.limitStack.getDomainSleepTime(cs, crawlEntry);
+            case LOCAL:     return this.coreStack.getDomainSleepTime(cs, crawlEntry);
+            case GLOBAL:    return this.limitStack.getDomainSleepTime(cs, crawlEntry);
             case REMOTE:   return this.remoteStack.getDomainSleepTime(cs, crawlEntry);
             case NOLOAD:   return this.noloadStack.getDomainSleepTime(cs, crawlEntry);
             default: return 0;
         }
     }
-        
+
     /**
      * get lists of crawl request entries for a specific host
      * @param host
@@ -265,28 +265,18 @@ public class NoticedURL {
      */
     public List<Request> getDomainStackReferences(final StackType stackType, String host, int maxcount) {
         switch (stackType) {
-            case CORE:     return this.coreStack.getDomainStackReferences(host, maxcount);
-            case LIMIT:    return this.limitStack.getDomainStackReferences(host, maxcount);
+            case LOCAL:     return this.coreStack.getDomainStackReferences(host, maxcount);
+            case GLOBAL:    return this.limitStack.getDomainStackReferences(host, maxcount);
             case REMOTE:   return this.remoteStack.getDomainStackReferences(host, maxcount);
             case NOLOAD:   return this.noloadStack.getDomainStackReferences(host, maxcount);
-            default: return null;
-        }
-    }
-    
-    public List<Request> top(final StackType stackType, final int count) {
-        switch (stackType) {
-            case CORE:     return top(this.coreStack, count);
-            case LIMIT:    return top(this.limitStack, count);
-            case REMOTE:   return top(this.remoteStack, count);
-            case NOLOAD:   return top(this.noloadStack, count);
             default: return null;
         }
     }
 
     public Request pop(final StackType stackType, final boolean delay, final CrawlSwitchboard cs) throws IOException {
         switch (stackType) {
-            case CORE:     return pop(this.coreStack, delay, cs);
-            case LIMIT:    return pop(this.limitStack, delay, cs);
+            case LOCAL:     return pop(this.coreStack, delay, cs);
+            case GLOBAL:    return pop(this.limitStack, delay, cs);
             case REMOTE:   return pop(this.remoteStack, delay, cs);
             case NOLOAD:   return pop(this.noloadStack, false, cs);
             default: return null;
@@ -310,8 +300,8 @@ public class NoticedURL {
     public void clear(final StackType stackType) {
     	Log.logInfo("NoticedURL", "CLEARING STACK " + stackType);
         switch (stackType) {
-                case CORE:     this.coreStack.clear(); break;
-                case LIMIT:    this.limitStack.clear(); break;
+                case LOCAL:     this.coreStack.clear(); break;
+                case GLOBAL:    this.limitStack.clear(); break;
                 case REMOTE:   this.remoteStack.clear(); break;
                 case NOLOAD:   this.noloadStack.clear(); break;
                 default: return;
@@ -340,17 +330,11 @@ public class NoticedURL {
         return null;
     }
 
-    private static List<Request> top(final Balancer balancer, int count) {
-        // this is a filo - top
-        if (count > balancer.size()) count = balancer.size();
-        return balancer.top(count);
-    }
-
     public Iterator<Request> iterator(final StackType stackType) {
         // returns an iterator of plasmaCrawlBalancerEntry Objects
         try {switch (stackType) {
-            case CORE:     return this.coreStack.iterator();
-            case LIMIT:    return this.limitStack.iterator();
+            case LOCAL:     return this.coreStack.iterator();
+            case GLOBAL:    return this.limitStack.iterator();
             case REMOTE:   return this.remoteStack.iterator();
             case NOLOAD:   return this.noloadStack.iterator();
             default: return null;

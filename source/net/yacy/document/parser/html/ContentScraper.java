@@ -152,6 +152,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
+        assert root != null;
         this.root = root;
         this.evaluationScores = new Evaluation();
         this.rss = new HashMap<MultiProtocolURI, String>();

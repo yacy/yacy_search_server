@@ -3328,7 +3328,7 @@ public final class Switchboard extends serverSwitch
         this.peers.mySeed().put(Seed.NCOUNT, Integer.toString(this.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         this.peers.mySeed().put(
             Seed.RCOUNT,
-            Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
+            Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.GLOBAL))); // the number of links that the peer provides for remote crawling (ZURL's)
         this.peers.mySeed().put(Seed.ICOUNT, Long.toString(this.indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
         this.peers.mySeed().put(Seed.SCOUNT, Integer.toString(this.peers.sizeConnected())); // the number of seeds that the peer has stored
         this.peers.mySeed().put(

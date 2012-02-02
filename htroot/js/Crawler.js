@@ -5,12 +5,10 @@ WORDCACHEBAR_LENGTH=1/4;
 
 
 var statusRPC;
-var queuesRPC;
-var refreshInterval=5;
+var refreshInterval=3;
 var wait=0;
 var changing=false; //change the interval
 var statusLoaded=true;
-var queueLoaded=true;
 
 function initCrawler(){
     refresh();
@@ -38,21 +36,20 @@ function newInterval(){
 	countInterval=window.setInterval("countdown()", 1000);
 	changing=false;
 }
+
 function countdown(){
-	if(statusLoaded && queueLoaded){
-		document.getElementById("nextUpdate").value=wait;
-                wait--;
-		if(wait==0){
+	if(statusLoaded){
+        wait--;
+		if (wait == 0) {
 			refresh();
 		}
 	}
 }
+
 function refresh(){
 	wait=refreshInterval;
 	statusLoaded=false;
-	queueLoaded=false;
 	requestStatus();
-	requestQueues();
 }
 
 function requestStatus(){
@@ -60,13 +57,6 @@ function requestStatus(){
 	statusRPC.open('get', '/api/status_p.xml?html=');
 	statusRPC.onreadystatechange = handleStatus;
 	statusRPC.send(null);
-}
-function requestQueues(){
-	queuesRPC=createRequestObject();
-	queuesRPC.open('get', '/api/queues_p.xml?html=');
-	queuesRPC.onreadystatechange = handleQueues;
-	queuesRPC.send(null);
-
 }
 
 function handleStatus(){
@@ -118,65 +108,44 @@ function handleStatus(){
 		img.setAttribute("src", BAR_IMG1);
 		wordCacheSpan.appendChild(img);
 	}
-	statusLoaded=true;
-}
-
-function handleQueues(){
-    if(queuesRPC.readyState != 4){
-		return;
-	}
-	var queuesResponse = queuesRPC.responseXML;
-	//xml=getFirstChild(queuesResponse);
-	xml=getFirstChild(queuesResponse, "queues");
-	if(queuesResponse != null){
-		clearTable(document.getElementById("queueTable"), 1);
 	
-		dbsize=getFirstChild(xml, "dbsize");
-		urlpublictextSize=getValue(getFirstChild(dbsize, "urlpublictext"));
-		rwipublictextSize=getValue(getFirstChild(dbsize, "rwipublictext"));
-		document.getElementById("urldbsize").firstChild.nodeValue=urlpublictextSize;
-		document.getElementById("rwidbsize").firstChild.nodeValue=rwipublictextSize;
-		
-		loaderqueue=getFirstChild(xml, "loaderqueue");
-		updateTable(loaderqueue, "loader");
-		
-		loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));
-		loaderqueue_max=getValue(getFirstChild(loaderqueue, "max"));
-		document.getElementById("loaderqueuesize").firstChild.nodeValue=loaderqueue_size;
-		document.getElementById("loaderqueuemax").firstChild.nodeValue=loaderqueue_max;
-		
-		localcrawlerqueue=getFirstChild(xml, "localcrawlerqueue");
-		localcrawlerqueue_size=getValue(getFirstChild(localcrawlerqueue, "size"));
-		localcrawlerqueue_state=getValue(getFirstChild(localcrawlerqueue, "state"));
-		document.getElementById("localcrawlerqueuesize").firstChild.nodeValue=localcrawlerqueue_size;
-		putQueueState("localcrawler", localcrawlerqueue_state);
-		
-		updateTable(localcrawlerqueue, "local crawler");
-		
-		limitcrawlerqueue=getFirstChild(xml, "limitcrawlerqueue");
-		updateTable(limitcrawlerqueue, "limitCrawlerTable");
-		limitcrawlerqueue_size=getValue(getFirstChild(limitcrawlerqueue, "size"));
-		limitcrawlerqueue_state=getValue(getFirstChild(limitcrawlerqueue, "state"));
-		document.getElementById("limitcrawlerqueuesize").firstChild.nodeValue=limitcrawlerqueue_size;
-		putQueueState("limitcrawler", limitcrawlerqueue_state);
-		updateTable(limitcrawlerqueue, "limit crawler");
-		
-		remotecrawlerqueue=getFirstChild(xml, "remotecrawlerqueue");
-		updateTable(remotecrawlerqueue, "remoteCrawlerTable");
-		remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
-		remotecrawlerqueue_state=getValue(getFirstChild(remotecrawlerqueue, "state"));
-		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
-		putQueueState("remotecrawler", remotecrawlerqueue_state);
-		updateTable(remotecrawlerqueue, "remote crawler");
-		
-		noloadcrawlerqueue=getFirstChild(xml, "noloadcrawlerqueue");
-		noloadcrawlerqueue_size=getValue(getFirstChild(noloadcrawlerqueue, "size"));
-		noloadcrawlerqueue_state=getValue(getFirstChild(noloadcrawlerqueue, "state"));
-		document.getElementById("noloadcrawlerqueuesize").firstChild.nodeValue=noloadcrawlerqueue_size;
-		putQueueState("noloadcrawler", noloadcrawlerqueue_state);
+	dbsize=getFirstChild(statusTag, "dbsize");
+	urlpublictextSize=getValue(getFirstChild(dbsize, "urlpublictext"));
+	rwipublictextSize=getValue(getFirstChild(dbsize, "rwipublictext"));
+	document.getElementById("urldbsize").firstChild.nodeValue=urlpublictextSize;
+	document.getElementById("rwidbsize").firstChild.nodeValue=rwipublictextSize;
+	
+	loaderqueue=getFirstChild(statusTag, "loaderqueue");	
+	loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));
+	loaderqueue_max=getValue(getFirstChild(loaderqueue, "max"));
+	document.getElementById("loaderqueuesize").firstChild.nodeValue=loaderqueue_size;
+	document.getElementById("loaderqueuemax").firstChild.nodeValue=loaderqueue_max;
+	
+	localcrawlerqueue=getFirstChild(statusTag, "localcrawlerqueue");
+	localcrawlerqueue_size=getValue(getFirstChild(localcrawlerqueue, "size"));
+	localcrawlerqueue_state=getValue(getFirstChild(localcrawlerqueue, "state"));
+	document.getElementById("localcrawlerqueuesize").firstChild.nodeValue=localcrawlerqueue_size;
+	putQueueState("localcrawler", localcrawlerqueue_state);
+	
+	limitcrawlerqueue=getFirstChild(statusTag, "limitcrawlerqueue");
+	limitcrawlerqueue_size=getValue(getFirstChild(limitcrawlerqueue, "size"));
+	limitcrawlerqueue_state=getValue(getFirstChild(limitcrawlerqueue, "state"));
+	document.getElementById("limitcrawlerqueuesize").firstChild.nodeValue=limitcrawlerqueue_size;
+	putQueueState("limitcrawler", limitcrawlerqueue_state);
+	
+	remotecrawlerqueue=getFirstChild(statusTag, "remotecrawlerqueue");
+	remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
+	remotecrawlerqueue_state=getValue(getFirstChild(remotecrawlerqueue, "state"));
+	document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
+	putQueueState("remotecrawler", remotecrawlerqueue_state);
+	
+	noloadcrawlerqueue=getFirstChild(statusTag, "noloadcrawlerqueue");
+	noloadcrawlerqueue_size=getValue(getFirstChild(noloadcrawlerqueue, "size"));
+	noloadcrawlerqueue_state=getValue(getFirstChild(noloadcrawlerqueue, "state"));
+	document.getElementById("noloadcrawlerqueuesize").firstChild.nodeValue=noloadcrawlerqueue_size;
+	putQueueState("noloadcrawler", noloadcrawlerqueue_state);
 
-	}
-	queueLoaded=true;
+	statusLoaded=true;
 }
 
 function putQueueState(queue, state) {
@@ -184,53 +153,17 @@ function putQueueState(queue, state) {
 	img = document.getElementById(queue + "stateIMG");
 	if (state == "paused") {
 		a.href = "Crawler_p.html?continue=" + queue;
-		a.title = "Continue this queue";
+		a.title = "Continue this queue (" + state + ")";
 		img.src = "/env/grafics/start.gif";
 		img.alt = "Continue this queue";
 	} else {
 		a.href = "Crawler_p.html?pause=" + queue;
-		a.title = "Pause this queue";
+		a.title = "Pause this queue (" + state + ")";
 		img.src = "/env/grafics/stop.gif";
 		img.alt = "Pause this queue";
 	}
 }
 
-function updateTable(indexingqueue, tablename){
-	indexingTable=document.getElementById("queueTable");
-	entries=indexingqueue.getElementsByTagName("entry");
-        
-    dark=false;
-    for(i=0;i<entries.length;i++){
-		profile=getValue(getFirstChild(entries[i], "profile"));
-		initiator=getValue(getFirstChild(entries[i], "initiator"));
-		depth=getValue(getFirstChild(entries[i], "depth"));
-		modified=getValue(getFirstChild(entries[i], "modified"));
-		anchor=getValue(getFirstChild(entries[i], "anchor"));
-		url=getValue(getFirstChild(entries[i], "url"));
-		size=getValue(getFirstChild(entries[i], "size"));
-		hash=getValue(getFirstChild(entries[i], "hash"));
-		inProcess=false;
-		if(getValue(getFirstChild(entries[i], "inProcess"))=="true"){
-			inProcess=true;
-		}
-		if (tablename=="indexingTable")
-			deletebutton=createLinkCol("IndexCreateIndexingQueue_p.html?deleteEntry="+hash, DELETE_STRING);
-		else
-			deletebutton=createCol("");
-		row=createIndexingRow(tablename, profile, initiator, depth, modified, anchor, url, size, deletebutton);
-		
-		//create row
-		if(inProcess){
-            row.setAttribute("class", "TableCellActive");
-        }else if(dark){
-            row.setAttribute("class", "TableCellDark");
-        }else{
-            row.setAttribute("class", "TableCellLight");
-        }
-        getFirstChild(indexingTable, "tbody").appendChild(row);
-        dark=!dark;
-    }
-}
 
 function shortenURL(url) {
 	if (url.length > 80) {

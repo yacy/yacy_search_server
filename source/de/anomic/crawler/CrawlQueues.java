@@ -215,7 +215,7 @@ public class CrawlQueues {
     }
 
     public int coreCrawlJobSize() {
-        return this.noticeURL.stackSize(NoticedURL.StackType.CORE) + this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD);
+        return this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD);
     }
 
     public boolean coreCrawlJob() {
@@ -226,14 +226,14 @@ public class CrawlQueues {
             // move some tasks to the core crawl job so we have something to do
             final int toshift = Math.min(10, limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             for (int i = 0; i < toshift; i++) {
-                this.noticeURL.shift(NoticedURL.StackType.LIMIT, NoticedURL.StackType.CORE, this.sb.crawler);
+                this.noticeURL.shift(NoticedURL.StackType.GLOBAL, NoticedURL.StackType.LOCAL, this.sb.crawler);
             }
             this.log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
                     ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "") +
                     ", robinsonMode=" + ((this.sb.isRobinsonMode()) ? "on" : "off"));
         }
 
-        final String queueCheckCore = loadIsPossible(NoticedURL.StackType.CORE);
+        final String queueCheckCore = loadIsPossible(NoticedURL.StackType.LOCAL);
         final String queueCheckNoload = loadIsPossible(NoticedURL.StackType.NOLOAD);
         if (queueCheckCore != null && queueCheckNoload != null) {
             if (this.log.isFine()) {
@@ -251,11 +251,11 @@ public class CrawlQueues {
 
         // do a local crawl
         Request urlEntry;
-        while (this.noticeURL.stackSize(NoticedURL.StackType.CORE) > 0 || this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) > 0) {
+        while (this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) > 0 || this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) > 0) {
             final String stats = "LOCALCRAWL[" +
                 this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) + ", " +
-                this.noticeURL.stackSize(NoticedURL.StackType.CORE) + ", " +
-                this.noticeURL.stackSize(NoticedURL.StackType.LIMIT) + ", " +
+                this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + ", " +
+                this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL) + ", " +
                 this.noticeURL.stackSize(NoticedURL.StackType.OVERHANG) +
                 ", " + this.noticeURL.stackSize(NoticedURL.StackType.REMOTE) + "]";
             try {
@@ -284,7 +284,7 @@ public class CrawlQueues {
                     return true;
                 }
 
-                urlEntry = this.noticeURL.pop(NoticedURL.StackType.CORE, true, this.sb.crawler);
+                urlEntry = this.noticeURL.pop(NoticedURL.StackType.LOCAL, true, this.sb.crawler);
                 if (urlEntry == null) {
                     continue;
                 }
@@ -300,7 +300,7 @@ public class CrawlQueues {
             } catch (final IOException e) {
                 this.log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
                 if (e.getMessage().indexOf("hash is null",0) > 0) {
-                    this.noticeURL.clear(NoticedURL.StackType.CORE);
+                    this.noticeURL.clear(NoticedURL.StackType.LOCAL);
                 }
             }
         }
@@ -547,7 +547,7 @@ public class CrawlQueues {
     }
 
     public int limitCrawlJobSize() {
-        return this.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
+        return this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL);
     }
 
     public int noloadCrawlJobSize() {
@@ -579,7 +579,7 @@ public class CrawlQueues {
         }
 
         // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
-        final String stats = "REMOTETRIGGEREDCRAWL[" + this.noticeURL.stackSize(NoticedURL.StackType.CORE) + ", " + this.noticeURL.stackSize(NoticedURL.StackType.LIMIT) + ", " + this.noticeURL.stackSize(NoticedURL.StackType.OVERHANG) + ", "
+        final String stats = "REMOTETRIGGEREDCRAWL[" + this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + ", " + this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL) + ", " + this.noticeURL.stackSize(NoticedURL.StackType.OVERHANG) + ", "
                         + this.noticeURL.stackSize(NoticedURL.StackType.REMOTE) + "]";
         try {
             final Request urlEntry = this.noticeURL.pop(NoticedURL.StackType.REMOTE, true, this.sb.crawler);
