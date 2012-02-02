@@ -73,27 +73,6 @@ public final class CharBuffer extends Writer {
         this.maximumLength = maximumLength;
     }
 
-    public CharBuffer(final int maximumLength, final char[] bb, final int of, final int le) {
-        if (of * 2 > bb.length) {
-            this.buffer = new char[le];
-            System.arraycopy(bb, of, this.buffer, 0, le);
-            this.length = le;
-            this.offset = 0;
-        } else {
-            this.buffer = bb;
-            this.length = le;
-            this.offset = of;
-        }
-        this.maximumLength = maximumLength;
-    }
-
-    public CharBuffer(final CharBuffer bb) {
-        this.buffer = bb.buffer;
-        this.length = bb.length;
-        this.offset = bb.offset;
-        this.maximumLength = bb.maximumLength;
-    }
-
     public CharBuffer(final File f) throws IOException {
         // initially fill the buffer with the content of a file
         if (f.length() > Integer.MAX_VALUE) throw new IOException("file is too large for buffering");

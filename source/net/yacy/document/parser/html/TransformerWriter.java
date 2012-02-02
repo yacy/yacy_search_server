@@ -534,8 +534,7 @@ public final class TransformerWriter extends Writer {
         this.filterOpts = null;
         if (this.filterCont != null) this.filterCont.close();
         this.filterCont = null;
-//      if (scraper != null) {scraper.close(); scraper = null;}
-//      if (transformer != null) {transformer.close(); transformer = null;}
+        if (this.scraper != null) this.scraper.finish();
     }
 
     private static boolean binaryHint(final char c) {

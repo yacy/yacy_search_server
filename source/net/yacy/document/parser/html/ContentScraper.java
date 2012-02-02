@@ -131,6 +131,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private float lon, lat;
     private MultiProtocolURI canonical;
 
+
     /**
      * {@link MultiProtocolURI} to the favicon that belongs to the document
      */
@@ -173,6 +174,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.lat = 0.0f;
         this.evaluationScores.match(Element.url, root.toNormalform(false, false));
         this.canonical = null;
+    }
+
+    @Override
+    public void finish() {
+        this.content.trimToSize();
     }
 
     private void mergeAnchors(final MultiProtocolURI url, final Properties p) {
