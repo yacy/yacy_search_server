@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -39,11 +39,11 @@ import net.yacy.cora.document.MultiProtocolURI;
 
 
 public class ScraperInputStream extends InputStream implements ScraperListener {
-    
+
     private static final int MODE_PRESCAN = 0;
     private static final int MODE_PRESCAN_FINISHED = 1;
     private int mode = 1;
-    
+
     private static final long preBufferSize = 4096;
     private long preRead = 0;
     private final BufferedInputStream bufferedIn;
@@ -51,10 +51,10 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
     private String detectedCharset;
     private boolean charsetChanged = false;
     private boolean endOfHead = false;
-    
+
     private Reader reader;
     private Writer writer;
-    
+
     public ScraperInputStream(
             final InputStream inStream,
             final String inputStreamCharset,
@@ -65,10 +65,10 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
         // create a input stream for buffereing
         this.bufferedIn = new BufferedInputStream(inStream, (int) preBufferSize);
         this.bufferedIn.mark((int) preBufferSize);
-        
+
         final ContentScraper scraper = new ContentScraper(rooturl);
         scraper.registerHtmlFilterEventListener(this);
-        
+
         try {
 	    this.reader = (inputStreamCharset == null) ? new InputStreamReader(this) : new InputStreamReader(this,inputStreamCharset);
 	} catch (UnsupportedEncodingException e) {
@@ -78,17 +78,17 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
 		// how is that possible?
 		this.reader = new InputStreamReader(this);
 	    }
-	} 
+	}
         this.writer = new TransformerWriter(null,null,scraper,transformer,passbyIfBinarySuspect);
     }
 
     private static String extractCharsetFromMimetypeHeader(final String mimeType) {
         if (mimeType == null) return null;
-        
+
         final String[] parts = mimeType.split(";");
         if (parts == null || parts.length <= 1) return null;
-        
-        for (int i=1; i < parts.length; i++) {    
+
+        for (int i=1; i < parts.length; i++) {
             final String param = parts[i].trim();
             if (param.startsWith("charset=")) {
                 String charset = param.substring("charset=".length()).trim();
@@ -97,13 +97,14 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
                 return charset.trim();
             }
         }
-        
-        return null;            
+
+        return null;
     }
 
+    @Override
     public void scrapeTag0(final String tagname, final Properties tagopts) {
         if (tagname == null || tagname.length() == 0) return;
-        
+
         if (tagname.equalsIgnoreCase("meta")) {
             if (tagopts.containsKey("http-equiv")) {
                 final String value = tagopts.getProperty("http-equiv");
@@ -113,7 +114,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
                     this.detectedCharset = extractCharsetFromMimetypeHeader(contentType);
                     if (this.detectedCharset != null && this.detectedCharset.length() > 0) {
                         this.charsetChanged = true;
-                    } else if (tagopts.containsKey("charset")) { 
+                    } else if (tagopts.containsKey("charset")) {
                         // sometimes the charset property is configured as extra attribut. try it ...
                         this.detectedCharset = tagopts.getProperty("charset");
                         this.charsetChanged = true;
@@ -123,48 +124,54 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
         }
     }
 
+    @Override
     public void scrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
         if (tagname == null || tagname.length() == 0) return;
-        
+
         if (tagname.equalsIgnoreCase("head")) {
             this.endOfHead = true;
         }
     }
-    
+
     public String detectCharset() throws IOException {
-        this.mode = MODE_PRESCAN; 
-        
+        this.mode = MODE_PRESCAN;
+
         // loop until we have detected the header element or the charset data
         int c;
         while ((c = this.reader.read())!= -1) {
             this.writer.write(c);
             if (this.charsetChanged) break; // thats enough
         }
-        
+
         // free writer
-        this.writer = null;        
-        // don't close writer here, otherwise it will shutdown our source stream 
+        this.writer = null;
+        // don't close writer here, otherwise it will shutdown our source stream
 
         // reset the buffer if not already done
         if (this.mode != MODE_PRESCAN_FINISHED) {
             this.mode++;
             this.bufferedIn.reset();
         }
-        
+
         // return scanning result
         return (this.charsetChanged) ? this.detectedCharset : null;
     }
 
+    @Override
     public int read() throws IOException {
         // mode 0 is called from within the detectCharset function
-        if (this.mode == MODE_PRESCAN) {      
+        if (this.mode == MODE_PRESCAN) {
             if (this.endOfHead || this.charsetChanged || this.preRead >= preBufferSize - 1) {
-                return -1;            
+                return -1;
             }
-            this.preRead++;            
-        }        
+            this.preRead++;
+        }
         return this.bufferedIn.read();
     }
 
-    
+    @Override
+    public void close() throws IOException {
+        if (this.writer != null) this.writer.close();
+    }
+
 }

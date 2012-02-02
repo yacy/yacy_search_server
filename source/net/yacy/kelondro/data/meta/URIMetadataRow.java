@@ -189,7 +189,7 @@ public class URIMetadataRow implements URIMetadata {
             final String dc_publisher,
             final float lat,
             final float lon) {
-        final CharBuffer s = new CharBuffer(20000, 360);
+        final CharBuffer s = new CharBuffer(3600, 360);
         s.append(url.toNormalform(false, true)).appendLF();
         s.append(dc_title).appendLF();
         if (dc_creator.length() > 80) s.append(dc_creator, 0, 80); else s.append(dc_creator);

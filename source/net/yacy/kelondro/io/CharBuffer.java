@@ -130,7 +130,7 @@ public final class CharBuffer extends Writer {
     }
 
     private void grow(int minSize) {
-        int newsize = 2 * Math.max(this.buffer.length, minSize);
+        int newsize = 12 * Math.max(this.buffer.length, minSize) / 10; // grow by 20%
         char[] tmp = new char[newsize];
         System.arraycopy(this.buffer, this.offset, tmp, 0, this.length);
         this.buffer = tmp;
@@ -478,15 +478,12 @@ public final class CharBuffer extends Writer {
         this.offset = 0;
     }
 
-    public void reset(final int newSize) {
-        this.resize(newSize);
-        this.reset();
-    }
-
-    public void resize(final int newSize) {
-        if(newSize < 0) throw new IllegalArgumentException("Illegal array size: " + newSize);
-        final char[] v = new char[newSize];
-        System.arraycopy(this.buffer,0,v,0,newSize > this.buffer.length ? this.buffer.length : newSize);
+    /**
+     * call trimToSize() whenever a CharBuffer is not extended any more and is kept to store the content permanently
+     */
+    public void trimToSize() {
+        final char[] v = new char[this.length];
+        System.arraycopy(this.buffer, this.offset, v, 0, this.length);
         this.buffer = v;
     }
 
@@ -497,13 +494,15 @@ public final class CharBuffer extends Writer {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
+        this.length = 0;
+        this.offset = 0;
     	this.buffer = null; // assist with garbage collection
     }
 
     @Override
-    public void flush() throws IOException {
-        // TODO Auto-generated method stub
+    public void flush() {
+        trimToSize();
     }
 
 }
