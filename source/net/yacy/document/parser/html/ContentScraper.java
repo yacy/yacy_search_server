@@ -496,7 +496,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             Log.logException(e);
             return cleanLine(super.stripAll(inlineHtml));
         } finally {
-            scraper.close();
             try {
                 writer.close();
             } catch (IOException e) {

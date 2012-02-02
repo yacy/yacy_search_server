@@ -510,6 +510,7 @@ public final class TransformerWriter extends Writer {
         // the filter process is messed up
         // instead, we simply flush the underlying output stream
         if (this.out != null) this.out.flush();
+        if (this.scraper != null) this.scraper.finish();
         // if you want to flush all, call close() at end of writing;
     }
 
