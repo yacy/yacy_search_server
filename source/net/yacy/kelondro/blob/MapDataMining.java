@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.UTF8;
@@ -357,7 +356,7 @@ public class MapDataMining extends MapHeap {
 
     }
 
-    public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final String whereKey, final String isValue) throws IOException {
+    public synchronized Collection<byte[]> select(final String whereKey, final String isValue) throws IOException {
         Collection<byte[]> idx = null;
         try {
             idx = this.columnIndex.getIndex(whereKey, isValue);
@@ -369,17 +368,7 @@ public class MapDataMining extends MapHeap {
                 throw ee;
             }
         }
-        Map<byte[], Map<String, String>> resultMap = new TreeMap<byte[], Map<String, String>>(this.ordering());
-        for (byte[] pk: idx) {
-            try {
-                resultMap.put(pk, this.get(pk));
-            } catch (final IOException e) {
-                Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
-                Log.logException(e);
-            }
-        }
-        return resultMap.entrySet().iterator();
+        return idx;
     }
 
     public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final String field) {

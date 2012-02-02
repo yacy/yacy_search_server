@@ -38,20 +38,26 @@ import net.yacy.kelondro.order.NaturalOrder;
 /**
  * a mapping from a column name to maps with the value of the columns to the primary keys where the entry exist in the table
  */
-public class MapColumnIndex extends HashMap<String, Map<String, Collection<byte[]>>> implements Map<String, Map<String, Collection<byte[]>>> {
+public class MapColumnIndex {
 
     private static final long serialVersionUID=-424741536889467566L;
 
+    private final Map<String, Map<String, Collection<byte[]>>> index;
+
     public MapColumnIndex() {
-        super();
+        this.index = new HashMap<String, Map<String, Collection<byte[]>>>();
     }
 
-    public Collection<byte[]> getIndex(final String whereKey, final String isValue) throws UnsupportedOperationException {
-        Map<String, Collection<byte[]>> references = this.get(whereKey);
+    public synchronized Collection<byte[]> getIndex(final String whereKey, final String isValue) throws UnsupportedOperationException {
+        Map<String, Collection<byte[]>> references = this.index.get(whereKey);
         if (references == null) throw new UnsupportedOperationException();
         Collection<byte[]> indexes = references.get(isValue);
         if (indexes == null) return new ArrayList<byte[]>(0); // empty collection
         return indexes;
+    }
+
+    public synchronized void clear() {
+        this.index.clear();
     }
 
     /**
@@ -60,9 +66,9 @@ public class MapColumnIndex extends HashMap<String, Map<String, Collection<byte[
      * @param isValue
      * @param table
      */
-    public void init(final String whereKey, final String isValue, final Iterator<Map.Entry<byte[], Map<String, String>>> table) {
+    public synchronized void init(final String whereKey, final String isValue, final Iterator<Map.Entry<byte[], Map<String, String>>> table) {
         Map<String, Collection<byte[]>> valueIdxMap = new HashMap<String, Collection<byte[]>>();
-        this.put(whereKey, valueIdxMap);
+        this.index.put(whereKey, valueIdxMap);
         Map.Entry<byte[], Map<String, String>> line;
         while (table.hasNext()) {
             line = table.next();
@@ -77,8 +83,8 @@ public class MapColumnIndex extends HashMap<String, Map<String, Collection<byte[
      * @param primarykey the primary key for the row that is updated
      * @param row the row that was updated (a mapping from column names to values)
      */
-    public void update(final byte[] primarykey, final Map<String, String> row) {
-        for (Map.Entry<String, Map<String, Collection<byte[]>>> entry: this.entrySet()) {
+    public synchronized void update(final byte[] primarykey, final Map<String, String> row) {
+        for (Map.Entry<String, Map<String, Collection<byte[]>>> entry: this.index.entrySet()) {
             // create an index for all columns that we track
             String value = row.get(entry.getKey());
             if (value == null) continue; // we don't need to remember that
@@ -106,8 +112,8 @@ public class MapColumnIndex extends HashMap<String, Map<String, Collection<byte[
      * delete all references to the primary key
      * @param primarykey
      */
-    public void delete(final byte[] primarykey) {
-        for (Map.Entry<String, Map<String, Collection<byte[]>>> entry: this.entrySet()) {
+    public synchronized void delete(final byte[] primarykey) {
+        for (Map.Entry<String, Map<String, Collection<byte[]>>> entry: this.index.entrySet()) {
             // we must check all index reference maps: iterate over entries
             indexdelete(primarykey, entry.getValue());
         }
