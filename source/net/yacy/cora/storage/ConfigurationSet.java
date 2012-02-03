@@ -121,13 +121,13 @@ public class ConfigurationSet extends AbstractSet<String> implements Set<String>
         return false;
     }
 
-    public void fill(final ConfigurationSet other) {
+    public void fill(final ConfigurationSet other, final boolean defaultActivated) {
         final Iterator<Entry> i = other.allIterator();
         Entry e;
         while (i.hasNext()) {
             e = i.next();
             if (contains(e.key) || containsDisabled(e.key)) continue;
-            this.add(e.key(), other.commentHeadline(e.key()), e.enabled());
+            this.add(e.key(), other.commentHeadline(e.key()), defaultActivated && e.enabled());
         }
     }
 

@@ -109,8 +109,8 @@ inboundlinks_tag_txt
 ## total number of inbound links, int
 inboundlinkscount_i
 
-## number of inbound links with noindex tag, int
-inboundlinksnoindexcount_i
+## number of inbound links with nofollow tag, int
+inboundlinksnofollowcount_i
 
 ## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
 outboundlinks_tag_txt
@@ -136,8 +136,8 @@ outboundlinks_tag_txt
 ## external number of inbound links, int
 outboundlinkscount_i
 
-## number of external links with noindex tag, int
-outboundlinksnoindexcount_i
+## number of external links with nofollow tag, int
+outboundlinksnofollowcount_i
 
 ## all image tags, encoded as <img> tag inclusive alt- and title property, textgen
 images_tag_txt

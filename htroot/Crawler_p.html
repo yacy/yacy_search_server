@@ -6,14 +6,22 @@
 <script type="text/javascript" src="/js/ajax.js"></script>
 <script type="text/javascript" src="/js/xml.js"></script>
 <script type="text/javascript" src="/js/html.js"></script>
-<script type="text/javascript" src="/js/Crawler.js"></script></head>
-<body id="Crawler" onload="initCrawler();">
+<script type="text/javascript" src="/js/Crawler.js"></script>
+	<script type="text/javascript">
+    function refreshiframe()
+    {
+        var f = document.getElementById('QueuesTable');
+        f.contentWindow.location.reload(true);
+        setTimeout("refreshiframe()", 2000);
+    }
+    </script>
+</head>
+<body id="Crawler" onload="initCrawler();refreshiframe();">
 #%env/templates/header.template%#
 #%env/templates/submenuCrawlMonitor.template%#
 <h2>Crawler Queues</h2>
 <noscript><p>(Please enable JavaScript to automatically update this page!)</p></noscript>
-<p> Next update in <input type="text" id="nextUpdate" onfocus="changeInterval()" onblur="newInterval()" size="2" /> seconds. <img src="/env/grafics/empty.gif" id="ajax" alt="empty"/>
-&nbsp;See a access timing <a href="/api/latency_p.xml">here</a></p>
+
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
@@ -71,20 +79,6 @@
         </tbody>
       </table>
 
-      <form action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-      <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
-        <tbody>
-          <tr class="TableHeader"> 
-            <th colspan="3">Speed</th>
-          </tr>
-          <tr class="TableCellLight">
-            <td align="left" #(crawlingSpeedMinChecked)#::class="TableCellDark"#(/crawlingSpeedMinChecked)#><input type="submit" name="crawlingPerformance" value="minimum" /></td>
-            <td align="left" #(crawlingSpeedCustChecked)#::class="TableCellDark"#(/crawlingSpeedCustChecked)#><input name="customPPM" type="text" size="5" maxlength="5" value="#[customPPMdefault]#" />PPM <input type="submit" name="crawlingPerformance" value="custom" /></td>
-            <td align="left" #(crawlingSpeedMaxChecked)#::class="TableCellDark"#(/crawlingSpeedMaxChecked)#><input type="submit" name="crawlingPerformance" value="maximum" /></td>
-          </tr>
-        </tbody>
-      </table>
-      </form>
 
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
@@ -103,6 +97,7 @@
         </tbody>
       </table>
 
+      <form action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
@@ -110,8 +105,16 @@
             <th colspan="2">Level</th>
           </tr>
           <tr class="TableCellLight"> 
+            <td align="left">Speed</td>
+            <td align="left" colspan="2">
+            <input #(crawlingSpeedMinChecked)#::class="TableCellDark"#(/crawlingSpeedMinChecked)# type="submit" name="crawlingPerformance" value="minimum" />
+            <input #(crawlingSpeedCustChecked)#::class="TableCellDark"#(/crawlingSpeedCustChecked)# name="customPPM" type="text" size="5" maxlength="5" value="#[customPPMdefault]#" />PPM <input type="submit" name="crawlingPerformance" value="custom" />
+            <input #(crawlingSpeedMaxChecked)#::class="TableCellDark"#(/crawlingSpeedMaxChecked)# type="submit" name="crawlingPerformance" value="maximum" />
+            </td>
+          </tr>
+          <tr class="TableCellLight"> 
             <td align="left">PPM (Pages Per Minute)</td>
-            <td align="left"><span id="ppmNum">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left" width="20"><span id="ppmNum">&nbsp;&nbsp;&nbsp;</span></td>
             <td align="left"><span id="ppmSpan">&nbsp;&nbsp;&nbsp;</span></td>
           </tr>
           <tr class="TableCellLight">
@@ -126,6 +129,7 @@
           </tr>
         </tbody>
       </table>
+      </form>
 
       <p class="watchCrawler"> #(info)#
         <!-- 0 -->
@@ -157,23 +161,10 @@
 
 <!-- crawl queues -->
 
-<p id="crawlingQueues"><strong>Crawl Queue:</strong></p>
-<table border="0" cellpadding="2" cellspacing="1" id="queueTable">
-  <tbody>
-    <tr class="TableHeader"> 
-      <th>Queue</th>
-      <th>Profile</th>
-      <th>Initiator</th>
-      <th>Depth</th>
-      <th>Modified Date</th>
-      <th>Anchor Name</th>
-      <th>URL</th>
-      <th>Size</th>
-      <th>Delete</th>
-    </tr>
-  </tbody>
-</table>
+<p>See an <a href="/api/latency_p.xml">access timing</a></p>
 
+	<iframe id="QueuesTable" src="IndexCreateQueues_p.html?embed=&urlsPerHost=1" width="100%" height="0" align="left" scrolling="no" marginheight="0" marginwidth="0" frameborder="0" ></iframe>
+    
 #%env/templates/footer.template%# 
 </body>
 </html>

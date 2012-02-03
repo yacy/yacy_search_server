@@ -14,9 +14,10 @@
   <div class="SubMenugroup">
     <h3>Queues</h3>
     <ul class="SubMenu">
-      <li><a href="/IndexCreateWWWLocalQueue_p.html" class="MenuItemLink lock">Local</a></li>
-      <li><a href="/IndexCreateWWWGlobalQueue_p.html" class="MenuItemLink lock">Global</a></li>
-      <li><a href="/IndexCreateWWWRemoteQueue_p.html" class="MenuItemLink lock">Remote</a></li>
+      <li><a href="/IndexCreateQueues_p.html?stack=LOCAL" class="MenuItemLink lock">Local</a></li>
+      <li><a href="/IndexCreateQueues_p.html?stack=GLOBAL" class="MenuItemLink lock">Global</a></li>
+      <li><a href="/IndexCreateQueues_p.html?stack=REMOTE" class="MenuItemLink lock">Remote</a></li>
+      <li><a href="/IndexCreateQueues_p.html?stack=NOLOAD" class="MenuItemLink lock">No-Load</a></li>
     </ul>
   </div>
   

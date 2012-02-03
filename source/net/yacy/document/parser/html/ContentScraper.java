@@ -131,6 +131,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private float lon, lat;
     private MultiProtocolURI canonical;
 
+
     /**
      * {@link MultiProtocolURI} to the favicon that belongs to the document
      */
@@ -151,6 +152,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
+        assert root != null;
         this.root = root;
         this.evaluationScores = new Evaluation();
         this.rss = new HashMap<MultiProtocolURI, String>();
@@ -173,6 +175,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.lat = 0.0f;
         this.evaluationScores.match(Element.url, root.toNormalform(false, false));
         this.canonical = null;
+    }
+
+    @Override
+    public void finish() {
+        this.content.trimToSize();
     }
 
     private void mergeAnchors(final MultiProtocolURI url, final Properties p) {
@@ -485,17 +492,23 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         final TransformerWriter writer = new TransformerWriter(null, null, scraper, null, false);
         try {
             FileUtils.copy(new CharArrayReader(inlineHtml), writer);
-            writer.close();
         } catch (final IOException e) {
             Log.logException(e);
             return cleanLine(super.stripAll(inlineHtml));
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException e) {
+            }
         }
         for (final Map.Entry<MultiProtocolURI, Properties> entry: scraper.getAnchors().entrySet()) {
             mergeAnchors(entry.getKey(), entry.getValue());
         }
         this.images.putAll(scraper.images);
 
-        return cleanLine(super.stripAll(scraper.content.getChars()));
+        String line = cleanLine(super.stripAll(scraper.content.getChars()));
+        scraper.close();
+        return line;
     }
 
     private final static String cleanLine(final String s) {
@@ -885,14 +898,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // scrape document to look up charset
         final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8", new MultiProtocolURI("http://localhost"),null,false);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
-        if(charset == null)
-               charset = Charset.defaultCharset().toString();
+        htmlFilter.close();
+        if (charset == null) charset = Charset.defaultCharset().toString();
 
         // scrape content
         final ContentScraper scraper = new ContentScraper(new MultiProtocolURI("http://localhost"));
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
-
+        writer.close();
         return scraper;
     }
 

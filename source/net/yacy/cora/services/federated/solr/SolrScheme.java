@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -148,7 +149,7 @@ public class SolrScheme extends ConfigurationSet {
         wordcount_i(Types.integer, true, true),
         paths_txt(Types.text_general, true, true, true),
         inboundlinkscount_i(Types.integer, true, true),
-        inboundlinksnoindexcount_i(Types.integer, true, true),
+        inboundlinksnofollowcount_i(Types.integer, true, true),
         inboundlinks_tag_txt(Types.text_general, true, true, true),
         inboundlinks_protocol_txt(Types.text_general, true, true, true),
         inboundlinks_urlstub_txt(Types.text_general, true, true, true),
@@ -157,7 +158,7 @@ public class SolrScheme extends ConfigurationSet {
         inboundlinks_relflags_txt(Types.text_general, true, true, true),
         inboundlinks_text_txt(Types.text_general, true, true, true),
         outboundlinkscount_i(Types.integer, true, true),
-        outboundlinksnoindexcount_i(Types.integer, true, true),
+        outboundlinksnofollowcount_i(Types.integer, true, true),
         outboundlinks_tag_txt(Types.text_general, true, true, true),
         outboundlinks_protocol_txt(Types.text_general, true, true, true),
         outboundlinks_urlstub_txt(Types.text_general, true, true, true),
@@ -297,7 +298,7 @@ public class SolrScheme extends ConfigurationSet {
         final Map<MultiProtocolURI, Properties> alllinks = yacydoc.getAnchors();
         int c = 0;
         if (isEmpty() || contains(Field.inboundlinkscount_i.name())) addSolr(solrdoc, Field.inboundlinkscount_i, yacydoc.inboundLinkCount());
-        if (isEmpty() || contains(Field.inboundlinksnoindexcount_i.name())) addSolr(solrdoc, Field.inboundlinksnoindexcount_i, yacydoc.inboundLinkNoindexCount());
+        if (isEmpty() || contains(Field.inboundlinksnofollowcount_i.name())) addSolr(solrdoc, Field.inboundlinksnofollowcount_i, yacydoc.inboundLinkNofollowCount());
         final String[] inboundlinksTag = new String[yacydoc.inboundLinkCount()];
         final String[] inboundlinksURLProtocol = new String[yacydoc.inboundLinkCount()];
         final String[] inboundlinksURLStub = new String[yacydoc.inboundLinkCount()];
@@ -325,7 +326,7 @@ public class SolrScheme extends ConfigurationSet {
             c++;
         }
         if (isEmpty() || contains(Field.inboundlinks_tag_txt.name())) addSolr(solrdoc, Field.inboundlinks_tag_txt, inboundlinksTag);
-        if (isEmpty() || contains(Field.inboundlinks_protocol_txt.name())) addSolr(solrdoc, Field.inboundlinks_protocol_txt, inboundlinksURLProtocol);
+        if (isEmpty() || contains(Field.inboundlinks_protocol_txt.name())) addSolr(solrdoc, Field.inboundlinks_protocol_txt, protocolList2indexedList(inboundlinksURLProtocol));
         if (isEmpty() || contains(Field.inboundlinks_urlstub_txt.name())) addSolr(solrdoc, Field.inboundlinks_urlstub_txt, inboundlinksURLStub);
         if (isEmpty() || contains(Field.inboundlinks_name_txt.name())) addSolr(solrdoc, Field.inboundlinks_name_txt, inboundlinksName);
         if (isEmpty() || contains(Field.inboundlinks_rel_txt.name())) addSolr(solrdoc, Field.inboundlinks_rel_txt, inboundlinksRel);
@@ -334,7 +335,7 @@ public class SolrScheme extends ConfigurationSet {
 
         c = 0;
         if (isEmpty() || contains(Field.outboundlinkscount_i.name())) addSolr(solrdoc, Field.outboundlinkscount_i, yacydoc.outboundLinkCount());
-        if (isEmpty() || contains(Field.outboundlinksnoindexcount_i.name())) addSolr(solrdoc, Field.outboundlinksnoindexcount_i, yacydoc.outboundLinkNoindexCount());
+        if (isEmpty() || contains(Field.outboundlinksnofollowcount_i.name())) addSolr(solrdoc, Field.outboundlinksnofollowcount_i, yacydoc.outboundLinkNofollowCount());
         final String[] outboundlinksTag = new String[yacydoc.outboundLinkCount()];
         final String[] outboundlinksURLProtocol = new String[yacydoc.outboundLinkCount()];
         final String[] outboundlinksURLStub = new String[yacydoc.outboundLinkCount()];
@@ -362,7 +363,7 @@ public class SolrScheme extends ConfigurationSet {
             c++;
         }
         if (isEmpty() || contains(Field.outboundlinks_tag_txt.name())) addSolr(solrdoc, Field.outboundlinks_tag_txt, outboundlinksTag);
-        if (isEmpty() || contains(Field.outboundlinks_protocol_txt.name())) addSolr(solrdoc, Field.outboundlinks_protocol_txt, outboundlinksURLProtocol);
+        if (isEmpty() || contains(Field.outboundlinks_protocol_txt.name())) addSolr(solrdoc, Field.outboundlinks_protocol_txt, protocolList2indexedList(outboundlinksURLProtocol));
         if (isEmpty() || contains(Field.outboundlinks_urlstub_txt.name())) addSolr(solrdoc, Field.outboundlinks_urlstub_txt, outboundlinksURLStub);
         if (isEmpty() || contains(Field.outboundlinks_name_txt.name())) addSolr(solrdoc, Field.outboundlinks_name_txt, outboundlinksName);
         if (isEmpty() || contains(Field.outboundlinks_rel_txt.name())) addSolr(solrdoc, Field.outboundlinks_rel_txt, outboundlinksRel);
@@ -476,7 +477,7 @@ public class SolrScheme extends ConfigurationSet {
             }
             addSolr(solrdoc, Field.imagescount_i, imgtags.length);
             if (isEmpty() || contains(Field.images_tag_txt.name())) addSolr(solrdoc, Field.images_tag_txt, imgtags);
-            if (isEmpty() || contains(Field.images_protocol_txt.name())) addSolr(solrdoc, Field.images_protocol_txt, imgprots);
+            if (isEmpty() || contains(Field.images_protocol_txt.name())) addSolr(solrdoc, Field.images_protocol_txt, protocolList2indexedList(imgprots));
             if (isEmpty() || contains(Field.images_urlstub_txt.name())) addSolr(solrdoc, Field.images_urlstub_txt, imgstubs);
             if (isEmpty() || contains(Field.images_alt_txt.name())) addSolr(solrdoc, Field.images_alt_txt, imgalts);
 
@@ -556,6 +557,18 @@ public class SolrScheme extends ConfigurationSet {
         return solrdoc;
     }
 
+    private static String[] protocolList2indexedList(String[] protocol) {
+        List<String> a = new ArrayList<String>();
+        for (int i = 0; i < protocol.length; i++) {
+            if (!protocol[i].equals("http")) {
+                String c = Integer.toString(i);
+                while (c.length() < 3) c = "0" + c;
+                a.add(c + "-" + protocol[i]);
+            }
+        }
+        return a.toArray(new String[a.size()]);
+    }
+
     /**
      * encode a string containing attributes from anchor rel properties binary:
      * bit 0: "me" contained in rel
@@ -615,7 +628,7 @@ public class SolrScheme extends ConfigurationSet {
     }
 
     /*
-     * standard solr scheme
+   standard solr schema
 
    <field name="name" type="textgen" indexed="true" stored="true"/>
    <field name="cat" type="string" indexed="true" stored="true" multiValued="true"/>
@@ -641,6 +654,5 @@ public class SolrScheme extends ConfigurationSet {
    <field name="content_type" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="last_modified" type="date" indexed="true" stored="true"/>
    <field name="links" type="string" indexed="true" stored="true" multiValued="true"/>
-
      */
 }

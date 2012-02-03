@@ -320,7 +320,9 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     public Row.Entry get(final byte[] key, final boolean forcecopy) throws IOException {
         final Index keeper = keeperOf(key);
         if (keeper == null) return null;
-        return keeper.get(key, forcecopy);
+        synchronized (this) { // avoid concurrent IO from different methods
+            return keeper.get(key, forcecopy);
+        }
     }
 
     @Override
@@ -376,8 +378,10 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     public Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         Index keeper = keeperOf(row.getPrimaryKeyBytes());
-        if (keeper != null) return keeper.replace(row);
-        synchronized (this.tables) {
+        if (keeper != null) synchronized (this) { // avoid concurrent IO from different methods
+            return keeper.replace(row);
+        }
+        synchronized (this) {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
             keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
         }
@@ -397,12 +401,11 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         assert row.objectsize() <= this.rowdef.objectsize;
         final byte[] key = row.getPrimaryKeyBytes();
         if (this.tables == null) return true;
-        Index keeper = null;
-        synchronized (this.tables) {
-            keeper = keeperOf(key);
+        Index keeper = keeperOf(key);
+        if (keeper != null) synchronized (this) { // avoid concurrent IO from different methods
+            return keeper.put(row);
         }
-        if (keeper != null) return keeper.put(row);
-        synchronized (this.tables) {
+        synchronized (this) {
             keeper = keeperOf(key); // we must check that again because it could have changed in between
             if (keeper != null) return keeper.put(row);
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
@@ -425,12 +428,12 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     @Override
     public void addUnique(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        Index table = (this.current == null) ? null : this.tables.get(this.current);
-        synchronized (this.tables) {
+        Index keeper = (this.current == null) ? null : this.tables.get(this.current);
+        synchronized (this) {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
-            if (table == null) table = newTable(); else table = checkTable(table);
+            if (keeper == null) keeper = newTable(); else keeper = checkTable(keeper);
         }
-        table.addUnique(row);
+        keeper.addUnique(row);
     }
 
     @Override
@@ -447,14 +450,18 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     public boolean delete(final byte[] key) throws IOException {
         final Index table = keeperOf(key);
         if (table == null) return false;
-        return table.delete(key);
+        synchronized (this) { // avoid concurrent IO from different methods
+            return table.delete(key);
+        }
     }
 
     @Override
     public Row.Entry remove(final byte[] key) throws IOException {
         final Index table = keeperOf(key);
         if (table == null) return null;
-        return table.remove(key);
+        synchronized (this) { // avoid concurrent IO from different methods
+            return table.remove(key);
+        }
     }
 
     @Override
@@ -472,7 +479,9 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         if (maxtable == null) {
             return null;
         }
-        return maxtable.removeOne();
+        synchronized (this) { // avoid concurrent IO from different methods
+            return maxtable.removeOne();
+        }
     }
 
     @Override
@@ -490,7 +499,9 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         if (maxtable == null) {
             return null;
         }
-        return maxtable.top(count);
+        synchronized (this) { // avoid concurrent IO from different methods
+            return maxtable.top(count);
+        }
     }
 
     @Override

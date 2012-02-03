@@ -146,7 +146,7 @@ public class Latency {
 
         // return time that is remaining
         //System.out.println("Latency: " + (waiting - timeSinceLastAccess));
-        return waiting - timeSinceLastAccess;
+        return Math.max(0, waiting - timeSinceLastAccess);
     }
 
     /**

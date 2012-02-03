@@ -365,6 +365,7 @@ public final class yacyRelease extends yacyVersion {
             try {
                 final CharBuffer signBuffer = new CharBuffer(getSignatureFile());
                 final byte[] signByteBuffer = Base64Order.standardCoder.decode(signBuffer.toString().trim());
+                signBuffer.close();
                 final CryptoLib cl = new CryptoLib();
                 for(final yacyUpdateLocation updateLocation : latestReleaseLocations) {
                     try {

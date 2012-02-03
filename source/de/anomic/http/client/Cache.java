@@ -40,6 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.Compressor;
@@ -172,26 +173,30 @@ public final class Cache {
      * @return true if the content of the url is in the cache, false otherwise
      */
     public static boolean has(final DigestURI url) {
+        return has(url.hash());
+    }
+
+    public static boolean has(final byte[] urlhash) {
         boolean headerExists;
         boolean fileExists;
         //synchronized (responseHeaderDB) {
-            headerExists = responseHeaderDB.containsKey(url.hash());
-            fileExists = fileDB.containsKey(url.hash());
+            headerExists = responseHeaderDB.containsKey(urlhash);
+            fileExists = fileDB.containsKey(urlhash);
         //}
         if (headerExists && fileExists) return true;
         if (!headerExists && !fileExists) return false;
         // if not both is there then we do a clean-up
         if (headerExists) try {
-            log.logWarning("header but not content of url " + url.toString() + " in cache; cleaned up");
+            log.logWarning("header but not content of urlhash " + ASCII.String(urlhash) + " in cache; cleaned up");
             if (responseHeaderDB instanceof MapHeap) {
-                ((MapHeap) responseHeaderDB).delete(url.hash());
+                ((MapHeap) responseHeaderDB).delete(urlhash);
             } else {
-                responseHeaderDB.remove(url.hash());
+                responseHeaderDB.remove(urlhash);
             }
         } catch (final IOException e) {}
         if (fileExists) try {
             //log.logWarning("content but not header of url " + url.toString() + " in cache; cleaned up");
-            fileDB.delete(url.hash());
+            fileDB.delete(urlhash);
         } catch (final IOException e) {}
         return false;
     }

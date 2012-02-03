@@ -29,6 +29,7 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -55,6 +56,7 @@ public class MapDataMining extends MapHeap {
     private Map<String, ScoreMap<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
     private Map<String, Long>   accLong; // to store accumulations of Long cells
     private Map<String, Float> accFloat; // to store accumulations of Float cells
+    private final MapColumnIndex columnIndex; // to store fast select-where indexes
 
 	@SuppressWarnings("unchecked")
 	public MapDataMining(final File heapFile,
@@ -72,6 +74,8 @@ public class MapDataMining extends MapHeap {
         this.sortfields = sortfields;
         this.longaccfields = longaccfields;
         this.floataccfields = floataccfields;
+
+        this.columnIndex = new MapColumnIndex();
 
         ScoreMap<String>[] cluster = null;
         if (sortfields == null) this.sortClusterMap = null; else {
@@ -192,6 +196,8 @@ public class MapDataMining extends MapHeap {
                 this.accFloat.put(floataccfield, FLOAT0);
             }
         }
+
+        this.columnIndex.clear();
     }
 
     @Override
@@ -216,6 +222,8 @@ public class MapDataMining extends MapHeap {
 
         // update sortCluster
         if (this.sortClusterMap != null) updateSortCluster(UTF8.String(key), newMap);
+
+        this.columnIndex.update(key, newMap);
     }
 
     private void updateAcc(final Map<String, String> map, final boolean add) {
@@ -294,6 +302,8 @@ public class MapDataMining extends MapHeap {
             }
         }
         super.delete(key);
+
+        this.columnIndex.delete(key);
     }
 
     private void deleteSortCluster(final String key) {
@@ -313,6 +323,10 @@ public class MapDataMining extends MapHeap {
         if (cluster == null) return null; // sort field does not exist
         //System.out.println("DEBUG: cluster for field " + field + ": " + cluster.toString());
         return new string2bytearrayIterator(cluster.keys(up));
+    }
+
+    private synchronized Iterator<byte[]> keys() throws IOException {
+        return super.keys(true, null);
     }
 
     private static class string2bytearrayIterator implements Iterator<byte[]> {
@@ -342,15 +356,25 @@ public class MapDataMining extends MapHeap {
 
     }
 
-    @Override
-    public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final String whereKey, final String isValue) throws IOException {
-        return super.entries(whereKey, isValue);
+    public synchronized Collection<byte[]> select(final String whereKey, final String isValue) throws IOException {
+        Collection<byte[]> idx = null;
+        try {
+            idx = this.columnIndex.getIndex(whereKey, isValue);
+        } catch (UnsupportedOperationException e) {
+            this.columnIndex.init(whereKey, isValue, new FullMapIterator(keys()));
+            try {
+                idx = this.columnIndex.getIndex(whereKey, isValue);
+            } catch (UnsupportedOperationException ee) {
+                throw ee;
+            }
+        }
+        return idx;
     }
-    
+
     public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final String field) {
-        return new MapIterator(keys(up, field), null, null);
+        return new FullMapIterator(keys(up, field));
     }
-    
+
     public synchronized long getLongAcc(final String field) {
         final Long accumulator = this.accLong.get(field);
         if (accumulator == null) return -1;

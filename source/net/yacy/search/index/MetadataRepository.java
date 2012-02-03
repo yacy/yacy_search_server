@@ -599,19 +599,21 @@ public final class MetadataRepository implements Iterable<byte[]> {
     public Map<String, URLHashCounter> domainSampleCollector() throws IOException {
         final Map<String, URLHashCounter> map = new HashMap<String, URLHashCounter>();
         // first collect all domains and calculate statistics about it
-        final CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
-        String hosthash;
-        byte[] urlhashb;
-        URLHashCounter ds;
-        if (i != null) while (i.hasNext()) {
-            urlhashb = i.next();
-            hosthash = ASCII.String(urlhashb, 6, 6);
-            ds = map.get(hosthash);
-            if (ds == null) {
-                ds = new URLHashCounter(urlhashb);
-                map.put(hosthash, ds);
-            } else {
-                ds.count++;
+        synchronized (this) {
+            final CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
+            String hosthash;
+            byte[] urlhashb;
+            URLHashCounter ds;
+            if (i != null) while (i.hasNext()) {
+                urlhashb = i.next();
+                hosthash = ASCII.String(urlhashb, 6, 6);
+                ds = map.get(hosthash);
+                if (ds == null) {
+                    ds = new URLHashCounter(urlhashb);
+                    map.put(hosthash, ds);
+                } else {
+                    ds.count++;
+                }
             }
         }
         return map;
@@ -739,11 +741,13 @@ public final class MetadataRepository implements Iterable<byte[]> {
         // first collect all url hashes that belong to the domain
         assert hosthash.length() == 6;
         final ArrayList<String> l = new ArrayList<String>();
-        final CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
-        String hash;
-        while (i != null && i.hasNext()) {
-            hash = ASCII.String(i.next());
-            if (hosthash.equals(hash.substring(6))) l.add(hash);
+        synchronized (this) {
+            final CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
+            String hash;
+            while (i != null && i.hasNext()) {
+                hash = ASCII.String(i.next());
+                if (hosthash.equals(hash.substring(6))) l.add(hash);
+            }
         }
 
         // then delete the urls using this list

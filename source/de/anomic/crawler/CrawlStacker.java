@@ -370,14 +370,14 @@ public final class CrawlStacker {
             // it may be possible that global == true and local == true, so do not check an error case against it
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LIMIT, entry);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.GLOBAL, entry);
         } else if (local) {
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry);
         } else if (proxy) {
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry);
         } else if (remote) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry);
         }

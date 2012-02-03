@@ -127,11 +127,7 @@ public final class TransformerWriter extends Writer {
             }
             bb.append('>');
             final char[] result = bb.getChars();
-            try {
-                bb.close();
-            } catch (final IOException e) {
-                Log.logException(e);
-            }
+            bb.close();
             return result;
     }
 
@@ -147,11 +143,7 @@ public final class TransformerWriter extends Writer {
             bb.append(text);
             bb.append('<').append('/').append(tagname).append('>');
             final char[] result = bb.getChars();
-            try {
-                bb.close();
-            } catch (final IOException e) {
-                Log.logException(e);
-            }
+            bb.close();
             return result;
     }
 
@@ -165,11 +157,7 @@ public final class TransformerWriter extends Writer {
             }
             bb.append('>');
             final char[] result = bb.getChars();
-            try {
-                bb.close();
-            } catch (final IOException e) {
-                Log.logException(e);
-            }
+            bb.close();
             return result;
     }
 
@@ -178,11 +166,7 @@ public final class TransformerWriter extends Writer {
             final CharBuffer cb = new CharBuffer(ContentScraper.MAX_DOCSIZE, gt0, gt0.length + text.length + tagname.length() + 3);
             cb.append(text).append('<').append('/').append(tagname).append('>');
             final char[] result = cb.getChars();
-            try {
-                cb.close();
-            } catch (final IOException e) {
-                Log.logException(e);
-            }
+            cb.close();
             return result;
     }
 
@@ -202,11 +186,7 @@ public final class TransformerWriter extends Writer {
                 result = bb.getChars(1);
             else
                 result = bb.getChars();
-            try {
-                bb.close();
-            } catch (final IOException ex) {
-                Log.logException(ex);
-            }
+            bb.close();
             return result;
     }
 
@@ -227,12 +207,7 @@ public final class TransformerWriter extends Writer {
                     // this single tag is collected at once here
                     final CharBuffer charBuffer = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
                     this.scraper.scrapeTag0(tag, charBuffer.propParser());
-                    try {
-                        charBuffer.close();
-                    } catch (final IOException e) {
-                        // TODO Auto-generated catch block
-                        Log.logException(e);
-                    }
+                    charBuffer.close();
                 }
                 if ((this.transformer != null) && (this.transformer.isTag0(tag))) {
                     // this single tag is collected at once here
@@ -240,11 +215,7 @@ public final class TransformerWriter extends Writer {
                     try {
                         return this.transformer.transformTag0(tag, scb.propParser(), quotechar);
                     } finally {
-                        try {
-                            scb.close();
-                        } catch (final IOException e) {
-                            Log.logException(e);
-                        }
+                        scb.close();
                     }
                 } else if (((this.scraper != null) && (this.scraper.isTag1(tag))) ||
                            ((this.transformer != null) && (this.transformer.isTag1(tag)))) {
@@ -252,11 +223,7 @@ public final class TransformerWriter extends Writer {
                     this.filterTag = tag;
                     final CharBuffer scb = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
                     this.filterOpts = scb.propParser();
-                    try {
-                        scb.close();
-                    } catch (final IOException e) {
-                        Log.logException(e);
-                    }
+                    scb.close();
                     if (this.filterCont == null) this.filterCont = new CharBuffer(ContentScraper.MAX_DOCSIZE, Math.max(100, content.length)); else this.filterCont.reset();
                     return new char[0];
                 } else {
@@ -543,6 +510,7 @@ public final class TransformerWriter extends Writer {
         // the filter process is messed up
         // instead, we simply flush the underlying output stream
         if (this.out != null) this.out.flush();
+        if (this.scraper != null) this.scraper.finish();
         // if you want to flush all, call close() at end of writing;
     }
 
@@ -567,8 +535,7 @@ public final class TransformerWriter extends Writer {
         this.filterOpts = null;
         if (this.filterCont != null) this.filterCont.close();
         this.filterCont = null;
-//      if (scraper != null) {scraper.close(); scraper = null;}
-//      if (transformer != null) {transformer.close(); transformer = null;}
+        if (this.scraper != null) this.scraper.finish();
     }
 
     private static boolean binaryHint(final char c) {

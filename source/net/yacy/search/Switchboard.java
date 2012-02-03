@@ -295,7 +295,7 @@ public final class Switchboard extends serverSwitch
         }
 
         // init TrayIcon if possible
-        tray = new Tray(this);
+        this.tray = new Tray(this);
 
         // remote proxy configuration
         initRemoteProxy();
@@ -636,6 +636,7 @@ public final class Switchboard extends serverSwitch
         // define a realtime parsable mimetype list
         this.log.logConfig("Parser: Initializing Mime Type deny list");
         TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
+        TextParser.setDenyExtension(getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
 
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
@@ -650,7 +651,7 @@ public final class Switchboard extends serverSwitch
 
         // update the working scheme with the backup scheme. This is necessary to include new features.
         // new features are always activated by default
-        workingScheme.fill(backupScheme);
+        workingScheme.fill(backupScheme, false);
 
         // set up the solr interface
         final String solrurls =
@@ -1598,7 +1599,7 @@ public final class Switchboard extends serverSwitch
         Domains.close();
         AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
         UPnP.deletePortMapping();
-        tray.remove();
+        this.tray.remove();
         try {
             HTTPClient.closeConnectionManager();
         } catch ( final InterruptedException e ) {
@@ -3327,7 +3328,7 @@ public final class Switchboard extends serverSwitch
         this.peers.mySeed().put(Seed.NCOUNT, Integer.toString(this.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         this.peers.mySeed().put(
             Seed.RCOUNT,
-            Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
+            Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.GLOBAL))); // the number of links that the peer provides for remote crawling (ZURL's)
         this.peers.mySeed().put(Seed.ICOUNT, Long.toString(this.indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
         this.peers.mySeed().put(Seed.SCOUNT, Integer.toString(this.peers.sizeConnected())); // the number of seeds that the peer has stored
         this.peers.mySeed().put(

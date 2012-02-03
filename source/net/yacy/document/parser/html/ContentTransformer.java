@@ -34,7 +34,6 @@ import java.util.TreeSet;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
 
 public class ContentTransformer extends AbstractTransformer implements Transformer {
 
@@ -90,11 +89,7 @@ public class ContentTransformer extends AbstractTransformer implements Transform
             }
             bb.append("</FONT> ");
             final char[] result = bb.getChars();
-            try {
-				bb.close();
-			} catch (IOException e) {
-			    Log.logException(e);
-			}
+            bb.close();
             return result;
     }
 

@@ -143,7 +143,7 @@ public class BookmarkHelper {
             //load the links
             final ContentScraper scraper = new ContentScraper(baseURL);
             //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-            final Writer writer= new TransformerWriter(null,null,scraper, null, false);
+            final Writer writer = new TransformerWriter(null, null, scraper, null, false);
             FileUtils.copy(input,writer);
             writer.close();
             links = scraper.getAnchors();

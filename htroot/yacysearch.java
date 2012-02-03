@@ -602,14 +602,14 @@ public class yacysearch {
                 (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "");
 
             // the query
-            final TreeSet<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
+            final Collection<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
 
             final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? query.length - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
-            final SortedSet<String> filtered = SetTools.joinConstructive(query[0], Switchboard.stopwords);
+            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(query[0], Switchboard.stopwords);
             if ( !filtered.isEmpty() ) {
-                SetTools.excludeDestructive(query[0], Switchboard.stopwords);
+                SetTools.excludeDestructiveByTestSmallInLarge(query[0], Switchboard.stopwords);
             }
 
             // if a minus-button was hit, remove a special reference first

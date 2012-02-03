@@ -25,8 +25,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
@@ -165,7 +165,7 @@ public class yacysearchitem {
             prop.putHTML("content_publisher", result.publisher());
             prop.putHTML("content_creator", result.creator());// author
             prop.putHTML("content_subject", result.subject());
-            final Set<String>[] query = theQuery.queryWords();
+            final Collection<String>[] query = theQuery.queryWords();
             final StringBuilder s = new StringBuilder(query[0].size() * 20);
             for (final String t: query[0]) {
                 s.append('+').append(t);
