@@ -482,16 +482,16 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (crawlingStartURL.isFile()) {
             return "file://" + crawlingStartURL.getPath() + ".*";
         } else if (crawlingStartURL.isSMB()) {
-            return "smb://" + crawlingStartURL.getHost() + ".*";
+            return "smb://" + crawlingStartURL.getHost() + "(?:/|$)+.*";
         } else if (crawlingStartURL.isFTP()) {
-            return "ftp://" + crawlingStartURL.getHost() + ".*";
+            return "ftp://" + crawlingStartURL.getHost() + "(?:/|$)+.*";
         } else {
             final String host = crawlingStartURL.getHost();
             if (host.startsWith("www.")) {
-                return "https?://" + crawlingStartURL.getHost() + ".*";
+                return "https?://" + crawlingStartURL.getHost() + "(?:/|$)+.*";
             } else {
                 // if the www is not given we accept that also
-                return "https?://(www.)?" + crawlingStartURL.getHost() + ".*";
+                return "https?://(?:www.)?" + crawlingStartURL.getHost() + "(?:/|$)+.*";
             }
         }
     }
