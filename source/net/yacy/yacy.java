@@ -59,6 +59,7 @@ import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
+import net.yacy.interaction.TripleStore;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -301,6 +302,12 @@ public final class yacy {
 
             // set user-agent
             HTTPClient.setDefaultUserAgent(ClientIdentification.getUserAgent());
+            
+            // initial fill of the triplestore
+            mkdirIfNeseccary (new File(sb.getConfig("triplestore", new File (dataHome, "DATA/TRIPLESTORE").toString())));
+            if (sb.getConfigBool("triplestore.persistent", false) == true) {
+            	TripleStore.Load(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").toString())+"/local.rdf");
+            }
 
             // start main threads
             final String port = sb.getConfig("port", "8090");
@@ -420,6 +427,11 @@ public final class yacy {
             Log.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
         }
+        
+        if (sb.getConfigBool("triplestore.persistent", false) == true) {
+        	TripleStore.Save(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").toString())+"/local.rdf");
+        }
+        
         Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         Log.shutdown();
         shutdownSemaphore.release(1000);
