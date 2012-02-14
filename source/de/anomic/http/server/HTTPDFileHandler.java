@@ -1475,10 +1475,12 @@ public final class HTTPDFileHandler {
 		String directory = "";
 		if (proxyurl.getPath().lastIndexOf('/') > 0)
 			directory = proxyurl.getPath().substring(0, proxyurl.getPath().lastIndexOf('/'));
+		
+		String location = "";
 
 		if (outgoingHeader.containsKey("Location")) {
 			// rewrite location header
-			String location = outgoingHeader.get("Location");
+			location = outgoingHeader.get("Location");
 			if (location.startsWith("http")) {
 				location = "/proxy.html?url=" + location;
 			} else {
@@ -1488,7 +1490,7 @@ public final class HTTPDFileHandler {
 		}
 
 		final String mimeType = outgoingHeader.getContentType();
-		if (mimeType.startsWith("text/html") || mimeType.startsWith("text")) {
+		if ((mimeType.startsWith("text/html") || mimeType.startsWith("text"))) {
 			final StringWriter buffer = new StringWriter();
 
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {

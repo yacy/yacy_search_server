@@ -73,7 +73,7 @@ public class Triple {
             
         }
         
-        if (post.containsKey("comment")) {
+        if (post.containsKey("url")) {
         
       
         	Interaction.Triple(url, s, p, o, from);
