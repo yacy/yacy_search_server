@@ -416,16 +416,20 @@ public final class HTTPDFileHandler {
 
             // we are finished with parsing
             // the result of value hand-over is in args and argc
-            if (path.length() == 0) {
+            if (path.isEmpty()) {
                 HTTPDemon.sendRespondError(conProp,out,4,400,null,"Bad Request",null);
                 out.flush();
                 return;
             }
-            File targetClass=null;
+            File targetClass = null;
 
             // locate the file
-            if (path.length() > 0 && path.charAt(0) != '/' && path.charAt(0) != '\\') path = "/" + path; // attach leading slash
-            if (path.endsWith("index.html")) path = path.substring(0, path.length() - 10);
+            if (!path.isEmpty() && path.charAt(0) != '/' && path.charAt(0) != '\\') {
+                path = "/" + path; // attach leading slash
+            }
+            if (path.endsWith("index.html")) {
+                path = path.substring(0, path.length() - 10);
+            }
 
             // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the locale.language
             String localeSelection = switchboard.getConfig("locale.language","default");
@@ -832,9 +836,7 @@ public final class HTTPDFileHandler {
 
                     targetDate = new Date(System.currentTimeMillis());
 
-                    if (exitValue == 0
-                            && cgiBody != null
-                            && !cgiBody.isEmpty()) {
+                    if (cgiBody != null && !cgiBody.isEmpty()) {
                         HTTPDemon.sendRespondHeader(
                                 conProp,
                                 out,
