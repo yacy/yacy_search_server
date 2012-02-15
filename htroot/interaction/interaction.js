@@ -44,7 +44,7 @@ function storevalue (s, p, o) {
 
 function loadvalue (s, p) {
 
-	var res = {result: "no result"};
+	var res = {result: ""};
 	
 	$.ajaxSetup({async: false});
 
