@@ -134,7 +134,7 @@ public final class transferRWI {
             final long startProcess = System.currentTimeMillis();
 
             // decode request
-            System.out.println("STRINGS " + UTF8.String(indexes));
+            //System.out.println("STRINGS " + UTF8.String(indexes));
             final Iterator<String> it = FileUtils.strings(indexes);
 
             // free memory
