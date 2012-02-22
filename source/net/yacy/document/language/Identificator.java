@@ -99,9 +99,10 @@ public final class Identificator {
         for (int i = 0; i < word.length(); i++) inc(word.charAt(i));
     }
 
+    //modified by copperdust; Ukraine, 2012
     public String getLanguage() {
 
-        if (this.language != null) return this.language; // don't compute that twice
+    	if (this.language != null) return this.language; // don't compute that twice
         if (this.letters == 0) return null; // not enough information available
 
         final LanguageStatistics testStat = new LanguageStatistics("text");
@@ -124,7 +125,6 @@ public final class Identificator {
         // create list with relevant languages
         final List<Integer> relevantLanguages = new Vector <Integer>();
         for (int i = 0; i < languages.size(); i++) {
-
             // only languages that contain the most common character in the text will be tested
             if (languages.get(i).contains(maxChar)) {
                 relevantLanguages.add(i);
@@ -135,47 +135,52 @@ public final class Identificator {
 
         // compare characters in text with characters in statistics
         final float[] offsetList = new float[relevantLanguages.size()];
-        final int[] votesList = new int[relevantLanguages.size()];
+        final float[] sumList = new float[relevantLanguages.size()];
 
         final Iterator<Character> iter = testStat.keySet().iterator();
-        float minimum;
         float offset = 0;
         float valueCharacter;
-        int bestLanguage = -1;
         float value;
 
         while (iter.hasNext()) {
-            minimum = 100.1f;
             character = iter.next();
             valueCharacter = testStat.get(character);
             for (int i = 0; i < relevantLanguages.size(); i++) {
                 value = languages.get(relevantLanguages.get(i)).get(character);
-                offset = Math.abs(value - valueCharacter);
-                offsetList[i] = offsetList[i] + offset;
-                if (offset < minimum) {
-                    minimum = offset;
-                    bestLanguage = i;
+                if (value > 0) {
+                	offset = Math.abs(value - valueCharacter);
+                	offsetList[i] = offsetList[i] + offset;
+                	sumList[i] = sumList[i] + value;// accumulation processed characters
+                	// normally must be 100 after loop for language written in
                 }
             }
-            votesList[bestLanguage] = ++votesList[bestLanguage];
         }
+        //50/50
+        //abs(50-40) + abs(50-10) = 10 + 40 = 50 -- 50 = 0 [60 must be]
+        //abs(50-25) + abs(50-25) = 25 + 25 = 50 -- 50 = 0 [0 must be]
+        
+        //75/25
+        //abs(50-60) + abs(50-15) = 10 + 35 = 45 -- 25 = 20 [60 must be]
+        //abs(50-12,5) + abs(50-12,5) = 37,5 + 37,5 = 75 -- 75 = 0 [0 must be]
+        
+        //25/75
+        //abs(50-20) + abs(50-5) = 30 + 45 = 75 -- 75 = 0 [60 must be]
+        //abs(50-37,5) + abs(50-37,5) = 12,5 + 12,5 = 25 -- 25 = 0 [0 must be]
 
-        // Now we can count how many votes each language got and how far it was away from the stats.
-        // If 2 languages have the same amount of votes, the one with the smaller offset wins.
-        int maxVotes = 0;
+        // Now we can count how closer each language to current pattern.
         float minOffset = 100.1f;
-        for (int i = 0; i < votesList.length; i++) {
-            if ((votesList[i] == maxVotes && offsetList[i] < minOffset) || (votesList[i] > maxVotes)) {
-                maxVotes = votesList[i];
-                minOffset = offsetList[i];
+        int bestLanguage = -1;
+        for (int i = 0; i < sumList.length; i++) {
+            offset = offsetList[i] + 100 - sumList[i];// actual difference
+            if (offset < minOffset) {
+                minOffset = offset;
                 bestLanguage = i;
             }
         }
 
-        // Only return name of language of offset is smaller than 20%. This
-        // prevents a language beeing reported that has won the voting, but
-        // is still not the right language.
-        if (offset < 20) {
+        // Return name of language only if offset is smaller than 30%.
+        // Prevents wrong language detection due to actual language not in langstats.
+        if (minOffset < 30) {
             this.language = languages.get(relevantLanguages.get(bestLanguage)).getName();
             return this.language;
         }

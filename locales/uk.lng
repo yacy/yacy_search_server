@@ -17,7 +17,6 @@ Server Access Overview==Огляд дуступу до сервера
 This is a list of \#\[num\]\# requests to the local http server within the last hour.==Це список містить #[num]# запитів до локального http-сервера за останню годину.
 This is a list of requests to the local http server within the last hour.==Це список запитів до локального http-сервера за останню годину.
 Showing \#\[num\]\# requests.==Показано #[num]# запитів.
-#>Host<==>Хост<
 >Path<==>Шлях<
 Date<==Дата<
 Access Count During==Кількість подій доступу
@@ -38,9 +37,11 @@ Remote Search Host Tracker==Трекер віддаленого пошуку
 This is a list of searches that had been requested from this\' peer search interface\.?==Це список всіх пошукових запитів, виконаних з цього вузла.
 Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Показано #[num]# з #[total]# запитів.
 Requesting Host==Сервер-запитувач
-Offset==Зміщення
+#Offset==Зміщення
+Offset==Зсув
 Expected Results==Очікувані результати
 Returned Results==Повернуті результати
+Known Results==Відомі результати
 Used Time \(ms\)==Використаний час (мс)
 URL fetch \(ms\)==Розбір URL (мс)
 Snippet comp \(ms\)==Створення перегляду (мс)
@@ -428,7 +429,7 @@ You can also use your peer without opening it, but this is not recomended.==Ви
 #File: ConfigHeuristics_p.html
 #---------------------------
 Heuristics Configuration==Настройки евристики
-A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="http://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
+A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==<a href="https://de.wikipedia.org/wiki/Heuristik">Heuristik</a> 'bezeichnet die Kunst, mit begrenztem Wissen und wenig Zeit zu guten Lösungen zu kommen.' (Wikipedia).
 The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Пошукова евристика може бути використовувати методи, які допомагають виявити можливі результати пошуку з використанням запитів по посиланнях, вбудованого сканування та запитів до інших пошукових систем.
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==При використанні пошукової евристики знайдені посилання не відображаються як пошукові результати, а індексуються та зберігаються разом з іншим вмістом.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Це гарантує, що чорні списки можуть бути використані, і що пошукові терміни з’являються дійсно на сторінках, які були знайдені за допомогою евристики.
@@ -655,6 +656,8 @@ Mime-Type==Тип MIME
 # --- Parser Names are hard-coded END ---
 "Submit"=="Відправити"
 : Advanced Settings<==: Аналізатори<
+enable/disable==ввімкнути/вимкнути
+>Extension==>Розширення
 #-----------------------------
 
 #File: ConfigPortal.html
@@ -805,7 +808,7 @@ Replace the word \"MySearch\" with your own message==Замініть вираз
 : System Update<==: Оновлення системи<
 Manual System Update==Ручне оновлення системи
 Current installed Release==Поточна встановлена версія
-Available Releases==Доступні версії
+Available Releases==Доступні випуски
 \(unsigned\)==(непідписана)
 \(signed\)==(підписана)
 "Download Release"=="Завантажити випуск"
@@ -1248,7 +1251,7 @@ load only files in a sub-path of given url==завантажити тільки 
 not more than <==не більше, ніж <
 >documents<==>документів<
 >Dynamic URLs<==>Динамічні URL<
-allow <a href="http://en.wikipedia.org/wiki/Query_string">query-strings</a> \(urls with a \'\?\' in the path\)==дозволити <a href="http://en.wikipedia.org/wiki/Query_string">рядки-запити</a> (URL зі "?" в шляху)
+allow <a href="http://en.wikipedia.org/wiki/Query_string">query-strings</a> \(urls with a \'\?\' in the path\)==дозволити <a href="https://en.wikipedia.org/wiki/Query_string">рядки-запити</a> (URL зі "?" в шляху)
 >Start<==>Запуск<
 "Start New Crawl"=="Запустити нове сканування"
 Hints<==Підказки<
@@ -2024,9 +2027,11 @@ Browse blog of peer==Переглянути блог вузла
 "DHT Receive: no"=="DHT-прийом: ні"
 #no tags given==не дано жодного ключа
 "no DHT receive"=="без DHT-прийому"
-"Accept Crawl: no"=="Приймання сканувань: ні"
+"Accept Crawl: no"=="Прийом сканувань: ні"
+#"Accept Crawl: no"=="Приймання сканувань: ні"
 "no crawl"=="без сканування"
-"Accept Crawl: yes"=="Приймання сканувань: так"
+"Accept Crawl: yes"=="Прийом сканувань: так"
+#"Accept Crawl: yes"=="Приймання сканувань: так"
 "crawl possible"=="Сканування можливе"
 Contact: passive==Зв’язок: пасивний
 Contact: offline==Зв’язок: не в мережі
@@ -2041,8 +2046,8 @@ Type: Virgin==Тип: Новенький
 "Virgin=="Новенький
 offline"==не в мережі"
 direct"==прямий"
-active"==активний"
-passive"==пасивний"
+#active"==активний"
+#passive"==пасивний"
 
 Seed download:==Завантаження насіння:
 Seed download: possible==Завантаження насіння: можливе
@@ -2288,8 +2293,8 @@ Sleep Time<br />per Cycle<br />\(millis\)==Час сну<br />за цикл<br /
 Exec Time<br />per Busy-Cycle<br />\(millis\)==Час запуску<br />за зайнятий цикл<br />(мс)
 Memory Use<br />per Busy-Cycle<br />\(kbytes\)==Використання<br />пам’яті<br />за зайнятий цикл<br />(кбайтів)
 >Delay between==>Затримка між
->idle loops==>холості цикли
->busy loops==>зайняті цикли
+>idle loops==>холостими циклами
+>busy loops==>зайнятими циклами
 Minimum of<br />Required Memory==Найменше<br />необхідної пам’яті
 Full Description==Повний опис
 Submit New Delay Values==Запам’ятати нові значення затримки
@@ -2338,7 +2343,8 @@ Size in KBytes==Розмір в КБайтах
 milliseconds==мілісекунд
 > kbytes<==> кбайтів<
 
-</body>==<script>window.onload = function () {\$("td:contains('unlimited')").text('необмежений'); \$("td:contains('HTTPD Server/Proxy')").text('HTTPD сервер/проксі'); \$("td:contains('DHT Distribution')").text('DHT розподіл'); \$("td:contains('YaCy Core')").text('Ядро YaCy'); \$("td:contains('Seed-List Upload')").text('Вивантаження списку насіння'); \$("a:contains('Local Crawl')").text('Місцеве сканування'); \$("td:contains('Remote Crawl URL Loader')").text('URL завантажувач віддаленого сканування'); \$("a:contains('Remote Crawl Job')").text('Завдання віддаленого сканування'); \$("td:contains('Surrogates')").text('Сурогати'); \$("td:contains('Cleanup')").text('Очищення'); \$("td:contains('Crawler Pool')").text('Басейн сканувача'); \$("td:contains('httpd Session Pool')").text('Басейн HTTPD сесії'); \$("td:contains('the HTTPD, used as web server and proxy')").text('HTTPD, використовується як веб-сервер і проксі'); \$("td:contains('selection, transfer and deletion of index entries that are not searched on your peer, but on others')").text('відбір, передача та видалення записів індексу, які шукались не на вашому вузлі, а на інших'); \$("td:contains('this is the p2p-control and peer-ping task')").text('це завдання p2p-керування та пінгу вузла'); \$("td:contains('task that a principal peer performes to generate and upload a seed-list to a ftp account')").text('завдання, яке головний вузол здійснює для створення і завантаження списку насіння для облікового запису ftp'); \$("td:contains('thread that performes a single crawl step from the local crawl queue')").text('потік, який виконує один крок сканування з місцевої черги сканування'); \$("td:contains('thread that loads remote crawl lists from other peers')").text('потік, який завантажує списки віддалених сканувань від інших вузлів'); \$("td:contains('thread that performes a single crawl/indexing step triggered by a remote peer')").text('потік, який проводить одиночний крок сканування/індексації, викликаний віддаленим вузлом'); \$("td:contains('A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.')").text('потік, що опитує шлях сурогатів і розміщує всі документи в один surroagte файл в черзі індексації.'); \$("td:contains('simple cleaning process for monitoring information')").text('простий процес очищення інформації моніторингу');}</script></body>
+#Сурогати->Заміщення
+</body>==<script>window.onload = function () {\$("td:contains('unlimited')").text('необмежений'); \$("td:contains('HTTPD Server/Proxy')").text('HTTPD сервер/проксі'); \$("td:contains('DHT Distribution')").text('DHT розподіл'); \$("td:contains('YaCy Core')").text('Ядро YaCy'); \$("td:contains('Seed-List Upload')").text('Вивантаження списку насіння'); \$("a:contains('Local Crawl')").text('Місцеве сканування'); \$("td:contains('Remote Crawl URL Loader')").text('URL завантажувач віддаленого сканування'); \$("a:contains('Remote Crawl Job')").text('Завдання віддаленого сканування'); \$("td:contains('Surrogates')").text('Заміщення'); \$("td:contains('Cleanup')").text('Очищення'); \$("td:contains('Crawler Pool')").text('Басейн сканувача'); \$("td:contains('httpd Session Pool')").text('Басейн HTTPD сесії'); \$("td:contains('the HTTPD, used as web server and proxy')").text('HTTPD, використовується як веб-сервер і проксі'); \$("td:contains('selection, transfer and deletion of index entries that are not searched on your peer, but on others')").text('відбір, передача та видалення записів індексу, які шукались не на вашому вузлі, а на інших'); \$("td:contains('this is the p2p-control and peer-ping task')").text('це завдання p2p-керування та пінгу вузла'); \$("td:contains('task that a principal peer performes to generate and upload a seed-list to a ftp account')").text('завдання, яке головний вузол здійснює для створення і завантаження списку насіння для облікового запису ftp'); \$("td:contains('thread that performes a single crawl step from the local crawl queue')").text('потік, який виконує один крок сканування з місцевої черги сканування'); \$("td:contains('thread that loads remote crawl lists from other peers')").text('потік, який завантажує списки віддалених сканувань від інших вузлів'); \$("td:contains('thread that performes a single crawl/indexing step triggered by a remote peer')").text('потік, який проводить одиночний крок сканування/індексації, викликаний віддаленим вузлом'); \$("td:contains('A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.')").text('потік, що опитує шлях сурогатів і розміщує всі документи в один surroagte файл в черзі індексації.'); \$("td:contains('simple cleaning process for monitoring information')").text('простий процес очищення інформації моніторингу');}</script></body>
 #-----------------------------
 
 #File: PerformanceConcurrency_p.html
@@ -2934,7 +2940,7 @@ See you soon!==До зустрічі!
 Just a moment, please!==Зачекайте трохи, будь ласка!
 Application will terminate after working off all scheduled tasks.==YaCy буде вимкнений після виконання намічених завдань.
 Then YaCy will restart.==Після цього YaCy буде перезапущений.
-If you can't reach YaCy's interface after 5 minutes restart failed.==Якщо ви не матимете через 5 хвилин доступ до інтерфейсу YaCy, значить перезапуск не вдався.
+If you can't reach YaCy's interface after 5 minutes restart failed.==Якщо через 5 хвилин доступу до інтерфейсу YaCy не буде, значить перезапуск не вдався.
 Installing release==Установка випуску
 YaCy will be restarted after installation==Після установки YaCy буде перезапущений
 #-----------------------------
@@ -3223,7 +3229,7 @@ Error with file input==Помилка з файлом
 started.==запущене.
 Please wait some seconds,==Будь ласка, зачекайте кілька секунд,
 it may take some seconds until the first result appears there.==незабаром будуть перші результати.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Якщо ви просканували якусь небажану сторінку, її можна видалити <a href="IndexCreateWWWLocalQueue_p.html"> ут</a>.
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Якщо ви просканували якусь небажану сторінку, її можна видалити <a href="IndexCreateWWWLocalQueue_p.html"> тут</a>.
 Crawl Queue:==Черга сканера:
 Queue</th>==Черга</th>
 Profile</th>==Профіль</th>
@@ -3410,7 +3416,7 @@ remote YaCy peers.==віддалених вузлів YaCy.
 
 #File: yacysearchitem.html
 #---------------------------
-"bookmark"=="закладка"
+#"bookmark"=="закладка"
 "recommend"=="рекомендувати"
 "delete"=="видалити"
 Pictures==Bilder
@@ -3424,6 +3430,8 @@ Show search results for "\#\[query\]\#" on map==Показати результ�
 >Domain Navigator==>Домени
 >Name Space Navigator==>Простір імен
 >Author Navigator==>Автори
+#Типи, Роди
+>Filetype Navigator==>Види файлів
 #-----------------------------
 
 ### Subdirectory api ###

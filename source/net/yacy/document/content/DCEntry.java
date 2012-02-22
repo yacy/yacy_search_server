@@ -165,10 +165,11 @@ public class DCEntry extends TreeMap<String, String> {
         return urls[0];
     }
     
-    public String getLanguage() {
-        String l = this.get("language");
-        if (l == null) l = this.get("dc:language");
-        if (l == null) return getIdentifier(true).language();
+    //modified by copperdust; Ukraine, 2012
+    public String getLanguage() {//final language computation
+        String l = this.get("dc:language");//from document metainfo
+        if (l == null) l = getIdentifier(true).language();//from symbolic frequency table
+        if (l == null) return this.get("language");//from TLD
         return l;
     }
     

@@ -560,12 +560,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     private void identPort(final String inputURL, final int dflt) throws MalformedURLException {
         // identify ref in file
-        int pss = 0;
-        int ip6 = this.host.indexOf('[');
-        if (ip6 >= 0 && ((ip6 = this.host.indexOf("]", ip6)) > 0)) {
-            pss = ip6 + 1;
-        }
-        final int r = this.host.indexOf(":", pss);
+        final int r = this.host.indexOf(':');
         if (r < 0) {
             this.port = dflt;
         } else {
@@ -940,12 +935,876 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     // language calculation
+    //modified by copperdust; Ukraine, 2012
     public final String language() {
         String language = "en";
         if (this.host == null) return language;
         final int pos = this.host.lastIndexOf('.');
-        if (pos > 0 && this.host.length() - pos == 3) language = this.host.substring(pos + 1).toLowerCase();
-        if (language.equals("uk")) language = "en";
+        String host_tld = this.host.substring(pos + 1).toLowerCase();
+        if (pos == 0) return language;
+        int length = this.host.length() - pos - 1;
+        switch (length) {
+	        case 2:
+	        	char firstletter = host_tld.charAt(0);
+	        	switch (firstletter) {//speed-up
+	        	case 'a':
+	        		if (host_tld.equals("au")) {//Australia /91,000,000
+			        	language = "en";//australian english; eng; eng; ause
+			        } else if (host_tld.equals("at")) {//Austria /23,000,000
+			        	language = "de";//german; ger (deu); deu
+			        } else if (host_tld.equals("ar")) {//Argentina /10,700,000
+			        	language = "es";//spanish
+			        } else if (host_tld.equals("ae")) {//United Arab Emirates /3,310,000
+			        	language = "ar";//arabic
+			        } else if (host_tld.equals("am")) {//Armenia /2,080,000
+			        	language = "hy";//armenian; arm (hye); hye
+			        } else if (host_tld.equals("ac")) {//Ascension Island /2,060,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("az")) {//Azerbaijan /1,340,000
+			        	language = "az";//azerbaijani; aze; aze (azj, azb)
+			        } else if (host_tld.equals("ag")) {//Antigua and Barbuda /1,310,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("as")) {//American Samoa /1,220,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("al")) {//Albania /389,000
+			        	language = "sq";//albanian; alb (sqi); sqi
+	        		} else if (host_tld.equals("ad")) {//Andorra /321,000
+			        	language = "ca";//catalan; cat
+			        } else if (host_tld.equals("ao")) {//Angola /153,000
+			        	language = "pt";//portuguese
+			        } else if (host_tld.equals("ai")) {//Anguilla /149,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("af")) {//Afghanistan /101,000
+			        	language = "ps";//pashto; pus
+			        } else if (host_tld.equals("an")) {//Netherlands Antilles /78,100
+			        	language = "nl";//dutch
+			        } else if (host_tld.equals("aq")) {//Antarctica /36,000
+			        	language = "en";//can be any
+			        } else if (host_tld.equals("aw")) {//Aruba /34,400
+			        	language = "nl";//dutch
+			        } else if (host_tld.equals("ax")) {//Aland Islands /28
+			        	language = "sv";//swedish
+			        }
+	        		break;
+				case 'b':
+					if (host_tld.equals("br")) {//Brazil /25,800,000
+						language = "pt";//portuguese
+			        } else if (host_tld.equals("be")) {//Belgium /25,100,000
+			        	language = "nl";//dutch
+			        } else if (host_tld.equals("bg")) {//Bulgaria /3,480,000
+			        	language = "bg";//bulgarian; bul
+			        } else if (host_tld.equals("bz")) {//Belize /2,790,000
+			        	language = "en";//english
+					} else if (host_tld.equals("ba")) {//Bosnia and Herzegovina /2,760,000
+			        	language = "sh";//serbo-croatian
+			        } else if (host_tld.equals("by")) {//Belarus /2,540,000
+			        	language = "be";//belarusian; bel
+			        } else if (host_tld.equals("bo")) {//Bolivia /1,590,000
+			        	language = "es";//spanish; spa
+			        	//language = "qu";//quechua; que
+			        	//language = "ay";//aymara; aym (ayr)
+			        	//und viele andere (indian)
+			        } else if (host_tld.equals("bd")) {//Bangladesh /342,000
+			        	language = "bn";//bengali; ben
+			        } else if (host_tld.equals("bw")) {//Botswana /244,000
+			        	//language = "en";//english
+			        	language = "tn";//tswana; tsn
+			        } else if (host_tld.equals("bh")) {//Bahrain /241,000
+			        	language = "ar";//arabic
+			        } else if (host_tld.equals("bf")) {//Burkina Faso /239,000
+			        	language = "fr";//french
+			        } else if (host_tld.equals("bm")) {//Bermuda /238,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("bn")) {//Brunei Darussalam /157,000
+			        	language = "ms";//malay; msa/mhp
+			        } else if (host_tld.equals("bb")) {//Barbados /131,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("bt")) {//Bhutan /123,000
+			        	language = "dz";//dzongkha; dzo
+			        } else if (host_tld.equals("bi")) {//Burundi /60,600
+			        	language = "rn";//kirundi; run
+			        } else if (host_tld.equals("bs")) {//Bahamas /37,700
+			        	language = "en";//english
+			        } else if (host_tld.equals("bj")) {//Benin /36,200
+			        	language = "fr";//french; fra (fre); fra
+			        } else if (host_tld.equals("bv")) {//Bouvet Island /55
+			        	language = "no";//norwegian; nor (nob/nno)
+			        }
+				    break;
+				case 'c':
+			        if (host_tld.equals("ca")) {//Canada /165,000,000
+			        	language = "en";//english
+			        	//language = "fr";//french
+			        } else if (host_tld.equals("ch")) {//Switzerland /62,100,000
+			        	language = "de";//german; gsw
+			        } else if (host_tld.equals("cn")) {//People's Republic of China /26,700,000
+			        	language = "zh";//chinese; 	chi (zho); cmn - Mandarin (Modern Standard Mandarin)
+			        } else if (host_tld.equals("cz")) {//Czech Republic /18,800,000
+			        	language = "cs";//czech; cze (ces); ces
+			        } else if (host_tld.equals("cl")) {//Chile /18,500,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("co")) {//Colombia /4,270,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("cc")) {//Cocos (Keeling) Islands /4,050,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("cr")) {//Costa Rica /2,060,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("cy")) {//Cyprus /2,500,000
+			        	language = "el";//greek; gre (ell); ell	
+			        } else if (host_tld.equals("cu")) {//Cuba /2,040,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("cx")) {//Christmas Island /1,830,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("cd")) {//Democratic Republic of the Congo /475,000
+			        	language = "fr";//french
+			        } else if (host_tld.equals("cg")) {//Republic of the Congo /193,000
+			        	language = "fr";//french
+			        } else if (host_tld.equals("cm")) {//Cameroon /119,000
+			        	//language = "fr";//french
+			        	language = "en";//english
+			        } else if (host_tld.equals("ci")) {//Cote d'Ivoire /95,200
+			        	language = "fr";//french
+			        } else if (host_tld.equals("cv")) {//Cape Verde /81,900
+			        	language = "pt";//portuguese; por
+			        } else if (host_tld.equals("ck")) {//Cook Islands /43,300
+			        	language = "en";//english
+			        	//language = "";//cook islands maori; rar (pnh, rkh)
+			        } else if (host_tld.equals("cf")) {//Central African Republic /703
+			        	language = "sg";//sango; sag; 92% could speak
+			        	//language = "fr";//french; fra (fre); fra; 22,5% could speak, but maybe inet users prefer this
+			        }
+				    break;
+				case 'd':
+					if (host_tld.equals("dk")) {//Denmark /19,700,000
+			        	language = "da";//danish; dan
+			        } else if (host_tld.equals("do")) {//Dominican Republic /1,510,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("dz")) {//Algeria /326,000
+			        	language = "ar";//arabic; ara; arq
+			        } else if (host_tld.equals("dj")) {//Djibouti /150,000
+			        	language = "ar";//arabic; ara; 94% are muslims, so arabic is primary
+			        	//language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("dm")) {//Dominica /30,100
+			        	language = "en";//english
+			        }
+				    break;
+				case 'e':
+					if (host_tld.equals("ee")) {//Estonia /6,790,000
+			        	language = "et";//estonian; est; est (ekk)
+			        } else if (host_tld.equals("eg")) {//Egypt /2,990,000
+			        	language = "ar";//modern standard arabic; ara; arb
+			        	//language = "ar";//egyptian arabic; ara; arz
+			        } else if (host_tld.equals("ec")) {//Ecuador /2,580,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("et")) {//Ethiopia /142,000
+			        	language = "am";//amharic; amh
+			        } else if (host_tld.equals("eu")) {//European Union /45,100
+			        	language = "en";//english (what can be else)
+			        } else if (host_tld.equals("er")) {//Eritrea /15,800
+			        	language = "ti";//tigrinya; tir
+			        }
+				    break;
+				case 'f':
+					if (host_tld.equals("fr")) {//France /96,700,000
+				        language = "fr";//french; fre (fra); fra
+					} else if (host_tld.equals("fi")) {//Finland /28,100,000
+			        	language = "fi";//finnish; fin (92%)
+					} else if (host_tld.equals("fm")) {//Federated States of Micronesia /4,580,000
+			        	language = "en";//english
+			        	//all native at regional level
+			        } else if (host_tld.equals("fo")) {//Faroe Islands /623,000
+			        	language = "fo";//faroese; fao
+			        } else if (host_tld.equals("fj")) {//Fiji /466,000
+			        	language = "fj";//fijian; fij
+			        	//also english, fiji hindi etc
+			        } else if (host_tld.equals("fk")) {//Falkland Islands /10,500
+			        	language = "en";//english
+			        }
+				    break;
+				case 'g':
+					if (host_tld.equals("gr")) {//Greece /13,500,000
+			        	language = "el";//greek; gre (ell); ell
+			        } else if (host_tld.equals("ge")) {//Georgia /2,480,000
+			        	language = "ka";//georgian; geo (kat); kat
+			        } else if (host_tld.equals("gt")) {//Guatemala /904,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("gs")) {//South Georgia and the South Sandwich Islands /772,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("gl")) {//Greenland /526,000
+			        	language = "kl";//greenlandic; kal
+			        } else if (host_tld.equals("gg")) {//Guernsey /322,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("gi")) {//Gibraltar /193,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("gh")) {//Ghana /107,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("gy")) {//Guyana /68,700
+			        	language = "en";//english
+			        } else if (host_tld.equals("gm")) {//Gambia /59,300
+			        	language = "en";//english
+			        } else if (host_tld.equals("gn")) {//Guinea /18,700
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("ga")) {//Gabon /17,900
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("gd")) {//Grenada /13,600
+			        	language = "en";//english
+			        } else if (host_tld.equals("gu")) {//Guam /12,800
+			        	//language = "ch";//chamorro; cha (looks like young generation don't want to use)
+			        	language = "en";//english
+			        } else if (host_tld.equals("gq")) {//Equatorial Guinea /1,450
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("gp")) {//Guadeloupe /980
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("gf")) {//French Guiana /926
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("gb")) {//United Kingdom of Great Britain and Northern Ireland (currently->uk) /186
+			        	language = "en";//english
+			        } else if (host_tld.equals("gw")) {//Guinea-Bissau /26
+			        	language = "pt";//portuguese; por
+			        }
+				    break;
+				case 'h':
+					if (host_tld.equals("hu")) {//Hungary /18,500,000
+			        	language = "hu";//hungarian; hun
+			        } else if (host_tld.equals("hk")) {//Hong Kong /9,510,000
+			        	language = "zh";//chinese; chi (zho, cmn)
+			        	//also english
+			        } else if (host_tld.equals("hr")) {//Croatia /6,080,000
+			        	language = "hr";//croatian; hrv
+			        } else if (host_tld.equals("hn")) {//Honduras /628,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("hm")) {//Heard and McDonald Islands /194,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("ht")) {//Haiti /17,700
+			        	language = "fr";//french; fre (fra); fra
+			        	//language = "ht";//haitian creole; hat
+			        }
+				    break;
+				case 'i':
+					if (host_tld.equals("it")) {//Italy /55,200,000
+			        	language = "it";//italian; ita
+			        } else if (host_tld.equals("il")) {//Israel /17,800,000
+			        	language = "he";//hebrew; heb
+			        } else if (host_tld.equals("ie")) {//Republic of Ireland + Northern Ireland /17,000,000
+			        	language = "ga";//irish; gle
+			        	//language = "en";//english
+			        } else if (host_tld.equals("in")) {//India /9,330,000
+			        	language = "hi";//hindi; hin
+			        } else if (language.equals("is")) {//Iceland /5,310,000
+			        	language = "is";//icelandic; ice (isl); isl
+			        } else if (host_tld.equals("ir")) {//Islamic Republic of Iran /2,940,000
+			        	language = "fa";//persian; per (fas); pes
+			        } else if (host_tld.equals("im")) {//Isle of Man /276,000
+			        	language = "en";//english
+			        	//language = "gv";//manx; glv (was dead, currently only slogans etc basically)
+			        } else if (host_tld.equals("io")) {//British Indian Ocean Territory /108,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("iq")) {//Iraq /133
+			        	language = "ar";//arabic; ara; acm
+			        	//language = "ku";//kurdish; kur
+			        }
+				    break;
+				case 'j':
+					if (host_tld.equals("jp")) {//Japan /139,000,000
+			        	language = "ja";//japanese; jpn
+			        } else if (host_tld.equals("jo")) {//Jordan /601,000
+			        	language = "ar";//jordanian arabic; ara; ajp
+			        	//language = "en";//english (businness)
+			        } else if (host_tld.equals("jm")) {//Jamaica /290,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("je")) {//Jersey /202,000
+			        	language = "en";//english
+			        }
+				    break;
+				case 'k':
+					if (host_tld.equals("kr")) {//Republic of Korea /13,700,000
+			        	language = "ko";//korean; kor
+			        } else if (host_tld.equals("kz")) {//Kazakhstan /2,680,000
+			        	language = "kk";//kazakh; kaz
+			        	//language = "ru";//russian; rus (de-facto is widely used than native language)
+			        } else if (host_tld.equals("kg")) {//Kyrgyzstan /1,440,000
+			        	language = "ky";//kyrgyz; kir
+			        	//language = "ru";//russian; rus (perhaps this one here is widely used)
+			        } else if (host_tld.equals("ki")) {//Kiribati /427,000
+			        	//language = "";//kiribati; gil (this one must be used, but don't have ISO 639-1) (!)
+			        	language = "en";//english
+			        	//here also can be other languages: .de.ki = deutsch
+			        } else if (host_tld.equals("kw")) {//Kuwait /356,000
+			        	language = "ar";//arabic; ara
+			        } else if (host_tld.equals("ke")) {//Kenya /301,000
+			        	language = "sw";//swahili; swa; swh
+			        	//language = "en";//english
+			        } else if (host_tld.equals("kh")) {//Cambodia /262,000
+			        	language = "km";//khmer; khm
+			        } else if (host_tld.equals("ky")) {//Cayman Islands /172,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("kn")) {//Saint Kitts and Nevis /9,830
+			        	language = "en";//english
+			        } else if (host_tld.equals("km")) {//Comoros /533
+			        	//Comorian dialects ISO 639-3: zdj, wni, swb, wlc - must be used here
+			        	language = "ar";//arabic; ara
+			        	//language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("kp")) {//Democratic People's Republic of Korea /122
+			        	language = "ko";//korean; kor
+			        }
+				    break;
+				case 'l':
+					if (host_tld.equals("lv")) {//Latvia /6,970,000
+			        	language = "lv";//latvian; lav;	lvs
+			        } else if (host_tld.equals("lt")) {//Lithuania /6,040,000
+			        	language = "lt";//lithuanian; lit
+			        } else if (host_tld.equals("lu")) {//Luxembourg /4,940,000
+			        	language = "lb";//luxembourgish; ltz (West Central German language familie; official 1984)
+			        	//wide spoken, but not business or media
+			        	//language = "fr";//french; fre (fra); fra (business)
+			        	//language = "de";//german; ger (deu); ltz (media)
+			        } else if (host_tld.equals("li")) {//Liechtenstein /3,990,000
+			        	language = "de";//german; ger (deu); deu
+			        } else if (host_tld.equals("lb")) {//Lebanon /1,890,000
+			        	language = "ar";//arabic; ara
+			        } else if (host_tld.equals("lk")) {//Sri Lanka /1,770,000
+			        	language = "si";//sinhala; sin
+			        	//language = "ta";//tamil; tam
+			        } else if (host_tld.equals("la")) {//Laos (Lao People’s Democratic Republic) /932,000
+			        	language = "lo";//lao; lao
+			        } else if (host_tld.equals("ly")) {//Libya /388,000
+			        	language = "ar";//libyan arabic; ara; ayl
+			        } else if (host_tld.equals("lc")) {//Saint Lucia /86,400
+			        	language = "en";//english
+			        	//language = "";//french creole; acf (ISO 639-3)
+			        	//ISO 639-1 is missed + not official, but this is 95% speaking language - must be first (!)
+			        } else if (host_tld.equals("ls")) {//Lesotho /81,900
+			        	language = "st";//sotho; sot (97%)
+			        	//language = "en";//english
+			        } else if (host_tld.equals("lr")) {//Liberia /588
+			        	language = "en";//english
+			        }
+				    break;
+				case 'm':
+					if (host_tld.equals("mx")) {//Mexico /13,700,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("my")) {//Malaysia /4,610,000
+			        	language = "en";//english (business)
+			        	//language = "";//malaysian; zsm, zlm (maybe must be used here, but no ISO 639-1,2)
+			        } else if (host_tld.equals("md")) {//Moldova /3,230,000
+			        	language = "ro";//romanian; rum (ron); ron
+			        } else if (host_tld.equals("ma")) {//Morocco /3,030,000
+			        	language = "ar";//moroccan arabic; ara; ary
+			        	//language = "fr";//french; fre (fra); fra
+			        	//language = "";//amazigh (berber); ber; tzm (no ISO 639-1 code)
+			        } else if (host_tld.equals("mk")) {//Republic of Macedonia /2,980,000
+			        	language = "mk";//macedonian; mac (mkd); mkd
+			        } else if (host_tld.equals("ms")) {//Montserrat /2,160,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("mt")) {//Malta /1,650,000
+			        	language = "mt";//maltese; mlt
+			        	//100% speak Maltese, 88% English, 66% Italian
+			        	//(but about 75-80% of sites have default english, support of maltese have ~50% of sites)
+			        } else if (host_tld.equals("mo")) {//Macau /1,310,000
+			        	language = "zh";//chinese; 	chi (zho); yue (cantonese)
+			        } else if (host_tld.equals("mn")) {//Mongolia /1,160,000
+			        	language = "mn";//Mongolian; mon; mon: khk
+			        } else if (host_tld.equals("mp")) {//Northern Mariana Islands /861,000
+			        	language = "en";//english
+			        	//language = "ch";//chamorro; cha
+			        	//language = "";//carolinian; ISO 639-3: cal (no ISO 639-1)
+			        } else if (host_tld.equals("mu")) {//Mauritius /651,000
+			        	language = "fr";//french; fre (fra); fra, mfe (predominant on media)
+			        	//language = "en";//english (goverment)
+			        } else if (host_tld.equals("mm")) {//Myanmar /367,000
+			        	language = "my";//burmese; bur (mya); mya
+			        } else if (host_tld.equals("mc")) {//Monaco /307,000
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("me")) {//Montenegro /?
+			        	language = "sh";//montenegrin (~serbo-croatian, near serbian); scr, scc; hbs (macrolanguage): srp (serbian)
+			        } else if (host_tld.equals("mz")) {//Mozambique /288,000
+			        	language = "pt";//portuguese; por
+			        	//language = "";//makhuwa; vmw (ISO 639-3)
+			        } else if (host_tld.equals("mg")) {//Madagascar /255,000
+			        	language = "mg";//malagasy; mlg (mlg); mlg (macrolanguage): plt
+			        	//language = "fr";//french; fre (fra); fra
+			        	//malagasy is native language, but elite want to french 
+			        } else if (host_tld.equals("mr")) {//Mauritania /210,000
+			        	language = "ar";//arabic; ara; mey
+			        	//language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("mv")) {//Maldives /125,000
+			        	language = "dv";//dhivehi; div
+			        	//English is used widely in commerce and increasingly in government schools.
+			        } else if (host_tld.equals("mw")) {//Malawi /87,000
+			        	//language = "ny";//chewa; nya
+			        	language = "en";//english (founded sites in english only, include goverment)
+			        } else if (host_tld.equals("ml")) {//Mali /73,500
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("mq")) {//Martinique /19,000
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("mh")) {//Marshall Islands /53
+			        	language = "mh";//marshallese; mah
+			        	//language = "en";//english
+			        }
+				    break;
+				case 'n':
+			        if (host_tld.equals("no")) {//Norway /32,300,000
+			        	language = "no";//norwegian; nor (nob/nno)
+			        } else if (host_tld.equals("nz")) {//New Zealand /18,500,000
+			        	language = "en";//english
+			        	//language = "mi";//maori; mao (mri); mri (4.2%)
+			        } else if (host_tld.equals("nu")) {//Niue /5,100,000
+			        	language = "en";//english
+			        	//language = "";//niuean; niu (no ISO 639-1) (97.4% of native, but most are bilingual in English)
+			        } else if (host_tld.equals("ni")) {//Nicaragua /4,240,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("np")) {//Nepal /1,910,000
+			        	language = "ne";//nepali; nep
+			        }if (host_tld.equals("na")) {//Namibia /1,650,000
+			        	language = "af";//afrikaans; afr
+			        	//language = "de";//German; ger (deu); deu
+			        	//language = "ng";//ndonga (ovambo); kua (ndo); ndo
+			        	//language = "en";//english
+			        	//Official is English.
+			        	//Northern majority of Namibians speak Oshiwambo as first language,
+			        	//whereas the most widely understood and spoken Afrikaans.
+			        	//Younger generation most widely understood English and Afrikaans.
+			        	//Afrikaans is spoken by 60% of the WHITE community, German is spoken by 32%,
+			        	//English is spoken by 7% and Portuguese by 1%.
+			        } else if (host_tld.equals("nr")) {//Nauru /466,000
+			        	//language = "na";//Nauruan; nau (50% - 66% at home)
+			        	language = "en";//english (goverment + business, also .co.nr is free so here can be any)
+			        } else if (host_tld.equals("nc")) {//New Caledonia /265,000
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("ne")) {//Niger /151,000
+			        	language = "fr";//french; fre (fra); fra (official and elite)
+			        	//language = "ha";//hausa; hau (50%)
+			        } else if (host_tld.equals("ng")) {//Nigeria /101,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("nf")) {//Norfolk Island /54,900
+			        	language = "en";//english
+			        }
+				    break;
+				case 'o':
+					if (host_tld.equals("om")) {//Oman /204,000
+			        	language = "ar";//omani arabic; ara; acx
+			        	//language = "en";//english (education and science is ar/en, but people speak mostly arabic)
+			        }
+				    break;
+				case 'p':
+					if (host_tld.equals("pl")) {//Poland /20,100,000
+			        	language = "pl";//polish; pol
+			        } else if (host_tld.equals("pt")) {//Portugal /9,100,000
+			        	language = "pt";//portuguese; por
+			        } else if (host_tld.equals("ph")) {//Philippines /4,080,000
+			        	language = "tl";//filipino; fil
+			        	//language = "en";//english
+			        } else if (host_tld.equals("pk")) {//Pakistan /3,180,000
+			        	language = "ur";//urdu; urd (lingua franca and national language)
+			        	//language = "en";//english (official language and used in business, government, and legal contracts)
+			        	//language = "";//pakistani english;6:pake
+			        	//(sase: South-Asian-English, engs: English Spoken)
+			        	//language = "pa";//punjabi; pan
+			        	//language = "ps";//pashto; pus; pst, pbt
+			        	//language = "sd";//sindhi; snd
+			        	//also Saraiki skr (no 1,2) and Balochi bal; bal (bgp, bgn, bcc) (no 1)
+			        } else if (host_tld.equals("pw")) {//Palau /3,010,000
+			        	language = "en";//english
+			        	//language = "";//palauan; pau (no ISO 639-1)
+			        	//language = "tl";//tagalog; tgl
+			        	//language = "ja";//japanese; jpn
+			        } else if (host_tld.equals("pe")) {//Peru /2,740,000
+			        	language = "es";//spanish; spa (83.9%)
+			        	//language = "qu";//quechua; que (13.2%)
+			        } else if (host_tld.equals("pr")) {//Puerto Rico /1,920,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("pa")) {//Panama /1,040,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("py")) {//Paraguay /962,000
+			        	language = "gn";//guarani; grn; gug (90%)
+			        	//language = "es";//spanish; spa (87%)
+			        } else if (host_tld.equals("ps")) {//Palestinian territories /559,000
+			        	language = "ar";//palestinian arabic; ara; ajp
+			        } else if (host_tld.equals("pf")) {//French Polynesia /240,000
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("pg")) {//Papua New Guinea /211,000
+			        	language = "en";//english (also pidgin Tok Pisin)
+			        	//language = "ho";//hiri motu; hmo
+			        } else if (host_tld.equals("pn")) {//Pitcairn Islands /80,900
+			        	language = "en";//english/pitkern (english creole); pih (ISO 639-3)
+			        	//language = "en";//english (second language in schools)
+			        } else if (host_tld.equals("pm")) {//Saint-Pierre and Miquelon /184
+			        	language = "fr";//french; fre (fra); fra
+			        }
+				    break;
+				case 'q':
+					if (host_tld.equals("qa")) {//Qatar /259,000
+			        	language = "ar";//gulf arabic; ara; afb
+			        }
+				    break;
+				case 'r':
+					if (host_tld.equals("ru")) {//Russia /67,900,000
+			        	language = "ru";//russian; rus
+			        } else if (host_tld.equals("ro")) {//Romania /7,990,000
+			        	language = "ro";//daco-romanian; rum (ron); ron
+			        } else if (host_tld.equals("rs")) {//Serbia /?
+			        	language = "sr";//serbian; srp
+			        } else if (host_tld.equals("re")) {//Reunion /146,000
+			        	language = "fr";//french; fre (fra); fra, rcf (Reunion Creole)
+			        } else if (host_tld.equals("rw")) {//Rwanda /131,000
+			        	language = "rw";//kinyarwanda; kin
+			        	//language = "en";//english
+			        	//language = "fr";//french; fre (fra); fra
+			        	//language = "sw";//swahili; swa
+			        }
+				    break;
+				case 's':
+					if (host_tld.equals("se")) {//Sweden /39,000,000
+			        	language = "sv";//swedish; swe
+			        } else if (host_tld.equals("es")) {//Spain /31,000,000
+			        	language = "es";//spanish; spa
+			        } else if (host_tld.equals("sg")) {//Singapore /8,770,000
+			        	language = "zh";//singaporean mandarin (chinese); chi (zho); cmn (49.9%)
+			        	//language = "en";//english (business, government and medium of instruction in schools) (32.3%)
+			        	//language = "ms";//malay; may (msa); msa, zsm ("national language") (12.2%)
+			        	//language = "ta";//tamil; tam
+			        } else if (host_tld.equals("sk")) {//Slovakia /8,040,000
+			        	language = "sk";//slovak; slo (slk); slk
+			        } else if (host_tld.equals("si")) {//Slovenia /4,420,000
+			        	language = "sl";//slovene; slv
+			        } else if (host_tld.equals("su")) {//Soviet Union /3,530,000
+			        	language = "ru";//russian; rus
+			        } else if (host_tld.equals("sa")) {//Saudi Arabia /2,770,000
+			        	language = "ar";//gulf arabic; ara; afb
+			        } else if (host_tld.equals("st")) {//Sao Tome and Principe /2,490,000
+			        	language = "pt";//portuguese; por (95%)
+			        	//language = "pt";//forro (creole); por; cri (85%)
+			        	//language = "pt";//angolar (creole); cpp; aoa (3%)
+			        	//language = "fr";//french; fre (fra); fra (Francophonie -> learns in schools)
+			        } else if (host_tld.equals("sv")) {//El Salvador /1,320,000
+			        	language = "es";//spanish; spa
+			        	//language = "";//nahuatl; nah; nlv and others (no ISO 639-1)
+			        	//language = "";//mayan; myn (no ISO 639-1,3)
+			        	//language = "";//q'eqchi'; kek (no ISO 639-1,2)
+			        } else if (host_tld.equals("sc")) {//Seychelles /949,000
+			        	language = "en";//english
+			        	//language = "fr";//french; fre (fra); fra
+			        	//language = "fr";//seychellois creole; fre (fra); crs
+			        } else if (host_tld.equals("sh")) {//Saint Helena /547,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("sn")) {//Senegal /503,000
+			        	language = "wo";//wolof; wol (80%)
+			        	//language = "fr";//french; fre (fra); fra
+			        	//(understood ~15%-20% of all males and ~1%-2% of all women, but official)
+			        } else if (host_tld.equals("sr")) {//Suriname /242,000
+			        	language = "nl";//dutch; dut (nld); nld (education, government, business and the media)
+			        	//language = "en";//sranan (suriname creole); srn; srn
+			        	//language = "bh";//bhojpuri (Surinamese Hindi is a dialect of Bhojpuri); bho
+			        	//language = "jv";//javanese; jvn
+			        } else if (host_tld.equals("sm")) {//San Marino /225,000
+			        	language = "it";//italian; ita
+			        } else if (host_tld.equals("sy")) {//Syria /115,000
+			        	language = "ar";//syrian arabic; ara; apc, ajp
+			        	//language = "ku";//kurmanji (kurdish); kur; kmr
+			        } else if (host_tld.equals("sz")) {//Swaziland /81,500
+			        	language = "ss";//swazi; ssw
+			        	//language = "en";//english
+			        } else if (host_tld.equals("sl")) {//Sierra Leone /13,800
+			        	language = "en";//Sierra Leone Krio (english); eng; kri (97% spoken)
+			        	//language = "en";//english (official)
+			        } else if (host_tld.equals("sb")) {//Solomon Islands /11,800
+			        	language = "en";//Pijin (Solomons Pidgin or Neo-Solomonic); cpe; pis
+			        	//language = "en";//english (1–2%)
+			        } else if (host_tld.equals("sd")) {//Sudan /11,700
+			        	language = "ar";//sudanese arabic; ara; apd
+			        	//language = "en";//english
+			        	//english and arabic promoted by goverment (english for education and official)
+			        } else if (host_tld.equals("so")) {//Somalia /512
+			        	language = "so";//somali; som
+			        	//language = "ar";//hadhrami arabic; ara; ayh
+			        	//language = "en";//english
+			        	//language = "it";//italian; ita
+			        	//language = "sw";//bravanese (swahili); swa; swh
+			        } else if (host_tld.equals("ss")) {//South Sudan /?
+			        	language = "en";//english
+			        	//language = "ar";//juba arabic; ara; pga
+			        	//language = "";//dinka; din (no ISO 639-1)
+			        	//English and Juba Arabic are the official languages, although Dinka is the most widely spoken
+			        }
+				    break;
+				case 't':
+					if (host_tld.equals("tw")) {//Republic of China (Taiwan) /14,000,000
+			        	language = "zh";//chinese; 	chi (zho); cmn - Mandarin (Modern Standard Mandarin)
+			        } else if (host_tld.equals("tr")) {//Turkey /8,310,000
+			        	language = "tr";//turkish; tur
+			        } else if (host_tld.equals("tv")) {//Tuvalu /7,170,000
+			        	//used for TV, domain currently operated by dotTV, a VeriSign company
+			        	//the Tuvalu government owns twenty percent of the company
+			        	//language = "";//tuvaluan; tvl (no ISO 639-1) (close to Maori(mi), Tahitian(ty), Samoan(sm), Tongan(to))
+			        	language = "en";//english
+			        } else if (host_tld.equals("th")) {//Thailand /6,470,000
+			        	language = "th";//thai; tha
+			        } else if (host_tld.equals("tc")) {//Turks and Caicos Islands /2,610,000
+			        	//language = "en";//english
+			        	language = "en";//turks and caicos islands creole; eng; tch
+			        } else if (host_tld.equals("to")) {//Tonga /2,490,000
+			        	//Often used unofficially for Torrent, Toronto, or Tokyo
+			        	language = "to";//tongan; ton
+			        	//language = "en";//english
+			        } else if (host_tld.equals("tk")) {//Tokelau /2,170,000
+			        	//Also used as a free domain service to the public (so maybe english here)
+			        	language = "to";//tokelauan; tvl/ton; tkl (no ISO 639-1,2)
+			        	//to - has marked similarities to the Niuafo'ou language of Tonga
+			        	//tvl - Tokelauan is a Polynesian language closely related to Tuvaluan
+			        	//language = "en";//english (main language is Tokelauan, but English is also spoken)
+			        } else if (host_tld.equals("tt")) {//Trinidad and Tobago /1,170,000
+			        	language = "en";//trinidadian english (official)
+			        	//language = "en";//trinidadian creole; eng; trf (main spoken)
+			        	//language = "en";//tobagonian creole; eng; tgh (main spoken)
+			        } else if (host_tld.equals("tn")) {//Tunisia /1,060,000
+			        	language = "ar";//tunisian arabic; ara; aeb
+			        } else if (host_tld.equals("tf")) {//French Southern and Antarctic Lands /777,000
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("tz")) {//Tanzania /405,000
+			        	language = "sw";//swahili; swa; swh
+			        	//language = "en";//english (Higher courts, higher education)
+			        } else if (host_tld.equals("tj")) {//Tajikistan /153,000
+			        	language = "tg";//tajik; tgk
+			        	//language = "ru";//russian; rus (wide in businness)
+			        } else if (host_tld.equals("tp")) {//East Timor /151,000
+			        	language = "pt";//portuguese; por
+			        	//language = "en";//english
+			        } else if (host_tld.equals("tm")) {//Turkmenistan /136,000
+			        	language = "tk";//turkmen; tuk
+			        } else if (host_tld.equals("tg")) {//Togo /36,000
+			        	language = "fr";//french; fre (fra); fra
+			        } else if (host_tld.equals("tl")) {//East Timor (Timor-Leste) /18,100
+			        	//language = "";//tetum; tet (no ISO 639-1)
+			        	language = "id";//indonesian; ind
+			        	//language = "pt";//portuguese; por (5% literally, 25-50% listeners)
+			        	//language = "en";//english
+			        } else if (host_tld.equals("td")) {//Chad /332
+			        	language = "ar";//chadian arabic; ara; shu
+			        	//language = "ar";//arabic; ara
+			        	//language = "fr";//french; fre (fra); fra
+			        }
+				    break;
+				case 'u':
+					if (host_tld.equals("uk")) {//United Kingdom of Great Britain and Northern Ireland /473,000,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("us")) {//United States of America /68,300,000
+			        	language = "en";//english
+			        } else if (host_tld.equals("ua")) {//Ukraine /6,820,000
+			        	language = "uk";//ukrainian; ukr
+			        } else if (host_tld.equals("uz")) {//Uzbekistan /2,610,000
+			        	language = "uz";//uzbek; uzb
+			        	//language = "ru";//russian; rus (14% native)
+			        } else if (host_tld.equals("uy")) {//Uruguay /2,020,000
+			        	language = "es";//spanish; spa
+			        	//language = "en";//english
+			        } else if (host_tld.equals("ug")) {//Uganda /337,000
+			        	language = "sw";//swahili; swa; swc
+			        	//language = "en";//english (also ugandan english)
+			        	//language = "lg";//ganda; lug (not all territory)
+			        }
+				    break;
+				case 'v':
+					if (host_tld.equals("vu")) {//Vanuatu /5,050,000
+			        	language = "en";//english (education)
+			        	//language = "bi";//bislama; bis (creole language, used as pidgin)
+			        	//language = "fr";//french; fre (fra); fra (education)
+			        	//many native languages, but no-one primary
+			        } else if (host_tld.equals("ve")) {//Venezuela /3,050,000
+			        	language = "es";//spanish; spa
+			        	//language = "en";//english
+			        	//language = "it";//italian; ita
+			        	//also many indigenous languages
+			        } else if (host_tld.equals("vn")) {//Vietnam /2,490,000
+			        	language = "vi";//vietnamese; vie
+			        } else if (host_tld.equals("va")) {//Vatican City /852,000
+			        	language = "it";//italian; ita
+			        } else if (host_tld.equals("vg")) {//British Virgin Islands /882,000
+			        	language = "en";//english
+			        	//language = "en";//virgin islands creole english; eng; vic
+			        } else if (host_tld.equals("vc")) {//Saint Vincent and the Grenadines /239,000
+			        	language = "en";//english
+			        	//language = "en";//vincentiancreole; eng; svc (home and friends)
+			        	//language = "bh";//bhojpuri; bho (east indian language)
+			        	//native indians 2% and no data about their language
+			        } else if (host_tld.equals("vi")) {//United States Virgin Islands /202,000
+			        	language = "en";//english
+			        	//language = "en";//virgin islands creole english; eng; vic
+			        	//language = "es";//spanish; spa
+			        	//language = "fr";//french; fre (fra); fra
+			        }
+				    break;
+				case 'w':
+					if (host_tld.equals("ws")) {//Samoa /3,000,000
+			        	language = "sm";//Samoan; smo (most people)
+			        	//but maybe english from the world also (!)
+			        } else if (host_tld.equals("wf")) {//Wallis and Futuna /30
+				        	language = "fr";//french; fre (fra); fra
+				        	//language = "";//wallisian; wls (no ISO 639-1,2)
+				        	//language = "";//futunan; fud (no ISO 639-1,2)
+				        	//could: wallisian+futunan=88.5%; french=78.2%
+				        	//had no knowledge: wallisian|futunan=7.2%; french=17.3% (!)
+			        }
+				    break;
+				case 'x':
+				    break;
+				case 'y':
+					if (host_tld.equals("yu")) {//Yugoslavia /3,270,000
+			        	language = "sh";//serbo-croatian; scr, scc; hbs (srp, hrv, bos)
+			        } else if (host_tld.equals("ye")) {//Yemen /93,800
+			        	language = "ar";//yemeni arabic; ara; ayh (hadhrami), ayn (aanaani), acq(ta'izzi-adeni)
+			        } else if (host_tld.equals("yt")) {//Mayotte /34
+			        	language = "fr";//french; fre (fra); fra (55% read/write)
+			        	//language = "sw";//maore comorian; swa; swb (41% r/w)
+			        	//language = "ar";//yemeni arabic; ara (33% r/w)
+			        }
+				    break;
+				case 'z':
+					if (host_tld.equals("za")) {//South Africa /16,400,000
+			        	//language = "zu";//zulu; zul (23.8%)
+			        	//language = "xh";//xhosa; xho (17.6%)
+			        	language = "af";//afrikaans; afr (13.3%)
+			        	//language = "en";//english; (8.2%, but language of commerce and science)
+			        	//need research (!)
+			        } else if (host_tld.equals("zw")) {//Zimbabwe /507,000
+			        	language = "sn";//shona; sna (70%)
+			        	//language = "nd";//ndebele; nde (20%)
+			        	//language = "en"//english (2.5%, but traditionally used for official business)
+			        } else if (host_tld.equals("zm")) {//Zambia /324,000
+			        	language = "en";//english (official business and is the medium of instruction in schools)
+			        	//language = "ny";//chewa; nya
+			        }
+				    break;
+	        	}
+	        	break;
+	        case 3:
+	        	if (host_tld.equals("cat")) {//Catalan linguistic and cultural community /22,479
+		        	language = "ca";//catalan; cat
+		        }
+	        	break;
+	        case 8:
+	        	if (host_tld.equals("xn--p1ai")) {//Russia/Cyrillic /67,900,000*
+		        	language = "ru";//russian; rus
+		        } else if (host_tld.equals("xn--node")) {//Georgia/Georgian /2,480,000*
+		        	language = "ka";//georgian; geo (kat); kat //Proposed
+		        }
+	        	break;
+	        case 9:
+	        	if (host_tld.equals("xn--j1amh")) {//Ukraine/Cyrillic /6,820,000*
+		        	language = "uk";//ukrainian; ukr //Proposed
+		        }
+	        	break;
+	        case 10:
+	        	if (host_tld.equals("xn--fiqs8s")) {//China/Simplified Chinese /26,700,000*
+		        	language = "zh";//chinese; 	chi (zho); cmn - Mandarin (Modern Standard Mandarin)
+		        } else if (host_tld.equals("xn--fiqz9s")) {//China/Traditional Chinese /26,700,000*
+		        	language = "zh";//chinese; 	chi (zho); cmn - Mandarin (Modern Standard Mandarin)
+		        } else if (host_tld.equals("xn--o3cw4h")) {//Thailand/Thai script /6,470,000*
+		        	language = "th";//thai; tha
+		        } else if (host_tld.equals("xn--wgbh1c")) {//Egypt/Arabic /2,990,000*
+		        	language = "ar";//modern standard arabic; ara; arb
+		        } else if (host_tld.equals("xn--wgbl6a")) {//Qatar/Arabic /259,000*
+		        	language = "ar";//gulf arabic; ara; afb
+		        } else if (host_tld.equals("xn--90a3ac")) {//Serbia/Cyrillic /?
+		        	language = "sr";//serbian; srp
+		        } else if (host_tld.equals("xn--wgv71a")) {//Japan/Japanese /139,000,000*
+		        	language = "ja";//japanese; jpn //Proposed
+		        }
+	        	break;
+	        case 11:
+	        	if (host_tld.equals("xn--kprw13d")) {//Taiwan/Simplified Chinese /14,000,000*
+		        	language = "zh";//chinese; 	chi (zho); cmn - Mandarin (Modern Standard Mandarin)
+		        } else if (host_tld.equals("xn--kpry57d")) {//Taiwan/Simplified Chinese /14,000,000*
+		        	language = "zh";//chinese; 	chi (zho); cmn - Mandarin (Modern Standard Mandarin)
+		        } else if (host_tld.equals("xn--j6w193g")) {//Hong Kong/Traditional Chinese /9,510,000*
+		        	language = "zh";//chinese; chi (zho, cmn)
+		        } else if (host_tld.equals("xn--h2brj9c")) {//India/Devanagari /9,330,000*
+		        	language = "hi";//hindi; hin
+		        } else if (host_tld.equals("xn--gecrj9c")) {//India/Gujarati /9,330,000*
+		        	language = "gu";//gujarati; guj
+		        	//also can be Kutchi and Hindi
+		        } else if (host_tld.equals("xn--s9brj9c")) {//India/Gurmukhi /9,330,000*
+		        	language = "pa";//punjabi; pan
+		        } else if (host_tld.equals("xn--45brj9c")) {//India/Bengali /9,330,000*
+		        	language = "bn";//bengali; ben
+		        } else if (host_tld.equals("xn--pgbs0dh")) {//Tunisia/Arabic /1,060,000*
+		        	language = "ar";//tunisian arabic; ara; aeb
+		        } else if (host_tld.equals("xn--80ao21a")) {//Kazakhstan/Cyrillic /2,680,000*
+		        	language = "kk";//kazakh; kaz //Proposed
+		        }
+	        	break;
+	        case 12:
+	        	if (host_tld.equals("xn--3e0b707e")) {//South Korea/Hangul /13,700,000*
+		        	language = "ko";//korean; kor
+		        } else if (host_tld.equals("xn--mgbtf8fl")) {//Syria/Arabic /115,000*
+		        	language = "ar";//syrian arabic; ara; apc, ajp
+		        } else if (host_tld.equals("xn--4dbrk0ce")) {//Israel/Hebrew /17,800,000*
+		        	language = "he";//hebrew; heb //Proposed
+		        } else if (host_tld.equals("xn--mgb9awbf")) {//Oman/Arabic /204,000
+		        	language = "ar";//omani arabic; ara; acx //Proposed
+		        } else if (host_tld.equals("xn--mgb2ddes")) {//Yemen/Arabic /93,800*
+		        	language = "ar";//yemeni arabic; ara; ayh (hadhrami), ayn (aanaani), acq(ta'izzi-adeni) //Proposed
+		        }
+	        	break;
+	        case 13:
+	        	if (host_tld.equals("xn--fpcrj9c3d")) {//India/Telugu /9,330,000*
+		        	language = "te";//telugu; tel
+		        } else if (host_tld.equals("xn--yfro4i67o")) {//Singapore/Chinese /8,770,000*
+		        	language = "zh";//singaporean mandarin (chinese); chi (zho); cmn
+		        } else if (host_tld.equals("xn--fzc2c9e2c")) {//Sri Lanka/Sinhala language /1,770,000*
+		        	language = "si";//sinhala; sin
+		        } else if (host_tld.equals("xn--ygbi2ammx")) {//Palestinian Territory/Arabic /559,000*
+		        	language = "ar";//palestinian arabic; ara; ajp
+		        }
+	        	break;
+	        case 14:
+	        	if (host_tld.equals("xn--mgbbh1a71e")) {//India/Urdu /9,330,000*
+		        	language = "ur";//urdu; urd
+		        } else if (host_tld.equals("xn--mgbaam7a8h")) {//United Arab Emirates/Arabic /3,310,000*
+		        	language = "ar";//arabic
+		        } else if (host_tld.equals("xn--mgbayh7gpa")) {//Jordan/Arabic /601,000*
+		        	language = "ar";//jordanian arabic; ara; ajp
+		        } else if (host_tld.equals("xn--mgbx4cd0ab")) {//Malaysia/Arabic(Jawi alphabet?) /4,610,000*
+		        	language = "ar";//arabic //Proposed (why not malay?)
+		        } else if (host_tld.equals("xn--54b7fta0cc")) {//Bangladesh/Bengali /342,000*
+		        	language = "bn";//bengali; ben //Proposed
+		        }
+	        	break;
+	        case 15:
+	        	if (host_tld.equals("xn--mgbc0a9azcg")) {//Morocco/Arabic /3,030,000*
+		        	language = "ar";//moroccan arabic; ara; ary
+		        } else if (host_tld.equals("xn--mgba3a4f16a")) {//Iran/Persian /2,940,000*
+		        	language = "fa";//persian; per (fas); pes
+		        } else if (host_tld.equals("xn--lgbbat1ad8j")) {//Algeria/Arabic /326,000*
+		        	language = "ar";//arabic; ara; arq
+		        }
+	        	break;
+	        case 16:
+	        	if (host_tld.equals("xn--xkc2al3hye2a")) {//Sri Lanka/Tamil /1,770,000*
+		        	language = "ta";//tamil; tam
+		        }
+	        	break;
+	        case 17:
+	        	if (host_tld.equals("xn--xkc2dl3a5ee0h")) {//India/Tamil /9,330,000*
+		        	language = "ta";//tamil; tam
+		        	//Badaga (ISO 639-3:bfq), Irula (ISO 639-3:iru), Paniya (ISO 639-3:pcg)
+		        } else if (host_tld.equals("xn--mgberp4a5d4ar")) {//Saudi Arabia/Arabic /2,770,000*
+		        	language = "ar";//gulf arabic; ara; afb
+		        } else if (host_tld.equals("xn--mgbai9azgqp6j")) {//Pakistan/Arabic /3,180,000*
+		        	language = "ar";//arabic //Proposed (why not urdu?)
+		        	//language = "ur";//urdu; urd (lingua franca and national language)
+		        }
+	        	break;
+	        case 22:
+	        	if (host_tld.equals("xn--clchc0ea0b2g2a9gcd")) {//Singapore/Tamil /8,770,000*
+		        	language = "ta";//tamil; tam
+		        }
+		        //* - stats from ccTLD
+	        	break;
+	        default:
+	        	break;
+        }
+        //6: ISO 639-6 Part 6: Alpha-4 - most of small languages from ISO 639-3 not exists.
+        //ISO 639-2 languages included, but not all.
         return language;
     }
 
@@ -1169,14 +2028,13 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
 
-    /*
     public static void main(final String[] args) {
         for (final String s: args) System.out.println(toTokens(s));
     }
-     */
+
+    /*
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
-          new String[]{null, "http://[2a00:1450:400c:c01::69]/"},
           new String[]{null, "C:WINDOWS\\CMD0.EXE"},
           new String[]{null, "file://C:WINDOWS\\CMD0.EXE"},
           new String[]{null, "file:/bin/yacy1"}, // file://<host>/<path> may have many '/' if the host is omitted and the path starts with '/'
@@ -1227,9 +2085,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         String environment, url;
         MultiProtocolURI aURL, aURL1;
         java.net.URL jURL;
-        for (String[] element : test) {
-            environment = element[0];
-            url = element[1];
+        for (int i = 0; i < test.length; i++) {
+            environment = test[i][0];
+            url = test[i][1];
             try {aURL = MultiProtocolURI.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}
@@ -1261,5 +2119,6 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             }
         }
     }
+    */
 
 }
