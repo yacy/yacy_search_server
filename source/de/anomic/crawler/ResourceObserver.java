@@ -34,71 +34,71 @@ import net.yacy.search.SwitchboardConstants;
 public class ResourceObserver {
 
     public static final Log log = new Log("RESOURCE OBSERVER");
-    
+
     // return values for available disk/memory
     public enum Space implements Comparable<Space> {
         LOW, MEDIUM, HIGH; // according to the order of the definition, LOW is smaller than MEDIUM and MEDIUM is smaller than HIGH
     }
-    
+
     private final Switchboard sb;
     private final File path; // path to check
-    
+
     private Space normalizedDiskFree = Space.HIGH;
     private Space normalizedMemoryFree = Space.HIGH;
-    
+
     public ResourceObserver(final Switchboard sb) {
         this.sb = sb;
         this.path = sb.getDataPath(SwitchboardConstants.INDEX_PRIMARY_PATH, "");
         log.logInfo("path for disc space measurement: " + this.path);
     }
-    
+
     public static void initThread() {
     	final Switchboard sb = Switchboard.getSwitchboard();
     	sb.observer =  new ResourceObserver(Switchboard.getSwitchboard());
     	sb.observer.resourceObserverJob();
     }
-    
+
     /**
      * checks the resources and pauses crawls if necessary
      */
     public void resourceObserverJob() {
     	MemoryControl.setProperMbyte(getMinFreeMemory());
 
-    	normalizedDiskFree = getNormalizedDiskFree();
-    	normalizedMemoryFree = getNormalizedMemoryFree();
+    	this.normalizedDiskFree = getNormalizedDiskFree();
+    	this.normalizedMemoryFree = getNormalizedMemoryFree();
 
-    	if (normalizedDiskFree.compareTo(Space.HIGH) < 0 || normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
+    	if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0 || this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
 
-    		if (normalizedDiskFree.compareTo(Space.HIGH) < 0 ) { // pause crawls
-    			if (!sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+    		if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0 ) { // pause crawls
+    			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
     				log.logInfo("pausing local crawls");
-    				sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+    				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
     			}
-    			if (!sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+    			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
     				log.logInfo("pausing remote triggered crawls");
-    				sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+    				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
     			}
     		}
 
-    		if ((normalizedDiskFree == Space.LOW || normalizedMemoryFree.compareTo(Space.HIGH) < 0) && sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
+    		if ((this.normalizedDiskFree == Space.LOW || this.normalizedMemoryFree.compareTo(Space.HIGH) < 0) && this.sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
     			log.logInfo("disabling index receive");
-    			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
-    			sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
-    			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
+    			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+    			this.sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
+    			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
     		}
     	}
-    	
+
     	else {
-    		if(sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false)) { // we were wrong!
+    		if(this.sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false)) { // we were wrong!
     			log.logInfo("enabling index receive");
-    			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
-    			sb.peers.mySeed().setFlagAcceptRemoteIndex(true);
-    			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false);
+    			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+    			this.sb.peers.mySeed().setFlagAcceptRemoteIndex(true);
+    			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false);
     		}
     		log.logInfo("resources ok");
     	}
     }
-    
+
     /**
      * returns the amount of disk space available
      * @return <ul>
@@ -112,58 +112,59 @@ public class ResourceObserver {
     	//final long currentSpace = getUsableSpace(this.path);
     	if (currentSpace < 1L) return Space.HIGH;
     	Space ret = Space.HIGH;
-    	
+
     	if (currentSpace < getMinFreeDiskSpace()) {
-    		log.logWarning("Volume " + this.path.toString() + ": free space (" + (currentSpace / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
+    		log.logWarning("Volume " + this.path.toString() + ": free space (" + (currentSpace / 1024 / 1024) + " MB) is low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
     		ret = Space.MEDIUM;
     	}
     	if (currentSpace < getMinFreeDiskSpace_hardlimit()) {
+            log.logWarning("Volume " + this.path.toString() + ": free space (" + (currentSpace / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
     		ret = Space.LOW;
     	}
     	return ret;
     }
-    
+
     private Space getNormalizedMemoryFree() {
     	if(!MemoryControl.properState()) return Space.LOW;
         return Space.HIGH;
     }
-    
+
     /**
      * @return <code>true</code> if disk space is available
      */
     public boolean getDiskAvailable() {
-        return normalizedDiskFree == Space.HIGH;
+        return this.normalizedDiskFree == Space.HIGH;
     }
-    
+
     /**
      * @return <code>true</code> if memory is available
      */
     public boolean getMemoryAvailable() {
-        return normalizedMemoryFree == Space.HIGH;
+        return this.normalizedMemoryFree == Space.HIGH;
     }
-    
+
     /**
      * @return amount of space (bytes) that should be kept free
      */
     public long getMinFreeDiskSpace() {
-        return sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000) /* MiB */ * 1024L * 1024L;
+        return this.sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000) /* MiB */ * 1024L * 1024L;
     }
-    
+
     /**
      * @return amount of space (bytes) that should at least be kept free
      */
     public long getMinFreeDiskSpace_hardlimit() {
-        return sb.getConfigLong(SwitchboardConstants.DISK_FREE_HARDLIMIT, 100) /* MiB */ * 1024L * 1024L;
+        return this.sb.getConfigLong(SwitchboardConstants.DISK_FREE_HARDLIMIT, 100) /* MiB */ * 1024L * 1024L;
     }
-    
+
     /**
      * @return amount of space (MiB) that should at least be free
      */
     public long getMinFreeMemory() {
-    	return sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 0);
+    	return this.sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 0);
     }
-    
-    
+
+
 	/**
 	 * This method calls File.getUsableSpace() from Java 6.
 	 * @param file the path to be checked
