@@ -560,7 +560,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     private void identPort(final String inputURL, final int dflt) throws MalformedURLException {
         // identify ref in file
-        final int r = this.host.indexOf(':');
+        int pss = 0;
+        int ip6 = this.host.indexOf('[');
+        if (ip6 >= 0 && ((ip6 = this.host.indexOf("]", ip6)) > 0)) {
+            pss = ip6 + 1;
+        }
+        final int r = this.host.indexOf(":", pss);
         if (r < 0) {
             this.port = dflt;
         } else {
