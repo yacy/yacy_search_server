@@ -8,5 +8,6 @@ PID=`fuser DATA/LOG/yacy00.log | awk '{print $1}'`
 echo "process-id is " $PID
 kill -3 $PID
 kill -9 $PID
+rm -f DATA/yacy.running
 echo "killed pid " $PID ", YaCy terminated"
 
