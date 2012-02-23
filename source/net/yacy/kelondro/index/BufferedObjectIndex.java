@@ -56,12 +56,14 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         this.entryComparator = new Row.EntryComparator(backend.row().objectOrder);
     }
 
+    @Override
     public byte[] smallestKey() {
         if (this.buffer == null || this.buffer.isEmpty()) return this.backend.smallestKey();
         if (this.backend.isEmpty()) return this.buffer.smallestKey();
         return this.backend.row().getOrdering().smallest(this.buffer.smallestKey(), this.backend.smallestKey());
     }
 
+    @Override
     public byte[] largestKey() {
         if (this.buffer == null || this.buffer.isEmpty()) return this.backend.largestKey();
         if (this.backend.isEmpty()) return this.buffer.largestKey();
@@ -77,6 +79,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public long mem() {
         return this.backend.mem() + this.buffer.mem();
     }
@@ -91,6 +94,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         if (this.buffer.size() >= this.buffersize) flushBuffer();
     }
 
+    @Override
     public void addUnique(final Entry row) throws RowSpaceExceededException, IOException {
         synchronized (this.backend) {
             checkBuffer();
@@ -98,6 +102,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public void clear() throws IOException {
         synchronized (this.backend) {
             this.backend.clear();
@@ -105,6 +110,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public void close() {
         synchronized (this.backend) {
             try {
@@ -118,20 +124,24 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public void deleteOnExit() {
         this.backend.deleteOnExit();
     }
 
+    @Override
     public String filename() {
         return this.backend.filename();
     }
 
+    @Override
     public int size() {
         synchronized (this.backend) {
             return this.buffer.size() + this.backend.size();
         }
     }
 
+    @Override
     public Entry get(final byte[] key, final boolean forcecopy) throws IOException {
         synchronized (this.backend) {
             final Entry entry = this.buffer.get(key, forcecopy);
@@ -140,6 +150,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
         Row.Entry entry;
@@ -150,12 +161,14 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         return map;
     }
 
+    @Override
     public boolean has(final byte[] key) {
         synchronized (this.backend) {
             return this.buffer.has(key) || this.backend.has(key);
         }
     }
 
+    @Override
     public boolean isEmpty() {
         synchronized (this.backend) {
             return this.buffer.isEmpty() && this.backend.isEmpty();
@@ -169,6 +182,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public boolean put(final Entry row) throws IOException, RowSpaceExceededException {
         synchronized (this.backend) {
             checkBuffer();
@@ -176,6 +190,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public Entry remove(final byte[] key) throws IOException {
         synchronized (this.backend) {
             final Entry entry = this.buffer.remove(key);
@@ -184,6 +199,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public boolean delete(final byte[] key) throws IOException {
         synchronized (this.backend) {
             final boolean b = this.buffer.delete(key);
@@ -192,6 +208,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         synchronized (this.backend) {
             flushBuffer();
@@ -199,6 +216,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public List<Row.Entry> top(final int count) throws IOException {
         final List<Row.Entry> list = new ArrayList<Row.Entry>();
         synchronized (this.backend) {
@@ -210,6 +228,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         return list;
     }
 
+    @Override
     public Entry removeOne() throws IOException {
         synchronized (this.backend) {
             if (!this.buffer.isEmpty()) {
@@ -220,6 +239,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public Entry replace(final Entry row) throws RowSpaceExceededException, IOException {
         synchronized (this.backend) {
             final Entry entry = this.buffer.replace(row);
@@ -228,21 +248,23 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public Row row() {
         return this.buffer.row();
     }
 
+    @Override
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         synchronized (this.backend) {
-            return new MergeIterator<byte[]>(
-                    this.buffer.keys(up, firstKey),
-                    this.backend.keys(up, firstKey),
-                    this.buffer.rowdef.getOrdering(),
-                    MergeIterator.simpleMerge,
-                    true);
+            CloneableIterator<byte[]> a = this.buffer.keys(up, firstKey);
+            CloneableIterator<byte[]> b = this.backend.keys(up, firstKey);
+            if (b == null) return a;
+            if (a == null) return b;
+            return new MergeIterator<byte[]>(a, b, this.buffer.rowdef.getOrdering(), MergeIterator.simpleMerge, true);
         }
     }
 
+    @Override
     public Iterator<Entry> iterator() {
         try {
             return this.rows();
@@ -252,6 +274,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         synchronized (this.backend) {
             return new MergeIterator<Entry>(
@@ -263,6 +286,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public CloneableIterator<Entry> rows() throws IOException {
         synchronized (this.backend) {
             return new MergeIterator<Entry>(
