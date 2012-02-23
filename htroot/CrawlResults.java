@@ -253,7 +253,7 @@ public class CrawlResults {
 
                     if (showIP && urle != null) {
                         prop.put("table_indexed_" + cnt + "_showIP", "1");
-                        prop.put("table_indexed_" + cnt + "_showIP_ip", urle.url().getInetAddress().getHostAddress());
+                        prop.put("table_indexed_" + cnt + "_showIP_ip", urle.url().getHost() == null ? "" : urle.url().getInetAddress().getHostAddress());
                     } else
                         prop.put("table_indexed_" + cnt + "_showIP", "0");
 

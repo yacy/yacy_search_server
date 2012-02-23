@@ -702,6 +702,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     public InetAddress getInetAddress() {
         if (this.hostAddress != null) return this.hostAddress;
+        if (this.host == null) return null; // this may happen for file:// urls
         this.hostAddress = Domains.dnsResolve(this.host.toLowerCase());
         return this.hostAddress;
     }
@@ -1050,7 +1051,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 			        } else if (host_tld.equals("cr")) {//Costa Rica /2,060,000
 			        	language = "es";//spanish; spa
 			        } else if (host_tld.equals("cy")) {//Cyprus /2,500,000
-			        	language = "el";//greek; gre (ell); ell	
+			        	language = "el";//greek; gre (ell); ell
 			        } else if (host_tld.equals("cu")) {//Cuba /2,040,000
 			        	language = "es";//spanish; spa
 			        } else if (host_tld.equals("cx")) {//Christmas Island /1,830,000
@@ -1323,7 +1324,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 			        } else if (host_tld.equals("mg")) {//Madagascar /255,000
 			        	language = "mg";//malagasy; mlg (mlg); mlg (macrolanguage): plt
 			        	//language = "fr";//french; fre (fra); fra
-			        	//malagasy is native language, but elite want to french 
+			        	//malagasy is native language, but elite want to french
 			        } else if (host_tld.equals("mr")) {//Mauritania /210,000
 			        	language = "ar";//arabic; ara; mey
 			        	//language = "fr";//french; fre (fra); fra

@@ -186,6 +186,7 @@ public final class CrawlStacker {
     }
     public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks, final boolean replace) {
         new Thread() {
+            @Override
             public void run() {
                 enqueueEntries(initiator, profileHandle, hyperlinks, true);
             }
@@ -240,6 +241,7 @@ public final class CrawlStacker {
     public void enqueueEntriesFTP(final byte[] initiator, final String profileHandle, final String host, final int port, final boolean replace) {
         final CrawlQueues cq = this.nextQueue;
         new Thread() {
+            @Override
             public void run() {
                 BlockingQueue<FTPClient.entryInfo> queue;
                 try {
@@ -487,13 +489,13 @@ public final class CrawlStacker {
         // this is expensive and those filters are check at the end of all other tests
 
         // filter with must-match for IPs
-        if ((depth > 0) && profile.ipMustMatchPattern() != CrawlProfile.MATCH_ALL_PATTERN && !profile.ipMustMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
+        if ((depth > 0) && profile.ipMustMatchPattern() != CrawlProfile.MATCH_ALL_PATTERN && url.getHost() != null && !profile.ipMustMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
             if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' does not match must-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
             return "ip " + url.getInetAddress().getHostAddress() + " of url does not match must-match filter";
         }
 
         // filter with must-not-match for IPs
-        if ((depth > 0) && profile.ipMustMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.ipMustNotMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
+        if ((depth > 0) && profile.ipMustMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && url.getHost() != null && profile.ipMustNotMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
             if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
             return "ip " + url.getInetAddress().getHostAddress() + " of url matches must-not-match filter";
         }
