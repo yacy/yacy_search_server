@@ -517,11 +517,13 @@ public class Balancer {
     	if (!this.domainStacks.isEmpty() && System.currentTimeMillis() - this.lastDomainStackFill < 60000L) return;
     	this.domainStacks.clear();
     	this.lastDomainStackFill = System.currentTimeMillis();
-    	final HandleSet handles = this.urlFileIndex.keysFromBuffer(objectIndexBufferSize / 2);
-        final CloneableIterator<byte[]> i = handles.keys(true, null);
+    	//final HandleSet handles = this.urlFileIndex.keysFromBuffer(objectIndexBufferSize / 2);
+        //final CloneableIterator<byte[]> i = handles.keys(true, null);
+        final CloneableIterator<byte[]> i = this.urlFileIndex.keys(true, null);
         byte[] handle;
         String host;
         Request request;
+        int count = 0;
     	while (i.hasNext()) {
     	    handle = i.next();
     	    final Row.Entry entry = this.urlFileIndex.get(handle, false);
@@ -533,6 +535,8 @@ public class Balancer {
             } catch (final RowSpaceExceededException e) {
                 break;
             }
+            count++;
+            if (this.domainStacks.size() > 0 && count > 120 * this.domainStacks.size()) break;
     	}
     	Log.logInfo("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + this.domainStacks.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
         this.domStackInitSize = this.domainStacks.size();
