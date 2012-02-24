@@ -61,10 +61,10 @@ SetCompressor /SOLID LZMA
 ; User-Agent to see the 64bit link: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Win64; x64; Trident/4.0)
 
 !define JRE_VERSION6 "1.6"
-; jre-6u30-windows-i586.exe
-!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=58125"
-; jre-6u30-windows-x64.exe
-!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=58126"
+; jre-6u31-windows-i586.exe
+!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=61044"
+; jre-6u31-windows-x64.exe
+!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=60338"
 
 ;!define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
 ;!define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
