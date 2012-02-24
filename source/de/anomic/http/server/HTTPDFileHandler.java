@@ -76,6 +76,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -1426,7 +1427,13 @@ public final class HTTPDFileHandler {
 			final String strARGS = (String) conProp.get("ARGS");
 			if(strARGS.startsWith("url=")) {
 				final String strUrl = strARGS.substring(4); // strip url=
+				
+				try {
 				proxyurl = new URL(strUrl);
+				} catch (MalformedURLException e) {
+					proxyurl = new URL (URLDecoder.decode(strUrl));
+
+				}
 			}
 		}
 
