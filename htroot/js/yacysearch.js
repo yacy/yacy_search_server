@@ -93,7 +93,7 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   	resnav += ("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
   }
   
-  numberofpages = Math.min(10, 1 + ((itemscount - 1) / itemsperpage));
+  numberofpages = Math.min(10, 1 + ((totalcount - 1) / itemsperpage));
   if (!numberofpages) numberofpages = 10;
   for (i = 0; i < numberofpages; i++) {
       if (i == thispage) {
