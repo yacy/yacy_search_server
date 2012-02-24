@@ -281,6 +281,7 @@ public class Scanner extends Thread {
                     if (access != Access.unknown) Scanner.this.services.put(this.service, access);
                 }
             } catch (final ExecutionException e) {
+            } catch (final OutOfMemoryError e) {
             }
             final Object r = Scanner.this.runner.remove(this);
             assert r != null;
