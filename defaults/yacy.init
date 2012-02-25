@@ -960,7 +960,7 @@ routing.deleteOldSeeds.time = 30
 
 # options to remember the default search engines when using the search compare features
 compare_yacy.left = YaCy
-compare_yacy.right = scroogle.org
+compare_yacy.right = metager.de
 
 # minimum free disk space for crawling (MiB)
 disk.free = 3000
@@ -1008,7 +1008,7 @@ about.body =
 
 # search heuristics
 heuristic.site = false
-heuristic.scroogle = true
+heuristic.scroogle = false
 heuristic.blekko = false
 
 # colours for generic design
