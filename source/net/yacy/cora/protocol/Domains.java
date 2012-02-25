@@ -851,11 +851,12 @@ public class Domains {
     }
 
     public static int getDomainID(final String host, final InetAddress hostaddress) {
-        if (host == null || host.isEmpty() || isLocal(host, hostaddress)) return TLD_Local_ID;
+        if (host == null || host.isEmpty()) return TLD_Local_ID;
         final int p = host.lastIndexOf('.');
         final String tld = (p > 0) ? host.substring(p + 1) : "";
         final Integer i = TLDID.get(tld);
-        return (i == null) ? TLD_Generic_ID : i.intValue();
+        if (i != null) return i.intValue();
+        return (isLocal(host, hostaddress)) ? TLD_Local_ID : TLD_Generic_ID;
     }
 
     /**
@@ -904,6 +905,12 @@ public class Domains {
             //System.out.println("ISLOCAL-GLOBALHOSTS-HIT " + host);
             return false;
         }
+
+        // check simply if the tld in the host is a known tld
+        final int p = host.lastIndexOf('.');
+        final String tld = (p > 0) ? host.substring(p + 1) : "";
+        final Integer i = TLDID.get(tld);
+        if (i != null) return false;
 
         // check dns lookup: may be a local address even if the domain name looks global
         if (!recursive) return false;
