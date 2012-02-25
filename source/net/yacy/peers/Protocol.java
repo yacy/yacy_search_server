@@ -159,7 +159,7 @@ public final class Protocol
      * exceptional failure case is when we know the other's peers hash, the other peers responds correctly but
      * they appear to be another peer by comparisment of the other peer's hash this works of course only if we
      * know the other peer's hash.
-     * 
+     *
      * @return the number of new seeds
      */
     public static int hello(
@@ -424,7 +424,7 @@ public final class Protocol
 
     /**
      * check the status of a remote peer
-     * 
+     *
      * @param target
      * @return an array of two long: [0] is the count of urls, [1] is a magic
      */
@@ -956,10 +956,12 @@ public final class Protocol
             }
 
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 8000);
-            resultMap =
-                FileUtils.table(httpClient.POSTbytes(new MultiProtocolURI("http://"
-                    + hostaddress
-                    + "/yacy/search.html"), hostname, parts, false));
+            byte[] a = httpClient.POSTbytes(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false);
+            if (a != null && a.length > 200000) {
+                // there is something wrong. This is too large, maybe a hack on the other side?
+                a = null;
+            }
+            resultMap = FileUtils.table(a);
 
             // evaluate request result
             if ( resultMap == null || resultMap.isEmpty() ) {
@@ -1139,7 +1141,7 @@ public final class Protocol
     /**
      * transfer the index. If the transmission fails, return a string describing the cause. If everything is
      * ok, return null.
-     * 
+     *
      * @param targetSeed
      * @param indexes
      * @param urlCache

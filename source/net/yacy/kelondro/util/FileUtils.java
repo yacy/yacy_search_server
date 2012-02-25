@@ -78,7 +78,7 @@ public final class FileUtils
 
     /**
      * Copies an InputStream to an OutputStream.
-     * 
+     *
      * @param source InputStream
      * @param dest OutputStream
      * @param count the total amount of bytes to copy (-1 for all, else must be greater than zero)
@@ -185,7 +185,7 @@ public final class FileUtils
 
     /**
      * Copies an InputStream to a File.
-     * 
+     *
      * @param source InputStream
      * @param dest File
      * @param count the amount of bytes to copy
@@ -219,7 +219,7 @@ public final class FileUtils
 
     /**
      * Copies a part of a File to an OutputStream.
-     * 
+     *
      * @param source File
      * @param dest OutputStream
      * @param start Number of bytes to skip from the beginning of the File
@@ -255,7 +255,7 @@ public final class FileUtils
 
     /**
      * Copies a File to an OutputStream.
-     * 
+     *
      * @param source File
      * @param dest OutputStream
      * @throws IOException
@@ -281,7 +281,7 @@ public final class FileUtils
 
     /**
      * Copies a File to a File.
-     * 
+     *
      * @param source File
      * @param dest File
      * @param count the amount of bytes to copy
@@ -424,7 +424,7 @@ public final class FileUtils
 
     /**
      * This function determines if a byte array is gzip compressed and uncompress it
-     * 
+     *
      * @param source properly gzip compressed byte array
      * @return uncompressed byte array
      * @throws IOException
@@ -666,6 +666,8 @@ public final class FileUtils
     }
 
     public static Map<String, String> table(final byte[] a) {
+        if (a == null) return new ConcurrentHashMap<String, String>();
+        //System.out.println("***TABLE: a.size = " + a.length);
         return table(strings(a));
     }
 
@@ -674,9 +676,7 @@ public final class FileUtils
             return new ArrayList<String>().iterator();
         }
         try {
-            return new StringsIterator(new BufferedReader(new InputStreamReader(
-                new ByteArrayInputStream(a),
-                "UTF-8")));
+            return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), "UTF-8")));
         } catch ( final UnsupportedEncodingException e ) {
             return null;
         }
@@ -684,7 +684,7 @@ public final class FileUtils
 
     /**
      * Read lines of a file into an ArrayList.
-     * 
+     *
      * @param listFile the file
      * @return the resulting array as an ArrayList
      */
@@ -714,7 +714,7 @@ public final class FileUtils
 
     /**
      * Write a String to a file (used for string representation of lists).
-     * 
+     *
      * @param listFile the file to write to
      * @param out the String to write
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
@@ -743,7 +743,7 @@ public final class FileUtils
 
     /**
      * Read lines of a text file into a String, optionally ignoring comments.
-     * 
+     *
      * @param listFile the File to read from.
      * @param withcomments If <code>false</code> ignore lines starting with '#'.
      * @return String representation of the file content.
@@ -783,7 +783,7 @@ public final class FileUtils
 
     /**
      * Read content of a directory into a String array of file names.
-     * 
+     *
      * @param dirname The directory to get the file listing from. If it doesn't exist yet, it will be created.
      * @return array of file names
      */
@@ -793,7 +793,7 @@ public final class FileUtils
 
     /**
      * Read content of a directory into a String array of file names.
-     * 
+     *
      * @param dirname The directory to get the file listing from. If it doesn't exist yet, it will be created.
      * @param filter String which contains a regular expression which has to be matched by file names in order
      *        to appear in returned array. All file names will be returned if filter is null.
@@ -805,7 +805,7 @@ public final class FileUtils
 
     /**
      * Read content of a directory into a String array of file names.
-     * 
+     *
      * @param dir The directory to get the file listing from. If it doesn't exist yet, it will be created.
      * @return array of file names
      */
@@ -815,7 +815,7 @@ public final class FileUtils
 
     /**
      * Read content of a directory into a String array of file names.
-     * 
+     *
      * @param dir The directory to get the file listing from. If it doesn't exist yet, it will be created.
      * @param filter String which contains a regular expression which has to be matched by file names in order
      *        to appear in returned array. All file names will be returned if filter is null.
@@ -872,7 +872,7 @@ public final class FileUtils
 
     /**
      * Write elements of an Array of Strings to a file (one element per line).
-     * 
+     *
      * @param listFile the file to write to
      * @param list the Array to write
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
@@ -887,7 +887,7 @@ public final class FileUtils
 
     public static class StringsIterator implements Iterator<String>
     {
-        private final BufferedReader reader;
+        private BufferedReader reader;
         private String nextLine;
 
         public StringsIterator(final BufferedReader reader) {
@@ -904,7 +904,7 @@ public final class FileUtils
         @Override
         public String next() {
             final String line = this.nextLine;
-            try {
+            if (this.reader != null) try {
                 while ( (this.nextLine = this.reader.readLine()) != null ) {
                     this.nextLine = this.nextLine.trim();
                     if ( this.nextLine.length() > 0 ) {
@@ -916,6 +916,13 @@ public final class FileUtils
             } catch ( final OutOfMemoryError e ) {
                 Log.logException(e);
                 this.nextLine = null;
+            }
+            if (this.nextLine == null && this.reader != null) {
+                try {
+                    this.reader.close();
+                } catch (IOException e) {} finally {
+                    this.reader = null;
+                }
             }
             return line;
         }
@@ -942,7 +949,7 @@ public final class FileUtils
 
     /**
      * Moves all files from a directory to another.
-     * 
+     *
      * @param from_dir Directory which contents will be moved.
      * @param to_dir Directory to move into. It must exist already.
      */
@@ -1010,7 +1017,7 @@ public final class FileUtils
 
     /**
      * copies the input stream to one output stream (byte per byte)
-     * 
+     *
      * @param in
      * @param out
      * @return number of copies bytes
@@ -1031,7 +1038,7 @@ public final class FileUtils
 
     /**
      * copies the input stream to both output streams (byte per byte)
-     * 
+     *
      * @param in
      * @param out0
      * @param out1
@@ -1060,7 +1067,7 @@ public final class FileUtils
 
     /**
      * copies the input stream to all writers (byte per byte)
-     * 
+     *
      * @param data
      * @param writer
      * @param charSet
@@ -1111,7 +1118,7 @@ public final class FileUtils
     /**
      * delete files and directories if a directory is not empty, delete also everything inside because
      * deletion sometimes fails on windows, there is also a windows exec included
-     * 
+     *
      * @param path
      */
     public static void deletedelete(final File path) {
