@@ -43,6 +43,8 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.citation.CitationReference;
+import net.yacy.kelondro.data.citation.CitationReferenceFactory;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.navigation.NavigationReference;
@@ -78,11 +80,13 @@ public class Segment {
 
     // the reference factory
     public static final ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
+    public static final ReferenceFactory<CitationReference> citationReferenceFactory = new CitationReferenceFactory();
     public static final ReferenceFactory<NavigationReference> navigationReferenceFactory = new NavigationReferenceFactory();
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
 
     private   final Log                            log;
     protected final IndexCell<WordReference>       termIndex;
+    //protected final IndexCell<CitationReference>   urlCitationIndex;
     //private   final IndexCell<NavigationReference> authorNavIndex;
     protected final MetadataRepository             urlMetadata;
     private   final File                           segmentPath;
@@ -113,6 +117,18 @@ public class Segment {
                 targetFileSize,
                 maxFileSize,
                 writeBufferSize);
+/*
+        this.urlCitationIndex = new IndexCell<CitationReference>(
+                segmentPath,
+                "urlcitation.index",
+                citationReferenceFactory,
+                wordOrder,
+                Word.commonHashLength,
+                entityCacheMaxSize,
+                targetFileSize,
+                maxFileSize,
+                writeBufferSize);
+*/
         /*
         this.authorNavIndex = new IndexCell<NavigationReference>(
                 new File(new File(segmentPath, "nav_author"), "idx"),
