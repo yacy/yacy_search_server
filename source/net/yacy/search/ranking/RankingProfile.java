@@ -99,7 +99,7 @@ public class RankingProfile {
         this.coeff_cathasvideo        = (mediatype == ContentDomain.VIDEO) ? 15 : 0;
         this.coeff_catindexof         = (mediatype == ContentDomain.TEXT) ? 0 : 15;
         this.coeff_date               = 7;
-        this.coeff_domlength          = 9;
+        this.coeff_domlength          = 10;
         this.coeff_hitcount           = 1;
         this.coeff_language           = 2;
         this.coeff_llocal             = 0;
@@ -108,10 +108,10 @@ public class RankingProfile {
         this.coeff_posinphrase        = 0;
         this.coeff_posintext          = 4;
         this.coeff_posofphrase        = 0;
-        this.coeff_termfrequency      = 6;
+        this.coeff_termfrequency      = 14;
         this.coeff_urlcomps           = 7;
         this.coeff_urllength          = 6;
-        this.coeff_worddistance       = 15;
+        this.coeff_worddistance       = 10;
         this.coeff_wordsintext        = 3;
         this.coeff_wordsintitle       = 2;
         this.coeff_ybr                = 8;
