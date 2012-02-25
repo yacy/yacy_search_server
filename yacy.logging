@@ -69,5 +69,11 @@ net.yacy.kelondro.logging.LogalizerHandler.debug = false
 net.yacy.kelondro.logging.LogalizerHandler.parserPackage = net.yacy.kelondro.logging
 
 org.apache.http.level = OFF
-org.apache.http.wire.level = OFF
+org.apache.commons.httpclient.level = OFF
+httpclient.wire.level = OFF
+# above log setting can be replaced by separate levels for header and content
+# e.g. to log content for attached Solr server
+# httpclient.wire.header.level = OFF
+# httpclient.wire.content.level = OFF
+
 org.apache.pdfbox.level = INFO
