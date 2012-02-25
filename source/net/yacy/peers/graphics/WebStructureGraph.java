@@ -130,12 +130,12 @@ public class WebStructureGraph
                 delcount--;
             }
         }
+
         this.publicRefDNSResolvingWorker = new PublicRefDNSResolvingProcess();
         this.publicRefDNSResolvingWorker.start();
     }
 
-    private class PublicRefDNSResolvingProcess extends Thread
-    {
+    private class PublicRefDNSResolvingProcess extends Thread {
         private PublicRefDNSResolvingProcess() {
         }
 
@@ -664,9 +664,17 @@ public class WebStructureGraph
         // find host with most references
         String maxhost = null;
         int refsize, maxref = 0;
-        joinOldNew();
-        synchronized ( this.structure_new ) {
+        synchronized ( this.structure_old ) {
             for ( final Map.Entry<String, String> entry : this.structure_old.entrySet() ) {
+                refsize = entry.getValue().length();
+                if ( refsize > maxref ) {
+                    maxref = refsize;
+                    maxhost = entry.getKey().substring(7);
+                }
+            }
+        }
+        synchronized ( this.structure_new ) {
+            for ( final Map.Entry<String, String> entry : this.structure_new.entrySet() ) {
                 refsize = entry.getValue().length();
                 if ( refsize > maxref ) {
                     maxref = refsize;

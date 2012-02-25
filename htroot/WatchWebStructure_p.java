@@ -64,11 +64,19 @@ public class WatchWebStructure_p {
             }
         }
 
+        // fix start point if a "www."-prefix would be better
+        if (host != null && !host.startsWith("www")) {
+            if (sb.webStructure.referencesCount(DigestURI.hosthash6("www." + host)) > sb.webStructure.referencesCount(DigestURI.hosthash6(host))) {
+                host = "www." + host;
+            }
+        }
+
         // find start point
         if (host == null ||
             host.length() == 0 ||
-            host.equals("auto") ||
-            sb.webStructure.referencesCount(DigestURI.hosthash6(host)) == 0) {
+            host.equals("auto")
+            // || sb.webStructure.referencesCount(DigestURI.hosthash6(host)) == 0
+            ) {
             // find domain with most references
             besthost = sb.webStructure.hostWithMaxReferences();
             if (besthost == null) besthost = host;

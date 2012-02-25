@@ -155,7 +155,7 @@ public class WebStructurePicture_p {
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;
-        while ((i.hasNext()) && (maxnodes > 0) && (System.currentTimeMillis() < timeout)) {
+        while (i.hasNext() && maxnodes > 0 && System.currentTimeMillis() < timeout) {
             entry = i.next();
             targethash = entry.getKey();
             targethost = structure.hostHash2hostName(targethash);
