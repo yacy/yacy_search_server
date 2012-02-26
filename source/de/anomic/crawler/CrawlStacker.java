@@ -495,8 +495,8 @@ public final class CrawlStacker {
         }
 
         // filter with must-not-match for IPs
-        if ((depth > 0) && profile.ipMustMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && url.getHost() != null && profile.ipMustNotMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
-            if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
+        if ((depth > 0) && profile.ipMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && url.getHost() != null && profile.ipMustNotMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
+            if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.ipMustNotMatchPattern().toString() + "'.");
             return "ip " + url.getInetAddress().getHostAddress() + " of url matches must-not-match filter";
         }
 
