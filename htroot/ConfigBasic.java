@@ -229,8 +229,8 @@ public class ConfigBasic {
         final boolean properName = (sb.peers.mySeed().getName().length() >= 3) && (!(Seed.isDefaultPeerName(sb.peers.mySeed().getName())));
         final boolean properPort = (sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal());
 
-        if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
-            env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
+        if ((env.getConfig(SwitchboardConstants.BROWSER_DEFAULT, "").startsWith("ConfigBasic.html,"))) {
+            env.setConfig(SwitchboardConstants.BROWSER_DEFAULT, env.getConfig(SwitchboardConstants.BROWSER_DEFAULT, "").substring(17));
             env.setConfig("browserPopUpPage", "Status.html");
             HTTPDFileHandler.initDefaultPath();
         }

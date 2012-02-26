@@ -50,14 +50,16 @@ public class ConfigPortal {
             if (post.containsKey("popup")) {
                 final String popup = post.get("popup", "status");
                 if ("front".equals(popup)) {
-                    sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html?display=2");
+                    sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html");
                 } else if ("search".equals(popup)) {
-                    sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "yacysearch.html?display=2");
+                    sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "yacysearch.html");
                 } else if ("interactive".equals(popup)) {
-                    sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "yacyinteractive.html?display=2");
+                    sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "yacyinteractive.html");
                 } else {
                     sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
                 }
+                sb.setConfig(SwitchboardConstants.BROWSER_DEFAULT, sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
+                HTTPDFileHandler.initDefaultPath();
             }
             if (post.containsKey("searchpage_set")) {
                 final String newGreeting = post.get(SwitchboardConstants.GREETING, "");
