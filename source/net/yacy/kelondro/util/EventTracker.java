@@ -28,8 +28,9 @@ package net.yacy.kelondro.util;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.peers.graphics.ProfilingGraph;
 
@@ -49,7 +50,7 @@ public class EventTracker {
         SEARCH;
     }
 
-    private final static Map<EClass, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<EClass, ConcurrentLinkedQueue<Event>>();
+    private final static Map<EClass, Queue<Event>> historyMaps = new ConcurrentHashMap<EClass, Queue<Event>>();
     private final static Map<EClass, Long> eventAccess = new ConcurrentHashMap<EClass, Long>(); // value: last time when this was accessed
 
     public final static void delete(final EClass eventName) {
@@ -73,11 +74,11 @@ public class EventTracker {
         }
 
         // get event history container
-        ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
+        Queue<Event> history = historyMaps.get(eventName);
 
         // create history
         if (history == null) {
-            history = new ConcurrentLinkedQueue<Event>();
+            history = new LinkedBlockingQueue<Event>();
 
             // update entry
             history.offer(new Event(eventPayload));
@@ -109,7 +110,7 @@ public class EventTracker {
     }
 
     public final static Iterator<Event> getHistory(final EClass eventName) {
-        final ConcurrentLinkedQueue<Event> list = historyMaps.get(eventName);
+        final Queue<Event> list = historyMaps.get(eventName);
         if (list == null) return null;
         return list.iterator();
     }

@@ -31,12 +31,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.services.federated.solr.SolrShardingConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
+import net.yacy.cora.services.federated.solr.SolrShardingConnector;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
@@ -76,7 +77,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
 
     // the class object
     private Index urlIndex;
-    private final ConcurrentLinkedQueue<byte[]> stack;
+    private final Queue<byte[]> stack;
     private final SolrConnector solrConnector;
 
     public ZURL(
@@ -105,14 +106,14 @@ public class ZURL implements Iterable<ZURL.Entry> {
             }
         }
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
-        this.stack = new ConcurrentLinkedQueue<byte[]>();
+        this.stack = new LinkedBlockingQueue<byte[]>();
     }
 
     public ZURL(final SolrShardingConnector solrConnector) {
         this.solrConnector = solrConnector;
         // creates a new ZUR in RAM
         this.urlIndex = new RowSet(rowdef);
-        this.stack = new ConcurrentLinkedQueue<byte[]>();
+        this.stack = new LinkedBlockingQueue<byte[]>();
     }
 
     public void clear() throws IOException {
@@ -163,6 +164,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         while (this.stack.size() > maxStackSize) this.stack.poll();
     }
 
+    @Override
     public Iterator<ZURL.Entry> iterator() {
         return new EntryIterator();
     }
@@ -185,14 +187,17 @@ public class ZURL implements Iterable<ZURL.Entry> {
         public EntryIterator() {
             this.hi = ZURL.this.stack.iterator();
         }
+        @Override
         public boolean hasNext() {
             return this.hi.hasNext();
         }
 
+        @Override
         public ZURL.Entry next() {
             return get(this.hi.next());
         }
 
+        @Override
         public void remove() {
             this.hi.remove();
         }
@@ -326,11 +331,13 @@ public class ZURL implements Iterable<ZURL.Entry> {
             this.error = false;
         }
 
+        @Override
         public boolean hasNext() {
             if (this.error) return false;
             return this.i.hasNext();
         }
 
+        @Override
         public Entry next() throws RuntimeException {
             final Row.Entry e = this.i.next();
             if (e == null) return null;
@@ -341,6 +348,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             }
         }
 
+        @Override
         public void remove() {
             this.i.remove();
         }

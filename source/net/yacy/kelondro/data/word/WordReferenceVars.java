@@ -28,8 +28,8 @@ package net.yacy.kelondro.data.word;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
@@ -66,7 +66,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                urlcomps, urllength,
                wordsintext, wordsintitle;
     private int virtualAge;
-    private final ConcurrentLinkedQueue<Integer> positions;
+    private final Queue<Integer> positions;
     public double termFrequency;
 
     public WordReferenceVars(
@@ -77,7 +77,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final int      hitcount,      // how often appears this word in the text
             final int      wordcount,     // total number of words
             final int      phrasecount,   // total number of phrases
-            final ConcurrentLinkedQueue<Integer> ps, // positions of words that are joined into the reference
+            final Queue<Integer> ps,      // positions of words that are joined into the reference
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
@@ -101,7 +101,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.llocal = outlinksSame;
         this.lother = outlinksOther;
         this.phrasesintext = phrasecount;
-        this.positions = new ConcurrentLinkedQueue<Integer>();
+        this.positions = new LinkedBlockingQueue<Integer>();
         if (ps.size() > 0) for (final Integer i: ps) this.positions.add(i);
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
@@ -124,7 +124,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.llocal = e.llocal();
         this.lother = e.lother();
         this.phrasesintext = e.phrasesintext();
-        this.positions = new ConcurrentLinkedQueue<Integer>();
+        this.positions = new LinkedBlockingQueue<Integer>();
         if (e.positions().size() > 0) for (final Integer i: e.positions()) this.positions.add(i);
         this.posinphrase = e.posinphrase();
         this.posofphrase = e.posofphrase();
@@ -195,46 +195,57 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.termFrequency = this.termFrequency + v.termFrequency;
     }
 
+    @Override
     public Bitfield flags() {
         return this.flags;
     }
 
+    @Override
     public byte[] getLanguage() {
         return this.language;
     }
 
+    @Override
     public char getType() {
         return this.type;
     }
 
+    @Override
     public int hitcount() {
         return this.hitcount;
     }
 
+    @Override
     public long lastModified() {
         return this.lastModified;
     }
 
+    @Override
     public int llocal() {
         return this.llocal;
     }
 
+    @Override
     public int lother() {
         return this.lother;
     }
 
+    @Override
     public int phrasesintext() {
         return this.phrasesintext;
     }
 
+    @Override
     public int posinphrase() {
         return this.posinphrase;
     }
 
+    @Override
     public Collection<Integer> positions() {
         return this.positions;
     }
 
+    @Override
     public int posofphrase() {
         return this.posofphrase;
     }
@@ -261,14 +272,17 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         );
     }
 
+    @Override
     public Entry toKelondroEntry() {
         return toRowEntry().toKelondroEntry();
     }
 
+    @Override
     public String toPropertyForm() {
         return toRowEntry().toPropertyForm();
     }
 
+    @Override
     public byte[] urlhash() {
         return this.urlHash;
     }
@@ -279,28 +293,34 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return this.hostHash;
     }
 
+    @Override
     public int urlcomps() {
         return this.urlcomps;
     }
 
+    @Override
     public int urllength() {
         return this.urllength;
     }
 
+    @Override
     public int virtualAge() {
         if (this.virtualAge > 0) return this.virtualAge;
         this.virtualAge = MicroDate.microDateDays(this.lastModified);
         return this.virtualAge;
     }
 
+    @Override
     public int wordsintext() {
         return this.wordsintext;
     }
 
+    @Override
     public int wordsintitle() {
         return this.wordsintitle;
     }
 
+    @Override
     public double termFrequency() {
         if (this.termFrequency == 0.0) this.termFrequency = (((double) hitcount()) / ((double) (wordsintext() + wordsintitle() + 1)));
         return this.termFrequency;
@@ -350,6 +370,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.termFrequency < (d = other.termFrequency)) this.termFrequency = d;
     }
 
+    @Override
     public void join(final Reference r) {
         // joins two entries into one entry
 
@@ -378,10 +399,12 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return ByteArray.hashCode(this.urlHash);
     }
 
+    @Override
     public int compareTo(final WordReferenceVars o) {
         return Base64Order.enhancedCoder.compare(this.urlHash, o.urlhash());
     }
 
+    @Override
     public int compare(final WordReferenceVars o1, final WordReferenceVars o2) {
         return o1.compareTo(o2);
     }

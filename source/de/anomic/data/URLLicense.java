@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,9 +26,10 @@
 
 package de.anomic.data;
 
+import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 
@@ -39,47 +40,47 @@ public class URLLicense {
     // it is used in case of snippet- and preview-Image-fetching to grant also non-authorized users the usage of a image-fetcher servlet
     private static final int maxQueue = 500;
     private static final long minCheck = 5000;
-    
+
     private final Random random;
     private final ConcurrentHashMap<String, DigestURI> permissions;
-    private final ConcurrentLinkedQueue<String> aging;
+    private final Queue<String> aging;
     private long lastCheck;
     private final int keylen;
-    
+
     public URLLicense(final int keylen) {
         this.permissions = new ConcurrentHashMap<String, DigestURI>();
-        this.aging = new ConcurrentLinkedQueue<String>();
+        this.aging = new LinkedBlockingQueue<String>();
         this.lastCheck = System.currentTimeMillis();
         this.random = new Random(System.currentTimeMillis());
         this.keylen = keylen;
     }
-    
+
     public String aquireLicense(final DigestURI url) {
         // generate license key
-        StringBuilder stringBuilder = new StringBuilder(keylen * 2);
+        StringBuilder stringBuilder = new StringBuilder(this.keylen * 2);
         if (url == null) return stringBuilder.toString();
-        while (stringBuilder.length() < keylen) stringBuilder.append(Integer.toHexString(random.nextInt()));
-        String license = stringBuilder.substring(0, keylen);
+        while (stringBuilder.length() < this.keylen) stringBuilder.append(Integer.toHexString(this.random.nextInt()));
+        String license = stringBuilder.substring(0, this.keylen);
         // store reference to url with license key
-        permissions.put(license, url);
-        aging.add(license);
+        this.permissions.put(license, url);
+        this.aging.add(license);
         if (System.currentTimeMillis() - this.lastCheck > minCheck) {
             // check aging
             this.lastCheck = System.currentTimeMillis();
             String s;
-            while (aging.size() > maxQueue) {
-                s = aging.poll();
-                if (s != null) permissions.remove(s);
+            while (this.aging.size() > maxQueue) {
+                s = this.aging.poll();
+                if (s != null) this.permissions.remove(s);
             }
         }
         // return the license key
         return license;
     }
-    
+
     public DigestURI releaseLicense(final String license) {
         DigestURI url = null;
-        url = permissions.remove(license);
+        url = this.permissions.remove(license);
         return url;
     }
-    
+
 }
