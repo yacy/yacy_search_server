@@ -48,10 +48,10 @@ public class yacyinteractive {
 
         final String query = (post == null) ? "" : post.get("query", "");
         final String startRecord = (post == null) ? "0" : post.get("startRecord", "");
-        final String maximumRecords = (post == null) ? "1000" : post.get("maximumRecords", "");
+        final String maximumRecords = (post == null) ? "10" : post.get("maximumRecords", "");
         prop.putHTML("query", query);
-        prop.putHTML("startRecord", startRecord);
-        prop.putHTML("maximumRecords", maximumRecords);
+        prop.put("startRecord", startRecord);
+        prop.put("maximumRecords", maximumRecords);
         prop.putHTML("querys", query.replaceAll(" ", "+"));
         prop.put("serverlist", query.length() == 0 ? 1 : 0);
         prop.put("allowrealtime", sb.indexSegments.URLCount() < 100000 ? 1 : 0);
