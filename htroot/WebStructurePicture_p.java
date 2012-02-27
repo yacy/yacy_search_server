@@ -135,10 +135,10 @@ public class WebStructurePicture_p {
                     final int cyc) {
         // returns the number of nodes that had been placed
         assert centerhost != null;
-        final GraphPlotter.coordinate center = graph.getPoint(centerhost);
+        final GraphPlotter.Point center = graph.getNode(centerhost);
         int mynodes = 0;
         if (center == null) {
-            graph.addPoint(centerhost, x, y, nextlayer);
+            graph.addNode(centerhost, x, y, nextlayer);
             maxnodes--;
             mynodes++;
         }
@@ -165,13 +165,13 @@ public class WebStructurePicture_p {
             maxtargetrefs = Math.max(targetrefs, maxtargetrefs);
             maxthisrefs = Math.max(thisrefs, maxthisrefs);
             targets.add(new String[] {targethash, targethost});
-            if (graph.getPoint(targethost) != null) continue;
+            if (graph.getNode(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
             final double angle = ((Base64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd) + (cyc / 360.0d)) * 2.0d * Math.PI;
             //System.out.println("ANGLE = " + angle);
             rr = radius * 0.25 * (1 - targetrefs / (double) maxtargetrefs);
             re = radius * 0.5 * (thisrefs / (double) maxthisrefs);
-            graph.addPoint(targethost, x + (radius - rr - re) * Math.cos(angle), y + (radius - rr - re) * Math.sin(angle), nextlayer);
+            graph.addNode(targethost, x + (radius - rr - re) * Math.cos(angle), y + (radius - rr - re) * Math.sin(angle), nextlayer);
             maxnodes--;
             mynodes++;
         }
@@ -183,12 +183,12 @@ public class WebStructurePicture_p {
             target = j.next();
             targethash = target[0];
             targethost = target[1];
-            final GraphPlotter.coordinate c = graph.getPoint(targethost);
+            final GraphPlotter.Point c = graph.getNode(targethost);
             assert c != null;
             nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targethash, targethost, maxnodes, timeout, c.x, c.y, nextlayer, maxlayer, cyc);
             mynodes += nextnodes;
             maxnodes -= nextnodes;
-            graph.setBorder(centerhost, targethost);
+            graph.setEdge(centerhost, targethost);
         }
         return mynodes;
     }

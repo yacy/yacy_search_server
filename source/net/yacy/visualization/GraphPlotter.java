@@ -45,35 +45,35 @@ public class GraphPlotter {
     // a ymageGraph is a set of points and borders between the points
     // to reference the points, they must all have a nickname
 
-    private final Map<String, coordinate> points;
-    private final Set<String> borders;
+    private final Map<String, Point> nodes; // the interconnected objects
+    private final Set<String> edges; // the links that connect pairs of vertices
     private double leftmost, rightmost, topmost, bottommost;
 
     public GraphPlotter() {
-        this.points = new HashMap<String, coordinate>();
-        this.borders = new HashSet<String>();
+        this.nodes = new HashMap<String, Point>();
+        this.edges = new HashSet<String>();
         this.leftmost = 1.0;
         this.rightmost = -1.0;
         this.topmost = -1.0;
         this.bottommost = 1.0;
     }
 
-    public coordinate getPoint(final String name) {
-        return this.points.get(name);
+    public Point getNode(final String node) {
+        return this.nodes.get(node);
     }
 
-    public coordinate[] getBorder(final String name) {
-        final int p = name.indexOf('$',0);
+    public Point[] getEdge(final String edge) {
+        final int p = edge.indexOf('$',0);
         if (p < 0) return null;
-        final coordinate from = getPoint(name.substring(0, p));
-        final coordinate to = getPoint(name.substring(p + 1));
+        final Point from = getNode(edge.substring(0, p));
+        final Point to = getNode(edge.substring(p + 1));
         if ((from == null) || (to == null)) return null;
-        return new coordinate[] {from, to};
+        return new Point[] {from, to};
     }
 
-    public coordinate addPoint(final String name, final double x, final double y, final int layer) {
-        final coordinate newc = new coordinate(x, y, layer);
-        final coordinate oldc = this.points.put(name, newc);
+    public Point addNode(final String node, final double x, final double y, final int layer) {
+        final Point newc = new Point(x, y, layer);
+        final Point oldc = this.nodes.put(node, newc);
         assert oldc == null; // all add shall be unique
         if (x > this.rightmost) this.rightmost = x;
         if (x < this.leftmost) this.leftmost = x;
@@ -82,22 +82,22 @@ public class GraphPlotter {
         return newc;
     }
 
-    public boolean hasBorder(final String fromPoint, final String toPoint) {
-        return this.borders.contains(fromPoint + "-" + toPoint);
+    public boolean hasEdge(final String fromNode, final String toNode) {
+        return this.edges.contains(fromNode + "-" + toNode);
     }
 
-    public void setBorder(final String fromPoint, final String toPoint) {
-        final coordinate from = this.points.get(fromPoint);
-        final coordinate to = this.points.get(toPoint);
+    public void setEdge(final String fromNode, final String toNode) {
+        final Point from = this.nodes.get(fromNode);
+        final Point to = this.nodes.get(toNode);
         assert from != null;
         assert to != null;
-        this.borders.add(fromPoint + "$" + toPoint);
+        this.edges.add(fromNode + "$" + toNode);
     }
 
-    public static class coordinate {
+    public static class Point {
         public double x, y;
         public int layer;
-        public coordinate(final double x, final double y, final int layer) {
+        public Point(final double x, final double y, final int layer) {
             assert x >= -1;
             assert x <=  1;
             assert y >= -1;
@@ -110,17 +110,17 @@ public class GraphPlotter {
 
     public void print() {
         // for debug purpose: print out all coordinates
-        final Iterator<Map.Entry<String, coordinate>> i = this.points.entrySet().iterator();
-        Map.Entry<String, coordinate> entry;
+        final Iterator<Map.Entry<String, Point>> i = this.nodes.entrySet().iterator();
+        Map.Entry<String, Point> entry;
         String name;
-        coordinate c;
+        Point c;
         while (i.hasNext()) {
             entry = i.next();
             name = entry.getKey();
             c = entry.getValue();
             System.out.println("point(" + c.x + ", " + c.y + ", " + c.layer + ") [" + name + "]");
         }
-        final Iterator<String> j = this.borders.iterator();
+        final Iterator<String> j = this.edges.iterator();
         while (j.hasNext()) {
             System.out.println("border(" + j.next() + ")");
         }
@@ -146,10 +146,10 @@ public class GraphPlotter {
         final double yfactor = ((this.topmost - this.bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (this.topmost - this.bottommost);
 
         // draw dots and names
-        final Iterator<Map.Entry<String, coordinate>> i = this.points.entrySet().iterator();
-        Map.Entry<String, coordinate> entry;
+        final Iterator<Map.Entry<String, Point>> i = this.nodes.entrySet().iterator();
+        Map.Entry<String, Point> entry;
         String name;
-        coordinate c;
+        Point c;
         int x, y;
         while (i.hasNext()) {
             entry = i.next();
@@ -164,12 +164,12 @@ public class GraphPlotter {
         }
 
         // draw lines
-        final Iterator<String> j = this.borders.iterator();
-        coordinate[] border;
+        final Iterator<String> j = this.edges.iterator();
+        Point[] border;
         image.setColor(color_line);
         int x0, x1, y0, y1;
         while (j.hasNext()) {
-            border = getBorder(j.next());
+            border = getEdge(j.next());
             if (border == null) continue;
             if (xfactor == 0.0) {
                 x0 = width / 2;
