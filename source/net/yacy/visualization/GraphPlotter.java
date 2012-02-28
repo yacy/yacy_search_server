@@ -26,6 +26,8 @@
 
 package net.yacy.visualization;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,7 +42,7 @@ import java.util.Set;
  * 0,0 is the center of the graph
  */
 
-public class GraphPlotter {
+public class GraphPlotter implements Cloneable {
 
     // a ymageGraph is a set of points and borders between the points
     // to reference the points, they must all have a nickname
@@ -58,11 +60,103 @@ public class GraphPlotter {
         this.bottommost = 1.0;
     }
 
+    public Object clone() {
+        GraphPlotter g = new GraphPlotter();
+        g.nodes.putAll(this.nodes);
+        g.edges.addAll(this.edges);
+        g.leftmost = this.leftmost;
+        g.rightmost = this.rightmost;
+        g.topmost = this.topmost;
+        g.bottommost = this.bottommost;
+        return g;
+    }
+    
+    public static class Ribbon {
+        double length, attraction, repulsion;
+        public Ribbon(double length, double attraction, double repulsion) {
+            this.length = length;
+            this.attraction = attraction;
+            this.repulsion = repulsion;
+        }
+    }
+
+    public static class Point implements Cloneable {
+        public double x, y;
+        public int layer;
+        public Point(final double x, final double y, final int layer) {
+            /*
+            assert x >= -1;
+            assert x <=  1;
+            assert y >= -1;
+            assert y <=  1;
+            */
+            this.x = x;
+            this.y = y;
+            this.layer = layer;
+        }
+        
+        public Object clone() {
+            return new Point(this.x, this.y, this.layer);
+        }
+    }
+
+    private final static double p2 = Math.PI / 2.0;
+    private final static double p23 = p2 * 3.0;
+    
+    public static void force(Point calcPoint, Point currentPoint, Point otherPoint, Ribbon r) {
+        double dx = otherPoint.x - currentPoint.x;
+        double dy = otherPoint.y - currentPoint.y;
+        double a = Math.atan(dy / dx); // the angle from this point to the other point
+        if (a < 0) a += Math.PI * 2.0; // this makes it easier for the asserts
+        double d = Math.sqrt(dx * dx + dy * dy); // the distance of the points
+        boolean attraction = d > r.length; // if the distance is greater than the ribbon length, then they attract, otherwise they repulse
+        double f = attraction ? r.attraction * (d - r.length) * (d - r.length) : - r.repulsion * (r.length - d) * (r.length - d); // the force
+        double x1 = Math.cos(a) * f;
+        double y1 = Math.sin(a) * f;
+        assert !(attraction && a < Math.PI) || y1 > 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
+        assert !(!attraction && a < Math.PI) || y1 < 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
+        assert !(attraction && a > Math.PI) || y1 < 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
+        assert !(!attraction && a > Math.PI) || y1 > 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
+        assert !(attraction && (a < p2 || a > p23)) || x1 > 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(!attraction && (a < p2 || a > p23)) || x1 < 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(attraction && !(a < p2 || a > p23)) || x1 < 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(!attraction && !(a < p2 || a > p23)) || x1 > 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        calcPoint.x += x1;
+        calcPoint.y += y1;
+    }
+    
+    public GraphPlotter physics(Ribbon all, Ribbon edges) {
+        GraphPlotter g = new GraphPlotter();
+        // compute force for every node
+        Point calc, current;
+        for (Map.Entry<String, Point> node: this.nodes.entrySet()) {
+            calc = (Point) node.getValue().clone();
+            current = (Point) node.getValue().clone();
+            for (Map.Entry<String, Point> p: this.nodes.entrySet()) {
+                if (!node.getKey().equals(p.getKey())) {
+                    //System.out.println("force all: " + node.getKey() + " - " + p.getKey());
+                    force(calc, current, p.getValue(), all);
+                }
+            }
+            for (String e: this.getEdges(node.getKey(), true)) {
+                //System.out.println("force edge start: " + node.getKey() + " - " + e);
+                force(calc, current, this.getNode(e), edges);
+            }
+            for (String e: this.getEdges(node.getKey(), false)) {
+                //System.out.println("force edge stop: " + node.getKey() + " - " + e);
+                force(calc, current, this.getNode(e), edges);
+            }
+            g.addNode(node.getKey(), calc);
+        }
+        g.edges.addAll(this.edges);
+        return g;
+    }
+    
     public Point getNode(final String node) {
         return this.nodes.get(node);
     }
 
-    public Point[] getEdge(final String edge) {
+    private Point[] getEdge(final String edge) {
         final int p = edge.indexOf('$',0);
         if (p < 0) return null;
         final Point from = getNode(edge.substring(0, p));
@@ -71,15 +165,18 @@ public class GraphPlotter {
         return new Point[] {from, to};
     }
 
+    public Point addNode(final String node, Point p) {
+        final Point p0 = this.nodes.put(node, p);
+        assert p0 == null; // all add shall be unique
+        if (p.x > this.rightmost) this.rightmost = p.x;
+        if (p.x < this.leftmost) this.leftmost = p.x;
+        if (p.y > this.topmost) this.topmost = p.y;
+        if (p.y < this.bottommost) this.bottommost = p.y;
+        return p;
+    }
+
     public Point addNode(final String node, final double x, final double y, final int layer) {
-        final Point newc = new Point(x, y, layer);
-        final Point oldc = this.nodes.put(node, newc);
-        assert oldc == null; // all add shall be unique
-        if (x > this.rightmost) this.rightmost = x;
-        if (x < this.leftmost) this.leftmost = x;
-        if (y > this.topmost) this.topmost = y;
-        if (y < this.bottommost) this.bottommost = y;
-        return newc;
+        return addNode(node, new Point(x, y, layer));
     }
 
     public boolean hasEdge(final String fromNode, final String toNode) {
@@ -93,19 +190,21 @@ public class GraphPlotter {
         assert to != null;
         this.edges.add(fromNode + "$" + toNode);
     }
-
-    public static class Point {
-        public double x, y;
-        public int layer;
-        public Point(final double x, final double y, final int layer) {
-            assert x >= -1;
-            assert x <=  1;
-            assert y >= -1;
-            assert y <=  1;
-            this.x = x;
-            this.y = y;
-            this.layer = layer;
+    
+    public Collection<String> getEdges(final String node, boolean start) {
+        Collection<String> c = new ArrayList<String>();
+        if (start) {
+            String s = node + "$";
+            for (String e: this.edges) {
+                if (e.startsWith(s)) c.add(e.substring(s.length()));
+            }
+        } else {
+            String s = "$" + node;
+            for (String e: this.edges) {
+                if (e.endsWith(s)) c.add(e.substring(0, e.length() - s.length()));
+            }
         }
+        return c;
     }
 
     public void print() {

@@ -113,10 +113,19 @@ public class WebStructurePicture_p {
             //assert (sb.webStructure.outgoingReferences(hash) != null);
 
             // recursively find domains, up to a specific depth
-            final GraphPlotter graph = new GraphPlotter();
+            GraphPlotter graph = new GraphPlotter();
             if (host != null && hash != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth, cyc);
             //graph.print();
 
+            // apply physics to it to get a better shape
+            if (post != null && post.containsKey("pa")) {
+                // test with: http://localhost:8090/WebStructurePicture_p.png?pa=10&ral=0.7&raa=0.001&rar=0.0002&rel=0.25&rea=0.1&rer=0.0001
+                GraphPlotter.Ribbon rAll = new GraphPlotter.Ribbon(post.getFloat("ral", 0.1f), post.getFloat("raa", 0.1f), post.getFloat("rar", 0.1f));
+                GraphPlotter.Ribbon rEdge = new GraphPlotter.Ribbon(post.getFloat("rel", 0.05f), post.getFloat("rea", 0.1f), post.getFloat("rer", 0.1f));
+                for (int i = 0; i < post.getInt("pa", 1); i++) graph = graph.physics(rAll, rEdge);
+            }
+            
+            // draw the graph
             graphPicture = graph.draw(width, height, 40, 40, 16, 16, color_back, color_dot, color_line, color_lineend, color_text);
         }
         // print headline
