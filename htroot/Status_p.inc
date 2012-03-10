@@ -87,13 +87,13 @@
         <td><div class="ProgressBarCaption">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#</div></td>
       </tr>
       <tr>
-        <td><a href="IndexCreateWWWLocalQueue_p.html">Local Crawl</a></td>
+        <td><a href="IndexCreateQueues_p.html?stack=LOCAL">Local Crawl</a></td>
         <td>#[localCrawlQueueSize]#</td>
         <td><a href="Status.html?#(localCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/localCrawlPaused)#=&amp;jobType=localCrawl" title="#(localCrawlPaused)#pause local crawl::continue local crawl#(/localCrawlPaused)#"><img src="env/grafics/#(localCrawlPaused)#stop.gif::start.gif#(/localCrawlPaused)#" alt="#(localCrawlPaused)#pause local crawl::continue local crawl#(/localCrawlPaused)#" style="width:12px;height:12px;" /></a></td>
         <td>#(localCrawlPaused)#&nbsp;::(paused)#(/localCrawlPaused)#</td>
       </tr>
       <tr>
-        <td><a href="IndexCreateWWWRemoteQueue_p.html">Remote triggered Crawl</a></td>
+        <td><a href="IndexCreateQueues_p.html?stack=REMOTE">Remote triggered Crawl</a></td>
         <td>#[remoteTriggeredCrawlQueueSize]#</td>
         <td><a href="Status.html?#(remoteTriggeredCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/remoteTriggeredCrawlPaused)#=&amp;jobType=remoteTriggeredCrawl" title="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#"><img src="env/grafics/#(remoteTriggeredCrawlPaused)#stop.gif::start.gif#(/remoteTriggeredCrawlPaused)#" alt="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#" style="width:12px;height:12px;" /></a></td>
         <td>#(remoteTriggeredCrawlPaused)#&nbsp;::(paused)#(/remoteTriggeredCrawlPaused)#</td>
