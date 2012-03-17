@@ -98,7 +98,9 @@ $(function() {
 	$("#sidebarNameSpace").accordion({});
     $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();
     $("#sidebarAbout").accordion({});
+#(focus)#::
 	$("#search").focus();
+#(/focus)#
 });
 //]]>
 </script>
@@ -176,7 +178,9 @@ document.getElementById("Enter").value = "search again";
 <!-- the search results -->
 <script type="text/javascript">
 var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
+#(focus)#::
 document.getElementById("search").focus();
+#(/focus)#
 </script>
 <div style="float:left; width:70%;">
 

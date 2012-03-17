@@ -80,7 +80,9 @@ var q = "#[query]#";
 var s = "#[startRecord]#";
 var m = "#[maximumRecords]#";
 if (q != "") search(q, m, s);
+#(focus)#::
 document.getElementById("search").focus();
+#(/focus)#
 //]]>
 </script>
 #%env/templates/footer.template%#

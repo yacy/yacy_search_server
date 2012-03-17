@@ -118,6 +118,10 @@ public class yacysearch {
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
 
+        //get focus option
+        final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
+        prop.put("focus", focus ? 1 : 0);
+        
         // produce vocabulary navigation sidebars
         Collection<Vocabulary> vocabularies = LibraryProvider.autotagging.getVocabularies();
         int j = 0;

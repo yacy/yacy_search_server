@@ -60,6 +60,7 @@ public class index {
         }
 
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
+        final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
 
         int searchoptions = (post == null) ? 0 : Math.min(1, post.getInt("searchoptions", 0));
         if (!sb.getConfigBool("search.options", true)) searchoptions = 0;
@@ -115,6 +116,7 @@ public class index {
         prop.put("type", type);
         prop.put("depth", "0");
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
+        prop.put("focus", focus ? 1 : 0);
         prop.put("pi", sb.getConfigBool("publicAdministratorPi", false) ? 1 : 0);
         prop.putHTML("constraint", constraint);
         prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);

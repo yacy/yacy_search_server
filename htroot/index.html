@@ -52,7 +52,7 @@
       });
     </script>
   </head>
-  <body id="index" onload="document.getElementById('search').focus()">    
+  <body id="index" onload="#(focus)#::document.getElementById('search').focus()#(/focus)#">
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
     ::
@@ -218,7 +218,9 @@
       #(/searchoptions)#
     </form>
     <script type="text/javascript">
+    #(focus)#::
       document.getElementById("search").focus();
+    #(/focus)#
     </script>
     
     #(topmenu)#
