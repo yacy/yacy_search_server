@@ -2936,10 +2936,10 @@ public final class Switchboard extends serverSwitch
         int wPPM = wantedPPM;
         // we consider 3 cases here
         //         wantedPPM <=   10: low performance
-        // 10   <  wantedPPM <  1000: custom performance
-        // 1000 <= wantedPPM        : maximum performance
-        if ( wPPM <= 10 ) {
-            wPPM = 10;
+        // 10   <  wantedPPM <  30000: custom performance
+        // 30000 <= wantedPPM        : maximum performance
+        if ( wPPM <= 0 ) {
+            wPPM = 1;
         }
         if ( wPPM >= 30000 ) {
             wPPM = 30000;
