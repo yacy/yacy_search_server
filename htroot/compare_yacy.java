@@ -36,10 +36,10 @@ import de.anomic.server.servletProperties;
 public class compare_yacy {
 
     private static final String defaultsearchL = "YaCy";
-    private static final String defaultsearchR = "scroogle.org";
+    private static final String defaultsearchR = "metager.de";
     private static final String[] order = {defaultsearchL, "YaCy (local)", "bing.com",
-        /*"google.de",*/ defaultsearchR, "scroogle.org",
-        "metager.de", "metager2.de (web)", "metager2.de (international)",
+        /*"google.de",*/ defaultsearchR, "metager.de",
+        "metager2.de (web)", "metager2.de (international)",
         "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch",
         "Sciencenet", "dbpedia", "wolfram alpha", "OAIster@OCLC", "oai.yacy.net"};
     private static final Map<String, String> searchengines = new HashMap<String, String>();
@@ -49,7 +49,6 @@ public class compare_yacy {
         searchengines.put("bing.com", "http://www.bing.com/search?q=");
         //searchengines.put("google.de", "http://www.google.de/#fp=1&q=");
         //searchengines.put("google.com", "http://www.google.com/#fp=1&q=");
-        searchengines.put("scroogle.org", "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=");
         searchengines.put("metager.de", "http://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
         searchengines.put("metager2.de (web)", "http://www.metager2.de/search.php?ses=web&q=");
         searchengines.put("metager2.de (international)", "http://www.metager2.de/search.php?ses=international&q=");
