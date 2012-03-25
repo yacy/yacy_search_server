@@ -27,10 +27,15 @@
 					  node=node.nextSibling;
 			  }
 	  }
+	  function clear_form() {
+	  	document.getElementById("key").value="";
+        document.getElementById("value").value="";
+        filterList();
+	  }
       //-->
     </script>
   </head>
-  <body id="ConfigAdvanced">
+  <body id="ConfigAdvanced" onload="filterList()">
   #%env/templates/header.template%#
   #%env/templates/submenuConfig.template%#
 
@@ -51,8 +56,9 @@
   </select><br />
   <form action="ConfigProperties_p.html" method="post" accept-charset="UTF-8">
     <fieldset>
-      <input type="text" id="key" name="key" size="40" onkeyup="filterList()" />:<input type="text" id="value" name="value" size="40" />
-      <input type="submit" value="Save" />
+      <input type="text" id="key" name="key" size="40" onkeyup="filterList()" value="#[keyPosted]#"/>:<input type="text" id="value" name="value" size="40" value="#[valuePosted]#" />
+      <input type="submit" value="Save" />&nbsp;
+      <input type="button" value="Clear" onclick="clear_form()" />
     </fieldset>
   </form>
   

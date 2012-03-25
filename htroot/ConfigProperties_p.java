@@ -44,15 +44,19 @@ public class ConfigProperties_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         
-        String key;
+        String key = "";
+        String value = "";
 
         //change a key
         if (post != null && post.containsKey("key") && post.containsKey("value")) {
             key = post.get("key").trim();
+            value = post.get("value").trim();
             if (key != null && !key.isEmpty()) {
-                env.setConfig(key, post.get("value").trim());
+                env.setConfig(key, value);
             }
         }
+        prop.putHTML("keyPosted", key);
+        prop.putHTML("valuePosted", value);
         
         Iterator<String> keys = env.configKeys();
 
