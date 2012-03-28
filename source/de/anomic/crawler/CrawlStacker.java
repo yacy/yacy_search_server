@@ -414,13 +414,13 @@ public final class CrawlStacker {
         // filter with must-match for URLs
         if ((depth > 0) && !profile.urlMustMatchPattern().matcher(urlstring).matches()) {
             if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' does not match must-match crawling filter '" + profile.urlMustMatchPattern().toString() + "'.");
-            return "url does not match must-match filter";
+            return "url does not match must-match filter " + profile.urlMustMatchPattern().toString();
         }
 
         // filter with must-not-match for URLs
         if ((depth > 0) && profile.urlMustNotMatchPattern().matcher(urlstring).matches()) {
             if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.urlMustNotMatchPattern().toString() + "'.");
-            return "url matches must-not-match filter";
+            return "url matches must-not-match filter " + profile.urlMustNotMatchPattern().toString();
         }
 
         // deny cgi
