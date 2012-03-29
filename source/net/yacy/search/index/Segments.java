@@ -101,21 +101,6 @@ public class Segments implements Iterable<Segment> {
         this.process_assignment.put(process, segmentName);
     }
 
-    public static void migrateOld(final File oldSingleSegment, final File newSegmentsPath, final String newSegmentName) {
-        if (!oldSingleSegment.exists()) return;
-        final File newSegmentPath = new File(newSegmentsPath, newSegmentName);
-        if (!newSegmentPath.exists()) newSegmentPath.mkdirs();
-        Segment.migrateTextIndex(oldSingleSegment, newSegmentPath);
-        Segment.migrateTextMetadata(oldSingleSegment, newSegmentPath);
-
-        final String[] oldFiles = oldSingleSegment.list();
-        for (final String oldFile: oldFiles) {
-            if (oldFile.startsWith("text.")) {
-                new File(oldSingleSegment, oldFile).renameTo(new File(newSegmentPath, oldFile));
-            }
-        }
-    }
-
     public String[] segmentNames() {
         return this.segments.keySet().toArray(new String[this.segments.size()]);
     }

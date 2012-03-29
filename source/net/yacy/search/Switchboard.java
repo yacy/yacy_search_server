@@ -384,16 +384,11 @@ public final class Switchboard extends serverSwitch
 
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
-        final File oldSingleSegment = new File(new File(indexPath, networkName), "TEXT");
-        final File newSegmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
-        Segments.migrateOld(
-            oldSingleSegment,
-            newSegmentsPath,
-            getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default"));
+        final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
         this.indexSegments =
             new Segments(
                 this.log,
-                newSegmentsPath,
+                segmentsPath,
                 wordCacheMaxCount,
                 fileSizeMax,
                 this.useTailCache,

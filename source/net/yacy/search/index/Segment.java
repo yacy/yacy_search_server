@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -47,8 +48,6 @@ import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.navigation.NavigationReference;
-import net.yacy.kelondro.data.navigation.NavigationReferenceFactory;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -81,12 +80,12 @@ public class Segment {
     // the reference factory
     public static final ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
     public static final ReferenceFactory<CitationReference> citationReferenceFactory = new CitationReferenceFactory();
-    public static final ReferenceFactory<NavigationReference> navigationReferenceFactory = new NavigationReferenceFactory();
+    //public static final ReferenceFactory<NavigationReference> navigationReferenceFactory = new NavigationReferenceFactory();
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
 
     private   final Log                            log;
     protected final IndexCell<WordReference>       termIndex;
-    //protected final IndexCell<CitationReference>   urlCitationIndex;
+    protected final IndexCell<CitationReference>   urlCitationIndex;
     //private   final IndexCell<NavigationReference> authorNavIndex;
     protected final MetadataRepository             urlMetadata;
     private   final File                           segmentPath;
@@ -98,9 +97,6 @@ public class Segment {
             final long maxFileSize,
             final boolean useTailCache,
             final boolean exceed134217727) throws IOException {
-
-        migrateTextIndex(segmentPath, segmentPath);
-        migrateTextMetadata(segmentPath, segmentPath);
 
         log.logInfo("Initializing Segment '" + segmentPath + ".");
 
@@ -117,10 +113,10 @@ public class Segment {
                 targetFileSize,
                 maxFileSize,
                 writeBufferSize);
-/*
+
         this.urlCitationIndex = new IndexCell<CitationReference>(
                 segmentPath,
-                "urlcitation.index",
+                "citation.index",
                 citationReferenceFactory,
                 wordOrder,
                 Word.commonHashLength,
@@ -128,7 +124,7 @@ public class Segment {
                 targetFileSize,
                 maxFileSize,
                 writeBufferSize);
-*/
+
         /*
         this.authorNavIndex = new IndexCell<NavigationReference>(
                 new File(new File(segmentPath, "nav_author"), "idx"),
@@ -154,38 +150,16 @@ public class Segment {
         return this.urlMetadata.getSolr();
     }
 
-    public static void migrateTextIndex(final File oldSegmentPath, final File newSegmentPath) {
-        final File oldCellPath = new File(oldSegmentPath, "RICELL");
-        if (!oldCellPath.exists()) return;
-        final String[] oldIndexFiles = oldCellPath.list();
-        for (final String oldIndexFile: oldIndexFiles) {
-            if (oldIndexFile.startsWith("index.")) {
-                final File newFile = new File(newSegmentPath, "text.index." + oldIndexFile.substring(6));
-                new File(oldCellPath, oldIndexFile).renameTo(newFile);
-            }
-        }
-        oldCellPath.delete();
-    }
-
-    public static void migrateTextMetadata(final File oldSegmentPath, final File newSegmentPath) {
-        final File oldMetadataPath = new File(oldSegmentPath, "METADATA");
-        if (!oldMetadataPath.exists()) return;
-        final String[] oldMetadataFiles = oldMetadataPath.list();
-        for (final String oldMetadataFile: oldMetadataFiles) {
-            if (oldMetadataFile.startsWith("urls.")) {
-                final File newFile = new File(newSegmentPath, "text.urlmd." + oldMetadataFile.substring(5));
-                new File(oldMetadataPath, oldMetadataFile).renameTo(newFile);
-            }
-        }
-        oldMetadataPath.delete();
-    }
-
     public MetadataRepository urlMetadata() {
         return this.urlMetadata;
     }
 
     public IndexCell<WordReference> termIndex() {
         return this.termIndex;
+    }
+
+    public IndexCell<CitationReference> urlCitation() {
+        return this.urlCitationIndex;
     }
 
     public boolean exists(final byte[] urlhash) {
@@ -196,6 +170,7 @@ public class Segment {
         try {
             this.termIndex.clear();
             this.urlMetadata.clear();
+            this.urlCitationIndex.clear();
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -238,7 +213,7 @@ public class Segment {
         final int urlLength = url.toNormalform(true, true).length();
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
 
-        // iterate over all words of context text
+        // iterate over all words of content text
         final Iterator<Map.Entry<String, Word>> i = condenser.words().entrySet().iterator();
         Map.Entry<String, Word> wentry;
         String word;
@@ -267,6 +242,11 @@ public class Segment {
                 Log.logException(e);
             }
             wordCount++;
+            
+            // during a search event it is possible that a heuristic is used which aquires index
+            // data during search-time. To transfer indexed data directly to the search process
+            // the following lines push the index data additionally to the search process
+            // this is done only for searched words
             if (searchEvent != null && !searchEvent.getQuery().excludeHashes.has(wordhash) && searchEvent.getQuery().queryHashes.has(wordhash)) {
                 // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
                 ReferenceContainer<WordReference> container;
@@ -282,9 +262,31 @@ public class Segment {
         return wordCount;
     }
 
+    private int addCitationIndex(final DigestURI url, final Date urlModified, final Document document) {
+    	if (document.getAnchors() == null) return 0;
+    	int refCount = 0;
+
+        // iterate over all outgoing links, this will create a context for those links
+        final byte[] urlhash = url.hash();
+        final long urldate = urlModified.getTime();
+        for (Map.Entry<MultiProtocolURI, Properties> anchorEntry: document.getAnchors().entrySet()) {
+        	MultiProtocolURI anchor = anchorEntry.getKey();
+        	byte[] refhash = new DigestURI(anchor).hash();
+        	//System.out.println("*** addCitationIndex: urlhash = " + ASCII.String(urlhash) + ", refhash = " + ASCII.String(refhash) + ", urldate = " + urlModified.toString());
+            try {
+                this.urlCitationIndex.add(urlhash, new CitationReference(refhash, urldate));
+            } catch (final Exception e) {
+                Log.logException(e);
+            }
+            refCount++;
+        }
+        return refCount;
+    }
+    
     public void close() {
         this.termIndex.close();
         this.urlMetadata.close();
+        this.urlCitationIndex.close();
     }
 
     public URIMetadataRow storeDocument(
@@ -392,6 +394,11 @@ public class Segment {
                 searchEvent,                                  // a search event that can have results directly
                 sourceName                                    // the name of the source where the index was created
         );
+        
+        // STORE PAGE REFERENCES INTO CITATION INDEX
+        final int refs = addCitationIndex(url, modDate, document);
+        
+        // finish index time
         final long indexingEndTime = System.currentTimeMillis();
 
         if (this.log.isInfo()) {
@@ -402,7 +409,7 @@ public class Segment {
                     "\n\tDescription:  " + dc_title +
                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
                     "Size: " + document.getTextLength() + " bytes | " +
-                    "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
+                    "Anchors: " + refs +
                     "\n\tLinkStorageTime: " + (storageEndTime - startTime) + " ms | " +
                     "indexStorageTime: " + (indexingEndTime - storageEndTime) + " ms");
         }
