@@ -22,4 +22,16 @@
 #{/domains}#
 </references>
 #(/in)#
+#(citations)#::
+<citations count="#[anchors]#">
+#{anchors}#
+<anchor id="#[hash]#" date="#[date]#" count="#[citationscount]#">
+  #(urle)#::<url>#[url]#</url>#(/urle)#
+#{citations}#
+  #(refurle)#<citation id="#[refhash]#" date="#[refdate]#"/>::<citation id="#[refhash]#" date="#[refdate]#">#[refurl]#</citation>#(/refurle)#
+#{/citations}#
+</anchor>
+#{/anchors}#
+</citations>
+#(/citations)#
 </webstructure>
