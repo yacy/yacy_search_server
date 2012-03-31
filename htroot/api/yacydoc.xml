@@ -29,5 +29,10 @@ you can validate it with http://www.stg.brown.edu/service/xmlvalid/
   <yacy:referrer.hash>yacy:urlhash:#[yacy_referrer_hash]#</yacy:referrer.hash>
   <yacy:referrer.url>#[yacy_referrer_url]#</yacy:referrer.url>
   <yacy:words>#[yacy_words]#</yacy:words>
+
+  <yacy:inbound>#[yacy_inbound]#</yacy:inbound>
+  <yacy:outbound>#[yacy_outbound]#</yacy:outbound>
+  <yacy:citations>#[yacy_citations]#</yacy:citations>
+  
   </record>
 </metadata>

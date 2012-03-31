@@ -67,6 +67,18 @@ public class yacydoc {
         prop.put("dc_type", "");
         prop.put("dc_identifier", "");
         prop.put("dc_language", "");
+        prop.put("geo_lat", "");
+        prop.put("geo_long", "");
+
+        prop.put("yacy_urlhash", "");
+        prop.putXML("yacy_loaddate", "");
+        prop.putXML("yacy_referrer_hash", "");
+        prop.putXML("yacy_referrer_url", "");
+        prop.put("yacy_size", "");
+        prop.put("yacy_words", "");
+        prop.put("yacy_citations", "");
+        prop.put("yacy_inbound", "");
+        prop.put("yacy_outbound", "");
 
         if (post == null) return prop;
 
@@ -110,7 +122,10 @@ public class yacydoc {
         prop.putXML("yacy_referrer_hash", (le == null) ? "" : ASCII.String(le.hash()));
         prop.putXML("yacy_referrer_url", (le == null) ? "" : le.url().toNormalform(false, true));
         prop.put("yacy_size", entry.size());
-        prop.put("yacy_words",entry.wordCount());
+        prop.put("yacy_words", entry.wordCount());
+        prop.put("yacy_citations", sb.indexSegments.segment(Segments.Process.PUBLIC).urlCitation().count(entry.hash()));
+        prop.put("yacy_inbound", entry.llocal());
+        prop.put("yacy_outbound", entry.lother());
 
         // return rewrite properties
         return prop;
