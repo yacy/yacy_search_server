@@ -62,7 +62,7 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist;
 import de.anomic.crawler.CrawlStacker;
 
-public final class MetadataRepository implements Iterable<byte[]> {
+public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
 
     // class objects
     protected     Index               urlIndexFile;

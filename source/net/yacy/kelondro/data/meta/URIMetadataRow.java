@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -166,6 +167,12 @@ public class URIMetadataRow implements URIMetadata {
         this.comp = null;
     }
 
+	@Override
+	public Map<String, byte[]> toMap() {
+		// TODO to be implemented
+		return null;
+	}
+	
     private void encodeDate(final int col, final Date d) {
         // calculates the number of days since 1.1.1970 and returns this as 4-byte array
         // 86400000 is the number of milliseconds in one day
@@ -642,4 +649,5 @@ public class URIMetadataRow implements URIMetadata {
             return p < 0 ? 0.0f : Float.parseFloat(this.latlon.substring(p + 1));
         }
     }
+
 }
