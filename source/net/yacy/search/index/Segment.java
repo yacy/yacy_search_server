@@ -274,7 +274,7 @@ public class Segment {
         	byte[] refhash = new DigestURI(anchor).hash();
         	//System.out.println("*** addCitationIndex: urlhash = " + ASCII.String(urlhash) + ", refhash = " + ASCII.String(refhash) + ", urldate = " + urlModified.toString());
             try {
-                this.urlCitationIndex.add(urlhash, new CitationReference(refhash, urldate));
+                this.urlCitationIndex.add(refhash, new CitationReference(urlhash, urldate));
             } catch (final Exception e) {
                 Log.logException(e);
             }
