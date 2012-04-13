@@ -30,9 +30,12 @@ import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -51,6 +54,7 @@ public class webstructure {
         String about = post == null ? null : post.get("about", null); // may be a URL, a URL hash or a domain hash
         prop.put("out", 0);
         prop.put("in", 0);
+        prop.put("references", 0);
         prop.put("citations", 0);
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         if (about != null) {
@@ -91,6 +95,49 @@ public class webstructure {
                 }
             }
             if (urlhash != null) {
+            	// anchors
+                prop.put("references", 1);
+                net.yacy.document.Document scraper = null;
+                if (url != null) try {
+                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST);
+                } catch (final IOException e) {
+                    Log.logException(e);
+                }
+                if (scraper != null) {
+                    prop.put("references_count", 1);
+                    prop.put("references_documents", 1);
+                    prop.put("references_documents_0_hash", urlhash);
+                    prop.put("references_documents_0_count", scraper.inboundLinkCount() + scraper.outboundLinkCount());
+                    prop.put("references_documents_0_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date()));
+                    prop.put("references_documents_0_urle", url == null ? 0 : 1);
+                    if (url != null) prop.put("references_documents_0_urle_url", url.toNormalform(true, false));
+                    int d = 0;
+                    Iterator<MultiProtocolURI> i = scraper.inboundLinks().iterator();
+            		while (i.hasNext()) {
+            			DigestURI refurl = new DigestURI(i.next());
+                    	byte[] refhash = refurl.hash();
+                    	prop.put("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true, false));
+                    	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);
+                    	prop.put("references_documents_0_anchors_" + d + "_outbound", 0);
+                    	d++;
+            		}
+                    i = scraper.outboundLinks().iterator();
+            		while (i.hasNext()) {
+            			DigestURI refurl = new DigestURI(i.next());
+                    	byte[] refhash = refurl.hash();
+                    	prop.put("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true, false));
+                    	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);
+                    	prop.put("references_documents_0_anchors_" + d + "_outbound", 1);
+                    	d++;
+            		}
+                    prop.put("references_documents_0_count", d);
+                    prop.put("references_documents_0_anchors", d);
+                } else {
+                    prop.put("references_count", 0);
+                    prop.put("references_documents", 0);
+            	}
+                
+                // citations
                 prop.put("citations", 1);
             	IndexCell<CitationReference> citationReferences = sb.indexSegments.segment(Segments.Process.PUBLIC).urlCitation();
             	ReferenceContainer<CitationReference> citations = null;
@@ -100,30 +147,30 @@ public class webstructure {
 				} catch (IOException e) {
 				}
             	if (citations != null) {
-                    prop.put("citations_anchors", 1);
-                    prop.put("citations_anchors_0_hash", urlhash);
-                    prop.put("citations_anchors_0_citationscount", citations.size());
-                    prop.put("citations_anchors_0_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(citations.lastWrote())));
-                    prop.put("citations_anchors_0_urle", url == null ? 0 : 1);
-                    if (url != null) prop.put("citations_anchors_0_urle_url", url.toNormalform(true, false));
-            		Iterator<CitationReference> i = citations.entries();
-            		int d = 0;
-            		CitationReference cr;
-            		byte[] refhash;
-            		DigestURI refurl;
-                    while (i.hasNext()) {
-                    	cr = i.next();
-                    	refhash = cr.urlhash();
-                    	refurl = authenticated ? sb.getURL(Segments.Process.PUBLIC, refhash) : null;
-                    	prop.put("citations_anchors_0_citations_" + d + "_refurle", refurl == null ? 0 : 1);
-                    	if (refurl != null) prop.put("citations_anchors_0_citations_" + d + "_refurle_refurl", refurl.toNormalform(true, false));
-                    	prop.put("citations_anchors_0_citations_" + d + "_refurle_refhash", refhash);
-                    	prop.put("citations_anchors_0_citations_" + d + "_refurle_refdate", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(cr.lastModified())));
+                    prop.put("citations_count", 1);
+                    prop.put("citations_documents", 1);
+                    prop.put("citations_documents_0_hash", urlhash);
+                    prop.put("citations_documents_0_count", citations.size());
+                    prop.put("citations_documents_0_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(citations.lastWrote())));
+                    prop.put("citations_documents_0_urle", url == null ? 0 : 1);
+                    if (url != null) prop.put("citations_documents_0_urle_url", url.toNormalform(true, false));
+                    int d = 0;
+                    Iterator<CitationReference> i = citations.entries();
+            		while (i.hasNext()) {
+                    	CitationReference cr = i.next();
+                    	byte[] refhash = cr.urlhash();
+                    	DigestURI refurl = authenticated ? sb.getURL(Segments.Process.PUBLIC, refhash) : null;
+                    	prop.put("citations_documents_0_anchors_" + d + "_urle", refurl == null ? 0 : 1);
+                    	if (refurl != null) prop.put("citations_documents_0_anchors_" + d + "_urle_url", refurl.toNormalform(true, false));
+                    	prop.put("citations_documents_0_anchors_" + d + "_urle_hash", refhash);
+                    	prop.put("citations_documents_0_anchors_" + d + "_urle_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(cr.lastModified())));
                     	d++;
             		}
-                    prop.put("citations_anchors_0_citations", d);
+                    prop.put("citations_documents_0_count", d);
+                    prop.put("citations_documents_0_anchors", d);
             	} else {
-                    prop.put("citations_anchors", 0);
+                    prop.put("citations_count", 0);
+                    prop.put("citations_documents", 0);
             	}
             }
         } else if (authenticated) {
@@ -151,7 +198,7 @@ public class webstructure {
         // return rewrite properties
         return prop;
     }
-    
+
     public static void reference(serverObjects prop, String prefix, int c, WebStructureGraph.StructureEntry sentry, WebStructureGraph ws) {
         prop.put(prefix + "_domains_" + c + "_hash", sentry.hosthash);
         prop.put(prefix + "_domains_" + c + "_domain", sentry.hostname);
