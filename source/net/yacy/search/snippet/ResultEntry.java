@@ -55,6 +55,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     private String alternative_urlname;
     private final TextSnippet textSnippet;
     private final List<MediaSnippet> mediaSnippets;
+    private final Segment indexSegment;
     
     // statistic objects
     public long dbRetrievalTime, snippetComputationTime, ranking;
@@ -66,6 +67,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                        final List<MediaSnippet> mediaSnippets,
                        final long dbRetrievalTime, final long snippetComputationTime) {
         this.urlentry = urlentry;
+        this.indexSegment = indexSegment;
         this.alternative_urlstring = null;
         this.alternative_urlname = null;
         this.textSnippet = textSnippet;
@@ -154,6 +156,15 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     }
     public int filesize() {
         return this.urlentry.size();
+    }
+    public int referencesCount() {
+    	return this.indexSegment.urlCitation().count(this.urlentry.hash());
+    }
+    public int llocal() {
+    	return this.urlentry.llocal();
+    }
+    public int lother() {
+    	return this.urlentry.lother();
     }
     public int limage() {
         return this.urlentry.limage();

@@ -306,6 +306,10 @@ public class SnippetProcess {
             r += rentry.lapp()   << this.query.ranking.coeff_cathasapp;
         }
 
+        // apply citation count
+        //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
+        r += (128 * rentry.referencesCount() / (1 + 2 * rentry.llocal() + rentry.lother())) << 8;
+        
         // prefer hit with 'prefer' pattern
         if (this.query.prefer.matcher(rentry.url().toNormalform(true, true)).matches()) {
             r += 256 << this.query.ranking.coeff_prefer;
