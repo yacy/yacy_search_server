@@ -53,6 +53,7 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Document;
+import net.yacy.document.parser.tarParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
@@ -310,7 +311,7 @@ public final class yacyRelease extends yacyVersion {
             final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
 
             final boolean unzipped = header.gzip() && (header.mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
-            if ((unzipped) && (name.endsWith(".tar.gz"))) {
+            if (unzipped && name.endsWith(".tar.gz")) {
                 download = new File(storagePath, name.substring(0, name.length() - 3));
             } else {
                 download = new File(storagePath, name);
@@ -340,6 +341,13 @@ public final class yacyRelease extends yacyVersion {
                 client.writeTo(new BufferedOutputStream(new FileOutputStream(download)));
             }
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + getUrl() + " failed");
+            // check again if this is actually a tar.gz or tar file since the httpc may have decompressed it
+            if (download.getName().endsWith("tar.gz") && tarParser.isTar(download)) {
+                String ts = download.getAbsoluteFile().toString();
+                File tar = new File(ts.substring(0, ts.length() - 3));
+                download.renameTo(tar);
+                download = tar;
+            }
         } catch (final IOException e) {
             // Saving file failed, abort download
             Log.logSevere("yacyVersion", "download of " + getName() + " failed: " + e.getMessage());

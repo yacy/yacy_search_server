@@ -47,10 +47,9 @@ public class tarTools {
 		        return new GZIPInputStream(new FileInputStream(new File(tarFileName)));
 		    } catch (IOException e) {
 		        // this might happen if the stream is not in gzip format.
-		        // there may be a 'gz' extension, but it may stil be a raw tar file
+		        // there may be a 'gz' extension, but it may still be a raw tar file
 		        // this can be caused by 'one too much gzip-content header' that was attached
-		        // by a release file server
-		        // so just try to open is as normal stream
+		        // by a release file server, so just try to open is as normal stream
 		        return new FileInputStream(new File(tarFileName));
 		    }
 		}

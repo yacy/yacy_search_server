@@ -25,13 +25,16 @@
 package net.yacy.document.parser;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -45,6 +48,8 @@ import org.apache.tools.tar.TarInputStream;
 
 public class tarParser extends AbstractParser implements Parser {
 
+    private final static String MAGIC = "ustar"; // A magic for a tar archive, may appear at #101h-#105
+    
     public tarParser() {
         super("Tape Archive File Parser");
         this.SUPPORTED_EXTENSIONS.add("tar");
@@ -97,5 +102,20 @@ public class tarParser extends AbstractParser implements Parser {
             }
         }
         return docacc.toArray(new Document[docacc.size()]);
+    }
+    
+    public final static boolean isTar(File f) {
+        if (!f.exists() || f.length() < 0x105) return false;
+        try {
+            RandomAccessFile raf = new RandomAccessFile(f, "r");
+            raf.seek(0x101);
+            byte[] b = new byte[5];
+            raf.read(b);
+            return MAGIC.equals(UTF8.String(b));
+        } catch (FileNotFoundException e) {
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
