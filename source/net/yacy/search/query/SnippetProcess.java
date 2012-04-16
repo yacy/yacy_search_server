@@ -308,7 +308,7 @@ public class SnippetProcess {
 
         // apply citation count
         //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
-        r += (128 * rentry.referencesCount() / (1 + 2 * rentry.llocal() + rentry.lother())) << 8;
+        r += (128 * rentry.referencesCount() / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
         
         // prefer hit with 'prefer' pattern
         if (this.query.prefer.matcher(rentry.url().toNormalform(true, true)).matches()) {
