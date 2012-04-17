@@ -60,6 +60,7 @@ public class GraphPlotter implements Cloneable {
         this.bottommost = 1.0;
     }
 
+    @Override
     public Object clone() {
         GraphPlotter g = new GraphPlotter();
         g.nodes.putAll(this.nodes);
@@ -70,7 +71,7 @@ public class GraphPlotter implements Cloneable {
         g.bottommost = this.bottommost;
         return g;
     }
-    
+
     public static class Ribbon {
         double length, attraction, repulsion;
         public Ribbon(double length, double attraction, double repulsion) {
@@ -94,7 +95,8 @@ public class GraphPlotter implements Cloneable {
             this.y = y;
             this.layer = layer;
         }
-        
+
+        @Override
         public Object clone() {
             return new Point(this.x, this.y, this.layer);
         }
@@ -102,7 +104,7 @@ public class GraphPlotter implements Cloneable {
 
     private final static double p2 = Math.PI / 2.0;
     private final static double p23 = p2 * 3.0;
-    
+
     public static void force(Point calcPoint, Point currentPoint, Point otherPoint, Ribbon r) {
         double dx = otherPoint.x - currentPoint.x;
         double dy = otherPoint.y - currentPoint.y;
@@ -113,18 +115,19 @@ public class GraphPlotter implements Cloneable {
         double f = attraction ? r.attraction * (d - r.length) * (d - r.length) : - r.repulsion * (r.length - d) * (r.length - d); // the force
         double x1 = Math.cos(a) * f;
         double y1 = Math.sin(a) * f;
-        assert !(attraction && a < Math.PI) || y1 > 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
-        assert !(!attraction && a < Math.PI) || y1 < 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
-        assert !(attraction && a > Math.PI) || y1 < 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
-        assert !(!attraction && a > Math.PI) || y1 > 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
-        assert !(attraction && (a < p2 || a > p23)) || x1 > 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
-        assert !(!attraction && (a < p2 || a > p23)) || x1 < 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
-        assert !(attraction && !(a < p2 || a > p23)) || x1 < 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
-        assert !(!attraction && !(a < p2 || a > p23)) || x1 > 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        // verify calculation
+        assert !(attraction && a < Math.PI) || y1 >= 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
+        assert !(!attraction && a < Math.PI) || y1 <= 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
+        assert !(attraction && a > Math.PI) || y1 <= 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
+        assert !(!attraction && a > Math.PI) || y1 >= 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
+        assert !(attraction && (a < p2 || a > p23)) || x1 >= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(!attraction && (a < p2 || a > p23)) || x1 <= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(attraction && !(a < p2 || a > p23)) || x1 <= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(!attraction && !(a < p2 || a > p23)) || x1 >= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
         calcPoint.x += x1;
         calcPoint.y += y1;
     }
-    
+
     public GraphPlotter physics(Ribbon all, Ribbon edges) {
         GraphPlotter g = new GraphPlotter();
         // compute force for every node
@@ -151,7 +154,7 @@ public class GraphPlotter implements Cloneable {
         g.edges.addAll(this.edges);
         return g;
     }
-    
+
     public Point getNode(final String node) {
         return this.nodes.get(node);
     }
@@ -190,7 +193,7 @@ public class GraphPlotter implements Cloneable {
         assert to != null;
         this.edges.add(fromNode + "$" + toNode);
     }
-    
+
     public Collection<String> getEdges(final String node, boolean start) {
         Collection<String> c = new ArrayList<String>();
         if (start) {
