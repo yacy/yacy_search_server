@@ -636,12 +636,30 @@ public class Blacklist_p {
             newEntry = newEntry.substring(8);
         }
 
-        int pos = newEntry.indexOf('/',0);
-        if (pos < 0) {
-            // add default empty path pattern
-            pos = newEntry.length();
-            newEntry = newEntry + "/.*";
+        if (newEntry.indexOf("*") < 0) {
+            // user did not use any wild cards and just submitted a word
+
+            addBlacklistEntry0(listsPath, blacklistToUse, ".*" + newEntry + ".*/.*", supportedBlacklistTypes);
+            addBlacklistEntry0(listsPath, blacklistToUse, ".*.*/.*" + newEntry + ".*", supportedBlacklistTypes);
+
+        } else {
+
+            int pos = newEntry.indexOf('/',0);
+            if (pos < 0) {
+                // add default empty path pattern
+                pos = newEntry.length();
+                newEntry = newEntry + "/.*";
+            }
+
+            addBlacklistEntry0(listsPath, blacklistToUse, newEntry, supportedBlacklistTypes);
         }
+    }
+
+    private static void addBlacklistEntry0(
+            final File listsPath,
+            final String blacklistToUse,
+            String newEntry,
+            final String[] supportedBlacklistTypes) {
 
         if (!Blacklist.blacklistFileContains(listsPath, blacklistToUse, newEntry)) {
             // append the line to the file
@@ -664,6 +682,7 @@ public class Blacklist_p {
             }
 
             // add to blacklist
+            int pos = newEntry.indexOf('/',0);
             for (final String supportedBlacklistType : supportedBlacklistTypes) {
                 if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklistToUse)) {
                     Switchboard.urlBlacklist.add(supportedBlacklistType, newEntry.substring(0, pos), newEntry.substring(pos + 1));
