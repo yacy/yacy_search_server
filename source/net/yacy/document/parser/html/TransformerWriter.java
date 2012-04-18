@@ -191,11 +191,21 @@ public final class TransformerWriter extends Writer {
     }
 
     private char[] filterTag(final String tag, final boolean opening, final char[] content, final char quotechar) {
-//      System.out.println("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + UTF8.String(content)); // debug
+        //System.out.println("FILTER1: filterTag=" + ((this.filterTag == null) ? "null" : this.filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + new String(content)); // debug
+        // distinguish the following cases:
+        // - (1) not collecting data for a tag and getting no tag (not opener and not close)
+        // - (2) not collecting data for a tag and getting a tag opener
+        // - (3) not collecting data for a tag and getting a tag close
+        // - (4) collecting data for a tag and getting no tag (not opener and not close)
+        // - (5) collecting data for a tag and getting a new/different tag opener without closing the previous tag
+        // - (6) collecting data for a tag and getting a tag close for the wrong tag (a different than the opener)
+        // - (7) collecting data for a tag and getting the correct close tag for that collecting tag
+
         if (this.filterTag == null) {
-            // we are not collection tag text
+            // we are not collection tag text -> case (1) - (3)
+
             if (tag == null) {
-                // and this is not a tag opener/closer
+                // case (1): this is not a tag opener/closer
                 if (this.scraper != null) this.scraper.scrapeText(content, null);
                 if (this.transformer != null) return this.transformer.transformText(content);
                 return content;
@@ -203,43 +213,19 @@ public final class TransformerWriter extends Writer {
 
             // we have a new tag
             if (opening) {
-                if ((this.scraper != null) && (this.scraper.isTag0(tag))) {
-                    // this single tag is collected at once here
-                    final CharBuffer charBuffer = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
-                    this.scraper.scrapeTag0(tag, charBuffer.propParser());
-                    charBuffer.close();
-                }
-                if ((this.transformer != null) && (this.transformer.isTag0(tag))) {
-                    // this single tag is collected at once here
-                    final CharBuffer scb = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
-                    try {
-                        return this.transformer.transformTag0(tag, scb.propParser(), quotechar);
-                    } finally {
-                        scb.close();
-                    }
-                } else if (((this.scraper != null) && (this.scraper.isTag1(tag))) ||
-                           ((this.transformer != null) && (this.transformer.isTag1(tag)))) {
-                    // ok, start collecting
-                    this.filterTag = tag;
-                    final CharBuffer scb = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
-                    this.filterOpts = scb.propParser();
-                    scb.close();
-                    if (this.filterCont == null) this.filterCont = new CharBuffer(ContentScraper.MAX_DOCSIZE, Math.max(100, content.length)); else this.filterCont.reset();
-                    return new char[0];
-                } else {
-                     // we ignore that thing and return it again
-                     return genTag0raw(tag, true, content);
-                }
+                // case (2):
+                return filterTagOpening(tag, content, quotechar);
             }
 
-            // we ignore that thing and return it again
+            // its a close tag
+            // case (3): we ignore that thing and return it again
             return genTag0raw(tag, false, content);
 
         }
 
-        // we are collection tag text for the tag 'filterTag'
+        // we are collection tag text for the tag 'filterTag' -> case (4) - (7)
         if (tag == null) {
-            // go on collecting content
+            // case (4): getting no tag, go on collecting content
             if (this.scraper != null) this.scraper.scrapeText(content, this.filterTag);
             if (this.transformer != null) {
                 this.filterCont.append(this.transformer.transformText(content));
@@ -250,13 +236,60 @@ public final class TransformerWriter extends Writer {
         }
 
         // it's a tag! which one?
-        if ((opening) || (!(tag.equalsIgnoreCase(this.filterTag)))) {
-            // this tag is not our concern. just add it
+        StringBuilder ret0 = new StringBuilder();
+        if (opening) {
+            // case (5): the opening should not be here. we close the previous tag as if it had been closed correctly
+            // this may happen if the html is not well-formed, like forgotten close tags
+            ret0.append(filterTagCloseing(quotechar));
+
+            // after this point we just go on and process a new tag
+            ret0.append(filterTagOpening(tag, content, quotechar));
+            return ret0.toString().toCharArray();
+        }
+
+        if (!tag.equalsIgnoreCase(this.filterTag)) {
+            // case (6): its a closing tag, but the wrong one. just add it.
             this.filterCont.append(genTag0raw(tag, opening, content));
             return new char[0];
         }
 
         // it's our closing tag! return complete result.
+        return filterTagCloseing(quotechar);
+    }
+
+    private char[] filterTagOpening(final String tag, final char[] content, final char quotechar) {
+        if (this.scraper != null && this.scraper.isTag0(tag)) {
+            // this single tag is collected at once here
+            final CharBuffer charBuffer = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
+            this.scraper.scrapeTag0(tag, charBuffer.propParser());
+            charBuffer.close();
+        }
+        if (this.transformer != null && this.transformer.isTag0(tag)) {
+            // this single tag is collected at once here
+            final CharBuffer scb = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
+            char[] b = new char[0];
+            try {
+                b = this.transformer.transformTag0(tag, scb.propParser(), quotechar);
+            } finally {
+                scb.close();
+            }
+            return b;
+        } else if ((this.scraper != null && this.scraper.isTag1(tag)) ||
+                   (this.transformer != null && this.transformer.isTag1(tag))) {
+            // ok, start collecting
+            this.filterTag = tag;
+            final CharBuffer scb = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
+            this.filterOpts = scb.propParser();
+            scb.close();
+            if (this.filterCont == null) this.filterCont = new CharBuffer(ContentScraper.MAX_DOCSIZE, Math.max(100, content.length)); else this.filterCont.reset();
+            return new char[0];
+        } else {
+             // we ignore that thing and return it again
+             return genTag0raw(tag, true, content);
+        }
+    }
+
+    private char[] filterTagCloseing(final char quotechar) {
         char[] ret;
         if (this.scraper != null) this.scraper.scrapeTag1(this.filterTag, this.filterOpts, this.filterCont.getChars());
         if (this.transformer != null) {
@@ -291,7 +324,7 @@ public final class TransformerWriter extends Writer {
 
     private char[] filterSentence(final char[] in, final char quotechar) {
         if (in.length == 0) return in;
-//      System.out.println("FILTER0: " + UTF8.String(in)); // debug
+        //System.out.println("FILTER0: " + new String(in)); // debug
         // scan the string and parse structure
         if (in.length > 2 && in[0] == lb) {
 
