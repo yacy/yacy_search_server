@@ -176,6 +176,10 @@ public class Status
             prop.put("hintSupport", "1");
         }
 
+        if (adminaccess && sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+            prop.put("warningCrawlPaused", "1");
+        }
+
         // hostname and port
         final String extendedPortString = sb.getConfig("port", "8090");
         final int pos = extendedPortString.indexOf(':', 0);
