@@ -164,12 +164,16 @@ public class Status
         prop.put("versionpp", versionstring);
 
         // place some more hints
-        if ( (adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) ) {
+        if (adminaccess && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) {
             prop.put("hintCrawlStart", "1");
         }
 
-        if ( (adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500) ) {
+        if (adminaccess && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500) {
             prop.put("hintCrawlMonitor", "1");
+        }
+
+        if (adminaccess && "intranet|webportal|allip".indexOf(env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified")) >= 0) {
+            prop.put("hintSupport", "1");
         }
 
         // hostname and port
