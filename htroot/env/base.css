@@ -625,9 +625,11 @@ form dt, dl.pairs dt {
 
 dt.hintIcon {
 	float:left;
+    clear:both;
 }
 
 dd.hint {
+	padding-top: 10px;
 	padding-bottom: 10px;
 }
 
