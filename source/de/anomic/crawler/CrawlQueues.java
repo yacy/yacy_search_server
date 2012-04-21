@@ -226,7 +226,7 @@ public class CrawlQueues {
             // move some tasks to the core crawl job so we have something to do
             final int toshift = Math.min(10, limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             for (int i = 0; i < toshift; i++) {
-                this.noticeURL.shift(NoticedURL.StackType.GLOBAL, NoticedURL.StackType.LOCAL, this.sb.crawler);
+                this.noticeURL.shift(NoticedURL.StackType.GLOBAL, NoticedURL.StackType.LOCAL, this.sb.crawler, this.sb.robots);
             }
             this.log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
                     ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + this.sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "") +
@@ -261,7 +261,7 @@ public class CrawlQueues {
             try {
                 if (this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) > 0) {
                     // get one entry that will not be loaded, just indexed
-                    urlEntry = this.noticeURL.pop(NoticedURL.StackType.NOLOAD, true, this.sb.crawler);
+                    urlEntry = this.noticeURL.pop(NoticedURL.StackType.NOLOAD, true, this.sb.crawler, this.sb.robots);
                     if (urlEntry == null) {
                         continue;
                     }
@@ -284,7 +284,7 @@ public class CrawlQueues {
                     return true;
                 }
 
-                urlEntry = this.noticeURL.pop(NoticedURL.StackType.LOCAL, true, this.sb.crawler);
+                urlEntry = this.noticeURL.pop(NoticedURL.StackType.LOCAL, true, this.sb.crawler, this.sb.robots);
                 if (urlEntry == null) {
                     continue;
                 }
@@ -582,7 +582,7 @@ public class CrawlQueues {
         final String stats = "REMOTETRIGGEREDCRAWL[" + this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + ", " + this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL) + ", " + this.noticeURL.stackSize(NoticedURL.StackType.OVERHANG) + ", "
                         + this.noticeURL.stackSize(NoticedURL.StackType.REMOTE) + "]";
         try {
-            final Request urlEntry = this.noticeURL.pop(NoticedURL.StackType.REMOTE, true, this.sb.crawler);
+            final Request urlEntry = this.noticeURL.pop(NoticedURL.StackType.REMOTE, true, this.sb.crawler, this.sb.robots);
             final String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +

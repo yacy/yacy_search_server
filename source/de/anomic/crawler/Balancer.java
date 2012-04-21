@@ -280,19 +280,19 @@ public class Balancer {
      * @param crawlEntry
      * @return
      */
-    public long getDomainSleepTime(final CrawlSwitchboard cs, Request crawlEntry) {
+    public long getDomainSleepTime(final CrawlSwitchboard cs, final RobotsTxt robots, Request crawlEntry) {
         final CrawlProfile profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
-        return getDomainSleepTime(cs, profileEntry, crawlEntry.url());
+        return getDomainSleepTime(cs, robots, profileEntry, crawlEntry.url());
     }
 
-    private long getDomainSleepTime(final CrawlSwitchboard cs, final CrawlProfile profileEntry, final DigestURI crawlURL) {
+    private long getDomainSleepTime(final CrawlSwitchboard cs, final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURI crawlURL) {
         if (profileEntry == null) {
             return 0;
         }
         long sleeptime = (
             profileEntry.cacheStrategy() == CacheStrategy.CACHEONLY ||
             (profileEntry.cacheStrategy() == CacheStrategy.IFEXIST && Cache.has(crawlURL.hash()))
-            ) ? 0 : Latency.waitingRemaining(crawlURL, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+            ) ? 0 : Latency.waitingRemaining(crawlURL, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         return sleeptime;
     }
 
@@ -367,7 +367,7 @@ public class Balancer {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
-    public Request pop(final boolean delay, final CrawlSwitchboard cs) throws IOException {
+    public Request pop(final boolean delay, final CrawlSwitchboard cs, final RobotsTxt robots) throws IOException {
         // returns a crawl entry from the stack and ensures minimum delta times
 
     	long sleeptime = 0;
@@ -409,7 +409,7 @@ public class Balancer {
 		        	return null;
 		        }
 		        // depending on the caching policy we need sleep time to avoid DoS-like situations
-		        sleeptime = getDomainSleepTime(cs, profileEntry, crawlEntry.url());
+		        sleeptime = getDomainSleepTime(cs, robots, profileEntry, crawlEntry.url());
 
 		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + ASCII.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + ASCII.String(rowEntry.getPrimaryKeyBytes());
 		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + ASCII.String(nexthash) + ", crawlEntry.url().hash() = " + ASCII.String(crawlEntry.url().hash());
@@ -425,7 +425,7 @@ public class Balancer {
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta) + ", domainStacks.size() = " + this.domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
+            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta) + ", domainStacks.size() = " + this.domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
             long loops = sleeptime / 1000;
             long rest = sleeptime % 1000;
             if (loops < 3) {

@@ -32,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.search.Switchboard;
 
 
 public class Latency {
@@ -161,7 +160,7 @@ public class Latency {
      * @param minimumGlobalDelta
      * @return the remaining waiting time in milliseconds
      */
-    public static long waitingRemaining(final MultiProtocolURI url, final Set<String> thisAgents, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static long waitingRemaining(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents, final long minimumLocalDelta, final long minimumGlobalDelta) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = host(url);
@@ -188,7 +187,7 @@ public class Latency {
         if (!local) {
             RobotsTxtEntry robotsEntry;
             try {
-                robotsEntry = Switchboard.getSwitchboard().robots.getEntry(url, thisAgents);
+                robotsEntry = robots.getEntry(url, thisAgents);
             } catch (final IOException e) {
                 robotsEntry = null;
             }
@@ -211,7 +210,7 @@ public class Latency {
     }
 
 
-    public static String waitingRemainingExplain(final MultiProtocolURI url, final Set<String> thisAgents, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static String waitingRemainingExplain(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents, final long minimumLocalDelta, final long minimumGlobalDelta) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = host(url);
@@ -241,7 +240,7 @@ public class Latency {
         if (!local) {
             RobotsTxtEntry robotsEntry;
             try {
-                robotsEntry = Switchboard.getSwitchboard().robots.getEntry(url, thisAgents);
+                robotsEntry = robots.getEntry(url, thisAgents);
             } catch (final IOException e) {
                 robotsEntry = null;
             }

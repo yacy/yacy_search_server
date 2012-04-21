@@ -247,12 +247,12 @@ public class NoticedURL {
      * get a list of domains that are currently maintained as domain stacks
      * @return a collection of clear text strings of host names
      */
-    public long getDomainSleepTime(final StackType stackType, final CrawlSwitchboard cs, Request crawlEntry) {
+    public long getDomainSleepTime(final StackType stackType, final RobotsTxt robots, final CrawlSwitchboard cs, Request crawlEntry) {
         switch (stackType) {
-            case LOCAL:     return this.coreStack.getDomainSleepTime(cs, crawlEntry);
-            case GLOBAL:    return this.limitStack.getDomainSleepTime(cs, crawlEntry);
-            case REMOTE:   return this.remoteStack.getDomainSleepTime(cs, crawlEntry);
-            case NOLOAD:   return this.noloadStack.getDomainSleepTime(cs, crawlEntry);
+            case LOCAL:     return this.coreStack.getDomainSleepTime(cs, robots, crawlEntry);
+            case GLOBAL:    return this.limitStack.getDomainSleepTime(cs, robots, crawlEntry);
+            case REMOTE:   return this.remoteStack.getDomainSleepTime(cs, robots, crawlEntry);
+            case NOLOAD:   return this.noloadStack.getDomainSleepTime(cs, robots, crawlEntry);
             default: return 0;
         }
     }
@@ -273,19 +273,19 @@ public class NoticedURL {
         }
     }
 
-    public Request pop(final StackType stackType, final boolean delay, final CrawlSwitchboard cs) throws IOException {
+    public Request pop(final StackType stackType, final boolean delay, final CrawlSwitchboard cs, final RobotsTxt robots) throws IOException {
         switch (stackType) {
-            case LOCAL:     return pop(this.coreStack, delay, cs);
-            case GLOBAL:    return pop(this.limitStack, delay, cs);
-            case REMOTE:   return pop(this.remoteStack, delay, cs);
-            case NOLOAD:   return pop(this.noloadStack, false, cs);
+            case LOCAL:     return pop(this.coreStack, delay, cs, robots);
+            case GLOBAL:    return pop(this.limitStack, delay, cs, robots);
+            case REMOTE:   return pop(this.remoteStack, delay, cs, robots);
+            case NOLOAD:   return pop(this.noloadStack, false, cs, robots);
             default: return null;
         }
     }
 
-    public void shift(final StackType fromStack, final StackType toStack, final CrawlSwitchboard cs) {
+    public void shift(final StackType fromStack, final StackType toStack, final CrawlSwitchboard cs, final RobotsTxt robots) {
         try {
-            final Request entry = pop(fromStack, false, cs);
+            final Request entry = pop(fromStack, false, cs, robots);
             if (entry != null) {
                 final String warning = push(toStack, entry);
                 if (warning != null) {
@@ -308,14 +308,14 @@ public class NoticedURL {
             }
     }
 
-    private Request pop(final Balancer balancer, final boolean delay, final CrawlSwitchboard cs) throws IOException {
+    private Request pop(final Balancer balancer, final boolean delay, final CrawlSwitchboard cs, final RobotsTxt robots) throws IOException {
         // this is a filo - pop
         int s;
         Request entry;
         int errors = 0;
         synchronized (balancer) {
             while ((s = balancer.size()) > 0) {
-                entry = balancer.pop(delay, cs);
+                entry = balancer.pop(delay, cs, robots);
                 if (entry == null) {
                     if (s > balancer.size()) continue;
                     errors++;
