@@ -53,7 +53,6 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.MemoryControl;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.client.Cache;
 
 public class Balancer {
 

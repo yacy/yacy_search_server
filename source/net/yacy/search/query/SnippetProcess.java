@@ -60,8 +60,8 @@ import net.yacy.search.snippet.TextSnippet;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
+import de.anomic.crawler.Cache;
 import de.anomic.data.WorkTables;
-import de.anomic.http.client.Cache;
 
 public class SnippetProcess {
 

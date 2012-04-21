@@ -32,7 +32,7 @@
     the class shall also be used to do a cache-cleaning and index creation
 */
 
-package de.anomic.http.client;
+package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;

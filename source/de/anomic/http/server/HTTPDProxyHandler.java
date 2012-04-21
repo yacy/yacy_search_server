@@ -87,9 +87,9 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import de.anomic.crawler.Cache;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.client.Cache;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 

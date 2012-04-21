@@ -39,8 +39,8 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.visualization.RasterPlotter;
+import de.anomic.crawler.Cache;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.client.Cache;
 
 public class OSMTile {
 

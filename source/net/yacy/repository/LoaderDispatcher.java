@@ -54,6 +54,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
+import de.anomic.crawler.Cache;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.FTPLoader;
@@ -62,7 +63,6 @@ import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.crawler.retrieval.SMBLoader;
-import de.anomic.http.client.Cache;
 
 public final class LoaderDispatcher {
 

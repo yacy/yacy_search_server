@@ -68,10 +68,10 @@ import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
 import net.yacy.search.ranking.ReferenceOrder;
+import de.anomic.crawler.Cache;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.data.ListManager;
 import de.anomic.data.WorkTables;
-import de.anomic.http.client.Cache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
