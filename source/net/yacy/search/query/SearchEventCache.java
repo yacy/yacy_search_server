@@ -32,6 +32,7 @@ import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import net.yacy.cora.document.Classification;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.SeedDB;
@@ -40,7 +41,6 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.snippet.ContentDomain;
 import de.anomic.data.WorkTables;
 
 public class SearchEventCache {
@@ -116,7 +116,7 @@ public class SearchEventCache {
     private static SearchEvent getDummyEvent(final WorkTables workTables, final LoaderDispatcher loader, final Segment indexSegment) {
         Log.logWarning("SearchEventCache", "returning dummy event");
         if (dummyEvent != null) return dummyEvent;
-        final QueryParams query = new QueryParams("", 0, null, indexSegment, new RankingProfile(ContentDomain.TEXT), "");
+        final QueryParams query = new QueryParams("", 0, null, indexSegment, new RankingProfile(Classification.ContentDomain.TEXT), "");
         dummyEvent = new SearchEvent(query, null, workTables, null, false, loader, 0, 0, 0, 0, false);
         return dummyEvent;
     }

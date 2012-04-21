@@ -29,11 +29,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.yacy.cora.document.Classification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.snippet.ContentDomain;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -151,7 +151,7 @@ public class Ranking_p {
             // we create empty entries for template strings
             final serverObjects prop = defaultValues();
             final RankingProfile ranking;
-            if (sb == null) ranking = new RankingProfile(ContentDomain.TEXT);
+            if (sb == null) ranking = new RankingProfile(Classification.ContentDomain.TEXT);
             else ranking = sb.getRanking();
             putRanking(prop, ranking, "local");
             return prop;
@@ -168,7 +168,7 @@ public class Ranking_p {
 
         if (post.containsKey("ResetRanking")) {
             sb.setConfig("rankingProfile", "");
-            final RankingProfile ranking = new RankingProfile(ContentDomain.TEXT);
+            final RankingProfile ranking = new RankingProfile(Classification.ContentDomain.TEXT);
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
             putRanking(prop, ranking, "local");

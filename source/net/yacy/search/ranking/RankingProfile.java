@@ -30,8 +30,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.search.snippet.ContentDomain;
 
 public class RankingProfile {
 
@@ -85,7 +86,7 @@ public class RankingProfile {
         coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer,
         coeff_termfrequency, coeff_language, coeff_citation;
 
-    public RankingProfile(final ContentDomain mediatype) {
+    public RankingProfile(final Classification.ContentDomain mediatype) {
         // set default-values
         this.coeff_appemph            = 5;
         this.coeff_appurl             = 11;

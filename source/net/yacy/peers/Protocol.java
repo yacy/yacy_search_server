@@ -62,6 +62,7 @@ import java.util.regex.Pattern;
 import net.yacy.migration;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.JSONArray;
 import net.yacy.cora.document.JSONException;
 import net.yacy.cora.document.JSONObject;
@@ -103,7 +104,6 @@ import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.snippet.ContentDomain;
 import net.yacy.search.snippet.TextSnippet;
 
 import org.apache.http.entity.mime.content.ContentBody;
@@ -1524,7 +1524,7 @@ public final class Protocol
                             "",
                             args[1],
                             null, //secondarySearchSuperviser,
-                            new RankingProfile(ContentDomain.TEXT), // rankingProfile,
+                            new RankingProfile(Classification.ContentDomain.TEXT), // rankingProfile,
                             null // constraint);
                         );
                     for ( final URIMetadataRow link : result.links ) {

@@ -37,6 +37,7 @@ import java.util.TreeSet;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Document;
@@ -127,7 +128,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return o1.compareTo(o2);
     }
 
-    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final ContentDomain mediatype, final CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
+    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();

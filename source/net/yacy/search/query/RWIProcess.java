@@ -39,6 +39,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.sorting.ClusteredScoreMap;
@@ -65,7 +67,6 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.ReferenceOrder;
-import net.yacy.search.snippet.ContentDomain;
 import net.yacy.search.snippet.ResultEntry;
 
 public final class RWIProcess extends Thread
@@ -288,7 +289,7 @@ public final class RWIProcess extends Thread
                 }
 
                 // check document domain
-                if ( this.query.contentdom != ContentDomain.TEXT ) {
+                if ( this.query.contentdom != Classification.ContentDomain.TEXT ) {
                     if ( (this.query.contentdom == ContentDomain.AUDIO)
                         && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio))) ) {
                         continue pollloop;

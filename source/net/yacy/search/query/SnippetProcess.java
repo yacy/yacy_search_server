@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.solr.SolrConnector;
@@ -52,7 +53,6 @@ import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
-import net.yacy.search.snippet.ContentDomain;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
@@ -293,23 +293,15 @@ public class SnippetProcess {
         long r = 0;
 
         // for media search: prefer pages with many links
-        if (this.query.contentdom == ContentDomain.IMAGE) {
-            r += rentry.limage() << this.query.ranking.coeff_cathasimage;
-        }
-        if (this.query.contentdom == ContentDomain.AUDIO) {
-            r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
-        }
-        if (this.query.contentdom == ContentDomain.VIDEO) {
-            r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
-        }
-        if (this.query.contentdom == ContentDomain.APP  ) {
-            r += rentry.lapp()   << this.query.ranking.coeff_cathasapp;
-        }
+        r += rentry.limage() << this.query.ranking.coeff_cathasimage;
+        r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
+        r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
+        r += rentry.lapp()   << this.query.ranking.coeff_cathasapp;
 
         // apply citation count
         //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
         r += (128 * rentry.referencesCount() / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
-        
+
         // prefer hit with 'prefer' pattern
         if (this.query.prefer.matcher(rentry.url().toNormalform(true, true)).matches()) {
             r += 256 << this.query.ranking.coeff_prefer;
@@ -588,7 +580,7 @@ public class SnippetProcess {
         }
 
         // load snippet
-        if (this.query.contentdom == ContentDomain.TEXT) {
+        if (this.query.contentdom == Classification.ContentDomain.TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
             final TextSnippet snippet = new TextSnippet(

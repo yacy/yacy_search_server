@@ -40,6 +40,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
@@ -59,7 +61,6 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.snippet.ContentDomain;
 
 public final class QueryParams {
 
@@ -112,7 +113,7 @@ public final class QueryParams {
     public int offset;
     public final Pattern urlMask, prefer;
     public final boolean urlMask_isCatchall, prefer_isMatchnothing;
-    public final ContentDomain contentdom;
+    public final Classification.ContentDomain contentdom;
     public final String targetlang;
     public final Collection<Autotagging.Metatag> metatags;
     public final String navigators;
@@ -288,10 +289,6 @@ public final class QueryParams {
 
     public void setOffset(final int newOffset) {
         this.offset = newOffset;
-    }
-
-    public String contentdom() {
-        return this.contentdom.toString();
     }
 
     public boolean isLocal() {
@@ -588,7 +585,7 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("contentdom=");
-        sb.append(theQuery.contentdom());
+        sb.append(theQuery.contentdom.toString());
 
         sb.append(ampersand);
         sb.append("former=");

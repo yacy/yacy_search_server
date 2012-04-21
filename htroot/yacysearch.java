@@ -39,6 +39,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
@@ -76,7 +78,6 @@ import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.snippet.ContentDomain;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkTables;
@@ -121,7 +122,7 @@ public class yacysearch {
         //get focus option
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
         prop.put("focus", focus ? 1 : 0);
-        
+
         // produce vocabulary navigation sidebars
         Collection<Vocabulary> vocabularies = LibraryProvider.autotagging.getVocabularies();
         int j = 0;
@@ -270,7 +271,7 @@ public class yacysearch {
         }
 
         // find search domain
-        final ContentDomain contentdom =
+        final Classification.ContentDomain contentdom =
             ContentDomain.contentdomParser(post == null ? "text" : post.get("contentdom", "text"));
 
         // patch until better search profiles are available

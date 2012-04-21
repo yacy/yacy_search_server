@@ -38,6 +38,8 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -70,7 +72,6 @@ import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.snippet.ContentDomain;
 import net.yacy.search.snippet.ResultEntry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -211,7 +212,7 @@ public final class search {
         final long timestamp = System.currentTimeMillis();
 
     	// prepare a search profile
-        final RankingProfile rankingProfile = (profile.length() == 0) ? new RankingProfile(ContentDomain.contentdomParser(contentdom)) : new RankingProfile("", profile);
+        final RankingProfile rankingProfile = (profile.length() == 0) ? new RankingProfile(Classification.ContentDomain.contentdomParser(contentdom)) : new RankingProfile("", profile);
 
         // prepare an abstract result
         final StringBuilder indexabstract = new StringBuilder(6000);

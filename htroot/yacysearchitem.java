@@ -30,6 +30,8 @@ import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
@@ -45,7 +47,6 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
-import net.yacy.search.snippet.ContentDomain;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
@@ -104,7 +105,7 @@ public class yacysearchitem {
         prop.put("navurlBase", QueryParams.navurlBase("html", theQuery, null, theQuery.urlMask.toString(), theQuery.navigators).toString());
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
-        if (theQuery.contentdom == ContentDomain.TEXT) {
+        if (theQuery.contentdom == Classification.ContentDomain.TEXT) {
             // text search
 
             // generate result object
@@ -210,7 +211,7 @@ public class yacysearchitem {
             return prop;
         }
 
-        if (theQuery.contentdom == ContentDomain.IMAGE) {
+        if (theQuery.contentdom == Classification.ContentDomain.IMAGE) {
             // image search; shows thumbnails
 
             prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content

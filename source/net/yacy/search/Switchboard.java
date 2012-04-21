@@ -76,6 +76,7 @@ import java.util.zip.ZipInputStream;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
@@ -149,7 +150,6 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.snippet.ContentDomain;
 import de.anomic.crawler.Cache;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
@@ -1462,7 +1462,7 @@ public final class Switchboard extends serverSwitch
 
     public RankingProfile getRanking() {
         return (getConfig("rankingProfile", "").length() == 0)
-            ? new RankingProfile(ContentDomain.TEXT)
+            ? new RankingProfile(Classification.ContentDomain.TEXT)
             : new RankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
     }
 

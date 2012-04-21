@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -47,7 +48,6 @@ import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.ranking.ReferenceOrder;
-import net.yacy.search.snippet.ContentDomain;
 
 /**
  * convenience class to access the yacycore library from outside of yacy to put files into the index
@@ -57,7 +57,7 @@ import net.yacy.search.snippet.ContentDomain;
 public class DocumentIndex extends Segment
 {
 
-    private static final RankingProfile textRankingDefault = new RankingProfile(ContentDomain.TEXT);
+    private static final RankingProfile textRankingDefault = new RankingProfile(Classification.ContentDomain.TEXT);
     //private Bitfield zeroConstraint = new Bitfield(4);
 
     private static DigestURI poison;
