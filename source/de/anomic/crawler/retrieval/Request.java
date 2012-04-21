@@ -95,7 +95,7 @@ public class Request extends WorkflowJob
 
     /**
      * convenience method for 'full' request object
-     * 
+     *
      * @param url
      * @param referrerhash
      */
@@ -105,7 +105,7 @@ public class Request extends WorkflowJob
 
     /**
      * A Request Entry is a object that is created to provide all information to load a specific resource.
-     * 
+     *
      * @param initiator the hash of the initiator peer
      * @param url the {@link URL} to crawl
      * @param referrer the hash of the referrer URL

@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.document;
+package net.yacy.cora.document;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.logging.Log;
 
 public class Classification {

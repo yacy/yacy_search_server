@@ -32,11 +32,11 @@ import java.util.List;
 
 import de.anomic.crawler.CrawlProfile;
 
+import net.yacy.cora.document.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.ftp.FTPClient;
-import net.yacy.document.Classification;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;

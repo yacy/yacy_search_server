@@ -52,6 +52,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.parser.html.ContentScraper;
