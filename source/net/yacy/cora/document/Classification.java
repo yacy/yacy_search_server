@@ -24,11 +24,13 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
 public class Classification {
 
+    private static final Set<String> textExtSet = new HashSet<String>();
     private static final Set<String> mediaExtSet = new HashSet<String>();
     private static final Set<String> imageExtSet = new HashSet<String>();
     private static final Set<String> audioExtSet = new HashSet<String>();
@@ -78,11 +80,13 @@ public class Classification {
 
     static {
 
-        final String apps = "7z,ace,arc,arj,apk,asf,asx,bat,bin,bkf,bz2,cab,com,css,dcm,deb,dll,dmg,exe,gho,ghs,gz,hqx,img,iso,jar,lha,rar,sh,sit,sitx,tar,tbz,tgz,tib,torrent,vbs,war,zip";
+        final String text = "htm,html,phtml,shtml,xhtml,php,php3,php4,php5,cfm,asp,aspx,tex,txt,jsp,mf,asp,aspx,csv,gpx,vcf,xsl,xml,pdf,doc,docx,xls,xlsx,ppt,pptx";
+        final String apps = "7z,ace,arc,arj,apk,asf,asx,bat,bin,bkf,bz2,cab,com,css,dcm,deb,dll,dmg,exe,java,gho,ghs,gz,hqx,img,iso,jar,lha,rar,sh,sit,sitx,tar,tbz,tgz,tib,torrent,vbs,war,zip";
         final String audio = "aac,aif,aiff,flac,m4a,m4p,mid,mp2,mp3,oga,ogg,ram,sid,wav,wma";
         final String video = "3g2,3gp,3gp2,3gpp,3gpp2,3ivx,asf,asx,avi,div,divx,dv,dvx,env,f4v,flv,hdmov,m1v,m4v,m-jpeg,moov,mov,movie,mp2v,mp4,mpe,mpeg,mpg,mpg4,mv4,ogm,ogv,qt,rm,rv,vid,swf,wmv";
         final String image = "ai,bmp,cdr,cmx,emf,eps,gif,img,jpeg,jpg,mng,pct,pdd,pdn,pict,png,psb,psd,psp,tif,tiff,wmf";
 
+        addSet(textExtSet, text); // image formats
         addSet(imageExtSet, image); // image formats
         addSet(audioExtSet, audio); // audio formats
         addSet(videoExtSet, video); // video formats
@@ -93,6 +97,11 @@ public class Classification {
     private static void addSet(Set<String> set, final String extString) {
         if ((extString == null) || (extString.length() == 0)) return;
         for (String s: extString.split(",")) set.add(s.toLowerCase().trim());
+    }
+
+    public static boolean isTextExtension(String textExt) {
+        if (textExt == null) return false;
+        return textExtSet.contains(textExt.trim().toLowerCase());
     }
 
     public static boolean isMediaExtension(String mediaExt) {
@@ -120,11 +129,19 @@ public class Classification {
         return appsExtSet.contains(appsExt.trim().toLowerCase());
     }
 
+    public static ContentDomain getContentDomain(String ext) {
+        if (isTextExtension(ext)) return ContentDomain.TEXT;
+        if (isImageExtension(ext)) return ContentDomain.IMAGE;
+        if (isAudioExtension(ext)) return ContentDomain.AUDIO;
+        if (isVideoExtension(ext)) return ContentDomain.VIDEO;
+        if (isApplicationExtension(ext)) return ContentDomain.APP;
+        return ContentDomain.ALL;
+    }
+
     public static boolean isPictureMime(final String mimeType) {
         if (mimeType == null) return false;
         return mimeType.toUpperCase().startsWith("IMAGE");
     }
-
 
     private static final Properties mimeTable = new Properties();
 
@@ -139,6 +156,14 @@ public class Classification {
             } finally {
                 if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (final Exception e1) {}
             }
+        }
+        for (Entry<Object, Object> entry: mimeTable.entrySet()) {
+            String ext = (String) entry.getKey();
+            String mime = (String) entry.getValue();
+            if (mime.startsWith("text/")) textExtSet.add(ext.toLowerCase());
+            if (mime.startsWith("audio/")) audioExtSet.add(ext.toLowerCase());
+            if (mime.startsWith("video/")) videoExtSet.add(ext.toLowerCase());
+            if (mime.startsWith("application/")) appsExtSet.add(ext.toLowerCase());
         }
     }
 

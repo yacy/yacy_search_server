@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.Punycode.PunycodeException;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.TimeoutRequest;
@@ -89,6 +90,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     protected       String host, path, quest, ref;
     protected       int port;
     protected       InetAddress hostAddress;
+    protected       ContentDomain contentDomain;
 
     /**
      * initialization of a MultiProtocolURI to produce poison pills for concurrent blocking queues
@@ -101,6 +103,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.path = null;
         this.quest = null;
         this.ref = null;
+        this.contentDomain = null;
         this.port = -1;
     }
 
@@ -116,6 +119,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.path = url.path;
         this.quest = url.quest;
         this.ref = url.ref;
+        this.contentDomain = null;
         this.port = url.port;
     }
 
@@ -123,6 +127,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         if (url == null) throw new MalformedURLException("url string is null");
 
         this.hostAddress = null;
+        this.contentDomain = null;
 
         // identify protocol
         assert (url != null);
@@ -257,6 +262,13 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public final boolean isFTP()   { return this.protocol.equals("ftp"); }
     public final boolean isFile()  { return this.protocol.equals("file"); }
     public final boolean isSMB()   { return this.protocol.equals("smb"); }
+
+    public final ContentDomain getContentDomain() {
+        if (this.contentDomain == null) {
+            this.contentDomain = Classification.getContentDomain(this.getFileExtension());
+        }
+        return this.contentDomain;
+    }
 
     public static MultiProtocolURI newURL(final String baseURL, final String relPath) throws MalformedURLException {
         if ((baseURL == null) ||

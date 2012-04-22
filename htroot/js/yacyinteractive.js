@@ -36,7 +36,7 @@ function search(search, count, offset) {
   } else if (window.ActiveXObject) { // IE
     self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
   }
-  self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&nav=all&maximumRecords=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
+  self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&nav=all&contentdom=all&maximumRecords=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
   self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {

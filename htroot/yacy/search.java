@@ -119,7 +119,7 @@ public final class search {
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  modifier = post.get("modifier", "").trim();
-        final String  contentdom = post.get("contentdom", "text");
+        final String  contentdom = post.get("contentdom", "all");
         final String  filter = post.get("filter", ".*"); // a filter on the url
         final Pattern snippetPattern = Pattern.compile(post.get("snippet", ".*")); // a filter on the snippet
         String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;

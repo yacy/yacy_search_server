@@ -176,6 +176,7 @@ public final class SearchEvent
                             SearchEvent.this.query.targetlang == null ? "" : SearchEvent.this.query.targetlang,
                             SearchEvent.this.query.sitehash == null ? "" : SearchEvent.this.query.sitehash,
                             SearchEvent.this.query.authorhash == null ? "" : SearchEvent.this.query.authorhash,
+                            SearchEvent.this.query.contentdom == null ? "all" : SearchEvent.this.query.contentdom.toString(),
                             remote_maxcount,
                             remote_maxtime,
                             SearchEvent.this.query.maxDistance,

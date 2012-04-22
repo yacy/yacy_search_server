@@ -46,7 +46,7 @@ public class RemoteSearch extends Thread {
 
     private static final ThreadGroup ysThreadGroup = new ThreadGroup("yacySearchThreadGroup");
 
-    final private String wordhashes, excludehashes, urlhashes, sitehash, authorhash;
+    final private String wordhashes, excludehashes, urlhashes, sitehash, authorhash, contentdom;
     final private boolean global;
     final private int partitions;
     final private Segment indexSegment;
@@ -72,7 +72,7 @@ public class RemoteSearch extends Thread {
               final Pattern snippet,
               final QueryParams.Modifier modifier,
               final String language,
-              final String sitehash, final String authorhash,
+              final String sitehash, final String authorhash, final String contentdom,
               final int count, final long time, final int maxDistance,
               final boolean global, final int partitions,
               final Seed targetPeer,
@@ -96,6 +96,7 @@ public class RemoteSearch extends Thread {
         this.language = language;
         this.sitehash = sitehash;
         this.authorhash = authorhash;
+        this.contentdom = contentdom;
         this.global = global;
         this.partitions = partitions;
         this.indexSegment = indexSegment;
@@ -120,7 +121,7 @@ public class RemoteSearch extends Thread {
                         this.peers.mySeed(),
                         this.wordhashes, this.excludehashes, this.urlhashes,
                         this.prefer, this.filter, this.snippet, this.modifier.getModifier(),
-                        this.language, this.sitehash, this.authorhash,
+                        this.language, this.sitehash, this.authorhash, this.contentdom,
                         this.count, this.time, this.maxDistance, this.global, this.partitions,
                         this.targetPeer, this.indexSegment, this.containerCache, this.secondarySearchSuperviser,
                         this.blacklist, this.rankingProfile, this.constraint);
@@ -166,6 +167,7 @@ public class RemoteSearch extends Thread {
             final String language,
             final String sitehash,
             final String authorhash,
+            final String contentdom,
             final int count, final long time, final int maxDist,
             final Segment indexSegment,
             final SeedDB peers,
@@ -200,7 +202,7 @@ public class RemoteSearch extends Thread {
             try {
                 RemoteSearch rs = new RemoteSearch(
                     wordhashes, excludehashes, "", prefer, filter, snippet, modifier,
-                    language, sitehash, authorhash,
+                    language, sitehash, authorhash, contentdom,
                     count, time, maxDist, true, targets, targetPeers[i],
                     indexSegment, peers, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
                 rs.start();
@@ -233,7 +235,7 @@ public class RemoteSearch extends Thread {
         if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(ASCII.getBytes(targetPeer.hash)));
         final RemoteSearch searchThread = new RemoteSearch(
-                wordhashes, "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, QueryParams.catchall_pattern, new QueryParams.Modifier(""), "", "", "", 20, time, 9999, true, 0, targetPeer,
+                wordhashes, "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, QueryParams.catchall_pattern, new QueryParams.Modifier(""), "", "", "", "all", 20, time, 9999, true, 0, targetPeer,
                 indexSegment, peers, containerCache, null, blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;

@@ -833,5 +833,22 @@ dc_rights
         return result;
     }
 
+    public static Map<MultiProtocolURI, String> getAudiolinks(final Document[] documents) {
+        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+        for (final Document d: documents) result.putAll(d.audiolinks);
+        return result;
+    }
+
+    public static Map<MultiProtocolURI, String> getVideolinks(final Document[] documents) {
+        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+        for (final Document d: documents) result.putAll(d.videolinks);
+        return result;
+    }
+
+    public static Map<MultiProtocolURI, String> getApplinks(final Document[] documents) {
+        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+        for (final Document d: documents) result.putAll(d.applinks);
+        return result;
+    }
 
 }

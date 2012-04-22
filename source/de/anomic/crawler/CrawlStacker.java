@@ -39,6 +39,7 @@ import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
@@ -353,9 +354,11 @@ public final class CrawlStacker {
 
         // check availability of parser and maxfilesize
         String warning = null;
-        if (entry.size() > maxFileSize /*||
-            (entry.url().getFileExtension().length() > 0 && TextParser.supports(entry.url(), null) != null)
-            */) {
+        if (entry.size() > maxFileSize ||
+            entry.url().getContentDomain() == ContentDomain.APP  ||
+            entry.url().getContentDomain() == ContentDomain.IMAGE  ||
+            entry.url().getContentDomain() == ContentDomain.AUDIO  ||
+            entry.url().getContentDomain() == ContentDomain.VIDEO ) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
             //if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;

@@ -105,7 +105,7 @@ public class yacysearchitem {
         prop.put("navurlBase", QueryParams.navurlBase("html", theQuery, null, theQuery.urlMask.toString(), theQuery.navigators).toString());
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
-        if (theQuery.contentdom == Classification.ContentDomain.TEXT) {
+        if (theQuery.contentdom == Classification.ContentDomain.TEXT || theQuery.contentdom == Classification.ContentDomain.ALL) {
             // text search
 
             // generate result object

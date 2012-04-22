@@ -38,6 +38,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.language.Identificator;
@@ -112,10 +113,10 @@ public final class Condenser {
         this.RESULT_FLAGS = new Bitfield(4);
 
         // construct flag set for document
-        if (!document.getImages().isEmpty())     this.RESULT_FLAGS.set(flag_cat_hasimage, true);
-        if (!document.getAudiolinks().isEmpty()) this.RESULT_FLAGS.set(flag_cat_hasaudio, true);
-        if (!document.getVideolinks().isEmpty()) this.RESULT_FLAGS.set(flag_cat_hasvideo, true);
-        if (!document.getApplinks().isEmpty())   this.RESULT_FLAGS.set(flag_cat_hasapp,   true);
+        if (document.dc_source().getContentDomain() == ContentDomain.IMAGE || !document.getImages().isEmpty())     this.RESULT_FLAGS.set(flag_cat_hasimage, true);
+        if (document.dc_source().getContentDomain() == ContentDomain.AUDIO || !document.getAudiolinks().isEmpty()) this.RESULT_FLAGS.set(flag_cat_hasaudio, true);
+        if (document.dc_source().getContentDomain() == ContentDomain.VIDEO || !document.getVideolinks().isEmpty()) this.RESULT_FLAGS.set(flag_cat_hasvideo, true);
+        if (document.dc_source().getContentDomain() == ContentDomain.APP   || !document.getApplinks().isEmpty())   this.RESULT_FLAGS.set(flag_cat_hasapp,   true);
         if (document.lat() != 0.0f && document.lon() != 0.0f) this.RESULT_FLAGS.set(flag_cat_haslocation, true);
 
         this.languageIdentificator = new Identificator();

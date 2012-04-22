@@ -589,6 +589,7 @@ public final class Protocol
         final String language,
         final String sitehash,
         final String authorhash,
+        final String contentdom,
         final int count,
         final long time,
         final int maxDistance,
@@ -634,6 +635,7 @@ public final class Protocol
                     language,
                     sitehash,
                     authorhash,
+                    contentdom,
                     count,
                     time,
                     maxDistance,
@@ -893,6 +895,7 @@ public final class Protocol
             final String language,
             final String sitehash,
             final String authorhash,
+            final String contentdom,
             final int count,
             final long time,
             final int maxDistance,
@@ -945,6 +948,7 @@ public final class Protocol
             parts.put("language", UTF8.StringBody(language));
             parts.put("sitehash", UTF8.StringBody(sitehash));
             parts.put("authorhash", UTF8.StringBody(authorhash));
+            parts.put("contentdom", UTF8.StringBody(contentdom));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));
             parts.put("profile", UTF8.StringBody(crypt.simpleEncode(rankingProfile.toExternalString())));
@@ -1516,6 +1520,7 @@ public final class Protocol
                             "", // language,
                             "", // sitehash,
                             "", // authorhash,
+                            "all", // contentdom,
                             10, // count,
                             3000, // time,
                             1000, // maxDistance,

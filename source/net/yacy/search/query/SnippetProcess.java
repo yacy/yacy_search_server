@@ -580,7 +580,7 @@ public class SnippetProcess {
         }
 
         // load snippet
-        if (this.query.contentdom == Classification.ContentDomain.TEXT) {
+        if (page.url().getContentDomain() == Classification.ContentDomain.TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
             final TextSnippet snippet = new TextSnippet(
@@ -612,7 +612,7 @@ public class SnippetProcess {
                 Log.logInfo("SEARCH", "sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
-        } else {
+        } else if (page.url().getContentDomain() == Classification.ContentDomain.IMAGE) {
             // attach media information
             startTime = System.currentTimeMillis();
             final List<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(page.url(), this.snippetFetchWordHashes, this.query.contentdom, cacheStrategy, 6000, !this.query.isLocal());
@@ -633,6 +633,8 @@ public class SnippetProcess {
                 Log.logInfo("SEARCH", "sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
+        } else {
+            return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, 0); // result without snippet
         }
         // finished, no more actions possible here
     }

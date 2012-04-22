@@ -2355,8 +2355,11 @@ public final class Switchboard extends serverSwitch
             // get the hyperlinks
             final Map<MultiProtocolURI, String> hl = Document.getHyperlinks(documents);
 
-            // add all images also to the crawl stack
+            // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links
             hl.putAll(Document.getImagelinks(documents));
+            hl.putAll(Document.getApplinks(documents));
+            hl.putAll(Document.getVideolinks(documents));
+            hl.putAll(Document.getAudiolinks(documents));
 
             // insert those hyperlinks to the crawler
             MultiProtocolURI nextUrl;
