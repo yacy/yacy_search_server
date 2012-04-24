@@ -523,12 +523,6 @@ public class yacysearch {
                 modifier.append("site:").append(sitehost).append(' ');
             }
 
-            final int heuristicScroogle = querystring.indexOf("/heuristic/scroogle", 0);
-            if ( heuristicScroogle >= 0 ) {
-                querystring = querystring.replace("/heuristic/scroogle", "");
-                modifier.append("/heuristic/scroogle ");
-            }
-
             final int heuristicBlekko = querystring.indexOf("/heuristic/blekko", 0);
             if ( heuristicBlekko >= 0 ) {
                 querystring = querystring.replace("/heuristic/blekko", "");
