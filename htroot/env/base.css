@@ -226,8 +226,8 @@ tt, *.tt {
 
 .thumbcontainer {
   margin: 2px;
-  width: 96px;
-  height: 96px; /* 96px thumbnail + some lines of text */
+  width: 128px;
+  height: 128px; /* 96px thumbnail + some lines of text */
   float: left;
 }
 
@@ -533,10 +533,10 @@ ul.SubMenu a.MenuItemLink {
 
 a.thumblink {
   display:block;
-  width: 96px;
-  height: 96px;
+  width: 128px;
+  height: 128px;
   margin: 2px;
-  line-height: 96px;
+  line-height: 128px;
   text-align: center;
   overflow: hidden;
 }
