@@ -502,7 +502,7 @@ public final class HTTPDProxyHandler {
                         final byte[] b = Cache.getContent(url.hash());
                         if (b != null) sizeBeforeDelete = b.length;
                     }
-                    Cache.delete(url);
+                    Cache.delete(url.hash());
                     conProp.put(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_REFRESH_MISS");
                 }
 

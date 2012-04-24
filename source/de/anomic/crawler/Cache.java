@@ -172,10 +172,6 @@ public final class Cache {
      * @param url the url of the resource
      * @return true if the content of the url is in the cache, false otherwise
      */
-    public static boolean has(final DigestURI url) {
-        return has(url.hash());
-    }
-
     public static boolean has(final byte[] urlhash) {
         boolean headerExists;
         boolean fileExists;
@@ -254,12 +250,12 @@ public final class Cache {
      * @param url
      * @throws IOException
      */
-    public static void delete(final DigestURI url) throws IOException {
+    public static void delete(final byte[] hash) throws IOException {
         if (responseHeaderDB instanceof MapHeap) {
-            ((MapHeap) responseHeaderDB).delete(url.hash());
+            ((MapHeap) responseHeaderDB).delete(hash);
         } else {
-            responseHeaderDB.remove(url.hash());
+            responseHeaderDB.remove(hash);
         }
-        fileDB.delete(url.hash());
+        fileDB.delete(hash);
     }
 }
