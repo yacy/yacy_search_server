@@ -60,8 +60,8 @@ import de.anomic.crawler.retrieval.Response;
 
 public class CrawlQueues {
 
-    private static final String ERROR_DB_FILENAME = "urlError3.db";
-    private static final String DELEGATED_DB_FILENAME = "urlDelegated3.db";
+    private static final String ERROR_DB_FILENAME = "urlError4.db";
+    private static final String DELEGATED_DB_FILENAME = "urlDelegated4.db";
     private static final Segments.Process PROCESS = Segments.Process.LOCALCRAWLING;
 
     protected Switchboard sb;

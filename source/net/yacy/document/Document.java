@@ -60,6 +60,7 @@ import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
+import de.anomic.crawler.retrieval.Request;
 
 
 public class Document {
@@ -827,7 +828,8 @@ dc_rights
         final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
         for (final Document d: documents) {
             for (final ImageEntry imageReference : d.getImages().values()) {
-                result.put(imageReference.url(), imageReference.alt());
+                // construct a image name which contains the document title to enhance the search process for images
+                result.put(imageReference.url(), description(d, imageReference.alt()));
             }
         }
         return result;
@@ -835,20 +837,57 @@ dc_rights
 
     public static Map<MultiProtocolURI, String> getAudiolinks(final Document[] documents) {
         final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
-        for (final Document d: documents) result.putAll(d.audiolinks);
+        for (final Document d: documents) {
+            for (Map.Entry<MultiProtocolURI, String> e: d.audiolinks.entrySet()) {
+                result.put(e.getKey(), description(d, e.getValue()));
+            }
+        }
         return result;
     }
 
     public static Map<MultiProtocolURI, String> getVideolinks(final Document[] documents) {
         final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
-        for (final Document d: documents) result.putAll(d.videolinks);
+        for (final Document d: documents) {
+            for (Map.Entry<MultiProtocolURI, String> e: d.videolinks.entrySet()) {
+                result.put(e.getKey(), description(d, e.getValue()));
+            }
+        }
         return result;
     }
 
     public static Map<MultiProtocolURI, String> getApplinks(final Document[] documents) {
         final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
-        for (final Document d: documents) result.putAll(d.applinks);
+        for (final Document d: documents) {
+            for (Map.Entry<MultiProtocolURI, String> e: d.applinks.entrySet()) {
+                result.put(e.getKey(), description(d, e.getValue()));
+            }
+        }
         return result;
+    }
+
+    private static final String description(Document d, String tagname) {
+        if (tagname == null || tagname.length() == 0) {
+            tagname = d.source.toTokens();
+        }
+        StringBuilder sb = new StringBuilder(60);
+        sb.append(d.dc_title());
+        if (!d.dc_description().equals(d.dc_title()) && sb.length() < Request.descrLength - tagname.length()) {
+            sb.append(' ');
+            sb.append(d.dc_description());
+        }
+        if (sb.length() < Request.descrLength - tagname.length()) {
+            sb.append(' ');
+            sb.append(d.dc_subject(','));
+        }
+        if (tagname.length() > 0) {
+            if (sb.length() > Request.descrLength - tagname.length() - 3) {
+                // cut this off because otherwise the tagname is lost.
+                sb.setLength(Request.descrLength - tagname.length() - 3);
+            }
+            sb.append(" - ");
+            sb.append(tagname);
+        }
+        return sb.toString().trim();
     }
 
 }

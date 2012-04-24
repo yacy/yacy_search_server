@@ -49,7 +49,7 @@ import org.apache.tools.tar.TarInputStream;
 public class tarParser extends AbstractParser implements Parser {
 
     private final static String MAGIC = "ustar"; // A magic for a tar archive, may appear at #101h-#105
-    
+
     public tarParser() {
         super("Tape Archive File Parser");
         this.SUPPORTED_EXTENSIONS.add("tar");
@@ -59,6 +59,7 @@ public class tarParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("multipart/x-tar");
     }
 
+    @Override
     public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, InputStream source) throws Parser.Failure, InterruptedException {
 
         final List<Document> docacc = new ArrayList<Document>();
@@ -88,7 +89,7 @@ public class tarParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
-                    subDocs = TextParser.parseSource(MultiProtocolURI.newURL(url,"#" + name), mime, null, tmp, false);
+                    subDocs = TextParser.parseSource(MultiProtocolURI.newURL(url,"#" + name), mime, null, tmp);
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {
@@ -103,7 +104,7 @@ public class tarParser extends AbstractParser implements Parser {
         }
         return docacc.toArray(new Document[docacc.size()]);
     }
-    
+
     public final static boolean isTar(File f) {
         if (!f.exists() || f.length() < 0x105) return false;
         try {

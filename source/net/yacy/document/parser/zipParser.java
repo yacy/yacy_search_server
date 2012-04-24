@@ -59,6 +59,7 @@ public class zipParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/vnd.android.package-archive");
     }
 
+    @Override
     public Document[] parse(final MultiProtocolURI url, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
@@ -87,7 +88,7 @@ public class zipParser extends AbstractParser implements Parser {
                     FileUtils.copy(zis, tmp, entry.getSize());
                     final MultiProtocolURI virtualURL = MultiProtocolURI.newURL(url, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
-                    docs = TextParser.parseSource(virtualURL, mime, null, tmp, false);
+                    docs = TextParser.parseSource(virtualURL, mime, null, tmp);
                     if (docs == null) continue;
                     for (final Document d: docs) docacc.add(d);
                 } catch (final Parser.Failure e) {

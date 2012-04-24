@@ -162,16 +162,23 @@ public class Response {
         this.content = content;
     }
 
+    /**
+     * create a 'virtual' response that is composed using crawl details from the request object
+     * this is used when the NOLOAD queue is processed
+     * @param request
+     * @param profile
+     */
     public Response(final Request request, final CrawlProfile profile) {
         this.request = request;
         // request and response headers may be zero in case that we process surrogates
         this.requestHeader = new RequestHeader();
         this.responseHeader = new ResponseHeader();
+        this.responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain"); // tell parser how to handle the content
         if (request.size() > 0) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
         this.responseStatus = "200";
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
-        this.content = request.url().toTokens().getBytes();
+        this.content = request.name().length() > 0 ? request.name().getBytes() : request.url().toTokens().getBytes();
     }
 
     public Response(
@@ -824,7 +831,7 @@ public class Response {
         final String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.mime());
         if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
         try {
-            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.content, false);
+            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.content);
         } catch (final Exception e) {
             return null;
         }

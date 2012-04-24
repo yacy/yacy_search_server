@@ -2329,8 +2329,7 @@ public final class Switchboard extends serverSwitch
                     response.url(),
                     response.getMimeType(),
                     response.getCharacterEncoding(),
-                    response.getContent(),
-                    response.profile().directDocByURL());
+                    response.getContent());
             if ( documents == null ) {
                 throw new Parser.Failure("Parser returned null.", response.url());
             }

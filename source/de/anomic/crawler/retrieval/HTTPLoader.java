@@ -159,7 +159,7 @@ public final class HTTPLoader {
 
                     // check if the url was already indexed
                     final String dbname = this.sb.urlExists(Segments.Process.LOCALCRAWLING, redirectionUrl.hash());
-                    if (dbname != null) {
+                    if (dbname != null) { //OTTO
                         this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection to double content", code);
                         throw new IOException("CRAWLER Redirection of URL=" + request.url().toString() + " ignored. The url appears already in db " + dbname);
                     }

@@ -56,7 +56,7 @@ import de.anomic.crawler.retrieval.Request;
 
 public class Balancer {
 
-    private static final String indexSuffix           = "9.db";
+    private static final String indexSuffix           = "A.db";
     private static final int    EcoFSBufferSize       = 1000;
     private static final int    objectIndexBufferSize = 1000;
     private static final String localhost             = "localhost";

@@ -54,6 +54,7 @@ public class gzipParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("gzip/document");
     }
 
+    @Override
     public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         File tempFile = null;
@@ -78,7 +79,7 @@ public class gzipParser extends AbstractParser implements Parser {
             out.close();
 
             // creating a new parser class to parse the unzipped content
-            docs = TextParser.parseSource(location,null,null,tempFile, false);
+            docs = TextParser.parseSource(location,null,null,tempFile);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;

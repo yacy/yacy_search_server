@@ -150,7 +150,7 @@ public class DocumentIndex extends Segment
             length = -1;
         }
         try {
-            documents = TextParser.parseSource(url, null, null, length, url.getInputStream(null, -1), true);
+            documents = TextParser.parseSource(url, null, null, length, url.getInputStream(null, -1));
         } catch ( final Exception e ) {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }

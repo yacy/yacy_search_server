@@ -101,14 +101,17 @@ public class MediawikiImporter extends Thread implements Importer {
         this.urlStub = null;
     }
 
+    @Override
     public int count() {
         return this.count;
     }
 
+    @Override
     public String source() {
         return this.sourcefile.getAbsolutePath();
     }
 
+    @Override
     public String status() {
         return "";
     }
@@ -117,6 +120,7 @@ public class MediawikiImporter extends Thread implements Importer {
      * return the number of articles per second
      * @return
      */
+    @Override
     public int speed() {
         if (this.count == 0) return 0;
         return (int) (this.count / Math.max(1L, runningTime() ));
@@ -126,14 +130,17 @@ public class MediawikiImporter extends Thread implements Importer {
      * return the remaining seconds for the completion of all records in milliseconds
      * @return
      */
+    @Override
     public long remainingTime() {
         return Math.max(0, this.approxdocs - this.count) / Math.max(1, speed() );
     }
 
+    @Override
     public long runningTime() {
         return (System.currentTimeMillis() - this.start) / 1000L;
     }
 
+    @Override
     public void run() {
         this.start = System.currentTimeMillis();
         try {
@@ -287,6 +294,7 @@ public class MediawikiImporter extends Thread implements Importer {
             this.mediawikixml = mediawikixml;
         }
 
+        @Override
         public void run() {
             try {
                 createIndex(this.mediawikixml);
@@ -365,6 +373,7 @@ public class MediawikiImporter extends Thread implements Importer {
             }
         }
 
+        @Override
         public Integer call() {
             wikisourcerecord r;
             try {
@@ -412,6 +421,7 @@ public class MediawikiImporter extends Thread implements Importer {
             }
         }
 
+        @Override
         public Integer call() {
             wikisourcerecord r;
             wikiraw c;
@@ -505,7 +515,7 @@ public class MediawikiImporter extends Thread implements Importer {
         public void genDocument() throws Parser.Failure {
             try {
 				this.url = new DigestURI(this.urlStub + this.title);
-				final Document[] parsed = TextParser.parseSource(this.url, "text/html", "UTF-8", UTF8.getBytes(this.html), false);
+				final Document[] parsed = TextParser.parseSource(this.url, "text/html", "UTF-8", UTF8.getBytes(this.html));
 				this.document = Document.mergeDocuments(this.url, "text/html", parsed);
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				this.document.setTitle(this.title);
@@ -626,6 +636,7 @@ public class MediawikiImporter extends Thread implements Importer {
             this.out = out;
         }
 
+        @Override
         public Integer call() {
             wikiparserrecord record;
             try {
@@ -682,6 +693,7 @@ public class MediawikiImporter extends Thread implements Importer {
             this.outputfilename = null;
         }
 
+        @Override
         public Integer call() {
             wikiparserrecord record;
             try {
