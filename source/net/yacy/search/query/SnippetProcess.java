@@ -612,27 +612,6 @@ public class SnippetProcess {
                 Log.logInfo("SEARCH", "sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
-        } else if (page.url().getContentDomain() == Classification.ContentDomain.IMAGE) {
-            // attach media information
-            startTime = System.currentTimeMillis();
-            final List<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(page.url(), this.snippetFetchWordHashes, this.query.contentdom, cacheStrategy, 6000, !this.query.isLocal());
-            final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH", "media snippet load time for " + page.url() + ": " + snippetComputationTime);
-
-            if (mediaSnippets != null && !mediaSnippets.isEmpty()) {
-                // found media snippets, return entry
-                return new ResultEntry(page, this.query.getSegment(), this.peers, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
-            } else if (cacheStrategy.mustBeOffline()) {
-                return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, snippetComputationTime);
-            } else {
-                // problems with snippet fetch
-                final String reason = "no media snippet";
-                if (this.deleteIfSnippetFail) {
-                    this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.queryHashes, reason);
-                }
-                Log.logInfo("SEARCH", "sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
-                return null;
-            }
         } else {
             return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, 0); // result without snippet
         }

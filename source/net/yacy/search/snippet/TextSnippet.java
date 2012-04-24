@@ -266,7 +266,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // first try to get the snippet from metadata
             String loc;
             final Request request = loader.request(url, true, reindexing);
-            final boolean inCache = de.anomic.crawler.Cache.has(row.url());
+            final boolean inCache = de.anomic.crawler.Cache.has(row.hash());
             final boolean noCacheUsage = url.isFile() || url.isSMB() || cacheStrategy == null;
             if (containsAllHashes(loc = row.dc_title(), queryhashes) ||
                 containsAllHashes(loc = row.dc_creator(), queryhashes) ||

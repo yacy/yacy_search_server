@@ -160,7 +160,7 @@ public class ViewFile {
         }
 
         // loading the resource content as byte array
-        prop.put("error_incache", Cache.has(url) ? 1 : 0);
+        prop.put("error_incache", Cache.has(url.hash()) ? 1 : 0);
 
         Response response = null;
         try {

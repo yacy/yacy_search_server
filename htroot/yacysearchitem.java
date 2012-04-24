@@ -215,29 +215,30 @@ public class yacysearchitem {
             // image search; shows thumbnails
 
             prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
-            final MediaSnippet ms = theSearch.result().oneImage(item);
+            //final MediaSnippet ms = theSearch.result().oneImage(item);
+            final ResultEntry ms = theSearch.oneResult(item, theQuery.isLocal() ? 1000 : 5000);
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
-                final String resultUrlstring = ms.href.toNormalform(true, false);
+                final String resultUrlstring = ms.url().toNormalform(true, false);
                 final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
-                final String license = sb.licensedURLs.aquireLicense(ms.href);
-                sb.loader.loadIfNotExistBackground(ms.href, 1024 * 1024 * 10);
+                final String license = sb.licensedURLs.aquireLicense(ms.url());
+                sb.loader.loadIfNotExistBackground(ms.url(), 1024 * 1024 * 10);
                 prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + resultUrlstring : resultUrlstring);
                 prop.putHTML("content_item_href", resultUrlstring);
                 prop.putHTML("content_item_target", target);
                 prop.put("content_item_code", license);
-                prop.putHTML("content_item_name", shorten(ms.name, MAX_NAME_LENGTH));
-                prop.put("content_item_mimetype", ms.mime);
-                prop.put("content_item_fileSize", ms.fileSize);
-                prop.put("content_item_width", ms.width);
-                prop.put("content_item_height", ms.height);
-                prop.put("content_item_attr", (ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"); // attributes, here: original size of image
-                prop.put("content_item_urlhash", ASCII.String(ms.source.hash()));
-                prop.put("content_item_source", ms.source.toNormalform(true, false));
-                prop.putXML("content_item_source-xml", ms.source.toNormalform(true, false));
-                prop.put("content_item_sourcedom", ms.source.getHost());
+                prop.putHTML("content_item_name", shorten(ms.title(), MAX_NAME_LENGTH));
+                prop.put("content_item_mimetype", "");
+                prop.put("content_item_fileSize", 0);
+                prop.put("content_item_width", 0);
+                prop.put("content_item_height", 0);
+                prop.put("content_item_attr", ""/*(ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"*/); // attributes, here: original size of image
+                prop.put("content_item_urlhash", ASCII.String(ms.url().hash()));
+                prop.put("content_item_source", ms.url().toNormalform(true, false));
+                prop.putXML("content_item_source-xml", ms.url().toNormalform(true, false));
+                prop.put("content_item_sourcedom", ms.url().getHost());
                 prop.put("content_item_nl", (item == theQuery.offset) ? 0 : 1);
                 prop.put("content_item", 1);
             }
