@@ -817,10 +817,6 @@ public class yacysearch {
                 if ( sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated ) {
                     sb.heuristicSite(theSearch, sitehost);
                 }
-                if ( (heuristicScroogle >= 0 || sb.getConfigBool("heuristic.scroogle", false))
-                    && authenticated ) {
-                    sb.heuristicScroogle(theSearch);
-                }
                 if ( (heuristicBlekko >= 0 || sb.getConfigBool("heuristic.blekko", false)) && authenticated ) {
                     sb.heuristicRSS("http://blekko.com/ws/$+/rss", theSearch, "blekko");
                 }
