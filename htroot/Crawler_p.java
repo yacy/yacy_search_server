@@ -184,7 +184,7 @@ public class Crawler_p {
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
 
-                final boolean directDocByURL = "on".equals(post.get("directDocByURL", "off"));
+                final boolean directDocByURL = "on".equals(post.get("directDocByURL", "on")); // catch also all linked media documents without loading them
                 env.setConfig("crawlingDirectDocByURL", directDocByURL);
 
                 // recrawl
