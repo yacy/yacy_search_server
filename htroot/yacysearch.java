@@ -275,14 +275,10 @@ public class yacysearch {
             ContentDomain.contentdomParser(post == null ? "all" : post.get("contentdom", "all"));
 
         // patch until better search profiles are available
-        if ( contentdom == ContentDomain.TEXT ) {
-            if ( maximumRecords > 50 && maximumRecords < 100 ) {
-                maximumRecords = 10;
-            }
-        } else {
-            if ( maximumRecords <= 32 ) {
-                maximumRecords = 64;
-            }
+        if (contentdom == ContentDomain.IMAGE && (maximumRecords == 10 || maximumRecords == 100)) {
+            maximumRecords = 64;
+        } else if ( maximumRecords > 50 && maximumRecords < 100 ) {
+            maximumRecords = 10;
         }
 
         // check the search tracker
@@ -1087,7 +1083,7 @@ public class yacysearch {
         prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
         prop.put("searchdomswitches_searchimage", sb.getConfigBool("search.image", true) ? 1 : 0);
         prop.put("searchdomswitches_searchapp", sb.getConfigBool("search.app", true) ? 1 : 0);
-        prop.put("searchdomswitches_searchtext_check", (contentdom == ContentDomain.TEXT) ? "1" : "0");
+        prop.put("searchdomswitches_searchtext_check", (contentdom == ContentDomain.TEXT || contentdom == ContentDomain.ALL) ? "1" : "0");
         prop.put("searchdomswitches_searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
         prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
         prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
