@@ -105,7 +105,7 @@ function resultNavigation() {
       if (maximumRecords != 10 && totalResults >= 10) html += "<input type=\"button\" value=\"10 results\" onClick=\"window.location.href='/yacyinteractive.html?query=" + query + "&startRecord=" + startRecord + "&maximumRecords=10'\"/>";
       if (maximumRecords != 100 && totalResults >= 100) html += "<input type=\"button\" value=\"100 results\" onClick=\"window.location.href='/yacyinteractive.html?query=" + query + "&startRecord=" + startRecord + "&maximumRecords=100'\"/>";
       if (maximumRecords != 1000 && totalResults >= 1000) html += "<input type=\"button\" value=\"1000 results\" onClick=\"window.location.href='/yacyinteractive.html?query=" + query + "&startRecord=" + startRecord + "&maximumRecords=1000'\"/>";
-      if (totalResults <= 10000 && maximumRecords < totalResults) html += "<input type=\"button\" value=\"all results\" onClick=\"window.location.href='/yacyinteractive.html?query=" + query + "&startRecord=" + startRecord + "&maximumRecords=" + totalResults + "'\"/>";
+      if (totalResults <= 10000 && maximumRecords < totalResults) html += "<input type=\"button\" value=\"all results\" onClick=\"window.location.href='/yacyinteractive.html?query=" + query + "&startRecord=" + startRecord + "&maximumRecords=" + Math.max(100,totalResults) + "'\"/>";
       html += "</div>"; // for inline
       html += "</div>"; // for result statistic wrapper
   } else {
