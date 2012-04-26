@@ -135,110 +135,120 @@ public class SolrScheme extends ConfigurationSet {
 
     public static enum Field {
 
-        id(Types.string, true, true),
-        sku(Types.text_en_splitting_tight, true, true, false, true),
-        ip_s(Types.string, true, true),
-        host_s(Types.string, true, true),
-        title(Types.text_general, true, true, true),
-        author(Types.text_general, true, true),
-        description(Types.text_general, true, true),
-        content_type(Types.string, true, true, true),
-        last_modified(Types.date, true, true),
-        keywords(Types.text_general, true, true),
-        text_t(Types.text_general, true, true),
-        wordcount_i(Types.integer, true, true),
-        paths_txt(Types.text_general, true, true, true),
-        inboundlinkscount_i(Types.integer, true, true),
-        inboundlinksnofollowcount_i(Types.integer, true, true),
-        inboundlinks_tag_txt(Types.text_general, true, true, true),
-        inboundlinks_protocol_txt(Types.text_general, true, true, true),
-        inboundlinks_urlstub_txt(Types.text_general, true, true, true),
-        inboundlinks_name_txt(Types.text_general, true, true, true),
-        inboundlinks_rel_txt(Types.text_general, true, true, true),
-        inboundlinks_relflags_txt(Types.text_general, true, true, true),
-        inboundlinks_text_txt(Types.text_general, true, true, true),
-        outboundlinkscount_i(Types.integer, true, true),
-        outboundlinksnofollowcount_i(Types.integer, true, true),
-        outboundlinks_tag_txt(Types.text_general, true, true, true),
-        outboundlinks_protocol_txt(Types.text_general, true, true, true),
-        outboundlinks_urlstub_txt(Types.text_general, true, true, true),
-        outboundlinks_name_txt(Types.text_general, true, true, true),
-        outboundlinks_rel_txt(Types.text_general, true, true, true),
-        outboundlinks_relflags_txt(Types.text_general, true, true, true),
-        outboundlinks_text_txt(Types.text_general, true, true, true),
-        charset_s(Types.string, true, true),
-        lon_coordinate(Types.tdouble, true, false),
-        lat_coordinate(Types.tdouble, true, false),
-        httpstatus_i(Types.integer, true, true),
-        h1_txt(Types.text_general, true, true, true),
-        h2_txt(Types.text_general, true, true, true),
-        h3_txt(Types.text_general, true, true, true),
-        h4_txt(Types.text_general, true, true, true),
-        h5_txt(Types.text_general, true, true, true),
-        h6_txt(Types.text_general, true, true, true),
-        htags_i(Types.integer, true, true),
-        canonical_s(Types.string, true, true),
-        robots_i(Types.integer, true, true),
-        metagenerator_t(Types.text_general, true, true),
-        boldcount_i(Types.integer, true, true),
-        bold_txt(Types.text_general, true, true, true),
-        bold_val(Types.integer, true, true, true),
-        italiccount_i(Types.integer, true, true),
-        italic_txt(Types.text_general, true, true, true),
-        italic_val(Types.integer, true, true, true),
-        licount_i(Types.integer, true, true),
-        li_txt(Types.text_general, true, true, true),
-        imagescount_i(Types.integer, true, true),
-        images_tag_txt(Types.text_general, true, true, true),
-        images_protocol_txt(Types.text_general, true, true, true),
-        images_urlstub_txt(Types.text_general, true, true, true),
-        images_alt_txt(Types.text_general, true, true, true),
-        csscount_i(Types.integer, true, true),
-        css_tag_txt(Types.text_general, true, true, true),
-        css_url_txt(Types.text_general, true, true, true),
-        scripts_txt(Types.text_general, true, true, true),
-        scriptscount_i(Types.integer, true, true),
-        frames_txt(Types.text_general, true, true, true),
-        framesscount_i(Types.integer, true, true),
-        iframes_txt(Types.text_general, true, true, true),
-        iframesscount_i(Types.integer, true, true),
-        flash_b(Types.bool, true, true),
-        responsetime_i(Types.integer, true, true),
-
-        ext_cms_txt(Types.text_general, true, true, true),
-        ext_cms_val(Types.integer, true, true, true),
-        ext_ads_txt(Types.text_general, true, true, true),
-        ext_ads_val(Types.integer, true, true, true),
-        ext_community_txt(Types.text_general, true, true, true),
-        ext_community_val(Types.integer, true, true, true),
-        ext_maps_txt(Types.text_general, true, true, true),
-        ext_maps_val(Types.integer, true, true, true),
-        ext_tracker_txt(Types.text_general, true, true, true),
-        ext_tracker_val(Types.integer, true, true, true),
-        ext_title_txt(Types.text_general, true, true, true),
-        ext_title_val(Types.integer, true, true, true),
-
-        failreason_t(Types.text_general, true, true);
+        id(Types.string, true, true, "primary key of document, the URL hash"),
+        sku(Types.text_en_splitting_tight, true, true, false, true, "url of document"),
+        ip_s(Types.string, true, true, "ip of host of url (after DNS lookup)"),
+        host_s(Types.string, true, true, "host of the url"),
+        title(Types.text_general, true, true, true, "content of title tag"),
+        author(Types.text_general, true, true, "content of author-tag"),
+        description(Types.text_general, true, true, "content of description-tag"),
+        content_type(Types.string, true, true, true, "mime-type of document"),
+        last_modified(Types.date, true, true, "last-modified from http header"),
+        keywords(Types.text_general, true, true, "content of keywords tag; words are separated by space"),
+        text_t(Types.text_general, true, true, "all visible text"),
+        wordcount_i(Types.integer, true, true, "number of words in visible area"),
+        paths_txt(Types.text_general, true, true, true, "all path elements in the url"),
+        // encoded as binary value into an integer:
+        // bit  0: "all" contained in html header meta
+        // bit  1: "index" contained in html header meta
+        // bit  2: "noindex" contained in html header meta
+        // bit  3: "nofollow" contained in html header meta
+        // bit  8: "noarchive" contained in http header properties
+        // bit  9: "nosnippet" contained in http header properties
+        // bit 10: "noindex" contained in http header properties
+        // bit 11: "nofollow" contained in http header properties
+        // bit 12: "unavailable_after" contained in http header properties
+        robots_i(Types.integer, true, true, "content of <meta name=\"robots\" content=#content#> tag and the \"X-Robots-Tag\" HTTP property"),
+        inboundlinkscount_i(Types.integer, true, true, "total number of inbound links"),
+        inboundlinksnofollowcount_i(Types.integer, true, true, "number of inbound links with nofollow tag"),
+        inboundlinks_tag_txt(Types.text_general, true, true, true, "internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
+        inboundlinks_protocol_txt(Types.text_general, true, true, true, "internal links, only the protocol"),
+        inboundlinks_urlstub_txt(Types.text_general, true, true, true, "internal links, the url only without the protocol"),
+        inboundlinks_name_txt(Types.text_general, true, true, true, "internal links, the name property of the a-tag"),
+        inboundlinks_rel_txt(Types.text_general, true, true, true, "internal links, the rel property of the a-tag"),
+        inboundlinks_relflags_txt(Types.text_general, true, true, true, "internal links, the rel property of the a-tag, coded binary"),
+        inboundlinks_text_txt(Types.text_general, true, true, true, "internal links, the text content of the a-tag"),
+        outboundlinkscount_i(Types.integer, true, true, "external number of inbound links"),
+        outboundlinksnofollowcount_i(Types.integer, true, true, "number of external links with nofollow tag"),
+        outboundlinks_tag_txt(Types.text_general, true, true, true, "external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
+        outboundlinks_protocol_txt(Types.text_general, true, true, true, "external links, only the protocol"),
+        outboundlinks_urlstub_txt(Types.text_general, true, true, true, "external links, the url only without the protocol"),
+        outboundlinks_name_txt(Types.text_general, true, true, true, "external links, the name property of the a-tag"),
+        outboundlinks_rel_txt(Types.text_general, true, true, true, "external links, the rel property of the a-tag"),
+        outboundlinks_relflags_txt(Types.text_general, true, true, true, "external links, the rel property of the a-tag, coded binary"),
+        outboundlinks_text_txt(Types.text_general, true, true, true, "external links, the text content of the a-tag"),
+        charset_s(Types.string, true, true, "character encoding"),
+        lon_coordinate(Types.tdouble, true, false, "longitude of location as declared in WSG84"),
+        lat_coordinate(Types.tdouble, true, false, "latitude of location as declared in WSG84"),
+        httpstatus_i(Types.integer, true, true, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
+        h1_txt(Types.text_general, true, true, true, "h1 header"),
+        h2_txt(Types.text_general, true, true, true, "h2 header"),
+        h3_txt(Types.text_general, true, true, true, "h3 header"),
+        h4_txt(Types.text_general, true, true, true, "h4 header"),
+        h5_txt(Types.text_general, true, true, true, "h5 header"),
+        h6_txt(Types.text_general, true, true, true, "h6 header"),
+        htags_i(Types.integer, true, true, "binary pattern for the existance of h1..h6 headlines"),
+        canonical_s(Types.string, true, true, "url inside the canonical link element"),
+        metagenerator_t(Types.text_general, true, true, "content of <meta name=\"generator\" content=#content#> tag"),
+        boldcount_i(Types.integer, true, true, "total number of occurrences of <b> or <strong>"),
+        bold_txt(Types.text_general, true, true, true, "all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order"),
+        bold_val(Types.integer, true, true, true, "number of occurrences of texts in bold_txt"),
+        italiccount_i(Types.integer, true, true, "total number of occurrences of <i>"),
+        italic_txt(Types.text_general, true, true, true, "all texts inside of <i> tags. no doubles. listed in the order of number of occurrences in decreasing order"),
+        italic_val(Types.integer, true, true, true, "number of occurrences of texts in italic_txt"),
+        licount_i(Types.integer, true, true, "number of <li> tags"),
+        li_txt(Types.text_general, true, true, true, "all texts in <li> tags"),
+        imagescount_i(Types.integer, true, true, "number of images"),
+        images_tag_txt(Types.text_general, true, true, true, " all image tags, encoded as <img> tag inclusive alt- and title property"),
+        images_protocol_txt(Types.text_general, true, true, true, "all image link protocols"),
+        images_urlstub_txt(Types.text_general, true, true, true, "all image links without the protocol and '://'"),
+        images_alt_txt(Types.text_general, true, true, true, "all image link alt tag"),
+        csscount_i(Types.integer, true, true, "number of entries in css_tag_txt and css_url_txt"),
+        css_tag_txt(Types.text_general, true, true, true, "full css tag with normalized url"),
+        css_url_txt(Types.text_general, true, true, true, "normalized urls within a css tag"),
+        scripts_txt(Types.text_general, true, true, true, "normaluzed urls within a scripts tag"),
+        scriptscount_i(Types.integer, true, true, "number of entries in scripts_txt"),
+        frames_txt(Types.text_general, true, true, true, "list of all links to frames"),
+        framesscount_i(Types.integer, true, true, "number of frames_txt"),
+        iframes_txt(Types.text_general, true, true, true, "list of all links to iframes"),
+        iframesscount_i(Types.integer, true, true, "number of iframes_txt"),
+        flash_b(Types.bool, true, true, "flag that shows if a swf file is linked"),
+        responsetime_i(Types.integer, true, true, "response time of target server in milliseconds"),
+        ext_cms_txt(Types.text_general, true, true, true, "names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias"),
+        ext_cms_val(Types.integer, true, true, true, "number of attributes that count for a specific cms in ext_cms_txt"),
+        ext_ads_txt(Types.text_general, true, true, true, "names of ad-servers/ad-services"),
+        ext_ads_val(Types.integer, true, true, true, "number of attributes counts in ext_ads_txt"),
+        ext_community_txt(Types.text_general, true, true, true, "names of recognized community functions"),
+        ext_community_val(Types.integer, true, true, true, "number of attribute counts in attr_community"),
+        ext_maps_txt(Types.text_general, true, true, true, "names of map services"),
+        ext_maps_val(Types.integer, true, true, true, "number of attribute counts in ext_maps_txt"),
+        ext_tracker_txt(Types.text_general, true, true, true, "names of tracker server"),
+        ext_tracker_val(Types.integer, true, true, true, "number of attribute counts in ext_tracker_txt"),
+        ext_title_txt(Types.text_general, true, true, true, "names matching title expressions"),
+        ext_title_val(Types.integer, true, true, true, "number of matching title expressions"),
+        failreason_t(Types.text_general, true, true, "fail reason if a page was not loaded. if the page was loaded then this field is empty");
 
         final Types type;
         final boolean indexed, stored;
         boolean multiValued, omitNorms;
+        final String comment;
 
-        private Field(final Types type, final boolean indexed, final boolean stored) {
+        private Field(final Types type, final boolean indexed, final boolean stored, final String comment) {
             this.type = type;
             this.indexed = indexed;
             this.stored = stored;
             this.multiValued = false;
             this.omitNorms = false;
+            this.comment = comment;
         }
 
-        private Field(final Types type, final boolean indexed, final boolean stored, final boolean multiValued) {
-            this(type, indexed, stored);
+        private Field(final Types type, final boolean indexed, final boolean stored, final boolean multiValued, final String comment) {
+            this(type, indexed, stored, comment);
             this.multiValued = multiValued;
         }
 
-        private Field(final Types type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms) {
-            this(type, indexed, stored, multiValued);
+        private Field(final Types type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final String comment) {
+            this(type, indexed, stored, multiValued, comment);
             this.omitNorms = omitNorms;
         }
 
@@ -260,6 +270,10 @@ public class SolrScheme extends ConfigurationSet {
 
         public final boolean isOmitNorms() {
             return this.omitNorms;
+        }
+
+        public final String getComment() {
+            return this.comment;
         }
 
     }

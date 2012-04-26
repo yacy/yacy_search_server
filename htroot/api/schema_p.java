@@ -51,7 +51,7 @@ public class schema_p {
 
         int c = 0;
         ConfigurationSet.Entry entry;
-        Field field = null;
+        SolrScheme.Field field = null;
         while (i.hasNext()) {
             entry = i.next();
             if (!entry.enabled()) continue; //scheme.contains(entry.key())
@@ -62,7 +62,7 @@ public class schema_p {
             }
             prop.put("fields_" + c + "_name", field.name());
             prop.put("fields_" + c + "_type", field.getType().printName());
-            prop.put("fields_" + c + "_comment", scheme.commentHeadline(entry.key()));
+            prop.put("fields_" + c + "_comment", field.getComment());
             prop.put("fields_" + c + "_indexedChecked", field.isIndexed() ? 1 : 0);
             prop.put("fields_" + c + "_storedChecked", field.isStored() ? 1 : 0);
             prop.put("fields_" + c + "_multiValuedChecked", field.isMultiValued() ? 1 : 0);

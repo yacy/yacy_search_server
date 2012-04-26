@@ -148,12 +148,19 @@ public class IndexFederated_p {
         int c = 0;
         boolean dark = false;
         ConfigurationSet.Entry entry;
+        SolrScheme.Field field;
         while (i.hasNext()) {
             entry = i.next();
+            try {
+                field = SolrScheme.Field.valueOf(entry.key());
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
+            if (field == null) continue;
             prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
-            prop.put("scheme_" + c + "_checked", scheme.contains(entry.key()) ? 1 : 0);
+            prop.put("scheme_" + c + "_checked", entry.enabled() ? 1 : 0);
             prop.putHTML("scheme_" + c + "_key", entry.key());
-            prop.putHTML("scheme_" + c + "_comment", scheme.commentHeadline(entry.key()));
+            prop.putHTML("scheme_" + c + "_comment",field.getComment() /*scheme.commentHeadline(entry.key())*/);
             c++;
         }
         prop.put("scheme", c);
