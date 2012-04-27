@@ -57,6 +57,7 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
@@ -69,6 +70,16 @@ import net.yacy.search.query.SearchEvent;
 import de.anomic.crawler.retrieval.Response;
 
 public class Segment {
+
+    // catchall word
+    final static String catchallString = "yacyall"; // a word that is always in all indexes; can be used for zero-word searches to find ALL documents
+    final static byte[] catchallHash;
+    final static Word   catchallWord = new Word(0, 0, 0);
+    static {
+        catchallHash = Word.word2hash(catchallString); // "KZzU-Vf6h5k-"
+        catchallWord.flags = new Bitfield(4);
+        for (int i = 0; i < catchallWord.flags.length(); i++) catchallWord.flags.set(i, true);
+    }
 
     // environment constants
     public static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
@@ -227,7 +238,7 @@ public class Segment {
                                 UTF8.getBytes(language),
                                 doctype,
                                 outlinksSame, outlinksOther);
-        Word wprop;
+        Word wprop = null;
         byte[] wordhash;
         while (i.hasNext()) {
             wentry = i.next();
@@ -242,7 +253,7 @@ public class Segment {
                 Log.logException(e);
             }
             wordCount++;
-            
+
             // during a search event it is possible that a heuristic is used which aquires index
             // data during search-time. To transfer indexed data directly to the search process
             // the following lines push the index data additionally to the search process
@@ -259,17 +270,26 @@ public class Segment {
                 }
             }
         }
+
+        // assign the catchall word
+        ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics
+        try {
+            this.termIndex.add(catchallHash, ientry);
+        } catch (final Exception e) {
+            Log.logException(e);
+        }
+
         return wordCount;
     }
 
-    private int addCitationIndex(final DigestURI url, final Date urlModified, final Document document) {
-    	if (document.getAnchors() == null) return 0;
+    private int addCitationIndex(final DigestURI url, final Date urlModified, final Map<MultiProtocolURI, Properties> anchors) {
+    	if (anchors == null) return 0;
     	int refCount = 0;
 
         // iterate over all outgoing links, this will create a context for those links
         final byte[] urlhash = url.hash();
         final long urldate = urlModified.getTime();
-        for (Map.Entry<MultiProtocolURI, Properties> anchorEntry: document.getAnchors().entrySet()) {
+        for (Map.Entry<MultiProtocolURI, Properties> anchorEntry: anchors.entrySet()) {
         	MultiProtocolURI anchor = anchorEntry.getKey();
         	byte[] refhash = new DigestURI(anchor).hash();
         	//System.out.println("*** addCitationIndex: urlhash = " + ASCII.String(urlhash) + ", refhash = " + ASCII.String(refhash) + ", urldate = " + urlModified.toString());
@@ -282,7 +302,7 @@ public class Segment {
         }
         return refCount;
     }
-    
+
     public void close() {
         this.termIndex.close();
         this.urlMetadata.close();
@@ -394,10 +414,10 @@ public class Segment {
                 searchEvent,                                  // a search event that can have results directly
                 sourceName                                    // the name of the source where the index was created
         );
-        
+
         // STORE PAGE REFERENCES INTO CITATION INDEX
-        final int refs = addCitationIndex(url, modDate, document);
-        
+        final int refs = addCitationIndex(url, modDate, document.getAnchors());
+
         // finish index time
         final long indexingEndTime = System.currentTimeMillis();
 

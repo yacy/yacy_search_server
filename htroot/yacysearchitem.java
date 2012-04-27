@@ -26,7 +26,6 @@
 
 import java.net.MalformedURLException;
 import java.util.Collection;
-import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
@@ -47,7 +46,6 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
-import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
 import de.anomic.server.serverObjects;
@@ -252,29 +250,20 @@ public class yacysearchitem {
             // any other media content
 
             // generate result object
-            final ResultEntry result = theSearch.oneResult(item, 500);
-            if (result == null) return prop; // no content
-
+            final ResultEntry ms = theSearch.oneResult(item, theQuery.isLocal() ? 1000 : 5000);
             prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
-            final List<MediaSnippet> media = result.mediaSnippets();
-            if (item == 0) col = true;
-            if (media != null) {
-                int c = 0;
-                for (final MediaSnippet ms : media) {
-                    final String resultUrlstring = ms.href.toNormalform(true, false);
-                    final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
-
-                    prop.putHTML("content_items_" + c + "_href", resultUrlstring);
-                    prop.putHTML("content_items_" + c + "_hrefshort", nxTools.shortenURLString(resultUrlstring, MAX_URL_LENGTH));
-                    prop.putHTML("content_items_" + c + "_target", target);
-                    prop.putHTML("content_items_" + c + "_name", shorten(ms.name, MAX_NAME_LENGTH));
-                    prop.put("content_items_" + c + "_col", (col) ? "0" : "1");
-                    c++;
-                    col = !col;
-                }
-                prop.put("content_items", c);
+            if (ms == null) {
+                prop.put("content_item", "0");
             } else {
-                prop.put("content_items", "0");
+                final String resultUrlstring = ms.url().toNormalform(true, false);
+                final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
+                prop.putHTML("content_item_href", resultUrlstring);
+                prop.putHTML("content_item_hrefshort", nxTools.shortenURLString(resultUrlstring, MAX_URL_LENGTH));
+                prop.putHTML("content_item_target", target);
+                prop.putHTML("content_item_name", shorten(ms.title(), MAX_NAME_LENGTH));
+                prop.put("content_item_col", (item % 2 == 0) ? "0" : "1");
+                prop.put("content_item_nl", (item == theQuery.offset) ? 0 : 1);
+                prop.put("content_item", 1);
             }
             theQuery.transmitcount = item + 1;
             return prop;
