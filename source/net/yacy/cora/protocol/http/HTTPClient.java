@@ -49,7 +49,6 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.HeaderFramework;
 
-import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -64,6 +63,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ClientConnectionManager;
@@ -178,7 +178,7 @@ public class HTTPClient {
 		HttpConnectionParams.setTcpNoDelay(httpParams, false);
 		// Defines whether the socket can be bound even though a previous connection is still in a timeout state.
 		HttpConnectionParams.setSoReuseaddr(httpParams, true);
-		
+
 		/**
 		 * HTTP client settings
 		 */
@@ -673,14 +673,17 @@ public class HTTPClient {
 
     private static SSLSocketFactory getSSLSocketFactory() {
     	final TrustManager trustManager = new X509TrustManager() {
+            @Override
             public void checkClientTrusted(final X509Certificate[] chain, final String authType)
                             throws CertificateException {
             }
 
+            @Override
             public void checkServerTrusted(final X509Certificate[] chain, final String authType)
                             throws CertificateException {
             }
 
+            @Override
             public X509Certificate[] getAcceptedIssuers() {
                     return null;
             }

@@ -27,7 +27,6 @@ package net.yacy.cora.services.federated.solr;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,12 +41,16 @@ import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthPolicy;
-import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.http.HttpHost;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
@@ -59,7 +62,7 @@ public class SolrSingleConnector implements SolrConnector {
 
     private final String solrurl, host, solrpath, solraccount, solrpw;
     private final int port;
-    private CommonsHttpSolrServer server;
+    private HttpSolrServer server;
     private final SolrScheme scheme;
 
     private final static int transmissionQueueCount = 4; // allow concurrent http sessions to solr
@@ -101,26 +104,21 @@ public class SolrSingleConnector implements SolrConnector {
             }
         }
         if (this.solraccount.length() > 0) {
-            final HttpClient client = new HttpClient();
-            final AuthScope scope = new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, null, null);
-            client.getState().setCredentials(scope,new UsernamePasswordCredentials(this.solraccount, this.solrpw));
-            final List<String> authPrefs = new ArrayList<String>(2);
-            authPrefs.add(AuthPolicy.DIGEST);
-            authPrefs.add(AuthPolicy.BASIC);
-            // This will exclude the NTLM authentication scheme
-            client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
-            client.getParams().setAuthenticationPreemptive(true);
-            try {
-                this.server = new CommonsHttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, client);
-            } catch (final MalformedURLException e) {
-                throw new IOException("bad auth connector url: " + this.solrurl);
-            }
+            final HttpClient client = new DefaultHttpClient() {
+                @Override
+                protected HttpContext createHttpContext() {
+                    HttpContext context = super.createHttpContext();
+                    AuthCache authCache = new BasicAuthCache();
+                    BasicScheme basicAuth = new BasicScheme();
+                    HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
+                    authCache.put(targetHost, basicAuth);
+                    context.setAttribute(ClientContext.AUTH_CACHE, authCache);
+                    return context;
+                }
+            };
+            this.server = new HttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, client);
         } else {
-            try {
-                this.server = new CommonsHttpSolrServer(this.solrurl);
-            } catch (final MalformedURLException e) {
-                throw new IOException("bad connector url: " + this.solrurl);
-            }
+            this.server = new HttpSolrServer(this.solrurl);
         }
         this.server.setDefaultMaxConnectionsPerHost( 128 );
         this.server.setMaxTotalConnections( 256 );

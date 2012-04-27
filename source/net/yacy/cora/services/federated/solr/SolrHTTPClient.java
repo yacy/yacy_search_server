@@ -51,7 +51,6 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
-import org.apache.solr.common.params.DefaultSolrParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.ContentStream;
@@ -208,11 +207,11 @@ public class SolrHTTPClient extends SolrServer {
       params = wparams;
     }
     else {
-      params = new DefaultSolrParams( wparams, params );
+      params = SolrParams.wrapDefaults(wparams, params);
     }
 
     if( this._invariantParams != null ) {
-      params = new DefaultSolrParams( this._invariantParams, params );
+      params = SolrParams.wrapDefaults( this._invariantParams, params );
     }
 
 
@@ -599,17 +598,20 @@ public class SolrHTTPClient extends SolrServer {
     final UpdateRequest req = new UpdateRequest();
     req.setDocIterator(new Iterator<SolrInputDocument>() {
 
-      public boolean hasNext() {
+      @Override
+    public boolean hasNext() {
         return beanIterator.hasNext();
       }
 
-      public SolrInputDocument next() {
+      @Override
+    public SolrInputDocument next() {
         final Object o = beanIterator.next();
         if (o == null) return null;
         return getBinder().toSolrInputDocument(o);
       }
 
-      public void remove() {
+      @Override
+    public void remove() {
         beanIterator.remove();
       }
     });
