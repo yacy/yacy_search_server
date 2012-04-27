@@ -125,8 +125,6 @@ public class SolrSingleConnector implements SolrConnector {
         } else {
             this.server = new HttpSolrServer(this.solrurl);
         }
-        this.server.setDefaultMaxConnectionsPerHost( 128 );
-        this.server.setMaxTotalConnections( 256 );
 
         // start worker
         this.transmissionWorker = new Worker[transmissionQueueCount];
