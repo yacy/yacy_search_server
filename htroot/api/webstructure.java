@@ -106,7 +106,7 @@ public class webstructure {
                     prop.put("references_count", 1);
                     prop.put("references_documents", 1);
                     prop.put("references_documents_0_hash", urlhash);
-                    prop.put("references_documents_0_count", scraper.inboundLinkCount() + scraper.outboundLinkCount());
+                    prop.put("references_documents_0_count", scraper.inboundLinks().size() + scraper.outboundLinks().size());
                     prop.put("references_documents_0_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date()));
                     prop.put("references_documents_0_urle", url == null ? 0 : 1);
                     if (url != null) prop.putXML("references_documents_0_urle_url", url.toNormalform(true, false));

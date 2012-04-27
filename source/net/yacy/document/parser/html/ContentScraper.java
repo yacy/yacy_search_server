@@ -65,8 +65,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final char[] minuteCharsHTML = "&#039;".toCharArray();
 
     // statics: for initialization of the HTMLFilterAbstractScraper
-    private static final Set<String> linkTags0 = new HashSet<String>(9,0.99f);
-    private static final Set<String> linkTags1 = new HashSet<String>(7,0.99f);
+    private static final Set<String> linkTags0 = new HashSet<String>(12,0.99f);
+    private static final Set<String> linkTags1 = new HashSet<String>(15,0.99f);
 
     public enum TagType {
         singleton, pair;
@@ -119,6 +119,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final Map<MultiProtocolURI, Properties> anchors;
     private final Map<MultiProtocolURI, String> rss, css;
     private final Set<MultiProtocolURI> script, frames, iframes;
+    private final Map<MultiProtocolURI, EmbedEntry> embeds; // urlhash/embed relation
     private final Map<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
     private final Map<String, String> metas;
     private String title;
@@ -159,6 +160,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.css = new HashMap<MultiProtocolURI, String>();
         this.anchors = new HashMap<MultiProtocolURI, Properties>();
         this.images = new HashMap<MultiProtocolURI, ImageEntry>();
+        this.embeds = new HashMap<MultiProtocolURI, EmbedEntry>();
         this.frames = new HashSet<MultiProtocolURI>();
         this.iframes = new HashSet<MultiProtocolURI>();
         this.metas = new HashMap<String, String>();
@@ -317,11 +319,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (tagname.equalsIgnoreCase("img")) {
             final String src = tagopts.getProperty("src", EMPTY_STRING);
             try {
-                final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
-                final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
                 if (src.length() > 0) {
                     final MultiProtocolURI url = absolutePath(src);
                     if (url != null) {
+                        final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
+                        final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
                         final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", EMPTY_STRING), width, height, -1);
                         addImage(this.images, ie);
                     }
@@ -334,6 +336,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (final MalformedURLException e) {}
         } else if (tagname.equalsIgnoreCase("frame")) {
             final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
+            tagopts.put("src", src.toNormalform(true, false));
             mergeAnchors(src, tagopts /* with property "name" */);
             this.frames.add(src);
             this.evaluationScores.match(Element.framepath, src.toNormalform(true, false));
@@ -361,13 +364,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String areatitle = cleanLine(tagopts.getProperty("title",EMPTY_STRING));
             //String alt   = tagopts.getProperty("alt",EMPTY_STRING);
             final String href  = tagopts.getProperty("href", EMPTY_STRING);
-            tagopts.put("nme", areatitle);
-            if (href.length() > 0) mergeAnchors(absolutePath(href), tagopts);
+            if (href.length() > 0) {
+                tagopts.put("nme", areatitle);
+                MultiProtocolURI url = absolutePath(href);
+                tagopts.put("href", url.toNormalform(true, false));
+                mergeAnchors(url, tagopts);
+            }
         } else if (tagname.equalsIgnoreCase("link")) {
             final String href = tagopts.getProperty("href", EMPTY_STRING);
             final MultiProtocolURI newLink = absolutePath(href);
 
             if (newLink != null) {
+                tagopts.put("href", newLink.toNormalform(true, false));
                 final String rel = tagopts.getProperty("rel", EMPTY_STRING);
                 final String linktitle = tagopts.getProperty("title", EMPTY_STRING);
                 final String type = tagopts.getProperty("type", EMPTY_STRING);
@@ -391,11 +399,26 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 }
             }
         } else if(tagname.equalsIgnoreCase("embed")) {
-            mergeAnchors(absolutePath(tagopts.getProperty("src", EMPTY_STRING)), tagopts /* with property "name" */);
+            final String src = tagopts.getProperty("src", EMPTY_STRING);
+            try {
+                if (src.length() > 0) {
+                    final MultiProtocolURI url = absolutePath(src);
+                    if (url != null) {
+                        final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
+                        final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
+                        tagopts.put("src", url.toNormalform(true, false));
+                        final EmbedEntry ie = new EmbedEntry(url, width, height, tagopts.getProperty("type", EMPTY_STRING), tagopts.getProperty("pluginspage", EMPTY_STRING));
+                        this.embeds.put(url, ie);
+                        mergeAnchors(url, tagopts);
+                    }
+                }
+            } catch (final NumberFormatException e) {}
         } else if(tagname.equalsIgnoreCase("param")) {
             final String name = tagopts.getProperty("name", EMPTY_STRING);
             if (name.equalsIgnoreCase("movie")) {
-                mergeAnchors(absolutePath(tagopts.getProperty("value", EMPTY_STRING)), tagopts /* with property "name" */);
+                MultiProtocolURI url = absolutePath(tagopts.getProperty("value", EMPTY_STRING));
+                tagopts.put("value", url.toNormalform(true, false));
+                mergeAnchors(url, tagopts /* with property "name" */);
             }
         }
 
@@ -419,6 +442,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     addImage(this.images, ie);
                 } else {
                     tagopts.put("text", recursiveParse(text));
+                    tagopts.put("href", url.toNormalform(true, false)); // we must assign this because the url may have resolved backpaths and may not be absolute
                     mergeAnchors(url, tagopts);
                 }
             }
@@ -460,6 +484,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (h.length() > 0) this.li.add(h);
         } else if (tagname.equalsIgnoreCase("iframe")) {
             final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
+            tagopts.put("src", src.toNormalform(true, false));
             mergeAnchors(src, tagopts /* with property "name" */);
             this.iframes.add(src);
             this.evaluationScores.match(Element.iframepath, src.toNormalform(true, false));
@@ -654,8 +679,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @return a map of <urlhash, ImageEntry>
      */
     public Map<MultiProtocolURI, ImageEntry> getImages() {
-        // this resturns a String(absolute url)/htmlFilterImageEntry - relation
         return this.images;
+    }
+
+    public Map<MultiProtocolURI, EmbedEntry> getEmbeds() {
+        return this.embeds;
     }
 
     public Map<String, String> getMetas() {

@@ -385,11 +385,11 @@ public class Segment {
                 new byte[0],                               // md5
                 (int) sourcesize,                          // size
                 condenser.RESULT_NUMB_WORDS,               // word count
-                Response.docType(document.dc_format()), // doctype
+                Response.docType(document.dc_format()),    // doctype
                 condenser.RESULT_FLAGS,                    // flags
                 UTF8.getBytes(language),                   // language
-                document.inboundLinkCount(),                   // inbound links
-                document.outboundLinkCount(),                  // outbound links
+                document.inboundLinks().size(),            // inbound links
+                document.outboundLinks().size(),           // outbound links
                 document.getAudiolinks().size(),           // laudio
                 document.getImages().size(),               // limage
                 document.getVideolinks().size(),           // lvideo
@@ -409,8 +409,8 @@ public class Segment {
                 condenser,                                    // document condenser
                 language,                                     // document language
                 Response.docType(document.dc_format()),       // document type
-                document.inboundLinkCount(),                  // inbound links
-                document.outboundLinkCount(),                 // outbound links
+                document.inboundLinks().size(),               // inbound links
+                document.outboundLinks().size(),              // outbound links
                 searchEvent,                                  // a search event that can have results directly
                 sourceName                                    // the name of the source where the index was created
         );

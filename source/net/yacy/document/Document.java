@@ -626,16 +626,6 @@ dc_rights
     	this.favicon = faviconURL;
     }
 
-    public int inboundLinkCount() {
-        if (this.inboundlinks == null) resortLinks();
-        return (this.inboundlinks == null) ? 0 : this.inboundlinks.size();
-    }
-
-    public int outboundLinkCount() {
-        if (this.outboundlinks == null) resortLinks();
-        return (this.outboundlinks == null) ? 0 : this.outboundlinks.size();
-    }
-
     public int inboundLinkNofollowCount() {
         if (this.inboundlinks == null) resortLinks();
         if (this.inboundlinks == null) return 0;
