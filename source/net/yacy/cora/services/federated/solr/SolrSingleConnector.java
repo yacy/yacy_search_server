@@ -42,11 +42,13 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -104,7 +106,7 @@ public class SolrSingleConnector implements SolrConnector {
             }
         }
         if (this.solraccount.length() > 0) {
-            final HttpClient client = new DefaultHttpClient() {
+            final DefaultHttpClient client = new DefaultHttpClient() {
                 @Override
                 protected HttpContext createHttpContext() {
                     HttpContext context = super.createHttpContext();
@@ -116,6 +118,9 @@ public class SolrSingleConnector implements SolrConnector {
                     return context;
                 }
             };
+            BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(new AuthScope(this.host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(this.solraccount, this.solrpw));
+            client.setCredentialsProvider(credsProvider);
             this.server = new HttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, client);
         } else {
             this.server = new HttpSolrServer(this.solrurl);
