@@ -72,6 +72,21 @@ public class ConfigurationSet extends AbstractSet<String> implements Set<String>
         }
     }
 
+    /**
+     * override the abstract implementation because that is not stable in concurrent requests
+     */
+    @Override
+    public boolean contains(Object o) {
+        if (o == null || !(o instanceof String)) return false;
+        String s = (String) o;
+        synchronized (this) {
+            for (String line : this.lines) {
+                if (line != null && line.equals(s)) return true;
+            }
+        }
+        return false;
+    }
+
     public boolean containsDisabled(final String o) {
         if (o == null) return false;
         final Iterator<Entry> i = new EntryIterator();
