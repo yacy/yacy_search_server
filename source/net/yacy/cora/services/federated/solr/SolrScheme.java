@@ -284,7 +284,7 @@ public class SolrScheme extends ConfigurationSet {
         final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
         addSolr(solrdoc, Field.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
         addSolr(solrdoc, Field.id, id);
-        addSolr(solrdoc, Field.sku, digestURI.toNormalform(true, false), 3.0f);
+        addSolr(solrdoc, Field.sku, digestURI.toNormalform(true, false));
         final InetAddress address = digestURI.getInetAddress();
         if (address != null) addSolr(solrdoc, Field.ip_s, address.getHostAddress());
         if (digestURI.getHost() != null) addSolr(solrdoc, Field.host_s, digestURI.getHost());
