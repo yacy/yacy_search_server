@@ -44,10 +44,10 @@
 	<classpathentry kind="lib" path="lib/wstx-asl-3.2.7.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.1.4.jar"/>
-	<classpathentry kind="lib" path="lib/apache-solr-solrj-3.5.0.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/apache-solr-solrj-3.6.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="output" path="gen"/>
