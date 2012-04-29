@@ -1063,9 +1063,10 @@ public class yacysearch {
             String hostName = header.get("Host", "localhost");
             if ( hostName.indexOf(':', 0) == -1 ) {
                 hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
-            }
+            }           
             prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
             prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+            prop.put("thisaddress", hostName);
         }
 
         prop.put("searchagain", global ? "1" : "0");
