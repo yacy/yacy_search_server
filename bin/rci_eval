@@ -1,2 +1,0 @@
-cd `dirname $0`/..
-java -server -Xms400m -Xmx400m -classpath source:classes de.anomic.plasma.plasmaRankingRCIEvaluation -rcieval .
