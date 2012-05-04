@@ -261,7 +261,7 @@ public class RobotsTxt {
     // methods that had been in robotsParser.java:
 
     private static final int DOWNLOAD_ACCESS_RESTRICTED = 0;
-    private static final int DOWNLOAD_ROBOTS_TXT = 1;
+    static final int DOWNLOAD_ROBOTS_TXT = 1;
     private static final int DOWNLOAD_ETAG = 2;
     private static final int DOWNLOAD_MODDATE = 3;
 
@@ -287,7 +287,7 @@ public class RobotsTxt {
         return port;
     }
 
-    private static Object[] downloadRobotsTxt(final MultiProtocolURI robotsURL, int redirectionCount, final RobotsTxtEntry entry) throws Exception {
+    static Object[] downloadRobotsTxt(final MultiProtocolURI robotsURL, int redirectionCount, final RobotsTxtEntry entry) throws Exception {
         if (robotsURL == null || !robotsURL.getProtocol().startsWith("http")) return null;
 
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
@@ -308,7 +308,7 @@ public class RobotsTxt {
 
         // adding referer
         reqHeaders.put(RequestHeader.REFERER, (MultiProtocolURI.newURL(robotsURL,"/")).toNormalform(true, true));
-        reqHeaders.put(RequestHeader.ACCEPT, HTTPLoader.DEFAULT_ACCEPT);
+        reqHeaders.put(HeaderFramework.ACCEPT, HTTPLoader.DEFAULT_ACCEPT);
         if (entry != null) {
             oldEtag = entry.getETag();
             reqHeaders = new RequestHeader();

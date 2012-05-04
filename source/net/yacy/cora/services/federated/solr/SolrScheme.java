@@ -417,7 +417,7 @@ public class SolrScheme extends ConfigurationSet {
             if (isEmpty() || contains(Field.images_alt_txt.name())) addSolr(solrdoc, Field.images_alt_txt, imgalts);
 
             // style sheets
-            if (isEmpty() || contains("css_txt")) {
+            if (isEmpty() || contains(Field.css_tag_txt.name())) {
                 final Map<MultiProtocolURI, String> csss = html.getCSS();
                 final String[] css_tag = new String[csss.size()];
                 final String[] css_url = new String[csss.size()];

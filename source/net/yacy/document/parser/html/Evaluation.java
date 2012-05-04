@@ -84,6 +84,11 @@ public class Evaluation {
             this.subject = subject;
             this.pattern = pattern;
         }
+
+        @Override
+        public String toString() {
+            return this.subject + ":" + this.pattern.toString();
+        }
     }
 
     private static class Model {
@@ -153,9 +158,16 @@ public class Evaluation {
             final List<Attribute> patterns = this.elementMatcher.get(element);
             if (patterns == null) return subjects;
             for (final Attribute attribute: patterns) {
-                if (attribute.pattern.matcher(content).matches()) subjects.inc(attribute.subject);
+                if (attribute.pattern.matcher(content).matches()) {
+                    subjects.inc(attribute.subject);
+                }
             }
             return subjects;
+        }
+
+        @Override
+        public String toString() {
+            return this.modelName + ":" + this.elementMatcher.toString();
         }
 
     }
@@ -164,6 +176,11 @@ public class Evaluation {
 
     public Evaluation() {
         this.modelMap = new HashMap<String, ClusteredScoreMap<String>>();
+    }
+
+    @Override
+    public String toString() {
+        return this.modelMap.toString();
     }
 
     /**
@@ -219,6 +236,17 @@ public class Evaluation {
         if (MemoryControl.request(content.length * 2, false)) {
             match(element, new String(content) /*Segment(content, 0, content.length)*/);
         }
+    }
+
+    public static void main(String[] args) {
+        String t =
+            "// [CDATA[\n" +
+            "var gaJsH xost = ((\"https:\" == document.location.protocol) ? \"https://ssl.\" : \"http://www.\");\n" +
+            "document.write(unescape(\"%3Cscript xsrc='\" + gaJ sHost + \"google-analytics.com/ga.js'\n" +
+            "type='text/javascript'%3E%3C/script%3E\"));\"\n" +
+            "\"// ]]\"";
+        Pattern p = Pattern.compile("(?s).*gaJsHost.*|(?s).*_gat._anonymizeIp.*");
+        if (p.matcher(t).matches()) System.out.println("1");
     }
 
 }

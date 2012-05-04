@@ -84,6 +84,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         link(TagType.singleton),
         embed(TagType.singleton), //added by [MN]
         param(TagType.singleton), //added by [MN]
+        iframe(TagType.singleton), // scraped as singleton to get such iframes that have no closing tag
 
         a(TagType.pair),
         h1(TagType.pair),
@@ -97,7 +98,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         strong(TagType.pair),
         i(TagType.pair),
         li(TagType.pair),
-        iframe(TagType.pair),
         script(TagType.pair);
 
         public TagType type;
@@ -351,7 +351,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String content = tagopts.getProperty("content", EMPTY_STRING);
             if (name.length() > 0) {
                 this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
-                if (name.equals("generator")) {
+                if (name.toLowerCase().equals("generator")) {
                     this.evaluationScores.match(Element.metagenerator, content);
                 }
             } else {
@@ -420,6 +420,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 tagopts.put("value", url.toNormalform(true, false));
                 mergeAnchors(url, tagopts /* with property "name" */);
             }
+        } else if (tagname.equalsIgnoreCase("iframe")) {
+            final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
+            tagopts.put("src", src.toNormalform(true, false));
+            mergeAnchors(src, tagopts /* with property "name" */);
+            this.iframes.add(src);
+            this.evaluationScores.match(Element.iframepath, src.toNormalform(true, false));
         }
 
         // fire event
@@ -482,12 +488,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if ((tagname.equalsIgnoreCase("li")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) this.li.add(h);
-        } else if (tagname.equalsIgnoreCase("iframe")) {
-            final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
-            tagopts.put("src", src.toNormalform(true, false));
-            mergeAnchors(src, tagopts /* with property "name" */);
-            this.iframes.add(src);
-            this.evaluationScores.match(Element.iframepath, src.toNormalform(true, false));
         } else if (tagname.equalsIgnoreCase("script")) {
             final String src = tagopts.getProperty("src", EMPTY_STRING);
             if (src.length() > 0) {

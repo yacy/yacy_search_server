@@ -28,8 +28,8 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.EventTracker;
 import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.search.EventTracker;
 
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

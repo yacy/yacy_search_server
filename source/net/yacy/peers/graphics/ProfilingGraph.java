@@ -29,8 +29,8 @@ package net.yacy.peers.graphics;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
-import net.yacy.kelondro.util.EventTracker;
-import net.yacy.kelondro.util.EventTracker.Event;
+import net.yacy.search.EventTracker;
+import net.yacy.search.EventTracker.Event;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.visualization.ChartPlotter;
 import net.yacy.visualization.RasterPlotter;

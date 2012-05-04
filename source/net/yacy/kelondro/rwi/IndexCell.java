@@ -42,8 +42,8 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.MergeIterator;
-import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.EventTracker;
 
 
 /*
