@@ -43,7 +43,6 @@
         <col width="10" />
         <col width="10" />
         <col width="10" />
-        <col width="10" />
         <col />
       </colgroup>
       <tr class="TableHeader">
@@ -55,7 +54,6 @@
         <th>Depth</th>
         <th>Modified Date</th>
         <th>Anchor Name</th>
-        <th>Delta/ms</th>
         <th>URL</th>
       </tr>
     #{host}#
@@ -63,7 +61,7 @@
         <td>#[hostcount]#</td>
         <td>#[hostdelta]#</td>
         <td><a href="IndexCreateQueues_p.html?#(embed)#::embed=&#(/embed)#delete=&stack=#[queuename]#&option=1&pattern=.*#[hostname]#.*&urlsPerHost=#[urlsPerHost]#"><img src="env/grafics/trash.gif"></a>&nbsp;#[hostname]#</td>
-        <td colspan="7"></td>
+        <td colspan="6"></td>
       </tr>
       #{list}#
       <tr class="TableCellLight">
@@ -73,7 +71,6 @@
         <td>#[depth]#</td>
         <td>#[modified]#</td>
         <td>#[anchor]#</td>
-        <td>#[delta]#</td>
         <td><a href="#[url]#">#[url]#</a></td>
       </tr>
       #{/list}#

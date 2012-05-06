@@ -148,7 +148,6 @@ public class IndexCreateQueues_p {
                     prop.put("crawler_host_" + hc + "_list_" + count + "_depth", request.depth());
                     prop.put("crawler_host_" + hc + "_list_" + count + "_modified", daydate(request.appdate()) );
                     prop.putHTML("crawler_host_" + hc + "_list_" + count + "_anchor", request.name());
-                    prop.put("crawler_host_" + hc + "_list_" + count + "_delta", sb.crawlQueues.noticeURL.getDomainSleepTime(stackType, sb.robots, sb.crawler, request));
                     prop.putHTML("crawler_host_" + hc + "_list_" + count + "_url", request.url().toNormalform(false, true));
                     prop.put("crawler_host_" + hc + "_list_" + count + "_hash", request.url().hash());
                     count++;
