@@ -153,11 +153,7 @@ public final class Row {
 
     public final Entry newEntry(final byte[] rowinstance) {
         if (rowinstance == null) return null;
-        //assert (rowinstance[0] != 0);
-        if (!(this.objectOrder.wellformed(rowinstance, 0, this.primaryKeyLength))) {
-            Log.logWarning("kelondroRow", "row not well-formed: rowinstance[0] = " + UTF8.String(rowinstance, 0, this.primaryKeyLength) + " / " + NaturalOrder.arrayList(rowinstance, 0, this.primaryKeyLength));
-            return null;
-        }
+        assert (this.objectOrder.wellformed(rowinstance, 0, this.primaryKeyLength)) :  "row not well-formed: rowinstance[0] = " + UTF8.String(rowinstance, 0, this.primaryKeyLength) + " / " + NaturalOrder.arrayList(rowinstance, 0, this.primaryKeyLength);
         return new Entry(rowinstance, false);
     }
 
@@ -170,14 +166,11 @@ public final class Row {
 
     public final Entry newEntry(final byte[] rowinstance, final int start, final boolean clone) {
         if (rowinstance == null) return null;
-        //assert (rowinstance[0] != 0);
-        final boolean wellformed = this.objectOrder.wellformed(rowinstance, start, this.primaryKeyLength);
         try {
-            assert (wellformed) : "rowinstance = " + UTF8.String(rowinstance);
+            assert (this.objectOrder.wellformed(rowinstance, start, this.primaryKeyLength)) : "rowinstance = " + UTF8.String(rowinstance);
         } catch (final Throwable e) {
             Log.logException(e);
         }
-        if (!wellformed) return null;
         // this method offers the option to clone the content
         // this is necessary if it is known that the underlying byte array may change and therefore
         // the reference to the byte array does not contain the original content
@@ -210,26 +203,32 @@ public final class Row {
             this.base = baseOrder;
         }
 
+        @Override
         public int compare(final Entry a, final Entry b) {
             return a.compareTo(b);
         }
 
+        @Override
         public boolean equal(final Entry a, final Entry b) {
             return a.equals(b);
         }
 
+        @Override
         public Order<Entry> clone() {
             return new EntryComparator(this.base);
         }
 
+        @Override
         public long cardinal(final Entry key) {
             return this.base.cardinal(key.bytes(), 0, key.getPrimaryKeyLength());
         }
 
+        @Override
         public String signature() {
             return this.base.signature();
         }
 
+        @Override
         public boolean wellformed(final Entry a) {
             return this.base.wellformed(a.getPrimaryKeyBytes());
         }
@@ -344,6 +343,7 @@ public final class Row {
             return Row.this.row[column].cellwidth;
         }
 
+        @Override
         public final int compareTo(final Entry o) {
             // compares only the content of the primary key
             if (Row.this.objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
@@ -351,6 +351,7 @@ public final class Row {
             return Row.this.objectOrder.compare(bytes(), o.bytes(), Row.this.primaryKeyLength);
         }
 
+        @Override
         public int compare(final Entry o1, final Entry o2) {
             return o1.compareTo(o2);
         }
