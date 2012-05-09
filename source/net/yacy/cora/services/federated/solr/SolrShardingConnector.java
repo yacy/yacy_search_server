@@ -31,12 +31,10 @@ import java.util.Collection;
 import java.util.List;
 
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.services.federated.solr.SolrShardingSelection.Method;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrInputDocument;
 
 
 public class SolrShardingConnector implements SolrConnector {
@@ -109,7 +107,7 @@ public class SolrShardingConnector implements SolrConnector {
      * @throws IOException
      */
     @Override
-    public void add(final SolrInputDocument solrdoc) throws IOException {
+    public void add(final SolrDoc solrdoc) throws IOException {
         this.connectors.get(this.sharding.select(solrdoc)).add(solrdoc);
     }
 
@@ -118,8 +116,8 @@ public class SolrShardingConnector implements SolrConnector {
      * @param docs
      * @throws IOException
      */
-    protected void addSolr(final Collection<SolrInputDocument> docs) throws IOException {
-        for (final SolrInputDocument doc: docs) add(doc);
+    protected void addSolr(final Collection<SolrDoc> docs) throws IOException {
+        for (final SolrDoc doc: docs) add(doc);
     }
 
     /**

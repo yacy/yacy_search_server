@@ -31,7 +31,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
 
 public interface SolrConnector {
 
@@ -71,7 +70,7 @@ public interface SolrConnector {
      * @throws IOException
      * @throws SolrException
      */
-    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException;
+    public void add(final SolrDoc solrdoc) throws IOException, SolrException;
 
     /**
      * register an entry as error document

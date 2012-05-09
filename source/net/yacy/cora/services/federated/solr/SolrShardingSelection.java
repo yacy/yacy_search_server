@@ -32,8 +32,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.solr.common.SolrInputDocument;
-
 public class SolrShardingSelection {
 
     public final static Charset charsetUTF8;
@@ -58,7 +56,7 @@ public class SolrShardingSelection {
         return (int) (this.chardID.getAndIncrement() % this.dimension);
     }
 
-    public int select(final SolrInputDocument solrdoc) throws IOException {
+    public int select(final SolrDoc solrdoc) throws IOException {
         if (this.method == Method.MODULO_HOST_MD5) {
             final String sku = (String) solrdoc.getField("sku").getValue();
             return selectURL(sku);

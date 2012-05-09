@@ -67,7 +67,7 @@ public class SolrSingleConnector implements SolrConnector {
     private final static int transmissionQueueCount = 4; // allow concurrent http sessions to solr
     private final static int transmissionQueueSize = 50; // number of documents that are collected until a commit is sent
     private final Worker[] transmissionWorker; // the transmission workers to solr
-    private final BlockingQueue<SolrInputDocument>[] transmissionQueue; // the queues quere documents are collected
+    private final BlockingQueue<SolrDoc>[] transmissionQueue; // the queues quere documents are collected
     private int transmissionRoundRobinCounter; // a rount robin counter for the transmission queues
 
     /**
@@ -82,7 +82,7 @@ public class SolrSingleConnector implements SolrConnector {
         this.transmissionRoundRobinCounter = 0;
         this.transmissionQueue = new ArrayBlockingQueue[transmissionQueueCount];
         for (int i = 0; i < transmissionQueueCount; i++) {
-            this.transmissionQueue[i] = new ArrayBlockingQueue<SolrInputDocument>(transmissionQueueSize);
+            this.transmissionQueue[i] = new ArrayBlockingQueue<SolrDoc>(transmissionQueueSize);
         }
 
         // connect using authentication
@@ -253,7 +253,7 @@ public class SolrSingleConnector implements SolrConnector {
     }
 
     @Override
-    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
+    public void add(final SolrDoc solrdoc) throws IOException, SolrException {
         int thisrrc = this.transmissionRoundRobinCounter;
         int nextrrc = thisrrc++;
         if (nextrrc >= transmissionQueueCount) nextrrc = 0;
@@ -290,7 +290,7 @@ public class SolrSingleConnector implements SolrConnector {
     @Override
     public void err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
 
-            final SolrInputDocument solrdoc = new SolrInputDocument();
+            final SolrDoc solrdoc = new SolrDoc();
             solrdoc.addField("id", ASCII.String(digestURI.hash()));
             solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
             final InetAddress address = digestURI.getInetAddress();

@@ -31,7 +31,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
 
 public class SolrRetryConnector implements SolrConnector {
 
@@ -109,7 +108,7 @@ public class SolrRetryConnector implements SolrConnector {
     }
 
     @Override
-    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
+    public void add(final SolrDoc solrdoc) throws IOException, SolrException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {

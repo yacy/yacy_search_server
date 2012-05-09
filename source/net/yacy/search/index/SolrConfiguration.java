@@ -40,6 +40,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
@@ -48,7 +49,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrInputDocument;
 
 public class SolrConfiguration extends ConfigurationSet {
 
@@ -84,37 +84,37 @@ public class SolrConfiguration extends ConfigurationSet {
         */
     }
 
-    protected void addSolr(final SolrInputDocument solrdoc, final SolrField key, final String value) {
-        if (isEmpty() || contains(key.name())) solrdoc.setField(key.name(), value);
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value) {
+        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
     }
 
-    protected void addSolr(final SolrInputDocument solrdoc, final SolrField key, final Date value) {
-        if (isEmpty() || contains(key.name())) solrdoc.setField(key.name(), value);
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final Date value) {
+        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
     }
 
-    protected void addSolr(final SolrInputDocument solrdoc, final SolrField key, final int value) {
-        if (isEmpty() || contains(key.name())) solrdoc.setField(key.name(), value);
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final int value) {
+        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
     }
 
-    protected void addSolr(final SolrInputDocument solrdoc, final SolrField key, final String[] value) {
-        if (isEmpty() || contains(key.name())) solrdoc.setField(key.name(), value);
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String[] value) {
+        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
     }
 
-    protected void addSolr(final SolrInputDocument solrdoc, final SolrField key, final float value) {
-        if (isEmpty() || contains(key.name())) solrdoc.setField(key.name(), value);
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final float value) {
+        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
     }
 
-    protected void addSolr(final SolrInputDocument solrdoc, final SolrField key, final boolean value) {
-        if (isEmpty() || contains(key.name())) solrdoc.setField(key.name(), value);
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final boolean value) {
+        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
     }
 
-    protected void addSolr(final SolrInputDocument solrdoc, final SolrField key, final String value, final float boost) {
-        if (isEmpty() || contains(key.name())) solrdoc.setField(key.name(), value, boost);
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value, final float boost) {
+        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value, boost);
     }
 
-    public SolrInputDocument yacy2solr(final String id, final ResponseHeader header, final Document yacydoc) {
+    public SolrDoc yacy2solr(final String id, final ResponseHeader header, final Document yacydoc) {
         // we user the SolrCell design as index scheme
-        final SolrInputDocument solrdoc = new SolrInputDocument();
+        final SolrDoc solrdoc = new SolrDoc();
         final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
         addSolr(solrdoc, SolrField.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
         addSolr(solrdoc, SolrField.id, id);

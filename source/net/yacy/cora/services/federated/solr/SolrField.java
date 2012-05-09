@@ -27,6 +27,23 @@ package net.yacy.cora.services.federated.solr;
 
 public interface SolrField {
 
+    /**
+     * this shall be implemented as enum, thus shall have the name() method
+     * @return the name of the enum constant
+     */
     public String name();
+
+
+    public SolrType getType();
+
+    public boolean isIndexed();
+
+    public boolean isStored();
+
+    public boolean isMultiValued();
+
+    public boolean isOmitNorms();
+
+    public String getComment();
 
 }
