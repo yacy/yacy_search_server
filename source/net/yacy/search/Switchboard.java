@@ -1012,6 +1012,7 @@ public final class Switchboard extends serverSwitch
         // load network configuration into settings
         String networkUnitDefinition =
             getConfig("network.unit.definition", "defaults/yacy.network.freeworld.unit");
+        if (networkUnitDefinition.length() == 0) networkUnitDefinition = "defaults/yacy.network.freeworld.unit"; // patch for a strange failure case where the path was overwritten by empty string
 
         // patch old values
         if ( networkUnitDefinition.equals("yacy.network.unit") ) {
