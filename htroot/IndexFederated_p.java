@@ -40,7 +40,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
 import net.yacy.search.index.SolrField;
-import net.yacy.search.index.SolrScheme;
+import net.yacy.search.index.SolrConfiguration;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -87,7 +87,7 @@ public class IndexFederated_p {
                 sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
             }
 
-            final SolrScheme scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
+            final SolrConfiguration scheme = new SolrConfiguration(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
 
             if (solrIsOnAfterwards) {
                 // switch on

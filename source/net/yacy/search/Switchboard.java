@@ -141,7 +141,7 @@ import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
-import net.yacy.search.index.SolrScheme;
+import net.yacy.search.index.SolrConfiguration;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
@@ -242,7 +242,7 @@ public final class Switchboard extends serverSwitch
     public SeedDB peers;
     public WorkTables tables;
     public Tray tray;
-    public SolrScheme solrScheme;
+    public SolrConfiguration solrScheme;
 
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -640,8 +640,8 @@ public final class Switchboard extends serverSwitch
         if ( !solrWorkProfile.exists() ) {
             FileUtils.copy(solrBackupProfile, solrWorkProfile);
         }
-        final SolrScheme backupScheme = new SolrScheme(solrBackupProfile);
-        this.solrScheme = new SolrScheme(solrWorkProfile);
+        final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile);
+        this.solrScheme = new SolrConfiguration(solrWorkProfile);
 
         // update the working scheme with the backup scheme. This is necessary to include new features.
         // new features are always activated by default

@@ -50,13 +50,13 @@ import net.yacy.kelondro.logging.Log;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
-public class SolrScheme extends ConfigurationSet {
+public class SolrConfiguration extends ConfigurationSet {
 
     /**
      * initialize with an empty ConfigurationSet which will cause that all the index
      * attributes are used
      */
-    public SolrScheme() {
+    public SolrConfiguration() {
         super();
     }
 
@@ -65,7 +65,7 @@ public class SolrScheme extends ConfigurationSet {
      * the configuration file simply contains a list of lines with keywords
      * @param configurationFile
      */
-    public SolrScheme(final File configurationFile) {
+    public SolrConfiguration(final File configurationFile) {
         super(configurationFile);
         // check consistency: compare with YaCyField enum
         for (String name: this) {
