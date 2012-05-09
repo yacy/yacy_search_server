@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -32,13 +32,13 @@ import java.util.List;
 import java.util.Set;
 
 
-public class CircleTool {  
+public class CircleTool {
 
-    private static short[][] circles = new short[0][]; 
-    
+    private static short[][] circles = new short[0][];
+
     private static short[] getCircleCoords(final short radius) {
         if ((radius - 1) < circles.length) return circles[radius - 1];
-        
+
         // read some lines from known circles
         Set<String> crds = new HashSet<String>();
         //crds.add("0|0");
@@ -49,11 +49,11 @@ public class CircleTool {
                 if (!(crds.contains(co))) crds.add(co);
             }
         }
-        
+
         // copy old circles into new array
         short[][] newCircles = new short[radius][];
         System.arraycopy(circles, 0, newCircles, 0, circles.length);
-        
+
         // compute more lines in new circles
         short x, y;
         List<short[]> crc;
@@ -69,8 +69,8 @@ public class CircleTool {
                     crc.add(new short[]{x, y});
                     crds.add(co);
                 }
-                x = (short) (((double) r + 0.5) * Math.cos(Math.PI * a / (4 * r1)));
-                y = (short) (((double) r + 0.5) * Math.sin(Math.PI * a / (4 * r1)));
+                x = (short) ((r + 0.5) * Math.cos(Math.PI * a / (4 * r1)));
+                y = (short) ((r + 0.5) * Math.sin(Math.PI * a / (4 * r1)));
                 co = x + "|" + y;
                 if (!(crds.contains(co))) {
                     crc.add(new short[]{x, y});
@@ -86,21 +86,21 @@ public class CircleTool {
                 coords = crc.get(i);
                 newCircles[r][i2++] = coords[0];
                 newCircles[r][i2++] = coords[1];
-                //System.out.print(circles[r][i][0] + "," +circles[r][i][1] + "; "); 
+                //System.out.print(circles[r][i][0] + "," +circles[r][i][1] + "; ");
             }
             //System.out.println();
         }
         crc = null;
         crds = null;
-        
+
         // move newCircles to circles array
         circles = newCircles;
         newCircles = null;
-        
+
         // finally return wanted slice
         return circles[radius - 1];
     }
-    
+
     public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, final int intensity) {
         if (radius == 0) {
             //matrix.plot(xc, yc, 100);
@@ -119,7 +119,7 @@ public class CircleTool {
             }
         }
     }
-    
+
     public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, int fromArc, int toArc) {
         // draws only a part of a circle
         // arc is given in degree
@@ -132,8 +132,11 @@ public class CircleTool {
         } else {
             final short[] c = getCircleCoords((short) radius);
             final short q = (short) (c.length / 2);
-            final short[] c4x = new short[q * 4];
-            final short[] c4y = new short[q * 4];
+            final short q2 = (short) (q * 2);
+            final short q3 = (short) (q * 3);
+            final short q4 = (short) (q * 4);
+            final short[] c4x = new short[q4];
+            final short[] c4y = new short[q4];
             short a0, a1, a2, a3, b0, b1;
             for (short i = 0; i < q; i++) {
                 b0 = (short) (2 * (i        ));
@@ -142,29 +145,33 @@ public class CircleTool {
                 a1 = c[b0 + 1];
                 a2 = c[b1    ];
                 a3 = c[b1 + 1];
-                c4x[i        ] =     a0    ; // quadrant 1
-                c4y[i        ] = (short) (-a1 - 1);  // quadrant 1
-                c4x[i +     q] = (short) (  1 - a2); // quadrant 2
-                c4y[i +     q] = (short) (-a3 - 1);  // quadrant 2
-                c4x[i + 2 * q] = (short) (  1 - a0); // quadrant 3
-                c4y[i + 2 * q] =     a1    ; // quadrant 3
-                c4x[i + 3 * q] =     a2    ; // quadrant 4
-                c4y[i + 3 * q] =     a3    ; // quadrant 4
+                c4x[i     ] =     a0    ; // quadrant 1
+                c4y[i     ] = (short) (-a1 - 1);  // quadrant 1
+                c4x[i + q ] = (short) (  1 - a2); // quadrant 2
+                c4y[i + q ] = (short) (-a3 - 1);  // quadrant 2
+                c4x[i + q2] = (short) (  1 - a0); // quadrant 3
+                c4y[i + q2] =     a1    ; // quadrant 3
+                c4x[i + q3] =     a2    ; // quadrant 4
+                c4y[i + q3] =     a3    ; // quadrant 4
             }
             if (fromArc == toArc) {
-                int i = q * 4 * fromArc / 360;
+                int i = q4 * fromArc / 360;
                 matrix.plot(xc + c4x[i], yc + c4y[i], 100);
             } else if (fromArc > toArc) {
                 // draw two parts
-                for (int i = q * 4 * fromArc / 360; i < q * 4; i++) {
+                int from = q4 * fromArc / 360;
+                int to   = q4 * toArc / 360;
+                for (int i = from; i < q4; i++) {
                     matrix.plot(xc + c4x[i], yc + c4y[i], 100);
                 }
-                for (int i = 0; i < q * 4 * toArc / 360; i++) {
+                for (int i = 0; i < to; i++) {
                     matrix.plot(xc + c4x[i], yc + c4y[i], 100);
                 }
             } else {
                 // can be drawn in one part
-                for (int i = q * 4 * fromArc / 360; i < q * 4 * toArc / 360; i++) {
+                int from = q4 * fromArc / 360;
+                int to   = q4 * toArc / 360;
+                for (int i = from; i < to; i++) {
                     matrix.plot(xc + c4x[i], yc + c4y[i], 100);
                 }
             }
