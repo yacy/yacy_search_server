@@ -32,7 +32,6 @@ import java.util.Iterator;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.SolrConnector;
-import net.yacy.cora.services.federated.solr.SolrScheme;
 import net.yacy.cora.services.federated.solr.SolrShardingConnector;
 import net.yacy.cora.services.federated.solr.SolrShardingSelection;
 import net.yacy.cora.services.federated.solr.SolrSingleConnector;
@@ -40,6 +39,8 @@ import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
+import net.yacy.search.index.SolrField;
+import net.yacy.search.index.SolrScheme;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -92,7 +93,7 @@ public class IndexFederated_p {
                 // switch on
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
                 try {
-                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrShardingConnector(solrurls, scheme, SolrShardingSelection.Method.MODULO_HOST_MD5, 10000) : null);
+                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrShardingConnector(solrurls, SolrShardingSelection.Method.MODULO_HOST_MD5, 10000) : null);
                 } catch (final IOException e) {
                     Log.logException(e);
                     sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
@@ -138,21 +139,17 @@ public class IndexFederated_p {
         }
 
         // write scheme
-        SolrScheme scheme = (sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() == null) ? null : sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().getScheme();
         final String schemename = sb.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
-        if (scheme == null) {
-            scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
-        }
-        final Iterator<ConfigurationSet.Entry> i = scheme.allIterator();
+        final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.allIterator();
 
         int c = 0;
         boolean dark = false;
         ConfigurationSet.Entry entry;
-        SolrScheme.Field field;
+        SolrField field;
         while (i.hasNext()) {
             entry = i.next();
             try {
-                field = SolrScheme.Field.valueOf(entry.key());
+                field = SolrField.valueOf(entry.key());
             } catch (IllegalArgumentException e) {
                 continue;
             }

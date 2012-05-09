@@ -31,8 +31,7 @@ import java.util.Collection;
 import java.util.List;
 
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.document.Document;
+import net.yacy.cora.services.federated.solr.SolrShardingSelection.Method;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocument;
@@ -43,25 +42,20 @@ import org.apache.solr.common.SolrInputDocument;
 public class SolrShardingConnector implements SolrConnector {
 
     private final List<SolrConnector> connectors;
-    private final SolrScheme scheme;
     private final SolrShardingSelection sharding;
     private final String[] urls;
 
-    public SolrShardingConnector(final String urlList, final SolrScheme scheme, final SolrShardingSelection.Method method, final long timeout) throws IOException {
+    public SolrShardingConnector(final String urlList, final SolrShardingSelection.Method method, final long timeout) throws IOException {
         urlList.replace(' ', ',');
         this.urls = urlList.split(",");
         this.connectors = new ArrayList<SolrConnector>();
         for (final String u: this.urls) {
-            this.connectors.add(new SolrRetryConnector(new SolrSingleConnector(u.trim(), scheme), timeout));
+            this.connectors.add(new SolrRetryConnector(new SolrSingleConnector(u.trim()), timeout));
         }
         this.sharding = new SolrShardingSelection(method, this.urls.length);
-        this.scheme = scheme;
     }
 
-    public SolrScheme getScheme() {
-        return this.scheme;
-    }
-
+    @Override
     public void close() {
         for (final SolrConnector connector: this.connectors) connector.close();
     }
@@ -70,6 +64,7 @@ public class SolrShardingConnector implements SolrConnector {
      * delete everything in the solr index
      * @throws IOException
      */
+    @Override
     public void clear() throws IOException {
         for (final SolrConnector connector: this.connectors) connector.clear();
     }
@@ -79,6 +74,7 @@ public class SolrShardingConnector implements SolrConnector {
      * @param id the url hash of the entry
      * @throws IOException
      */
+    @Override
     public void delete(final String id) throws IOException {
         for (final SolrConnector connector: this.connectors) connector.delete(id);
     }
@@ -88,6 +84,7 @@ public class SolrShardingConnector implements SolrConnector {
      * @param ids a list of url hashes
      * @throws IOException
      */
+    @Override
     public void delete(final List<String> ids) throws IOException {
         for (final SolrConnector connector: this.connectors) connector.delete(ids);
     }
@@ -98,6 +95,7 @@ public class SolrShardingConnector implements SolrConnector {
      * @return true if any entry in solr exists
      * @throws IOException
      */
+    @Override
     public boolean exists(final String id) throws IOException {
         for (final SolrConnector connector: this.connectors) {
             if (connector.exists(id)) return true;
@@ -106,21 +104,11 @@ public class SolrShardingConnector implements SolrConnector {
     }
 
     /**
-     * add a YaCy document. This calls the scheme processor to add the document as solr document
-     * @param id the url hash of the entry
-     * @param header the http response header
-     * @param doc the YaCy document
-     * @throws IOException
-     */
-    public void add(final String id, final ResponseHeader header, final Document doc) throws IOException {
-        add(this.scheme.yacy2solr(id, header, doc));
-    }
-
-    /**
      * add a Solr document
      * @param solrdoc
      * @throws IOException
      */
+    @Override
     public void add(final SolrInputDocument solrdoc) throws IOException {
         this.connectors.get(this.sharding.select(solrdoc)).add(solrdoc);
     }
@@ -141,6 +129,7 @@ public class SolrShardingConnector implements SolrConnector {
      * @param httpstatus
      * @throws IOException
      */
+    @Override
     public void err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
         this.connectors.get(this.sharding.selectURL(digestURI.toNormalform(true, false))).err(digestURI, failReason, httpstatus);
     }
@@ -152,6 +141,7 @@ public class SolrShardingConnector implements SolrConnector {
      * @param querystring
      * @throws IOException
      */
+    @Override
     public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException {
         final SolrDocumentList list = new SolrDocumentList();
         for (final SolrConnector connector: this.connectors) {
@@ -181,6 +171,7 @@ public class SolrShardingConnector implements SolrConnector {
         return size;
     }
 
+    @Override
     public long getSize() {
         final long[] size = getSizeList();
         long s = 0;

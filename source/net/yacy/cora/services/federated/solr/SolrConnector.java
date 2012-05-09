@@ -27,8 +27,6 @@ package net.yacy.cora.services.federated.solr;
 import java.io.IOException;
 import java.util.List;
 
-import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocumentList;
@@ -36,12 +34,6 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 
 public interface SolrConnector {
-
-    /**
-     * with a scheme the fields of a SolrDocument can be translated to actual data values
-     * @return the solr scheme that can translate the SolrDocument
-     */
-    public SolrScheme getScheme();
 
     public void close();
 
@@ -72,15 +64,6 @@ public interface SolrConnector {
      * @throws IOException
      */
     public boolean exists(final String id) throws IOException;
-
-    /**
-     * add a YaCy document. This calls the scheme processor to add the document as solr document
-     * @param id the url hash of the entry
-     * @param header the http response header
-     * @param doc the YaCy document
-     * @throws IOException
-     */
-    public void add(final String id, final ResponseHeader header, final Document doc) throws IOException;
 
     /**
      * add a solr input document

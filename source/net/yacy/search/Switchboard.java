@@ -91,7 +91,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
-import net.yacy.cora.services.federated.solr.SolrScheme;
 import net.yacy.cora.services.federated.solr.SolrShardingConnector;
 import net.yacy.cora.services.federated.solr.SolrShardingSelection;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
@@ -142,6 +141,7 @@ import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
+import net.yacy.search.index.SolrScheme;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
@@ -242,6 +242,7 @@ public final class Switchboard extends serverSwitch
     public SeedDB peers;
     public WorkTables tables;
     public Tray tray;
+    public SolrScheme solrScheme;
 
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -640,22 +641,20 @@ public final class Switchboard extends serverSwitch
             FileUtils.copy(solrBackupProfile, solrWorkProfile);
         }
         final SolrScheme backupScheme = new SolrScheme(solrBackupProfile);
-        final SolrScheme workingScheme = new SolrScheme(solrWorkProfile);
+        this.solrScheme = new SolrScheme(solrWorkProfile);
 
         // update the working scheme with the backup scheme. This is necessary to include new features.
         // new features are always activated by default
-        workingScheme.fill(backupScheme, false);
+        this.solrScheme.fill(backupScheme, false);
 
         // set up the solr interface
-        final String solrurls =
-            getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
-        final boolean usesolr =
-            getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
+        final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
+        final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
+
         try {
             this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(
                 (usesolr) ? new SolrShardingConnector(
                     solrurls,
-                    workingScheme,
                     SolrShardingSelection.Method.MODULO_HOST_MD5,
                     10000) : null);
         } catch ( final IOException e ) {
@@ -2432,7 +2431,7 @@ public final class Switchboard extends serverSwitch
                         this.indexSegments
                             .segment(Segments.Process.LOCALCRAWLING)
                             .getSolr()
-                            .add(id, in.queueEntry.getResponseHeader(), doc);
+                            .add(this.solrScheme.yacy2solr(id, in.queueEntry.getResponseHeader(), doc));
                     } catch ( final IOException e ) {
                         Log.logWarning(
                             "SOLR",

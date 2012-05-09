@@ -27,8 +27,6 @@ package net.yacy.cora.services.federated.solr;
 import java.io.IOException;
 import java.util.List;
 
-import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocumentList;
@@ -43,11 +41,6 @@ public class SolrRetryConnector implements SolrConnector {
     public SolrRetryConnector(final SolrConnector solrConnector, final long retryMaxTime) {
         this.solrConnector = solrConnector;
         this.retryMaxTime = retryMaxTime;
-    }
-
-    @Override
-    public SolrScheme getScheme() {
-        return this.solrConnector.getScheme();
     }
 
     @Override
@@ -113,21 +106,6 @@ public class SolrRetryConnector implements SolrConnector {
         }
         if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
         return false;
-    }
-
-    @Override
-    public void add(final String id, final ResponseHeader header, final Document doc) throws IOException {
-        final long t = System.currentTimeMillis() + this.retryMaxTime;
-        Throwable ee = null;
-        while (System.currentTimeMillis() < t) try {
-            this.solrConnector.add(id, header, doc);
-            return;
-        } catch (final Throwable e) {
-            ee = e;
-            try {Thread.sleep(10);} catch (final InterruptedException e1) {}
-            continue;
-        }
-        if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
     }
 
     @Override

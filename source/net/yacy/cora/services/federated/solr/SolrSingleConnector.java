@@ -36,8 +36,6 @@ import java.util.concurrent.BlockingQueue;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
@@ -65,7 +63,6 @@ public class SolrSingleConnector implements SolrConnector {
     private final String solrurl, host, solrpath, solraccount, solrpw;
     private final int port;
     private HttpSolrServer server;
-    private final SolrScheme scheme;
 
     private final static int transmissionQueueCount = 4; // allow concurrent http sessions to solr
     private final static int transmissionQueueSize = 50; // number of documents that are collected until a commit is sent
@@ -80,9 +77,8 @@ public class SolrSingleConnector implements SolrConnector {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-    public SolrSingleConnector(final String url, final SolrScheme scheme) throws IOException {
+    public SolrSingleConnector(final String url) throws IOException {
         this.solrurl = url;
-        this.scheme = scheme;
         this.transmissionRoundRobinCounter = 0;
         this.transmissionQueue = new ArrayBlockingQueue[transmissionQueueCount];
         for (int i = 0; i < transmissionQueueCount; i++) {
@@ -188,11 +184,6 @@ public class SolrSingleConnector implements SolrConnector {
     }
 
     @Override
-    public SolrScheme getScheme() {
-        return this.scheme;
-    }
-
-    @Override
     public long getSize() {
         try {
             final SolrDocumentList list = get("*:*", 0, 1);
@@ -259,11 +250,6 @@ public class SolrSingleConnector implements SolrConnector {
         } catch (final Throwable e) {
             throw new IOException(e);
         }
-    }
-
-    @Override
-    public void add(final String id, final ResponseHeader header, final Document doc) throws IOException, SolrException {
-        add(this.scheme.yacy2solr(id, header, doc));
     }
 
     @Override
@@ -384,7 +370,8 @@ public class SolrSingleConnector implements SolrConnector {
     public static void main(final String args[]) {
         SolrSingleConnector solr;
         try {
-            solr = new SolrSingleConnector("http://127.0.0.1:8983/solr", new SolrScheme());
+            //SolrScheme scheme = new SolrScheme();
+            solr = new SolrSingleConnector("http://127.0.0.1:8983/solr");
             solr.clear();
             final File exampleDir = new File("/Data/workspace2/yacy/test/parsertest/");
             long t, t0, a = 0;

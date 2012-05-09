@@ -22,15 +22,12 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.File;
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.solr.SolrScheme;
-import net.yacy.cora.services.federated.solr.SolrScheme.Field;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
+import net.yacy.search.index.SolrField;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -42,21 +39,16 @@ public class schema_p {
         final Switchboard sb = (Switchboard) env;
 
         // write scheme
-        SolrScheme scheme = (sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() == null) ? null : sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().getScheme();
-        final String schemename = sb.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
-        if (scheme == null) {
-            scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
-        }
-        final Iterator<ConfigurationSet.Entry> i = scheme.allIterator();
+        final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.allIterator();
 
         int c = 0;
         ConfigurationSet.Entry entry;
-        SolrScheme.Field field = null;
+        SolrField field = null;
         while (i.hasNext()) {
             entry = i.next();
             if (!entry.enabled()) continue; //scheme.contains(entry.key())
             try {
-                field = Field.valueOf(entry.key());
+                field = SolrField.valueOf(entry.key());
             } catch (IllegalArgumentException e) {
                 continue;
             }
