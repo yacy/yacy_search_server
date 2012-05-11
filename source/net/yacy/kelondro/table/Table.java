@@ -689,7 +689,9 @@ public class Table implements Index, Iterable<Row.Entry> {
                         continue;
                     }
                     this.file.put(i, p, 0);
-                    this.index.put(lr.getPrimaryKeyBytes(), i);
+                    byte[] pk = lr.getPrimaryKeyBytes();
+                    if (pk == null) continue;
+                    this.index.put(pk, i);
                     break;
                 }
             }
