@@ -30,8 +30,6 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -50,6 +48,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -64,26 +63,14 @@ public class SolrSingleConnector implements SolrConnector {
     private final int port;
     private HttpSolrServer server;
 
-    private final static int transmissionQueueCount = 4; // allow concurrent http sessions to solr
-    private final static int transmissionQueueSize = 50; // number of documents that are collected until a commit is sent
-    private final Worker[] transmissionWorker; // the transmission workers to solr
-    private final BlockingQueue<SolrDoc>[] transmissionQueue; // the queues quere documents are collected
-    private int transmissionRoundRobinCounter; // a rount robin counter for the transmission queues
-
     /**
      * create a new solr connector
      * @param url the solr url, like http://192.168.1.60:8983/solr/ or http://admin:pw@192.168.1.60:8983/solr/
      * @param scheme
      * @throws IOException
      */
-    @SuppressWarnings("unchecked")
     public SolrSingleConnector(final String url) throws IOException {
         this.solrurl = url;
-        this.transmissionRoundRobinCounter = 0;
-        this.transmissionQueue = new ArrayBlockingQueue[transmissionQueueCount];
-        for (int i = 0; i < transmissionQueueCount; i++) {
-            this.transmissionQueue[i] = new ArrayBlockingQueue<SolrDoc>(transmissionQueueSize);
-        }
 
         // connect using authentication
         final MultiProtocolURI u = new MultiProtocolURI(this.solrurl);
@@ -121,65 +108,20 @@ public class SolrSingleConnector implements SolrConnector {
         } else {
             this.server = new HttpSolrServer(this.solrurl);
         }
-
-        // start worker
-        this.transmissionWorker = new Worker[transmissionQueueCount];
-        for (int i = 0; i < transmissionQueueCount; i++) {
-            this.transmissionWorker[i] = new Worker(i);
-            this.transmissionWorker[i].start();
-        }
-    }
-
-    private class Worker extends Thread {
-        boolean shallRun;
-        int idx;
-        public Worker(final int i) {
-            this.idx = i;
-            this.shallRun = true;
-        }
-        public void pleaseStop() {
-            this.shallRun = false;
-        }
-        @Override
-        public void run() {
-            while (this.shallRun) {
-                if (SolrSingleConnector.this.transmissionQueue[this.idx].size() > 0) {
-                    try {
-                        flushTransmissionQueue(this.idx);
-                    } catch (final IOException e) {
-                        Log.logSevere("SolrSingleConnector", "flush Transmission failed in worker:IO", e);
-                        continue;
-                    } catch (final SolrException e) {
-                        Log.logSevere("SolrSingleConnector", "flush Transmission failed in worker:Solr", e);
-                        continue;
-                    }
-                } else {
-                    try {Thread.sleep(1000);} catch (final InterruptedException e) {}
-                }
-            }
-            try {
-                flushTransmissionQueue(this.idx);
-            } catch (final IOException e) {}
-        }
+        this.server.setAllowCompression(true);
+        this.server.setConnectionTimeout(60000);
+        this.server.setMaxRetries(10);
+        this.server.setSoTimeout(60000);
     }
 
     @Override
     public void close() {
-        for (int i = 0; i < transmissionQueueCount; i++) {
-            if (this.transmissionWorker[i].isAlive()) {
-                this.transmissionWorker[i].pleaseStop();
-                try {this.transmissionWorker[i].join();} catch (final InterruptedException e) {}
-            }
-        }
-        for (int i = 0; i < transmissionQueueCount; i++) {
-            try {
-                flushTransmissionQueue(i);
-            } catch (final IOException e) {
-                Log.logException(e);
-            } catch (final SolrException e) {
-                Log.logException(e);
-            }
-
+        try {
+            this.server.commit();
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -254,35 +196,23 @@ public class SolrSingleConnector implements SolrConnector {
 
     @Override
     public void add(final SolrDoc solrdoc) throws IOException, SolrException {
-        int thisrrc = this.transmissionRoundRobinCounter;
-        int nextrrc = thisrrc++;
-        if (nextrrc >= transmissionQueueCount) nextrrc = 0;
-        this.transmissionRoundRobinCounter = nextrrc;
-        if (this.transmissionWorker[thisrrc].isAlive()) {
-            this.transmissionQueue[thisrrc].offer(solrdoc);
-        } else {
-            if (this.transmissionQueue[thisrrc].size() > 0) flushTransmissionQueue(thisrrc);
-            final Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
-            docs.add(solrdoc);
-            addSolr(docs);
+        try {
+            this.server.add(solrdoc);
+            //this.server.commit();
+        } catch (SolrServerException e) {
+            Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdoc.toString());
+            throw new IOException(e);
         }
     }
 
-    protected void addSolr(final Collection<SolrInputDocument> docs) throws IOException, SolrException {
-
+    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
+        ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
+        for (SolrDoc d: solrdocs) l.add(d);
         try {
-            if (docs.size() != 0) this.server.add(docs);
-            this.server.commit();
-            /* To immediately commit after adding documents, you could use:
-                  UpdateRequest req = new UpdateRequest();
-                  req.setAction( UpdateRequest.ACTION.COMMIT, false, false );
-                  req.add( docs );
-                  UpdateResponse rsp = req.process( server );
-             */
-        } catch (final SolrException e) {
-            // the field is probably not known
-            Log.logWarning("SolrConnector", e.getMessage());
-        } catch (final Throwable e) {
+            this.server.add(l);
+            //this.server.commit();
+        } catch (SolrServerException e) {
+            Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdocs.toString());
             throw new IOException(e);
         }
     }
@@ -303,25 +233,10 @@ public class SolrSingleConnector implements SolrConnector {
                 final String[] paths = path.split("/");
                 if (paths.length > 0) solrdoc.addField("attr_paths", paths);
             }
-
             solrdoc.addField("failreason_t", failReason);
             solrdoc.addField("httpstatus_i", httpstatus);
-
             add(solrdoc);
     }
-
-    private void flushTransmissionQueue(final int idx) throws IOException, SolrException {
-        final Collection<SolrInputDocument> c = new ArrayList<SolrInputDocument>();
-        while (this.transmissionQueue[idx].size() > 0) {
-            try {
-                c.add(this.transmissionQueue[idx].take());
-            } catch (final InterruptedException e) {
-                continue;
-            }
-        }
-        addSolr(c);
-    }
-
 
     /**
      * get a query result from solr

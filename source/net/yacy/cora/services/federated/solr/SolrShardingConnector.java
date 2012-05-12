@@ -35,6 +35,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 
 
 public class SolrShardingConnector implements SolrConnector {
@@ -109,6 +110,11 @@ public class SolrShardingConnector implements SolrConnector {
     @Override
     public void add(final SolrDoc solrdoc) throws IOException {
         this.connectors.get(this.sharding.select(solrdoc)).add(solrdoc);
+    }
+
+    @Override
+    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
+        for (SolrDoc d: solrdocs) this.connectors.get(this.sharding.select(d)).add(d);
     }
 
     /**
