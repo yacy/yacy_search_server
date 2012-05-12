@@ -656,7 +656,7 @@ public final class Switchboard extends serverSwitch
                 (usesolr) ? new SolrShardingConnector(
                     solrurls,
                     SolrShardingSelection.Method.MODULO_HOST_MD5,
-                    10000) : null);
+                    10000, true) : null);
         } catch ( final IOException e ) {
             Log.logException(e);
             this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
