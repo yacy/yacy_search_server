@@ -35,6 +35,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 
 
 public class SolrShardingConnector implements SolrConnector {
@@ -43,12 +44,14 @@ public class SolrShardingConnector implements SolrConnector {
     private final SolrShardingSelection sharding;
     private final String[] urls;
 
-    public SolrShardingConnector(final String urlList, final SolrShardingSelection.Method method, final long timeout) throws IOException {
+    public SolrShardingConnector(final String urlList, final SolrShardingSelection.Method method, final long timeout, boolean multipleConnections) throws IOException {
         urlList.replace(' ', ',');
         this.urls = urlList.split(",");
         this.connectors = new ArrayList<SolrConnector>();
+        SolrConnector s;
         for (final String u: this.urls) {
-            this.connectors.add(new SolrRetryConnector(new SolrSingleConnector(u.trim()), timeout));
+            s = multipleConnections ? new SolrMultipleConnector(u.trim(), 2) : new SolrSingleConnector(u.trim());
+            this.connectors.add(new SolrRetryConnector(s, timeout));
         }
         this.sharding = new SolrShardingSelection(method, this.urls.length);
     }
@@ -109,6 +112,11 @@ public class SolrShardingConnector implements SolrConnector {
     @Override
     public void add(final SolrDoc solrdoc) throws IOException {
         this.connectors.get(this.sharding.select(solrdoc)).add(solrdoc);
+    }
+
+    @Override
+    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
+        for (SolrDoc d: solrdocs) this.connectors.get(this.sharding.select(d)).add(d);
     }
 
     /**

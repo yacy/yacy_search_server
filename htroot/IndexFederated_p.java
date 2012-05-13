@@ -39,8 +39,8 @@ import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
-import net.yacy.search.index.SolrField;
 import net.yacy.search.index.SolrConfiguration;
+import net.yacy.search.index.SolrField;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -93,7 +93,7 @@ public class IndexFederated_p {
                 // switch on
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
                 try {
-                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrShardingConnector(solrurls, SolrShardingSelection.Method.MODULO_HOST_MD5, 10000) : null);
+                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new SolrShardingConnector(solrurls, SolrShardingSelection.Method.MODULO_HOST_MD5, 10000, true) : null);
                 } catch (final IOException e) {
                     Log.logException(e);
                     sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);

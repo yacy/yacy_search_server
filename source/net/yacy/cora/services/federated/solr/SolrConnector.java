@@ -25,6 +25,7 @@
 package net.yacy.cora.services.federated.solr;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -71,6 +72,7 @@ public interface SolrConnector {
      * @throws SolrException
      */
     public void add(final SolrDoc solrdoc) throws IOException, SolrException;
+    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException;
 
     /**
      * register an entry as error document
