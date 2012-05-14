@@ -91,6 +91,7 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
+import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.services.federated.solr.SolrShardingConnector;
 import net.yacy.cora.services.federated.solr.SolrShardingSelection;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
@@ -2428,10 +2429,8 @@ public final class Switchboard extends serverSwitch
                         // in case that this happens it appears that the doc id is the right one
                     }
                     try {
-                        this.indexSegments
-                            .segment(Segments.Process.LOCALCRAWLING)
-                            .getSolr()
-                            .add(this.solrScheme.yacy2solr(id, in.queueEntry.getResponseHeader(), doc));
+                        SolrDoc solrDoc = this.solrScheme.yacy2solr(id, in.queueEntry.getResponseHeader(), doc);
+                        this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().add(solrDoc);
                     } catch ( final IOException e ) {
                         Log.logWarning(
                             "SOLR",

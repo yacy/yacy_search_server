@@ -223,7 +223,7 @@ public class SolrSingleConnector implements SolrConnector {
 
             final SolrDoc solrdoc = new SolrDoc();
             solrdoc.addField("id", ASCII.String(digestURI.hash()));
-            solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
+            solrdoc.addField("sku", digestURI.toNormalform(true, false));
             final InetAddress address = digestURI.getInetAddress();
             if (address != null) solrdoc.addField("ip_s", address.getHostAddress());
             if (digestURI.getHost() != null) solrdoc.addField("host_s", digestURI.getHost());
