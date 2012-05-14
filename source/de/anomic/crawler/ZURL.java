@@ -37,6 +37,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.solr.SolrConnector;
+import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.services.federated.solr.SolrShardingConnector;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
@@ -49,6 +50,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.search.index.SolrConfiguration;
 import de.anomic.crawler.retrieval.Request;
 
 public class ZURL implements Iterable<ZURL.Entry> {
@@ -79,15 +81,18 @@ public class ZURL implements Iterable<ZURL.Entry> {
     private Index urlIndex;
     private final Queue<byte[]> stack;
     private final SolrConnector solrConnector;
+    private final SolrConfiguration solrConfiguration;
 
     public ZURL(
             final SolrConnector solrConnector,
+            final SolrConfiguration solrConfiguration,
     		final File cachePath,
     		final String tablename,
     		final boolean startWithEmptyFile,
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.solrConnector = solrConnector;
+        this.solrConfiguration = solrConfiguration;
         // creates a new ZURL in a file
         cachePath.mkdirs();
         final File f = new File(cachePath, tablename);
@@ -109,8 +114,10 @@ public class ZURL implements Iterable<ZURL.Entry> {
         this.stack = new LinkedBlockingQueue<byte[]>();
     }
 
-    public ZURL(final SolrShardingConnector solrConnector) {
+    public ZURL(final SolrShardingConnector solrConnector,
+                    final SolrConfiguration solrConfiguration) {
         this.solrConnector = solrConnector;
+        this.solrConfiguration = solrConfiguration;
         // creates a new ZUR in RAM
         this.urlIndex = new RowSet(rowdef);
         this.stack = new LinkedBlockingQueue<byte[]>();
@@ -156,7 +163,8 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (this.solrConnector != null && (failCategory == FailCategory.TEMPORARY_NETWORK_FAILURE || failCategory == FailCategory.FINAL_ROBOTS_RULE)) {
             // send the error to solr
             try {
-                this.solrConnector.err(bentry.url(), failCategory.name() + " " + reason, httpcode);
+                SolrDoc errorDoc = this.solrConfiguration.err(bentry.url(), failCategory.name() + " " + reason, httpcode);
+                this.solrConnector.add(errorDoc);
             } catch (final IOException e) {
                 Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true, false) + " to solr: " + e.getMessage());
             }

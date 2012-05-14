@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import net.yacy.kelondro.data.meta.DigestURI;
-
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
@@ -103,11 +101,6 @@ public class SolrMultipleConnector implements SolrConnector {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public void err(DigestURI digestURI, String failReason, int httpstatus) throws IOException {
-        this.solr.err(digestURI, failReason, httpstatus);
     }
 
     @Override

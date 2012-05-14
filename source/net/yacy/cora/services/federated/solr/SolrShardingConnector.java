@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.List;
 
 import net.yacy.cora.protocol.Domains;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -127,19 +126,6 @@ public class SolrShardingConnector implements SolrConnector {
     protected void addSolr(final Collection<SolrDoc> docs) throws IOException {
         for (final SolrDoc doc: docs) add(doc);
     }
-
-    /**
-     * register an entry as error document
-     * @param digestURI
-     * @param failReason
-     * @param httpstatus
-     * @throws IOException
-     */
-    @Override
-    public void err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
-        this.connectors.get(this.sharding.selectURL(digestURI.toNormalform(true, false))).err(digestURI, failReason, httpstatus);
-    }
-
 
     /**
      * get a query result from solr

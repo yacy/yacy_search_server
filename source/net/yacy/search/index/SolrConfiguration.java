@@ -26,6 +26,7 @@ package net.yacy.search.index;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -490,6 +492,33 @@ public class SolrConfiguration extends ConfigurationSet {
         }
         return a;
     }
+
+    /**
+     * register an entry as error document
+     * @param digestURI
+     * @param failReason
+     * @param httpstatus
+     * @throws IOException
+     */
+    public SolrDoc err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
+        final SolrDoc solrdoc = new SolrDoc();
+        addSolr(solrdoc, SolrField.id, ASCII.String(digestURI.hash()));
+        addSolr(solrdoc, SolrField.sku, digestURI.toNormalform(true, false));
+        final InetAddress address = digestURI.getInetAddress();
+        if (address != null) addSolr(solrdoc, SolrField.ip_s, address.getHostAddress());
+        if (digestURI.getHost() != null) addSolr(solrdoc, SolrField.host_s, digestURI.getHost());
+
+        // path elements of link
+        final String path = digestURI.getPath();
+        if (path != null) {
+            final String[] paths = path.split("/");
+            if (paths.length > 0) addSolr(solrdoc, SolrField.paths_txt, paths);
+        }
+        addSolr(solrdoc, SolrField.failreason_t, failReason);
+        addSolr(solrdoc, SolrField.httpstatus_i, httpstatus);
+        return solrdoc;
+    }
+
 
     /*
    standard solr schema
