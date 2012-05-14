@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -65,17 +65,19 @@ public class PhpBB3Dao implements Dao {
         this.prefix = prefix;
         this.users = new HashMap<Integer, String>();
     }
-    
+
+    @Override
     protected void finalize() throws Throwable {
         close();
     }
-    
+
+    @Override
     public Date first() {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.statement();
-            rs = stmt.executeQuery("select min(post_time) from " + prefix + "posts");
+            stmt = this.conn.statement();
+            rs = stmt.executeQuery("select min(post_time) from " + this.prefix + "posts");
             if (rs.next()) {
                 return new Date(rs.getLong(1) * 1000L);
             }
@@ -89,12 +91,13 @@ public class PhpBB3Dao implements Dao {
         }
     }
 
+    @Override
     public Date latest() {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.statement();
-            rs = stmt.executeQuery("select max(post_time) from " + prefix + "posts");
+            stmt = this.conn.statement();
+            rs = stmt.executeQuery("select max(post_time) from " + this.prefix + "posts");
             if (rs.next()) {
                 return new Date(rs.getLong(1) * 1000L);
             }
@@ -108,18 +111,21 @@ public class PhpBB3Dao implements Dao {
         }
     }
 
+    @Override
     public int size() throws SQLException {
-    	return this.conn.count(prefix + "posts");
+    	return this.conn.count(this.prefix + "posts");
     }
 
+    @Override
     public DCEntry get(int item) {
-        return getOne("select * from " + prefix + "posts where post_id = " + item);
+        return getOne("select * from " + this.prefix + "posts where post_id = " + item);
     }
-    
+
+    @Override
     public BlockingQueue<DCEntry> query(int from, int until, int queueSize) {
         // define the sql query
         final StringBuilder sql = new StringBuilder(256);
-        sql.append("select * from " + prefix + "posts where post_id >= ");
+        sql.append("select * from " + this.prefix + "posts where post_id >= ");
         sql.append(from);
         if (until > from) {
             sql.append(" and post_id < ");
@@ -130,24 +136,25 @@ public class PhpBB3Dao implements Dao {
         // execute the query and push entries to a queue concurrently
         return toQueue(sql, queueSize);
     }
-    
+
+    @Override
     public BlockingQueue<DCEntry> query(Date from, int queueSize) {
      // define the sql query
         final StringBuilder sql = new StringBuilder(256);
-        sql.append("select * from " + prefix + "posts where post_time >= ");
+        sql.append("select * from " + this.prefix + "posts where post_time >= ");
         sql.append(from.getTime() / 1000);
         sql.append(" order by post_id");
 
         // execute the query and push entries to a queue concurrently
         return toQueue(sql, queueSize);
     }
-    
-    
+
+
     private DCEntry getOne(String sql) {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.statement();
+            stmt = this.conn.statement();
             rs = stmt.executeQuery(sql);
             if (rs.next()) {
                 try {
@@ -165,16 +172,17 @@ public class PhpBB3Dao implements Dao {
             if (stmt != null) try {stmt.close();} catch (SQLException e) {}
         }
     }
-    
+
     private BlockingQueue<DCEntry> toQueue(final StringBuilder sql, int queueSize) {
         // execute the query and push entries to a queue concurrently
         final BlockingQueue<DCEntry> queue = new ArrayBlockingQueue<DCEntry>(queueSize);
         Thread dbreader = new Thread() {
+            @Override
             public void run() {
                 Statement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = conn.statement();
+                    stmt = PhpBB3Dao.this.conn.statement();
                     rs = stmt.executeQuery(sql.toString());
                     while (rs.next()) {
                         try {
@@ -197,7 +205,7 @@ public class PhpBB3Dao implements Dao {
         dbreader.start();
         return queue;
     }
-    
+
     protected DCEntry parseResultSet(ResultSet rs) throws SQLException, MalformedURLException {
         DigestURI url;
         int item = rs.getInt("post_id");
@@ -208,7 +216,7 @@ public class PhpBB3Dao implements Dao {
         Date date = new Date(rs.getLong("post_time") * 1000L);
         return new DCEntry(url, date, subject, user, text, 0.0f, 0.0f);
     }
-    
+
     public static String xmlCleaner(String s) {
         if (s == null) return null;
 
@@ -217,10 +225,10 @@ public class PhpBB3Dao implements Dao {
 
         for (int i = 0; i < s.length(); i++ ) {
                 c = s.charAt(i);
-                if ((c >= 0x0020 && c <= 0xD7FF) || 
+                if ((c >= 0x0020 && c <= 0xD7FF) ||
                     (c >= 0xE000 && c <= 0xFFFD) ||
                      c == 0x0009 ||
-                     c == 0x000A || 
+                     c == 0x000A ||
                      c == 0x000D ) {
                     sbOutput.append(c);
                 }
@@ -231,14 +239,14 @@ public class PhpBB3Dao implements Dao {
     private String getUser(int poster_id) {
         String nick = this.users.get(poster_id);
         if (nick != null) return nick;
-        
+
         StringBuilder sql = new StringBuilder(256);
-        sql.append("select * from " + prefix + "users where user_id = ");
+        sql.append("select * from " + this.prefix + "users where user_id = ");
         sql.append(poster_id);
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.statement();
+            stmt = this.conn.statement();
             rs = stmt.executeQuery(sql.toString());
             if (rs.next()) nick = rs.getString("username");
             if (nick == null) nick = "";
@@ -252,7 +260,8 @@ public class PhpBB3Dao implements Dao {
             if (stmt != null) try {stmt.close();} catch (SQLException e) {}
         }
     }
-    
+
+    @Override
     public int writeSurrogates(
         BlockingQueue<DCEntry> queue,
         File targetdir,
@@ -264,7 +273,7 @@ public class PhpBB3Dao implements Dao {
             String targethost = new DigestURI(this.urlstub).getHost();
             int fc = 0;
             File outputfiletmp = null, outputfile = null;
-            
+
             // write the result from the query concurrently in a file
             OutputStreamWriter osw = null;
             DCEntry e;
@@ -304,11 +313,12 @@ public class PhpBB3Dao implements Dao {
         }
         return 0;
     }
-    
-    public void close() {
+
+    @Override
+    public synchronized void close() {
         this.conn.close();
     }
-    
+
     public static void main(String[] args) {
         PhpBB3Dao db;
         try {
@@ -331,5 +341,5 @@ public class PhpBB3Dao implements Dao {
             Log.logException(e);
         }
     }
-    
+
 }

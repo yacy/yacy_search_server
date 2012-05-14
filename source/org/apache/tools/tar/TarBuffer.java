@@ -436,7 +436,7 @@ public class TarBuffer {
      * current block before closing.
      * @throws IOException on error
      */
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         if (this.debug) {
             System.err.println("TarBuffer.closeBuffer().");
         }

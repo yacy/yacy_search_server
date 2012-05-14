@@ -50,6 +50,7 @@ import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 
 public class Domains {
@@ -468,8 +469,8 @@ public class Domains {
         noLocalCheck = v;
     }
 
-    public static void close() {
-        if (globalHosts != null) try {globalHosts.close();} catch (final IOException e) {}
+    public static synchronized void close() {
+        if (globalHosts != null) try {globalHosts.close();} catch (final IOException e) {Log.logException(e);}
     }
 
     /**

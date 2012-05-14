@@ -44,7 +44,7 @@ public class SolrRetryConnector implements SolrConnector {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         this.solrConnector.close();
     }
 

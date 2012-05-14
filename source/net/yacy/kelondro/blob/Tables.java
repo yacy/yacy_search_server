@@ -99,7 +99,7 @@ public class Tables implements Iterable<String> {
         heap.close();
     }
 
-    public void close() {
+    public synchronized void close() {
         for (final BEncodedHeap heap: this.tables.values()) heap.close();
         this.tables.clear();
     }

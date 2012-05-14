@@ -122,7 +122,7 @@ public class NewsDB {
         }
     }
 
-    public void close() {
+    public synchronized void close() {
         if (this.news != null) this.news.close();
         this.news = null;
     }

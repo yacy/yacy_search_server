@@ -473,7 +473,7 @@ public final class CharBuffer extends Writer {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         this.length = 0;
         this.offset = 0;
     	this.buffer = null; // assist with garbage collection

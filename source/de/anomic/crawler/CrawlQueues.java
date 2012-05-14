@@ -98,7 +98,7 @@ public class CrawlQueues {
         this.delegatedURL = new ZURL(this.sb.indexSegments.segment(PROCESS).getSolr(), newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
     }
 
-    public void close() {
+    public synchronized void close() {
         // wait for all workers to finish
         for (final Loader w: this.workers.values()) {
             w.interrupt();

@@ -111,7 +111,7 @@ public class TarInputStream extends FilterInputStream {
      * @throws IOException on error
      */
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         this.buffer.close();
     }
 

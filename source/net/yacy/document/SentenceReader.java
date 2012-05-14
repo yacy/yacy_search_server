@@ -142,7 +142,7 @@ public class SentenceReader implements Iterator<StringBuilder> {
         throw new UnsupportedOperationException();
     }
     
-    public void close() {
+    public synchronized void close() {
     	try {
     		raf.close();
     	} catch(IOException ioe) {

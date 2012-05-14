@@ -88,7 +88,7 @@ public class BlogBoard {
         return database.containsKey(UTF8.getBytes(key));
     }
     
-    public void close() {
+    public synchronized void close() {
         database.close();
     }
     

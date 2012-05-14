@@ -434,7 +434,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
             return this.map;
         }
 
-        public void close() {
+        public synchronized void close() {
             this.map.close();
         }
     }

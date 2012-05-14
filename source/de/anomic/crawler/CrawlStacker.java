@@ -121,7 +121,7 @@ public final class CrawlStacker {
         this.slowQueue.announceShutdown();
     }
 
-    public void close() {
+    public synchronized void close() {
         this.log.logInfo("Shutdown. waiting for remaining " + size() + " crawl stacker job entries. please wait.");
         this.fastQueue.announceShutdown();
         this.slowQueue.announceShutdown();

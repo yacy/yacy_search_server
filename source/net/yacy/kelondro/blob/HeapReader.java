@@ -803,8 +803,8 @@ public class HeapReader {
             }
         }
 
-        public void close() {
-            if (this.is != null) try { this.is.close(); } catch (final IOException e) {}
+        public synchronized void close() {
+            if (this.is != null) try { this.is.close(); } catch (final IOException e) {Log.logException(e);}
             this.is = null;
         }
 

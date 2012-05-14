@@ -67,7 +67,7 @@ public class MessageBoard {
         return database.size();
     }
     
-    public void close() {
+    public synchronized void close() {
         database.close();
     }
     

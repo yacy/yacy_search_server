@@ -117,7 +117,7 @@ public class TripleStore {
         return this.store.keyIterator();
     }
 
-    public void close() {
+    public synchronized void close() {
         this.store.close();
     }
 

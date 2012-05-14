@@ -749,7 +749,7 @@ public class WebStructureGraph
         }
     }
 
-    public void close() {
+    public synchronized void close() {
         // finish dns resolving queue
         if ( this.publicRefDNSResolvingWorker.isAlive() ) {
             log.logInfo("Waiting for the DNS Resolving Queue to terminate");

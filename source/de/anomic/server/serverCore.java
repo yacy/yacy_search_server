@@ -560,7 +560,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             return this.stopped;
         }
 
-        public void close() {
+        public synchronized void close() {
             // closing the socket to the client
             if (this.controlSocket != null) try {
                 this.controlSocket.close();

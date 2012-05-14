@@ -115,7 +115,7 @@ public class SolrSingleConnector implements SolrConnector {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         try {
             this.server.commit();
         } catch (SolrServerException e) {
@@ -205,6 +205,7 @@ public class SolrSingleConnector implements SolrConnector {
         }
     }
 
+    @Override
     public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
         ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
         for (SolrDoc d: solrdocs) l.add(d);

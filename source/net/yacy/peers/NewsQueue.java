@@ -98,7 +98,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
         }
     }
 
-    public void close() {
+    public synchronized void close() {
         if (this.queueStack != null) this.queueStack.close();
         this.queueStack = null;
     }

@@ -564,7 +564,7 @@ public class MediawikiImporter extends Thread implements Importer {
             return this.bb.getBytes();
         }
 
-        public void close() {
+        public synchronized void close() {
             try {
                 this.is.close();
             } catch (final IOException e) {

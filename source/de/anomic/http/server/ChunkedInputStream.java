@@ -62,7 +62,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class ChunkedInputStream extends InputStream {
     /** The inputstream that we're wrapping */
-    private InputStream in;
+    private final InputStream in;
 
     /** The chunk size */
     private int chunkSize;
@@ -87,7 +87,7 @@ public class ChunkedInputStream extends InputStream {
      * @throws IOException If an IO error occurs
      */
     public ChunkedInputStream(final InputStream in) throws IOException {
-            
+
         if (in == null) {
             throw new IllegalArgumentException("InputStream parameter may not be null");
         }
@@ -95,37 +95,38 @@ public class ChunkedInputStream extends InputStream {
         this.pos = 0;
     }
 
-    
+
     /**
      * <p> Returns all the data in a chunked stream in coalesced form. A chunk
      * is followed by a CRLF. The method returns -1 as soon as a chunksize of 0
      * is detected.</p>
-     * 
+     *
      * <p> Trailer headers are read automcatically at the end of the stream and
      * can be obtained with the getResponseFooters() method.</p>
      *
      * @return -1 of the end of the stream has been reached or the next data
      * byte
      * @throws IOException If an IO problem occurs
-     * 
+     *
      * @see HttpMethod#getResponseFooters()
      */
+    @Override
     public int read() throws IOException {
 
-        if (closed) {
+        if (this.closed) {
             throw new IOException("Attempted read from closed stream.");
         }
-        if (eof) {
+        if (this.eof) {
             return -1;
-        } 
-        if (pos >= chunkSize) {
+        }
+        if (this.pos >= this.chunkSize) {
             nextChunk();
-            if (eof) { 
+            if (this.eof) {
                 return -1;
             }
         }
-        pos++;
-        return in.read();
+        this.pos++;
+        return this.in.read();
     }
 
     /**
@@ -139,20 +140,21 @@ public class ChunkedInputStream extends InputStream {
      * @see java.io.InputStream#read(byte[], int, int)
      * @throws IOException if an IO problem occurs.
      */
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
 
-        if (closed) throw new IOException("Attempted read from closed stream.");
-        if (eof) return -1;
-        
-        if (pos >= chunkSize) {
+        if (this.closed) throw new IOException("Attempted read from closed stream.");
+        if (this.eof) return -1;
+
+        if (this.pos >= this.chunkSize) {
             nextChunk();
-            if (eof) { 
+            if (this.eof) {
                 return -1;
             }
         }
-        len = Math.min(len, chunkSize - pos);
-        int count = in.read(b, off, len);
-        pos += count;
+        len = Math.min(len, this.chunkSize - this.pos);
+        int count = this.in.read(b, off, len);
+        this.pos += count;
         return count;
     }
 
@@ -164,6 +166,7 @@ public class ChunkedInputStream extends InputStream {
      * @see java.io.InputStream#read(byte[])
      * @throws IOException if an IO problem occurs.
      */
+    @Override
     public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
@@ -173,9 +176,9 @@ public class ChunkedInputStream extends InputStream {
      * @throws IOException If an IO error occurs.
      */
     private void readCRLF() throws IOException {
-        int cr = in.read();
+        int cr = this.in.read();
         if (cr != '\r') throw new IOException("CRLF expected at end of chunk: cr != " + cr);
-        int lf = in.read();
+        int lf = this.in.read();
         if (lf != '\n') throw new IOException("CRLF expected at end of chunk: lf != " + lf);
     }
 
@@ -185,12 +188,12 @@ public class ChunkedInputStream extends InputStream {
      * @throws IOException If an IO error occurs.
      */
     private void nextChunk() throws IOException {
-        if (!bof) readCRLF();
-        chunkSize = getChunkSizeFromInputStream(in);
-        bof = false;
-        pos = 0;
-        if (chunkSize == 0) {
-            eof = true;
+        if (!this.bof) readCRLF();
+        this.chunkSize = getChunkSizeFromInputStream(this.in);
+        this.bof = false;
+        this.pos = 0;
+        if (this.chunkSize == 0) {
+            this.eof = true;
             skipTrailerHeaders();
         }
     }
@@ -203,24 +206,24 @@ public class ChunkedInputStream extends InputStream {
      * @param in The new input stream.
      * @param required <tt>true<tt/> if a valid chunk must be present,
      *                 <tt>false<tt/> otherwise.
-     * 
+     *
      * @return the chunk size as integer
-     * 
+     *
      * @throws IOException when the chunk size could not be parsed
      */
-    private static int getChunkSizeFromInputStream(final InputStream in) 
+    private static int getChunkSizeFromInputStream(final InputStream in)
       throws IOException {
-            
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         // States: 0=normal, 1=\r was scanned, 2=inside quoted string, -1=end
-        int state = 0; 
+        int state = 0;
         while (state != -1) {
         int b = in.read();
-            if (b == -1) { 
+            if (b == -1) {
                 throw new IOException("chunked stream ended unexpectedly");
             }
             switch (state) {
-                case 0: 
+                case 0:
                     switch (b) {
                         case '\r':
                             state = 1;
@@ -286,7 +289,7 @@ public class ChunkedInputStream extends InputStream {
      *
      * @param data the byte array to be encoded
      * @return The string representation of the byte array
-     * 
+     *
      * @since 3.0
      */
     private static String getAsciiString(final byte[] data) throws IOException {
@@ -300,14 +303,14 @@ public class ChunkedInputStream extends InputStream {
             throw new IOException("HttpClient requires ASCII support");
         }
     }
-    
+
     /**
      * Reads and stores the Trailer headers.
      * @throws IOException If an IO problem occurs
      */
     private void skipTrailerHeaders() throws IOException {
         for (; ;) {
-            String line = readLine(in, "US-ASCII");
+            String line = readLine(this.in, "US-ASCII");
             if ((line == null) || (line.trim().length() < 1)) break;
         }
     }
@@ -324,7 +327,7 @@ public class ChunkedInputStream extends InputStream {
      *
      * @throws IOException if an I/O problem occurs
      * @return a line from the stream
-     * 
+     *
      * @since 3.0
      */
     private static String readLine(InputStream inputStream, String charset) throws IOException {
@@ -348,7 +351,7 @@ public class ChunkedInputStream extends InputStream {
         final String result = getString(rawdata, 0, len - offset, charset);
         return result;
     }
-    
+
 
     /**
      * Converts the byte array of HTTP content characters to a string. If
@@ -357,16 +360,16 @@ public class ChunkedInputStream extends InputStream {
      *
      * @param data the byte array to be encoded
      * @param offset the index of the first byte to encode
-     * @param length the number of bytes to encode 
+     * @param length the number of bytes to encode
      * @param charset the desired character encoding
      * @return The result of the conversion.
-     * 
+     *
      * @since 3.0
      */
     private static String getString(
-        final byte[] data, 
-        int offset, 
-        int length, 
+        final byte[] data,
+        int offset,
+        int length,
         String charset
     ) {
 
@@ -384,12 +387,12 @@ public class ChunkedInputStream extends InputStream {
             return new String(data, offset, length);
         }
     }
-    
+
     /**
      * Return byte array from an (unchunked) input stream.
-     * Stop reading when <tt>"\n"</tt> terminator encountered 
+     * Stop reading when <tt>"\n"</tt> terminator encountered
      * If the stream ends before the line terminator is found,
-     * the last part of the string will still be returned. 
+     * the last part of the string will still be returned.
      * If no input data available, <code>null</code> is returned.
      *
      * @param inputStream the stream to read from
@@ -412,22 +415,23 @@ public class ChunkedInputStream extends InputStream {
         }
         return buf.toByteArray();
     }
-    
+
     /**
      * Upon close, this reads the remainder of the chunked message,
      * leaving the underlying socket at a position to start reading the
      * next response without scanning.
      * @throws IOException If an IO problem occurs.
      */
-    public void close() throws IOException {
-        if (!closed) {
+    @Override
+    public synchronized void close() throws IOException {
+        if (!this.closed) {
             try {
-                if (!eof) {
+                if (!this.eof) {
                     exhaustInputStream(this);
                 }
             } finally {
-                eof = true;
-                closed = true;
+                this.eof = true;
+                this.closed = true;
             }
         }
     }

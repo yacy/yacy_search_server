@@ -82,6 +82,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return (int) ((this.rowdef.objectOrder.cardinal(row.bytes(), 0, row.getPrimaryKeyLength()) / 17) % (this.cluster.length));
     }
 
+    @Override
     public final byte[] smallestKey() {
         final HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.cluster.length);
         synchronized (this.cluster) {
@@ -94,6 +95,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return keysort.smallestKey();
     }
 
+    @Override
     public final byte[] largestKey() {
         final HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.cluster.length);
         synchronized (this.cluster) {
@@ -115,6 +117,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return r;
     }
 
+    @Override
     public final void addUnique(final Entry row) throws RowSpaceExceededException {
         final int i = indexFor(row);
         assert i >= 0 : "i = " + i;
@@ -126,28 +129,37 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         for (final Entry row: rows) addUnique(row);
     }
 
+    @Override
     public final void clear() {
         synchronized (this.cluster) {
             for (final RAMIndex c: this.cluster) if (c != null) c.clear();
         }
     }
 
-    public final void close() {
-        clear();
+    @Override
+	public final void close() {
         synchronized (this.cluster) {
-            for (final RAMIndex c: this.cluster) if (c != null) c.close();
+            for (final RAMIndex c: this.cluster) {
+                if (c != null) {
+                    //Log.logInfo("RAMIndexCluster", "Closing RAM index at " + c.getName() + " with " + c.size() + " entries ...");
+                    c.close();
+                }
+            }
         }
     }
 
+    @Override
     public final void deleteOnExit() {
         // no nothing here
     }
 
+    @Override
     public final String filename() {
         // we don't have a file name
         return null;
     }
 
+    @Override
     public final Entry get(final byte[] key, final boolean forcecopy) {
         final int i = indexFor(key);
         if (i < 0) return null;
@@ -156,8 +168,10 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return r.get(key, forcecopy);
     }
 
+    @Override
     public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
+
         Row.Entry entry;
         for (final byte[] key: keys) {
             entry = get(key, forcecopy);
@@ -166,6 +180,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return map;
     }
 
+    @Override
     public final boolean has(final byte[] key) {
         final int i = indexFor(key);
         if (i < 0) return false;
@@ -174,6 +189,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return r.has(key);
     }
 
+    @Override
     public final CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         synchronized (this.cluster) {
             final Collection<CloneableIterator<byte[]>> col = new ArrayList<CloneableIterator<byte[]>>();
@@ -193,6 +209,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public final boolean put(final Entry row) throws RowSpaceExceededException {
         final int i = indexFor(row);
         assert i >= 0 : "i = " + i;
@@ -200,18 +217,21 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return accessArray(i).put(row);
     }
 
+    @Override
     public final boolean delete(final byte[] key) {
         final int i = indexFor(key);
         if (i < 0) return false;
         return accessArray(i).delete(key);
     }
 
+    @Override
     public final Entry remove(final byte[] key) {
         final int i = indexFor(key);
         if (i < 0) return null;
         return accessArray(i).remove(key);
     }
 
+    @Override
     public final ArrayList<RowCollection> removeDoubles() throws RowSpaceExceededException {
         final ArrayList<RowCollection> col = new ArrayList<RowCollection>();
         synchronized (this.cluster) {
@@ -225,6 +245,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return col;
     }
 
+    @Override
     public final Entry removeOne() {
         synchronized (this.cluster) {
             for (int i = 0; i < this.cluster.length; i++) {
@@ -238,6 +259,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return null;
     }
 
+    @Override
     public List<Row.Entry> top(final int count) {
         final List<Row.Entry> list = new ArrayList<Row.Entry>();
         synchronized (this.cluster) {
@@ -256,6 +278,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return list;
     }
 
+    @Override
     public final Entry replace(final Entry row) throws RowSpaceExceededException {
         final int i = indexFor(row);
         assert i >= 0 : "i = " + i;
@@ -263,10 +286,12 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return accessArray(i).replace(row);
     }
 
+    @Override
     public final Row row() {
         return this.rowdef;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public final CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) {
         synchronized (this.cluster) {
@@ -282,10 +307,12 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         }
     }
 
+    @Override
     public final CloneableIterator<Entry> rows() {
         return rows(true, null);
     }
 
+    @Override
     public final int size() {
         int c = 0;
         synchronized (this.cluster) {
@@ -294,6 +321,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return c;
     }
 
+    @Override
     public long mem() {
         long m = 0;
         synchronized (this.cluster) {
@@ -302,6 +330,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return m;
     }
 
+    @Override
     public final boolean isEmpty() {
         synchronized (this.cluster) {
             for (final RAMIndex i: this.cluster) if (i != null && !i.isEmpty()) return false;
@@ -309,6 +338,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         return true;
     }
 
+    @Override
     public final Iterator<Entry> iterator() {
         return this.rows(true, null);
     }

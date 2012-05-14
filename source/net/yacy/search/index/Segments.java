@@ -176,7 +176,7 @@ public class Segments implements Iterable<Segment> {
         segment(this.process_assignment.get(process)).close();
     }
 
-    public void close() {
+    public synchronized void close() {
         if (this.segments != null) for (final Segment s: this.segments.values()) s.close();
         this.segments = null;
     }

@@ -57,7 +57,7 @@ public class SolrShardingConnector implements SolrConnector {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         for (final SolrConnector connector: this.connectors) connector.close();
     }
 

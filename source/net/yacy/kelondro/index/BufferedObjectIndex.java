@@ -111,7 +111,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         synchronized (this.backend) {
             try {
                 flushBuffer();

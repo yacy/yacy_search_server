@@ -139,7 +139,7 @@ public class ContentTransformer extends AbstractTransformer implements Transform
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         // free resources
         super.close();
     }

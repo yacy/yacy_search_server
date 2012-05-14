@@ -1551,7 +1551,7 @@ public final class Switchboard extends serverSwitch
         return this.crawler.clear();
     }
 
-    public void close() {
+    public synchronized void close() {
         this.log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         MemoryTracker.stopSystemProfiling();
         terminateAllThreads(true);

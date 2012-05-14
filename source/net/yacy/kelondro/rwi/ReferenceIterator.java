@@ -83,7 +83,7 @@ public class ReferenceIterator <ReferenceType extends Reference> extends LookAhe
         return null;
     }
 
-    public void close() {
+    public synchronized void close() {
         if (this.blobs != null) this.blobs.close();
         this.blobs = null;
     }

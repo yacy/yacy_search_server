@@ -75,7 +75,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             true);
     }
 
-    public void close() {
+    public synchronized void close() {
         this.array.close(true);
     }
 

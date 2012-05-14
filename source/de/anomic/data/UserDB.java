@@ -78,7 +78,7 @@ public final class UserDB {
         }
     }
     
-    public void close() {
+    public synchronized void close() {
         userTable.close();
     }
     

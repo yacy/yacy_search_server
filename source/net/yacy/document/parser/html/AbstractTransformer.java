@@ -1,4 +1,4 @@
-// AbstractTransformer.java 
+// AbstractTransformer.java
 // ----------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -37,15 +37,18 @@ public abstract class AbstractTransformer implements Transformer {
         this.tags1  = tags1;
     }
 
+    @Override
     public boolean isTag0(final String tag) {
-        return tags0.contains(tag);
+        return this.tags0.contains(tag);
     }
 
+    @Override
     public boolean isTag1(final String tag) {
-        return tags1.contains(tag);
+        return this.tags1.contains(tag);
     }
 
     //the 'missing' method that shall be implemented:
+    @Override
     public abstract char[] transformText(char[] text);
     /* could be easily implemented as:
     {
@@ -54,18 +57,21 @@ public abstract class AbstractTransformer implements Transformer {
     */
 
     // the other methods must take into account to construct the return value correctly
+    @Override
     public char[] transformTag0(final String tagname, final Properties tagopts, final char quotechar) {
         return TransformerWriter.genTag0(tagname, tagopts, quotechar);
     }
 
+    @Override
     public char[] transformTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
         return TransformerWriter.genTag1(tagname, tagopts, text, quotechar);
     }
 
-    public void close() {
+    @Override
+    public synchronized void close() {
         // free resources
-        tags0 = null;
-        tags1 = null;
+        this.tags0 = null;
+        this.tags1 = null;
     }
-        
+
 }
