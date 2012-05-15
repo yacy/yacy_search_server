@@ -38,6 +38,7 @@ import net.yacy.kelondro.io.ByteCount;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segments;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.Latency;
@@ -127,13 +128,15 @@ public final class HTTPLoader {
         client.setRedirecting(false); // we want to handle redirection ourselves, so we don't index pages twice
         client.setTimout(this.socketTimeout);
         client.setHeader(requestHeader.entrySet());
-            // send request
-        	final byte[] responseBody = client.GETbytes(url, maxFileSize);
-        	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
-        	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
 
-        	if (code > 299 && code < 310) {
-        		// redirection (content may be empty)
+        // send request
+    	final byte[] responseBody = client.GETbytes(url, maxFileSize);
+    	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+    	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
+
+    	if (code > 299 && code < 310) {
+    		// redirection (content may be empty)
+    	    if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
                 if (header.containsKey(HeaderFramework.LOCATION)) {
                     // getting redirection URL
                 	String redirectionUrlString = header.get(HeaderFramework.LOCATION);
@@ -172,40 +175,45 @@ public final class HTTPLoader {
                     this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no redirection url provided", code);
                     throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
                 }
-            } else if (responseBody == null) {
-        	    // no response, reject file
-                this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", code);
-                throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
-        	} else if (code == 200 || code == 203) {
-                // the transfer is ok
+    	    } else {
+    	        // we don't want to follow redirects
+                this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", code);
+                throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
+    	    }
+        } else if (responseBody == null) {
+    	    // no response, reject file
+            this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", code);
+            throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
+    	} else if (code == 200 || code == 203) {
+            // the transfer is ok
 
-                // we write the new cache entry to file system directly
-                final long contentLength = responseBody.length;
-                ByteCount.addAccountCount(ByteCount.CRAWLER, contentLength);
+            // we write the new cache entry to file system directly
+            final long contentLength = responseBody.length;
+            ByteCount.addAccountCount(ByteCount.CRAWLER, contentLength);
 
-                // check length again in case it was not possible to get the length before loading
-                if (maxFileSize > 0 && contentLength > maxFileSize) {
-                	this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", code);
-                	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
-                }
-
-                // create a new cache entry
-                final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
-                response = new Response(
-                        request,
-                        requestHeader,
-                        header,
-                        Integer.toString(code),
-                        profile,
-                        responseBody
-                );
-
-                return response;
-        	} else {
-                // if the response has not the right response type then reject file
-            	this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", code);
-                throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
+            // check length again in case it was not possible to get the length before loading
+            if (maxFileSize > 0 && contentLength > maxFileSize) {
+            	this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", code);
+            	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
             }
+
+            // create a new cache entry
+            final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+            response = new Response(
+                    request,
+                    requestHeader,
+                    header,
+                    Integer.toString(code),
+                    profile,
+                    responseBody
+            );
+
+            return response;
+    	} else {
+            // if the response has not the right response type then reject file
+        	this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", code);
+            throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
+        }
     }
 
     public static Response load(final Request request) throws IOException {

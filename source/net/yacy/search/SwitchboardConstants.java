@@ -296,6 +296,7 @@ public final class SwitchboardConstants {
      * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>
      */
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
+    public static final String CRAWLER_FOLLOW_REDIRECTS         = "crawler.http.FollowRedirects";
     public static final String YACY_MODE_DEBUG                  = "yacyDebugMode";
 
     /**
