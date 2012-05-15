@@ -30,11 +30,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.yacy.kelondro.util.FileUtils;
+
 import net.yacy.cora.storage.ConfigurationSet.Entry;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.index.SolrField;
 /**
  * this class reads configuration attributes as a list of keywords from a list
@@ -49,8 +52,10 @@ import net.yacy.search.index.SolrField;
  * - a line may contain a key only or a key=value pair
  * @author Michael Christen
  */
-public class ConfigurationSet extends TreeMap<String,Entry> {
-    private static final long serialVersionUID = 1L;
+public class ConfigurationSet extends TreeMap<String,Entry> implements Serializable {
+
+    private static final long serialVersionUID=-5961730809008841258L;
+
     private final File file;
 
     public ConfigurationSet() {
@@ -103,7 +108,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> {
                             entry.setComment(comment);
                             comment = null;
                         }
-                        this.put(key, entry);                        
+                        this.put(key, entry);
                     }
                 }
             }
@@ -192,7 +197,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> {
     public void commit() throws IOException {
         if (this.file == null) return;
         // create a temporary bak file, use it as template to preserve user comments
-        File bakfile = new File (file.getAbsolutePath() + ".bak");
+        File bakfile = new File (this.file.getAbsolutePath() + ".bak");
         FileUtils.copy (this.file, bakfile);
 
         TreeMap tclone = (TreeMap) this.clone(); // clone to write appended entries
@@ -219,7 +224,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> {
                         // second # = is a line comment
                         i = s.indexOf("#");
                         s = s.substring(0,i).trim();
-                    } 
+                    }
                     if (s.contains("=")) {
                         i = s.indexOf("=");
                         key = s.substring(0,i).trim();
@@ -232,7 +237,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> {
                             writer.write (e.toString());
                             tclone.remove(key); // remove written entries from clone
                         } else {writer.write(sorig); }
-                        writer.write("\n");                        
+                        writer.write("\n");
                     } else {
                         writer.write(sorig+"\n");
                     }
@@ -241,7 +246,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> {
             reader.close();
             bakfile.delete();
         } catch (final IOException e) {}
-        
+
         // write remainig entries (not already written)
         Iterator ie = tclone.entrySet().iterator();
         while (ie.hasNext()) {

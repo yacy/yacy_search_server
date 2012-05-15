@@ -27,9 +27,17 @@ package net.yacy.search.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -46,7 +54,9 @@ import net.yacy.kelondro.logging.Log;
 
 import org.apache.solr.common.SolrDocument;
 
-public class SolrConfiguration extends ConfigurationSet {
+public class SolrConfiguration extends ConfigurationSet implements Serializable {
+
+    private static final long serialVersionUID=-499100932212840385L;
 
     /**
      * initialize with an empty ConfigurationSet which will cause that all the index
