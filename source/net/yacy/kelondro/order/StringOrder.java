@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,24 +27,29 @@
 
 package net.yacy.kelondro.order;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.Order;
 
-public class StringOrder implements Comparator<String> {
+public class StringOrder implements Comparator<String>, Serializable {
+
+    private static final long serialVersionUID=-5443022063770309585L;
 
     public ByteOrder baseOrder;
+
     public StringOrder(final ByteOrder base) {
         this.baseOrder = base;
     }
-    
+
     public StringOrder(final Order<byte[]> base) {
         this.baseOrder = (ByteOrder) base;
     }
-    
+
+    @Override
     public final int compare(final String s1, final String s2) {
-        return baseOrder.compare(UTF8.getBytes(s1), UTF8.getBytes(s2));
+        return this.baseOrder.compare(UTF8.getBytes(s1), UTF8.getBytes(s2));
     }
 }

@@ -24,8 +24,10 @@
 
 package net.yacy.cora.order;
 
+import java.io.Serializable;
 
-public interface ByteOrder extends Order<byte[]> {
+
+public interface ByteOrder extends Order<byte[]>, Serializable {
 
     @Override
     public boolean wellformed(byte[] a);

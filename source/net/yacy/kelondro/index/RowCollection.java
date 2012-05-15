@@ -26,6 +26,7 @@ package net.yacy.kelondro.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -46,10 +47,11 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.kelondroException;
 
 
-public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, Cloneable {
+public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, Cloneable, Serializable {
 
-	private static final byte[] EMPTY_CACHE = new byte[0];
-	
+    private static final long serialVersionUID=-4670634138825982705L;
+    private static final byte[] EMPTY_CACHE = new byte[0];
+
     public  static final long growfactorLarge100 = 140L;
     public  static final long growfactorSmall100 = 120L;
     private static final int isortlimit = 20;
@@ -134,6 +136,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.lastTimeWrote = lastTimeWrote;
     }
 
+    @Override
     public RowCollection clone() {
         return new RowCollection(this.rowdef, this.chunkcache, this.chunkcount, this.sortBound, this.lastTimeWrote);
     }
@@ -334,6 +337,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         return b;
     }
 
+    @Override
     public synchronized final Row.Entry get(final int index, final boolean clone) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < this.chunkcount) : "get: access with index " + index + " is above chunkcount " + this.chunkcount + "; sortBound = " + this.sortBound;
@@ -478,6 +482,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     }
 
 
+    @Override
     public final void delete(final int p) {
         removeRow(p, true);
     }
@@ -533,6 +538,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.lastTimeWrote = System.currentTimeMillis();
     }
 
+    @Override
     public int size() {
         return this.chunkcount;
     }
@@ -566,14 +572,17 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             this.keepOrderWhenRemoving = keepOrderWhenRemoving;
         }
 
+        @Override
         public boolean hasNext() {
             return this.p < RowCollection.this.chunkcount;
         }
 
+        @Override
         public byte[] next() {
             return getKey(this.p++);
         }
 
+        @Override
         public void remove() {
             this.p--;
             removeRow(this.p, this.keepOrderWhenRemoving);
@@ -583,6 +592,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     /**
      * return an iterator for the row entries in this object
      */
+    @Override
     public Iterator<Row.Entry> iterator() {
         // iterates kelondroRow.Entry - type entries
         return new rowIterator();
@@ -601,14 +611,17 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             this.p = 0;
         }
 
+        @Override
         public boolean hasNext() {
             return this.p < RowCollection.this.chunkcount;
         }
 
+        @Override
         public Row.Entry next() {
             return get(this.p++, true);
         }
 
+        @Override
         public void remove() {
             this.p--;
             removeRow(this.p, true);
@@ -637,6 +650,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             this.S = S;
         }
 
+        @Override
         public Integer call() throws Exception {
             return Integer.valueOf(this.rc.partition(this.L, this.R, this.S, new byte[this.rc.rowdef.objectsize]));
         }
@@ -817,6 +831,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         return true;
     }
 
+    @Override
     public synchronized String toString() {
         final StringBuilder s = new StringBuilder(80);
         final Iterator<Row.Entry> i = iterator();

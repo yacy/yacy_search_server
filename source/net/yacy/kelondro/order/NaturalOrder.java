@@ -26,6 +26,7 @@
 
 package net.yacy.kelondro.order;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Iterator;
 
@@ -34,8 +35,9 @@ import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.Order;
 import net.yacy.kelondro.index.HandleSet;
 
-public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
+public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable, Serializable {
 
+    private static final long serialVersionUID=7170913936645013046L;
     public static final ByteOrder naturalOrder = new NaturalOrder(true);
     public static final Comparator<String> naturalComparator = new StringOrder(naturalOrder);
     public NaturalOrder(final boolean ascending) {
@@ -47,14 +49,17 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return new HandleSet(keylength, this, space);
     }
 
+    @Override
     public boolean wellformed(final byte[] a) {
         return true;
     }
 
+    @Override
     public boolean wellformed(final byte[] a, final int astart, final int alength) {
         return true;
     }
 
+    @Override
     public final Order<byte[]> clone() {
         final NaturalOrder o = new NaturalOrder(this.asc);
         o.rotate(this.zero);
@@ -75,6 +80,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return null;
     }
 
+    @Override
     public final String signature() {
         if (!this.asc) return "nd";
         if ( this.asc) return "nu";
@@ -92,6 +98,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return c;
     }
 
+    @Override
     public final long cardinal(final byte[] key) {
         if (this.zero == null) return cardinalI(key, 0, key.length);
         final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
@@ -100,6 +107,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
 
+    @Override
     public long cardinal(final byte[] key, final int off, final int len) {
         if (this.zero == null) return cardinalI(key, off, len);
         final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
@@ -150,6 +158,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
     // is less than, equal to, or greater than the second.
     // two arrays are also equal if one array is a subset of the other's array
     // with filled-up char(0)-values
+    @Override
     public final int compare(final byte[] a, final byte[] b) {
         if (a.length == b.length) {
             return (this.asc) ? compare0(a, b, a.length) : compare0(b, 0, a, 0, a.length);
@@ -165,10 +174,12 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return (a.length > b.length) ? -1 : 1;
     }
 
+    @Override
     public final int compare(final byte[] a, final byte[] b, final int length) {
         return (this.asc) ? compare0(a, b, length) : compare0(b, a, length);
     }
 
+    @Override
     public final int compare(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
         return (this.asc) ? compare0(a, aoffset, b, boffset, length) : compare0(b, boffset, a, aoffset, length);
     }
@@ -193,6 +204,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return sig(az - bz);
     }
 
+    @Override
     public final boolean equal(final byte[] a, final byte[] b) {
         if ((a == null) && (b == null)) return true;
         if ((a == null) || (b == null)) return false;
@@ -206,6 +218,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return true;
     }
 
+    @Override
     public final boolean equal(final byte[] a, int astart, final byte[] b, int bstart, int length) {
         if ((a == null) && (b == null)) return true;
         if ((a == null) || (b == null)) return false;
@@ -284,10 +297,12 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
             this.b256Iterator = b256Iterator;
         }
 
+        @Override
         public boolean hasNext() {
             return this.b256Iterator.hasNext();
         }
 
+        @Override
         public Long next() {
             final byte[] b = this.b256Iterator.next();
             assert (b != null);
@@ -295,6 +310,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
             return Long.valueOf(decodeLong(b));
         }
 
+        @Override
         public void remove() {
             this.b256Iterator.remove();
         }
