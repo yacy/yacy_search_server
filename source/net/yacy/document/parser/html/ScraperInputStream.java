@@ -170,7 +170,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         if (this.writer != null) this.writer.close();
     }
 

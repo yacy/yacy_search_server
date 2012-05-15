@@ -31,10 +31,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import org.apache.http.HttpHost;
@@ -115,7 +113,7 @@ public class SolrSingleConnector implements SolrConnector {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         try {
             this.server.commit();
         } catch (SolrServerException e) {
@@ -205,6 +203,7 @@ public class SolrSingleConnector implements SolrConnector {
         }
     }
 
+    @Override
     public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
         ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
         for (SolrDoc d: solrdocs) l.add(d);
@@ -215,27 +214,6 @@ public class SolrSingleConnector implements SolrConnector {
             Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdocs.toString());
             throw new IOException(e);
         }
-    }
-
-    @Override
-    public void err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
-
-            final SolrDoc solrdoc = new SolrDoc();
-            solrdoc.addField("id", ASCII.String(digestURI.hash()));
-            solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
-            final InetAddress address = digestURI.getInetAddress();
-            if (address != null) solrdoc.addField("ip_s", address.getHostAddress());
-            if (digestURI.getHost() != null) solrdoc.addField("host_s", digestURI.getHost());
-
-            // path elements of link
-            final String path = digestURI.getPath();
-            if (path != null) {
-                final String[] paths = path.split("/");
-                if (paths.length > 0) solrdoc.addField("attr_paths", paths);
-            }
-            solrdoc.addField("failreason_t", failReason);
-            solrdoc.addField("httpstatus_i", httpstatus);
-            add(solrdoc);
     }
 
     /**

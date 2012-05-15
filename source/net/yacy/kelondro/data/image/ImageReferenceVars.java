@@ -26,6 +26,7 @@
 
 package net.yacy.kelondro.data.image;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -38,9 +39,12 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.util.ByteArray;
 
 
-public class ImageReferenceVars extends AbstractReference implements ImageReference, Reference, Cloneable {
+public class ImageReferenceVars extends AbstractReference implements ImageReference, Reference, Cloneable, Serializable {
 
-	/**
+    private static final long serialVersionUID=3669156620967277347L;
+
+
+    /**
 	 * object for termination of concurrent blocking queue processing
 	 */
 	public static final ImageReferenceVars poison = new ImageReferenceVars();

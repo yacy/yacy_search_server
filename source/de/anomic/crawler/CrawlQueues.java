@@ -82,8 +82,8 @@ public class CrawlQueues {
         this.log.logConfig("Starting Crawling Management");
         this.noticeURL = new NoticedURL(queuePath, sb.peers.myBotIDs(), sb.useTailCache, sb.exceed134217727);
         FileUtils.deletedelete(new File(queuePath, ERROR_DB_FILENAME));
-        this.errorURL = new ZURL(sb.indexSegments.segment(PROCESS).getSolr(), queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
-        this.delegatedURL = new ZURL(sb.indexSegments.segment(PROCESS).getSolr(), queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
+        this.errorURL = new ZURL(sb.indexSegments.segment(PROCESS).getSolr(), sb.solrScheme, queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
+        this.delegatedURL = new ZURL(sb.indexSegments.segment(PROCESS).getSolr(), sb.solrScheme, queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
     }
 
     public void relocate(final File newQueuePath) {
@@ -94,11 +94,11 @@ public class CrawlQueues {
 
         this.noticeURL = new NoticedURL(newQueuePath, this.sb.peers.myBotIDs(), this.sb.useTailCache, this.sb.exceed134217727);
         FileUtils.deletedelete(new File(newQueuePath, ERROR_DB_FILENAME));
-        this.errorURL = new ZURL(this.sb.indexSegments.segment(PROCESS).getSolr(), newQueuePath, ERROR_DB_FILENAME, false, this.sb.useTailCache, this.sb.exceed134217727);
-        this.delegatedURL = new ZURL(this.sb.indexSegments.segment(PROCESS).getSolr(), newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
+        this.errorURL = new ZURL(this.sb.indexSegments.segment(PROCESS).getSolr(), this.sb.solrScheme, newQueuePath, ERROR_DB_FILENAME, false, this.sb.useTailCache, this.sb.exceed134217727);
+        this.delegatedURL = new ZURL(this.sb.indexSegments.segment(PROCESS).getSolr(), this.sb.solrScheme, newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
     }
 
-    public void close() {
+    public synchronized void close() {
         // wait for all workers to finish
         for (final Loader w: this.workers.values()) {
             w.interrupt();

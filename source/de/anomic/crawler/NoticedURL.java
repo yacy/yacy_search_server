@@ -91,7 +91,7 @@ public class NoticedURL {
         this.noloadStack.clear();
     }
 
-    public void close() {
+    public synchronized void close() {
         Log.logInfo("NoticedURL", "CLOSING ALL STACKS");
         if (this.coreStack != null) {
             this.coreStack.close();

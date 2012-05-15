@@ -698,6 +698,7 @@ crawler.http.acceptEncoding=gzip
 crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
 crawler.http.maxFileSize=10485760
+crawler.http.FollowRedirects=true;
 
 # ftp crawler specific settings; size in bytes
 crawler.ftp.maxFileSize=10485760

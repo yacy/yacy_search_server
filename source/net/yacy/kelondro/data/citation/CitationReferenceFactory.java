@@ -20,11 +20,15 @@
 
 package net.yacy.kelondro.data.citation;
 
+import java.io.Serializable;
+
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 
-public class CitationReferenceFactory implements ReferenceFactory<CitationReference> {
+public class CitationReferenceFactory implements ReferenceFactory<CitationReference>, Serializable {
+
+    private static final long serialVersionUID=-1098504892965986149L;
 
     @Override
     public CitationReference produceSlow(final Entry e) {

@@ -82,7 +82,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         return r;
     }
 
-    public void close() {
+    public synchronized void close() {
     	this.e.close();
     }
 
@@ -153,7 +153,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
             return r;
         }
 
-        public void close() {
+        public synchronized void close() {
         	this.e.close();
         }
     }

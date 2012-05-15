@@ -303,7 +303,7 @@ public class Segment {
         return refCount;
     }
 
-    public void close() {
+    public synchronized void close() {
         this.termIndex.close();
         this.urlMetadata.close();
         this.urlCitationIndex.close();

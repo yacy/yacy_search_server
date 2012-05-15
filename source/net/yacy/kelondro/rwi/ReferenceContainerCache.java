@@ -101,7 +101,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
     	this.cache = null;
     }
 

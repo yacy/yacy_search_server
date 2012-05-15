@@ -203,6 +203,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
     }
 
     public boolean exists(final byte[] urlHash) {
+        if (urlHash == null) return false;
         try {
             if (this.solr != null && this.solr.exists(ASCII.String(urlHash))) {
                 return true;

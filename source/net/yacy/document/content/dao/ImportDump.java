@@ -100,7 +100,7 @@ public class ImportDump {
         close();
     }
     
-    public void close() {
+    public synchronized void close() {
         this.conn.close();
     }
     

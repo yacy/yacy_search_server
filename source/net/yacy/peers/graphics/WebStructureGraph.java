@@ -28,6 +28,7 @@
 package net.yacy.peers.graphics;
 
 import java.io.File;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -342,8 +343,9 @@ public class WebStructureGraph
             hosthashes);
     }
 
-    public static class HostReferenceFactory implements ReferenceFactory<HostReference>
-    {
+    public static class HostReferenceFactory implements ReferenceFactory<HostReference>, Serializable {
+
+        private static final long serialVersionUID=7461135579006223155L;
 
         private static final Row hostReferenceRow = new Row(
             "String h-6, Cardinal m-4 {b256}, Cardinal c-4 {b256}",
@@ -369,8 +371,9 @@ public class WebStructureGraph
 
     }
 
-    public static class HostReference extends AbstractReference implements Reference
-    {
+    public static class HostReference extends AbstractReference implements Reference, Serializable {
+
+        private static final long serialVersionUID=-9170091435821206765L;
 
         private final Row.Entry entry;
 
@@ -749,7 +752,7 @@ public class WebStructureGraph
         }
     }
 
-    public void close() {
+    public synchronized void close() {
         // finish dns resolving queue
         if ( this.publicRefDNSResolvingWorker.isAlive() ) {
             log.logInfo("Waiting for the DNS Resolving Queue to terminate");

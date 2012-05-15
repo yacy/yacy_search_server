@@ -375,7 +375,7 @@ public class Balancer {
     	synchronized (this) {
     	    byte[] failhash = null;
     		while (!this.urlFileIndex.isEmpty()) {
-    		    byte[] nexthash = getbest();
+    		    byte[] nexthash = getbest(robots);
     		    if (nexthash == null) return null;
 
 		        // check minimumDelta and if necessary force a sleep
@@ -442,7 +442,7 @@ public class Balancer {
         return crawlEntry;
     }
 
-    private byte[] getbest() {
+    private byte[] getbest(final RobotsTxt robots) {
 
     	// check if we need to get entries from the file index
     	try {
@@ -469,7 +469,23 @@ public class Balancer {
 
             final byte[] n = entry.getValue().removeOne();
             if (n == null) continue;
-            final long w = Latency.waitingRemainingGuessed(entry.getKey(), this.minimumLocalDelta, this.minimumGlobalDelta);
+
+            long w;
+            Row.Entry rowEntry;
+            try {
+                rowEntry=(n == null) ? null : this.urlFileIndex.get(n, false);
+                if (rowEntry == null) {
+                    w = Latency.waitingRemainingGuessed(entry.getKey(), this.minimumLocalDelta, this.minimumGlobalDelta);
+                } else {
+                    Request crawlEntry = new Request(rowEntry);
+                    w = Latency.waitingRemaining(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
+                    //System.out.println("*** waitingRemaining = " + w + ", guessed = " + Latency.waitingRemainingGuessed(entry.getKey(), this.minimumLocalDelta, this.minimumGlobalDelta));
+                    //System.out.println("*** explained: " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta));
+                }
+            } catch (IOException e1) {
+                w = Latency.waitingRemainingGuessed(entry.getKey(), this.minimumLocalDelta, this.minimumGlobalDelta);
+            }
+
             if (w < smallestWaiting) {
                 smallestWaiting = w;
                 besturlhash = n;

@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,6 +26,7 @@
 
 package net.yacy.kelondro.data.word;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,13 +40,15 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.ByteBuffer;
 
-public class WordReferenceFactory implements ReferenceFactory<WordReference> {
+public class WordReferenceFactory implements ReferenceFactory<WordReference>, Serializable {
+
+    private static final long serialVersionUID=-7168706947127349876L;
 
     @Override
     public WordReference produceSlow(final Entry e) {
         return new WordReferenceRow(e);
     }
-    
+
     @Override
     public WordReference produceFast(final WordReference r) {
         if (r instanceof WordReferenceVars) return r;
@@ -134,7 +137,7 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference> {
                 urlsb.append(dom);
                 url = urlsb.toString();
                 ci.trim(6);
-                
+
                 peers = target.get(url);
                 if (peers == null) {
                     peers = new StringBuilder(24);

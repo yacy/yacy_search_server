@@ -702,7 +702,7 @@ dc_rights
         }
     }
 
-    public void close() {
+    public synchronized void close() {
         if (this.text == null) return;
 
         // try close the output stream

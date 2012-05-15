@@ -243,7 +243,7 @@ public class DocumentIndex extends Segment
      * close the index. This terminates all worker threads and then closes the segment.
      */
     @Override
-    public void close() {
+    public synchronized void close() {
         // send termination signal to worker threads
         for ( @SuppressWarnings("unused")
         final Worker element : this.worker ) {

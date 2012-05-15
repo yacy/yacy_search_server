@@ -100,7 +100,7 @@ public class WikiBoard {
     /**
      * Closes database files.
      */
-    public void close() {
+    public synchronized void close() {
         datbase.close();
         bkpbase.close();
     }

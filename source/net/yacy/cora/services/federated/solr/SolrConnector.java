@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import net.yacy.kelondro.data.meta.DigestURI;
-
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
@@ -73,16 +71,6 @@ public interface SolrConnector {
      */
     public void add(final SolrDoc solrdoc) throws IOException, SolrException;
     public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException;
-
-    /**
-     * register an entry as error document
-     * @param digestURI
-     * @param failReason
-     * @param httpstatus
-     * @throws IOException
-     */
-    public void err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException;
-
 
     /**
      * get a query result from solr

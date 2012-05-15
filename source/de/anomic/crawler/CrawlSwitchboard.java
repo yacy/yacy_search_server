@@ -541,7 +541,7 @@ public final class CrawlSwitchboard
         return hasDoneSomething;
     }
 
-    public void close() {
+    public synchronized void close() {
         this.profilesActiveCrawlsCache.clear();
         this.profilesActiveCrawls.close();
         this.profilesPassiveCrawls.close();

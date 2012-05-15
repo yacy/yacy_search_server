@@ -81,7 +81,7 @@ public class BlogBoardComments {
         return this.database.size();
     }
 
-    public void close() {
+    public synchronized void close() {
         this.database.close();
     }
 

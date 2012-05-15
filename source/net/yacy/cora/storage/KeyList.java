@@ -91,7 +91,7 @@ public class KeyList implements Iterable<String> {
         }
     }
 
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         synchronized (this.raf) {
             this.raf.close();
         }

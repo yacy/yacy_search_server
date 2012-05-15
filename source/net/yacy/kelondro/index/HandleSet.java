@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,27 +31,34 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.SetTools;
 
 
-public final class HandleSet implements Iterable<byte[]>, Cloneable {
-    
+public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializable {
+
+    private static final long serialVersionUID=444204785291174968L;
+
     private final Row rowdef;
     private RowSet index;
-    
+
     public HandleSet(final int keylength, final ByteOrder objectOrder, final int expectedspace) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key")}, objectOrder);
         try {
-            this.index = new RowSet(rowdef, expectedspace);
+            this.index = new RowSet(this.rowdef, expectedspace);
         } catch (RowSpaceExceededException e) {
             try {
-                this.index = new RowSet(rowdef, 0);
+                this.index = new RowSet(this.rowdef, 0);
             } catch (RowSpaceExceededException ee) {
                 Log.logException(ee);
                 this.index = null;
@@ -73,18 +80,18 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
     public HandleSet clone() {
         return new HandleSet(this.rowdef, this.index.clone());
     }
-    
+
     public byte[] export() {
-        return index.exportCollection();
+        return this.index.exportCollection();
     }
-    
+
     /**
      * initialize a HandleSet with the content of a dump
      * @param keylength
      * @param objectOrder
      * @param file
-     * @throws IOException 
-     * @throws RowSpaceExceededException 
+     * @throws IOException
+     * @throws RowSpaceExceededException
      */
     public HandleSet(final int keylength, final ByteOrder objectOrder, final File file) throws IOException, RowSpaceExceededException {
         this(keylength, objectOrder, (int) (file.length() / (keylength + 8)));
@@ -128,32 +135,32 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         os.close();
         return c;
     }
-    
+
     public final synchronized byte[] smallestKey() {
         return this.index.smallestKey();
     }
-    
+
     public final synchronized byte[] largestKey() {
         return this.index.largestKey();
     }
-    
+
     public ByteOrder comparator() {
         return this.rowdef.objectOrder;
     }
-    
+
     public final Row row() {
-        return index.row();
+        return this.index.row();
     }
-    
+
     public final void clear() {
         this.index.clear();
     }
-    
+
     public final synchronized boolean has(final byte[] key) {
         assert (key != null);
-        return index.has(key);
+        return this.index.has(key);
     }
-    
+
     public final void putAll(final HandleSet aset) throws RowSpaceExceededException {
         for (byte[] b: aset) put(b);
     }
@@ -161,36 +168,36 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
     /**
      * Adds the key to the set
      * @param key
-     * @return true if this set did _not_ already contain the given key. 
+     * @return true if this set did _not_ already contain the given key.
      * @throws IOException
      * @throws RowSpaceExceededException
      */
     public final boolean put(final byte[] key) throws RowSpaceExceededException {
         assert (key != null);
-        final Row.Entry newentry = index.row().newEntry(key);
-        return index.put(newentry);
+        final Row.Entry newentry = this.index.row().newEntry(key);
+        return this.index.put(newentry);
     }
-    
+
     public final void putUnique(final byte[] key) throws RowSpaceExceededException {
         assert (key != null);
-        final Row.Entry newentry = index.row().newEntry(key);
-        index.addUnique(newentry);
+        final Row.Entry newentry = this.index.row().newEntry(key);
+        this.index.addUnique(newentry);
     }
-    
+
     public final boolean remove(final byte[] key) {
         assert (key != null);
         Row.Entry indexentry;
-        indexentry = index.remove(key);
+        indexentry = this.index.remove(key);
         return indexentry != null;
     }
 
     public final synchronized byte[] removeOne() {
         Row.Entry indexentry;
-        indexentry = index.removeOne();
+        indexentry = this.index.removeOne();
         if (indexentry == null) return null;
         return indexentry.getPrimaryKeyBytes();
     }
-    
+
     /**
      * get one entry; objects are taken from the end of the list
      * a getOne(0) would return the same object as removeOne() would remove
@@ -200,39 +207,40 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
     public final synchronized byte[] getOne(int idx) {
         if (idx >= this.size()) return null;
         Row.Entry indexentry;
-        indexentry = index.get(this.size() - 1 - idx, true);
+        indexentry = this.index.get(this.size() - 1 - idx, true);
         if (indexentry == null) return null;
         return indexentry.getPrimaryKeyBytes();
     }
-    
+
     public final synchronized boolean isEmpty() {
-        return index.isEmpty();
+        return this.index.isEmpty();
     }
-    
+
     public final synchronized int size() {
-        return index.size();
+        return this.index.size();
     }
-    
+
     public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
-        return index.keys(up, firstKey);
+        return this.index.keys(up, firstKey);
     }
-    
+
+    @Override
     public final Iterator<byte[]> iterator() {
         return keys(true, null);
     }
-    
+
     public final synchronized void close() {
-        index.close();
-        index = null;
+        this.index.close();
+        this.index = null;
     }
-    
+
     @Override
     public final String toString() {
         return this.index.toString();
     }
-    
+
     // set tools
-    
+
     public HandleSet joinConstructive(final HandleSet other) throws RowSpaceExceededException {
         return joinConstructive(this, other);
     }
@@ -299,26 +307,62 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
     public void excludeDestructive(final HandleSet other) {
         excludeDestructive(this, other);
     }
-    
+
     private static void excludeDestructive(final HandleSet set1, final HandleSet set2) {
         if (set1 == null) return;
         if (set2 == null) return;
         assert set1.comparator() == set2.comparator();
         if (set1.isEmpty() || set2.isEmpty()) return;
-        
+
         if (set1.size() < set2.size())
             excludeDestructiveByTestSmallInLarge(set1, set2);
         else
             excludeDestructiveByTestLargeInSmall(set1, set2);
     }
-    
+
     private static void excludeDestructiveByTestSmallInLarge(final HandleSet small, final HandleSet large) {
         final Iterator<byte[]> mi = small.iterator();
         while (mi.hasNext()) if (large.has(mi.next())) mi.remove();
     }
-    
+
     private static void excludeDestructiveByTestLargeInSmall(final HandleSet large, final HandleSet small) {
         final Iterator<byte[]> si = small.iterator();
         while (si.hasNext()) large.remove(si.next());
     }
+
+    public static void main(String[] args) {
+        HandleSet s = new HandleSet(8, NaturalOrder.naturalOrder, 100);
+        try {
+            s.put(UTF8.getBytes("Hello"));
+            s.put(UTF8.getBytes("World"));
+
+            // test Serializable
+            try {
+                // write to file
+                File f = File.createTempFile("HandleSet", "stream");
+                ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
+                out.writeObject(s);
+                out.close();
+
+                // read from file
+                ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
+                HandleSet s1 = (HandleSet) in.readObject();
+                in.close();
+
+                for (byte[] b: s1) {
+                    System.out.println(UTF8.String(b));
+                }
+                s1.close();
+            } catch(IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        } catch (RowSpaceExceededException e) {
+            e.printStackTrace();
+        }
+        s.close();
+        Log.shutdown();
+    }
+
 }

@@ -25,6 +25,7 @@
 package net.yacy.kelondro.index;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -42,8 +43,9 @@ import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.MemoryControl;
 
 
-public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> {
+public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>, Serializable {
 
+    private static final long serialVersionUID=-6036029762440788566L;
     private static final int collectionReSortLimit = 3000;
 
     public RowSet(final RowSet rs) {
@@ -118,20 +120,24 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         super(rowdef, chunkcache, chunkcount, sortBound, lastTimeWrote);
     }
 
+    @Override
     public RowSet clone() {
         return new RowSet(super.rowdef, super.chunkcache, super.chunkcount, super.sortBound, super.lastTimeWrote);
     }
 
-	public void reset() {
+	@Override
+    public void reset() {
 		super.reset();
 	}
 
+    @Override
     public final synchronized boolean has(final byte[] key) {
         assert key.length == this.rowdef.primaryKeyLength;
         final int index = find(key, 0);
         return index >= 0;
     }
 
+    @Override
     public final synchronized Row.Entry get(final byte[] key, final boolean forcecopy) {
         assert key.length == this.rowdef.primaryKeyLength;
         final int index = find(key, 0);
@@ -139,6 +145,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         return get(index, forcecopy);
     }
 
+    @Override
     public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
         Row.Entry entry;
@@ -156,6 +163,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public final boolean put(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
         final byte[] key = entry.getPrimaryKeyBytes();
@@ -176,6 +184,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         }
     }
 
+    @Override
     public final Row.Entry replace(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
         final byte[] key = entry.getPrimaryKeyBytes();
@@ -227,6 +236,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
      * if the entry was found, return the entry, but delete the entry from the set
      * if the entry was not found, return null.
      */
+    @Override
     public final synchronized boolean delete(final byte[] a) {
         boolean exists = false;
         int index;
@@ -258,6 +268,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         }
     }
 
+    @Override
     public final synchronized Row.Entry remove(final byte[] a) {
         Row.Entry entry = null;
         int index;
@@ -346,6 +357,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         return super.keys(true);
     }
 
+    @Override
     public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         return new keyIterator(up, firstKey);
     }
@@ -372,10 +384,12 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
             }
         }
 
-		public final keyIterator clone(final Object second) {
+		@Override
+        public final keyIterator clone(final Object second) {
             return new keyIterator(this.up, (byte[]) second);
         }
 
+        @Override
         public final boolean hasNext() {
         	if (this.p < 0) return false;
         	if (this.p >= size()) return false;
@@ -386,27 +400,32 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
             }
         }
 
+        @Override
         public final byte[] next() {
             final byte[] key = getKey(this.p);
             if (this.up) this.p++; else this.p--;
             return key;
         }
 
+        @Override
         public final void remove() {
             throw new UnsupportedOperationException();
         }
     }
 
+    @Override
     public final synchronized Iterator<Row.Entry> iterator() {
         // iterates kelondroRow.Entry - type entries
         sort();
         return super.iterator();
     }
 
+    @Override
     public final synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
         return new rowIterator(up, firstKey);
     }
 
+    @Override
     public final synchronized CloneableIterator<Row.Entry> rows() {
         return new rowIterator(true, null);
     }
@@ -432,10 +451,12 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
             }
         }
 
-		public final rowIterator clone(final Object second) {
+		@Override
+        public final rowIterator clone(final Object second) {
             return new rowIterator(this.up, (byte[]) second);
         }
 
+        @Override
         public final boolean hasNext() {
         	if (this.p < 0) return false;
         	if (this.p >= size()) return false;
@@ -446,12 +467,14 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
             }
         }
 
+        @Override
         public final Row.Entry next() {
             final Row.Entry entry = get(this.p, true);
             if (this.up) this.p++; else this.p--;
             return entry;
         }
 
+        @Override
         public final void remove() {
             throw new UnsupportedOperationException();
         }
@@ -677,10 +700,12 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         return randomHash(r.nextLong(), r.nextLong());
     }
 
+    @Override
     public String filename() {
         return null;
     }
 
+    @Override
     public void deleteOnExit() {
         // do nothing, there is no file
     }

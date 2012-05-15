@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import net.yacy.kelondro.data.meta.DigestURI;
-
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
@@ -44,7 +42,7 @@ public class SolrRetryConnector implements SolrConnector {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         this.solrConnector.close();
     }
 
@@ -126,21 +124,6 @@ public class SolrRetryConnector implements SolrConnector {
     @Override
     public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
         for (SolrDoc d: solrdocs) add(d);
-    }
-
-    @Override
-    public void err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
-        final long t = System.currentTimeMillis() + this.retryMaxTime;
-        Throwable ee = null;
-        while (System.currentTimeMillis() < t) try {
-            this.solrConnector.err(digestURI, failReason, httpstatus);
-            return;
-        } catch (final Throwable e) {
-            ee = e;
-            try {Thread.sleep(10);} catch (final InterruptedException e1) {}
-            continue;
-        }
-        if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
     }
 
     @Override

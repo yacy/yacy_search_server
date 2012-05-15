@@ -53,7 +53,7 @@ public class BookmarkDate {
         this.datesTable = new MapHeap(datesFile, 20, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
     }
     
-    public void close() {
+    public synchronized void close() {
         this.datesTable.close();
     }
     

@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,6 +26,7 @@
 
 package net.yacy.kelondro.data.navigation;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import net.yacy.cora.document.ASCII;
@@ -33,12 +34,14 @@ import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
 
-public class NavigationReferenceVars  extends AbstractReference implements NavigationReference, Reference, Cloneable {
+public class NavigationReferenceVars  extends AbstractReference implements NavigationReference, Reference, Cloneable, Serializable {
+
+    private static final long serialVersionUID=2873544331190937594L;
 
     public byte[] termhash, refhash;
     public int hitcount, position;
     byte flags;
-    
+
     public NavigationReferenceVars(
             final byte[]   termhash,
             final byte[]   refhash,
@@ -52,7 +55,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         this.position = pos;
         this.flags = flags;
     }
-    
+
     public NavigationReferenceVars(final NavigationReference e) {
         this.refhash = e.urlhash();
         this.termhash = e.termHash();
@@ -60,7 +63,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         this.position = e.position(0);
         this.flags = e.flags();
     }
-    
+
     @Override
     public NavigationReferenceVars clone() {
         final NavigationReferenceVars c = new NavigationReferenceVars(
@@ -72,7 +75,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         );
         return c;
     }
-    
+
     public NavigationReferenceRow toRowEntry() {
         return new NavigationReferenceRow(
                 this.termhash,
@@ -81,50 +84,58 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
                 this.position,
                 this.flags);
     }
-    
+
+    @Override
     public String toPropertyForm() {
         return toRowEntry().toPropertyForm();
     }
 
+    @Override
     public Entry toKelondroEntry() {
         return toRowEntry().toKelondroEntry();
     }
 
+    @Override
     public String navigationHash() {
         return ASCII.String(this.termhash) + ASCII.String(this.refhash);
     }
-    
+
+    @Override
     public byte[] urlhash() {
         return this.refhash;
     }
 
+    @Override
     public byte[] termHash() {
         return this.termhash;
     }
- 
+
+    @Override
     public int hitcount() {
         return this.hitcount;
     }
 
+    @Override
     public int position(final int p) {
         assert p == 0 : "p = " + p;
         return this.position;
     }
-    
+
+    @Override
     public byte flags() {
         return this.flags;
     }
- 
+
     @Override
     public String toString() {
         return toPropertyForm();
     }
-    
+
     @Override
     public int hashCode() {
         return this.navigationHash().hashCode();
     }
-    
+
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
@@ -133,24 +144,28 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         NavigationReferenceVars other = (NavigationReferenceVars) obj;
         return this.navigationHash().equals(other.navigationHash());
     }
-    
+
+    @Override
     public boolean isOlder(final Reference other) {
         return false;
     }
 
-    
+
     // unsupported operations:
 
+    @Override
     public void join(final Reference oe) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public long lastModified() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Collection<Integer> positions() {
         throw new UnsupportedOperationException();
     }
-    
+
 }

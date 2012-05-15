@@ -154,7 +154,7 @@ public class BEncodedHeapShard extends AbstractMapStore implements MapStore {
     }
     
     @Override
-    public void close() {
+    public synchronized void close() {
         if (this.shard == null) return;
         
         final Iterator<MapStore> i = this.shard.values().iterator();

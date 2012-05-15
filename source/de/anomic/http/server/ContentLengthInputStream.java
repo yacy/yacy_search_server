@@ -62,12 +62,12 @@ import java.io.InputStream;
  * @since 2.0
  */
 public class ContentLengthInputStream extends InputStream {
-    
+
     /**
      * The maximum number of bytes that can be read from the stream. Subsequent
      * read operations will return -1.
      */
-    private long contentLength;
+    private final long contentLength;
 
     /** The current position */
     private long pos = 0;
@@ -86,7 +86,7 @@ public class ContentLengthInputStream extends InputStream {
      * @param in The stream to wrap
      * @param contentLength The maximum number of bytes that can be read from
      * the stream. Subsequent read operations will return -1.
-     * 
+     *
      * @since 3.0
      */
     public ContentLengthInputStream(InputStream in, long contentLength) {
@@ -102,14 +102,15 @@ public class ContentLengthInputStream extends InputStream {
      * primed to parse the next response.</p>
      * @throws IOException If an IO problem occurs.
      */
-    public void close() throws IOException {
-        if (!closed) {
+    @Override
+    public synchronized void close() throws IOException {
+        if (!this.closed) {
             try {
                 ChunkedInputStream.exhaustInputStream(this);
             } finally {
                 // close after above so that we don't throw an exception trying
                 // to read after closed!
-                closed = true;
+                this.closed = true;
             }
         }
     }
@@ -121,15 +122,16 @@ public class ContentLengthInputStream extends InputStream {
      * @throws IOException If an IO problem occurs
      * @see java.io.InputStream#read()
      */
+    @Override
     public int read() throws IOException {
-        if (closed) {
+        if (this.closed) {
             throw new IOException("Attempted read from closed stream.");
         }
 
-        if (pos >= contentLength) {
+        if (this.pos >= this.contentLength) {
             return -1;
         }
-        pos++;
+        this.pos++;
         return this.wrappedStream.read();
     }
 
@@ -145,20 +147,21 @@ public class ContentLengthInputStream extends InputStream {
      *
      * @throws java.io.IOException Should an error occur on the wrapped stream.
      */
+    @Override
     public int read (byte[] b, int off, int len) throws java.io.IOException {
-        if (closed) {
+        if (this.closed) {
             throw new IOException("Attempted read from closed stream.");
         }
 
-        if (pos >= contentLength) {
+        if (this.pos >= this.contentLength) {
             return -1;
         }
 
-        if (pos + len > contentLength) {
-            len = (int) (contentLength - pos);
+        if (this.pos + len > this.contentLength) {
+            len = (int) (this.contentLength - this.pos);
         }
         int count = this.wrappedStream.read(b, off, len);
-        pos += count;
+        this.pos += count;
         return count;
     }
 
@@ -170,6 +173,7 @@ public class ContentLengthInputStream extends InputStream {
      * @throws IOException If an IO problem occurs
      * @see java.io.InputStream#read(byte[])
      */
+    @Override
     public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
@@ -182,20 +186,22 @@ public class ContentLengthInputStream extends InputStream {
      * @throws IOException If an error occurs while skipping bytes.
      * @see InputStream#skip(long)
      */
+    @Override
     public long skip(long n) throws IOException {
-        // make sure we don't skip more bytes than are 
+        // make sure we don't skip more bytes than are
         // still available
-        long length = Math.min(n, contentLength - pos);
+        long length = Math.min(n, this.contentLength - this.pos);
         // skip and keep track of the bytes actually skipped
         length = this.wrappedStream.skip(length);
         // only add the skipped bytes to the current position
         // if bytes were actually skipped
         if (length > 0) {
-            pos += length;
+            this.pos += length;
         }
         return length;
     }
 
+    @Override
     public int available() throws IOException {
         if (this.closed) {
             return 0;
@@ -204,7 +210,7 @@ public class ContentLengthInputStream extends InputStream {
         if (this.pos + avail > this.contentLength ) {
             avail = (int)(this.contentLength - this.pos);
         }
-        return avail;     
+        return avail;
     }
-    
+
 }

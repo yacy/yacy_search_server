@@ -113,7 +113,7 @@ public class BookmarksDB {
     // bookmarksDB's functions for 'destructing' the class
     // -----------------------------------------------------
 
-    public void close(){
+    public synchronized void close(){
         this.bookmarks.close();
         this.tags.clear();
         this.dates.close();

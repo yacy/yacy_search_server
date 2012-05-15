@@ -27,6 +27,7 @@
 
 package net.yacy.kelondro.index;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -48,9 +49,10 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.kelondroException;
 
 
-public final class Row {
+public final class Row implements Serializable {
 
     //private final static Pattern commaPattern = Pattern.compile(",");
+    private static final long serialVersionUID=-148412365988669116L;
 
     protected final Column[]        row;
     public final int[]              colstart;
@@ -235,7 +237,9 @@ public final class Row {
 
     }
 
-    public class Entry implements Comparable<Entry>, Comparator<Entry>, Cloneable {
+    public class Entry implements Comparable<Entry>, Comparator<Entry>, Cloneable, Serializable {
+
+        private static final long serialVersionUID=-2576312347345553495L;
 
         private byte[] rowinstance;
         private int offset; // the offset where the row starts within rowinstance
@@ -257,7 +261,7 @@ public final class Row {
         public Entry(final byte[] newrow, final int start, final boolean forceclone) {
             if (forceclone || newrow.length - start < Row.this.objectsize) {
                 this.rowinstance = new byte[Row.this.objectsize];
-                System.arraycopy(newrow, start, this.rowinstance, 0, Row.this.objectsize);
+                System.arraycopy(newrow, start, this.rowinstance, 0, Math.min(newrow.length, Row.this.objectsize));
                 this.offset = 0;
             } else {
                 this.rowinstance = newrow;
@@ -632,7 +636,10 @@ public final class Row {
 
     }
 
-    public final class EntryIndex extends Entry {
+    public final class EntryIndex extends Entry implements Serializable {
+
+        private static final long serialVersionUID=153069052590699231L;
+
         private final int index;
         public EntryIndex(final byte[] row, final int i) {
             super(row, false);
