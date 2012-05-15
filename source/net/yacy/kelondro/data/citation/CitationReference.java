@@ -20,6 +20,7 @@
 
 package net.yacy.kelondro.data.citation;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import net.yacy.cora.document.ASCII;
@@ -33,9 +34,11 @@ import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.util.ByteArray;
 
-public class CitationReference implements Reference /*, Cloneable*/ {
+public class CitationReference implements Reference, Serializable {
 
     // this object stores citation attributes to URL references
+
+    private static final long serialVersionUID=1920200210928897131L;
 
     public static final Row citationRow = new Row(new Column[]{
             new Column("h", Column.celltype_string,    Column.encoder_bytes, Word.commonHashLength, "urlhash"),

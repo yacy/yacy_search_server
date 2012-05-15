@@ -54,6 +54,8 @@ import net.yacy.kelondro.order.Base64Order;
  */
 public class ReferenceContainer<ReferenceType extends Reference> extends RowSet {
 
+    private static final long serialVersionUID=-540567425172727979L;
+
     private   byte[] termHash;
     protected ReferenceFactory<ReferenceType> factory;
     public static int maxReferences = 0; // overwrite this to enable automatic index shrinking. 0 means no shrinking
@@ -255,16 +257,19 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             this.rowEntryIterator = iterator();
         }
 
+        @Override
         public boolean hasNext() {
             return this.rowEntryIterator.hasNext();
         }
 
+        @Override
         public ReferenceType next() {
             final Row.Entry rentry = this.rowEntryIterator.next();
             if (rentry == null) return null;
             return ReferenceContainer.this.factory.produceSlow(rentry);
         }
 
+        @Override
         public void remove() {
             this.rowEntryIterator.remove();
         }
@@ -562,10 +567,12 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return pivot;
     }
 
+    @Override
     public synchronized String toString() {
         return "C[" + ASCII.String(this.termHash) + "] has " + size() + " entries";
     }
 
+    @Override
     public int hashCode() {
         return (int) Base64Order.enhancedCoder.decodeLong(this.termHash, 0, 4);
     }

@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,21 +26,28 @@
 
 package net.yacy.kelondro.data.image;
 
+import java.io.Serializable;
+
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 
-public class ImageReferenceFactory implements ReferenceFactory<ImageReference> {
+public class ImageReferenceFactory implements ReferenceFactory<ImageReference>, Serializable {
 
+    private static final long serialVersionUID=-2209473508756878863L;
+
+    @Override
     public ImageReference produceSlow(Entry e) {
         return null; //new ImageReferenceRow(e);
     }
-    
+
+    @Override
     public ImageReference produceFast(ImageReference r) {
         if (r instanceof ImageReferenceVars) return r;
         return new ImageReferenceVars(r);
     }
 
+    @Override
     public Row getRow() {
         return ImageReferenceRow.urlEntryRow;
     }

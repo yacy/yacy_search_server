@@ -237,7 +237,9 @@ public final class Row implements Serializable {
 
     }
 
-    public class Entry implements Comparable<Entry>, Comparator<Entry>, Cloneable {
+    public class Entry implements Comparable<Entry>, Comparator<Entry>, Cloneable, Serializable {
+
+        private static final long serialVersionUID=-2576312347345553495L;
 
         private byte[] rowinstance;
         private int offset; // the offset where the row starts within rowinstance
@@ -634,7 +636,10 @@ public final class Row implements Serializable {
 
     }
 
-    public final class EntryIndex extends Entry {
+    public final class EntryIndex extends Entry implements Serializable {
+
+        private static final long serialVersionUID=153069052590699231L;
+
         private final int index;
         public EntryIndex(final byte[] row, final int i) {
             super(row, false);

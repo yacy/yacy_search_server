@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -24,88 +24,91 @@
 
 package net.yacy.kelondro.order;
 
+import java.io.Serializable;
 
-public class Bitfield implements Cloneable {
+
+public class Bitfield implements Cloneable, Serializable {
 
     // the bitfield implements a binary array. Such arrays may be exported in a base64-String
-    
-    private byte[] bb;    
+
+    private static final long serialVersionUID=3605122793792478052L;
+    private byte[] bb;
 
     public Bitfield() {
         this(0);
     }
-    
+
     public Bitfield(final byte[] b) {
         if (b == null) this.bb = new byte[0]; else this.bb = b;
     }
-    
+
     public Bitfield(final int bytelength) {
         this.bb= new byte[bytelength];
-        for (int i = 0 ; i < bytelength; i++) bb[i] = 0;
+        for (int i = 0 ; i < bytelength; i++) this.bb[i] = 0;
     }
 
     public Bitfield(final int bytelength, final String exported) {
         // imports a b64-encoded bitfield
         final byte[] b = Base64Order.enhancedCoder.decode(exported);
         if (b.length == bytelength) {
-            bb = b;
+            this.bb = b;
         } else {
-            bb = new byte[bytelength];
+            this.bb = new byte[bytelength];
             assert (b.length <= bytelength) : "exported = " + exported + " has bytelength = " + b.length + " > " + bytelength;
-            System.arraycopy(b, 0, bb, 0, Math.min(b.length, bytelength));
+            System.arraycopy(b, 0, this.bb, 0, Math.min(b.length, bytelength));
         }
     }
-    
+
     @Override
     public Bitfield clone() {
         final Bitfield theClone = new Bitfield(new byte[this.bb.length]);
         System.arraycopy(this.bb, 0, theClone.bb, 0, this.bb.length);
         return theClone;
     }
-    
+
     public void set(final int pos, final boolean value) {
         assert (pos >= 0);
         final int slot = pos >> 3; // /8
-        if (slot >= bb.length) {
+        if (slot >= this.bb.length) {
             // extend capacity
             byte[] nb = new byte[slot + 1];
-            System.arraycopy(bb, 0, nb, 0, bb.length);
-            for (int i = bb.length; i < nb.length; i++) nb[i] = 0;
-            bb = nb;
+            System.arraycopy(this.bb, 0, nb, 0, this.bb.length);
+            for (int i = this.bb.length; i < nb.length; i++) nb[i] = 0;
+            this.bb = nb;
         }
         if (value) {
-            bb[slot] = (byte) (bb[slot] | (1 << (pos % 8)));
+            this.bb[slot] = (byte) (this.bb[slot] | (1 << (pos % 8)));
         } else {
-            bb[slot] = (byte) (bb[slot] & (0xff ^ (1 << (pos % 8))));
+            this.bb[slot] = (byte) (this.bb[slot] & (0xff ^ (1 << (pos % 8))));
         }
     }
-    
+
     public boolean get(final int pos) {
         assert (pos >= 0);
         final int slot = pos >> 3; // /8
-        if (slot >= bb.length) return false;
-        return (bb[slot] & (1 << (pos % 8))) > 0;
+        if (slot >= this.bb.length) return false;
+        return (this.bb[slot] & (1 << (pos % 8))) > 0;
     }
 
     public int length() {
-        return bb.length << 3;
+        return this.bb.length << 3;
     }
-    
+
     public String exportB64() {
-        return Base64Order.enhancedCoder.encode(bb);
+        return Base64Order.enhancedCoder.encode(this.bb);
     }
-    
+
     public byte[] bytes() {
-        return bb;
+        return this.bb;
     }
-    
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(length());
         for (int i = length() - 1; i >= 0; i--) sb.append((this.get(i)) ? '1' : '0');
         return sb.toString();
     }
-    
+
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
@@ -116,17 +119,17 @@ public class Bitfield implements Cloneable {
         for (int i = 0; i < this.bb.length; i++) if (this.bb[i] != other.bb[i]) return false;
         return true;
     }
-    
+
     @Override
     public int hashCode() {
         return this.toString().hashCode();
     }
-    
+
     public void and(final Bitfield x) {
         final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) set(i, this.get(i) && x.get(i));
     }
-    
+
     public void or(final Bitfield x) {
         final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) set(i, this.get(i) || x.get(i));
@@ -134,7 +137,7 @@ public class Bitfield implements Cloneable {
             for (int i = c; i < x.length(); i++) set(i, x.get(i));
         }
     }
-    
+
     public void xor(final Bitfield x) {
         final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) set(i, this.get(i) != x.get(i));
@@ -142,13 +145,13 @@ public class Bitfield implements Cloneable {
             for (int i = c; i < x.length(); i++) set(i, x.get(i));
         }
     }
-    
+
     public boolean anyOf(final Bitfield x) {
         final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) if ((x.get(i)) && (this.get(i))) return true;
         return false;
     }
-    
+
     public boolean allOf(final Bitfield x) {
         final int c = Math.min(x.length(), this.length());
         for (int i = 0; i < c; i++) if ((x.get(i)) && (!(this.get(i)))) return false;
@@ -157,7 +160,7 @@ public class Bitfield implements Cloneable {
         }
         return true;
     }
-    
+
     public static void main(final String[] args) {
         Bitfield test = new Bitfield(4);
         final int l = test.length();
@@ -166,19 +169,19 @@ public class Bitfield implements Cloneable {
         for (int i = 0; i < l/2; i++) {
             System.out.println(test.exportB64());
             test.set(i, true);
-            System.out.println(i + ":" + test.toString()); 
+            System.out.println(i + ":" + test.toString());
         }
         for (int i = l/2; i < l; i++) {
             System.out.println(test.exportB64());
             test = new Bitfield(4, test.exportB64());
             test.set(i, true);
-            System.out.println(i + ":" + test.toString()); 
+            System.out.println(i + ":" + test.toString());
         }
         System.out.println(test.exportB64());
         for (int i = l - 1; i >= 0; i--) {
             test.set(i, false);
-            System.out.println(i + ":" + test.toString()); 
+            System.out.println(i + ":" + test.toString());
         }
-        System.out.println("after:     " + test.toString());       
+        System.out.println("after:     " + test.toString());
     }
 }
