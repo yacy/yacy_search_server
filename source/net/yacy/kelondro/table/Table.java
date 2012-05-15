@@ -690,7 +690,11 @@ public class Table implements Index, Iterable<Row.Entry> {
                     }
                     this.file.put(i, p, 0);
                     byte[] pk = lr.getPrimaryKeyBytes();
-                    if (pk == null) continue;
+                    if (pk == null) {
+                        // Table file might be corrupt
+                        Log.logWarning("TABLE", "Possible corruption found in table " + this.filename() + " detected. i=" + i + ",p=" + p);
+                        continue;
+                    }
                     this.index.put(pk, i);
                     break;
                 }

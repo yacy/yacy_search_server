@@ -34,7 +34,6 @@ import javax.imageio.ImageIO;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.BannerData;
-import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.visualization.RasterPlotter;
