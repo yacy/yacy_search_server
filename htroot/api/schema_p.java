@@ -22,10 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.Iterator;
-
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.SolrField;
 import de.anomic.server.serverObjects;
@@ -39,30 +36,23 @@ public class schema_p {
         final Switchboard sb = (Switchboard) env;
 
         // write scheme
-        final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.allIterator();
-
         int c = 0;
-        ConfigurationSet.Entry entry;
-        SolrField field = null;
-        while (i.hasNext()) {
-            entry = i.next();
-            if (!entry.enabled()) continue; //scheme.contains(entry.key())
-            try {
-                field = SolrField.valueOf(entry.key());
-            } catch (IllegalArgumentException e) {
-                continue;
+        for (SolrField field : SolrField.values()) {
+            if (sb.solrScheme.contains(field.name())) {
+                prop.put("fields_" + c + "_solrname", field.getSolrFieldName());
+                prop.put("fields_" + c + "_type", field.getType().printName());
+                prop.put("fields_" + c + "_comment", field.getComment());
+                prop.put("fields_" + c + "_indexedChecked", field.isIndexed() ? 1 : 0);
+                prop.put("fields_" + c + "_storedChecked", field.isStored() ? 1 : 0);
+                prop.put("fields_" + c + "_multiValuedChecked", field.isMultiValued() ? 1 : 0);
+                prop.put("fields_" + c + "_omitNormsChecked", field.isOmitNorms() ? 1 : 0);
+                c++;
             }
-            prop.put("fields_" + c + "_name", field.name());
-            prop.put("fields_" + c + "_type", field.getType().printName());
-            prop.put("fields_" + c + "_comment", field.getComment());
-            prop.put("fields_" + c + "_indexedChecked", field.isIndexed() ? 1 : 0);
-            prop.put("fields_" + c + "_storedChecked", field.isStored() ? 1 : 0);
-            prop.put("fields_" + c + "_multiValuedChecked", field.isMultiValued() ? 1 : 0);
-            prop.put("fields_" + c + "_omitNormsChecked", field.isOmitNorms() ? 1 : 0);
-            c++;
         }
         prop.put("fields", c);
-
+        
+        prop.put("solruniquekey",SolrField.id.getSolrFieldName());
+        prop.put("solrdefaultsearchfield",SolrField.text_t.getSolrFieldName());
         // return rewrite properties
         return prop;
     }

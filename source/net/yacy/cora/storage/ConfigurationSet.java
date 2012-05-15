@@ -30,11 +30,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.AbstractSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Set;
-
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.cora.storage.ConfigurationSet.Entry;
+import net.yacy.search.index.SolrField;
 /**
  * this class reads configuration attributes as a list of keywords from a list
  * the list may contain lines with one keyword, comment lines, empty lines and out-commented keyword lines
@@ -44,61 +45,85 @@ import java.util.Set;
  * - all lines beginning with '##' are comments
  * - all non-empty lines not beginning with '#' are keyword lines
  * - all lines beginning with '#' and where the second character is not '#' are commented-out keyword lines
- *
+ * - all text after a '#' not at beginn of line is treated as comment (like 'key = value  # comment' )
+ * - a line may contain a key only or a key=value pair
  * @author Michael Christen
  */
-public class ConfigurationSet extends AbstractSet<String> implements Set<String> {
-
+public class ConfigurationSet extends TreeMap<String,Entry> {
+    private static final long serialVersionUID = 1L;
     private final File file;
-    private String[] lines;
 
     public ConfigurationSet() {
         this.file = null;
-        this.lines = new String[0];
     }
 
     public ConfigurationSet(final File file) {
         this.file = file;
         try {
             final BufferedReader br = new BufferedReader(new FileReader(this.file));
-            final LinkedList<String> sl = new LinkedList<String>();
             String s;
-            while ((s = br.readLine()) != null) sl.add(s.trim());
-            this.lines = new String[sl.size()];
-            int c = 0;
-            for (final String s0: sl) this.lines[c++] = s0;
-        } catch (final IOException e) {
-            this.lines = new String[0];
-        }
+            boolean enabled;
+            String comment, key, value;
+            int i;
+            comment = null;
+            while ((s = br.readLine()) != null) {
+
+                if (s.startsWith("##") || s.isEmpty()){
+                    // is comment line - do nothing
+                    if (s.startsWith("##")) comment = s.substring(2);
+                    continue;
+                } else {
+                    if (s.startsWith("#")) {
+                        enabled = false ;
+                        s = s.substring (1).trim();
+                    } else {
+                        enabled = true;
+                    }
+                    if (s.contains("#")) {
+                        // second # = text afterwards is a comment
+                        i = s.indexOf("#");
+                        comment = s.substring(i+1);
+                        s = s.substring(0,i).trim();
+                    } else {
+                       // comment = null;
+                    }
+                    if (s.contains("=")) {
+                        i = s.indexOf("=");
+                        key = s.substring(0,i).trim();
+                        value = s.substring(i+1).trim();
+                        if (value.isEmpty()) value = null;
+
+                    } else {
+                        key = s.trim();
+                        value = null;
+                    }
+                    if (!key.isEmpty()) {
+                        Entry entry = new Entry(key, value, enabled);
+                        if (comment != null) {
+                            entry.setComment(comment);
+                            comment = null;
+                        }
+                        this.put(key, entry);                        
+                    }
+                }
+            }
+        } catch (final IOException e) {}
     }
 
     /**
      * override the abstract implementation because that is not stable in concurrent requests
      */
-    @Override
-    public boolean contains(Object o) {
-        if (o == null || !(o instanceof String)) return false;
-        String s = (String) o;
-        synchronized (this) {
-            for (String line : this.lines) {
-                if (line != null && line.equals(s)) return true;
-            }
-        }
-        return false;
+    public boolean contains (String key) {
+        if (key == null) return false;
+        Entry e = this.get(key);
+        return e == null ? false : e.enabled();
     }
-
     public boolean containsDisabled(final String o) {
         if (o == null) return false;
-        final Iterator<Entry> i = new EntryIterator();
-        Entry e;
-        while (i.hasNext()) {
-            e = i.next();
-            if (!e.enabled() && o.equals(e.key)) return true;
-        }
-        return false;
+        Entry e = this.get(o);
+        return e == null ? false : !e.enabled();
     }
 
-    @Override
     public boolean add(final String key) {
         return add(key, null);
     }
@@ -108,244 +133,205 @@ public class ConfigurationSet extends AbstractSet<String> implements Set<String>
     }
 
     public boolean add(final String key, final String comment, final boolean enabled) {
-        if (contains(key)) {
-            try {
-                if (!enabled) disable(key);
-            } catch (final IOException e) {
+        boolean modified = false;
+        Entry entry = get(key);
+        if (entry == null) {
+           entry = new Entry (key,enabled);
+           if (comment != null) entry.setComment(comment);
+           this.put (key,entry);
+           modified = true;
+        } else {
+            if (entry.enabled() != enabled) {
+                entry.setEnable(enabled);
+                modified = true;
             }
-            return true;
-        }
-        if (containsDisabled(key)) {
-            try {
-                if (enabled) enable(key);
-            } catch (final IOException e) {
+            if ( (comment != null) && ( !comment.equals(entry.getComment()) )) {
+                entry.setComment(comment);
+                modified = true;
             }
-            return false;
         }
-        // extend the lines
-        final String[] l = new String[this.lines.length + (comment == null ? 2 : 3)];
-        System.arraycopy(this.lines, 0, l, 0, this.lines.length);
-        l[this.lines.length] = "";
-        if (comment != null) l[this.lines.length + 1] = "## " + comment;
-        l[this.lines.length + (comment == null ? 1 : 2)] = enabled ? key : "#" + key;
-        this.lines = l;
+
         try {
-            commit();
+            if (modified) {
+                commit();
+                try {
+                    SolrField f = SolrField.valueOf(key);
+                    f.setSolrFieldName(entry.getValue());
+                } catch (IllegalArgumentException e) {}
+            }
+
         } catch (final IOException e) {
         }
-        return false;
+        return modified;
     }
 
     public void fill(final ConfigurationSet other, final boolean defaultActivated) {
-        final Iterator<Entry> i = other.allIterator();
-        Entry e;
+        final Iterator<Entry> i = other.entryIterator();
+        Entry e, enew = null;
         while (i.hasNext()) {
             e = i.next();
             if (contains(e.key) || containsDisabled(e.key)) continue;
-            this.add(e.key(), other.commentHeadline(e.key()), defaultActivated && e.enabled());
+            // add as new entry
+            enew = new Entry(e.key(),e.getValue(),defaultActivated && e.enabled());
+            enew.setComment(e.getComment());
+            this.put (e.key(),enew);
         }
-    }
-
-    @Override
-    public boolean isEmpty() {
-        // a shortcut to a fast 'true' in case that we initialized the class without a configuration file
-        return this.lines == null || this.lines.length == 0 || super.isEmpty();
+        if (enew != null) {
+            try {
+                commit();
+            } catch (IOException ex) {
+                Logger.getLogger(ConfigurationSet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     /**
      * save the configuration back to the file
      * @throws IOException
      */
-    private void commit() throws IOException {
+    public void commit() throws IOException {
         if (this.file == null) return;
+        // create a temporary bak file, use it as template to preserve user comments
+        File bakfile = new File (file.getAbsolutePath() + ".bak");
+        FileUtils.copy (this.file, bakfile);
+
+        TreeMap tclone = (TreeMap) this.clone(); // clone to write appended entries
+
         final BufferedWriter writer = new BufferedWriter(new FileWriter(this.file));
-        for (final String s: this.lines) {
-            writer.write(s);
-            writer.write("\n");
+        try {
+            final BufferedReader reader = new BufferedReader(new FileReader(bakfile));
+            String s, sorig;
+            String key;
+            int i;
+            while ((sorig = reader.readLine()) != null) {
+
+                if (sorig.startsWith("##") || sorig.isEmpty()){
+                    // is comment line - write as is
+                    writer.write(sorig + "\n");
+                    continue;
+                } else {
+                    if (sorig.startsWith("#")) {
+                        s = sorig.substring (1).trim();
+                    } else {
+                        s = sorig;
+                    }
+                    if (s.contains("#")) {
+                        // second # = is a line comment
+                        i = s.indexOf("#");
+                        s = s.substring(0,i).trim();
+                    } 
+                    if (s.contains("=")) {
+                        i = s.indexOf("=");
+                        key = s.substring(0,i).trim();
+                    } else {
+                        key = s.trim();
+                    }
+                    if (!key.isEmpty()) {
+                        Entry e = this.get(key);
+                        if (e != null) {
+                            writer.write (e.toString());
+                            tclone.remove(key); // remove written entries from clone
+                        } else {writer.write(sorig); }
+                        writer.write("\n");                        
+                    } else {
+                        writer.write(sorig+"\n");
+                    }
+                }
+            }
+            reader.close();
+            bakfile.delete();
+        } catch (final IOException e) {}
+        
+        // write remainig entries (not already written)
+        Iterator ie = tclone.entrySet().iterator();
+        while (ie.hasNext()) {
+            Object e = ie.next();
+            writer.write (e.toString() + "\n");
         }
         writer.close();
     }
-
-    @Override
+ /*
     public Iterator<String> iterator() {
-        return new LineIterator(true);
+        return  this.keySet().iterator();
     }
-
-    public Iterator<String> disabledIterator() {
-        return new LineIterator(false);
-    }
-
-    public Iterator<Entry> allIterator() {
-        return new EntryIterator();
-    }
-
-    private boolean isCommentLine(final int line) {
-        return this.lines[line].startsWith("##");
-    }
-
-    private boolean isKeyLine(final int line) {
-        return this.lines[line].length() > 0 && this.lines[line].charAt(0) != '#';
-    }
-
-    private boolean isDisabledLine(final int line) {
-        return this.lines[line].length() > 1 && this.lines[line].charAt(0) == '#' && this.lines[line].charAt(1) != '#';
-    }
-
-    public void enable(final String key) throws IOException {
-        for (int i = 0; i < this.lines.length; i++) {
-            if (isDisabledLine(i) && this.lines[i].substring(1).trim().equals(key)) {
-                this.lines[i] = key;
-                commit();
-                return;
-            }
-        }
-    }
-
-    public void disable(final String key) throws IOException {
-        for (int i = 0; i < this.lines.length; i++) {
-            if (isKeyLine(i) && this.lines[i].equals(key)) {
-                this.lines[i] = "#" + key;
-                commit();
-                return;
-            }
-        }
-    }
-
-    public String commentHeadline(final String key) {
-        for (int i = 1; i < this.lines.length; i++) {
-            if (this.lines[i].equals(key) ||
-                (isDisabledLine(i) && this.lines[i].substring(1).trim().equals(key))
-               ) {
-                return isCommentLine(i - 1) ? this.lines[i - 1].substring(2).trim() : "";
-            }
-        }
-        return "";
-    }
-
-    public class LineIterator implements Iterator<String> {
-
-        EntryIterator i;
-        Entry nextEntry;
-        private final boolean enabled;
-
-        public LineIterator(final boolean enabled) {
-            this.enabled = enabled;
-            this.i = new EntryIterator();
-            findNextValid();
-        }
-
-        public void findNextValid() {
-            while (this.i.hasNext()) {
-                this.nextEntry = this.i.next();
-                if (this.nextEntry.enabled() == this.enabled) return;
-            }
-            this.nextEntry = null;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.nextEntry != null;
-        }
-
-        @Override
-        public String next() {
-            if (this.nextEntry == null) return null;
-            final String s = this.nextEntry.key();
-            findNextValid();
-            return s;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
-    }
-
-    public class EntryIterator implements Iterator<Entry> {
-
-        private int line;
-
-        public EntryIterator() {
-            this.line = -1;
-            findNextKeywordLine();
-        }
-
-        /**
-         * increase line counter until it points to the next keyword line
-         * @return true if a next line was found, false if EOL
-         */
-        private boolean findNextKeywordLine() {
-            this.line++;
-            if (this.line >= ConfigurationSet.this.lines.length) return false;
-            while (ConfigurationSet.this.lines[this.line].length() == 0 ||
-                   ConfigurationSet.this.lines[this.line].startsWith("##")) {
-                 this.line++;
-                 if (this.line >= ConfigurationSet.this.lines.length) return false;
-             }
-            return true;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.line < ConfigurationSet.this.lines.length;
-        }
-
-        @Override
-        public Entry next() {
-            final String s = ConfigurationSet.this.lines[this.line];
-            findNextKeywordLine();
-            if (s.charAt(0) == '#') return new Entry(s.substring(1).trim(), false);
-            return new Entry(s, true);
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
+*/
+    public Iterator<Entry> entryIterator() {
+        return this.values().iterator();
     }
 
     public class Entry {
         private final String key;
-        private final boolean enabled;
+        private String value;
+        private boolean enabled;
+        private String comment;
+
         public Entry(final String key, final boolean enabled) {
             this.enabled = enabled;
+            // split in key, value if line contains a "=" (equal sign)   e.g.   myattribute = 123
+            // for backward compatibility here the key parameter is checked to contain a "="
+            if (key.contains("=")) {
+                int i = key.indexOf("=");
+                this.key = key.substring(0,i).trim();
+                this.value = key.substring(i+1).trim();
+            } else {
+                this.key = key;
+                this.value = null;
+            }
+        }
+        public Entry (final String key, String value, final boolean enabled) {
+            this.enabled = enabled;
             this.key = key;
+            this.value = value;
         }
         public String key() {
             return this.key;
         }
+        public void setValue(String theValue) {
+            //empty string not wanted
+            if ((theValue != null) && theValue.isEmpty()) {
+                this.value = null;
+            } else {
+                this.value = theValue;
+            }
+        }
+        public String getValue() {
+            return this.value;
+        }
+        public void setComment(String comment) {
+            this.comment = comment;
+        }
+        public String getComment() {
+            return this.comment;
+        }
+        public void setEnable(boolean value){
+            this.enabled = value;
+        }
         public boolean enabled() {
             return this.enabled;
         }
-    }
-
-    @Override
-    public int size() {
-        int c = 0;
-        for (final String s: this.lines) {
-            if (s.length() > 0 && s.charAt(0) != '#') c++;
+        @Override
+        public String toString(){
+            // output string to write to config file
+            return (this.enabled ? "" : "#") + (this.value != null ?  this.key + " = " + this.value : this.key ) + (this.comment != null ? "  #" + this.comment : "");
         }
-        return c;
     }
 
     public static void main(final String[] args) {
         if (args.length == 0) return;
-        final File f = new File(args[0]);
+        final File f = new File (args[0]);
         final ConfigurationSet cs = new ConfigurationSet(f);
-        Iterator<String> i = cs.iterator();
-        String k;
+        Iterator<Entry> i = cs.entryIterator();
+        Entry k;
         System.out.println("\nall activated attributes:");
         while (i.hasNext()) {
             k = i.next();
-            System.out.println(k + " - " + cs.commentHeadline(k));
+            if (k.enabled()) System.out.println(k.toString());
         }
-        i = cs.disabledIterator();
+        i = cs.entryIterator();
         System.out.println("\nall deactivated attributes:");
         while (i.hasNext()) {
             k = i.next();
-            System.out.println(k + " - " + cs.commentHeadline(k));
+            if (!k.enabled()) System.out.println(k.toString() );
         }
     }
 

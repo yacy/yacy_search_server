@@ -29,13 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -65,26 +59,24 @@ public class SolrConfiguration extends ConfigurationSet {
     /**
      * initialize the scheme with a given configuration file
      * the configuration file simply contains a list of lines with keywords
+     * or keyword = value lines (while value is a custom Solr field name
      * @param configurationFile
      */
     public SolrConfiguration(final File configurationFile) {
         super(configurationFile);
         // check consistency: compare with YaCyField enum
-        for (String name: this) {
+        if (this.isEmpty()) return;
+        Iterator<Entry> it = this.entryIterator();
+        for (ConfigurationSet.Entry etr = it.next(); it.hasNext(); etr = it.next()) {
             try {
-                SolrField.valueOf(name);
+                SolrField f = SolrField.valueOf(etr.key());
+                f.setSolrFieldName(etr.getValue());
             } catch (IllegalArgumentException e) {
-                Log.logWarning("SolrScheme", "solr scheme file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + name + "'");
+                Log.logWarning("SolrScheme", "solr scheme file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
+                it.remove();
             }
         }
-        /*
-        for (YaCyField field: YaCyField.values()) {
-            if (!this.contains(field.name())) {
-                Log.logWarning("SolrScheme", "solr scheme file " + configurationFile.getAbsolutePath() + " omits known attribute '" + field.name() + "'");
             }
-        }
-        */
-    }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value) {
         if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
@@ -114,8 +106,30 @@ public class SolrConfiguration extends ConfigurationSet {
         if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value, boost);
     }
 
+
+    /**
+     * save configuration to file and update enum SolrFields
+     * @throws IOException
+     */
+    @Override
+    public void commit() throws IOException {
+        try {
+            super.commit();
+            // make sure the enum SolrField.SolrFieldName is current
+            Iterator<Entry> it = this.entryIterator();
+            for (ConfigurationSet.Entry etr = it.next(); it.hasNext(); etr = it.next()) {
+                try {
+                    SolrField f = SolrField.valueOf(etr.key());
+                    f.setSolrFieldName(etr.getValue());
+                } catch (IllegalArgumentException e) {
+                    continue;
+                }
+            }
+        } catch (final IOException e) {}
+    }
+
     public SolrDoc yacy2solr(final String id, final ResponseHeader header, final Document yacydoc) {
-        // we user the SolrCell design as index scheme
+        // we use the SolrCell design as index scheme
         final SolrDoc solrdoc = new SolrDoc();
         final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
         addSolr(solrdoc, SolrField.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
@@ -453,39 +467,39 @@ public class SolrConfiguration extends ConfigurationSet {
     }
 
     public String solrGetID(final SolrDocument solr) {
-        return (String) solr.getFieldValue("id");
+        return (String) solr.getFieldValue(SolrField.id.getSolrFieldName());
     }
 
     public DigestURI solrGetURL(final SolrDocument solr) {
         try {
-            return new DigestURI((String) solr.getFieldValue("sku"));
+            return new DigestURI((String) solr.getFieldValue(SolrField.sku.getSolrFieldName()));
         } catch (final MalformedURLException e) {
             return null;
         }
     }
 
     public String solrGetTitle(final SolrDocument solr) {
-        return (String) solr.getFieldValue("title");
+        return (String) solr.getFieldValue(SolrField.title.getSolrFieldName());
     }
 
     public String solrGetText(final SolrDocument solr) {
-        return (String) solr.getFieldValue("text_t");
+        return (String) solr.getFieldValue(SolrField.text_t.getSolrFieldName());
     }
 
     public String solrGetAuthor(final SolrDocument solr) {
-        return (String) solr.getFieldValue("author");
+        return (String) solr.getFieldValue(SolrField.author.getSolrFieldName());
     }
 
     public String solrGetDescription(final SolrDocument solr) {
-        return (String) solr.getFieldValue("description");
+        return (String) solr.getFieldValue(SolrField.description.getSolrFieldName());
     }
 
     public Date solrGetDate(final SolrDocument solr) {
-        return (Date) solr.getFieldValue("last_modified");
+        return (Date) solr.getFieldValue(SolrField.last_modified.getSolrFieldName());
     }
 
     public Collection<String> solrGetKeywords(final SolrDocument solr) {
-        final Collection<Object> c = solr.getFieldValues("keywords");
+        final Collection<Object> c = solr.getFieldValues(SolrField.keywords.getSolrFieldName());
         final ArrayList<String> a = new ArrayList<String>();
         for (final Object s: c) {
             a.add((String) s);

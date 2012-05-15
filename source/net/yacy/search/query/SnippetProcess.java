@@ -62,6 +62,7 @@ import org.apache.solr.common.SolrDocumentList;
 
 import de.anomic.crawler.Cache;
 import de.anomic.data.WorkTables;
+import net.yacy.search.index.SolrField;
 
 public class SnippetProcess {
 
@@ -497,7 +498,7 @@ public class SnippetProcess {
                     String solrContent = null;
                     if (this.solr != null) {
                         SolrDocument sd = null;
-                        final SolrDocumentList sdl = this.solr.get("id:" + ASCII.String(page.hash()), 0, 1);
+                        final SolrDocumentList sdl = this.solr.get(SolrField.id.getSolrFieldName()+ ":" + ASCII.String(page.hash()), 0, 1);
                         if (sdl.size() > 0) {
                             sd = sdl.get(0);
                         }

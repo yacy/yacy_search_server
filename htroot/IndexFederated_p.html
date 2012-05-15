@@ -65,24 +65,26 @@
       </dl>
       </div>
       <div>
-      <h3>Index Scheme</h3>
+          <h3>Index Scheme</h3><p>If you use a custom Solr schema you may enter a different field name in the column 'cutom Solr Field Name' of the YacY default attribute name</p>
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">
         <td>Active</td>
         <td>Attribute</td>
+        <td>custom Solr Field Name</td>
         <td>Comment</td>
       </tr>
       #{scheme}#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
         <td align="center"><input type="checkbox" name="scheme_#[key]#" value="checked" #(checked)#::checked="checked"#(/checked)#/></td>
         <td align="left">#[key]#</td>
+        <td align="left"><input type="text" name="scheme_solrfieldname_#[key]#" value="#[solrfieldname]#"/></td>
         <td align="left">#[comment]#</td>
       </tr>
       #{/scheme}#
       </table>
       </div>
     </fieldset>
-    <input type="submit" name="set" value="Set" />
+      <input type="submit" name="set" value="Set" />
     </form>
     
     #%env/templates/footer.template%#

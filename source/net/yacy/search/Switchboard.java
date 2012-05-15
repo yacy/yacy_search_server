@@ -645,8 +645,8 @@ public final class Switchboard extends serverSwitch
         this.solrScheme = new SolrConfiguration(solrWorkProfile);
 
         // update the working scheme with the backup scheme. This is necessary to include new features.
-        // new features are always activated by default
-        this.solrScheme.fill(backupScheme, false);
+        // new features are always activated by default (if activated in input-backupScheme)
+        this.solrScheme.fill(backupScheme, true);
 
         // set up the solr interface
         final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");

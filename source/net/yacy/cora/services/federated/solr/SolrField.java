@@ -31,8 +31,9 @@ public interface SolrField {
      * this shall be implemented as enum, thus shall have the name() method
      * @return the name of the enum constant
      */
-    public String name();
-
+    public String name(); // default field name (according to SolCell default scheme) <= enum.name()
+    
+    public String getSolrFieldName(); // return the default or custom solr field name to use for solr requests
 
     public SolrType getType();
 

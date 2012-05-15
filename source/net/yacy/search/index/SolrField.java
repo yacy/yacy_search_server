@@ -28,7 +28,7 @@ import net.yacy.cora.services.federated.solr.SolrType;
 
 public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField {
 
-    id(SolrType.string, true, true, "primary key of document, the URL hash"),
+    id(SolrType.string, true, true, "primary key of document, the URL hash **mandatory field**"),
     sku(SolrType.text_en_splitting_tight, true, true, false, true, "url of document"),
     ip_s(SolrType.string, true, true, "ip of host of url (after DNS lookup)"),
     host_s(SolrType.string, true, true, "host of the url"),
@@ -121,10 +121,11 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     ext_title_val(SolrType.integer, true, true, true, "number of matching title expressions"),
     failreason_t(SolrType.text_general, true, true, "fail reason if a page was not loaded. if the page was loaded then this field is empty");
 
-    final SolrType type;
-    final boolean indexed, stored;
-    boolean multiValued, omitNorms;
-    final String comment;
+    private String solrFieldName = null; // solr field name in custom solr schema, defaults to solcell schema field name (= same as this.name() )
+    private final SolrType type;
+    private final boolean indexed, stored;
+    private boolean multiValued, omitNorms;
+    private String comment;
 
     private SolrField(final SolrType type, final boolean indexed, final boolean stored, final String comment) {
         this.type = type;
@@ -143,6 +144,27 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     private SolrField(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final String comment) {
         this(type, indexed, stored, multiValued, comment);
         this.omitNorms = omitNorms;
+    }
+
+    /**
+     * Returns the YaCy default or (if available) custom field name for Solr
+     * @return SolrFieldname String
+     */
+    public final String getSolrFieldName() {
+        return (this.solrFieldName == null ? this.name() : this.solrFieldName);
+    }
+
+    /**
+     * Set a custom Solr field name (and converts it to lower case)
+     * @param theValue = the field name
+     */
+    public final void setSolrFieldName(String theValue) {
+        // make sure no empty string is assigned
+        if ( (theValue != null) && (!theValue.isEmpty()) ) {
+            this.solrFieldName = theValue.toLowerCase();
+        } else {
+            this.solrFieldName = null;
+        }
     }
 
     public final SolrType getType() {

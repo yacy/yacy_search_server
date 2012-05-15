@@ -24,7 +24,6 @@
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
@@ -39,10 +38,9 @@ import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
-import net.yacy.search.index.SolrConfiguration;
-import net.yacy.search.index.SolrField;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import net.yacy.search.index.SolrField;
 
 public class IndexFederated_p {
 
@@ -87,8 +85,6 @@ public class IndexFederated_p {
                 sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
             }
 
-            final SolrConfiguration scheme = new SolrConfiguration(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
-
             if (solrIsOnAfterwards) {
                 // switch on
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
@@ -101,23 +97,32 @@ public class IndexFederated_p {
             }
 
             // read index scheme table flags
-            final Iterator<ConfigurationSet.Entry> i = scheme.allIterator();
+            final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.entryIterator();
             ConfigurationSet.Entry entry;
+            boolean modified = false; // flag to remember changes
             while (i.hasNext()) {
                 entry = i.next();
                 final String v = post.get("scheme_" + entry.key());
-                final boolean c = v != null && v.equals("checked");
-                try {
-                    if (entry.enabled()) {
-                        if (!c) {
-                            scheme.disable(entry.key());
-                        }
-                    } else {
-                        if (c) {
-                            scheme.enable(entry.key());
-                        }
+                final String sfn = post.get("scheme_solrfieldname_" + entry.key());
+                if (sfn != null ) {
+                    // set custom solr field name
+                    if (!sfn.equals(entry.getValue())) {
+                        entry.setValue(sfn);
+                        modified = true;
                     }
-                } catch (final IOException e) {}
+                }
+                // set enable flag
+                final boolean c = v != null && v.equals("checked");
+                if (entry.enabled() != c) {
+                    entry.setEnable(c);
+                    modified = true;
+                }
+            }
+            if (modified) { // save settings to config file if modified
+                try {
+                    sb.solrScheme.commit();
+                    modified = false;
+                } catch (IOException ex) {}
             }
         }
 
@@ -140,26 +145,29 @@ public class IndexFederated_p {
 
         // write scheme
         final String schemename = sb.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
-        final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.allIterator();
 
         int c = 0;
         boolean dark = false;
+        // use enum SolrField to keep defined order
+        for(SolrField field : SolrField.values()) {
+            prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
+            prop.put("scheme_" + c + "_checked", sb.solrScheme.contains(field.name()) ? 1 : 0);
+            prop.putHTML("scheme_" + c + "_key", field.name());
+            prop.putHTML("scheme_" + c + "_solrfieldname",field.name().equalsIgnoreCase(field.getSolrFieldName()) ? "" : field.getSolrFieldName());
+            if (field.getComment() != null) prop.putHTML("scheme_" + c + "_comment",field.getComment());
+            c++;
+        }
+  /*    final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.entryIterator();
         ConfigurationSet.Entry entry;
-        SolrField field;
         while (i.hasNext()) {
             entry = i.next();
-            try {
-                field = SolrField.valueOf(entry.key());
-            } catch (IllegalArgumentException e) {
-                continue;
-            }
-            if (field == null) continue;
             prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
             prop.put("scheme_" + c + "_checked", entry.enabled() ? 1 : 0);
             prop.putHTML("scheme_" + c + "_key", entry.key());
-            prop.putHTML("scheme_" + c + "_comment",field.getComment() /*scheme.commentHeadline(entry.key())*/);
+            prop.putHTML("scheme_" + c + "_solrfieldname",entry.getValue() == null ? "" : entry.getValue());
+            if (entry.getComment() != null) prop.putHTML("scheme_" + c + "_comment",entry.getComment());
             c++;
-        }
+        }*/
         prop.put("scheme", c);
 
         // fill attribute fields

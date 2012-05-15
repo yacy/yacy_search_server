@@ -53,6 +53,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import net.yacy.search.index.SolrField;
 
 
 public class SolrSingleConnector implements SolrConnector {
@@ -108,7 +109,7 @@ public class SolrSingleConnector implements SolrConnector {
         }
         this.server.setAllowCompression(true);
         this.server.setConnectionTimeout(60000);
-        this.server.setMaxRetries(10);
+        this.server.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
         this.server.setSoTimeout(60000);
     }
 
@@ -169,7 +170,7 @@ public class SolrSingleConnector implements SolrConnector {
     @Override
     public boolean exists(final String id) throws IOException {
         try {
-            final SolrDocumentList list = get("id:" + id, 0, 1);
+            final SolrDocumentList list = get(SolrField.id.getSolrFieldName() + ":" + id, 0, 1);
             return list.getNumFound() > 0;
         } catch (final Throwable e) {
             Log.logException(e);
@@ -195,7 +196,7 @@ public class SolrSingleConnector implements SolrConnector {
     @Override
     public void add(final SolrDoc solrdoc) throws IOException, SolrException {
         try {
-            this.server.add(solrdoc);
+            this.server.add(solrdoc,180000); // commitWithIn 180s
             //this.server.commit();
         } catch (SolrServerException e) {
             Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdoc.toString());
@@ -208,7 +209,7 @@ public class SolrSingleConnector implements SolrConnector {
         ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
         for (SolrDoc d: solrdocs) l.add(d);
         try {
-            this.server.add(l);
+            this.server.add(l,180000); // commitWithIn 120s
             //this.server.commit();
         } catch (SolrServerException e) {
             Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdocs.toString());
@@ -263,12 +264,12 @@ public class SolrSingleConnector implements SolrConnector {
     public static void main(final String args[]) {
         SolrSingleConnector solr;
         try {
-            //SolrScheme scheme = new SolrScheme();
             solr = new SolrSingleConnector("http://127.0.0.1:8983/solr");
             solr.clear();
-            final File exampleDir = new File("/Data/workspace2/yacy/test/parsertest/");
+            final File exampleDir = new File("test/parsertest/");
             long t, t0, a = 0;
             int c = 0;
+            System.out.println("push files in " + exampleDir.getAbsolutePath() + " to Solr");
             for (final String s: exampleDir.list()) {
                 if (s.startsWith(".")) continue;
                 t = System.currentTimeMillis();

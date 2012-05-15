@@ -51,13 +51,13 @@
     <fields>
 #{fields}#
         <!-- #[comment]# -->
-        <field name="#[name]#" type="#[type]#"#(indexedChecked)#:: indexed="true"#(/indexedChecked)##(storedChecked)#:: stored="true"#(/storedChecked)##(multiValuedChecked)#:: multiValued="true"#(/multiValuedChecked)##(omitNormsChecked)#:: omitNorms="true"#(/omitNormsChecked)#/>
+        <field name="#[solrname]#" type="#[type]#"#(indexedChecked)#:: indexed="true"#(/indexedChecked)##(storedChecked)#:: stored="true"#(/storedChecked)##(multiValuedChecked)#:: multiValued="true"#(/multiValuedChecked)##(omitNormsChecked)#:: omitNorms="true"#(/omitNormsChecked)#/>
 
 #{/fields}#
     </fields>
     
-    <uniqueKey>id</uniqueKey>
-    <defaultSearchField>sku</defaultSearchField>
+    <uniqueKey>#[solruniquekey]#</uniqueKey>
+    <defaultSearchField>#[solrdefaultsearchfield]#</defaultSearchField>
     <solrQueryParser defaultOperator="AND"/>
 </schema>
 

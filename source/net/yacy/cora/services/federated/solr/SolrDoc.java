@@ -41,35 +41,35 @@ public class SolrDoc extends SolrInputDocument {
     }
 
     public final void addSolr(final SolrField key, final String value) {
-       this.setField(key.name(), value);
+       this.setField(key.getSolrFieldName(), value);
     }
 
     public final void addSolr(final SolrField key, final Date value) {
-        this.setField(key.name(), value);
+        this.setField(key.getSolrFieldName(), value);
     }
 
     public final void addSolr(final SolrField key, final int value) {
-        this.setField(key.name(), value);
+        this.setField(key.getSolrFieldName(), value);
     }
 
     public final void addSolr(final SolrField key, final String[] value) {
-        this.setField(key.name(), value);
+        this.setField(key.getSolrFieldName(), value);
     }
 
     public final void addSolr(final SolrField key, final List<String> value) {
-        this.setField(key.name(), value.toArray(new String[value.size()]));
+        this.setField(key.getSolrFieldName(), value.toArray(new String[value.size()]));
     }
 
     public final void addSolr(final SolrField key, final float value) {
-        this.setField(key.name(), value);
+        this.setField(key.getSolrFieldName(), value);
     }
 
     public final void addSolr(final SolrField key, final boolean value) {
-        this.setField(key.name(), value);
+        this.setField(key.getSolrFieldName(), value);
     }
 
     public final void addSolr(final SolrField key, final String value, final float boost) {
-        this.setField(key.name(), value, boost);
+        this.setField(key.getSolrFieldName(), value, boost);
     }
 
 }
