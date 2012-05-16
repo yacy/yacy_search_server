@@ -505,16 +505,21 @@ public final class SearchEvent
             this.urlhash = urlhash;
             this.heuristicName = heuristicName;
             this.redundant = redundant;
-        }/*
-         public int compareTo(HeuristicResult o) {
+        }
+
+        public int compareTo(HeuristicResult o) {
             return Base64Order.enhancedCoder.compare(this.urlhash, o.urlhash);
          }
-         public int hashCode() {
+
+        @Override
+        public int hashCode() {
             return (int) Base64Order.enhancedCoder.cardinal(this.urlhash);
-         }
-         public boolean equals(Object o) {
+        }
+
+        @Override
+        public boolean equals(Object o) {
             return Base64Order.enhancedCoder.equal(this.urlhash, ((HeuristicResult) o).urlhash);
-         }*/
+        }
     }
 
     public class SecondarySearchSuperviser extends Thread

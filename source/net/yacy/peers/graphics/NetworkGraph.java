@@ -324,12 +324,12 @@ public class NetworkGraph {
 
     private static class drawNetworkPicturePeerJob {
 
-        private RasterPlotter img;
-        private int centerX, centerY, innerradius, outerradius, coronaangle;
-        private Seed seed;
-        private String colorDot, colorLine, colorText;
-        private double cyc;
-        public drawNetworkPicturePeerJob() {} // used to produce a poison pill
+        private final RasterPlotter img;
+        private final int centerX, centerY, innerradius, outerradius, coronaangle;
+        private final Seed seed;
+        private final String colorDot, colorLine, colorText;
+        private final double cyc;
+        //public drawNetworkPicturePeerJob() {} // used to produce a poison pill
         public drawNetworkPicturePeerJob(
                         final RasterPlotter img, final int centerX, final int centerY,
                         final int innerradius, final int outerradius,

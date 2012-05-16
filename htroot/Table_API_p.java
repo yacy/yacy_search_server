@@ -36,7 +36,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.QueryParams;
-
 import de.anomic.data.WorkTables;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -73,7 +72,6 @@ public class Table_API_p {
             typefilter = Pattern.compile(post.get("filter", ".*"));
         }
 
-        String pk;
         boolean scheduleevent = false; // flag if schedule info of row changes
         String current_schedule_pk = ""; // pk of changed schedule data row
         if (post != null && post.containsKey("scheduleevent")) {

@@ -1,4 +1,4 @@
-// loaderThreads.java 
+// loaderThreads.java
 // ---------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -24,7 +24,6 @@
 
 package de.anomic.tools;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +32,7 @@ import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 public class loaderThreads {
-    
+
     // global values for loader threads
     protected int timeout;
     protected String user;
@@ -41,16 +40,16 @@ public class loaderThreads {
     protected ProxySettings remoteProxyConfig;
 
     // management objects for collection of threads
-    private Map<String, Thread> threads;
+    private final Map<String, Thread> threads;
     private int completed, failed;
-    
+
     public loaderThreads() {
        this(10000, null, null);
     }
-    
+
     public loaderThreads(
-            final int timeout, 
-            final String user, 
+            final int timeout,
+            final String user,
             final String password
     ) {
         this.timeout = timeout;
@@ -60,45 +59,45 @@ public class loaderThreads {
         this.completed = 0;
         this.failed = 0;
     }
-    
+
     public void newThread(final String name, final DigestURI url, final loaderProcess process) {
         final Thread t = new loaderThread(url, process);
-        threads.put(name, t);
+        this.threads.put(name, t);
         t.start();
     }
-    
+
     public void terminateThread(final String name) {
-        final loaderThread t = (loaderThread) threads.get(name);
+        final loaderThread t = (loaderThread) this.threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
         t.terminate();
     }
-    
+
     public int threadCompleted(final String name) {
-        final loaderThread t = (loaderThread) threads.get(name);
+        final loaderThread t = (loaderThread) this.threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
         return t.completed();
     }
-    
+
     public int threadStatus(final String name) {
-        final loaderThread t = (loaderThread) threads.get(name);
+        final loaderThread t = (loaderThread) this.threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
         return t.status();
     }
-    
+
     public int completed() {
-        return completed;
+        return this.completed;
     }
-    
+
     public int failed() {
-        return failed;
+        return this.failed;
     }
-    
+
     public int count() {
-        return threads.size();
+        return this.threads.size();
     }
-    
+
     public Exception threadError(final String name) {
-        final loaderThread t = (loaderThread) threads.get(name);
+        final loaderThread t = (loaderThread) this.threads.get(name);
         if (t == null) throw new RuntimeException("no such thread: " + name);
         return t.error();
     }
@@ -109,7 +108,7 @@ public class loaderThreads {
         private final loaderProcess process;
         private byte[] page;
         private boolean loaded;
-        
+
         public loaderThread(final DigestURI url, final loaderProcess process) {
             this.url = url;
             this.process = process;
@@ -118,47 +117,48 @@ public class loaderThreads {
             this.loaded = false;
         }
 
+        @Override
         public void run() {
             try {
-                page = url.get(ClientIdentification.getUserAgent(), timeout);
-                loaded = true;
-                process.feed(page);
-                if (process.status() == loaderCore.STATUS_FAILED) {
-                    error = process.error();
+                this.page = this.url.get(ClientIdentification.getUserAgent(), loaderThreads.this.timeout);
+                this.loaded = true;
+                this.process.feed(this.page);
+                if (this.process.status() == loaderCore.STATUS_FAILED) {
+                    this.error = this.process.error();
                 }
-                if ((process.status() == loaderCore.STATUS_COMPLETED) ||
-                    (process.status() == loaderCore.STATUS_FINALIZED)) completed++;
-                if ((process.status() == loaderCore.STATUS_ABORTED) ||
-                    (process.status() == loaderCore.STATUS_FAILED)) failed++;
+                if ((this.process.status() == loaderCore.STATUS_COMPLETED) ||
+                    (this.process.status() == loaderCore.STATUS_FINALIZED)) loaderThreads.this.completed++;
+                if ((this.process.status() == loaderCore.STATUS_ABORTED) ||
+                    (this.process.status() == loaderCore.STATUS_FAILED)) loaderThreads.this.failed++;
             } catch (final Exception e) {
-                error = e;
-                failed++;
+                this.error = e;
+                loaderThreads.this.failed++;
             }
         }
-            
+
 	public void terminate() {
-            process.terminate();
+            this.process.terminate();
         }
-        
+
         public boolean loaded() {
-            return loaded;
+            return this.loaded;
         }
-        
+
         public int completed() {
-            if (process.status() == loaderCore.STATUS_READY) return 1;
-            if (process.status() == loaderCore.STATUS_RUNNING) return 9 + ((process.completed() * 9) / 10);
-            if (process.status() == loaderCore.STATUS_COMPLETED) return 100;
+            if (this.process.status() == loaderCore.STATUS_READY) return 1;
+            if (this.process.status() == loaderCore.STATUS_RUNNING) return 9 + ((this.process.completed() * 9) / 10);
+            if (this.process.status() == loaderCore.STATUS_COMPLETED) return 100;
             return 0;
         }
 
         public int status() {
-            return process.status(); // see constants in loaderCore
+            return this.process.status(); // see constants in loaderCore
         }
-    
+
         public Exception error() {
-            return error;
+            return this.error;
         }
-        
+
     }
 
 }

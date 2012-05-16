@@ -95,7 +95,6 @@ public final class RWIProcess extends Thread
     private final ScoreMap<String> ref; // reference score computation for the commonSense heuristic
     private final Map<String, byte[]> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
     private final ReferenceOrder order;
-    private final long startTime;
     private boolean addRunning;
     private final boolean remote;
 
@@ -141,7 +140,6 @@ public final class RWIProcess extends Thread
         this.ref = new ConcurrentScoreMap<String>();
         this.feedersAlive = new AtomicInteger(0);
         this.feedersTerminated = new AtomicInteger(0);
-        this.startTime = System.currentTimeMillis();
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.receivedRemoteReferences = new AtomicInteger(0);

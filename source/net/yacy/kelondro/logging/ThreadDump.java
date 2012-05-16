@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import net.yacy.document.parser.html.CharacterCoding;
@@ -210,7 +209,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
 
         Thread thread;
         // collect single dumps
-        for (final Entry<Thread, StackTraceElement[]> entry: stackTraces.entrySet()) {
+        for (final Map.Entry<Thread, StackTraceElement[]> entry: stackTraces.entrySet()) {
             thread = entry.getKey();
             final StackTraceElement[] stackTraceElements = entry.getValue();
             StackTraceElement ste;
@@ -274,7 +273,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         bufferappend(buffer, plain, "");
 
         // write dumps
-        for (final Entry<StackTrace, List<String>> entry: entrySet()) {
+        for (final Map.Entry<StackTrace, List<String>> entry: entrySet()) {
             final List<String> threads = entry.getValue();
             for (final String t: threads) bufferappend(buffer, plain, t);
             bufferappend(buffer, plain, entry.getKey().text);
@@ -317,7 +316,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         ThreadDump x;
         for (final Map<Thread, StackTraceElement[]> trace: stackTraces) {
             x = new ThreadDump(rootPath, trace, plain, Thread.State.RUNNABLE);
-            for (final Entry<StackTrace, List<String>> e: x.entrySet()) {
+            for (final Map.Entry<StackTrace, List<String>> e: x.entrySet()) {
                 if (multiDumpFilterPattern.matcher(e.getKey().text).matches()) continue;
                 Integer c = dumps.get(e.getKey().text);
                 if (c == null) dumps.put(e.getKey().text, Integer.valueOf(1));
@@ -330,16 +329,16 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
 
         // write dumps
         while (!dumps.isEmpty()) {
-            final Entry<String, Integer> e = removeMax(dumps);
+            final Map.Entry<String, Integer> e = removeMax(dumps);
             bufferappend(buffer, plain, "Occurrences: " + e.getValue());
             bufferappend(buffer, plain, e.getKey());
         }
         bufferappend(buffer, plain, "");
     }
 
-    private static Entry<String, Integer> removeMax(final Map<String, Integer> result) {
-        Entry<String, Integer> max = null;
-        for (final Entry<String, Integer> e: result.entrySet()) {
+    private static Map.Entry<String, Integer> removeMax(final Map<String, Integer> result) {
+        Map.Entry<String, Integer> max = null;
+        for (final Map.Entry<String, Integer> e: result.entrySet()) {
             if (max == null || e.getValue().intValue() > max.getValue().intValue()) {
                 max = e;
             }

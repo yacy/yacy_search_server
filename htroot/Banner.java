@@ -34,7 +34,6 @@ import javax.imageio.ImageIO;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.BannerData;
-import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.visualization.RasterPlotter;
@@ -111,12 +110,12 @@ public class Banner {
             }
         }
 
-        final BannerData data = 
+        final BannerData data =
                 new BannerData(
                         width, height, bgcolor, textcolor, bordercolor, name, links,
                         words, type, myppm, network, peers, nlinks, nwords,
                         nqph, nppm);
-        
+
         if (!net.yacy.peers.graphics.Banner.logoIsLoaded()) {
          // do not write a cache to disc; keep in RAM
             ImageIO.setUseCache(false);

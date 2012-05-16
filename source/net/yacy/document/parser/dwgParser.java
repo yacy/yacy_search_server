@@ -50,7 +50,7 @@ public class dwgParser extends AbstractParser implements Parser {
      * How far to skip after the last standard property, before
      *  we find any custom properties that might be there.
      */
-    private static final int CUSTOM_PROPERTIES_SKIP = 20;
+    //private static final int CUSTOM_PROPERTIES_SKIP = 20;
 
     public dwgParser() {
         super("DWG (CAD Drawing) parser (very basic)");
