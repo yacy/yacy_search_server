@@ -216,6 +216,13 @@ public class AugmentHtmlStream {
 		Switchboard sb = Switchboard.getSwitchboard();
 
 		boolean augmented = false;
+		
+		try {
+			Log.logInfo("AUGMENTATION", url.getName());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		String Doc = data.toString();
 
