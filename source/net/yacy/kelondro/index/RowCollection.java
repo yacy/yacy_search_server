@@ -169,10 +169,10 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         return (int) (time / day) - 10957;
     }
 
-    private static Column exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4;
+    private static Column exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4, collectionColumnProducer;
 
     protected static final long exportOverheadSize = 14;
-
+    
     private static Row exportRow(final int chunkcachelength) {
         /*
         return new Row(
@@ -191,15 +191,17 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         if (exportColumn2 == null) exportColumn2 = new Column("short lastwrote-2 {b256}");
         if (exportColumn3 == null) exportColumn3 = new Column("byte[] orderkey-2");
         if (exportColumn4 == null) exportColumn4 = new Column("int orderbound-4 {b256}");
+        if (collectionColumnProducer == null) collectionColumnProducer = new Column("byte[] collection-1");
         /*
          * because of a strange bug these objects cannot be initialized as normal
          * static final. If I try that, they are not initialized and are assigned null. why?
          */
-        final StringBuilder colName = new StringBuilder(30);
-        colName.append("byte[] collection-").append(Integer.toString(chunkcachelength));
+        
+        Column collectionColumn = (Column) collectionColumnProducer.clone();
+        collectionColumn.setCellwidth(chunkcachelength);
         final Row er = new Row(new Column[]{
                     exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4,
-                    new Column(colName.toString())
+                    collectionColumn
                 },
                 NaturalOrder.naturalOrder
         );

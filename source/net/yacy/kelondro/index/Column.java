@@ -31,7 +31,7 @@ import java.io.Serializable;
 
 import net.yacy.kelondro.util.kelondroException;
 
-public final class Column implements Serializable {
+public final class Column implements Cloneable, Serializable {
 
     private static final long serialVersionUID=6558500565023465301L;
 
@@ -60,7 +60,7 @@ public final class Column implements Serializable {
         this.nickname = nickname;
         this.description = description;
     }
-
+    
     public Column(String celldef) {
         // define column with column syntax
         // example: <UDate-3>
@@ -194,6 +194,24 @@ public final class Column implements Serializable {
         } else {
             this.description = this.nickname;
         }
+    }
+
+    /**
+     * th clone method is useful to produce a similiar column with a different cell width
+     * @return the cloned Column
+     */
+    public Object clone() {
+    	return new Column(this.nickname, this.celltype, this.encoder, this.cellwidth, this.description);
+    }
+
+    /**
+     * a column width may change when the object was not yet used.
+     * this applies to clones of Column objects which are used as Column producers
+     * @param cellwidth
+     */
+    public void setCellwidth(int cellwidth) {
+    	assert this.celltype == celltype_string || this.celltype == celltype_binary;
+    	this.cellwidth = cellwidth;
     }
 
     @Override
