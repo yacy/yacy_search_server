@@ -72,8 +72,8 @@ import de.anomic.crawler.retrieval.Response;
 public class Segment {
 
     // catchall word
-    final static String catchallString = "yacyall"; // a word that is always in all indexes; can be used for zero-word searches to find ALL documents
-    final static byte[] catchallHash;
+    public final static String catchallString = "yacyall"; // a word that is always in all indexes; can be used for zero-word searches to find ALL documents
+    public final static byte[] catchallHash;
     final static Word   catchallWord = new Word(0, 0, 0);
     static {
         catchallHash = Word.word2hash(catchallString); // "KZzU-Vf6h5k-"
