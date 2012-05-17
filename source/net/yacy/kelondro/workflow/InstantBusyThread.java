@@ -182,4 +182,14 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         return oneTimeJob( thread, startupDelay);
     }
 
+    @Override
+    public void open() {
+        // Not implemented in this thread
+    }
+
+    @Override
+    public synchronized void close() {
+     // Not implemented in this thread
+    }
+
 }

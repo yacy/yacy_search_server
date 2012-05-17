@@ -50,7 +50,7 @@ public class DocumentMetadata implements Metadata {
 	}
 
 	@Override
-	public void close() {
+	public synchronized void close() {
 		// TODO Auto-generated method stub
 		
 	}
