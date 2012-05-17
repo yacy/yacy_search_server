@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -200,7 +201,8 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         File bakfile = new File (this.file.getAbsolutePath() + ".bak");
         FileUtils.copy (this.file, bakfile);
 
-        TreeMap tclone = (TreeMap) this.clone(); // clone to write appended entries
+        @SuppressWarnings("unchecked")
+        TreeMap<String,Entry> tclone = (TreeMap<String,Entry>) this.clone(); // clone to write appended entries
 
         final BufferedWriter writer = new BufferedWriter(new FileWriter(this.file));
         try {
@@ -248,7 +250,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         } catch (final IOException e) {}
 
         // write remainig entries (not already written)
-        Iterator ie = tclone.entrySet().iterator();
+        Iterator<Map.Entry<String,Entry>> ie = tclone.entrySet().iterator();
         while (ie.hasNext()) {
             Object e = ie.next();
             writer.write (e.toString() + "\n");

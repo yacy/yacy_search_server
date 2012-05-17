@@ -61,7 +61,7 @@ public class yacysearchitem {
     private static final int MAX_NAME_LENGTH = 60;
     private static final int MAX_URL_LENGTH = 120;
 
-    private static boolean col = true;
+    //private static boolean col = true;
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;

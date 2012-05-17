@@ -110,12 +110,12 @@ public class Banner {
             }
         }
 
-        final BannerData data = 
+        final BannerData data =
                 new BannerData(
                         width, height, bgcolor, textcolor, bordercolor, name, links,
                         words, type, myppm, network, peers, nlinks, nwords,
                         nqph, nppm);
-        
+
         if (!net.yacy.peers.graphics.Banner.logoIsLoaded()) {
          // do not write a cache to disc; keep in RAM
             ImageIO.setUseCache(false);

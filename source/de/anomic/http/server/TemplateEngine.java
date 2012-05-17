@@ -129,7 +129,7 @@ public final class TemplateEngine {
 
     private final static byte lbr  = (byte)'[';
     private final static byte rbr  = (byte)']';
-    private final static byte[] pOpen  = {hashChar, lbr};
+    //private final static byte[] pOpen  = {hashChar, lbr};
     private final static byte[] pClose = {rbr, hashChar};
 
     private final static byte lcbr  = (byte)'{';
@@ -142,7 +142,7 @@ public final class TemplateEngine {
     private final static byte[] aOpen  = {hashChar, lrbr};
     private final static byte[] aClose = {rrbr, hashChar};
 
-    private final static byte[] iOpen  = {hashChar, pcChar};
+    //private final static byte[] iOpen  = {hashChar, pcChar};
     private final static byte[] iClose = {pcChar, hashChar};
 
     private final static byte[] ul = "_".getBytes();
