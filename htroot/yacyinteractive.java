@@ -54,7 +54,7 @@ public class yacyinteractive {
         prop.put("startRecord", startRecord);
         prop.put("maximumRecords", maximumRecords);
         prop.putHTML("querys", query.replaceAll(" ", "+"));
-        prop.put("serverlist", query.length() == 0 ? 1 : 0);
+        prop.put("serverlist", query.isEmpty() ? 1 : 0);
         prop.put("focus", focus ? 1 : 0);
         prop.put("allowrealtime", sb.indexSegments.URLCount() < 100000 ? 1 : 0);
         return prop;

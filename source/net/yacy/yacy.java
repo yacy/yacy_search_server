@@ -173,7 +173,7 @@ public final class yacy {
 			f = new File(dataHome, "DATA/LOG/");
             mkdirsIfNeseccary(f);
 			f = new File(dataHome, "DATA/LOG/yacy.logging");
-			final File f0 = new File(appHome, "yacy.logging");
+			final File f0 = new File(appHome, "defaults/yacy.logging");
 			if (!f.exists() || f0.lastModified() > f.lastModified()) try {
 			    FileUtils.copy(f0, f);
             } catch (final IOException e){

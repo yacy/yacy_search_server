@@ -466,7 +466,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
      * @param rel
      * @return binary encoded information about rel
      */
-    private int relEval(final String[] rel) {
+    private static int relEval(final String[] rel) {
         int i = 0;
         for (final String s: rel) {
             final String s0 = s.toLowerCase().trim();

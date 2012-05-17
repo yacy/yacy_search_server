@@ -62,6 +62,7 @@ import org.apache.solr.common.SolrDocumentList;
 
 import de.anomic.crawler.Cache;
 import de.anomic.data.WorkTables;
+import net.yacy.search.index.Segment;
 import net.yacy.search.index.SolrField;
 
 public class SnippetProcess {
@@ -606,6 +607,10 @@ public class SnippetProcess {
                 return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
+            	if (this.snippetFetchWordHashes.has(Segment.catchallHash)) {
+            		// we accept that because the word cannot be on the page
+            		return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, 0);
+            	}
                 final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
                 if (this.deleteIfSnippetFail) {
                     this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.queryHashes, reason);

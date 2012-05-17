@@ -92,8 +92,6 @@ public class YMarkTables {
 	public final static String ADMIN_AUTHENTICATE_MSG = "Admin authentication required!";
 
     public final static String p1 = "(?:^|.*,)";
-    public final static String p2 = "\\Q";
-    public final static String p3 = "\\E";
     public final static String p4 = "(?:,.*|$)";
     public final static String p5 = "((?:";
     public final static String p6 = ")(?:,.*|$)){";
@@ -194,9 +192,7 @@ public class YMarkTables {
     	patternBuilder.setLength(0);
     	patternBuilder.append(p1);
     	patternBuilder.append('(');
-    	patternBuilder.append(p2);
-		patternBuilder.append(folder);
-		patternBuilder.append(p3);
+		patternBuilder.append(Pattern.quote(folder));
 		patternBuilder.append(')');
 		patternBuilder.append(p4);
     	final Pattern p = Pattern.compile(patternBuilder.toString());
@@ -210,9 +206,7 @@ public class YMarkTables {
     	patternBuilder.append(p1);
     	patternBuilder.append(p5);
     	for (final String tag : tagArray) {
-        	patternBuilder.append(p2);
-    		patternBuilder.append(tag);
-    		patternBuilder.append(p3);
+    		patternBuilder.append(Pattern.quote(tag));
         	patternBuilder.append('|');
 		}
     	patternBuilder.deleteCharAt(patternBuilder.length()-1);

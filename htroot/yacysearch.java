@@ -28,6 +28,7 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -120,9 +121,8 @@ public class yacysearch {
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
 
         //get focus option
-        final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
-        prop.put("focus", focus ? 1 : 0);
-
+        prop.put("focus", ((post == null) ? true : post.get("focus", "1").equals("1")) ? 1 : 0);
+        
         // produce vocabulary navigation sidebars
         Collection<Vocabulary> vocabularies = LibraryProvider.autotagging.getVocabularies();
         int j = 0;
@@ -1105,6 +1105,11 @@ public class yacysearch {
         prop.putXML("rss_queryenc", originalquerystring.replace(' ', '+'));
 
         sb.localSearchLastAccess = System.currentTimeMillis();
+
+        // hostname and port (assume locahost if nothing helps)
+        final InetAddress hostIP = Domains.myPublicLocalIP();
+        prop.put("myhost", hostIP != null ? hostIP.getHostAddress() : "localhost");
+        prop.put("myport", serverCore.getPortNr(sb.getConfig("port", "8090")));
 
         // return rewrite properties
         return prop;

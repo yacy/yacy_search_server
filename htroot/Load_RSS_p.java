@@ -1,5 +1,5 @@
 /**
- *  oad_RSS_p
+ *  Load_RSS_p
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 20.08.2010 at http://yacy.net
  *
@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.RSSFeed;
@@ -83,7 +84,7 @@ public class Load_RSS_p {
                 if (messageurl.length() == 0) continue;
                 final byte[] api_pk = row.get("api_pk");
                 final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
-                if (r == null || !r.get("comment", "").matches(".*\\Q" + messageurl + "\\E.*")) {
+                if (r == null || !r.get("comment", "").matches(".*" + Pattern.quote(messageurl) + ".*")) {
                     d.add(row.getPK());
                 }
             }
@@ -125,7 +126,7 @@ public class Load_RSS_p {
                 if (messageurl.length() == 0) continue;
                 final byte[] api_pk = row.get("api_pk");
                 final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
-                if (r != null && r.get("comment", "").matches(".*\\Q" + messageurl + "\\E.*")) {
+                if (r != null && r.get("comment", "").matches(".*" + Pattern.quote(messageurl) + ".*")) {
                     d.add(row.getPK());
                 }
             }
@@ -194,7 +195,7 @@ public class Load_RSS_p {
                     // check if feed is registered in scheduler
                     final byte[] api_pk = row.get("api_pk");
                     final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
-                    if (r != null && r.get("comment", "").matches(".*\\Q" + messageurl + "\\E.*")) {
+                    if (r != null && r.get("comment", "").matches(".*" + Pattern.quote(messageurl) + ".*")) {
                         // this is a recorded entry
                         final Date date_next_exec = r.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
                         prop.put("showscheduledfeeds_list_" + apic + "_pk", UTF8.String(row.getPK()));

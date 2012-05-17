@@ -42,7 +42,7 @@ public class DocumentReference {
     	return data.size();
     }
 
-    public void close() {
+    public synchronized void close() {
     	if (data != null) {
     		data.close();
     	}

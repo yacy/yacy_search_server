@@ -208,8 +208,8 @@ public class GuiHandler extends Handler {
         
     }
 
-    public void close() throws SecurityException {
-        
+    public synchronized void close() throws SecurityException {
+        // Nothing implement here
     }
 
 }
