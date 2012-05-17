@@ -90,7 +90,7 @@ public class tarTools {
 		Log.logInfo("UNTAR", "finished");
 	}
 	
-	public static void main(final String args[]){
+	public static void main(final String args[]) {
 		// @arg0 source
 		// @arg1 destination
 		if(args.length == 2){

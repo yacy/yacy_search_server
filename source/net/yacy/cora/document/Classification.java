@@ -129,7 +129,7 @@ public class Classification {
         return appsExtSet.contains(appsExt.trim().toLowerCase());
     }
 
-    public static ContentDomain getContentDomain(String ext) {
+    public static ContentDomain getContentDomain(final String ext) {
         if (isTextExtension(ext)) return ContentDomain.TEXT;
         if (isImageExtension(ext)) return ContentDomain.IMAGE;
         if (isAudioExtension(ext)) return ContentDomain.AUDIO;

@@ -62,37 +62,37 @@ public class DocumentMetadata implements Metadata {
 	}
 
 	@Override
-	public URIMetadata load(Element<WordReference> obrwi) {
+	public URIMetadata load(final Element<WordReference> obrwi) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public URIMetadata load(byte[] urlHash) {
+	public URIMetadata load(final byte[] urlHash) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void store(URIMetadata entry) throws IOException {
+	public void store(final URIMetadata entry) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public boolean remove(byte[] urlHashBytes) {
+	public boolean remove(final byte[] urlHashBytes) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean exists(byte[] urlHash) {
+	public boolean exists(final byte[] urlHash) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
+	public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -104,14 +104,14 @@ public class DocumentMetadata implements Metadata {
 	}
 
 	@Override
-	public CloneableIterator<URIMetadata> entries(boolean up, String firstHash)
+	public CloneableIterator<URIMetadata> entries(final boolean up, final String firstHash)
 			throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public int deleteDomain(String hosthash) throws IOException {
+	public int deleteDomain(final String hosthash) throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
