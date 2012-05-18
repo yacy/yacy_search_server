@@ -9,7 +9,7 @@
 // $LastChangedBy: apfelmaennchen $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -37,35 +37,35 @@ public class YMarkUtil {
     public final static String TAGS_SEPARATOR = ",";
     public final static String FOLDERS_SEPARATOR = "/";
     public final static String EMPTY_STRING = new String();
-        
+
     /**
      * conveniance function to generate url hashes for YMark bookmarks
      * @param url a string representation of a valid url
      * @return a byte[] hash for the input URL string
      * @throws MalformedURLException
-     * @see net.yacy.kelondro.data.meta.DigestURI.DigestURI(String url, byte[] hash).hash() 
+     * @see net.yacy.kelondro.data.meta.DigestURI.DigestURI(String url, byte[] hash).hash()
      */
     public final static byte[] getBookmarkId(String url) throws MalformedURLException {
-		return (new DigestURI(url, null)).hash();
+		return (new DigestURI(url)).hash();
     }
-    
+
     /**
      * conveniance function to generate word hashes for YMark tags and folders
-     * @param key a tag or folder name 
+     * @param key a tag or folder name
      * @return a byte[] hash for the input string
      * @see net.yacy.kelondro.data.word.Word.word2hash(final String word)
      */
     public final static byte[] getKeyId(final String key) {
         return Word.word2hash(key.toLowerCase());
     }
-    
+
     public final static byte[] keySetToBytes(final HashSet<String> urlSet) {
     	return keySetToString(urlSet).getBytes();
     }
-    
+
     public final static String keySetToString(final HashSet<String> urlSet) {
     	final Iterator<String> urlIter = urlSet.iterator();
-    	final 
+    	final
     	StringBuilder urls = new StringBuilder(urlSet.size()*20);
     	while(urlIter.hasNext()) {
     		urls.append(TAGS_SEPARATOR);
@@ -74,22 +74,22 @@ public class YMarkUtil {
     	urls.deleteCharAt(0);
     	return urls.toString();
     }
-    
+
     public final static HashSet<String> keysStringToSet(final String keysString) {
     	HashSet<String> keySet = new HashSet<String>();
-        final String[] keyArray = keysString.split(TAGS_SEPARATOR);                    
+        final String[] keyArray = keysString.split(TAGS_SEPARATOR);
         for (final String key : keyArray) {
         	keySet.add(key);
         }
         return keySet;
     }
-    
+
     public final static String cleanTagsString(final String tagsString) {
     	return cleanTagsString(tagsString, YMarkUtil.EMPTY_STRING);
     }
-        
-    public final static String cleanTagsString(final String tagsString, final String dflt) {        
-    	StringBuilder ts = new StringBuilder(tagsString);    	
+
+    public final static String cleanTagsString(final String tagsString, final String dflt) {
+    	StringBuilder ts = new StringBuilder(tagsString);
     	if(ts.length() == 0)
     		return dflt;
     	// get rid of double commas and space characters following a comma
@@ -108,15 +108,15 @@ public class YMarkUtil {
 			ts.deleteCharAt(ts.length()-1);
     	return ts.toString();
     }
-    
+
     public final static String cleanFoldersString(final String foldersString) {
     	return cleanFoldersString(foldersString, YMarkUtil.EMPTY_STRING);
     }
-    
-    public final static String cleanFoldersString(final String foldersString, final String dflt) {        
+
+    public final static String cleanFoldersString(final String foldersString, final String dflt) {
     	if(foldersString.isEmpty())
     		return dflt;
-    	StringBuilder fs = new StringBuilder(cleanTagsString(foldersString));    	
+    	StringBuilder fs = new StringBuilder(cleanTagsString(foldersString));
     	if(fs.length() == 0)
     		return YMarkEntry.BOOKMARK.FOLDERS.deflt();
     	for (int i = 0; i < fs.length()-1; i++) {
@@ -134,5 +134,5 @@ public class YMarkUtil {
 			fs.deleteCharAt(fs.length()-1);
 		}
     	return fs.toString();
-    }	
+    }
 }

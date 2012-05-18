@@ -2422,7 +2422,7 @@ public final class Switchboard extends serverSwitch
             // send the documents to solr
             for ( final Document doc : in.documents ) {
                 try {
-                    final String id = UTF8.String(new DigestURI(doc.dc_identifier(), null).hash());
+                    final String id = UTF8.String(new DigestURI(doc.dc_identifier()).hash());
                     final String iquh = UTF8.String(in.queueEntry.url().hash());
                     if ( !id.equals(iquh) ) {
                         this.log.logWarning("condenseDocument consistency check doc="

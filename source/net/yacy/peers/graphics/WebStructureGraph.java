@@ -157,9 +157,6 @@ public class WebStructureGraph
         final Document document,
         final Condenser condenser) {
         // generate citation reference
-        if ( url.isLocal() ) {
-            return; // we do this only for global urls
-        }
         final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
         final Iterator<MultiProtocolURI> it = hl.keySet().iterator();
         final HashSet<MultiProtocolURI> globalRefURLs = new HashSet<MultiProtocolURI>();

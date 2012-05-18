@@ -131,7 +131,7 @@ public class IndexControlURLs_p {
         String urlhash = post.get("urlhash", "").trim();
         if (urlhash.length() == 0 && urlstring.length() > 0) {
             try {
-                urlhash = ASCII.String(new DigestURI(urlstring, null).hash());
+                urlhash = ASCII.String(new DigestURI(urlstring).hash());
             } catch (final MalformedURLException e) {
             }
         }

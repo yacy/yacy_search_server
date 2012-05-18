@@ -211,7 +211,7 @@ public final class CrawlStacker {
                     u = u + "/index.html";
                 }
                 try {
-                    final byte[] uh = new DigestURI(u, null).hash();
+                    final byte[] uh = new DigestURI(u).hash();
                     this.indexSegment.urlMetadata().remove(uh);
                     this.nextQueue.noticeURL.removeByURLHash(uh);
                     this.nextQueue.errorURL.remove(uh);

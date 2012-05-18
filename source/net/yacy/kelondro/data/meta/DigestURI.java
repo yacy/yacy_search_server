@@ -116,7 +116,8 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      * DigestURI from URI string
      */
     public DigestURI(final String url) throws MalformedURLException {
-        this(url, null);
+        super(url);
+        this.hash = null;
     }
 
     /**

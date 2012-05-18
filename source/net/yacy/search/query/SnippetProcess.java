@@ -53,6 +53,8 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.SolrField;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
@@ -62,10 +64,10 @@ import org.apache.solr.common.SolrDocumentList;
 
 import de.anomic.crawler.Cache;
 import de.anomic.data.WorkTables;
-import net.yacy.search.index.Segment;
-import net.yacy.search.index.SolrField;
 
 public class SnippetProcess {
+
+    private final static int SNIPPET_WORKER_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
 
     // input values
     final RWIProcess  rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
@@ -126,7 +128,7 @@ public class SnippetProcess {
 
         // start worker threads to fetch urls and snippets
         this.workerThreads = null;
-        deployWorker(Math.min(10, query.itemsPerPage), query.neededResults());
+        deployWorker(Math.min(SNIPPET_WORKER_THREADS, query.itemsPerPage), query.neededResults());
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), SearchEvent.Type.SNIPPETFETCH_START, ((this.workerThreads == null) ? "no" : this.workerThreads.length) + " online snippet fetch threads started", 0, 0), false);
     }
 
@@ -193,8 +195,8 @@ public class SnippetProcess {
 
             // deploy worker to get more results
             if (!anyWorkerAlive()) {
-                final int neededInclPrefetch = this.query.neededResults() + ((MemoryControl.available() > 100 * 1024 * 1024) ? this.query.itemsPerPage : 0);
-                deployWorker(Math.min(20, this.query.itemsPerPage), neededInclPrefetch);
+                final int neededInclPrefetch = this.query.neededResults() + ((MemoryControl.available() > 100 * 1024 * 1024 && SNIPPET_WORKER_THREADS >= 8) ? this.query.itemsPerPage : 0);
+                deployWorker(Math.min(SNIPPET_WORKER_THREADS, this.query.itemsPerPage), neededInclPrefetch);
             }
 
             try {entry = this.result.element(item, 50);} catch (final InterruptedException e) {break;}
