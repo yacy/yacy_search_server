@@ -828,19 +828,20 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public String toNormalform(final boolean excludeReference, final boolean stripAmp) {
-        return toNormalform(excludeReference, stripAmp, false, false);
+        return toNormalform(excludeReference, stripAmp, false);
     }
 
     private static final Pattern ampPattern = Pattern.compile("&amp;");
-    public String toNormalform(final boolean excludeReference, final boolean stripAmp, final boolean resolveHost, final boolean removeSessionID) {
-        String result = toNormalform0(excludeReference, resolveHost, removeSessionID);
+
+    public String toNormalform(final boolean excludeReference, final boolean stripAmp, final boolean removeSessionID) {
+        String result = toNormalform0(excludeReference, removeSessionID);
         if (stripAmp) {
             result = ampPattern.matcher(result).replaceAll("&");
         }
         return result;
     }
 
-    private String toNormalform0(final boolean excludeReference, final boolean resolveHost, final boolean removeSessionID) {
+    private String toNormalform0(final boolean excludeReference, final boolean removeSessionID) {
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
@@ -866,13 +867,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 u.append("@");
             }
             final String hl = getHost().toLowerCase();
-            if (resolveHost) {
-                final InetAddress r = getInetAddress();
-                u.append(r == null ? hl : r.getHostAddress());
-            } else {
-                u.append(hl);
-            }
-
+            u.append(hl);
         }
         if (!defaultPort) {
             u.append(":");

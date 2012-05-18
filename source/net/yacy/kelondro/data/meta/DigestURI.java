@@ -73,7 +73,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         }
         return (url == null) ? null : ASCII.String(url.hash(), 6, 6);
     }
-    
+
     /**
      * from a given list of hosts make a list of host hashes
      * the list is separated by comma
@@ -93,7 +93,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         }
         return sb.toString();
     }
-    
+
     public static Set<String> hosthashess(String hosthashes) {
         if (hosthashes == null || hosthashes.length() == 0) return null;
         HashSet<String> h = new HashSet<String>();
@@ -103,7 +103,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         }
         return h;
     }
-    
+
 
     /**
      * DigestURI from File
@@ -244,7 +244,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         final StringBuilder hashs = new StringBuilder(12);
         assert hashs.length() == 0;
         // form the 'local' part of the hash
-        final String normalform = toNormalform(true, true, false, true);
+        final String normalform = toNormalform(true, true, true);
         final String b64l = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(normalform));
         if (b64l.length() < 5) return null;
         hashs.append(b64l.substring(0, 5)); // 5 chars

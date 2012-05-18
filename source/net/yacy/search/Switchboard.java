@@ -2376,7 +2376,7 @@ public final class Switchboard extends serverSwitch
 
                 // process the next hyperlink
                 nextUrl = nextEntry.getKey();
-                final String u = nextUrl.toNormalform(true, true, false, true);
+                final String u = nextUrl.toNormalform(true, true, true);
                 if ( !(u.startsWith("http://")
                     || u.startsWith("https://")
                     || u.startsWith("ftp://")

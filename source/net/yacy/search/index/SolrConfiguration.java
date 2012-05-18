@@ -283,7 +283,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 final String[] css_url = new String[csss.size()];
                 c = 0;
                 for (final Map.Entry<MultiProtocolURI, String> entry: csss.entrySet()) {
-                    final String url = entry.getKey().toNormalform(false, false, false, false);
+                    final String url = entry.getKey().toNormalform(false, false);
                     inboundLinks.remove(url);
                     ouboundLinks.remove(url);
                     css_tag[c] =
@@ -305,7 +305,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 for (final MultiProtocolURI url: scriptss) {
                     inboundLinks.remove(url);
                     ouboundLinks.remove(url);
-                    scripts[c++] = url.toNormalform(false, false, false, false);
+                    scripts[c++] = url.toNormalform(false, false);
                 }
                 addSolr(solrdoc, SolrField.scriptscount_i, scripts.length);
                 if (scripts.length > 0) addSolr(solrdoc, SolrField.scripts_txt, scripts);
@@ -319,7 +319,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 for (final MultiProtocolURI url: framess) {
                     inboundLinks.remove(url);
                     ouboundLinks.remove(url);
-                    frames[c++] = url.toNormalform(false, false, false, false);
+                    frames[c++] = url.toNormalform(false, false);
                 }
                 addSolr(solrdoc, SolrField.framesscount_i, frames.length);
                 if (frames.length > 0) addSolr(solrdoc, SolrField.frames_txt, frames);
@@ -333,7 +333,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 for (final MultiProtocolURI url: iframess) {
                     inboundLinks.remove(url);
                     ouboundLinks.remove(url);
-                    iframes[c++] = url.toNormalform(false, false, false, false);
+                    iframes[c++] = url.toNormalform(false, false);
                 }
                 addSolr(solrdoc, SolrField.iframesscount_i, iframes.length);
                 if (iframes.length > 0) addSolr(solrdoc, SolrField.iframes_txt, iframes);

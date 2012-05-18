@@ -58,7 +58,7 @@ public class EmbedEntry {
 
     @Override
     public String toString() {
-        return "<embed url=\"" + this.url.toNormalform(false, false, false, false) + "\"" +
+        return "<embed url=\"" + this.url.toNormalform(false, false) + "\"" +
                (this.type != null && this.type.length() > 0 ? " type=\"" + this.type + "\"" : "") +
                (this.pluginspage != null && this.pluginspage.length() > 0 ? " pluginspage=\"" + this.pluginspage + "\"" : "") +
                (this.width >= 0 ? " width=\"" + this.width + "\"" : "") +
