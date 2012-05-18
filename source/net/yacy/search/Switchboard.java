@@ -69,6 +69,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -729,8 +730,15 @@ public final class Switchboard extends serverSwitch
         }
 
         // init nameCacheNoCachingList
-        Domains
-            .setNoCachingPatterns(getConfig(SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO, ""));
+        Domains.setNoCachingPatterns(getConfig(SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO, ""));
+        try {
+            Domains.setNoCachingPatterns(getConfig(SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO, ""));
+        } catch (PatternSyntaxException pse) {
+            Log.logSevere("Switchboard", "Invalid regular expression in "
+                            + SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO
+                            + " property: " + pse.getMessage());
+            System.exit(-1);
+        }
 
         // generate snippets cache
         this.log.logConfig("Initializing Snippet Cache");
