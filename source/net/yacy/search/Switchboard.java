@@ -730,7 +730,6 @@ public final class Switchboard extends serverSwitch
         }
 
         // init nameCacheNoCachingList
-        Domains.setNoCachingPatterns(getConfig(SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO, ""));
         try {
             Domains.setNoCachingPatterns(getConfig(SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO, ""));
         } catch (PatternSyntaxException pse) {

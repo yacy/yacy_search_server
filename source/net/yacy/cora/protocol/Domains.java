@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.storage.ARC;
@@ -503,11 +504,11 @@ public class Domains {
         throw new UnknownHostException("host not in cache");
     }
 
-    public static void setNoCachingPatterns(final String patternList) {
+    public static void setNoCachingPatterns(final String patternList) throws PatternSyntaxException {
         nameCacheNoCachingPatterns = makePatterns(patternList);
     }
 
-    public static List<Pattern> makePatterns(final String patternList) {
+    public static List<Pattern> makePatterns(final String patternList) throws PatternSyntaxException {
     	final String[] entries = (patternList != null) ? patternList.split(",") : new String[0];
     	final List<Pattern> patterns = new ArrayList<Pattern>(entries.length);
     	for (final String entry : entries) {
