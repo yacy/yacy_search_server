@@ -42,7 +42,8 @@ public class ConfigPortal {
 
         if (post != null) {
             // AUTHENTICATE
-            if (!header.containsKey(RequestHeader.AUTHORIZATION)) {
+            if (!sb.verifyAuthentication(header)) {
+                // force log-in
                 prop.putHTML("AUTHENTICATE","log-in");
                 return prop;
             }
