@@ -275,12 +275,10 @@
     <!-- copy configuration files -->
     <copy todir="${release_main}">
       <fileset dir=".">
-        <include name="yacy.logging"/>
         <include name="yacy.yellow"/>
         <include name="yacy.badwords.example"/>
         <include name="yacy.stopwords"/>
         <include name="yacy.parser"/>
-        <include name="httpd.mime"/>
       </fileset>
     </copy>
 
