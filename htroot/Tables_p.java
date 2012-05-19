@@ -76,7 +76,7 @@ public class Tables_p {
         if (post.get("deleterows", "").length() > 0) {
             for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("pk_")) try {
-                    sb.tables.delete(table, entry.getValue().substring(5).getBytes());
+                    sb.tables.delete(table, entry.getValue().substring(3).getBytes());
                 } catch (final IOException e) {
                     Log.logException(e);
                 }
@@ -117,8 +117,8 @@ public class Tables_p {
                 // check if we can find a key
                 String pk = null;
                 for (final Map.Entry<String, String> entry: post.entrySet()) {
-                    if (entry.getValue().startsWith("mark_")) {
-                        pk = entry.getValue().substring(5);
+                    if (entry.getValue().startsWith("pk_")) {
+                        pk = entry.getValue().substring(3);
                         break;
                     }
                 }
