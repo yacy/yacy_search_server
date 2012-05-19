@@ -126,7 +126,7 @@ public class IndexControlRWIs_p
 
             final String keystring = post.get("keystring", "").trim();
             byte[] keyhash = post.get("keyhash", "").trim().getBytes();
-            if (keyhash == null || keyhash.length == 0) {
+            if (keystring.length() > 0) {
                 keyhash = Word.word2hash(keystring);
             }
             prop.putHTML("keystring", keystring);
