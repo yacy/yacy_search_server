@@ -587,7 +587,7 @@ public final class RWIProcess extends Thread
             }
 
             // check content domain
-            if (this.query.contentdom != Classification.ContentDomain.ALL && page.url().getContentDomain() != this.query.contentdom) {
+            if (page.url().getContentDomain() != Classification.ContentDomain.ALL && page.url().getContentDomain() != this.query.contentdom) {
                 this.sortout++;
                 continue;
             }
