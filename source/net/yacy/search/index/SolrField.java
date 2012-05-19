@@ -99,7 +99,7 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     csscount_i(SolrType.integer, true, true, "number of entries in css_tag_txt and css_url_txt"),
     css_tag_txt(SolrType.text_general, true, true, true, "full css tag with normalized url"),
     css_url_txt(SolrType.text_general, true, true, true, "normalized urls within a css tag"),
-    scripts_txt(SolrType.text_general, true, true, true, "normaluzed urls within a scripts tag"),
+    scripts_txt(SolrType.text_general, true, true, true, "normalized urls within a scripts tag"),
     scriptscount_i(SolrType.integer, true, true, "number of entries in scripts_txt"),
     frames_txt(SolrType.text_general, true, true, true, "list of all links to frames"),
     framesscount_i(SolrType.integer, true, true, "number of frames_txt"),
