@@ -584,7 +584,7 @@ public class SnippetProcess {
         }
 
         // load snippet
-        if (page.url().getContentDomain() == Classification.ContentDomain.TEXT) {
+        if (page.url().getContentDomain() == Classification.ContentDomain.TEXT || page.url().getContentDomain() == Classification.ContentDomain.ALL) {
             // attach text snippet
             startTime = System.currentTimeMillis();
             final TextSnippet snippet = new TextSnippet(
