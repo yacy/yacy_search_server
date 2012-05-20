@@ -793,7 +793,7 @@ public final class Switchboard extends serverSwitch
                 },
                 this,
                 "storeDocumentIndex",
-                2 * WorkflowProcessor.availableCPU,
+                2,
                 null,
                 1 /*Math.max(1, WorkflowProcessor.availableCPU / 2)*/);
         this.indexingAnalysisProcessor =
@@ -805,7 +805,7 @@ public final class Switchboard extends serverSwitch
                 },
                 this,
                 "webStructureAnalysis",
-                2 * WorkflowProcessor.availableCPU,
+                WorkflowProcessor.availableCPU + 1,
                 this.indexingStorageProcessor,
                 WorkflowProcessor.availableCPU);
         this.indexingCondensementProcessor =
@@ -817,7 +817,7 @@ public final class Switchboard extends serverSwitch
                 },
                 this,
                 "condenseDocument",
-                4 * WorkflowProcessor.availableCPU,
+                WorkflowProcessor.availableCPU + 1,
                 this.indexingAnalysisProcessor,
                 WorkflowProcessor.availableCPU);
         this.indexingDocumentProcessor =
@@ -829,7 +829,7 @@ public final class Switchboard extends serverSwitch
                 },
                 this,
                 "parseDocument",
-                4 * WorkflowProcessor.availableCPU,
+                Math.max(20, WorkflowProcessor.availableCPU * 2), // it may happen that this is filled with new files from the search process. That means there should be enough place for two result pages
                 this.indexingCondensementProcessor,
                 WorkflowProcessor.availableCPU);
 
