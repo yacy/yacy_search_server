@@ -275,7 +275,9 @@ public class DidYouMean {
         // we take guessLib entries as long as there is any entry in it
         // to see if this is the case, we must wait for termination of the producer
         for (final Thread t: producers) {
-            try { t.join(); } catch (final InterruptedException e) {}
+            if (this.timeLimit > System.currentTimeMillis()) try {
+                t.join(Math.max(0, this.timeLimit - System.currentTimeMillis()));
+            } catch (final InterruptedException e) {}
         }
 
         // if there is not any entry in guessLib, then transfer all entries from the
@@ -297,7 +299,9 @@ public class DidYouMean {
 
         // wait for termination of consumer
         for (final Consumer c: consumers) {
-            try { c.join(); } catch (final InterruptedException e) {}
+            if (this.timeLimit > System.currentTimeMillis()) try {
+                c.join(Math.max(0, this.timeLimit - System.currentTimeMillis()));
+            } catch (final InterruptedException e) {}
         }
 
         // we don't want the given word in the result
