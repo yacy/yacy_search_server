@@ -25,6 +25,8 @@
 package net.yacy.search.snippet;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -173,7 +175,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         // try to get the snippet from a document at the cache (or in the web)
         // this requires that the document is parsed after loading
         String textline = null;
-        HandleSet remainingHashes = queryhashes;
+        HandleSet remainingHashes = queryhashes.clone();
         { //encapsulate potential expensive sentences
             Collection<StringBuilder> sentences = null;
 
@@ -181,39 +183,113 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             if (solrText != null) {
                 // compute sentences from solr query
                 sentences = Document.getSentences(pre, new ByteArrayInputStream(UTF8.getBytes(solrText)));
+                if (sentences != null) {
+                    try {
+                        final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
+                        textline = tsr.getSnippet();
+                        remainingHashes =  tsr.getRemainingWords();
+                    } catch (final UnsupportedOperationException e) {
+                        init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
+                        return;
+                    }
+                }
             }
 
-            // if then no sentences are found, we fail-over to get the content from the re-loaded document
-            if (sentences == null) {
-                final Document document = loadDocument(loader, row, queryhashes, cacheStrategy, url, reindexing, source);
-                if (document == null) {
-                    return;
-                }
+            // try to get the snippet from metadata
+            removeMatchingHashes(row.dc_title(), remainingHashes);
+            removeMatchingHashes(row.dc_creator(), remainingHashes);
+            removeMatchingHashes(row.dc_subject(), remainingHashes);
+            removeMatchingHashes(row.url().toNormalform(true, true).replace('-', ' '), remainingHashes);
 
-                // compute sentences from parsed document
-                sentences = document.getSentences(pre);
-                document.close();
+            boolean isInCache = de.anomic.crawler.Cache.has(url.hash());
+
+            if (remainingHashes.size() == 0) {
+                // the snippet is fully inside the metadata!
+
+                if (isInCache) {
+                    // get the sentences from the cache
+                    final Request request = loader.request(url, true, reindexing);
+                    Response response;
+                    try {
+                        response = loader == null ? null : loader.load(request, CacheStrategy.CACHEONLY, true);
+                    } catch (IOException e1) {
+                        response = null;
+                    }
+                    Document document = null;
+                    if (response != null) {
+                        try {
+                            document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+                            sentences = document.getSentences(pre);
+                        } catch (final Parser.Failure e) {
+                        }
+                    }
+                }
 
                 if (sentences == null) {
-                    init(url.hash(), null, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences");
+                    init(url.hash(), null, ResultClass.SOURCE_METADATA, null);
+                    return;
+                } else {
+                    // use the first lines from the text as snippet
+                    final StringBuilder s = new StringBuilder(snippetMaxLength);
+                    for (final StringBuilder t: sentences) {
+                        s.append(t).append(' ');
+                        if (s.length() >= snippetMaxLength / 4 * 3) break;
+                    }
+                    if (s.length() > snippetMaxLength) { s.setLength(snippetMaxLength); s.trimToSize(); }
+                    init(url.hash(), s.length() > 0 ? s.toString() : this.line, ResultClass.SOURCE_METADATA, null);
                     return;
                 }
             }
 
-            if (this.resultStatus == ResultClass.SOURCE_METADATA) {
-                // if we already know that there is a match then use the first lines from the text as snippet
-                final StringBuilder s = new StringBuilder(snippetMaxLength);
-                for (final StringBuilder t: sentences) {
-                    s.append(t).append(' ');
-                    if (s.length() >= snippetMaxLength / 4 * 3) break;
+            // try to load the resource from the cache
+            Response response = null;
+            try {
+                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB() || cacheStrategy == null) ? CacheStrategy.NOCACHE : cacheStrategy, true);
+            } catch (IOException e) {
+                response = null;
+            }
+
+            if (response == null) {
+                // in case that we did not get any result we can still return a success when we are not allowed to go online
+                if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {
+                    init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
+                    return;
                 }
-                if (s.length() > snippetMaxLength) { s.setLength(snippetMaxLength); s.trimToSize(); }
-                init(url.hash(), s.length() > 0 ? s.toString() : this.line, ResultClass.SOURCE_METADATA, null);
+
+                // if it is still not available, report an error
+                init(url.hash(), null, ResultClass.ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
+                return;
+            }
+
+            if (!isInCache && response != null) {
+                // place entry on indexing queue
+                Switchboard.getSwitchboard().toIndexer(response);
+                this.resultStatus = ResultClass.SOURCE_WEB;
+            }
+
+            Document document = null;
+            try {
+                document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+            } catch (final Parser.Failure e) {
+                init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
+                return;
+            }
+            if (document == null) {
+                init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
+                return;
+            }
+
+            // compute sentences from parsed document
+            sentences = document.getSentences(pre);
+            document.close();
+
+            if (sentences == null) {
+                init(url.hash(), null, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences");
                 return;
             }
 
             try {
-                final SnippetExtractor tsr = new SnippetExtractor(sentences, queryhashes, snippetMaxLength);
+                final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
                 textline = tsr.getSnippet();
                 remainingHashes =  tsr.getRemainingWords();
             } catch (final UnsupportedOperationException e) {
@@ -247,81 +323,6 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
 //        document.close();
         init(url.hash(), snippetLine, source, null);
-    }
-
-    private Document loadDocument(
-            final LoaderDispatcher loader,
-            final URIMetadataRow row,
-            final HandleSet queryhashes,
-            final CacheStrategy cacheStrategy,
-            final DigestURI url,
-            final boolean reindexing,
-            ResultClass source) {
-        /* ===========================================================================
-         * LOAD RESOURCE DATA
-         * =========================================================================== */
-        // if the snippet is not in the cache, we can try to get it from the htcache
-        Response response = null;
-        try {
-            // first try to get the snippet from metadata
-            String loc;
-            final Request request = loader.request(url, true, reindexing);
-            final boolean inCache = de.anomic.crawler.Cache.has(row.hash());
-            final boolean noCacheUsage = url.isFile() || url.isSMB() || cacheStrategy == null;
-            if (containsAllHashes(loc = row.dc_title(), queryhashes) ||
-                containsAllHashes(loc = row.dc_creator(), queryhashes) ||
-                containsAllHashes(loc = row.dc_subject(), queryhashes) ||
-                containsAllHashes(loc = row.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
-                // try to create the snippet from information given in the url
-                if (inCache) response = loader == null ? null : loader.load(request, CacheStrategy.CACHEONLY, true);
-                Document document = null;
-                if (response != null) {
-                    try {
-                        document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-                    } catch (final Parser.Failure e) {
-                    }
-                }
-                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
-                return document;
-            } else {
-                // try to load the resource from the cache
-                response = loader == null ? null : loader.load(request, noCacheUsage ? CacheStrategy.NOCACHE : cacheStrategy, true);
-                if (response == null) {
-                    // in case that we did not get any result we can still return a success when we are not allowed to go online
-                    if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {
-                        init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
-                        return null;
-                    }
-
-                    // if it is still not available, report an error
-                    init(url.hash(), null, ResultClass.ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
-                    return null;
-                } else {
-                    // place entry on indexing queue
-                    Switchboard.getSwitchboard().toIndexer(response);
-                    source = ResultClass.SOURCE_WEB;
-                }
-            }
-        } catch (final Exception e) {
-            //Log.logException(e);
-            init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
-            return null;
-        }
-
-        /* ===========================================================================
-         * PARSE RESOURCE
-         * =========================================================================== */
-        Document document = null;
-        try {
-            document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-        } catch (final Parser.Failure e) {
-            init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
-            return null;
-        }
-        if (document == null) {
-            init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
-        }
-        return document;
     }
 
     private void init(
@@ -495,15 +496,17 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return theWord.toString();
     }
 
-    private static boolean containsAllHashes(
-            final String sentence, final HandleSet queryhashes) {
+    private static void removeMatchingHashes(final String sentence, final HandleSet queryhashes) {
         final SortedMap<byte[], Integer> m = WordTokenizer.hashSentence(sentence, null, 100);
+        ArrayList<byte[]> o = new ArrayList<byte[]>(queryhashes.size());
         for (final byte[] b : queryhashes) {
-            if (!(m.containsKey(b))) {
-                return false;
+            if (m.containsKey(b)) {
+                o.add(b);
             }
         }
-        return true;
+        for (final byte[] b : o) {
+            queryhashes.remove(b);
+        }
     }
 
 }
