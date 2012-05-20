@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class yacysearch {
 
         //get focus option
         prop.put("focus", ((post == null) ? true : post.get("focus", "1").equals("1")) ? 1 : 0);
-        
+
         // produce vocabulary navigation sidebars
         Collection<Vocabulary> vocabularies = LibraryProvider.autotagging.getVocabularies();
         int j = 0;
@@ -212,7 +213,7 @@ public class yacysearch {
 
         // collect search attributes
 
-        int maximumRecords =
+        int itemsPerPage =
             Math.min(
                 (authenticated)
                     ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline()
@@ -275,10 +276,10 @@ public class yacysearch {
             ContentDomain.contentdomParser(post == null ? "all" : post.get("contentdom", "all"));
 
         // patch until better search profiles are available
-        if (contentdom == ContentDomain.IMAGE && (maximumRecords == 10 || maximumRecords == 100)) {
-            maximumRecords = 64;
-        } else if ( maximumRecords > 50 && maximumRecords < 100 ) {
-            maximumRecords = 10;
+        if (contentdom == ContentDomain.IMAGE && (itemsPerPage == 10 || itemsPerPage == 100)) {
+            itemsPerPage = 64;
+        } else if ( contentdom != ContentDomain.IMAGE && itemsPerPage > 50 && itemsPerPage < 100 ) {
+            itemsPerPage = 10;
         }
 
         // check the search tracker
@@ -736,7 +737,7 @@ public class yacysearch {
                     metatags,
                     navigation,
                     snippetFetchStrategy,
-                    maximumRecords,
+                    itemsPerPage,
                     startRecord,
                     urlmask,
                     clustersearch && global ? QueryParams.Searchdom.CLUSTER : (global && indexReceiveGranted
@@ -781,7 +782,7 @@ public class yacysearch {
                     + " - "
                     + theQuery.neededResults()
                     + " links to be computed, "
-                    + theQuery.displayResults()
+                    + theQuery.itemsPerPage()
                     + " lines to be displayed");
             EventChannel.channels(EventChannel.LOCALSEARCH).addMessage(
                 new RSSMessage("Local Search Request", theQuery.queryString, ""));
@@ -858,21 +859,25 @@ public class yacysearch {
                 final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(100, 5).iterator();
                 int meanCount = 0;
                 String suggestion;
-                while ( meanCount < meanMax && meanIt.hasNext() ) {
-                    suggestion = meanIt.next().toString();
-                    prop.put("didYouMean_suggestions_" + meanCount + "_word", suggestion);
-                    prop.put(
-                        "didYouMean_suggestions_" + meanCount + "_url",
-                        QueryParams.navurl(
-                            "html",
-                            0,
-                            theQuery,
-                            suggestion,
-                            originalUrlMask.toString(),
-                            theQuery.navigators).toString());
-                    prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
-                    meanCount++;
-                }
+                try {
+                    meanCollect: while ( meanCount < meanMax && meanIt.hasNext() ) {
+                        try {
+                            suggestion = meanIt.next().toString();
+                            prop.put("didYouMean_suggestions_" + meanCount + "_word", suggestion);
+                            prop.put(
+                                "didYouMean_suggestions_" + meanCount + "_url",
+                                QueryParams.navurl(
+                                    "html",
+                                    0,
+                                    theQuery,
+                                    suggestion,
+                                    originalUrlMask.toString(),
+                                    theQuery.navigators).toString());
+                            prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
+                            meanCount++;
+                        } catch (ConcurrentModificationException e) {break meanCollect;}
+                    }
+                } catch (ConcurrentModificationException e) {}
                 prop.put("didYouMean_suggestions_" + (meanCount - 1) + "_sep", "");
                 prop.put("didYouMean", meanCount > 0 ? 1 : 0);
                 prop.put("didYouMean_suggestions", meanCount);
@@ -931,7 +936,7 @@ public class yacysearch {
                     + indexcount
                     % theSearch.getQuery().itemsPerPage : startRecord + theSearch.getQuery().itemsPerPage,
                 true));
-            prop.put("num-results_itemsPerPage", maximumRecords);
+            prop.put("num-results_itemsPerPage", itemsPerPage);
             prop.put("num-results_totalcount", Formatter.number(indexcount, true));
             prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch)
                 ? "1"
@@ -954,7 +959,7 @@ public class yacysearch {
 
             // compose page navigation
             final StringBuilder resnav = new StringBuilder(200);
-            final int thispage = startRecord / theQuery.displayResults();
+            final int thispage = startRecord / theQuery.itemsPerPage();
             if ( thispage == 0 ) {
                 resnav
                     .append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
@@ -970,7 +975,7 @@ public class yacysearch {
                 resnav
                     .append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
-            final int numberofpages = Math.min(10, 1 + ((indexcount - 1) / theQuery.displayResults()));
+            final int numberofpages = Math.min(10, 1 + ((indexcount - 1) / theQuery.itemsPerPage()));
 
             for ( int i = 0; i < numberofpages; i++ ) {
                 if ( i == thispage ) {
@@ -1012,11 +1017,11 @@ public class yacysearch {
             prop.put("pageNavBottom_resnav", resnavs);
 
             // generate the search result lines; the content will be produced by another servlet
-            for ( int i = 0; i < theQuery.displayResults(); i++ ) {
+            for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {
                 prop.put("results_" + i + "_item", startRecord + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
             }
-            prop.put("results", theQuery.displayResults());
+            prop.put("results", theQuery.itemsPerPage());
             prop
                 .put(
                     "resultTable",
@@ -1050,7 +1055,7 @@ public class yacysearch {
             String hostName = header.get("Host", "localhost");
             if ( hostName.indexOf(':', 0) == -1 ) {
                 hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
-            }           
+            }
             prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
             prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
             prop.put("thisaddress", hostName);
@@ -1058,7 +1063,7 @@ public class yacysearch {
 
         prop.put("searchagain", global ? "1" : "0");
         prop.putHTML("former", originalquerystring);
-        prop.put("count", maximumRecords);
+        prop.put("count", itemsPerPage);
         prop.put("offset", startRecord);
         prop.put("resource", global ? "global" : "local");
         prop.putHTML("urlmaskfilter", originalUrlMask);

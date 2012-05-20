@@ -34,7 +34,7 @@ public class yacysearchlatestinfo {
 
         // dynamically update count values
         final int totalcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
-        final int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
+        final int offset = theQuery.neededResults() - theQuery.itemsPerPage() + 1;
         prop.put("offset", offset);
         prop.put("itemscount",Formatter.number(offset + theSearch.getQuery().itemsPerPage >= totalcount ? offset + totalcount % theSearch.getQuery().itemsPerPage - 1 : offset + theSearch.getQuery().itemsPerPage - 1));
         prop.put("itemsperpage", theSearch.getQuery().itemsPerPage);

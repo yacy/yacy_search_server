@@ -282,7 +282,7 @@ public final class QueryParams {
         return this.offset + this.itemsPerPage;
     }
 
-    public int displayResults() {
+    public int itemsPerPage() {
         // the number of result lines that are displayed at once (size of result page)
         return this.itemsPerPage;
     }
@@ -537,7 +537,7 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("startRecord=");
-        sb.append(page * theQuery.displayResults());
+        sb.append(page * theQuery.itemsPerPage());
 
         return sb;
     }
@@ -554,7 +554,7 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("maximumRecords=");
-        sb.append(theQuery.displayResults());
+        sb.append(theQuery.itemsPerPage());
 
         sb.append(ampersand);
         sb.append("resource=");
