@@ -306,8 +306,9 @@ public class IndexControlRWIs_p
                     Seed seed = null;
                     if ( host.length() != 0 ) {
                         if ( host.length() == 12 ) {
-                            // the host string is a peer hash
-                            seed = sb.peers.getConnected(host);
+                            // the host string is !likely! a peer hash (or peer name with 12 chars)
+                            seed = sb.peers.getConnected(host); // check for seed.hash
+                            if (seed == null) seed = sb.peers.lookupByName(host); // check for peer name
                         } else {
                             // the host string can be a host name
                             seed = sb.peers.lookupByName(host);
@@ -317,59 +318,63 @@ public class IndexControlRWIs_p
                         seed = sb.peers.getConnected(host);
                     }
 
-                    // prepare index
-                    ReferenceContainer<WordReference> index;
-                    final long starttime = System.currentTimeMillis();
-                    index = segment.termIndex().get(keyhash, null);
-                    // built urlCache
-                    final Iterator<WordReference> urlIter = index.entries();
-                    final TreeMap<byte[], URIMetadataRow> knownURLs =
-                        new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
-                    final HandleSet unknownURLEntries =
-                        new HandleSet(
-                            WordReferenceRow.urlEntryRow.primaryKeyLength,
-                            WordReferenceRow.urlEntryRow.objectOrder,
-                            index.size());
-                    Reference iEntry;
-                    URIMetadataRow lurl;
-                    while ( urlIter.hasNext() ) {
-                        iEntry = urlIter.next();
-                        lurl = segment.urlMetadata().load(iEntry.urlhash());
-                        if ( lurl == null ) {
-                            try {
-                                unknownURLEntries.put(iEntry.urlhash());
-                            } catch ( final RowSpaceExceededException e ) {
-                                Log.logException(e);
+                    if (seed != null) { // if no seed found skip transfer
+                        // prepare index
+                        ReferenceContainer<WordReference> index;
+                        final long starttime = System.currentTimeMillis();
+                        index = segment.termIndex().get(keyhash, null);
+                        // built urlCache
+                        final Iterator<WordReference> urlIter = index.entries();
+                        final TreeMap<byte[], URIMetadataRow> knownURLs =
+                                new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
+                        final HandleSet unknownURLEntries =
+                                new HandleSet(
+                                WordReferenceRow.urlEntryRow.primaryKeyLength,
+                                WordReferenceRow.urlEntryRow.objectOrder,
+                                index.size());
+                        Reference iEntry;
+                        URIMetadataRow lurl;
+                        while (urlIter.hasNext()) {
+                            iEntry = urlIter.next();
+                            lurl = segment.urlMetadata().load(iEntry.urlhash());
+                            if (lurl == null) {
+                                try {
+                                    unknownURLEntries.put(iEntry.urlhash());
+                                } catch (final RowSpaceExceededException e) {
+                                    Log.logException(e);
+                                }
+                                urlIter.remove();
+                            } else {
+                                knownURLs.put(iEntry.urlhash(), lurl);
                             }
-                            urlIter.remove();
-                        } else {
-                            knownURLs.put(iEntry.urlhash(), lurl);
                         }
-                    }
 
-                    // make an indexContainerCache
-                    final ReferenceContainerCache<WordReference> icc =
-                        new ReferenceContainerCache<WordReference>(
-                            Segment.wordReferenceFactory,
-                            Segment.wordOrder,
-                            Word.commonHashLength);
-                    try {
-                        icc.add(index);
-                    } catch ( final RowSpaceExceededException e ) {
-                        Log.logException(e);
-                    }
+                        // make an indexContainerCache
+                        final ReferenceContainerCache<WordReference> icc =
+                                new ReferenceContainerCache<WordReference>(
+                                Segment.wordReferenceFactory,
+                                Segment.wordOrder,
+                                Word.commonHashLength);
+                        try {
+                            icc.add(index);
+                        } catch (final RowSpaceExceededException e) {
+                            Log.logException(e);
+                        }
 
-                    // transport to other peer
-                    final boolean gzipBody = sb.getConfigBool("indexControl.gzipBody", false);
-                    final int timeout = (int) sb.getConfigLong("indexControl.timeout", 60000);
-                    final String error = Protocol.transferIndex(seed, icc, knownURLs, gzipBody, timeout);
-                    prop.put("result", (error == null) ? ("Successfully transferred "
-                        + knownURLs.size()
-                        + " words in "
-                        + ((System.currentTimeMillis() - starttime) / 1000)
-                        + " seconds, "
-                        + unknownURLEntries.size() + " URL not found") : "error: " + error);
-                    index = null;
+                        // transport to other peer
+                        final boolean gzipBody = sb.getConfigBool("indexControl.gzipBody", false);
+                        final int timeout = (int) sb.getConfigLong("indexControl.timeout", 60000);
+                        final String error = Protocol.transferIndex(seed, icc, knownURLs, gzipBody, timeout);
+                        prop.put("result", (error == null) ? ("Successfully transferred "
+                                + knownURLs.size()
+                                + " words in "
+                                + ((System.currentTimeMillis() - starttime) / 1000)
+                                + " seconds, "
+                                + unknownURLEntries.size() + " URL not found") : "error: " + error);
+                        index = null;
+                    } else {
+                        prop.put("result", "Peer " + host + " not found");
+                    }          
                 } catch ( final IOException e ) {
                     Log.logException(e);
                 }

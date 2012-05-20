@@ -74,7 +74,7 @@ public class MapColumnIndex {
             line = table.next();
             String value = line.getValue().get(whereKey);
             if (value == null) continue; // we don't need to remember that
-            indexupdate(line.getKey(), valueIdxMap, value);
+            indexupdate(line.getKey(), valueIdxMap, value.toLowerCase()); // add the entry lowercase (needed for seedDB.lookupByName)
         }
     }
 
