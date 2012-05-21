@@ -205,6 +205,7 @@ public final class HTTPLoader {
                     header,
                     Integer.toString(code),
                     profile,
+                    false,
                     responseBody
             );
 
@@ -273,6 +274,7 @@ public final class HTTPLoader {
                         header,
                         Integer.toString(code),
                         null,
+                        false,
                         responseBody
                 );
 

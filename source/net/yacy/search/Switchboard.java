@@ -1794,7 +1794,7 @@ public final class Switchboard extends serverSwitch
                     0,
                     0,
                     0);
-            response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
+            response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile, false);
             final indexingQueueEntry queueEntry =
                 new indexingQueueEntry(Segments.Process.SURROGATES, response, new Document[] {
                     document

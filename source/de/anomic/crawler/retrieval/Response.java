@@ -66,6 +66,7 @@ public class Response {
     private final  CrawlProfile       profile;
     private        byte[]             content;
     private        int                status;          // tracker indexing status, see status defs below
+    private final  boolean            fromCache;
 
     // doctype calculation
     public static char docType(final MultiProtocolURI url) {
@@ -151,6 +152,7 @@ public class Response {
             final ResponseHeader responseHeader,
             final String responseStatus,
             final CrawlProfile profile,
+            final boolean fromCache,
             final byte[] content) {
         this.request = request;
         // request and response headers may be zero in case that we process surrogates
@@ -160,6 +162,7 @@ public class Response {
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
         this.content = content;
+        this.fromCache = fromCache;
     }
 
     /**
@@ -179,6 +182,7 @@ public class Response {
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
         this.content = request.name().length() > 0 ? request.name().getBytes() : request.url().toTokens().getBytes();
+        this.fromCache = true;
     }
 
     public Response(
@@ -186,8 +190,9 @@ public class Response {
             final RequestHeader requestHeader,
             final ResponseHeader responseHeader,
             final String responseStatus,
-            final CrawlProfile profile) {
-        this(request, requestHeader, responseHeader, responseStatus, profile, null);
+            final CrawlProfile profile,
+            final boolean fromCache) {
+        this(request, requestHeader, responseHeader, responseStatus, profile, fromCache, null);
     }
 
     public void updateStatus(final int newStatus) {
@@ -196,6 +201,10 @@ public class Response {
 
     public ResponseHeader getResponseHeader() {
         return this.responseHeader;
+    }
+
+    public boolean fromCache() {
+        return this.fromCache;
     }
 
     public int getStatus() {

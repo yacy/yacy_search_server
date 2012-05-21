@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -38,9 +38,6 @@ import java.util.List;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
-
-import de.anomic.crawler.CrawlProfile;
-
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -53,11 +50,12 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
+import de.anomic.crawler.CrawlProfile;
 
 public class SMBLoader {
 
     public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
-    
+
     private final Switchboard sb;
     private final Log log;
     private final long maxFileSize;
@@ -65,20 +63,20 @@ public class SMBLoader {
     public SMBLoader(final Switchboard sb, final Log log) {
         this.sb = sb;
         this.log = log;
-        maxFileSize = sb.getConfigLong("crawler.smb.maxFileSize", -1l);
+        this.maxFileSize = sb.getConfigLong("crawler.smb.maxFileSize", -1l);
     }
-    
-    
+
+
     public Response load(final Request request, boolean acceptOnlyParseable) throws IOException {
         DigestURI url = request.url();
         if (!url.getProtocol().equals("smb")) throw new IOException("wrong loader for SMBLoader: " + url.getProtocol());
 
         RequestHeader requestHeader = new RequestHeader();
         if (request.referrerhash() != null) {
-            DigestURI ur = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
+            DigestURI ur = this.sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
             if (ur != null) requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true, false));
         }
-        
+
         // process directories: transform them to html with meta robots=noindex (using the ftpc lib)
         String[] l = null;
         try {l = url.list();} catch (IOException e) {}
@@ -103,30 +101,31 @@ public class SMBLoader {
                 }
                 list.add(u + s);
             }
-         
+
             StringBuilder content = FTPClient.dirhtml(u, null, null, null, list, true);
-            
+
             ResponseHeader responseHeader = new ResponseHeader();
             responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-            final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
+            final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
             Response response = new Response(
-                    request, 
+                    request,
                     requestHeader,
                     responseHeader,
                     "200",
                     profile,
+                    false,
                     content.toString().getBytes());
-            
+
             return response;
         }
-        
+
         // create response header
         String mime = Classification.ext2mime(url.getFileExtension());
         ResponseHeader responseHeader = new ResponseHeader();
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date(url.lastModified())));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
-        
+
         // check mime type and availability of parsers
         // and also check resource size and limitation of the size
         long size;
@@ -137,46 +136,48 @@ public class SMBLoader {
         }
         String parserError = null;
         if ((acceptOnlyParseable && (parserError = TextParser.supports(url, mime)) != null) ||
-            (size > maxFileSize && maxFileSize >= 0)) {
+            (size > this.maxFileSize && this.maxFileSize >= 0)) {
             // we know that we cannot process that file before loading
             // only the metadata is returned
-            
+
             if (parserError != null) {
-                log.logInfo("No parser available in SMB crawler: '" + parserError + "' for URL " + request.url().toString() + ": parsing only metadata");
+                this.log.logInfo("No parser available in SMB crawler: '" + parserError + "' for URL " + request.url().toString() + ": parsing only metadata");
             } else {
-                log.logInfo("Too big file in SMB crawler with size = " + size + " Bytes for URL " + request.url().toString() + ": parsing only metadata");
+                this.log.logInfo("Too big file in SMB crawler with size = " + size + " Bytes for URL " + request.url().toString() + ": parsing only metadata");
             }
-            
+
             // create response with metadata only
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
-            final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
+            final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
             Response response = new Response(
-                    request, 
+                    request,
                     requestHeader,
                     responseHeader,
                     "200",
                     profile,
+                    false,
                     url.toTokens().getBytes());
             return response;
         }
-        
+
         // load the resource
         InputStream is = url.getInputStream(null, -1);
         byte[] b = FileUtils.read(is);
         is.close();
-        
+
         // create response with loaded content
-        final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
+        final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
         Response response = new Response(
-                request, 
+                request,
                 requestHeader,
                 responseHeader,
                 "200",
                 profile,
+                false,
                 b);
         return response;
     }
- 
+
     public static void main(String[] args) {
         //jcifs.Config.setProperty( "jcifs.netbios.wins", "192.168.1.220" );
         //NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("domain", "username", "password");

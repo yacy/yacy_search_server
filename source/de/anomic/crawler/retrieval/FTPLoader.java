@@ -134,6 +134,7 @@ public class FTPLoader {
                             responseHeader,
                             "200",
                             profile,
+                            false,
                             dirList.toString().getBytes());
                 }
             } else {
@@ -253,6 +254,7 @@ public class FTPLoader {
                     responseHeader,
                     "200",
                     profile,
+                    false,
                     null);
             return response;
         }
@@ -268,6 +270,7 @@ public class FTPLoader {
                 responseHeader,
                 "200",
                 profile,
+                false,
                 b);
         return response;
     }

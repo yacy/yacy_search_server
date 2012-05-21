@@ -218,6 +218,7 @@ public final class LoaderDispatcher {
                         cachedResponse,
                         "200",
                         crawlProfile,
+                        true,
                         content);
 
                 // check which caching strategy shall be used

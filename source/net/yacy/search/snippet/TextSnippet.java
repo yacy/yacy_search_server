@@ -201,12 +201,10 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             removeMatchingHashes(row.dc_subject(), remainingHashes);
             removeMatchingHashes(row.url().toNormalform(true, true).replace('-', ' '), remainingHashes);
 
-            boolean isInCache = de.anomic.crawler.Cache.has(url.hash());
-
             if (remainingHashes.size() == 0) {
                 // the snippet is fully inside the metadata!
 
-                if (isInCache) {
+                if (de.anomic.crawler.Cache.has(url.hash())) {
                     // get the sentences from the cache
                     final Request request = loader.request(url, true, reindexing);
                     Response response;
@@ -261,7 +259,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 return;
             }
 
-            if (!isInCache && response != null) {
+            if (!response.fromCache()) {
                 // place entry on indexing queue
                 Switchboard.getSwitchboard().toIndexer(response);
                 this.resultStatus = ResultClass.SOURCE_WEB;
