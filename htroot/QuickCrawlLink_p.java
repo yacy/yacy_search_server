@@ -37,6 +37,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.util.NumberTools;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
@@ -83,7 +84,7 @@ public class QuickCrawlLink_p {
             int port = 80;
             final int pos = hostSocket.indexOf(':',0);
             if (pos != -1) {
-                port = Integer.parseInt(hostSocket.substring(pos + 1));
+                port = NumberTools.parseIntDecSubstring(hostSocket, pos + 1);
                 //host = hostSocket.substring(0, pos);
             }
 

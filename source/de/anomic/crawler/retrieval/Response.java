@@ -40,6 +40,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.util.NumberTools;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 
@@ -349,7 +350,7 @@ public class Response {
                     final Date date = this.responseHeader.date();
                     if (date == null) return "stale_no_date_given_in_response";
                     try {
-                        final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
+                        final long ttl = 1000 * NumberTools.parseLongDecSubstring(cacheControl, 8); // milliseconds to live
                         if (GenericFormatter.correctedUTCTime() - date.getTime() > ttl) {
                             //System.out.println("***not indexed because cache-control");
                             return "stale_expired";
@@ -517,7 +518,7 @@ public class Response {
                     // we need also the load date
                     if (date == null) { return false; }
                     try {
-                        final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
+                        final long ttl = 1000 * NumberTools.parseLongDecSubstring(cacheControl, 8); // milliseconds to live
                         if (GenericFormatter.correctedUTCTime() - date.getTime() > ttl) {
                             return false;
                         }
@@ -663,7 +664,7 @@ public class Response {
                         return "Stale_(no_date_given_in_response)";
                     }
                     try {
-                        final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
+                        final long ttl = 1000 * NumberTools.parseLongDecSubstring(cacheControl,8); // milliseconds to live
                         if (GenericFormatter.correctedUTCTime() - date.getTime() > ttl) {
                             //System.out.println("***not indexed because cache-control");
                             return "Stale_(expired_by_cache-control)";

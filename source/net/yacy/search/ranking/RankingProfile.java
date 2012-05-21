@@ -33,6 +33,7 @@ import java.util.Map;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.NumberTools;
 
 public class RankingProfile {
 
@@ -145,7 +146,7 @@ public class RankingProfile {
                     p = e.indexOf('=');
                     if (p < 0) System.out.println("DEBUG: bug in plasmaSearchRankingProfile: e = " + e);
                     if ((p > 0) && (e.length() > p + 1)) try {
-                        coeff.put(e.substring(s, p), Integer.valueOf(Integer.parseInt(e.substring(p + 1))));
+                        coeff.put(e.substring(s, p), Integer.valueOf(NumberTools.parseIntDecSubstring(e, p + 1)));
                     } catch (final NumberFormatException e1) {
                         System.out.println("wrong parameter: " + e.substring(s, p) + "=" + e.substring(p + 1));
                         Log.logException(e1);

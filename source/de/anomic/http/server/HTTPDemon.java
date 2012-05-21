@@ -65,6 +65,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.NumberTools;
 import net.yacy.search.Switchboard;
 
 import org.apache.commons.fileupload.FileItem;
@@ -269,7 +270,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             // default port 80
             return false; // not allowed
         }
-        if (Integer.parseInt(host.substring(pos + 1)) == 80) return false;
+        if (NumberTools.parseIntDecSubstring(host, pos + 1) == 80) return false;
 
         // the access path must be into the yacy protocol path; it must start with 'yacy'
         if (!(prop.containsKey(HeaderFramework.CONNECTION_PROP_PATH) && ((String) prop.get(HeaderFramework.CONNECTION_PROP_PATH)).startsWith("/yacy/"))) return false;
@@ -596,7 +597,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         pos = arg.indexOf(':');
         int port = 443;
         if (pos >= 0) {
-            port = Integer.parseInt(arg.substring(pos + 1));
+            port = NumberTools.parseIntDecSubstring(arg, pos + 1);
             //the offcut: arg = arg.substring(0, pos);
         }
 
@@ -755,8 +756,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 try {
                     if (s.length() >= pos + 6 && (s.charAt(pos + 1) == 'u' || s.charAt(pos + 1) == 'U')) {
                         // non-standard encoding of IE for unicode-chars
-                        final int bh = Integer.parseInt(s.substring(pos + 2, pos + 4), 16);
-                        final int bl = Integer.parseInt(s.substring(pos + 4, pos + 6), 16);
+                        final int bh = NumberTools.parseIntDecSubstring(s.substring(pos + 2, pos + 4), 16);
+                        final int bl = NumberTools.parseIntDecSubstring(s.substring(pos + 4, pos + 6), 16);
                         // TODO: needs conversion from UTF-16 to UTF-8
                         baos.write(bh);
                         baos.write(bl);
@@ -1054,7 +1055,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final int port;
             final int pos = host.indexOf(':');
             if (pos != -1) {
-                port = Integer.parseInt(host.substring(pos + 1));
+                port = NumberTools.parseIntDecSubstring(host, pos + 1);
                 host = host.substring(0, pos);
             } else {
                 port = 80;

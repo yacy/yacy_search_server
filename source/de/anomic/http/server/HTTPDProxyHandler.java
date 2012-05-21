@@ -84,6 +84,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.NumberTools;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -341,7 +342,7 @@ public final class HTTPDProxyHandler {
             if ((pos = host.indexOf(':')) < 0) {
                 port = 80;
             } else {
-                port = Integer.parseInt(host.substring(pos + 1));
+                port = NumberTools.parseIntDecSubstring(host, pos + 1);
                 host = host.substring(0, pos);
             }
 
@@ -457,7 +458,7 @@ public final class HTTPDProxyHandler {
             if ((pos = host.indexOf(':')) < 0) {
                 port = 80;
             } else {
-                port = Integer.parseInt(host.substring(pos + 1));
+                port = NumberTools.parseIntDecSubstring(host, pos + 1);
                 host = host.substring(0, pos);
             }
 
@@ -753,7 +754,7 @@ public final class HTTPDProxyHandler {
             if ((pos = host.indexOf(':')) < 0) {
                 port = 80;
             } else {
-                port = Integer.parseInt(host.substring(pos + 1));
+                port = NumberTools.parseIntDecSubstring(host, pos + 1);
                 host = host.substring(0, pos);
             }
 
@@ -870,7 +871,7 @@ public final class HTTPDProxyHandler {
             if ((pos = host.indexOf(':')) < 0) {
                 port = 80;
             } else {
-                port = Integer.parseInt(host.substring(pos + 1));
+                port = NumberTools.parseIntDecSubstring(host, pos + 1);
                 host = host.substring(0, pos);
             }
 
@@ -1196,7 +1197,7 @@ public final class HTTPDProxyHandler {
         if ((pos = host.indexOf(':')) < 0) {
             port = 80;
         } else {
-            port = Integer.parseInt(host.substring(pos + 1));
+            port = NumberTools.parseIntDecSubstring(host, pos + 1);
             host = host.substring(0, pos);
         }
 

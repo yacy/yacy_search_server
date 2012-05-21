@@ -36,6 +36,7 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.NumberTools;
 
 
 public class Relations {
@@ -59,11 +60,11 @@ public class Relations {
         if (p >= 0) filename = filename.substring(0, p);
         p = filename.lastIndexOf('-');
         assert p >= 0;
-        final int payloadsize = Integer.parseInt(filename.substring(p + 1));
+        final int payloadsize = NumberTools.parseIntDecSubstring(filename, p + 1);
         filename = filename.substring(0, p);
         p = filename.lastIndexOf('-');
         assert p >= 0;
-        final int keysize = Integer.parseInt(filename.substring(p + 1));
+        final int keysize = NumberTools.parseIntDecSubstring(filename, p + 1);
         return rowdef(keysize, payloadsize);
     }
 

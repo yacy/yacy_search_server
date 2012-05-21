@@ -29,6 +29,7 @@
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.util.NumberTools;
 import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -52,7 +53,7 @@ public class YaCySearchPluginFF {
         int port = 80;
         final int pos = hostSocket.indexOf(':',0);
         if (pos != -1) {
-            port = Integer.parseInt(hostSocket.substring(pos + 1));
+            port = NumberTools.parseIntDecSubstring(hostSocket, pos + 1);
             host = hostSocket.substring(0, pos);
         }
 

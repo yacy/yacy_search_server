@@ -50,6 +50,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.util.NumberTools;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.ZURL.FailCategory;
@@ -77,7 +78,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         int p = 0;
         if (attr != null && (p = attr.indexOf(" x ",0)) > 0) {
             this.width = Integer.parseInt(attr.substring(0, p).trim());
-            this.height = Integer.parseInt(attr.substring(p + 3).trim());
+            this.height = NumberTools.parseIntDecSubstring(attr, p + 3);
         }
         this.ranking = ranking; // the smaller the better! small values should be shown first
         if ((this.name == null) || (this.name.length() == 0)) this.name = "_";

@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.kelondro.util.NumberTools;
 
 
 /**
@@ -554,7 +555,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         if ((pos = host.indexOf(':')) < 0) {
             port = 80;
         } else {
-            port = Integer.parseInt(host.substring(pos + 1));
+            port = NumberTools.parseIntDecSubstring(host, pos + 1);
             host = host.substring(0, pos);
         }
 

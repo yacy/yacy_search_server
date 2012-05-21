@@ -29,6 +29,7 @@ package net.yacy.kelondro.index;
 
 import java.io.Serializable;
 
+import net.yacy.kelondro.util.NumberTools;
 import net.yacy.kelondro.util.kelondroException;
 
 public final class Column implements Cloneable, Serializable {
@@ -60,7 +61,7 @@ public final class Column implements Cloneable, Serializable {
         this.nickname = nickname;
         this.description = description;
     }
-    
+
     public Column(String celldef) {
         // define column with column syntax
         // example: <UDate-3>
@@ -134,7 +135,7 @@ public final class Column implements Cloneable, Serializable {
             final int q = celldef.indexOf(' ');
             if (q < 0) {
                 try {
-                    this.cellwidth = Integer.parseInt(celldef.substring(p + 1));
+                    this.cellwidth = NumberTools.parseIntDecSubstring(celldef, p + 1);
                 } catch (final NumberFormatException e) {
                     throw new kelondroException("kelondroColumn - cellwidth description wrong:" + celldef.substring(p + 1));
                 }
@@ -200,6 +201,7 @@ public final class Column implements Cloneable, Serializable {
      * th clone method is useful to produce a similiar column with a different cell width
      * @return the cloned Column
      */
+    @Override
     public Object clone() {
     	return new Column(this.nickname, this.celltype, this.encoder, this.cellwidth, this.description);
     }

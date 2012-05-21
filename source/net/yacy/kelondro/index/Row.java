@@ -46,6 +46,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.NumberTools;
 import net.yacy.kelondro.util.kelondroException;
 
 
@@ -316,7 +317,7 @@ public final class Row implements Serializable {
                     } else {
                         if ((decimalCardinal) && (col.celltype == Column.celltype_cardinal)) {
                             try {
-                                setCol(col.encoder, this.offset + clstrt, col.cellwidth,  Long.parseLong(token.substring(p + 1).trim()));
+                                setCol(col.encoder, this.offset + clstrt, col.cellwidth, NumberTools.parseLongDecSubstring(token, p + 1));
                             } catch (final NumberFormatException e) {
                                 Log.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(col.encoder, this.offset + clstrt, col.cellwidth, 0);
@@ -324,7 +325,7 @@ public final class Row implements Serializable {
                         } else if ((decimalCardinal) && (col.celltype == Column.celltype_binary)) {
                             assert col.cellwidth == 1;
                             try {
-                                setCol(clstrt, col.cellwidth, new byte[]{(byte) Integer.parseInt(token.substring(p + 1).trim())});
+                                setCol(clstrt, col.cellwidth, new byte[]{(byte) NumberTools.parseIntDecSubstring(token, p + 1)});
                             } catch (final NumberFormatException e) {
                                 Log.logSevere("kelondroRow", "NumberFormatException for celltype_binary, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(clstrt, col.cellwidth, new byte[]{0});
