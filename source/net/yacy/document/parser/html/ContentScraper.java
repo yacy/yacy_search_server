@@ -47,6 +47,7 @@ import javax.swing.event.EventListenerList;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.Evaluation.Element;
@@ -780,7 +781,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         try {
             final int pos = s.indexOf(';');
             if (pos < 0) return 9999;
-            final int i = Integer.parseInt(s.substring(0, pos));
+            final int i = NumberTools.parseIntDecSubstring(s, 0, pos);
             return i;
         } catch (final NumberFormatException e) {
             return 9999;

@@ -29,7 +29,7 @@ package net.yacy.kelondro.index;
 
 import java.io.Serializable;
 
-import net.yacy.kelondro.util.NumberTools;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.util.kelondroException;
 
 public final class Column implements Cloneable, Serializable {
@@ -142,7 +142,7 @@ public final class Column implements Cloneable, Serializable {
                 celldef = "";
             } else {
                 try {
-                    this.cellwidth = Integer.parseInt(celldef.substring(p + 1, q));
+                    this.cellwidth = NumberTools.parseIntDecSubstring(celldef, p + 1, q);
                 } catch (final NumberFormatException e) {
                     throw new kelondroException("kelondroColumn - cellwidth description wrong:" + celldef.substring(p + 1, q));
                 }

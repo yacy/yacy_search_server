@@ -51,6 +51,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
@@ -611,13 +612,13 @@ public class MediawikiImporter extends Thread implements Importer {
                 p += 7;
                 int q = s.indexOf('"', p + 1);
                 if (q < 0) return null;
-                start = Long.parseLong(s.substring(p, q));
+                start = NumberTools.parseLongDecSubstring(s, p, q);
                 p = s.indexOf("length=\"", q);
                 if (p < 0) return null;
                 p += 8;
                 q = s.indexOf('"', p + 1);
                 if (q < 0) return null;
-                final int length = Integer.parseInt(s.substring(p, q));
+                final int length = NumberTools.parseIntDecSubstring(s, p, q);
                 //Log.logInfo("WIKITRANSLATION", "start = " + start + ", length = " + length);
                 return new wikisourcerecord(title, start, start + length);
             }

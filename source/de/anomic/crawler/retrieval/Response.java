@@ -36,11 +36,11 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.util.NumberTools;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 

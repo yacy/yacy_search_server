@@ -19,7 +19,9 @@
  */
 
 
-package net.yacy.kelondro.util;
+package net.yacy.cora.util;
+
+import java.util.Random;
 
 public class NumberTools {
 
@@ -31,14 +33,18 @@ public class NumberTools {
      * @return the number
      * @throws NumberFormatException
      */
+    public static final long parseLongDecSubstring(String s) throws NumberFormatException {
+        if (s == null) throw new NumberFormatException(s);
+        return parseLongDecSubstring(s, 0, s.length());
+    }
+
     public static final long parseLongDecSubstring(String s, int startPos) throws NumberFormatException {
-        if (s == null) {
-            throw new NumberFormatException("null");
-        }
-        final int len = s.length();
-        if (len <= startPos) {
-            throw new NumberFormatException(s);
-        }
+        if (s == null) throw new NumberFormatException(s);
+        return parseLongDecSubstring(s, startPos, s.length());
+    }
+
+    public static final long parseLongDecSubstring(String s, int startPos, final int endPos) throws NumberFormatException {
+        if (s == null || endPos > s.length() || endPos <= startPos) throw new NumberFormatException(s);
 
         long result = 0;
         boolean negative = false;
@@ -54,15 +60,14 @@ public class NumberTools {
                 negative = true;
                 limit = Long.MIN_VALUE;
             } else if (firstChar != '+') throw new NumberFormatException(s);
-
-            if (len == 1) throw new NumberFormatException(s);
             i++;
+            if (endPos == i) throw new NumberFormatException(s);
         }
         multmin = limit / 10;
-        while (i < len) {
+        while (i < endPos) {
             c = s.charAt(i++);
             if (c == ' ') break;
-            digit = c - 48;
+            digit = c - '0';
             if (digit < 0 || digit > 9 || result < multmin) throw new NumberFormatException(s);
             result *= 10;
             if (result < limit + digit) throw new NumberFormatException(s);
@@ -71,15 +76,18 @@ public class NumberTools {
         return negative ? result : -result;
     }
 
-    public static final int parseIntDecSubstring(String s, int startPos) throws NumberFormatException {
-        if (s == null) {
-            throw new NumberFormatException("null");
-        }
+    public static final int parseIntDecSubstring(String s) throws NumberFormatException {
+        if (s == null) throw new NumberFormatException(s);
+        return parseIntDecSubstring(s, 0, s.length());
+    }
 
-        final int len = s.length();
-        if (len <= startPos) {
-            throw new NumberFormatException(s);
-        }
+    public static final int parseIntDecSubstring(String s, int startPos) throws NumberFormatException {
+        if (s == null) throw new NumberFormatException(s);
+        return parseIntDecSubstring(s, startPos, s.length());
+    }
+
+    public static final int parseIntDecSubstring(String s, int startPos, final int endPos) throws NumberFormatException {
+        if (s == null || endPos > s.length() || endPos <= startPos) throw new NumberFormatException(s);
 
         int result = 0;
         boolean negative = false;
@@ -95,17 +103,17 @@ public class NumberTools {
                 negative = true;
                 limit = Integer.MIN_VALUE;
             } else if (firstChar != '+') throw new NumberFormatException(s);
-
-            if (len == 1) throw new NumberFormatException(s);
             i++;
+            if (endPos == i) throw new NumberFormatException(s);
         }
         multmin = limit / 10;
-        while (i < len) {
+        while (i < endPos) {
             c = s.charAt(i++);
             if (c == ' ') break;
-            digit = c - 48;
+            digit = c - '0';
             if (digit < 0  || digit > 9 || result < multmin) throw new NumberFormatException(s);
             result *= 10;
+            //result = (result << 3) + (result << 1);
             if (result < limit + digit) throw new NumberFormatException(s);
             result -= digit;
         }
@@ -114,5 +122,37 @@ public class NumberTools {
 
     public static void main(String[] args) {
         System.out.println("the number is " + parseLongDecSubstring("number=78 ", 7));
+        System.out.println("the number is " + parseIntDecSubstring("number=78x ", 7, 9));
+        Random r = new Random(1);
+        String[] s = new String[1000000];
+        for (int i = 0; i < s.length; i++) s[i] = "abc " + Integer.toString(r.nextInt()) + " ";
+        long d = 0;
+        long t0 = System.currentTimeMillis();
+        for (String element : s) {
+            d += Integer.parseInt(element.substring(4).trim());
+        }
+        System.out.println("java: " + d + " - " + (System.currentTimeMillis() - t0) + " millis");
+        d = 0;
+        t0 = System.currentTimeMillis();
+        for (String element : s) {
+            d += parseIntDecSubstring(element, 4);
+        }
+        System.out.println("cora: " + d + " - " + (System.currentTimeMillis() - t0) + " millis");
+
+        r = new Random(1);
+        for (int i = 0; i < s.length; i++) s[i] = Integer.toString(r.nextInt());
+
+        d = 0;
+        t0 = System.currentTimeMillis();
+        for (String element : s) {
+            d += Integer.parseInt(element);
+        }
+        System.out.println("java: " + d + " - " + (System.currentTimeMillis() - t0) + " millis");
+        d = 0;
+        t0 = System.currentTimeMillis();
+        for (String element : s) {
+            d += parseIntDecSubstring(element);
+        }
+        System.out.println("cora: " + d + " - " + (System.currentTimeMillis() - t0) + " millis");
     }
 }

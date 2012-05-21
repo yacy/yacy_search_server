@@ -27,14 +27,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.server.serverCore;
-import java.util.*;
 
 
 public final class OS {
@@ -168,7 +170,7 @@ public final class OS {
 	public static int getPID() {
         final String pids = ManagementFactory.getRuntimeMXBean().getName();
         final int p = pids.indexOf('@');
-        return p >= 0 ? Integer.parseInt(pids.substring(0, p)) : -1;
+        return p >= 0 ? NumberTools.parseIntDecSubstring(pids, 0, p) : -1;
 	}
 
 	public static void execAsynchronous(final File scriptFile) throws IOException {

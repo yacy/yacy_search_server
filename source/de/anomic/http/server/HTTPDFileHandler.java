@@ -97,6 +97,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ScraperInputStream;
@@ -1155,7 +1156,7 @@ public final class HTTPDFileHandler {
                                 final String rangesVal = rangeHeaderVal.substring("bytes=".length());
                                 final String[] ranges = rangesVal.split(",");
                                 if ((ranges.length == 1)&&(ranges[0].endsWith("-"))) {
-                                    rangeStartOffset = Integer.parseInt(ranges[0].substring(0,ranges[0].length()-1));
+                                    rangeStartOffset = NumberTools.parseIntDecSubstring(ranges[0], 0, ranges[0].length() - 1);
                                     statusCode = 206;
                                     header.put(HeaderFramework.CONTENT_RANGE, "bytes " + rangeStartOffset + "-" + (targetFile.length()-1) + "/" + targetFile.length());
                                 }

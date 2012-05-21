@@ -58,6 +58,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -65,7 +66,6 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.NumberTools;
 import net.yacy.search.Switchboard;
 
 import org.apache.commons.fileupload.FileItem;
@@ -796,7 +796,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         for (int i = 0, len = s.length(); i < len; i++) {
             if (s.charAt(i) == '&' && (end = s.indexOf(';', i + 1)) > i) {
                 if (s.charAt(i + 1) == '#') {                           // &#1234; symbols
-                    b.write(Integer.parseInt(s.substring(i + 2, end)));
+                    b.write(NumberTools.parseIntDecSubstring(s, i + 2, end));
                     i += end - i;
                 } else {                                                // 'named' smybols
                     if (log.isFine()) log.logFine("discovered yet unimplemented HTML entity '" + s.substring(i, end + 1) + "'");

@@ -32,8 +32,8 @@ import java.util.Map;
 
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.NumberTools;
 
 public class RankingProfile {
 

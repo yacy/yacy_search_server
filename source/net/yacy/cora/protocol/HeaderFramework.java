@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.util.NumberTools;
+import net.yacy.cora.util.NumberTools;
 
 
 /**

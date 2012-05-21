@@ -31,7 +31,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import net.yacy.kelondro.util.NumberTools;
+import net.yacy.cora.util.NumberTools;
 
 public class GenericFormatter extends AbstractFormatter implements DateFormatter {
 
@@ -148,7 +148,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         if (diffString.length() > 0 && diffString.charAt(0) == '+') ahead = true;
         else if (diffString.length() > 0 && diffString.charAt(0) == '-') ahead = false;
         else throw new IllegalArgumentException("UTC String malformed (wrong sign):" + diffString);
-        final long oh = Long.parseLong(diffString.substring(1, 3));
+        final long oh = NumberTools.parseLongDecSubstring(diffString, 1, 3);
         final long om = NumberTools.parseLongDecSubstring(diffString, 3);
         return ((ahead) ? (long) 1 : (long) -1) * (oh * AbstractFormatter.hourMillis + om * AbstractFormatter.minuteMillis);
     }

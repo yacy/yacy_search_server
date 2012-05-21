@@ -31,12 +31,12 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.kelondro.util.NumberTools;
 
 
 public class Relations {

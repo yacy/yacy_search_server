@@ -29,7 +29,7 @@
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.NumberTools;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
