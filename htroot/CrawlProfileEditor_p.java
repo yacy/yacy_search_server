@@ -24,13 +24,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -39,8 +36,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.CrawlStacker;
-import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -49,19 +44,6 @@ public class CrawlProfileEditor_p {
 
     private final static String CRAWL_PROFILE_PREFIX = "crawlProfiles_";
     private static final String EDIT_ENTRIES_PREFIX = "edit_entries_";
-
-    private static final Set<String> ignoreNames = new HashSet<String>();
-    static {
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_PROXY);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_REMOTE);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE);
-        ignoreNames.add(CrawlSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES);
-        ignoreNames.add(CrawlSwitchboard.DBFILE_PASSIVE_CRAWL_PROFILES);
-    }
 
     public static class eentry {
         public static final int BOOLEAN = 0;
@@ -136,7 +118,7 @@ public class CrawlProfileEditor_p {
         final Map<String, String> orderdHandles = new TreeMap<String, String>();
         for (final byte[] h : sb.crawler.getActive()) {
             selentry = sb.crawler.getActive(h);
-            if (selentry != null && !ignoreNames.contains(selentry.name())) {
+            if (selentry != null && !CrawlProfile.ignoreNames.contains(selentry.name())) {
                 orderdHandles.put(selentry.name(), selentry.handle());
             }
         }
@@ -187,7 +169,7 @@ public class CrawlProfileEditor_p {
         // put active crawls into list
         for (final byte[] h: sb.crawler.getActive()) {
             profile = sb.crawler.getActive(h);
-            putProfileEntry(prop, sb.crawlStacker, profile, true, dark, count, domlistlength);
+            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, sb.crawlStacker, true, dark, count, domlistlength);
             dark = !dark;
             count++;
         }
@@ -195,7 +177,7 @@ public class CrawlProfileEditor_p {
         boolean existPassiveCrawls = false;
         for (final byte[] h: sb.crawler.getPassive()) {
             profile = sb.crawler.getPassive(h);
-            putProfileEntry(prop, sb.crawlStacker, profile, false, dark, count, domlistlength);
+            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, sb.crawlStacker, false, dark, count, domlistlength);
             dark = !dark;
             count++;
             existPassiveCrawls = true;
@@ -234,49 +216,4 @@ public class CrawlProfileEditor_p {
         return prop;
     }
 
-    private static void putProfileEntry(
-            final servletProperties prop,
-            final CrawlStacker crawlStacker,
-            final CrawlProfile profile,
-            final boolean active,
-            final boolean dark,
-            final int count,
-            final int domlistlength) {
-
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_name", profile.name());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", (!active || ignoreNames.contains(profile.name())) ? "0" : "1");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", profile.handle());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", (active) ? "0" : "1");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", profile.handle());
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_startURL", profile.startURL());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_handle", profile.handle());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", profile.depth());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustmatch", profile.urlMustMatchPattern().toString());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", profile.urlMustNotMatchPattern().toString());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", "inactive");
-
-        int i = 0;
-        if (active && profile.domMaxPages() > 0
-                && profile.domMaxPages() != Integer.MAX_VALUE) {
-        String item;
-        while (i <= domlistlength && !(item = profile.domName(true, i)).isEmpty()){
-            if (i == domlistlength) {
-                item += " ...";
-            }
-            prop.putHTML(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterContent_" + i + "_item", item);
-            i++;
-        }
-        }
-
-        prop.put(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent", i);
-
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(profile.domMaxPages()));
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_withQuery", (profile.crawlingQ()) ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_storeCache", (profile.storeHTCache()) ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", (profile.indexText()) ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", (profile.indexMedia()) ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", (profile.remoteIndexing()) ? "1" : "0");
-    }
 }

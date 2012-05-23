@@ -46,6 +46,7 @@ import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
@@ -125,6 +126,18 @@ public class Crawler_p {
             } else if ("remotecrawler".equals(queue)) {
                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
+        }
+
+    	if (post != null && post.containsKey("terminate")) try {
+            final String handle = post.get("handle", "");
+            // termination of a crawl: shift the crawl from active to passive
+            final CrawlProfile p = sb.crawler.getActive(handle.getBytes());
+            if (p != null) sb.crawler.putPassive(handle.getBytes(), p);
+            // delete all entries from the crawl queue that are deleted here
+            sb.crawler.removeActive(handle.getBytes());
+            sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
+        } catch (final RowSpaceExceededException e) {
+            Log.logException(e);
         }
 
         if (post != null && post.containsKey("crawlingstart")) {
@@ -614,6 +627,24 @@ public class Crawler_p {
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
         prop.put("customPPMdefault", Integer.toString(LCppm));
 
+
+        // generate crawl profile table
+        int count = 0;
+        boolean dark = true;
+        final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
+        CrawlProfile profile;
+        // put active crawls into list
+        for (final byte[] h: sb.crawler.getActive()) {
+            profile = sb.crawler.getActive(h);
+        	if (CrawlProfile.ignoreNames.contains(profile.name())) continue;
+            profile.putProfileEntry("crawlProfilesShow_list_", prop, sb.crawlStacker, true, dark, count, domlistlength);
+            dark = !dark;
+            count++;
+        }
+        prop.put("crawlProfilesShow_list", count);
+        prop.put("crawlProfilesShow", count == 0 ? 0 : 1);
+
+        
         // return rewrite properties
         return prop;
     }
