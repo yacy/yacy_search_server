@@ -86,7 +86,7 @@ public class Wiki {
             // only the administrator may change the access right
             if (!sb.verifyAuthentication(header)) {
                 // check access right for admin
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            	prop.authenticationRequired();
                 return prop;
             }
 
@@ -105,7 +105,7 @@ public class Wiki {
 
             if ((access.equals("admin") && (!sb.verifyAuthentication(header)))) {
                 // check access right for admin
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            	prop.authenticationRequired();
                 return prop;
             }
 
@@ -129,7 +129,7 @@ public class Wiki {
         if (post != null && post.containsKey("edit")) {
             if ((access.equals("admin") && (!sb.verifyAuthentication(header)))) {
                 // check access right for admin
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            	prop.authenticationRequired();
                 return prop;
             }
 

@@ -87,9 +87,7 @@ public class YMarkTables {
     public final static String FOLDERS_ROOT = "/";
     public final static String BOOKMARKS_LOG = "BOOKMARKS";
     public final static String USER_ADMIN = "admin";
-	public final static String USER_AUTHENTICATE = "AUTHENTICATE";
 	public final static String USER_AUTHENTICATE_MSG = "Bookmark user authentication required!";
-	public final static String ADMIN_AUTHENTICATE_MSG = "Admin authentication required!";
 
     public final static String p1 = "(?:^|.*,)";
     public final static String p4 = "(?:,.*|$)";

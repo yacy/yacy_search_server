@@ -18,7 +18,7 @@ public class delete_p {
     		if(!isAdmin){
     			// force authentication if desired
         			if(post.containsKey("login")){
-        				prop.put("AUTHENTICATE","admin log-in");
+                    	prop.authenticationRequired();
         			}
         			return prop;
     		}

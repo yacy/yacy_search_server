@@ -44,7 +44,7 @@ public class ConfigPortal {
             // AUTHENTICATE
             if (!sb.verifyAuthentication(header)) {
                 // force log-in
-                prop.putHTML("AUTHENTICATE","log-in");
+            	prop.authenticationRequired();
                 return prop;
             }
 

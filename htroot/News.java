@@ -52,7 +52,7 @@ public class News {
             
             if ((post.containsKey("deletespecific")) && (tableID >= 0)) {
                 if (sb.adminAuthenticated(header) < 2) {
-                    prop.put("AUTHENTICATE", "admin log-in");
+                	prop.authenticationRequired();
                     return prop; // this button needs authentication, force log-in
                 }
                 final Iterator<String> e = post.keySet().iterator();
@@ -71,7 +71,7 @@ public class News {
             
             if ((post.containsKey("deleteall")) && (tableID >= 0)) {
                 if (sb.adminAuthenticated(header) < 2) {
-                    prop.put("AUTHENTICATE", "admin log-in");
+                	prop.authenticationRequired();
                     return prop; // this button needs authentication, force log-in
                 }
                 try {

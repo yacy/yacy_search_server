@@ -66,7 +66,7 @@ public class Surftips {
         final boolean authorizedAccess = sb.verifyAuthentication(header);
         if ((post != null) && (post.containsKey("publicPage"))) {
             if (!authorizedAccess) {
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            	prop.authenticationRequired();
                 return prop;
             }
             publicPage = post.get("publicPage", "0").equals("1");
@@ -79,7 +79,7 @@ public class Surftips {
             String hash;
             if ((post != null) && ((hash = post.get("voteNegative", null)) != null)) {
                 if (!sb.verifyAuthentication(header)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                	prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting
@@ -93,7 +93,7 @@ public class Surftips {
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 if (!sb.verifyAuthentication(header)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                	prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting

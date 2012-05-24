@@ -72,7 +72,7 @@ public class Supporter {
             String hash;
             if ((post != null) && ((hash = post.get("voteNegative", null)) != null)) {
                 if (!sb.verifyAuthentication(header)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                	prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting
@@ -86,7 +86,7 @@ public class Supporter {
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 if (!sb.verifyAuthentication(header)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                	prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting

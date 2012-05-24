@@ -76,7 +76,7 @@ public class BlogComments {
                 hasRights = true;
             } else if (post.containsKey("login")) {
                 //opens login window if login link is clicked
-                prop.put("AUTHENTICATE","admin log-in");
+            	prop.authenticationRequired();
             }
         }
 

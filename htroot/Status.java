@@ -74,7 +74,7 @@ public class Status
 
         if ( post != null && post.size() > 0 ) {
             if ( sb.adminAuthenticated(header) < 2 ) {
-                prop.put("AUTHENTICATE", "admin log-in");
+            	prop.authenticationRequired();
                 return prop;
             }
             boolean redirect = false;

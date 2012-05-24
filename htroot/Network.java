@@ -190,7 +190,7 @@ public class Network {
 
                 // AUTHENTICATE
                 if (!requestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
-                    prop.putHTML("AUTHENTICATE","log-in");
+                	prop.authenticationRequired();
                     return prop;
                 }
 

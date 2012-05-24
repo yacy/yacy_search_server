@@ -157,7 +157,7 @@ public class User{
             }
             //XXX: This should not be needed anymore, because of isLoggedout
             if(! (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
-                prop.put("AUTHENTICATE","admin log-in");
+            	prop.authenticationRequired();
             }
             if(post.containsKey("returnto")){
                 prop.put("LOCATION", post.get("returnto"));

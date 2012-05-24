@@ -66,6 +66,10 @@ import net.yacy.search.Switchboard;
 
 public class serverObjects extends HashMap<String, String> implements Cloneable {
 
+    public static final String ACTION_AUTHENTICATE = "AUTHENTICATE";
+    public static final String ACTION_LOCATION = "LOCATION";
+	public final static String ADMIN_AUTHENTICATE_MSG = "admin log-in. If you don't know the password, set it with {yacyhome}/bin/passwd.sh {newpassword}";
+    
     private final static Pattern patternNewline = Pattern.compile("\n");
     private final static Pattern patternDoublequote = Pattern.compile("\"");
     private final static Pattern patternSlash = Pattern.compile("/");
@@ -91,6 +95,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         super(input);
     }
 
+    public void authenticationRequired() {
+    	this.put(ACTION_AUTHENTICATE, ADMIN_AUTHENTICATE_MSG);
+    }
+    
     private static final String removeByteOrderMark(final String s) {
         if (s == null || s.length() == 0) return s;
         if (s.charAt(0) == BOM) return s.substring(1);

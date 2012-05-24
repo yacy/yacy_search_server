@@ -67,7 +67,7 @@ public class ConfigBasic {
         final int authentication = sb.adminAuthenticated(header);
         if (authentication < 2) {
             // must authenticate
-            prop.put("AUTHENTICATE", "admin log-in");
+        	prop.authenticationRequired();
             return prop;
         }
 

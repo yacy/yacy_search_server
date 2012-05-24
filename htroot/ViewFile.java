@@ -139,7 +139,7 @@ public class ViewFile {
             // it is therefore protected by the admin password
 
             if (!sb.verifyAuthentication(header)) {
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            	prop.authenticationRequired();
                 return prop;
             }
 

@@ -342,7 +342,7 @@ public final class HTTPDFileHandler {
                     serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
 
                 final ResponseHeader responseHeader = getDefaultHeaders(path);
-                responseHeader.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
+                responseHeader.put(RequestHeader.WWW_AUTHENTICATE, "Basic realm=\"" + serverObjects.ADMIN_AUTHENTICATE_MSG + "\"");
                 final servletProperties tp=new servletProperties();
                 tp.put("returnto", path);
                 HTTPDemon.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, responseHeader);

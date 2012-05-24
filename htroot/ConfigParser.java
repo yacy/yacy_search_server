@@ -45,7 +45,7 @@ public class ConfigParser {
         if (post != null) {
             if (!sb.verifyAuthentication(header)) {
                 // force log-in
-                prop.put("AUTHENTICATE", "admin log-in");
+            	prop.authenticationRequired();
                 return prop;
             }
 

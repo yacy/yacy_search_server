@@ -126,7 +126,7 @@ public class Bookmarks {
     	if (post != null) {
             if (!isAdmin) {
                 if(post.containsKey("login")){
-                    prop.put("AUTHENTICATE","admin log-in");
+                	prop.authenticationRequired();
                 }
             } else if (post.containsKey("mode")) {
                 final String mode=post.get("mode");

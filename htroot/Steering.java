@@ -51,7 +51,7 @@ public class Steering {
         // handle access rights
         if (!sb.verifyAuthentication(header)) {
             Log.logInfo("STEERING", "log-in attempt for steering from " + requestIP);
-            prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+        	prop.authenticationRequired();
             return prop;
         }
 

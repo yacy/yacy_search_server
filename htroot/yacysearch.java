@@ -612,7 +612,7 @@ public class yacysearch {
             if ( post != null && post.containsKey("deleteref") ) {
                 try {
                     if ( !sb.verifyAuthentication(header) ) {
-                        prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                    	prop.authenticationRequired();
                         return prop;
                     }
 
@@ -642,7 +642,7 @@ public class yacysearch {
             // if a plus-button was hit, create new voting message
             if ( post != null && post.containsKey("recommendref") ) {
                 if ( !sb.verifyAuthentication(header) ) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                	prop.authenticationRequired();
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
@@ -679,7 +679,7 @@ public class yacysearch {
             // if a bookmarks-button was hit, create new bookmark entry
             if ( post != null && post.containsKey("bookmarkref") ) {
                 if ( !sb.verifyAuthentication(header) ) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                	prop.authenticationRequired();
                     return prop;
                 }
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash

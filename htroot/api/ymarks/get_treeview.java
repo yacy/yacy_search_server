@@ -256,7 +256,7 @@ public class get_treeview {
 				}
 	        }
         } else {
-        	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
+        	prop.put(serverObjects.ACTION_AUTHENTICATE, YMarkTables.USER_AUTHENTICATE_MSG);
         }
         // return rewrite properties
         return prop;

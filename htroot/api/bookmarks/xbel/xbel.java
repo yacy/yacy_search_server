@@ -32,7 +32,7 @@ public class xbel {
     	if(post != null) {
     		if(!isAdmin) {
     			if(post.containsKey("login")) {
-    				prop.put("AUTHENTICATE","admin log-in");
+                	prop.authenticationRequired();
     			}
     		}
         	if(post.containsKey("tag")) {

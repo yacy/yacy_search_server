@@ -94,12 +94,12 @@ public class CrawlResults {
             if (authorization.length() != 0) {
                 if (! sb.verifyAuthentication(header)){
                     // force log-in (again, because wrong password was given)
-                    prop.put("AUTHENTICATE", "admin log-in");
+                	prop.authenticationRequired();
                     return prop;
                 }
             } else {
                 // force log-in
-                prop.put("AUTHENTICATE", "admin log-in");
+            	prop.authenticationRequired();
                 return prop;
             }
         }
