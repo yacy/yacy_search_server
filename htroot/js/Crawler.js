@@ -3,9 +3,8 @@ BAR_IMG1="/env/grafics/green-block.png";
 BAR_IMG2="/env/grafics/red-block.png";
 WORDCACHEBAR_LENGTH=1/4;
 
-
 var statusRPC;
-var refreshInterval=3;
+var refreshInterval=2;
 var wait=0;
 var changing=false; //change the interval
 var statusLoaded=true;
@@ -50,6 +49,7 @@ function refresh(){
 	wait=refreshInterval;
 	statusLoaded=false;
 	requestStatus();
+	getRSS("/api/feed.xml?count=20&set=REMOTEINDEXING,LOCALINDEXING&time=" + (new Date()).getTime());
 }
 
 function requestStatus(){
@@ -90,10 +90,6 @@ function handleStatus(){
 	var wordCacheSize=getValue(getFirstChild(statusTag, "wordCacheSize"));
 	var wordCacheMaxSize=getValue(getFirstChild(statusTag, "wordCacheMaxSize"));
 
-	wordCacheNum=document.getElementById("wordcacheNum");
-	removeAllChildren(wordCacheNum);
-	wordCacheNum.appendChild(document.createTextNode(wordCacheSize+"/"+wordCacheMaxSize));
-	
 	wordCacheSpan=document.getElementById("wordcacheSpan");
 	removeAllChildren(wordCacheSpan);
 	var img;
@@ -164,7 +160,6 @@ function putQueueState(queue, state) {
 	}
 }
 
-
 function shortenURL(url) {
 	if (url.length > 80) {
 		return url.substr(0, 80) + "...";
@@ -186,4 +181,18 @@ function createIndexingRow(queue, profile, initiator, depth, modified, anchor, u
 	row.appendChild(createCol(size));
 	row.appendChild(deletebutton);
 	return row;
+}
+
+crawllist_head = "<table cellpadding='2' cellspacing='1' ><tr class='TableHeader'><td width='50%'><strong>Title</strong></td><td width='50%'><strong>URL</strong></td></tr>";
+crawllist_body = "";
+crawllist_tail = "</table>";
+function showRSS(RSS) {
+  var doc = document.getElementById("crawllist");
+  if (doc != null) {
+    for (var i=0; i<RSS.items.length; i++) {
+      crawllist_body = "<tr class='TableCellLight'><td><a href='ViewFile.html?action=info&urlHash=" + RSS.items[i].guid.value + "' class='small' target='_blank' title='" + RSS.items[i].link + "'>" + RSS.items[i].description + "</a></td><td><a href='ViewFile.html?action=info&urlHash=" + RSS.items[i].guid.value + "' class='small' target='_blank' title='" + RSS.items[i].link + "'>" + RSS.items[i].link + "</a></td></tr>" + crawllist_body;
+    }
+    doc.innerHTML = crawllist_head + crawllist_body + crawllist_tail;
+  }
+  return true;
 }

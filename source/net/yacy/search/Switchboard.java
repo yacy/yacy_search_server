@@ -2621,9 +2621,7 @@ public final class Switchboard extends serverSwitch
                         ASCII.getBytes(this.peers.mySeed().hash))
                         ? EventChannel.LOCALINDEXING
                         : EventChannel.REMOTEINDEXING);
-            feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(
-                true,
-                false)));
+            feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url()));
         } catch ( final IOException e ) {
             //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(
