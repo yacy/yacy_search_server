@@ -189,6 +189,7 @@ crawllist_tail = "</table>";
 function showRSS(RSS) {
   var doc = document.getElementById("crawllist");
   if (doc != null) {
+    if (crawllist_body.length > 100000) crawllist_body = "";
     for (var i=0; i<RSS.items.length; i++) {
       crawllist_body = "<tr class='TableCellLight'><td><a href='ViewFile.html?action=info&urlHash=" + RSS.items[i].guid.value + "' class='small' target='_blank' title='" + RSS.items[i].link + "'>" + RSS.items[i].description + "</a></td><td><a href='ViewFile.html?action=info&urlHash=" + RSS.items[i].guid.value + "' class='small' target='_blank' title='" + RSS.items[i].link + "'>" + RSS.items[i].link + "</a></td></tr>" + crawllist_body;
     }
