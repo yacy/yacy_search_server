@@ -421,6 +421,7 @@ public class Network {
                                     prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", 0);  // red/red; offline was off
                                 }
                             }
+                            prop.put(STR_TABLE_LIST + conCount + "_nodestate", seed.getFlagRootNode() ? 0 : 1);
                             if (seed.getFlagAcceptRemoteIndex()) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", "");
                             } else {

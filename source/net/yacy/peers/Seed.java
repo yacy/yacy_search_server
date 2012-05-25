@@ -785,9 +785,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return getFlag(2);
     }
 
+    public final boolean getFlagRootNode() {
+        return getFlag(FLAG_ROOT_NODE);
+    }
+    
     public final void setUnusedFlags() {
         for ( int i = 4; i < 24; i++ ) {
-            setFlag(i, true);
+            setFlag(i, false);
         }
     }
 
