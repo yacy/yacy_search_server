@@ -2,6 +2,7 @@ package de.anomic.data;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -152,14 +153,17 @@ public class DidYouMean {
         }
 
         final ReversibleScoreMap<StringBuilder> scored = new ClusteredScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-        for (final StringBuilder s: preSorted) {
-            if (System.currentTimeMillis() > timelimit) {
-                break;
-            }
-            if (!(scored.sizeSmaller(2 * preSortSelection))) {
-                break;
-            }
-            scored.inc(s, this.index.count(Word.word2hash(s)));
+        try {
+	        for (final StringBuilder s: preSorted) {
+	            if (System.currentTimeMillis() > timelimit) {
+	                break;
+	            }
+	            if (!(scored.sizeSmaller(2 * preSortSelection))) {
+	                break;
+	            }
+	            scored.inc(s, this.index.count(Word.word2hash(s)));
+	        }
+        } catch (ConcurrentModificationException e) {
         }
         final SortedSet<StringBuilder> countSorted = Collections.synchronizedSortedSet(new TreeSet<StringBuilder>(new headMatchingComparator(this.word, this.INDEX_SIZE_COMPARATOR)));
         final int wc = this.index.count(Word.word2hash(this.word)); // all counts must be greater than this
