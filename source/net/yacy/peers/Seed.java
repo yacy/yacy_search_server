@@ -167,6 +167,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     private static final int FLAG_DIRECT_CONNECT = 0;
     private static final int FLAG_ACCEPT_REMOTE_CRAWL = 1;
     private static final int FLAG_ACCEPT_REMOTE_INDEX = 2;
+    private static final int FLAG_ROOT_NODE = 3;
 
     public static final String DFLT_NETWORK_UNIT = "freeworld";
     public static final String DFLT_NETWORK_GROUP = "";
@@ -764,7 +765,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final void setFlagAcceptRemoteIndex(final boolean value) {
         setFlag(FLAG_ACCEPT_REMOTE_INDEX, value);
     }
-
+    
+    public final void setFlagRootNode(final boolean value) {
+        setFlag(FLAG_ROOT_NODE, value);
+    }
+    
     public final boolean getFlagDirectConnect() {
         return getFlag(0);
     }

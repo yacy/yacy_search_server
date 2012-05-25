@@ -171,6 +171,7 @@ public final class Protocol
 
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
+        long responseTime = Long.MAX_VALUE;
         try {
             // generate request
             final Map<String, ContentBody> parts =
@@ -188,6 +189,7 @@ public final class Protocol
                     Seed.b64Hash2hexHash(otherHash) + ".yacyh",
                     parts,
                     false);
+            responseTime = System.currentTimeMillis() - start;
             Network.log.logInfo("yacyClient.hello thread '"
                 + Thread.currentThread().getName()
                 + "' contacted peer at "
@@ -195,7 +197,7 @@ public final class Protocol
                 + ", received "
                 + ((content == null) ? "null" : content.length)
                 + " bytes, time = "
-                + (System.currentTimeMillis() - start)
+                + responseTime
                 + " milliseconds");
             result = FileUtils.table(content);
         } catch ( final Exception e ) {
@@ -256,6 +258,12 @@ public final class Protocol
             }
         }
 
+        // get access type response
+        String mytype = result.get(Seed.YOURTYPE);
+        if ( mytype == null ) {
+            mytype = "";
+        }
+        
         // set my own seed according to new information
         // we overwrite our own IP number only
         if ( serverCore.useStaticIP ) {
@@ -263,16 +271,13 @@ public final class Protocol
         } else {
             final String myIP = result.get("yourip");
             final String properIP = Seed.isProperIP(myIP);
+            mySeed.setFlagRootNode(mytype.equals(Seed.PEERTYPE_SENIOR) && responseTime < 1000 && Domains.isThisHostIP(myIP));
             if ( properIP == null ) {
                 mySeed.setIP(myIP);
             }
         }
 
         // change our seed-type
-        String mytype = result.get(Seed.YOURTYPE);
-        if ( mytype == null ) {
-            mytype = "";
-        }
         final Accessible accessible = new Accessible();
         if ( mytype.equals(Seed.PEERTYPE_SENIOR) || mytype.equals(Seed.PEERTYPE_PRINCIPAL) ) {
             accessible.IWasAccessed = true;
