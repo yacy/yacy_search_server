@@ -37,9 +37,9 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.Seed;
-import net.yacy.peers.Protocol;
 import net.yacy.peers.Network;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.peers.operation.yacyVersion;
@@ -112,7 +112,7 @@ public final class hello {
         final String userAgent = header.get(HeaderFramework.USER_AGENT, "<unknown>");
         final String reportedip = remoteSeed.getIP();
         final String reportedPeerType = remoteSeed.get(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR);
-        final float clientversion = remoteSeed.getVersion();
+        final double clientversion = remoteSeed.getVersion();
 
         if (sb.isRobinsonMode() && !sb.isPublicRobinson()) {
         	// if we are a robinson cluster, answer only if this client is known by our network definition

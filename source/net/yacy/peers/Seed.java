@@ -247,7 +247,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * check the peer name: protect against usage as XSS hack
-     * 
+     *
      * @param id
      * @return a checked name without "<" and ">"
      */
@@ -260,7 +260,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * generate a default peer name
-     * 
+     *
      * @return
      */
     private static String defaultPeerName() {
@@ -274,7 +274,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * Checks for the static fragments of a generated default peer name, such as the string 'dpn'
-     * 
+     *
      * @see #makeDefaultPeerName()
      * @param name the peer name to check for default peer name compliance
      * @return whether the given peer name may be a default generated peer name
@@ -301,7 +301,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * try to get the IP<br>
-     * 
+     *
      * @return the IP or null
      */
     public final String getIP() {
@@ -311,7 +311,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * try to get the peertype<br>
-     * 
+     *
      * @return the peertype or null
      */
     public final String getPeerType() {
@@ -320,7 +320,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * try to get the peertype<br>
-     * 
+     *
      * @return the peertype or "virgin"
      */
     public final String orVirgin() {
@@ -329,7 +329,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * try to get the peertype<br>
-     * 
+     *
      * @return the peertype or "junior"
      */
     public final String orJunior() {
@@ -338,7 +338,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * try to get the peertype<br>
-     * 
+     *
      * @return the peertype or "senior"
      */
     public final String orSenior() {
@@ -347,7 +347,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * try to get the peertype<br>
-     * 
+     *
      * @return the peertype or "principal"
      */
     public final String orPrincipal() {
@@ -356,7 +356,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * Get a value from the peer's DNA (its set of peer defining values, e.g. IP, name, version, ...)
-     * 
+     *
      * @param key the key for the value to fetch
      * @param dflt the default value
      */
@@ -503,7 +503,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * Cause: the natural order of octal hashes are the same as the b64-order of b64Hashes. a hexhash cannot
      * be used in such cases, and b64Hashes are not appropriate for file names
      * </p>
-     * 
+     *
      * @param b64Hash a base64 hash
      * @return the octal representation of the given base64 hash
      */
@@ -513,7 +513,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * <code>12 * 6 bit = 72 bit = 18</code> characters hex-hash
-     * 
+     *
      * @param b64Hash a base64 hash
      * @return the hexadecimal representation of the given base64 hash
      */
@@ -535,21 +535,21 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * The returned version follows this pattern: <code>MAJORVERSION . MINORVERSION 0 SVN REVISION</code>
-     * 
+     *
      * @return the YaCy version of this peer as a float or <code>0</code> if no valid value could be retrieved
      *         from this yacySeed object
      */
-    public final float getVersion() {
+    public final Double getVersion() {
         try {
-            return Float.parseFloat(get(Seed.VERSION, Seed.ZERO));
+            return Double.parseDouble(get(Seed.VERSION, Seed.ZERO));
         } catch ( final NumberFormatException e ) {
-            return 0;
+            return 0.0d;
         }
     }
 
     /**
      * get the SVN version of the peer
-     * 
+     *
      * @return
      */
     public final int getRevision() {
@@ -582,7 +582,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * If this seed is part of a cluster, the peer has probably the {@linkplain #alternativeIP} object set to
      * a local IP. If this is present and the public IP of this peer is identical to the public IP of the own
      * seed, construct an address using this IP; otherwise return the public address
-     * 
+     *
      * @see #getPublicAddress()
      * @return the alternative IP:port if present, else the public address
      */
@@ -654,7 +654,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     /**
      * test if the lastSeen time of the seed has a time-out
-     * 
+     *
      * @param milliseconds the maximum age of the last-seen value
      * @return true, if the time between the last-seen time and now is greater then the given time-out
      */
@@ -765,30 +765,32 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final void setFlagAcceptRemoteIndex(final boolean value) {
         setFlag(FLAG_ACCEPT_REMOTE_INDEX, value);
     }
-    
+
     public final void setFlagRootNode(final boolean value) {
         setFlag(FLAG_ROOT_NODE, value);
     }
-    
+
     public final boolean getFlagDirectConnect() {
-        return getFlag(0);
+        return getFlag(FLAG_DIRECT_CONNECT);
     }
 
     public final boolean getFlagAcceptRemoteCrawl() {
         //if (getVersion() < 0.300) return false;
         //if (getVersion() < 0.334) return true;
-        return getFlag(1);
+        return getFlag(FLAG_ACCEPT_REMOTE_CRAWL);
     }
 
     public final boolean getFlagAcceptRemoteIndex() {
         //if (getVersion() < 0.335) return false;
-        return getFlag(2);
+        return getFlag(FLAG_ACCEPT_REMOTE_INDEX);
     }
 
     public final boolean getFlagRootNode() {
+        double v = getVersion();
+        if (v < 1.02009142d) return false;
         return getFlag(FLAG_ROOT_NODE);
     }
-    
+
     public final void setUnusedFlags() {
         for ( int i = 4; i < 24; i++ ) {
             setFlag(i, false);

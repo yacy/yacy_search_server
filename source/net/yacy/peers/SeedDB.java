@@ -413,17 +413,17 @@ public final class SeedDB implements AlternativeDomainNames {
     	return clustermap;
     }
 
-    public Iterator<Seed> seedsConnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
+    public Iterator<Seed> seedsConnected(final boolean up, final boolean rot, final byte[] firstHash, final double minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, this.seedActiveDB, minVersion);
     }
 
-    private Iterator<Seed> seedsDisconnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
+    private Iterator<Seed> seedsDisconnected(final boolean up, final boolean rot, final byte[] firstHash, final double minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, this.seedPassiveDB, minVersion);
     }
 
-    public Seed anySeedVersion(final float minVersion) {
+    public Seed anySeedVersion(final double minVersion) {
         // return just any seed that has a specific minimum version number
         final Iterator<Seed> e = seedsConnected(true, true, Seed.randomHash(), minVersion);
         return e.next();
@@ -938,14 +938,14 @@ public final class SeedDB implements AlternativeDomainNames {
         private Iterator<Map.Entry<byte[], Map<String, String>>> it;
         private Seed nextSeed;
         private final MapDataMining database;
-        private float minVersion;
+        private double minVersion;
 
-        private seedEnum(final boolean up, final boolean rot, final byte[] firstKey, final byte[] secondKey, final MapDataMining database, final float minVersion) {
+        private seedEnum(final boolean up, final boolean rot, final byte[] firstKey, final byte[] secondKey, final MapDataMining database, final double minVersion) {
             this.database = database;
             this.minVersion = minVersion;
             try {
                 this.it = (firstKey == null) ? database.entries(up, rot) : database.entries(up, rot, firstKey, secondKey);
-                float version;
+                double version;
                 while (true) {
                     this.nextSeed = internalNext();
                     if (this.nextSeed == null) break;
@@ -1023,7 +1023,7 @@ public final class SeedDB implements AlternativeDomainNames {
 
         public Seed next() {
             final Seed seed = this.nextSeed;
-            float version;
+            double version;
             try {while (true) {
                 this.nextSeed = internalNext();
                 if (this.nextSeed == null) break;

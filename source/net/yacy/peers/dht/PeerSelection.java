@@ -1,4 +1,4 @@
-// PeerSelection.java 
+// PeerSelection.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published 05.11.2008 on http://yacy.net
@@ -84,18 +84,18 @@ public class PeerSelection {
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results
         if (seedDB == null) { return null; }
-        
+
         // put in seeds according to dht
         final Map<String, Seed> regularSeeds = new HashMap<String, Seed>(); // dht position seeds
         Seed seed;
-        Iterator<Seed> dhtEnum;         
+        Iterator<Seed> dhtEnum;
         Iterator<byte[]> iter = wordhashes.iterator();
         while (iter.hasNext()) {
             selectDHTPositions(seedDB, iter.next(), redundancy, regularSeeds);
         }
         //int minimumseeds = Math.min(seedDB.scheme.verticalPartitions(), regularSeeds.size()); // that should be the minimum number of seeds that are returned
         //int maximumseeds = seedDB.scheme.verticalPartitions() * redundancy; // this is the maximum number of seeds according to dht and heuristics. It can be more using burst mode.
-        
+
         // put in some seeds according to size of peer.
         // But not all, that would produce too much load on the largest peers
         dhtEnum = seedDB.seedsSortedConnected(false, Seed.ICOUNT);
@@ -159,7 +159,7 @@ public class PeerSelection {
                 regularSeeds.put(seed.hash, seed);
             }
         }
-        
+
         // produce return set
         Seed[] result = new Seed[regularSeeds.size()];
         result = regularSeeds.values().toArray(result);
@@ -167,9 +167,9 @@ public class PeerSelection {
     }
 
     private static void selectDHTPositions(
-            final SeedDB seedDB, 
+            final SeedDB seedDB,
             byte[] wordhash,
-            int redundancy, 
+            int redundancy,
             Map<String, Seed> regularSeeds) {
         // this method is called from the search target computation
         final long[] dhtVerticalTargets = seedDB.scheme.dhtPositions(wordhash);
@@ -193,7 +193,7 @@ public class PeerSelection {
     public static byte[] selectTransferStart() {
         return ASCII.getBytes(Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + Word.commonHashLength));
     }
-    
+
     public static byte[] limitOver(final SeedDB seedDB, final byte[] startHash) {
         final Iterator<Seed> seeds = getAcceptRemoteIndexSeeds(seedDB, startHash, 1, false);
         if (seeds.hasNext()) return ASCII.getBytes(seeds.next().hash);
@@ -210,7 +210,7 @@ public class PeerSelection {
         while (seedIter.hasNext() && max-- > 0) targets.add(seedIter.next());
         return targets;
     }
-    
+
     /**
      * returns an enumeration of yacySeed-Objects that have the AcceptRemoteIndex-Flag set
      * the seeds are enumerated in the right order according to the DHT
@@ -223,7 +223,7 @@ public class PeerSelection {
     public static Iterator<Seed> getAcceptRemoteIndexSeeds(final SeedDB seedDB, final byte[] starthash, final int max, final boolean alsoMyOwn) {
         return new acceptRemoteIndexSeedEnum(seedDB, starthash, Math.min(max, seedDB.sizeConnected()), alsoMyOwn);
     }
-    
+
     private static class acceptRemoteIndexSeedEnum implements Iterator<Seed> {
 
         private final Iterator<Seed> se;
@@ -232,7 +232,7 @@ public class PeerSelection {
         private final HandleSet doublecheck;
         private int remaining;
         private final boolean alsoMyOwn;
-        
+
         private acceptRemoteIndexSeedEnum(SeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
             this.seedDB = seedDB;
             this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX, alsoMyOwn);
@@ -241,7 +241,7 @@ public class PeerSelection {
             this.nextSeed = nextInternal();
             this.alsoMyOwn = alsoMyOwn;
         }
-        
+
         @Override
         public boolean hasNext() {
             return this.nextSeed != null;
@@ -264,7 +264,7 @@ public class PeerSelection {
                     }
                     if (s.getFlagAcceptRemoteIndex() ||
                         (this.alsoMyOwn && s.hash.equals(this.seedDB.mySeed().hash)) // Accept own peer regardless of FlagAcceptRemoteIndex
-                       ) { 
+                       ) {
                         this.remaining--;
                         return s;
                     }
@@ -277,7 +277,7 @@ public class PeerSelection {
             }
             return null;
         }
-        
+
         @Override
         public Seed next() {
             final Seed next = this.nextSeed;
@@ -291,7 +291,7 @@ public class PeerSelection {
         }
 
     }
-    
+
     /**
      * enumerate seeds for DHT target positions
      * @param seedDB
@@ -299,12 +299,12 @@ public class PeerSelection {
      * @param minVersion
      * @return
      */
-    protected static Iterator<Seed> getDHTSeeds(final SeedDB seedDB, final byte[] firstHash, final float minVersion) {
+    protected static Iterator<Seed> getDHTSeeds(final SeedDB seedDB, final byte[] firstHash, final double minVersion) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
         return new seedDHTEnum(seedDB, firstHash, minVersion, false);
     }
 
-    protected static Iterator<Seed> getDHTSeeds(final SeedDB seedDB, final byte[] firstHash, final float minVersion, final boolean alsoMyOwn) {
+    protected static Iterator<Seed> getDHTSeeds(final SeedDB seedDB, final byte[] firstHash, final double minVersion, final boolean alsoMyOwn) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
         return new seedDHTEnum(seedDB, firstHash, minVersion, alsoMyOwn);
     }
@@ -312,13 +312,13 @@ public class PeerSelection {
 
         private Iterator<Seed> e;
         private int steps;
-        private final float minVersion;
+        private final double minVersion;
         private final SeedDB seedDB;
         private boolean alsoMyOwn;
         private int pass, insertOwnInPass;
         private Seed nextSeed;
-        
-        private seedDHTEnum(final SeedDB seedDB, final byte[] firstHash, final float minVersion, final boolean alsoMyOwn) {
+
+        private seedDHTEnum(final SeedDB seedDB, final byte[] firstHash, final double minVersion, final boolean alsoMyOwn) {
             this.seedDB = seedDB;
             this.steps = seedDB.sizeConnected() + ((alsoMyOwn) ? 1 : 0);
             this.minVersion = minVersion;
@@ -332,7 +332,7 @@ public class PeerSelection {
             }
             this.nextSeed = nextInternal();
         }
-        
+
         @Override
         public boolean hasNext() {
             return (this.nextSeed != null) || this.alsoMyOwn;
@@ -341,7 +341,7 @@ public class PeerSelection {
         public Seed nextInternal() {
             if (this.steps == 0) return null;
             this.steps--;
-            
+
             if (!this.e.hasNext() && this.pass == 1) {
                 this.e = this.seedDB.seedsConnected(true, false, null, this.minVersion);
                 this.pass = 2;
@@ -375,7 +375,7 @@ public class PeerSelection {
             throw new UnsupportedOperationException();
         }
     }
-    
+
     /**
      * enumerate peers that provide remote crawl urls
      * @param seedDB
@@ -384,19 +384,19 @@ public class PeerSelection {
     public static Iterator<Seed> getProvidesRemoteCrawlURLs(final SeedDB seedDB) {
         return new providesRemoteCrawlURLsEnum(seedDB);
     }
-    
+
     private static class providesRemoteCrawlURLsEnum implements Iterator<Seed> {
 
         private final Iterator<Seed> se;
         private Seed nextSeed;
         private final SeedDB seedDB;
-        
+
         private providesRemoteCrawlURLsEnum(final SeedDB seedDB) {
             this.seedDB = seedDB;
             this.se = getDHTSeeds(seedDB, null, yacyVersion.YACY_POVIDES_REMOTECRAWL_LISTS);
             this.nextSeed = nextInternal();
         }
-        
+
         @Override
         public boolean hasNext() {
             return this.nextSeed != null;
@@ -418,7 +418,7 @@ public class PeerSelection {
             }
             return null;
         }
-        
+
         @Override
         public Seed next() {
             final Seed next = this.nextSeed;
@@ -442,14 +442,14 @@ public class PeerSelection {
      * @return a hash map of peer hashes to seed object
      */
     public static Map<String, Seed> seedsByAgeX(final SeedDB seedDB, final boolean up, int count) {
-        
+
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
 
         // fill a score object
         final ScoreMap<String> seedScore = new ConcurrentScoreMap<String>();
         Seed ys;
         long absage;
-        final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN); 
+        final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN);
         int searchcount = 1000;
         if (searchcount > seedDB.sizeConnected()) searchcount = seedDB.sizeConnected();
         try {
@@ -461,7 +461,7 @@ public class PeerSelection {
                     seedScore.inc(ys.hash, (int) absage); // the higher absage, the older is the peer
                 } catch (final Exception e) {}
             }
-            
+
             // result is now in the score object; create a result vector
             final Map<String, Seed> result = new HashMap<String, Seed>();
             final Iterator<String> it = seedScore.keys(up);
@@ -477,7 +477,7 @@ public class PeerSelection {
             return null;
         }
     }
-    
+
 
 
     /**
@@ -491,7 +491,7 @@ public class PeerSelection {
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
         Seed ys;
         //long age;
-        final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN); 
+        final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN);
         try {
             final Map<String, Seed> result = new HashMap<String, Seed>();
             while (s.hasNext() && count-- > 0) {
@@ -509,6 +509,6 @@ public class PeerSelection {
         }
     }
 
-    
-    
+
+
 }
