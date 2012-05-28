@@ -38,7 +38,7 @@ import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.util.FileUtils;
 
-import org.apache.tools.bzip2.CBZip2InputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 
 public class bzipParser extends AbstractParser implements Parser {
@@ -78,7 +78,7 @@ public class bzipParser extends AbstractParser implements Parser {
 
             int read = 0;
             final byte[] data = new byte[1024];
-            final CBZip2InputStream zippedContent = new CBZip2InputStream(source);
+            final BZip2CompressorInputStream zippedContent = new BZip2CompressorInputStream(source);
 
             tempFile = File.createTempFile("bunzip","tmp");
             tempFile.deleteOnExit();

@@ -110,6 +110,7 @@ public class dbtest {
             return this.table_reference;
         }
 
+        @Override
         public abstract void run();
 
         public long getSource() {
@@ -122,6 +123,7 @@ public class dbtest {
             super(table_test, table_reference, aSource);
         }
 
+        @Override
         public void run() {
             final STEntry entry = new STEntry(getSource());
             System.out.println("write:  " + NaturalOrder.arrayList(entry.getKey(), 0, entry.getKey().length));
@@ -145,6 +147,7 @@ public class dbtest {
             super(table_test, table_reference, aSource);
         }
 
+        @Override
         public void run() {
             final STEntry entry = new STEntry(getSource());
             System.out.println("remove: " + NaturalOrder.arrayList(entry.getKey(), 0, entry.getKey().length));
@@ -164,6 +167,7 @@ public class dbtest {
             super(table_test, table_reference, aSource);
         }
 
+        @Override
         public void run() {
             final STEntry entry = new STEntry(getSource());
             try {

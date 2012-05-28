@@ -60,7 +60,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 
-import org.apache.tools.bzip2.CBZip2InputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 import de.anomic.data.wiki.WikiCode;
 import de.anomic.data.wiki.WikiParser;
@@ -154,7 +154,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 if (b != 'B') throw new IOException("Invalid bz2 content.");
                 b = is.read();
                 if (b != 'Z') throw new IOException("Invalid bz2 content.");
-                is = new CBZip2InputStream(is);
+                is = new BZip2CompressorInputStream(is);
             } else if (this.sourcefile.getName().endsWith(".gz")) {
                 is = new GZIPInputStream(is);
             }
