@@ -3,7 +3,8 @@
 # add in /etc/crontab
 # 0 *	* * *	yacy    cd /home/yacy/production/bin && ./checkalive.sh
 
-RESULT=`wget -t 1 --spider http://localhost:8090/Status.html 2>&1`
+port=$(grep ^port= ../DATA/SETTINGS/yacy.conf |cut -d= -f2)
+RESULT=`wget -t 1 --spider http://localhost:$port/Status.html 2>&1`
 FLAG=0
 
 for x in $RESULT; do
