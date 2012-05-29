@@ -35,10 +35,8 @@
 		//layerMaplint = new OpenLayers.Layer.OSM.Maplint("Maplint");
 		layerWMS = new OpenLayers.Layer.WMS( "OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
         layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
-		layerOsmarender = new OpenLayers.Layer.OSM.Osmarender("Osmarender");
 		layerCycleMap = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
 		map.addLayer(layerMapnik);
-	    map.addLayer(layerOsmarender);
 		map.addLayer(layerCycleMap);
 		//map.addLayer(layerMaplint);
 		map.addLayer(layerWMS);
