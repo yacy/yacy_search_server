@@ -18,7 +18,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -98,46 +97,19 @@ public class yacysearch_location {
                 RSSMessage message;
                 loop: while ((message = results.poll(maximumTime, TimeUnit.MILLISECONDS)) != RSSMessage.POISON) {
                     if (message == null) break loop;
-
-                    // find all associated locations
-                    final Set<Location> locations = new HashSet<Location>();
-                    final StringBuilder words = new StringBuilder(120);
-                    if (search_title) words.append(message.getTitle().trim()).append(space);
-                    if (search_publisher) words.append(message.getCopyright().trim()).append(space);
-                    if (search_creator) words.append(message.getAuthor().trim()).append(space);
-                    String subject = "";
-                    assert message != null;
-                    assert message.getSubject() != null;
-                    for (final String s: message.getSubject()) subject += s.trim() + space;
-                    if (search_subject) words.append(subject).append(space);
-                    final String[] wordlist = words.toString().trim().split(space);
-                    for (final String word: wordlist) if (word.length() >= 3) locations.addAll(LibraryProvider.geoLoc.find(word, true));
-                    for (int i = 0; i < wordlist.length - 1; i++) locations.addAll(LibraryProvider.geoLoc.find(wordlist[i] + space + wordlist[i + 1], true));
-                    for (int i = 0; i < wordlist.length - 2; i++) locations.addAll(LibraryProvider.geoLoc.find(wordlist[i] + space + wordlist[i + 1] + space + wordlist[i + 2], true));
-
-                    // add locations from metatag
-                    if (metatag) {
-                        if (message.getLat() != 0.0f && message.getLon() != 0.0f) {
-                            locations.add(new Location(message.getLon(), message.getLat(), message.getTitle().trim()));
-                        }
-                    }
-
-                    for (final Location location: locations) {
-                        // write for all locations a point to this message
-                        prop.put("kml_placemark_" + placemarkCounter + "_location", location.getName());
-                        prop.put("kml_placemark_" + placemarkCounter + "_name", message.getTitle());
-                        prop.put("kml_placemark_" + placemarkCounter + "_author", message.getAuthor());
-                        prop.put("kml_placemark_" + placemarkCounter + "_copyright", message.getCopyright());
-                        prop.put("kml_placemark_" + placemarkCounter + "_subject", subject.trim());
-                        prop.put("kml_placemark_" + placemarkCounter + "_description", message.getDescription());
-                        prop.put("kml_placemark_" + placemarkCounter + "_date", message.getPubDate());
-                        prop.putXML("kml_placemark_" + placemarkCounter + "_url", message.getLink());
-                        prop.put("kml_placemark_" + placemarkCounter + "_pointname", location.getName());
-                        prop.put("kml_placemark_" + placemarkCounter + "_lon", location.lon());
-                        prop.put("kml_placemark_" + placemarkCounter + "_lat", location.lat());
-                        placemarkCounter++;
-                        if (placemarkCounter >= maximumRecords) break loop;
-                    }
+                    prop.put("kml_placemark_" + placemarkCounter + "_location", message.getTitle());
+                    prop.put("kml_placemark_" + placemarkCounter + "_name", message.getTitle());
+                    prop.put("kml_placemark_" + placemarkCounter + "_author", message.getAuthor());
+                    prop.put("kml_placemark_" + placemarkCounter + "_copyright", message.getCopyright());
+                    prop.put("kml_placemark_" + placemarkCounter + "_subject", message.getSubject());
+                    prop.put("kml_placemark_" + placemarkCounter + "_description", message.getDescription());
+                    prop.put("kml_placemark_" + placemarkCounter + "_date", message.getPubDate());
+                    prop.putXML("kml_placemark_" + placemarkCounter + "_url", message.getLink());
+                    prop.put("kml_placemark_" + placemarkCounter + "_pointname", message.getTitle());
+                    prop.put("kml_placemark_" + placemarkCounter + "_lon", message.getLon());
+                    prop.put("kml_placemark_" + placemarkCounter + "_lat", message.getLat());
+                    placemarkCounter++;
+                    if (placemarkCounter >= maximumRecords) break loop;
                 }
             } catch (final InterruptedException e) {}
             prop.put("kml_placemark", placemarkCounter);

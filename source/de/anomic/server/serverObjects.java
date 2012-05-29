@@ -69,7 +69,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public static final String ACTION_AUTHENTICATE = "AUTHENTICATE";
     public static final String ACTION_LOCATION = "LOCATION";
 	public final static String ADMIN_AUTHENTICATE_MSG = "admin log-in. If you don't know the password, set it with {yacyhome}/bin/passwd.sh {newpassword}";
-    
+
     private final static Pattern patternNewline = Pattern.compile("\n");
     private final static Pattern patternDoublequote = Pattern.compile("\"");
     private final static Pattern patternSlash = Pattern.compile("/");
@@ -98,7 +98,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public void authenticationRequired() {
     	this.put(ACTION_AUTHENTICATE, ADMIN_AUTHENTICATE_MSG);
     }
-    
+
     private static final String removeByteOrderMark(final String s) {
         if (s == null || s.length() == 0) return s;
         if (s.charAt(0) == BOM) return s.substring(1);
@@ -124,6 +124,20 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
             return super.remove(key);
         } else {
             return super.put(key, value);
+        }
+    }
+
+    public String put(final String key, final String[] values) {
+        if (key == null) {
+            // this does nothing
+            return null;
+        } else if (values == null) {
+            // assigning the null value creates the same effect like removing the element
+            return super.remove(key);
+        } else {
+            StringBuilder sb = new StringBuilder(10 + values.length * 8);
+            for (String s: values) sb.append(s).append(' ');
+            return put(key, sb.toString().trim());
         }
     }
 
