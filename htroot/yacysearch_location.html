@@ -15,11 +15,11 @@
     var map;
     var searchLayer_md = null;
     var searchLayer_co = null;
-    var path_mdsearch = 'yacysearch_location.rss?dom=metatag&query=';
-    var path_cosearch = 'yacysearch_location.rss?dom=query&query=';
+    var path_mdsearch = 'yacysearch_location.rss?dom=alltext&query=';
+    var path_losearch = 'yacysearch_location.rss?dom=location&query=';
     var marker_md = new OpenLayers.Icon("/env/grafics/marker_red.png", new OpenLayers.Size(11,16));
     var marker_co = new OpenLayers.Icon("/env/grafics/star_yellow.png", new OpenLayers.Size(25,25));
-    // possible values for dom: query,metatag,alltext,title,publisher,creator,subject
+    // possible values for dom: location,metatag,alltext,title,publisher,creator,subject
     
     function init() {
         map = new OpenLayers.Map('map', {
@@ -51,7 +51,7 @@
         
         #(initsearch)#::
         var query = '#[query]#'.replace(' ', '+');
-        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_cosearch + query, {'icon':marker_co});
+        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_losearch + query, {'icon':marker_co});
         map.addLayer(searchLayer_co);
         searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query, {'icon':marker_md});
         map.addLayer(searchLayer_md);
@@ -63,7 +63,7 @@
         if (searchLayer_md != null) searchLayer_md.destroy();
         if (searchLayer_co != null) searchLayer_co.destroy();
         var center = map.getCenter().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_cosearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&zoom=' + map.getZoom(), {'icon':marker_co});
+        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_losearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&zoom=' + map.getZoom(), {'icon':marker_co});
         map.addLayer(searchLayer_co);
         searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query, {'icon':marker_md});
         map.addLayer(searchLayer_md);

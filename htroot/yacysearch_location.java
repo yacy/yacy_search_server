@@ -54,7 +54,7 @@ public class yacysearch_location {
             prop.put("kml", 1);
             if (post == null) return prop;
             final String query = post.get("query", "");
-            final boolean search_query = post.get("dom", "").indexOf("query",0) >= 0;
+            final boolean search_query = post.get("dom", "").indexOf("location",0) >= 0;
             final boolean metatag = post.get("dom", "").indexOf("metatag",0) >= 0;
             final boolean alltext = post.get("dom", "").indexOf("alltext",0) >= 0;
             final boolean search_title = alltext || post.get("dom", "").indexOf("title",0) >= 0;
@@ -97,6 +97,7 @@ public class yacysearch_location {
                 // take the results and compute some locations
                 RSSMessage message;
                 loop: while ((message = results.poll(maximumTime, TimeUnit.MILLISECONDS)) != RSSMessage.POISON) {
+                    if (message == null) break loop;
 
                     // find all associated locations
                     final Set<Location> locations = new HashSet<Location>();
