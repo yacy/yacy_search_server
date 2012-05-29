@@ -384,25 +384,8 @@
     <!-- copy searchtest -->
     <copy todir="${release_main}/bin">
       <fileset dir="bin">
-        <include name="apicall.sh"/>
-        <include name="apicat.sh"/>
-        <include name="clearall.sh"/>
-        <include name="clearcache.sh"/>
-        <include name="clearindex.sh"/>
-        <include name="deleteurl.sh"/>
-        <include name="deploy.sh"/>
-        <include name="down.sh"/>
-        <include name="dumpcheck.sh"/>
-        <include name="importmediawiki.sh"/>
-        <include name="importOAIList.sh"/>
-        <include name="importurllist.sh"/>
-        <include name="localsearch.sh"/>
+        <include name="**/*.sh"/>
         <include name="searchtest*"/>
-        <include name="surrogateCleanOut.sh"/>
-        <include name="surrogateMVin.sh"/>
-        <include name="surrogateMVtmp.sh"/>
-        <include name="surrogateRefeed.sh"/>
-        <include name="up.sh"/>
       </fileset>
     </copy>
 
