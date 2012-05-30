@@ -19,6 +19,7 @@
     var path_losearch = 'yacysearch_location.rss?dom=location&query=';
     var marker_md = new OpenLayers.Icon("/env/grafics/marker_red.png", new OpenLayers.Size(11,16));
     var marker_co = new OpenLayers.Icon("/env/grafics/star_yellow.png", new OpenLayers.Size(25,25));
+    var bounds = new OpenLayers.Bounds();
     // possible values for dom: location,metatag,alltext,title,publisher,creator,subject
     
     function init() {
@@ -71,10 +72,6 @@
         map.addLayer(searchLayer_co);
         searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_md});
         map.addLayer(searchLayer_md);
-        //map.zoomToExtent(searchLayer_co.getExtent());
-        //map.panTo(searchLayer_co.getExtent().getCenterLonLat());
-        //map.setCenter(searchLayer_co.getExtent().getLonLatFromViewPortPx, 5);
-        //map.setCenter(searchLayer_co.getExtent().getCenterLonLat(), map.getZoomForExtent(searchLayer_co.getExtent(), true));
         //document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?query=' + query);
     }
     
@@ -85,6 +82,12 @@
 	    var cocount = searchLayer_co.markers.length;
         var mdcount = searchLayer_md.markers.length;
         document.getElementById('resultline').innerHTML = mdcount + " POIs found";
+        if (mdcount > 0) {
+          var bounds = searchLayer_md.getDataExtent();
+          map.panTo(bounds.getCenterLonLat());
+          map.zoomTo(map.getZoomForExtent(bounds));
+          //map.setCenter(bounds.getCenterLonLat(), map.getZoomForExtent(bounds));
+        }
       }
     }
   </script>
