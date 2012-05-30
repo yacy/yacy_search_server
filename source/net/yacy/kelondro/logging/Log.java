@@ -409,6 +409,8 @@ public final class Log {
                     e.printStackTrace(ps);
                     ps.close();
                     exceptionLog.logSevere(msg + "\n" + baos.toString(), e);
+                    Log.logException(e);
+                    Log.logException(e.getCause());
                     //System.err.print("Exception in thread \"" + t.getName() + "\" ");
                     //e.printStackTrace(System.err);
                 }
