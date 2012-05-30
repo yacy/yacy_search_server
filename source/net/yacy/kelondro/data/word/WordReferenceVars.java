@@ -31,7 +31,6 @@ import java.util.Comparator;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
@@ -394,9 +393,14 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return Base64Order.enhancedCoder.equal(this.urlHash, other.urlHash);
     }
 
+    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
+
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(this.urlHash);
+        if (this.hashCache == Integer.MIN_VALUE) {
+            this.hashCache = ByteArray.hashCode(this.urlHash);
+        }
+        return this.hashCache;
     }
 
     @Override

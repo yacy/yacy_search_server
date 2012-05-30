@@ -381,9 +381,14 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         this.wordsintext = this.wordsintext + oe.wordsintext();
     }
 
+    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
+
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(this.urlHash);
+        if (this.hashCache == Integer.MIN_VALUE) {
+            this.hashCache = ByteArray.hashCode(this.urlHash);
+        }
+        return this.hashCache;
     }
 
     public void addPosition(int position) {
