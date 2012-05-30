@@ -57,7 +57,12 @@ public class Blacklist {
     private static final File BLACKLIST_DHT_CACHEFILE = new File("DATA/WORK/BlacklistCache_DHT.ser");
 
     public enum BlacklistType {
-    	DHT, CRAWLER, PROXY, SEARCH, SURFTIPS, NEWS
+    	DHT, CRAWLER, PROXY, SEARCH, SURFTIPS, NEWS;
+
+    	@Override
+    	public final String toString () {
+    		return super.toString().toLowerCase();
+    	}
     }
 
     public final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
