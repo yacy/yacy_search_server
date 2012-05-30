@@ -56,6 +56,8 @@
         searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query, {'icon':marker_md});
         map.addLayer(searchLayer_md);
         #(/initsearch)#
+        
+        window.setInterval("refresh()", 1000);
     }
 
     function search() {
@@ -63,15 +65,27 @@
         if (searchLayer_md != null) searchLayer_md.destroy();
         if (searchLayer_co != null) searchLayer_co.destroy();
         var center = map.getCenter().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_losearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&zoom=' + map.getZoom(), {'icon':marker_co});
+        var extend = map.getExtent().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+        var radius = Math.sqrt(extend.getWidth() * extend.getWidth() + extend.getHeight() * extend.getHeight()) / 2;
+        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_losearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_co});
         map.addLayer(searchLayer_co);
-        searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query, {'icon':marker_md});
+        searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_md});
         map.addLayer(searchLayer_md);
         //map.zoomToExtent(searchLayer_co.getExtent());
         //map.panTo(searchLayer_co.getExtent().getCenterLonLat());
         //map.setCenter(searchLayer_co.getExtent().getLonLatFromViewPortPx, 5);
         //map.setCenter(searchLayer_co.getExtent().getCenterLonLat(), map.getZoomForExtent(searchLayer_co.getExtent(), true));
         //document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?query=' + query);
+    }
+    
+    function refresh() {
+      if (searchLayer_co == null || searchLayer_md == null) {
+        document.getElementById('resultline').innerHTML = "";
+      } else {
+	    var cocount = searchLayer_co.markers.length;
+        var mdcount = searchLayer_md.markers.length;
+        document.getElementById('resultline').innerHTML = mdcount + " POIs found";
+      }
     }
   </script>
 
@@ -98,9 +112,10 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
   <h2>#[promoteSearchPageGreeting]#</h2>
   <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a></div>
   <fieldset class="yacys">
-     <input type="text" value="#(initsearch)#::#[query]##(/initsearch)#" id="query" size="42" />
+     <input type="text" value="#(initsearch)#::#[query]##(/initsearch)#" id="query" size="42" onFocus="this.select()" />
      <input type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;" />
   </fieldset>
+  <div id="resultline"></div>
 </form><br/>
 <div id="map" style="clear:both; width:100%; height:720px"></div>
 <script type="text/javascript">
