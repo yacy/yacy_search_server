@@ -84,10 +84,12 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
         }
     }
 
+    @Override
     public int getJobCount() {
         return getManager().queueSize();
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public J job(final J next) throws Exception {
         J out = null;
@@ -116,8 +118,9 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
                 terminate(false);
             } catch (final InvocationTargetException e) {
                 final String targetException = e.getTargetException().getMessage();
-                Log.logException(e.getTargetException());
                 Log.logException(e);
+                Log.logException(e.getCause());
+                Log.logException(e.getTargetException());
                 if ((targetException != null) &&
                         ((targetException.indexOf("heap space",0) > 0) ||
                         (targetException.indexOf("NullPointerException",0) > 0))) {
