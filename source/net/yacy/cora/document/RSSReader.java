@@ -20,6 +20,7 @@
 
 package net.yacy.cora.document;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,9 +58,10 @@ public class RSSReader extends DefaultHandler {
         this.type = Type.none;
     }
 
-    public RSSReader(final int maxsize, final InputStream stream, final Type type) throws IOException {
+    public RSSReader(final int maxsize, InputStream stream, final Type type) throws IOException {
         this(maxsize);
         this.type = type;
+        if (!(stream instanceof ByteArrayInputStream) && !(stream instanceof BufferedInputStream)) stream = new BufferedInputStream(stream);
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
             final SAXParser saxParser = factory.newSAXParser();
