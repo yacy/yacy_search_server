@@ -88,6 +88,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     }
 
     private static String artificialGuidPrefix = "c0_";
+    private static String calculatedGuidPrefix = "c1_";
     public static final RSSMessage POISON = new RSSMessage("", "", "");
 
     public static final HashSet<String> tags = new HashSet<String>();
@@ -123,11 +124,6 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     public void setValue(final String name, final String value) {
         this.map.put(name, value);
-        // if possible generate a guid if not existent so far
-        if ((name.equals("title") || name.equals("description") || name.equals("link")) &&
-            (!this.map.containsKey("guid") || this.map.get("guid").startsWith(artificialGuidPrefix))) {
-            this.map.put("guid", artificialGuidPrefix + Integer.toHexString((getTitle() + getDescription() + getLink()).hashCode()));
-        }
     }
 
     @Override
@@ -217,7 +213,13 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     @Override
     public String getGuid() {
-        return Token.guid.valueFrom(this.map, "");
+        String guid = Token.guid.valueFrom(this.map, "");
+        if ((guid.length() == 0 || guid.startsWith(artificialGuidPrefix)) &&
+            (this.map.containsKey("title") || this.map.containsKey("description") || this.map.containsKey("link"))) {
+            guid = calculatedGuidPrefix + Integer.toHexString(getTitle().hashCode() + getDescription().hashCode() + getLink().hashCode());
+            this.map.put("guid", guid);
+        }
+        return guid;
     }
 
     public String getTTL() {
