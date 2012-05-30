@@ -28,10 +28,10 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
@@ -81,6 +81,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
             return this.keys;
         }
 
+        @Override
         public String toString() {
             return this.keys.iterator().next();
         }
@@ -99,16 +100,16 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     private final Map<String, String> map;
 
     public RSSMessage(final String title, final String description, final String link) {
-        this.map = new ConcurrentHashMap<String, String>();
+        this.map = new HashMap<String, String>();
         this.map.put("title", title);
         this.map.put("description", description);
         this.map.put("link", link);
         this.map.put("pubDate", ISO8601Formatter.FORMATTER.format());
         this.map.put("guid", artificialGuidPrefix + Integer.toHexString((title + description + link).hashCode()));
     }
-    
+
     public RSSMessage(final String title, final String description, final DigestURI link) {
-        this.map = new ConcurrentHashMap<String, String>();
+        this.map = new HashMap<String, String>();
         this.map.put("title", title);
         this.map.put("description", description);
         this.map.put("link", link.toNormalform(true, false));
@@ -117,7 +118,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     }
 
     public RSSMessage() {
-        this.map = new ConcurrentHashMap<String, String>();
+        this.map = new HashMap<String, String>();
     }
 
     public void setValue(final String name, final String value) {
@@ -129,10 +130,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         }
     }
 
+    @Override
     public String getTitle() {
         return Token.title.valueFrom(this.map, "");
     }
 
+    @Override
     public String getLink() {
         return Token.link.valueFrom(this.map, "");
     }
@@ -158,22 +161,27 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return o1.compareTo(o2);
     }
 
+    @Override
     public String getDescription() {
         return Token.description.valueFrom(this.map, "");
     }
 
+    @Override
     public String getAuthor() {
         return Token.author.valueFrom(this.map, "");
     }
 
+    @Override
     public String getCopyright() {
         return Token.copyright.valueFrom(this.map, "");
     }
 
+    @Override
     public String getCategory() {
         return Token.category.valueFrom(this.map, "");
     }
 
+    @Override
     public String[] getSubject() {
         final String subject = Token.subject.valueFrom(this.map, "");
         if (subject.indexOf(',') >= 0) return subject.split(",");
@@ -181,14 +189,17 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return subject.split(" ");
     }
 
+    @Override
     public String getReferrer() {
         return Token.referrer.valueFrom(this.map, "");
     }
 
+    @Override
     public String getLanguage() {
         return Token.language.valueFrom(this.map, "");
     }
 
+    @Override
     public Date getPubDate() {
         final String dateString = Token.pubDate.valueFrom(this.map, "");
         Date date;
@@ -204,6 +215,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return date;
     }
 
+    @Override
     public String getGuid() {
         return Token.guid.valueFrom(this.map, "");
     }
@@ -212,10 +224,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return Token.ttl.valueFrom(this.map, "");
     }
 
+    @Override
     public String getDocs() {
         return Token.docs.valueFrom(this.map, "");
     }
 
+    @Override
     public long getSize() {
         final String size = Token.size.valueFrom(this.map, "-1");
         return (size == null || size.length() == 0) ? -1 : Long.parseLong(size);
@@ -227,10 +241,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return sb.toString();
     }
 
+    @Override
     public float getLon() {
         return Float.parseFloat(Token.lon.valueFrom(this.map, "0.0"));
     }
 
+    @Override
     public float getLat() {
         return Float.parseFloat(Token.lat.valueFrom(this.map, "0.0"));
     }
@@ -240,18 +256,22 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return this.map.toString();
     }
 
+    @Override
     public void setAuthor(final String author) {
         setValue("author", author);
     }
 
+    @Override
     public void setCategory(final String category) {
         setValue("category", category);
     }
 
+    @Override
     public void setCopyright(final String copyright) {
         setValue("copyright", copyright);
     }
 
+    @Override
     public void setSubject(final String[] tags) {
         final StringBuilder sb = new StringBuilder(tags.length * 10);
         for (final String tag: tags) sb.append(tag).append(',');
@@ -259,38 +279,47 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         setValue("subject", sb.toString());
     }
 
+    @Override
     public void setDescription(final String description) {
         setValue("description", description);
     }
 
+    @Override
     public void setDocs(final String docs) {
         setValue("docs", docs);
     }
 
+    @Override
     public void setGuid(final String guid) {
         setValue("guid", guid);
     }
 
+    @Override
     public void setLanguage(final String language) {
         setValue("language", language);
     }
 
+    @Override
     public void setLink(final String link) {
         setValue("link", link);
     }
 
+    @Override
     public void setPubDate(final Date pubdate) {
         setValue("pubDate", ISO8601Formatter.FORMATTER.format(pubdate));
     }
 
+    @Override
     public void setReferrer(final String referrer) {
         setValue("referrer", referrer);
     }
 
+    @Override
     public void setSize(final long size) {
         setValue("size", Long.toString(size));
     }
 
+    @Override
     public void setTitle(final String title) {
         setValue("title", title);
     }
