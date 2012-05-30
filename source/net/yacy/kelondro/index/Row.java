@@ -157,14 +157,14 @@ public final class Row implements Serializable {
     public final Entry newEntry(final byte[] rowinstance) {
         if (rowinstance == null) return null;
         assert (this.objectOrder.wellformed(rowinstance, 0, this.primaryKeyLength)) :  "row not well-formed: rowinstance[0] = " + UTF8.String(rowinstance, 0, this.primaryKeyLength) + " / " + NaturalOrder.arrayList(rowinstance, 0, this.primaryKeyLength);
-        return new Entry(rowinstance, false);
+        return new Entry(rowinstance, 0, false);
     }
 
     public final Entry newEntry(final Entry oldrow, final int fromColumn) {
         if (oldrow == null) return null;
         assert (oldrow.getColBytes(0, false)[0] != 0);
         assert (this.objectOrder.wellformed(oldrow.getPrimaryKeyBytes(), 0, this.primaryKeyLength));
-        return new Entry(oldrow, fromColumn, false);
+        return new Entry(oldrow.rowinstance, oldrow.offset + oldrow.colstart(fromColumn), false);
     }
 
     public final Entry newEntry(final byte[] rowinstance, final int start, final boolean clone) {
@@ -249,14 +249,6 @@ public final class Row implements Serializable {
             this.rowinstance = new byte[Row.this.objectsize];
             //for (int i = 0; i < objectsize; i++) this.rowinstance[i] = 0;
             this.offset = 0;
-        }
-
-        public Entry(final byte[] newrow, final boolean forceclone) {
-            this(newrow, 0, forceclone);
-        }
-
-        public Entry(final Entry oldrow, final int fromColumn, final boolean forceclone) {
-            this(oldrow.rowinstance, oldrow.offset + oldrow.colstart(fromColumn), forceclone);
         }
 
         public Entry(final byte[] newrow, final int start, final boolean forceclone) {
@@ -643,7 +635,7 @@ public final class Row implements Serializable {
 
         private final int index;
         public EntryIndex(final byte[] row, final int i) {
-            super(row, false);
+            super(row, 0, false);
             this.index = i;
         }
         public int index() {
