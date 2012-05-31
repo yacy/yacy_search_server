@@ -108,6 +108,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
     }
 
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final double value) {
+        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
+    }
+
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final boolean value) {
         if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
     }

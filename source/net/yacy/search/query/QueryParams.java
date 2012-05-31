@@ -141,6 +141,7 @@ public final class QueryParams {
     public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     public final String userAgent;
     public boolean filterfailurls;
+    public double lat, lon, radius;
 
     public QueryParams(
             final String queryString,
@@ -198,6 +199,9 @@ public final class QueryParams {
         this.userAgent = userAgent;
         this.transmitcount = 0;
         this.filterfailurls = false;
+        this.lat = 0.0d;
+        this.lon = 0.0d;
+        this.radius = 0.0d;
     }
 
     public QueryParams(
@@ -224,7 +228,8 @@ public final class QueryParams {
         final Segment indexSegment,
         final RankingProfile ranking,
         final String userAgent,
-        final boolean filterfailurls) {
+        final boolean filterfailurls,
+        final double lat, final double lon, final double radius) {
 
         this.queryString = queryString;
         this.queryHashes = queryHashes;
@@ -271,7 +276,14 @@ public final class QueryParams {
         this.userAgent = userAgent;
         this.transmitcount = 0;
         this.filterfailurls = filterfailurls;
+        // we normalize here the location and radius because that should cause a better caching
+        // and as surplus it will increase privacy
+        this.lat = Math.floor(lat * this.kmNormal) / this.kmNormal;
+        this.lon = Math.floor(lon * this.kmNormal) / this.kmNormal;
+        this.radius = Math.floor(radius * this.kmNormal + 1) / this.kmNormal;
     }
+
+    double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
 
     public Segment getSegment() {
         return this.indexSegment;
@@ -510,6 +522,8 @@ public final class QueryParams {
         context.append(this.maxDistance);
         context.append(asterisk);
         context.append(this.modifier.s);
+        context.append(asterisk);
+        context.append(this.lat).append(asterisk).append(this.lon).append(asterisk).append(this.radius);
         context.append(asterisk);
         context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
         String result = context.toString();

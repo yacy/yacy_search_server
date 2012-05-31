@@ -182,10 +182,10 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public int lapp() {
         return this.urlentry.lapp();
     }
-    public float lat() {
+    public double lat() {
         return this.urlentry.lat();
     }
-    public float lon() {
+    public double lon() {
         return this.urlentry.lon();
     }
     public WordReferenceVars word() {

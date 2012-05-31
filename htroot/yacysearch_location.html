@@ -20,6 +20,8 @@
     var shallZoom   = true;  // flag if the map shall be zoomed to the search result
     var shallReload = false; // flag if the search shall be repeated upon next resize of the window
     var poisfound = 0;
+    var kmNormal = 100; // ca. 1km grid for radius
+    var meterNormal = 100000; // ca. 1m grid for location
     
     // automatically adapt height of map upon window resize
     function adaptHeight() {
@@ -66,6 +68,7 @@
 
     function zoomChanged () {
       shallZoom = false; // no automatic zoom if user hs zoomed
+      refreshsearch();
     } 
       
     // called if a search is submitted
@@ -81,8 +84,11 @@
       var center = map.getCenter().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
       var extend = map.getExtent().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
       var radius = Math.sqrt(extend.getWidth() * extend.getWidth() + extend.getHeight() * extend.getHeight()) / 2;
-      searchLayer_co0 = new OpenLayers.Layer.GeoRSS('Communities',       path_losearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_co});
-      searchLayer_md0 = new OpenLayers.Layer.GeoRSS('Point Of Interest', path_mdsearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_md});
+      radius = Math.floor(radius * kmNormal + 1) / kmNormal;
+      var lon = Math.floor(center.lon * meterNormal) / meterNormal;
+      var lat = Math.floor(center.lat * meterNormal) / meterNormal;
+      searchLayer_co0 = new OpenLayers.Layer.GeoRSS('Communities',       path_losearch + query + '&lon=' + lon + '&lat=' + lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_co});
+      searchLayer_md0 = new OpenLayers.Layer.GeoRSS('Point Of Interest', path_mdsearch + query + '&lon=' + lon + '&lat=' + lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_md});
       map.addLayer(searchLayer_co0);
       map.addLayer(searchLayer_md0);
       //document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?query=' + query);
@@ -92,7 +98,7 @@
     
     function refresh() {
       // check double-buffer state
-      if (searchLayer_md0 != null && searchLayer_md0.markers.length > 0) {
+      if (searchLayer_md0 != null) {
         // switch the double-buffer
         if (searchLayer_md1 != null) searchLayer_md1.destroy();
         if (searchLayer_co1 != null) searchLayer_co1.destroy();
@@ -108,13 +114,13 @@
       }
       var cocount = searchLayer_co1.markers.length;
       var mdcount = searchLayer_md1.markers.length;
-      if (mdcount + cocount <= poisfound) {
-        return;
-      }
+      //if (mdcount + cocount <= poisfound) {
+      //  return;
+      //}
       
       // update map and result line
       poisfound = mdcount + cocount;
-      document.getElementById('resultline').innerHTML = poisfound + " POIs found";
+      document.getElementById('resultline').innerHTML = poisfound + " POIs found in visible map";
       
       // check if any of the markers is visible on the screen.
       // this is only necessary if shallZoom = false since this would set shallZoom = true

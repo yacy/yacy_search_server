@@ -123,7 +123,7 @@ public class URIMetadataRow implements URIMetadata {
             final String dc_creator,
             final String dc_subject,
             final String dc_publisher,
-            final float lon, final float lat, // decimal degrees as in WGS84; if unknown both values may be 0.0f;
+            final double lon, final double lat, // decimal degrees as in WGS84; if unknown both values may be 0.0d;
             final Date mod,
             final Date load,
             final Date fresh,
@@ -194,8 +194,8 @@ public class URIMetadataRow implements URIMetadata {
             final String dc_creator,
             final String dc_subject,
             final String dc_publisher,
-            final float lat,
-            final float lon) {
+            final double lat,
+            final double lon) {
         final CharBuffer s = new CharBuffer(3600, 360);
         s.append(url.toNormalform(false, true)).appendLF();
         s.append(dc_title).appendLF();
@@ -205,7 +205,7 @@ public class URIMetadataRow implements URIMetadata {
         s.appendLF();
         if (dc_publisher.length() > 80) s.append(dc_publisher, 0, 80); else s.append(dc_publisher);
         s.appendLF();
-        if (lon == 0.0f && lat == 0.0f) s.appendLF(); else s.append(Float.toString(lat)).append(',').append(Float.toString(lon)).appendLF();
+        if (lon == 0.0f && lat == 0.0f) s.appendLF(); else s.append(Double.toString(lat)).append(',').append(Double.toString(lon)).appendLF();
 		return UTF8.getBytes(s.toString());
     }
 
@@ -418,11 +418,11 @@ public class URIMetadataRow implements URIMetadata {
         return this.metadata().dc_subject();
     }
 
-    public float lat() {
+    public double lat() {
         return this.metadata().lat();
     }
 
-    public float lon() {
+    public double lon() {
         return this.metadata().lon();
     }
 
@@ -638,15 +638,15 @@ public class URIMetadataRow implements URIMetadata {
         public String  dc_creator() { return this.dc_creator; }
         public String  dc_publisher() { return this.dc_publisher; }
         public String  dc_subject()   { return this.dc_subject; }
-        public float lat() {
-            if (this.latlon == null || this.latlon.length() == 0) return 0.0f;
+        public double lat() {
+            if (this.latlon == null || this.latlon.length() == 0) return 0.0d;
             final int p = this.latlon.indexOf(',');
-            return p < 0 ? 0.0f : Float.parseFloat(this.latlon.substring(0, p));
+            return p < 0 ? 0.0f : Double.parseDouble(this.latlon.substring(0, p));
         }
-        public float lon() {
-            if (this.latlon == null || this.latlon.length() == 0) return 0.0f;
+        public double lon() {
+            if (this.latlon == null || this.latlon.length() == 0) return 0.0d;
             final int p = this.latlon.indexOf(',');
-            return p < 0 ? 0.0f : Float.parseFloat(this.latlon.substring(p + 1));
+            return p < 0 ? 0.0f : Double.parseDouble(this.latlon.substring(p + 1));
         }
     }
 

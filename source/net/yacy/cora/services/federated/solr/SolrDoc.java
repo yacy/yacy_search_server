@@ -64,6 +64,10 @@ public class SolrDoc extends SolrInputDocument {
         this.setField(key.getSolrFieldName(), value);
     }
 
+    public final void addSolr(final SolrField key, final double value) {
+        this.setField(key.getSolrFieldName(), value);
+    }
+
     public final void addSolr(final SolrField key, final boolean value) {
         this.setField(key.getSolrFieldName(), value);
     }

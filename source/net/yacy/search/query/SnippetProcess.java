@@ -360,7 +360,7 @@ public class SnippetProcess {
         Worker worker;
         if (this.workerThreads == null) {
             this.workerThreads = new Worker[deployCount];
-            synchronized(this.workerThreads) {
+            synchronized(this.workerThreads) {try {
                 for (int i = 0; i < this.workerThreads.length; i++) {
                     if (this.result.sizeAvailable() >= neededResults ||
                         (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0)) {
@@ -376,7 +376,7 @@ public class SnippetProcess {
                         }
                     }
                 }
-            }
+            } catch (OutOfMemoryError e) {}}
         } else {
             // there are still worker threads running, but some may be dead.
             // if we find dead workers, reanimate them
