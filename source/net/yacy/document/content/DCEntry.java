@@ -230,7 +230,7 @@ public class DCEntry extends TreeMap<String, String> {
 
     public String[] getSubject() {
         String t = this.get("categories");
-        if (t == null) this.get("dc:subject");
+        if (t == null) t = this.get("dc:subject");
         t = stripCDATA(t);
         if (t == null) return new String[]{};
         return t.split(";");
@@ -238,7 +238,7 @@ public class DCEntry extends TreeMap<String, String> {
 
     public double getLon() {
         String t = this.get("geo:long");
-        if (t == null) this.get("geo:lon");
+        if (t == null) t = this.get("geo:lon");
         t = stripCDATA(t);
         if (t == null) return 0.0d;
         return Double.parseDouble(t);
@@ -246,7 +246,7 @@ public class DCEntry extends TreeMap<String, String> {
 
     public double getLat() {
         String t = this.get("geo:lat");
-        if (t == null) this.get("geo:lat");
+        if (t == null) t = this.get("geo:lat");
         t = stripCDATA(t);
         if (t == null) return 0.0d;
         return Double.parseDouble(t);

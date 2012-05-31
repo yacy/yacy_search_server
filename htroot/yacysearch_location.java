@@ -66,7 +66,7 @@ public class yacysearch_location {
             //i.e. http://localhost:8090/yacysearch_location.kml?query=berlin&maximumTime=2000&maximumRecords=100
 
             int placemarkCounter = 0;
-            if (search_query) {
+            if (query.length() > 0 && search_query) {
                 final Set<Location> locations = LibraryProvider.geoLoc.find(query, true);
                 for (final String qp: query.split(" ")) {
                     locations.addAll(LibraryProvider.geoLoc.find(qp, true));
@@ -88,7 +88,7 @@ public class yacysearch_location {
                 }
             }
 
-            if (metatag || search_title || search_publisher || search_creator || search_subject) try {
+            if (query.length() > 0 && (metatag || search_title || search_publisher || search_creator || search_subject)) try {
                 // get a queue of search results
                 final String rssSearchServiceURL = "http://127.0.0.1:" + sb.getConfig("port", "8090") + "/yacysearch.rss";
                 final BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
