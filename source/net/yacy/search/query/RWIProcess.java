@@ -83,7 +83,9 @@ public final class RWIProcess extends Thread
     //private final int[] domZones;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
 
-    private int remote_resourceSize, remote_indexCount, remote_peerCount;
+    private int remote_resourceSize;
+    private int remote_indexCount;
+    private int remote_peerCount;
     private int local_indexCount;
     private final AtomicInteger maxExpectedRemoteReferences, expectedRemoteReferences,
         receivedRemoteReferences;
@@ -204,7 +206,7 @@ public final class RWIProcess extends Thread
                     System.currentTimeMillis() - timer),
                 false);
             if ( !index.isEmpty() ) {
-                add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true);
+                add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true, 10000);
             }
         } catch ( final Exception e ) {
             Log.logException(e);
@@ -218,7 +220,8 @@ public final class RWIProcess extends Thread
         final boolean local,
         final String resourceName,
         final int fullResource,
-        final boolean finalizeAddAtEnd) {
+        final boolean finalizeAddAtEnd,
+        final long maxtime) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         //Log.logInfo("RWIProcess", "added a container, size = " + index.size());
@@ -239,7 +242,7 @@ public final class RWIProcess extends Thread
         long timer = System.currentTimeMillis();
 
         // normalize entries
-        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
+        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index, maxtime);
         int is = index.size();
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
             this.query.id(true),
@@ -624,6 +627,18 @@ public final class RWIProcess extends Thread
                 && (page.lat() == 0.0f || page.lon() == 0.0f) ) {
                 this.sortout++;
                 continue;
+            }
+
+            // check geo coordinates
+            double lat, lon;
+            if (this.query.radius > 0.0d && this.query.lat != 0.0d && this.query.lon != 0.0d && (lat = page.lat()) > 0.0d && (lon = page.lon()) > 0.0d) {
+                double latDelta = this.query.lat - lat;
+                double lonDelta = this.query.lon - lon;
+                double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta); // pythagoras
+                if (distance > this.query.radius) {
+                    this.sortout++;
+                    continue;
+                }
             }
 
             // check vocabulary constraint

@@ -44,7 +44,7 @@ public class AccessTracker {
 
     public static final int minSize = 100;
     public static final int maxSize = 1000;
-    public static final int maxAge = 10 * 60 * 1000;
+    public static final int maxAge = 24 * 60 * 60 * 1000;
 
     public enum Location {local, remote}
 

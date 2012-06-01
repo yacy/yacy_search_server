@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -48,7 +48,7 @@ import net.yacy.search.index.Segment;
 
 
 public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEntry> {
-    
+
     // payload objects
     private final URIMetadataRow urlentry;
     private String alternative_urlstring;
@@ -56,10 +56,10 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     private final TextSnippet textSnippet;
     private final List<MediaSnippet> mediaSnippets;
     private final Segment indexSegment;
-    
+
     // statistic objects
     public long dbRetrievalTime, snippetComputationTime, ranking;
-    
+
     public ResultEntry(final URIMetadataRow urlentry,
                        final Segment indexSegment,
                        SeedDB peers,
@@ -103,9 +103,13 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
             if ((p = this.alternative_urlname.indexOf('?')) > 0) this.alternative_urlname = this.alternative_urlname.substring(0, p);
         }
     }
+    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(this.urlentry.hash());
+        if (this.hashCache == Integer.MIN_VALUE) {
+            this.hashCache = ByteArray.hashCode(this.urlentry.hash());
+        }
+        return this.hashCache;
     }
     @Override
     public boolean equals(final Object obj) {
@@ -178,10 +182,10 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public int lapp() {
         return this.urlentry.lapp();
     }
-    public float lat() {
+    public double lat() {
         return this.urlentry.lat();
     }
-    public float lon() {
+    public double lon() {
         return this.urlentry.lon();
     }
     public WordReferenceVars word() {

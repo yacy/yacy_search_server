@@ -130,7 +130,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final List<String> li;
     private final CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
-    private float lon, lat;
+    private double lon, lat;
     private MultiProtocolURI canonical;
 
 
@@ -803,7 +803,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     // <meta NAME="ICBM" CONTENT="38.90551492, 1.454004505" />
     // <meta NAME="geo.position" CONTENT="38.90551492;1.454004505" />
 
-    public float getLon() {
+    public double getLon() {
         if (this.lon != 0.0f) return this.lon;
         String s = this.metas.get("ICBM"); // InterContinental Ballistic Missile (abbrev. supposed to be a joke: http://www.jargon.net/jargonfile/i/ICBMaddress.html), see http://geourl.org/add.html#icbm
         if (s != null) {
@@ -811,8 +811,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (p < 0) p = s.indexOf(',');
             if (p < 0) p = s.indexOf(' ');
             if (p > 0) {
-                this.lat = Float.parseFloat(s.substring(0, p).trim());
-                this.lon = Float.parseFloat(s.substring(p + 1).trim());
+                this.lat = Double.parseDouble(s.substring(0, p).trim());
+                this.lon = Double.parseDouble(s.substring(p + 1).trim());
             }
         }
         if (this.lon != 0.0f) return this.lon;
@@ -822,15 +822,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (p < 0) p = s.indexOf(',');
             if (p < 0) p = s.indexOf(' ');
             if (p > 0) {
-                this.lat = Float.parseFloat(s.substring(0, p).trim());
-                this.lon = Float.parseFloat(s.substring(p + 1).trim());
+                this.lat = Double.parseDouble(s.substring(0, p).trim());
+                this.lon = Double.parseDouble(s.substring(p + 1).trim());
             }
         }
         return this.lon;
     }
 
-    public float getLat() {
-        if (this.lat != 0.0f) return this.lat;
+    public double getLat() {
+        if (this.lat != 0.0d) return this.lat;
         getLon(); // parse with getLon() method which creates also the lat value
         return this.lat;
     }

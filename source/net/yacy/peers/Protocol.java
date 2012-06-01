@@ -263,7 +263,7 @@ public final class Protocol
         if ( mytype == null ) {
             mytype = "";
         }
-        
+
         // set my own seed according to new information
         // we overwrite our own IP number only
         if ( serverCore.useStaticIP ) {
@@ -786,7 +786,7 @@ public final class Protocol
         // store remote result to local result container
         // insert one container into the search result buffer
         // one is enough, only the references are used, not the word
-        containerCache.add(container[0], false, target.getName() + "/" + target.hash, result.joincount, true);
+        containerCache.add(container[0], false, target.getName() + "/" + target.hash, result.joincount, true, 5000);
         containerCache.addExpectedRemoteReferences(-count);
 
         // insert the containers to the index

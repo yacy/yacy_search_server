@@ -100,9 +100,14 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
     }
 
+    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
+
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(this.href.hash());
+        if (this.hashCache == Integer.MIN_VALUE) {
+            this.hashCache = ByteArray.hashCode(this.href.hash());
+        }
+        return this.hashCache;
     }
 
     @Override

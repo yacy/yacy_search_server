@@ -485,6 +485,29 @@ public class yacysearch {
                 }
             }
 
+            int radius = 0;
+            double lon = 0.0d, lat = 0.0d, rad = 0.0d;
+            if ((radius = querystring.indexOf("/radius/")) >= 0) {
+                int ve = querystring.indexOf(' ', radius + 8);
+                String geo = "";
+                if (ve < 0) {
+                    geo = querystring.substring(radius);
+                    querystring = querystring.substring(0, radius).trim();
+                } else {
+                    geo = querystring.substring(radius, ve);
+                    querystring = querystring.substring(0, radius) + querystring.substring(ve);
+                }
+                geo = geo.substring(8);
+                String[] sp = geo.split("/");
+                if (sp.length == 3) try {
+                    lat = Double.parseDouble(sp[0]);
+                    lon = Double.parseDouble(sp[1]);
+                    rad = Double.parseDouble(sp[2]);
+                } catch (NumberFormatException e) {
+                    lon = 0.0d; lat = 0.0d; rad = 0.0d;
+                }
+            }
+
             String tenant = null;
             if ( post.containsKey("tenant") ) {
                 tenant = post.get("tenant");
@@ -757,7 +780,8 @@ public class yacysearch {
                     header.get(RequestHeader.USER_AGENT, ""),
                     sb.getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, false)
                         && sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
-                        && sb.peers.mySeed().getFlagAcceptRemoteIndex());
+                        && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
+                    lat, lon, rad);
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),

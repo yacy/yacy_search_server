@@ -160,12 +160,14 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         this.hash = null;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
+    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
+
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(hash());
+        if (this.hashCache == Integer.MIN_VALUE) {
+            this.hashCache = ByteArray.hashCode(hash());
+        }
+        return this.hashCache;
     }
 
     public static final int flagTypeID(final String hash) {

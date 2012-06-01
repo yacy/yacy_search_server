@@ -65,11 +65,11 @@ public class ReferenceOrder {
         this.language = language;
     }
 
-    public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container) {
+    public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container, long maxtime) {
         final LinkedBlockingQueue<WordReferenceVars> out = new LinkedBlockingQueue<WordReferenceVars>();
         int threads = cores;
         if (container.size() < 100) threads = 2;
-        final Thread distributor = new NormalizeDistributor(container, out, threads);
+        final Thread distributor = new NormalizeDistributor(container, out, threads, maxtime);
         distributor.start();
         try {
             distributor.join(10); // let the distributor work for at least 10 milliseconds
@@ -85,17 +85,19 @@ public class ReferenceOrder {
         ReferenceContainer<WordReference> container;
         LinkedBlockingQueue<WordReferenceVars> out;
         private final int threads;
+        private final long maxtime;
 
-        public NormalizeDistributor(final ReferenceContainer<WordReference> container, final LinkedBlockingQueue<WordReferenceVars> out, final int threads) {
+        public NormalizeDistributor(final ReferenceContainer<WordReference> container, final LinkedBlockingQueue<WordReferenceVars> out, final int threads, final long maxtime) {
             this.container = container;
             this.out = out;
             this.threads = threads;
+            this.maxtime = maxtime;
         }
 
         @Override
         public void run() {
             // transform the reference container into a stream of parsed entries
-            final BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(this.container);
+            final BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(this.container, this.maxtime);
 
             // start the transformation threads
             final Semaphore termination = new Semaphore(this.threads);
@@ -148,6 +150,7 @@ public class ReferenceOrder {
             }
         }
 
+        @Override
         public void run() {
             try {
                 WordReferenceVars iEntry;

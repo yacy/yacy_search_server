@@ -35,14 +35,14 @@ import net.yacy.kelondro.logging.Log;
 
 
 public class MergeIterator<E> implements CloneableIterator<E> {
-    
+
     private final Comparator<E> comp;
     private final CloneableIterator<E> a;
     private final CloneableIterator<E> b;
     private E na, nb;
     private final Method merger;
     private final boolean up;
-    
+
     public MergeIterator(
             final CloneableIterator<E> a,
             final CloneableIterator<E> b,
@@ -61,51 +61,54 @@ public class MergeIterator<E> implements CloneableIterator<E> {
         nextb();
     }
 
+    @Override
     public MergeIterator<E> clone(final Object modifier) {
-        assert a != null;
-        assert b != null;
-        assert merger != null;
-        return new MergeIterator<E>(a.clone(modifier), b.clone(modifier), comp, merger, up);
+        assert this.a != null;
+        assert this.b != null;
+        assert this.merger != null;
+        return new MergeIterator<E>(this.a.clone(modifier), this.b.clone(modifier), this.comp, this.merger, this.up);
     }
-    
+
     private void nexta() {
         try {
-            if (a != null && a.hasNext()) na = a.next(); else na = null;
+            if (this.a != null && this.a.hasNext()) this.na = this.a.next(); else this.na = null;
         } catch (final ConcurrentModificationException e) {
-            na = null;
+            this.na = null;
         }
     }
     private void nextb() {
         try {
-            if (b != null && b.hasNext()) nb = b.next(); else nb = null;
+            if (this.b != null && this.b.hasNext()) this.nb = this.b.next(); else this.nb = null;
         } catch (final ConcurrentModificationException e) {
-            nb = null;
+            this.nb = null;
         }
     }
-    
+
+    @Override
     public boolean hasNext() {
-        return (na != null) || (nb != null);
+        return (this.na != null) || (this.nb != null);
     }
-    
-	@SuppressWarnings("unchecked")
+
+	@Override
+    @SuppressWarnings("unchecked")
     public E next() {
         E s;
-        if (na == null) {
-            s = nb;
+        if (this.na == null) {
+            s = this.nb;
             nextb();
             return s;
         }
-        if (nb == null) {
-            s = na;
+        if (this.nb == null) {
+            s = this.na;
             nexta();
             return s;
         }
         // compare the Objects
-        final int c = comp.compare(na, nb);
+        final int c = this.comp.compare(this.na, this.nb);
         if (c == 0) {
             try {
                 //System.out.print("MERGE OF " + na.toString() + " AND " + nb.toString() + ": ");
-                s = (E) this.merger.invoke(null, new Object[]{na, nb});
+                s = (E) this.merger.invoke(null, new Object[]{this.na, this.nb});
                 //System.out.println("RESULT IS " + s.toString());
             } catch (final IllegalArgumentException e) {
                 Log.logException(e);
@@ -115,26 +118,28 @@ public class MergeIterator<E> implements CloneableIterator<E> {
                 s = null;
             } catch (final InvocationTargetException e) {
                 Log.logException(e);
+                Log.logException(e.getCause());
                 s = null;
             }
             nexta();
             nextb();
             return s;
-        } else if ((up && c < 0) || (!up && c > 0)) {
-            s = na;
+        } else if ((this.up && c < 0) || (!this.up && c > 0)) {
+            s = this.na;
             nexta();
             return s;
         } else {
-            s = nb;
+            s = this.nb;
             nextb();
             return s;
         }
     }
-    
+
+    @Override
     public void remove() {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
     }
-    
+
     public static <A> CloneableIterator<A> cascade(final Collection<CloneableIterator<A>> iterators, final Order<A> c, final Method merger, final boolean up) {
         // this extends the ability to combine two iterators
         // to the ability of combining a set of iterators
@@ -142,7 +147,7 @@ public class MergeIterator<E> implements CloneableIterator<E> {
         if (iterators.isEmpty()) return null;
         return cascade(iterators.iterator(), c, merger, up);
     }
-    
+
     private static <A> CloneableIterator<A> cascade(final Iterator<CloneableIterator<A>> iiterators, final Order<A> c, final Method merger, final boolean up) {
         if (iiterators == null) return null;
         if (!(iiterators.hasNext())) return null;
@@ -151,7 +156,7 @@ public class MergeIterator<E> implements CloneableIterator<E> {
         assert merger != null;
         return new MergeIterator<A>(one, cascade(iiterators, c, merger, up), c, merger, up);
     }
-    
+
     public static final Method simpleMerge;
     static {
         Method meth = null;
@@ -166,9 +171,9 @@ public class MergeIterator<E> implements CloneableIterator<E> {
             meth = null;
         }
         assert meth != null;
-        simpleMerge = meth; 
+        simpleMerge = meth;
     }
-    
+
     // do not remove the following method, it is not reference anywhere directly but indirectly using reflection
     // please see initialization of simpleMerge above
     public static Object mergeEqualByReplace(final Object a, final Object b) {

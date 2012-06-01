@@ -264,7 +264,7 @@ public class Segment {
                 try {
                     container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
                     container.add(ientry);
-                    rankingProcess.add(container, true, sourceName, -1, !i.hasNext());
+                    rankingProcess.add(container, true, sourceName, -1, !i.hasNext(), 5000);
                 } catch (final RowSpaceExceededException e) {
                     continue;
                 }
@@ -377,7 +377,7 @@ public class Segment {
                 document.dc_subject(' '),                  // tags
                 document.dc_publisher(),                   // publisher (may be important to get location data)
                 document.lon(),                            // decimal degrees as in WGS84;
-                document.lat(),                            // if unknown both values may be 0.0f;
+                document.lat(),                            // if unknown both values may be 0.0d;
                 modDate,                                   // modification date
                 loadDate,                                  // loaded date
                 new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula

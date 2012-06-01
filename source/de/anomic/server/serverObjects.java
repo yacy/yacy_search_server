@@ -183,6 +183,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         return (null == this.put(key, Float.toString(value))) ? Float.NaN : value;
     }
 
+    public double put(final String key, final double value) {
+        return (null == this.put(key, Double.toString(value))) ? Double.NaN : value;
+    }
+
     /**
      * same as {@link #put(String, double)} but for integer types
      * @return Returns 0 for the error case.
@@ -354,6 +358,16 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         if (s == null) return dflt;
         try {
             return Float.parseFloat(s);
+        } catch (final NumberFormatException e) {
+            return dflt;
+        }
+    }
+
+    public double getDouble(final String key, final double dflt) {
+        final String s = removeByteOrderMark(super.get(key));
+        if (s == null) return dflt;
+        try {
+            return Double.parseDouble(s);
         } catch (final NumberFormatException e) {
             return dflt;
         }

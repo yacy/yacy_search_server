@@ -83,6 +83,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         this.handle = Long.valueOf(System.currentTimeMillis() + getName().hashCode());
     }
 
+    @Override
     public int getJobCount() {
         if (this.jobCountMethod == null) return Integer.MAX_VALUE;
         try {
@@ -101,6 +102,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         }
     }
 
+    @Override
     public boolean job() throws Exception {
         instantThreadCounter++;
         //System.out.println("started job " + this.handle + ": " + this.getName());
@@ -121,6 +123,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
             Log.logException(e);
+            Log.logException(e.getCause());
             Log.logException(e.getTargetException());
             Log.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
         } catch (final OutOfMemoryError e) {
@@ -136,6 +139,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         return jobHasDoneSomething;
     }
 
+    @Override
     public void freemem() {
         if (this.freememExecMethod == null) return;
         try {

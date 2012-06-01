@@ -133,9 +133,14 @@ public class CitationReference implements Reference, Serializable {
         return false;
     }
 
+    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
+
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(this.urlhash());
+        if (this.hashCache == Integer.MIN_VALUE) {
+            this.hashCache = ByteArray.hashCode(this.urlhash());
+        }
+        return this.hashCache;
     }
 
     @Override

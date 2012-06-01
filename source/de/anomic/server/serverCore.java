@@ -298,15 +298,18 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         : new InetSocketAddress(bindIP, bindPort);
     }
 
+    @Override
     public void open() {
         this.log.logConfig("* server started on " + Domains.myPublicLocalIP() + ":" + this.extendedPort);
     }
 
+    @Override
     public void freemem() {
         // FIXME: can we something here to flush memory? Idea: Reduce the size of some of our various caches.
     }
 
     // class body
+    @Override
     public boolean job() throws Exception {
         try {
             // prepare for new connection
@@ -407,6 +410,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         }
     }
 
+    @Override
     public synchronized void close() {
         // consuming the isInterrupted Flag. Otherwise we could not properly close the session pool
         Thread.interrupted();
@@ -456,6 +460,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         return l;
     }
 
+    @Override
     public int getJobCount() {
         final Thread[] threadList = new Thread[sessionThreadGroup.activeCount()];
         serverCore.sessionThreadGroup.enumerate(threadList, false);
@@ -527,6 +532,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             sessionCounter++;
         }
 
+        @Override
         public int hashCode() {
             // return a hash code so it is possible to store objects of httpc objects in a HashSet
             return this.hashIndex;
@@ -619,6 +625,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
          *
          * @see java.lang.Thread#run()
          */
+        @Override
         public void run()  {
             this.runningsession = true;
 
@@ -804,6 +811,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                     } catch (final InvocationTargetException e) {
                         serverCore.this.log.logSevere("command execution, target exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         // we extract a target exception
+                        writeLine(this.commandObj.error(e.getCause()));
                         writeLine(this.commandObj.error(e.getTargetException()));
                         break;
                     } catch (final NoSuchMethodException e) {

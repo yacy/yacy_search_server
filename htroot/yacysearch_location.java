@@ -37,8 +37,6 @@ import de.anomic.server.serverSwitch;
 
 public class yacysearch_location {
 
-    private static final String space = " ";
-
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -62,10 +60,13 @@ public class yacysearch_location {
             final boolean search_subject = alltext || post.get("dom", "").indexOf("subject",0) >= 0;
             final long maximumTime = post.getLong("maximumTime", 5000);
             final int maximumRecords = post.getInt("maximumRecords", 3000);
+            final double lon = post.getDouble("lon", 0.0d);
+            final double lat = post.getDouble("lat", 0.0d);
+            final double radius = post.getDouble("r", 0.0d);
             //i.e. http://localhost:8090/yacysearch_location.kml?query=berlin&maximumTime=2000&maximumRecords=100
 
             int placemarkCounter = 0;
-            if (search_query) {
+            if (query.length() > 0 && search_query) {
                 final Set<Location> locations = LibraryProvider.geoLoc.find(query, true);
                 for (final String qp: query.split(" ")) {
                     locations.addAll(LibraryProvider.geoLoc.find(qp, true));
@@ -87,11 +88,11 @@ public class yacysearch_location {
                 }
             }
 
-            if (metatag || search_title || search_publisher || search_creator || search_subject) try {
+            if (query.length() > 0 && (metatag || search_title || search_publisher || search_creator || search_subject)) try {
                 // get a queue of search results
                 final String rssSearchServiceURL = "http://127.0.0.1:" + sb.getConfig("port", "8090") + "/yacysearch.rss";
                 final BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
-                SRURSSConnector.searchSRURSS(results, rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, null, false, null);
+                SRURSSConnector.searchSRURSS(results, rssSearchServiceURL, lon == 0.0d && lat == 0.0d ? query : query + " /radius/" + lat + "/" + lon + "/" + radius, maximumTime, Integer.MAX_VALUE, null, false, null);
 
                 // take the results and compute some locations
                 RSSMessage message;

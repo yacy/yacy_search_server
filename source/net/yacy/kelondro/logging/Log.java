@@ -76,6 +76,7 @@ public final class Log {
     }
 
     public final void logSevere(final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(this.theLogger, Level.SEVERE, message, thrown);
     }
 
@@ -88,6 +89,7 @@ public final class Log {
     }
 
     public final void logWarning(final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(this.theLogger, Level.WARNING, message, thrown);
     }
 
@@ -100,6 +102,7 @@ public final class Log {
     }
 
     public final void logConfig(final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(this.theLogger, Level.CONFIG, message, thrown);
     }
 
@@ -112,6 +115,7 @@ public final class Log {
     }
 
     public final void logInfo(final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(this.theLogger, Level.INFO, message, thrown);
     }
 
@@ -124,6 +128,7 @@ public final class Log {
     }
 
     public final void logFine(final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(this.theLogger, Level.FINE, message, thrown);
     }
 
@@ -136,6 +141,7 @@ public final class Log {
     }
 
     public final void logFiner(final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(this.theLogger, Level.FINER, message, thrown);
     }
 
@@ -148,6 +154,7 @@ public final class Log {
     }
 
     public final void logFinest(final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(this.theLogger, Level.FINEST, message, thrown);
     }
 
@@ -165,6 +172,7 @@ public final class Log {
         enQueueLog(appName, Level.SEVERE, message);
     }
     public final static void logSevere(final String appName, final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(appName, Level.SEVERE, message, thrown);
     }
 
@@ -172,9 +180,11 @@ public final class Log {
         enQueueLog(appName, Level.WARNING, message);
     }
     public final static void logException(final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog("StackTrace", Level.WARNING, thrown.getMessage(), thrown);
     }
     public final static void logWarning(final String appName, final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(appName, Level.WARNING, message, thrown);
     }
 
@@ -182,6 +192,7 @@ public final class Log {
         enQueueLog(appName, Level.CONFIG, message);
     }
     public final static void logConfig(final String appName, final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(appName, Level.CONFIG, message, thrown);
     }
 
@@ -189,6 +200,7 @@ public final class Log {
         enQueueLog(appName, Level.INFO, message);
     }
     public final static void logInfo(final String appName, final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(appName, Level.INFO, message, thrown);
     }
 
@@ -196,6 +208,7 @@ public final class Log {
         enQueueLog(appName, Level.FINE, message);
     }
     public final static void logFine(final String appName, final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(appName, Level.FINE, message, thrown);
     }
     public final static boolean isFine(final String appName) {
@@ -206,6 +219,7 @@ public final class Log {
         enQueueLog(appName, Level.FINER, message);
     }
     public final static void logFiner(final String appName, final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(appName, Level.FINER, message, thrown);
     }
 
@@ -213,6 +227,7 @@ public final class Log {
         enQueueLog(appName, Level.FINEST, message);
     }
     public final static void logFinest(final String appName, final String message, final Throwable thrown) {
+        if (thrown == null) return;
         enQueueLog(appName, Level.FINEST, message, thrown);
     }
     public final static boolean isFinest(final String appName) {
@@ -220,6 +235,7 @@ public final class Log {
     }
 
     private final static void enQueueLog(final Logger logger, final Level level, final String message, final Throwable thrown) {
+        if (thrown == null) return;
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             logger.log(level, message, thrown);
         } else {
@@ -244,6 +260,7 @@ public final class Log {
     }
 
     private final static void enQueueLog(final String loggername, final Level level, final String message, final Throwable thrown) {
+        if (thrown == null) return;
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             Logger.getLogger(loggername).log(level, message, thrown);
         } else {
@@ -385,12 +402,15 @@ public final class Log {
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
                 @Override
                 public void uncaughtException(final Thread t, final Throwable e) {
+                    if (e == null) return;
                     final String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
                     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     final PrintStream ps = new PrintStream(baos);
                     e.printStackTrace(ps);
                     ps.close();
                     exceptionLog.logSevere(msg + "\n" + baos.toString(), e);
+                    Log.logException(e);
+                    Log.logException(e.getCause());
                     //System.err.print("Exception in thread \"" + t.getName() + "\" ");
                     //e.printStackTrace(System.err);
                 }

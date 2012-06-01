@@ -87,7 +87,7 @@ public class Document {
     private boolean resorted;
     private final Set<String> languages;
     private final boolean indexingDenied;
-    private final float lon, lat;
+    private final double lon, lat;
     private final Object parserObject; // the source object that was used to create the Document
 
     public Document(final MultiProtocolURI location, final String mimeType, final String charset,
@@ -95,7 +95,7 @@ public class Document {
                     final Set<String> languages,
                     final String[] keywords, final String title, final String author, final String publisher,
                     final String[] sections, final String abstrct,
-                    final float lon, final float lat,
+                    final double lon, final double lat,
                     final Object text,
                     final Map<MultiProtocolURI, Properties> anchors,
                     final Map<MultiProtocolURI, String> rss,
@@ -400,11 +400,11 @@ dc_rights
         return this.emaillinks;
     }
 
-    public float lon() {
+    public double lon() {
         return this.lon;
     }
 
-    public float lat() {
+    public double lat() {
         return this.lat;
     }
 
@@ -743,7 +743,7 @@ dc_rights
         final Map<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
         final Map<MultiProtocolURI, String> rss = new HashMap<MultiProtocolURI, String>();
         final Map<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
-        float lon = 0.0f, lat = 0.0f;
+        double lon = 0.0d, lat = 0.0d;
 
         for (final Document doc: docs) {
 
@@ -784,7 +784,7 @@ dc_rights
             anchors.putAll(doc.getAnchors());
             rss.putAll(doc.getRSS());
             ContentScraper.addAllImages(images, doc.getImages());
-            if (doc.lon() != 0.0f && doc.lat() != 0.0f) { lon = doc.lon(); lat = doc.lat(); }
+            if (doc.lon() != 0.0d && doc.lat() != 0.0d) { lon = doc.lon(); lat = doc.lat(); }
         }
         return new Document(
                 location,

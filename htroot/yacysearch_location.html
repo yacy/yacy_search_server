@@ -6,72 +6,144 @@
   <script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
   <script type="text/javascript" src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
   <script type="text/javascript">
-    function adaptHeight() {
-      document.getElementById('map').style.height = (document.documentElement.clientHeight - 130) + "px";
-    }
-    window.onresize = adaptHeight;
-  </script>
-  <script type="text/javascript">
+    // possible values for dom: location,metatag,alltext,title,publisher,creator,subject
+    
     var map;
-    var searchLayer_md = null;
-    var searchLayer_co = null;
+    var searchLayer_md0 = null; // two layers each for double-buffering during search
+    var searchLayer_md1 = null;
+    var searchLayer_co0 = null;
+    var searchLayer_co1 = null;
     var path_mdsearch = 'yacysearch_location.rss?dom=alltext&query=';
     var path_losearch = 'yacysearch_location.rss?dom=location&query=';
     var marker_md = new OpenLayers.Icon("/env/grafics/marker_red.png", new OpenLayers.Size(11,16));
     var marker_co = new OpenLayers.Icon("/env/grafics/star_yellow.png", new OpenLayers.Size(25,25));
-    // possible values for dom: location,metatag,alltext,title,publisher,creator,subject
+    var shallZoom   = true;  // flag if the map shall be zoomed to the search result
+    var shallReload = false; // flag if the search shall be repeated upon next resize of the window
+    var poisfound = 0;
+    var kmNormal = 100; // ca. 1km grid for radius
+    var meterNormal = 100000; // ca. 1m grid for location
     
+    // automatically adapt height of map upon window resize
+    function adaptHeight() {
+      document.getElementById('map').style.height = (document.documentElement.clientHeight - 130) + "px";
+    }
+    window.onresize = adaptHeight;
+    
+    // initialize the map layers
     function init() {
-        map = new OpenLayers.Map('map', {
-                maxResolution:'auto',
-				controls:[
-					new OpenLayers.Control.Navigation(),
-					new OpenLayers.Control.PanZoomBar(),
-					new OpenLayers.Control.ZoomBox(),
-					new OpenLayers.Control.LayerSwitcher(),
-					new OpenLayers.Control.Attribution()]
-        });
-    
-		//layerMaplint = new OpenLayers.Layer.OSM.Maplint("Maplint");
-		layerWMS = new OpenLayers.Layer.WMS( "OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
-        layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
-		layerCycleMap = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
-		map.addLayer(layerMapnik);
-		map.addLayer(layerCycleMap);
-		//map.addLayer(layerMaplint);
-		map.addLayer(layerWMS);
-		    
-        map.addControl(new OpenLayers.Control.LayerSwitcher());
-        map.setCenter(new OpenLayers.LonLat(9,48) // Center of the map
+      map = new OpenLayers.Map('map', {
+              maxResolution:'auto',
+              controls:[
+                new OpenLayers.Control.Navigation(),
+                new OpenLayers.Control.PanZoomBar(),
+                new OpenLayers.Control.ZoomBox(),
+                new OpenLayers.Control.LayerSwitcher(),
+                new OpenLayers.Control.Attribution()]
+      });
+      //layerMaplint = new OpenLayers.Layer.OSM.Maplint("Maplint");
+      layerWMS = new OpenLayers.Layer.WMS( "OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
+      layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
+      layerCycleMap = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
+      map.addLayer(layerMapnik);
+      map.addLayer(layerCycleMap);
+      //map.addLayer(layerMaplint);
+      map.addLayer(layerWMS);
+        
+      map.addControl(new OpenLayers.Control.LayerSwitcher());
+      map.setCenter(new OpenLayers.LonLat(9,48) // Center of the map
           .transform(
             new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
             new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
           ), 5 // Zoom level
         );
+      map.events.register( "zoomend", map, zoomChanged );
+      map.events.register( "movestart", map, zoomChanged );
+      
+      //#(initsearch)#::
+      var query = '#[query]#'.replace(' ', '+');
+      //#(/initsearch)#        
         
-        #(initsearch)#::
-        var query = '#[query]#'.replace(' ', '+');
-        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_losearch + query, {'icon':marker_co});
-        map.addLayer(searchLayer_co);
-        searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query, {'icon':marker_md});
-        map.addLayer(searchLayer_md);
-        #(/initsearch)#
+      window.setInterval("refresh()", 1000);
     }
 
+    function zoomChanged () {
+      shallZoom = false; // no automatic zoom if user hs zoomed
+      refreshsearch();
+    } 
+      
+    // called if a search is submitted
     function search() {
-        var query = document.getElementById('query').value.replace(' ', '+');
-        if (searchLayer_md != null) searchLayer_md.destroy();
-        if (searchLayer_co != null) searchLayer_co.destroy();
-        var center = map.getCenter().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_losearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&zoom=' + map.getZoom(), {'icon':marker_co});
-        map.addLayer(searchLayer_co);
-        searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query, {'icon':marker_md});
-        map.addLayer(searchLayer_md);
-        //map.zoomToExtent(searchLayer_co.getExtent());
-        //map.panTo(searchLayer_co.getExtent().getCenterLonLat());
-        //map.setCenter(searchLayer_co.getExtent().getLonLatFromViewPortPx, 5);
-        //map.setCenter(searchLayer_co.getExtent().getCenterLonLat(), map.getZoomForExtent(searchLayer_co.getExtent(), true));
-        //document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?query=' + query);
+      refreshsearch();
+    }
+    
+    // refresh is called if the map is zoomed or paned to get a new search result for the viewport
+    function refreshsearch() {
+      var query = document.getElementById('query').value.replace(' ', '+');
+      if (searchLayer_md0 != null) searchLayer_md0.destroy();
+      if (searchLayer_co0 != null) searchLayer_co0.destroy();
+      var center = map.getCenter().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+      var extend = map.getExtent().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+      var radius = Math.sqrt(extend.getWidth() * extend.getWidth() + extend.getHeight() * extend.getHeight()) / 2;
+      radius = Math.floor(radius * kmNormal + 1) / kmNormal;
+      var lon = Math.floor(center.lon * meterNormal) / meterNormal;
+      var lat = Math.floor(center.lat * meterNormal) / meterNormal;
+      searchLayer_co0 = new OpenLayers.Layer.GeoRSS('Communities',       path_losearch + query + '&lon=' + lon + '&lat=' + lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_co});
+      searchLayer_md0 = new OpenLayers.Layer.GeoRSS('Point Of Interest', path_mdsearch + query + '&lon=' + lon + '&lat=' + lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_md});
+      map.addLayer(searchLayer_co0);
+      map.addLayer(searchLayer_md0);
+      //document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?query=' + query);
+      poisfound = 0;
+      document.getElementById('resultline').innerHTML = "";
+    }
+    
+    function refresh() {
+      // check double-buffer state
+      if (searchLayer_md0 != null) {
+        // switch the double-buffer
+        if (searchLayer_md1 != null) searchLayer_md1.destroy();
+        if (searchLayer_co1 != null) searchLayer_co1.destroy();
+        searchLayer_md1 = searchLayer_md0;
+        searchLayer_co1 = searchLayer_co0;
+        searchLayer_md0 = null;
+        searchLayer_co0 = null;
+      }
+      
+      // check if we need to do something
+      if (searchLayer_co1 == null || searchLayer_md1 == null) {
+        return;
+      }
+      var cocount = searchLayer_co1.markers.length;
+      var mdcount = searchLayer_md1.markers.length;
+      //if (mdcount + cocount <= poisfound) {
+      //  return;
+      //}
+      
+      // update map and result line
+      poisfound = mdcount + cocount;
+      document.getElementById('resultline').innerHTML = poisfound + " POIs found in visible map";
+      
+      // check if any of the markers is visible on the screen.
+      // this is only necessary if shallZoom = false since this would set shallZoom = true
+      var bounds = searchLayer_md1.getDataExtent();
+	  /*
+      if (!shallZoom) {
+        // check all markers
+        //if (!bounds.intersectsBounds(map.getExtent())) shallZoom = true;
+        var anyInScreen = false;
+        var mapbounds = map.getExtent();
+        //alert(searchLayer_md1.markers.length + " markers");
+        for (var marker in searchLayer_md1.markers) {
+          if (marker.lonlat != null && mapbounds.containsLonLat(marker.lonlat, {})) {anyInScreen = true; break;}
+        }
+        if (!anyInScreen) shallZoom = true;
+      }
+      */
+      // zoom to layer bounds
+      if (shallZoom) {
+        if (bounds == null) {return;} //bounds = searchLayer_co1.getDataExtent();
+        map.panTo(bounds.getCenterLonLat());
+        map.zoomTo(map.getZoomForExtent(bounds));
+      }
     }
   </script>
 
@@ -98,9 +170,10 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
   <h2>#[promoteSearchPageGreeting]#</h2>
   <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a></div>
   <fieldset class="yacys">
-     <input type="text" value="#(initsearch)#::#[query]##(/initsearch)#" id="query" size="42" />
+     <input type="text" value="#(initsearch)#::#[query]##(/initsearch)#" id="query" size="42" onFocus="this.select()" />
      <input type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;" />
   </fieldset>
+  <div id="resultline"></div>
 </form><br/>
 <div id="map" style="clear:both; width:100%; height:720px"></div>
 <script type="text/javascript">

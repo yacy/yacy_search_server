@@ -579,6 +579,7 @@ public final class HTTPDFileHandler {
                     e.getTargetException().getMessage() +
                     "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
                     Log.logException(e);
+                    Log.logException(e.getCause());
                     Log.logException(e.getTargetException());
                     targetClass = null;
                 }
@@ -978,12 +979,9 @@ public final class HTTPDFileHandler {
                             if (e.getCause() instanceof InterruptedException) {
                                 throw new InterruptedException(e.getCause().getMessage());
                             }
-
-                            theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
-                                    e.getMessage() +
-                                    " target exception at " + targetClass + ": " +
-                                    e.getTargetException().toString() + ":" +
-                                    e.getTargetException().getMessage(),e);
+                            Log.logException(e);
+                            Log.logException(e.getCause());
+                            Log.logException(e.getTargetException());
                             targetClass = null;
                             throw e;
                         }

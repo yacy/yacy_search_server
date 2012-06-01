@@ -143,7 +143,7 @@ public final class yacyRelease extends yacyVersion {
             // return a dev-release or a main-release
             if ((latestdev != null) &&
                 ((latestmain == null) || (latestdev.compareTo(latestmain) > 0)) &&
-                (!(Float.toString(latestdev.getReleaseNr()).matches(blacklist)))) {
+                (!(Double.toString(latestdev.getReleaseNr()).matches(blacklist)))) {
                 // consider a dev-release
                 if (latestdev.compareTo(thisVersion()) <= 0) {
                     Network.log.logInfo(
@@ -155,7 +155,7 @@ public final class yacyRelease extends yacyVersion {
             }
             if (latestmain != null) {
                 // consider a main release
-                if ((Float.toString(latestmain.getReleaseNr()).matches(blacklist))) {
+                if ((Double.toString(latestmain.getReleaseNr()).matches(blacklist))) {
                     Network.log.logInfo(
                             "rulebasedUpdateInfo: latest dev " + (latestdev == null ? "null" : latestdev.getName()) +
                             " matches with blacklist '" + blacklist + "'");
@@ -172,7 +172,7 @@ public final class yacyRelease extends yacyVersion {
         }
         if ((concept.equals("main")) && (latestmain != null)) {
             // return a main-release
-            if ((Float.toString(latestmain.getReleaseNr()).matches(blacklist))) {
+            if ((Double.toString(latestmain.getReleaseNr()).matches(blacklist))) {
                 Network.log.logInfo(
                         "rulebasedUpdateInfo: latest main " + latestmain.getName() +
                         " matches with blacklist'" + blacklist + "'");

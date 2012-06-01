@@ -25,6 +25,7 @@
 
 package net.yacy.cora.document;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -1967,8 +1968,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public InputStream getInputStream(final String userAgent, final int timeout) throws IOException {
-        if (isFile()) return new FileInputStream(getFSFile());
-        if (isSMB()) return new SmbFileInputStream(getSmbFile());
+        if (isFile()) return new BufferedInputStream(new FileInputStream(getFSFile()));
+        if (isSMB()) return new BufferedInputStream(new SmbFileInputStream(getSmbFile()));
         if (isFTP()) {
             final FTPClient client = new FTPClient();
             client.open(this.host, this.port < 0 ? 21 : this.port);

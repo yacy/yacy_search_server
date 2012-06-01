@@ -741,7 +741,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     private boolean getFlag(final int flag) {
         final String flags = get(Seed.FLAGS, Seed.FLAGSZERO);
-        return (new bitfield(UTF8.getBytes(flags))).get(flag);
+        return (new bitfield(ASCII.getBytes(flags))).get(flag);
     }
 
     private void setFlag(final int flag, final boolean value) {
@@ -749,7 +749,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( flags.length() != 4 ) {
             flags = Seed.FLAGSZERO;
         }
-        final bitfield f = new bitfield(UTF8.getBytes(flags));
+        final bitfield f = new bitfield(ASCII.getBytes(flags));
         f.set(flag, value);
         this.dna.put(Seed.FLAGS, UTF8.String(f.getBytes()));
     }

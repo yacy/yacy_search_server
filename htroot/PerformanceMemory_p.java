@@ -110,7 +110,8 @@ public class PerformanceMemory_p {
             prop.putNum("EcoList_" + c + "_tableSize", mapx.get(Table.StatKeys.tableSize));
 
             assert mapx.get(Table.StatKeys.tableKeyMem) != null : mapx;
-            mem = Long.parseLong(mapx.get(Table.StatKeys.tableKeyMem));
+            String v = mapx.get(Table.StatKeys.tableKeyMem);
+            mem = v == null ? 0 : Long.parseLong(v);
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableKeyMem", Formatter.bytesToString(mem));
             prop.put("EcoList_" + c + "_tableKeyChunkSize", mapx.get(Table.StatKeys.tableKeyChunkSize));
