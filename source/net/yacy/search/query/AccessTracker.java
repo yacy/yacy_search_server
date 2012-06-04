@@ -82,7 +82,7 @@ public class AccessTracker {
         final long timeout = System.currentTimeMillis() - maxAge;
         while (list.size() > 0) {
             final QueryParams q = list.getFirst();
-            if (q.time.longValue() > timeout) break;
+            if (q.starttime > timeout) break;
             addToDump(list.removeFirst());
         }
     }
@@ -103,7 +103,7 @@ public class AccessTracker {
         //if (query.resultcount == 0) return;
         if (query.queryString == null || query.queryString.length() == 0) return;
         final StringBuilder sb = new StringBuilder(40);
-        sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(query.time)));
+        sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(query.starttime)));
         sb.append(' ');
         sb.append(Integer.toString(query.resultcount));
         sb.append(' ');

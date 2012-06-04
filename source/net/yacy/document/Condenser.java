@@ -26,7 +26,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -83,7 +82,6 @@ public final class Condenser {
     public  static final int flag_cat_hasvideo      = 22; // the page refers to (at least one) videos
     public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
 
-    private final static int numlength = 5;
 
     //private Properties analysis;
     private final Map<String, Word> words; // a string (the words) to (indexWord) - relation
@@ -96,19 +94,29 @@ public final class Condenser {
     public int RESULT_DIFF_SENTENCES = -1;
     public Bitfield RESULT_FLAGS = new Bitfield(4);
     private final Identificator languageIdentificator;
-    private final NumberFormat intStringFormatter = NumberFormat.getIntegerInstance(); // use a new instance for each object for a better concurrency
+    /*
+    private final static int numlength = 5;
+    private static final ThreadLocal <NumberFormat> intStringFormatter =
+        new ThreadLocal <NumberFormat>() {
+          @Override protected NumberFormat initialValue() {
+              NumberFormat n = NumberFormat.getIntegerInstance();
+              n.setMinimumIntegerDigits(numlength);
+              n.setMaximumIntegerDigits(numlength);
+              return n;
+          }
+      };
+     */
 
     public Condenser(
             final Document document,
             final boolean indexText,
             final boolean indexMedia,
-            final WordCache meaningLib
+            final WordCache meaningLib,
+            final boolean doAutotagging
             ) {
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
-        this.intStringFormatter.setMinimumIntegerDigits(numlength);
-        this.intStringFormatter.setMaximumIntegerDigits(numlength);
         this.words = new HashMap<String, Word>();
         this.RESULT_FLAGS = new Bitfield(4);
 
@@ -124,7 +132,7 @@ public final class Condenser {
 
         Map.Entry<MultiProtocolURI, String> entry;
         if (indexText) {
-            createCondensement(document.getText(), meaningLib);
+            createCondensement(document.getText(), meaningLib, doAutotagging);
             // the phrase counter:
             // phrase   0 are words taken from the URL
             // phrase   1 is the MainTitle
@@ -262,11 +270,11 @@ public final class Condenser {
         }
     }
 
-    public Condenser(final InputStream text, final WordCache meaningLib) {
+    public Condenser(final InputStream text, final WordCache meaningLib, boolean doAutotagging) {
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         this.words = new TreeMap<String, Word>();
-        createCondensement(text, meaningLib);
+        createCondensement(text, meaningLib, doAutotagging);
     }
 
     public int excludeWords(final SortedSet<String> stopwords) {
@@ -286,7 +294,7 @@ public final class Condenser {
         return this.languageIdentificator.getLanguage();
     }
 
-    private void createCondensement(final InputStream is, final WordCache meaningLib) {
+    private void createCondensement(final InputStream is, final WordCache meaningLib, boolean doAutotagging) {
         assert is != null;
         final Set<String> currsentwords = new HashSet<String>();
         String word = "";
@@ -312,8 +320,10 @@ public final class Condenser {
 	            if (word.length() < wordminsize) continue;
 
 	            // get tags from autotagging
-	            tag = LibraryProvider.autotagging.getPrintTagFromWord(word);
-	            if (tag != null) this.tags.add(tag);
+	            if (doAutotagging) {
+	                tag = LibraryProvider.autotagging.getPrintTagFromWord(word);
+	                if (tag != null) this.tags.add(tag);
+	            }
 
 	            // distinguish punctuation and words
 	            wordlen = word.length();
@@ -393,7 +403,7 @@ public final class Condenser {
         if (text == null) return null;
         ByteArrayInputStream buffer;
 		buffer = new ByteArrayInputStream(UTF8.getBytes(text));
-        return new Condenser(buffer, meaningLib).words();
+        return new Condenser(buffer, meaningLib, false).words();
     }
 
     public static void main(final String[] args) {

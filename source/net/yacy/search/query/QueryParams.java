@@ -133,7 +133,7 @@ public final class QueryParams {
     public final String tenant;
     public final Modifier modifier;
     public Seed remotepeer;
-    public final Long time;
+    public final long starttime, maxtime, timeout; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
     // values that are set after a search:
     public int resultcount; // number of found results
     public int transmitcount; // number of results that had been shown to the user
@@ -192,7 +192,9 @@ public final class QueryParams {
         this.siteexcludes = null;
         this.authorhash = null;
         this.remotepeer = null;
-        this.time = Long.valueOf(System.currentTimeMillis());
+        this.starttime = Long.valueOf(System.currentTimeMillis());
+        this.maxtime = 10000;
+        this.timeout = this.starttime + this.timeout;
         this.specialRights = false;
         this.navigators = "all";
         this.indexSegment = indexSegment;
@@ -270,7 +272,9 @@ public final class QueryParams {
         this.snippetCacheStrategy = snippetCacheStrategy;
         this.host = host;
         this.remotepeer = null;
-        this.time = Long.valueOf(System.currentTimeMillis());
+        this.starttime = Long.valueOf(System.currentTimeMillis());
+        this.maxtime = 10000;
+        this.timeout = this.starttime + this.timeout;
         this.specialRights = specialRights;
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
@@ -378,6 +382,7 @@ public final class QueryParams {
     public static final boolean anymatch(final String text, final HandleSet keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
+        if (keyhashes == null || keyhashes.isEmpty()) return false;
     	final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
     	return SetTools.anymatch(wordhashes, keyhashes);
     }

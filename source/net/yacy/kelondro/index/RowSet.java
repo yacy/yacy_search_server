@@ -520,7 +520,9 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         int c0p, c1p;
         int o;
         final int objectsize = c0.rowdef.objectsize;
-        while (c0i < c0.size() && c1i < c1.size()) {
+        final int c0s = c0.size();
+        final int c1s = c1.size();
+        while (c0i < c0s && c1i < c1s) {
             c0p = c0i * objectsize;
             c1p = c1i * objectsize;
             o = c0.rowdef.objectOrder.compare(

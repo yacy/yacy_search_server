@@ -365,7 +365,7 @@ public class SnippetProcess {
                         (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0)) {
                         break;
                     }
-                    worker = new Worker(i, 10000, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
+                    worker = new Worker(i, this.query.maxtime, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
                     worker.start();
                     this.workerThreads[i] = worker;
                     if (this.rankingProcess.expectMoreRemoteReferences()) {
@@ -387,7 +387,7 @@ public class SnippetProcess {
                         break;
                     }
                     if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) {
-                        worker = new Worker(i, 10000, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
+                        worker = new Worker(i, this.query.maxtime, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
                         worker.start();
                         this.workerThreads[i] = worker;
                         deployCount--;
@@ -532,6 +532,9 @@ public class SnippetProcess {
                     if (nav_topics) {
                         SnippetProcess.this.rankingProcess.addTopics(resultEntry);
                     }
+                }
+                if (System.currentTimeMillis() >= this.timeout) {
+                    Log.logWarning("SnippetProcess", "worker ended with timoeout");
                 }
                 //System.out.println("FINISHED WORKER " + id + " FOR " + this.neededResults + " RESULTS, loops = " + loops);
             } catch (final Exception e) {

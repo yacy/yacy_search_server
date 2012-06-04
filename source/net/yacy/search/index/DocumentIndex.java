@@ -158,7 +158,7 @@ public class DocumentIndex extends Segment
         final URIMetadataRow[] rows = new URIMetadataRow[documents.length];
         int c = 0;
         for ( final Document document : documents ) {
-            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib);
+            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, true);
             rows[c++] =
                 super.storeDocument(
                     url,
