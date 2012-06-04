@@ -1049,7 +1049,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                         if (d[d.length-1].toUpperCase().equals("w")) {lon = -lon; lonm = -lonm;}
                     }
                 }
-                if (lon != 0.0f && lat != 0.0f) {
+                if (lon != 0.0d && lat != 0.0d) {
                     // replace this with a format that the html parser can understand
                     line = line.substring(0, p) + (name.length() > 0 ? (" " + name) : "") + " <nobr> " + lato + " " + lat + "\u00B0 " + latm + "'</nobr><nobr>" + lono + " " + lon + "\u00B0 " + lonm + "'</nobr> " + line.substring(q + WIKI_CLOSE_METADATA.length());
                     s = p;

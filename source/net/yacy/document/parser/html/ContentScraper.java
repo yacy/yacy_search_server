@@ -174,8 +174,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.li = new ArrayList<String>();
         this.content = new CharBuffer(MAX_DOCSIZE, 1024);
         this.htmlFilterEventListeners = new EventListenerList();
-        this.lon = 0.0f;
-        this.lat = 0.0f;
+        this.lon = 0.0d;
+        this.lat = 0.0d;
         this.evaluationScores.match(Element.url, root.toNormalform(false, false));
         this.canonical = null;
     }
@@ -227,29 +227,29 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     r--;
                     if (newtext[r] == 'N') {
                         this.lat =  Float.parseFloat(new String(newtext, r + 2, p - r - 2)) +
-                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0f;
-                        if (this.lon != 0.0f) break location;
+                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
+                        if (this.lon != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'S') {
                         this.lat = -Float.parseFloat(new String(newtext, r + 2, p - r - 2)) -
-                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0f;
-                        if (this.lon != 0.0f) break location;
+                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
+                        if (this.lon != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'E') {
                         this.lon =  Float.parseFloat(new String(newtext, r + 2, p - r - 2)) +
-                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0f;
-                        if (this.lat != 0.0f) break location;
+                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
+                        if (this.lat != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'W') {
                         this.lon = -Float.parseFloat(new String(newtext, r + 2, p - r - 2)) -
-                                    Float.parseFloat(new String(newtext, p + 2, q - p - pl - 1)) / 60.0f;
-                        if (this.lat != 0.0f) break location;
+                                    Float.parseFloat(new String(newtext, p + 2, q - p - pl - 1)) / 60.0d;
+                        if (this.lat != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
@@ -804,7 +804,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     // <meta NAME="geo.position" CONTENT="38.90551492;1.454004505" />
 
     public double getLon() {
-        if (this.lon != 0.0f) return this.lon;
+        if (this.lon != 0.0d) return this.lon;
         String s = this.metas.get("ICBM"); // InterContinental Ballistic Missile (abbrev. supposed to be a joke: http://www.jargon.net/jargonfile/i/ICBMaddress.html), see http://geourl.org/add.html#icbm
         if (s != null) {
             int p = s.indexOf(';');
@@ -815,7 +815,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 this.lon = Double.parseDouble(s.substring(p + 1).trim());
             }
         }
-        if (this.lon != 0.0f) return this.lon;
+        if (this.lon != 0.0d) return this.lon;
         s = this.metas.get("geo.position"); // http://geotags.com/geobot/add-tags.html
         if (s != null) {
             int p = s.indexOf(';');
