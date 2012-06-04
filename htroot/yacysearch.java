@@ -45,13 +45,12 @@ import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.SimpleVocabulary;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
-import net.yacy.document.Autotagging.Metatag;
-import net.yacy.document.Autotagging.Vocabulary;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -125,9 +124,9 @@ public class yacysearch {
         prop.put("focus", ((post == null) ? true : post.get("focus", "1").equals("1")) ? 1 : 0);
 
         // produce vocabulary navigation sidebars
-        Collection<Vocabulary> vocabularies = LibraryProvider.autotagging.getVocabularies();
+        Collection<SimpleVocabulary> vocabularies = LibraryProvider.autotagging.getVocabularies();
         int j = 0;
-        for (Vocabulary v: vocabularies) {
+        for (SimpleVocabulary v: vocabularies) {
             prop.put("sidebarVocabulary_" + j + "_vocabulary", v.getName());
             j++;
         }
@@ -464,7 +463,7 @@ public class yacysearch {
             }
 
             int voc = 0;
-            Collection<Metatag> metatags = new ArrayList<Metatag>(1);
+            Collection<SimpleVocabulary.Metatag> metatags = new ArrayList<SimpleVocabulary.Metatag>(1);
             while ((voc = querystring.indexOf("/vocabulary/", 0)) >= 0) {
                 String vocabulary = "";
                 int ve = querystring.indexOf(' ', voc + 12);

@@ -41,12 +41,12 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.lod.SimpleVocabulary;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
-import net.yacy.document.Autotagging.Metatag;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -236,7 +236,7 @@ public final class search {
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
-                    new HashSet<Metatag>(),
+                    new HashSet<SimpleVocabulary.Metatag>(),
                     "", // no navigation
                     null, // no snippet computation
                     count,
@@ -299,7 +299,7 @@ public final class search {
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
-                    new HashSet<Metatag>(),
+                    new HashSet<SimpleVocabulary.Metatag>(),
                     "", // no navigation
                     null, // no snippet computation
                     count,

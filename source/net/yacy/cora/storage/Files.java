@@ -1,5 +1,5 @@
 /**
- *  ConfigurationSet
+ *  Files
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 29.06.2011 at http://yacy.net
  *
@@ -26,15 +26,92 @@ package net.yacy.cora.storage;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.zip.GZIPInputStream;
+
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 public class Files {
 
+	/**
+	 * open text files for reading. If the files are compressed, choose the
+	 * appropriate decompression method automatically
+	 * @param f
+	 * @return the input stream for the file
+	 * @throws IOException
+	 */
+	public static InputStream read(File f) throws IOException {
+
+        // make input stream
+        InputStream is = new BufferedInputStream(new FileInputStream(f));
+        if (f.toString().endsWith(".bz2")) is = new BZip2CompressorInputStream(is);
+        if (f.toString().endsWith(".gz")) is = new GZIPInputStream(is);
+        
+        return is;
+	}
+	
+	/**
+	 * reading a file line by line should be done with two concurrent processes
+	 * - one reading the file and doing IO operations
+	 * - one processing the result
+	 * This method makes is easy to create concurrent file readers by providing
+	 * a process that fills a blocking queue with lines from a file.
+	 * After the method is called, it returns immediately a blocking queue which is
+	 * filled concurrently with the lines of the file. When the reading is finished,
+	 * this is signalled with a poison entry, the POISON_LINE String which can be
+	 * compared with an "==" operation.
+	 * @param f the file to read
+	 * @param maxQueueSize
+	 * @return a blocking queue which is filled with the lines, terminated by POISON_LINE
+	 * @throws IOException
+	 */
+	public final static String POISON_LINE = "__@POISON__";
+	public static BlockingQueue<String> concurentLineReader(final File f, final int maxQueueSize) throws IOException {
+		final BlockingQueue<String> q = new ArrayBlockingQueue<String>(maxQueueSize);
+		final InputStream is = read(f);
+		final BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+		Thread t = new Thread() {
+			public void run() {
+				String line;
+				try {
+					while ((line = br.readLine()) != null) {
+						q.put(line);
+					}
+				} catch (IOException e) {
+				} catch (InterruptedException e) {
+				} finally {
+					try {
+						q.put(POISON_LINE);
+						try {
+							br.close();
+							is.close();
+						} catch (IOException ee) {
+						}
+					} catch (InterruptedException e) {
+						// last try
+						q.add(POISON_LINE);
+						try {
+							br.close();
+							is.close();
+						} catch (IOException ee) {
+						}
+					}
+				}
+			}
+		};
+		t.start();
+		return q;
+	}
+	
     /**
      * copy a file or a complete directory
      * @param from the source file or directory

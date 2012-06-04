@@ -128,6 +128,7 @@ public class yacysearchitem {
             prop.put("content_showMetadata", sb.getConfigBool("search.result.show.metadata", true) ? 1 : 0);
             prop.put("content_showParser", sb.getConfigBool("search.result.show.parser", true) ? 1 : 0);
             prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
+            prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) ? 1 : 0);
             prop.put("content_authorized", authenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
             prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
@@ -198,7 +199,7 @@ public class yacysearchitem {
             } else {
                 prop.put("content_code", "");
             }
-            if (result.lat() == 0.0f || result.lon() == 0.0f) {
+            if (result.lat() == 0.0d || result.lon() == 0.0d) {
                 prop.put("content_loc", 0);
             } else {
                 prop.put("content_loc", 1);

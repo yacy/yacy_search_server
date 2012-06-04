@@ -92,6 +92,7 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false));
                 sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
+                sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache", false));
 
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete", false));
@@ -136,6 +137,7 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.metadata", true);
                 sb.setConfig("search.result.show.parser", true);
                 sb.setConfig("search.result.show.pictures", false);
+                sb.setConfig("search.result.show.cache", false);
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh");
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
                 sb.setConfig("about.headline", "");
@@ -165,6 +167,7 @@ public class ConfigPortal {
         prop.put("search.result.show.metadata", sb.getConfigBool("search.result.show.metadata", false) ? 1 : 0);
         prop.put("search.result.show.parser", sb.getConfigBool("search.result.show.parser", false) ? 1 : 0);
         prop.put("search.result.show.pictures", sb.getConfigBool("search.result.show.pictures", false) ? 1 : 0);
+        prop.put("search.result.show.cache", sb.getConfigBool("search.result.show.cache", false) ? 1 : 0);
 
         prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors",0) >= 0 ? 1 : 0);
