@@ -931,7 +931,7 @@ public class yacysearch {
             // update the search tracker
             try {
                 synchronized ( trackerHandles ) {
-                    trackerHandles.add(theQuery.time);
+                    trackerHandles.add(theQuery.starttime);
                     while ( trackerHandles.size() > 600 ) {
                         if ( !trackerHandles.remove(trackerHandles.first()) ) {
                             break;

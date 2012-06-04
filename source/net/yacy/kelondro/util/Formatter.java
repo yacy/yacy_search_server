@@ -1,4 +1,4 @@
-// Formatter.java 
+// Formatter.java
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -40,26 +40,37 @@ import java.util.Locale;
  * to the locale set for YaCy.
  */
 public final class Formatter {
-    // default formatter
-    private static NumberFormat numForm = NumberFormat.getInstance(new Locale("en"));
-    
-    // generic formatter that can be used when no localized formatting is allowed
-    private static final NumberFormat cleanNumForm = 
-        new DecimalFormat("####.##", new DecimalFormatSymbols(Locale.ENGLISH));
 
-    static {
-        // just initialize defaults on class load
-        initDefaults();
-    }
+    // default formatter
+    private static Locale locale = new Locale("en");
+    /**
+     * use ThreadLocal to generate new formatter for each Thread since NumberFormat is not synchronized
+     */
+    private static final ThreadLocal <NumberFormat> numForm =
+        new ThreadLocal <NumberFormat>() {
+          @Override protected NumberFormat initialValue() {
+              NumberFormat n = locale == null ? new DecimalFormat("####.##", new DecimalFormatSymbols(Locale.ENGLISH)) : NumberFormat.getInstance(locale);
+              n.setGroupingUsed(true);          // always group int digits
+              n.setParseIntegerOnly(false);     // allow int/double/float
+              n.setMaximumFractionDigits(2);    // 2 decimal digits for float/double
+              return n;
+          }
+      };
+      private static final ThreadLocal <NumberFormat> cleanNumForm =
+          new ThreadLocal <NumberFormat>() {
+            @Override protected NumberFormat initialValue() {
+                NumberFormat n = new DecimalFormat("####.##", new DecimalFormatSymbols(Locale.ENGLISH));
+                return n;
+            }
+        };
 
 
     /**
      * @param locale the {@link Locale} to set or <code>null</code> to set the special
      * empty locale to create unformatted numbers
      */
-    public static void setLocale(final Locale locale) {
-        numForm = (locale == null ? cleanNumForm : NumberFormat.getInstance(locale));
-        initDefaults();
+    public static void setLocale(final Locale l) {
+        locale = l;
     }
 
     /**
@@ -67,28 +78,24 @@ public final class Formatter {
      */
     public static void setLocale(final String lang) {
         final String l = (lang.equalsIgnoreCase("default") ? "en" : lang.toLowerCase());
-        
         setLocale(l.equals("none") ? null : new Locale(l));
     }
 
-    private static void initDefaults() {
-        numForm.setGroupingUsed(true);          // always group int digits
-        numForm.setParseIntegerOnly(false);     // allow int/double/float
-        numForm.setMaximumFractionDigits(2);    // 2 decimal digits for float/double
-    }
 
     public static String number(final double d, final boolean localized) {
-        return (localized ? number(d) : cleanNumForm.format(d));
+        return (localized ? numForm.get().format(d) : cleanNumForm.get().format(d));
     }
+
     public static String number(final double d) {
-        return numForm.format(d);
+        return numForm.get().format(d);
     }
 
     public static String number(final long l, final boolean localized) {
-        return (localized ? number(l) : cleanNumForm.format(l));
+        return (localized ? numForm.get().format(l) : cleanNumForm.get().format(l));
     }
+
     public static String number(final long l) {
-        return numForm.format(l);
+        return numForm.get().format(l);
     }
 
     /**
@@ -107,11 +114,11 @@ public final class Formatter {
                 ret = number(Float.parseFloat(s));
             }
         } catch (final NumberFormatException e) { /* empty */ }
-        
+
         return (ret == null ? "-" : ret);
     }
 
-    
+
     /**
      * Formats a number if it are bytes to greatest unit (1024 based)
      * @param byteCount

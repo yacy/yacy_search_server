@@ -137,10 +137,11 @@ public final class ConsoleOutErrHandler extends Handler {
 
         if (record.getLevel().intValue() >= this.splitLevel.intValue()) {
             this.stdErrHandler.publish(record);
+            this.stdErrHandler.flush();
         } else {
             this.stdOutHandler.publish(record);
+            this.stdOutHandler.flush();
         }
-        flush();
     }
 
     @Override

@@ -71,10 +71,6 @@ public class ReferenceOrder {
         if (container.size() < 100) threads = 2;
         final Thread distributor = new NormalizeDistributor(container, out, threads, maxtime);
         distributor.start();
-        try {
-            distributor.join(10); // let the distributor work for at least 10 milliseconds
-        } catch (final InterruptedException e) {
-        }
 
         // return the resulting queue while the processing queues are still working
         return out;
@@ -103,17 +99,21 @@ public class ReferenceOrder {
             final Semaphore termination = new Semaphore(this.threads);
             final NormalizeWorker[] worker = new NormalizeWorker[this.threads];
             for (int i = 0; i < this.threads; i++) {
-                worker[i] = new NormalizeWorker(this.out, termination);
+                worker[i] = new NormalizeWorker(this.out, termination, this.maxtime);
                 worker[i].start();
             }
 
             // fill the queue
             WordReferenceVars iEntry;
             int p = 0;
+            long timeout = System.currentTimeMillis() + this.maxtime;
             try {
                 while ((iEntry = vars.take()) != WordReferenceVars.poison) {
                     worker[p % this.threads].add(iEntry);
                     p++;
+                    if (System.currentTimeMillis() > timeout) {
+                        Log.logWarning("NormalizeDistributor", "adding of decoded rows to workers ended with timeout = " + this.maxtime);
+                    }
                 }
             } catch (final InterruptedException e) {
             }
@@ -136,11 +136,13 @@ public class ReferenceOrder {
         private final BlockingQueue<WordReferenceVars> out;
         private final Semaphore termination;
         private final BlockingQueue<WordReferenceVars> decodedEntries;
+        private final long maxtime;
 
-        public NormalizeWorker(final BlockingQueue<WordReferenceVars> out, final Semaphore termination) {
+        public NormalizeWorker(final BlockingQueue<WordReferenceVars> out, final Semaphore termination, long maxtime) {
             this.out = out;
             this.termination = termination;
             this.decodedEntries = new LinkedBlockingQueue<WordReferenceVars>();
+            this.maxtime = maxtime;
         }
 
         public void add(final WordReferenceVars entry) {
@@ -158,6 +160,7 @@ public class ReferenceOrder {
                 String dom;
                 Integer count;
                 final Integer int1 = 1;
+                long timeout = System.currentTimeMillis() + this.maxtime;
                 while ((iEntry = this.decodedEntries.take()) != WordReferenceVars.poison) {
                     // find min/max
                     if (ReferenceOrder.this.min == null) ReferenceOrder.this.min = iEntry.clone(); else ReferenceOrder.this.min.min(iEntry);
@@ -170,6 +173,11 @@ public class ReferenceOrder {
                         doms0.put(dom, int1);
                     } else {
                         doms0.put(dom, LargeNumberCache.valueOf(count.intValue() + 1));
+                    }
+
+                    if (System.currentTimeMillis() > timeout) {
+                        Log.logWarning("NormalizeWorker", "normlization of decoded rows ended with timeout = " + this.maxtime);
+                        break;
                     }
                 }
 

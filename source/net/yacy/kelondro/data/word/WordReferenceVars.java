@@ -36,6 +36,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.MicroDate;
@@ -429,10 +430,11 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	    // transform without concurrency to omit thread creation overhead
     	    for (final Row.Entry entry: container) try {
                 vars.put(new WordReferenceVars(new WordReferenceRow(entry)));
-            } catch (final InterruptedException e) {}
-            try {
-                vars.put(WordReferenceVars.poison);
-            } catch (final InterruptedException e) {}
+            } catch (final InterruptedException e) {} finally {
+                try {
+                    vars.put(WordReferenceVars.poison);
+                } catch (final InterruptedException e) {}
+            }
             return vars;
     	}
     	final Thread distributor = new TransformDistributor(container, vars, maxtime);
@@ -470,13 +472,26 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     		while (p > 0) {
     			p--;
 				worker[p % cores0].add(this.container.get(p, false));
-				if (p % 100 == 0 && System.currentTimeMillis() > timeout) break;
+				if (p % 100 == 0 && System.currentTimeMillis() > timeout) {
+				    Log.logWarning("TransformDistributor", "distribution of WordReference entries to worker queues ended with timeout = " + this.maxtime);
+				    break;
+				}
             }
 
         	// insert poison to stop the queues
         	for (int i = 0; i < cores0; i++) {
         	    worker[i].add(WordReferenceRow.poisonRowEntry);
         	}
+
+        	// wait for the worker to terminate because we want to place a poison entry into the out queue afterwards
+        	for (int i = 0; i < cores0; i++) {
+                try {
+                    worker[i].join();
+                } catch (InterruptedException e) {
+                }
+            }
+
+        	this.out.add(WordReferenceVars.poison);
     	}
     }
 
@@ -506,7 +521,10 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     		try {
 				while ((entry = this.in.take()) != WordReferenceRow.poisonRowEntry) {
 				    this.out.put(new WordReferenceVars(new WordReferenceRow(entry)));
-				    if (System.currentTimeMillis() > timeout) break;
+				    if (System.currentTimeMillis() > timeout) {
+	                    Log.logWarning("TransformWorker", "normalization of row entries from row to vars ended with timeout = " + this.maxtime);
+				        break;
+				    }
 				}
 			} catch (final InterruptedException e) {}
     	}

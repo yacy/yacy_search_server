@@ -430,7 +430,7 @@ public final class search {
 
         // update the search tracker
         synchronized (trackerHandles) {
-            trackerHandles.add(theQuery.time); // thats the time when the handle was created
+            trackerHandles.add(theQuery.starttime); // thats the time when the handle was created
             // we don't need too much entries in the list; remove superfluous
             while (trackerHandles.size() > 36) if (!trackerHandles.remove(trackerHandles.first())) break;
         }

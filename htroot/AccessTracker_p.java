@@ -163,8 +163,8 @@ public class AccessTracker_p {
                 prop.put("page_list_" + m + "_dark", ((dark) ? 1 : 0) );
                 dark =! dark;
                 prop.putHTML("page_list_" + m + "_host", query.host);
-                prop.put("page_list_" + m + "_date", SimpleFormatter.format(new Date(query.time.longValue())));
-                prop.put("page_list_" + m + "_timestamp", query.time.longValue());
+                prop.put("page_list_" + m + "_date", SimpleFormatter.format(new Date(query.starttime)));
+                prop.put("page_list_" + m + "_timestamp", query.starttime);
                 if (page == 2) {
                     // local search
                     prop.putNum("page_list_" + m + "_offset", query.offset);

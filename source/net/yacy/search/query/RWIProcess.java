@@ -99,6 +99,7 @@ public final class RWIProcess extends Thread
     private final ReferenceOrder order;
     private boolean addRunning;
     private final boolean remote;
+    private final long maxtime;
 
     // navigation scores
     private final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
@@ -145,6 +146,7 @@ public final class RWIProcess extends Thread
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.receivedRemoteReferences = new AtomicInteger(0);
+        this.maxtime = query.maxtime;
     }
 
     public void addExpectedRemoteReferences(int x) {
@@ -206,7 +208,7 @@ public final class RWIProcess extends Thread
                     System.currentTimeMillis() - timer),
                 false);
             if ( !index.isEmpty() ) {
-                add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true, 10000);
+                add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true, this.maxtime);
             }
         } catch ( final Exception e ) {
             Log.logException(e);
@@ -260,6 +262,7 @@ public final class RWIProcess extends Thread
             this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts", 0) >= 0;
 
         // apply all constraints
+        long timeout = System.currentTimeMillis() + maxtime;
         try {
             WordReferenceVars iEntry;
             final String pattern = this.query.urlMask.pattern();
@@ -269,9 +272,16 @@ public final class RWIProcess extends Thread
                     || pattern.equals("ftp://.*")
                     || pattern.equals("smb://.*")
                     || pattern.equals("file://.*");
+            long remaining;
             pollloop: while ( true ) {
-                iEntry = decodedEntries.poll(1, TimeUnit.SECONDS);
-                if ( iEntry == null || iEntry == WordReferenceVars.poison ) {
+                remaining = timeout - System.currentTimeMillis();
+                if (remaining <= 0) break;
+                iEntry = decodedEntries.poll(remaining, TimeUnit.MILLISECONDS);
+                if ( iEntry == null ) {
+                    Log.logWarning("RWIProcess", "terminated 'add' loop after poll time-out = " + remaining);
+                    break pollloop;
+                }
+                if ( iEntry == WordReferenceVars.poison ) {
                     break pollloop;
                 }
                 assert (iEntry.urlhash().length == index.row().primaryKeyLength);
@@ -363,6 +373,7 @@ public final class RWIProcess extends Thread
                     //}
                 }
             }
+            if (System.currentTimeMillis() >= timeout) Log.logWarning("RWIProcess", "rwi normalization ended with timeout = " + maxtime);
 
         } catch ( final InterruptedException e ) {
         } catch ( final RowSpaceExceededException e ) {
@@ -602,9 +613,10 @@ public final class RWIProcess extends Thread
             final String pagetitle = page.dc_title().toLowerCase();
 
             // check exclusion
-            if ( (QueryParams.anymatch(pagetitle, this.query.excludeHashes))
+            if ( this.query.excludeHashes != null && !this.query.excludeHashes.isEmpty() &&
+                ((QueryParams.anymatch(pagetitle, this.query.excludeHashes))
                 || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.excludeHashes))
-                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.excludeHashes)) ) {
+                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.excludeHashes)))) {
                 this.sortout++;
                 continue;
             }
