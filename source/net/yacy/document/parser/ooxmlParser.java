@@ -35,8 +35,11 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.SAXException;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
@@ -71,6 +74,20 @@ public class ooxmlParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.spreadsheetml.template");
     }
 
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static SAXParser getParser() throws SAXException {
+    	SAXParser parser = tlSax.get();
+    	if (parser == null) {
+    		try {
+				parser = SAXParserFactory.newInstance().newSAXParser();
+			} catch (ParserConfigurationException e) {
+				throw new SAXException(e.getMessage(), e);
+			}
+    		tlSax.set(parser);
+    	}
+    	return parser;
+    }
+    
     private Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final File dest) throws Parser.Failure, InterruptedException {
 
         CharBuffer writer = null;
@@ -85,8 +102,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
             // opening the file as zip file
             final ZipFile zipFile= new ZipFile(dest);
             final Enumeration<? extends ZipEntry> zipEnum = zipFile.entries();
-            final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-
+            
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {
 
@@ -105,7 +121,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
 	                    // extract data
 	                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
 	                    try {
-		                    final SAXParser saxParser = saxParserFactory.newSAXParser();
+		                    final SAXParser saxParser = getParser();
 		                    saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
 
 		                    // close readers and writers
@@ -118,7 +134,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
                 } else if (entryName.equals("docProps/core.xml")) {
                     //  meta.xml contains metadata about the document
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
-                    final SAXParser saxParser = saxParserFactory.newSAXParser();
+                    final SAXParser saxParser = getParser();
                     final ODMetaHandler metaData = new ODMetaHandler();
                     saxParser.parse(zipFileEntryStream, metaData);
                     docDescription = metaData.getDescription();

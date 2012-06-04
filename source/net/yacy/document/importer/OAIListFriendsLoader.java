@@ -102,6 +102,20 @@ public class OAIListFriendsLoader {
         return map;
     }
 
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static SAXParser getParser() throws SAXException {
+    	SAXParser parser = tlSax.get();
+    	if (parser == null) {
+    		try {
+				parser = SAXParserFactory.newInstance().newSAXParser();
+			} catch (ParserConfigurationException e) {
+				throw new SAXException(e.getMessage(), e);
+			}
+    		tlSax.set(parser);
+    	}
+    	return parser;
+    }
+    
     // get a resumption token using a SAX xml parser from am input stream
     private static class Parser extends DefaultHandler {
 
@@ -120,10 +134,9 @@ public class OAIListFriendsLoader {
             this.buffer = new StringBuilder();
             this.parsingValue = false;
             this.atts = null;
-            final SAXParserFactory factory = SAXParserFactory.newInstance();
             this.stream = new ByteArrayInputStream(b);
             try {
-                this.saxParser = factory.newSAXParser();
+                this.saxParser = getParser();
                 this.saxParser.parse(this.stream, this);
             } catch (final SAXException e) {
                 Log.logException(e);
@@ -131,10 +144,6 @@ public class OAIListFriendsLoader {
             } catch (final IOException e) {
                 Log.logException(e);
                 Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + UTF8.String(b));
-            } catch (final ParserConfigurationException e) {
-                Log.logException(e);
-                Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + UTF8.String(b));
-                throw new IOException(e.getMessage());
             } finally {
                 try {
                     this.stream.close();

@@ -57,14 +57,27 @@ public class RSSReader extends DefaultHandler {
         this.parsingItem = false;
         this.type = Type.none;
     }
-
+    
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static SAXParser getParser() throws SAXException {
+    	SAXParser parser = tlSax.get();
+    	if (parser == null) {
+    		try {
+				parser = SAXParserFactory.newInstance().newSAXParser();
+			} catch (ParserConfigurationException e) {
+				throw new SAXException(e.getMessage(), e);
+			}
+    		tlSax.set(parser);
+    	}
+    	return parser;
+    }
+    
     public RSSReader(final int maxsize, InputStream stream, final Type type) throws IOException {
         this(maxsize);
         this.type = type;
         if (!(stream instanceof ByteArrayInputStream) && !(stream instanceof BufferedInputStream)) stream = new BufferedInputStream(stream);
-        final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
-            final SAXParser saxParser = factory.newSAXParser();
+            final SAXParser saxParser = getParser();
             // do not look at external dtd - see: http://www.ibm.com/developerworks/xml/library/x-tipcfsx/index.html
             saxParser.getXMLReader().setEntityResolver(new EntityResolver() {
 				@Override
@@ -75,8 +88,6 @@ public class RSSReader extends DefaultHandler {
             });
             saxParser.parse(stream, this);
         } catch (final SAXException e) {
-            throw new IOException (e.getMessage());
-        } catch (final ParserConfigurationException e) {
             throw new IOException (e.getMessage());
         }
     }

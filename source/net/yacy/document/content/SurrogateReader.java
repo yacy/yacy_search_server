@@ -72,6 +72,20 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private SAXParser saxParser;
     private final InputSource inputSource;
     private final InputStream inputStream;
+
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static SAXParser getParser() throws SAXException {
+    	SAXParser parser = tlSax.get();
+    	if (parser == null) {
+    		try {
+				parser = SAXParserFactory.newInstance().newSAXParser();
+			} catch (ParserConfigurationException e) {
+				throw new SAXException(e.getMessage(), e);
+			}
+    		tlSax.set(parser);
+    	}
+    	return parser;
+    }
     
     public SurrogateReader(final InputStream stream, int queueSize) throws IOException {
         this.buffer = new StringBuilder(300);
@@ -85,12 +99,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         this.inputSource.setEncoding("UTF-8");
         this.inputStream = stream;
         
-        final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
-            this.saxParser = factory.newSAXParser();
-        } catch (ParserConfigurationException e) {
-            Log.logException(e);
-            throw new IOException(e.getMessage());
+            this.saxParser = getParser();
         } catch (SAXException e) {
             Log.logException(e);
             throw new IOException(e.getMessage());

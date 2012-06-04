@@ -51,6 +51,20 @@ public class mmParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.add("application/freemind");
         SUPPORTED_MIME_TYPES.add("application/x-freemind");
     }
+
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static SAXParser getParser() throws SAXException {
+    	SAXParser parser = tlSax.get();
+    	if (parser == null) {
+    		try {
+				parser = SAXParserFactory.newInstance().newSAXParser();
+			} catch (ParserConfigurationException e) {
+				throw new SAXException(e.getMessage(), e);
+			}
+    		tlSax.set(parser);
+    	}
+    	return parser;
+    }
     
     public Document[] parse(final MultiProtocolURI location, final String mimeType,
             final String charset, final InputStream source)
@@ -61,7 +75,7 @@ public class mmParser extends AbstractParser implements Parser {
         byte[] content = new byte[0];
 
         try {
-            final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+            final SAXParser saxParser = getParser();
             final FreeMindHandler freeMindHandler = new FreeMindHandler();
             saxParser.parse(source, freeMindHandler);
 
@@ -76,8 +90,6 @@ public class mmParser extends AbstractParser implements Parser {
 
             content = UTF8.getBytes(sb.toString());
 
-        } catch (ParserConfigurationException ex) {
-            log.logWarning(ex.getMessage());
         } catch (SAXException ex) {
             log.logWarning(ex.getMessage());
         } catch (IOException ex) {

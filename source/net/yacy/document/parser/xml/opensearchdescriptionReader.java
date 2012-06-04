@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -113,11 +114,24 @@ public class opensearchdescriptionReader extends DefaultHandler {
         this.imageURL = null;
     }
 
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static SAXParser getParser() throws SAXException {
+    	SAXParser parser = tlSax.get();
+    	if (parser == null) {
+    		try {
+				parser = SAXParserFactory.newInstance().newSAXParser();
+			} catch (ParserConfigurationException e) {
+				throw new SAXException(e.getMessage(), e);
+			}
+    		tlSax.set(parser);
+    	}
+    	return parser;
+    }
+    
     public opensearchdescriptionReader(final String path) {
         this();
         try {
-            final SAXParserFactory factory = SAXParserFactory.newInstance();
-            final SAXParser saxParser = factory.newSAXParser();
+            final SAXParser saxParser = getParser();
             saxParser.parse(path, this);
         } catch (final Exception e) {
             Log.logException(e);
@@ -127,8 +141,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
     public opensearchdescriptionReader(final InputStream stream) {
         this();
         try {
-            final SAXParserFactory factory = SAXParserFactory.newInstance();
-            final SAXParser saxParser = factory.newSAXParser();
+            final SAXParser saxParser = getParser();
             saxParser.parse(stream, this);
         } catch (final Exception e) {
             Log.logException(e);
