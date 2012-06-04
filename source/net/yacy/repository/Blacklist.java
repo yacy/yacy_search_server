@@ -93,21 +93,21 @@ public class Blacklist {
     public static final String BLACKLIST_TYPES_STRING = "proxy,crawler,dht,search,surftips,news";
     private File blacklistRootPath = null;
     private final ConcurrentMap<String, HandleSet> cachedUrlHashs;
-    private final ConcurrentMap<String, Map<String, List<String>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
-    private final ConcurrentMap<String, Map<String, List<String>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
+    private final ConcurrentMap<String, Map<String, List<Pattern>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
+    private final ConcurrentMap<String, Map<String, List<Pattern>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
 
     public Blacklist(final File rootPath) {
 
         setRootPath(rootPath);
 
         // prepare the data structure
-        this.hostpaths_matchable = new ConcurrentHashMap<String, Map<String, List<String>>>();
-        this.hostpaths_notmatchable = new ConcurrentHashMap<String, Map<String, List<String>>>();
+        this.hostpaths_matchable = new ConcurrentHashMap<String, Map<String, List<Pattern>>>();
+        this.hostpaths_notmatchable = new ConcurrentHashMap<String, Map<String, List<Pattern>>>();
         this.cachedUrlHashs = new ConcurrentHashMap<String, HandleSet>();
 
         for (final String blacklistType : BLACKLIST_TYPES) {
-            this.hostpaths_matchable.put(blacklistType, new ConcurrentHashMap<String, List<String>>());
-            this.hostpaths_notmatchable.put(blacklistType, new ConcurrentHashMap<String, List<String>>());
+            this.hostpaths_matchable.put(blacklistType, new ConcurrentHashMap<String, List<Pattern>>());
+            this.hostpaths_notmatchable.put(blacklistType, new ConcurrentHashMap<String, List<Pattern>>());
             this.cachedUrlHashs.put(blacklistType, new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
         }
     }
@@ -126,7 +126,7 @@ public class Blacklist {
         this.blacklistRootPath = rootPath;
     }
 
-    protected Map<String, List<String>> getBlacklistMap(final String blacklistType, final boolean matchable) {
+    protected Map<String, List<Pattern>> getBlacklistMap(final String blacklistType, final boolean matchable) {
         if (blacklistType == null) {
             throw new IllegalArgumentException("Blacklist type not set.");
         }
@@ -149,10 +149,10 @@ public class Blacklist {
     }
 
     public void clear() {
-        for (final Map<String, List<String>> entry : this.hostpaths_matchable.values()) {
+        for (final Map<String, List<Pattern>> entry : this.hostpaths_matchable.values()) {
             entry.clear();
         }
-        for (final Map<String, List<String>> entry : this.hostpaths_notmatchable.values()) {
+        for (final Map<String, List<Pattern>> entry : this.hostpaths_notmatchable.values()) {
             entry.clear();
         }
         for (final HandleSet entry : this.cachedUrlHashs.values()) {
@@ -163,12 +163,12 @@ public class Blacklist {
     public int size() {
         int size = 0;
         for (final String entry : this.hostpaths_matchable.keySet()) {
-            for (final List<String> ientry : this.hostpaths_matchable.get(entry).values()) {
+            for (final List<Pattern> ientry : this.hostpaths_matchable.get(entry).values()) {
                 size += ientry.size();
             }
         }
         for (final String entry : this.hostpaths_notmatchable.keySet()) {
-            for (final List<String> ientry : this.hostpaths_notmatchable.get(entry).values()) {
+            for (final List<Pattern> ientry : this.hostpaths_notmatchable.get(entry).values()) {
                 size += ientry.size();
             }
         }
@@ -185,15 +185,16 @@ public class Blacklist {
      * create a blacklist from file, entries separated by 'sep'
      * duplicit entries are removed
      * @param blFile
-     * @param sep 
+     * @param sep
      */
     private void loadList(final BlacklistFile blFile, final String sep) {
-        final Map<String, List<String>> blacklistMapMatch = getBlacklistMap(blFile.getType(), true);
-        final Map<String, List<String>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(), false);
+        final Map<String, List<Pattern>> blacklistMapMatch = getBlacklistMap(blFile.getType(), true);
+        final Map<String, List<Pattern>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(), false);
         Set<Map.Entry<String, List<String>>> loadedBlacklist;
         Map.Entry<String, List<String>> loadedEntry;
-        List<String> paths;
+        List<Pattern> paths;
         List<String> loadedPaths;
+        List<Pattern> loadedPathsPattern;
 
         final Set<String> fileNames = blFile.getFileNamesUnified();
         for (final String fileName : fileNames) {
@@ -208,19 +209,32 @@ public class Blacklist {
             for (final Iterator<Map.Entry<String, List<String>>> mi = loadedBlacklist.iterator(); mi.hasNext();) {
                 loadedEntry = mi.next();
                 loadedPaths = loadedEntry.getValue();
+                loadedPathsPattern = new ArrayList<Pattern>();
+                for (String a: loadedPaths) {
+                    if (a.equals("*")) {
+                        loadedPathsPattern.add(Pattern.compile(".*"));
+                        continue;
+                    }
+                    if (a.indexOf("?*",0) > 0) {
+                        // prevent "Dangling meta character '*'" exception
+                        Log.logWarning("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + a);
+                        continue;
+                    }
+                    loadedPathsPattern.add(Pattern.compile(a));
+                }
 
                 // create new entry if host mask unknown, otherwise merge
                 // existing one with path patterns from blacklist file
                 paths = (isMatchable(loadedEntry.getKey())) ? blacklistMapMatch.get(loadedEntry.getKey()) : blacklistMapNotMatch.get(loadedEntry.getKey());
                 if (paths == null) {
                     if (isMatchable(loadedEntry.getKey())) {
-                        blacklistMapMatch.put(loadedEntry.getKey(), loadedPaths);
+                        blacklistMapMatch.put(loadedEntry.getKey(), loadedPathsPattern);
                     } else {
-                        blacklistMapNotMatch.put(loadedEntry.getKey(), loadedPaths);
+                        blacklistMapNotMatch.put(loadedEntry.getKey(), loadedPathsPattern);
                     }
                 } else {
                     // check for duplicates? (refactor List -> Set)
-                    paths.addAll(new HashSet<String>(loadedPaths));
+                    paths.addAll(new HashSet<Pattern>(loadedPathsPattern));
                 }
             }
         }
@@ -229,7 +243,6 @@ public class Blacklist {
     public void loadList(final String blacklistType, final String fileNames, final String sep) {
         // method for not breaking older plasmaURLPattern interface
         final BlacklistFile blFile = new BlacklistFile(fileNames, blacklistType);
-
         loadList(blFile, sep);
     }
 
@@ -240,8 +253,8 @@ public class Blacklist {
 
     public void remove(final String blacklistType, final String host, final String path) {
 
-        final Map<String, List<String>> blacklistMap = getBlacklistMap(blacklistType, true);
-        List<String> hostList = blacklistMap.get(host);
+        final Map<String, List<Pattern>> blacklistMap = getBlacklistMap(blacklistType, true);
+        List<Pattern> hostList = blacklistMap.get(host);
         if (hostList != null) {
             hostList.remove(path);
             if (hostList.isEmpty()) {
@@ -249,7 +262,7 @@ public class Blacklist {
             }
         }
 
-        final Map<String, List<String>> blacklistMapNotMatch = getBlacklistMap(blacklistType, false);
+        final Map<String, List<Pattern>> blacklistMapNotMatch = getBlacklistMap(blacklistType, false);
         hostList = blacklistMapNotMatch.get(host);
         if (hostList != null) {
             hostList.remove(path);
@@ -268,19 +281,17 @@ public class Blacklist {
         }
 
         final String p = (path.length() > 0 && path.charAt(0) == '/') ? path.substring(1) : path;
-
-        final Map<String, List<String>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
+        final Map<String, List<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
         // avoid PatternSyntaxException e
-        final String h =
-                ((!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+        final String h = ((!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
 
-        List<String> hostList;
+        List<Pattern> hostList;
         if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
-            blacklistMap.put(h, (hostList = new ArrayList<String>()));
+            blacklistMap.put(h, (hostList = new ArrayList<Pattern>()));
         }
 
-        hostList.add(p);
+        hostList.add(Pattern.compile(p));
     }
 
     public int blacklistCacheSize() {
@@ -300,14 +311,12 @@ public class Blacklist {
         boolean ret = false;
 
         if (blacklistType != null && host != null && path != null) {
-            final Map<String, List<String>> blacklistMap =
-                    getBlacklistMap(blacklistType, isMatchable(host));
+            final Map<String, List<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
             // avoid PatternSyntaxException e
-            final String h =
-                    ((!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+            final String h = ((!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
 
-            final List<String> hostList = blacklistMap.get(h);
+            final List<Pattern> hostList = blacklistMap.get(h);
             if (hostList != null) {
                 ret = hostList.contains(path);
             }
@@ -338,13 +347,11 @@ public class Blacklist {
         return true;
     }
 
+    private final static Pattern m1 = Pattern.compile("^[a-z0-9.-]*$");       // simple Domain (yacy.net or www.yacy.net)
+    private final static Pattern m2 = Pattern.compile("^\\*\\.[a-z0-9-.]*$"); // start with *. (not .* and * must follow a dot)
+    private final static Pattern m3 = Pattern.compile("^[a-z0-9-.]*\\.\\*$"); // ends with .* (not *. and before * must be a dot)
     public static boolean isMatchable(final String host) {
-
-        return (
-                (Pattern.matches("^[a-z0-9.-]*$", host))            // simple Domain (yacy.net or www.yacy.net)
-                || (Pattern.matches("^\\*\\.[a-z0-9-.]*$", host))   // start with *. (not .* and * must follow a dot)
-                || (Pattern.matches("^[a-z0-9-.]*\\.\\*$", host))   // ends with .* (not *. and before * must be a dot)
-                );
+        return (m1.matcher(host).matches() || m2.matcher(host).matches() || m3.matcher(host).matches());
     }
 
     public String getEngineInfo() {
@@ -360,24 +367,19 @@ public class Blacklist {
         }
 
         // getting the proper blacklist
-        final Map<String, List<String>> blacklistMapMatched = getBlacklistMap(blacklistType, true);
+        final Map<String, List<Pattern>> blacklistMapMatched = getBlacklistMap(blacklistType, true);
 
         final String p = (path.length() > 0 && path.charAt(0) == '/') ? path.substring(1) : path;
 
-        List<String> app;
+        List<Pattern> app;
         boolean matched = false;
-        String pp = ""; // path-pattern
+        Pattern pp; // path-pattern
 
         // try to match complete domain
         if (!matched && (app = blacklistMapMatched.get(hostlow)) != null) {
             for (int i = app.size() - 1; !matched && i > -1; i--) {
                 pp = app.get(i);
-                if (pp.indexOf("?*",0) > 0) {
-                    // prevent "Dangling meta character '*'" exception
-                    Log.logWarning("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + pp);
-                    continue;
-                }
-                matched |= (("*".equals(pp)) || (p.matches(pp)));
+                matched |= pp.matcher(p).matches();
             }
         }
         // first try to match the domain with wildcard '*'
@@ -387,13 +389,13 @@ public class Blacklist {
             if ((app = blacklistMapMatched.get(hostlow.substring(0, index + 1) + "*")) != null) {
                 for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= (("*".equals(pp)) || (p.matches(pp)));
+                    matched |= pp.matcher(p).matches();
                 }
             }
             if ((app = blacklistMapMatched.get(hostlow.substring(0, index))) != null) {
                 for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= (("*".equals(pp)) || (p.matches(pp)));
+                    matched |= pp.matcher(p).matches();
                 }
             }
         }
@@ -402,13 +404,13 @@ public class Blacklist {
             if ((app = blacklistMapMatched.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
                 for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= (("*".equals(pp)) || (p.matches(pp)));
+                    matched |= pp.matcher(p).matches();
                 }
             }
             if ((app = blacklistMapMatched.get(hostlow.substring(index + 1, hostlow.length()))) != null) {
                 for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= (("*".equals(pp)) || (p.matches(pp)));
+                    matched |= pp.matcher(p).matches();
                 }
             }
         }
@@ -416,15 +418,15 @@ public class Blacklist {
 
         // loop over all Regexentrys
         if (!matched) {
-            final Map<String, List<String>> blacklistMapNotMatched = getBlacklistMap(blacklistType, false);
+            final Map<String, List<Pattern>> blacklistMapNotMatched = getBlacklistMap(blacklistType, false);
             String key;
-            for (final Entry<String, List<String>> entry : blacklistMapNotMatched.entrySet()) {
+            for (final Entry<String, List<Pattern>> entry : blacklistMapNotMatched.entrySet()) {
                 key = entry.getKey();
                 try {
                     if (Pattern.matches(key, hostlow)) {
                         app = entry.getValue();
                         for (int i = 0; i < app.size(); i++) {
-                            if (Pattern.matches(app.get(i), p)) {
+                            if (app.get(i).matcher(p).matches()) {
                                 return true;
                             }
                         }
