@@ -44,8 +44,8 @@ import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.SimpleVocabulary;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
-import net.yacy.document.Autotagging;
 import net.yacy.document.Condenser;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -115,7 +115,7 @@ public final class QueryParams {
     public final boolean urlMask_isCatchall, prefer_isMatchnothing;
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
-    public final Collection<Autotagging.Metatag> metatags;
+    public final Collection<SimpleVocabulary.Metatag> metatags;
     public final String navigators;
     public final Searchdom domType;
     public final int zonecode;
@@ -180,7 +180,7 @@ public final class QueryParams {
         this.itemsPerPage = itemsPerPage;
         this.offset = 0;
         this.targetlang = "en";
-        this.metatags = new ArrayList<Autotagging.Metatag>(0);
+        this.metatags = new ArrayList<SimpleVocabulary.Metatag>(0);
         this.domType = Searchdom.LOCAL;
         this.zonecode = DigestURI.TLD_any_zone_filter;
         this.domMaxTargets = 0;
@@ -213,7 +213,7 @@ public final class QueryParams {
         final String modifier,
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
-        final Collection<Autotagging.Metatag> metatags,
+        final Collection<SimpleVocabulary.Metatag> metatags,
         final String navigators,
         final CacheStrategy snippetCacheStrategy,
         final int itemsPerPage, final int offset, final String urlMask,

@@ -42,6 +42,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.lod.SimpleVocabulary;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
@@ -49,7 +50,6 @@ import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Autotagging;
-import net.yacy.document.Autotagging.Metatag;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -646,7 +646,7 @@ public final class RWIProcess extends Thread
             final String[] taglist = tags == null || tags.length() == 0 ? new String[0] : SPACE_PATTERN.split(page.dc_subject());
             if (this.query.metatags != null && this.query.metatags.size() > 0) {
                 // all metatags must appear in the tags list
-                for (Metatag metatag: this.query.metatags) {
+                for (SimpleVocabulary.Metatag metatag: this.query.metatags) {
                     if (!Autotagging.metatagAppearIn(metatag, taglist)) {
                         this.sortout++;
                         //Log.logInfo("RWIProcess", "sorted out " + page.url());
@@ -714,7 +714,7 @@ public final class RWIProcess extends Thread
             tagharvest: for (String tag: taglist) {
                 if (tag.length() < 1 || tag.charAt(0) != LibraryProvider.tagPrefix) continue tagharvest;
                 try {
-                    Metatag metatag = LibraryProvider.autotagging.metatag(tag);
+                	SimpleVocabulary.Metatag metatag = LibraryProvider.autotagging.metatag(tag);
                     ScoreMap<String> voc = this.vocabularyNavigator.get(metatag.getVocabularyName());
                     if (voc == null) {
                         voc = new ConcurrentScoreMap<String>();
