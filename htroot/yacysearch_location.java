@@ -59,7 +59,7 @@ public class yacysearch_location {
             final boolean search_creator = alltext || post.get("dom", "").indexOf("creator",0) >= 0;
             final boolean search_subject = alltext || post.get("dom", "").indexOf("subject",0) >= 0;
             final long maximumTime = post.getLong("maximumTime", 5000);
-            final int maximumRecords = post.getInt("maximumRecords", 3000);
+            final int maximumRecords = post.getInt("maximumRecords", 6000);
             final double lon = post.getDouble("lon", 0.0d);
             final double lat = post.getDouble("lat", 0.0d);
             final double radius = post.getDouble("r", 0.0d);

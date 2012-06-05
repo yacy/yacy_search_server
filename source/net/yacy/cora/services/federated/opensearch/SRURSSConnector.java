@@ -49,7 +49,7 @@ import org.apache.http.entity.mime.content.ContentBody;
 
 public class SRURSSConnector extends Thread implements SearchAccumulator {
 
-    private final static int recordsPerSession = 100;
+    private final static int recordsPerSession = 250;
 
     final String urlBase;
     final String query;

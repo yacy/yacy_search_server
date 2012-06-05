@@ -20,6 +20,7 @@
     var shallZoom   = true;  // flag if the map shall be zoomed to the search result
     var shallReload = false; // flag if the search shall be repeated upon next resize of the window
     var poisfound = 0;
+    var poisxml = "";
     var kmNormal = 100; // ca. 1km grid for radius
     var meterNormal = 100000; // ca. 1m grid for location
     
@@ -87,8 +88,9 @@
       radius = Math.floor(radius * kmNormal + 1) / kmNormal;
       var lon = Math.floor(center.lon * meterNormal) / meterNormal;
       var lat = Math.floor(center.lat * meterNormal) / meterNormal;
+      poisxml = path_mdsearch + query + '&lon=' + lon + '&lat=' + lat + '&r=' + radius + '&z=' + map.getZoom();
       searchLayer_co0 = new OpenLayers.Layer.GeoRSS('Communities',       path_losearch + query + '&lon=' + lon + '&lat=' + lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_co});
-      searchLayer_md0 = new OpenLayers.Layer.GeoRSS('Point Of Interest', path_mdsearch + query + '&lon=' + lon + '&lat=' + lat + '&r=' + radius + '&z=' + map.getZoom(), {'icon':marker_md});
+      searchLayer_md0 = new OpenLayers.Layer.GeoRSS('Point Of Interest', poisxml, {'icon':marker_md});
       map.addLayer(searchLayer_co0);
       map.addLayer(searchLayer_md0);
       //document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?query=' + query);
@@ -119,8 +121,8 @@
       //}
       
       // update map and result line
-      poisfound = mdcount + cocount;
-      document.getElementById('resultline').innerHTML = poisfound + " POIs found in visible map";
+      poisfound = mdcount;
+      document.getElementById('resultline').innerHTML = (poisfound == 0) ? "searching..." : poisfound + " <a href=\"" + poisxml + "\">POIs</a> found in region";
       
       // check if any of the markers is visible on the screen.
       // this is only necessary if shallZoom = false since this would set shallZoom = true
