@@ -85,7 +85,7 @@ public class BookmarksDB {
             try {
                 bookmark = it.next();
             } catch (Throwable e) {
-                Log.logException(e);
+                //Log.logException(e);
                 continue;
             }
             if (bookmark == null) continue;
@@ -160,7 +160,7 @@ public class BookmarksDB {
             return (map == null) ? null : new Bookmark(map);
         } catch (MalformedURLException e) {
             Log.logException(e);
-            return null;            
+            return null;
         } catch (final IOException e) {
             Log.logException(e);
             return null;
@@ -681,14 +681,17 @@ public class BookmarksDB {
             //this.nextEntry = null;
         }
 
+        @Override
         public boolean hasNext() {
             return this.bookmarkIter.hasNext();
         }
 
+        @Override
         public Bookmark next() {
             return getBookmark(UTF8.String(this.bookmarkIter.next()));
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -708,6 +711,7 @@ public class BookmarksDB {
             this.newestFirst = newestFirst;
         }
 
+        @Override
         public int compare(final String obj1, final String obj2) {
             final Bookmark bm1 = getBookmark(obj1);
             final Bookmark bm2 = getBookmark(obj2);
@@ -736,6 +740,7 @@ public class BookmarksDB {
          */
         private static final long serialVersionUID = 3105057490088903930L;
 
+        @Override
         public int compare(final Tag obj1, final Tag obj2){
             return obj1.getTagName().compareTo(obj2.getTagName());
     	}
@@ -749,6 +754,7 @@ public class BookmarksDB {
          */
         private static final long serialVersionUID = 4149185397646373251L;
 
+        @Override
         public int compare(final Tag obj1, final Tag obj2) {
             if (obj1.size() < obj2.size()) {
                 return 1;

@@ -221,7 +221,7 @@ public class SnippetProcess {
 
     private int resultCounter = 0;
     public ResultEntry nextResult() {
-        final ResultEntry re = oneResult(this.resultCounter, 3000);
+        final ResultEntry re = oneResult(this.resultCounter, Math.max(3000, this.query.timeout - System.currentTimeMillis()));
         this.resultCounter++;
         return re;
     }

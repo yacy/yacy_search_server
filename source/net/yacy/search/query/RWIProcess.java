@@ -124,10 +124,8 @@ public final class RWIProcess extends Thread
         this.remote_resourceSize = 0;
         this.remote_indexCount = 0;
         this.local_indexCount = 0;
-        this.urlhashes =
-            new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
-        this.misses =
-            new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
         this.sortout = 0;
         this.flagcount = new int[32];
         for ( int i = 0; i < 32; i++ ) {
@@ -273,12 +271,16 @@ public final class RWIProcess extends Thread
                     || pattern.equals("smb://.*")
                     || pattern.equals("file://.*");
             long remaining;
+            int count = 0;
             pollloop: while ( true ) {
                 remaining = timeout - System.currentTimeMillis();
-                if (remaining <= 0) break;
+                if (remaining <= 0) {
+                    Log.logWarning("RWIProcess", "terminated 'add' loop before poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
+                    break;
+                }
                 iEntry = decodedEntries.poll(remaining, TimeUnit.MILLISECONDS);
                 if ( iEntry == null ) {
-                    Log.logWarning("RWIProcess", "terminated 'add' loop after poll time-out = " + remaining);
+                    Log.logWarning("RWIProcess", "terminated 'add' loop after poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
                     break pollloop;
                 }
                 if ( iEntry == WordReferenceVars.poison ) {
@@ -286,6 +288,7 @@ public final class RWIProcess extends Thread
                 }
                 assert (iEntry.urlhash().length == index.row().primaryKeyLength);
                 //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
+                count++;
 
                 // increase flag counts
                 for ( int j = 0; j < 32; j++ ) {
@@ -462,10 +465,12 @@ public final class RWIProcess extends Thread
             }
             // loop as long as we can expect that we should get more results
             final long timeout = System.currentTimeMillis() + waitingtime;
-            while ( ((!feedingIsFinished() && this.addRunning) || this.stack.sizeQueue() > 0)
-                && (this.query.itemsPerPage < 1 || loops++ < this.query.itemsPerPage) ) {
+            while ( ((!feedingIsFinished() && this.addRunning) || this.stack.sizeQueue() > 0) &&
+                   (this.query.itemsPerPage < 1 ||
+                    loops++ < this.query.itemsPerPage ||
+                    (loops > 1000 && this.doubleDomCache.size() > 0)) ) {
                 if ( waitingtime <= 0 ) {
-                    rwi = this.stack.poll();
+                    rwi = this.addRunning ? this.stack.poll(waitingtime) : this.stack.poll();
                 } else {
                     timeoutloop: while ( System.currentTimeMillis() < timeout ) {
                         if ( feedingIsFinished() && this.stack.sizeQueue() == 0 ) {
@@ -478,6 +483,7 @@ public final class RWIProcess extends Thread
                     }
                 }
                 if ( rwi == null ) {
+                    //Log.logWarning("RWIProcess", "terminated takeRWI with rwi == null");
                     break;
                 }
                 if ( !skipDoubleDom ) {
@@ -487,17 +493,20 @@ public final class RWIProcess extends Thread
 
                 // check doubledom
                 final String hosthash = rwi.getElement().hosthash();
-                synchronized ( this.doubleDomCache ) {
-                    m = this.doubleDomCache.get(hosthash);
-                    if ( m == null ) {
-                        // first appearance of dom. we create an entry to signal that one of that domain was already returned
-                        m = new WeakPriorityBlockingQueue<WordReferenceVars>((this.query.specialRights)
-                                ? maxDoubleDomSpecial
-                                : maxDoubleDomAll);
-                        this.doubleDomCache.put(hosthash, m);
-                        return rwi;
+                m = this.doubleDomCache.get(hosthash);
+                if (m == null) {
+                    synchronized ( this.doubleDomCache ) {
+                        m = this.doubleDomCache.get(hosthash);
+                        if ( m == null ) {
+                            // first appearance of dom. we create an entry to signal that one of that domain was already returned
+                            m = new WeakPriorityBlockingQueue<WordReferenceVars>(this.query.specialRights ? maxDoubleDomSpecial : maxDoubleDomAll);
+                            this.doubleDomCache.put(hosthash, m);
+                            return rwi;
+                        }
+                        // second appearances of dom
+                        m.put(rwi);
                     }
-                    // second appearances of dom
+                } else {
                     m.put(rwi);
                 }
             }
@@ -511,41 +520,47 @@ public final class RWIProcess extends Thread
         // find best entry from all caches
         WeakPriorityBlockingQueue.Element<WordReferenceVars> bestEntry = null;
         WeakPriorityBlockingQueue.Element<WordReferenceVars> o;
-        synchronized ( this.doubleDomCache ) {
-            final Iterator<WeakPriorityBlockingQueue<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
-            while ( i.hasNext() ) {
-                try {
-                    m = i.next();
-                } catch ( final ConcurrentModificationException e ) {
-                    Log.logException(e);
-                    continue; // not the best solution...
-                }
-                if ( m == null ) {
-                    continue;
-                }
-                if ( m.isEmpty() ) {
-                    continue;
-                }
-                if ( bestEntry == null ) {
-                    bestEntry = m.peek();
-                    continue;
-                }
-                o = m.peek();
-                if ( o == null ) {
-                    continue;
-                }
-                if ( o.getWeight() < bestEntry.getWeight() ) {
-                    bestEntry = o;
-                }
+        final Iterator<WeakPriorityBlockingQueue<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
+        while ( i.hasNext() ) {
+            try {
+                m = i.next();
+            } catch ( final ConcurrentModificationException e ) {
+                Log.logException(e);
+                continue; // not the best solution...
+            }
+            if ( m == null ) {
+                continue;
+            }
+            if ( m.isEmpty() ) {
+                continue;
             }
             if ( bestEntry == null ) {
-                return null;
+                bestEntry = m.peek();
+                continue;
             }
-
-            // finally remove the best entry from the doubledom cache
-            m = this.doubleDomCache.get(bestEntry.getElement().hosthash());
-            bestEntry = m.poll();
+            o = m.peek();
+            if ( o == null ) {
+                continue;
+            }
+            if ( o.getWeight() < bestEntry.getWeight() ) {
+                bestEntry = o;
+            }
         }
+        if ( bestEntry == null ) {
+            return null;
+        }
+
+        // finally remove the best entry from the doubledom cache
+        m = this.doubleDomCache.get(bestEntry.getElement().hosthash());
+        bestEntry = m.poll();
+        if (m.sizeAvailable() == 0) {
+            synchronized ( this.doubleDomCache ) {
+                if (m.sizeAvailable() == 0) {
+                    this.doubleDomCache.remove(bestEntry.getElement().hosthash());
+                }
+            }
+        }
+
         return bestEntry;
     }
 
