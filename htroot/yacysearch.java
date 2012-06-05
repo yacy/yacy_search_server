@@ -364,7 +364,7 @@ public class yacysearch {
             // check available memory and clean up if necessary
             if ( !MemoryControl.request(8000000L, false) ) {
                 indexSegment.urlMetadata().clearCache();
-                SearchEventCache.cleanupEvents(true);
+                SearchEventCache.cleanupEvents(false);
             }
 
             final RankingProfile ranking = sb.getRanking();

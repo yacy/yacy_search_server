@@ -343,7 +343,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * @throws IOException
      */
     @Override
-    public ReferenceContainer<ReferenceType> delete(final byte[] termHash) throws IOException {
+    public ReferenceContainer<ReferenceType> remove(final byte[] termHash) throws IOException {
         removeDelayed();
         ReferenceContainer<ReferenceType> c1 = null;
         try {
@@ -354,7 +354,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         if (c1 != null) {
             this.array.delete(termHash);
         }
-        final ReferenceContainer<ReferenceType> c0 = this.ram.delete(termHash);
+        final ReferenceContainer<ReferenceType> c0 = this.ram.remove(termHash);
         if (c1 == null) return c0;
         if (c0 == null) return c1;
         try {
@@ -368,6 +368,22 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                 return (c1.size() > c0.size()) ? c1: c0;
             }
         }
+    }
+
+    @Override
+    public void delete(final byte[] termHash) throws IOException {
+        removeDelayed();
+        ReferenceContainer<ReferenceType> c1 = null;
+        try {
+            c1 = this.array.get(termHash);
+        } catch (final RowSpaceExceededException e2) {
+            Log.logException(e2);
+        }
+        if (c1 != null) {
+            this.array.delete(termHash);
+        }
+        this.ram.delete(termHash);
+        return;
     }
 
     @Override

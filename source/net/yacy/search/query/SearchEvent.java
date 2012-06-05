@@ -82,7 +82,7 @@ public final class SearchEvent
         RESULTLIST;
     }
 
-    public static final int max_results_preparation = 3000;
+    public static final int max_results_preparation = 420000;
 
     // class variables that may be implemented with an abstract class
     private long eventTime;
@@ -118,7 +118,7 @@ public final class SearchEvent
         final int burstMultiwordPercent,
         final boolean deleteIfSnippetFail) {
         if ( MemoryControl.available() < 1024 * 1024 * 100 ) {
-            SearchEventCache.cleanupEvents(true);
+            SearchEventCache.cleanupEvents(false);
         }
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
@@ -300,7 +300,7 @@ public final class SearchEvent
 
         // store this search to a cache so it can be re-used
         if ( MemoryControl.available() < 1024 * 1024 * 100 ) {
-            SearchEventCache.cleanupEvents(true);
+            SearchEventCache.cleanupEvents(false);
         }
         SearchEventCache.put(this.query.id(false), this);
     }

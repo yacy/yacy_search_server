@@ -643,10 +643,10 @@ public final class RWIProcess extends Thread
 
             // check geo coordinates
             double lat, lon;
-            if (this.query.radius > 0.0d && this.query.lat != 0.0d && this.query.lon != 0.0d && (lat = page.lat()) > 0.0d && (lon = page.lon()) > 0.0d) {
+            if (this.query.radius > 0.0d && this.query.lat != 0.0d && this.query.lon != 0.0d && (lat = page.lat()) != 0.0d && (lon = page.lon()) != 0.0d) {
                 double latDelta = this.query.lat - lat;
                 double lonDelta = this.query.lon - lon;
-                double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta) / 2; // pythagoras
+                double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta); // pythagoras
                 if (distance > this.query.radius) {
                     this.sortout++;
                     continue;

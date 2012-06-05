@@ -462,7 +462,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @return the indexContainer if the cache contained the container, null otherwise
      */
     @Override
-    public ReferenceContainer<ReferenceType> delete(final byte[] termHash) {
+    public ReferenceContainer<ReferenceType> remove(final byte[] termHash) {
         // returns the index that had been deleted
         assert this.cache != null;
         if (this.cache == null) return null;
@@ -470,9 +470,18 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     }
 
     @Override
+    public void delete(final byte[] termHash) {
+        // returns the index that had been deleted
+        assert this.cache != null;
+        if (this.cache == null) return;
+        this.cache.remove(new ByteArray(termHash));
+    }
+
+    @Override
     public void removeDelayed(final byte[] termHash, final byte[] urlHashBytes) {
         remove(termHash, urlHashBytes);
     }
+
     @Override
     public boolean remove(final byte[] termHash, final byte[] urlHashBytes) {
         assert this.cache != null;

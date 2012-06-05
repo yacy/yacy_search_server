@@ -1914,7 +1914,7 @@ public final class Switchboard extends serverSwitch
                 for ( final Segment indexSegment : this.indexSegments ) {
                     indexSegment.urlMetadata().clearCache();
                 }
-                SearchEventCache.cleanupEvents(true);
+                SearchEventCache.cleanupEvents(false);
                 this.trail.clear();
             }
 

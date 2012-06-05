@@ -209,7 +209,7 @@ public class Dispatcher {
             // but to avoid race conditions return the results from the deletes
             rc = new ArrayList<ReferenceContainer<WordReference>>(containers.size());
             for (final ReferenceContainer<WordReference> c: containers) {
-                container = this.segment.termIndex().delete(c.getTermHash()); // be aware this might be null!
+                container = this.segment.termIndex().remove(c.getTermHash()); // be aware this might be null!
                 if (container != null && !container.isEmpty()) {
                     if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
                     rc.add(container);

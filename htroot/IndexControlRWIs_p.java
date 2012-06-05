@@ -374,7 +374,7 @@ public class IndexControlRWIs_p
                         index = null;
                     } else {
                         prop.put("result", "Peer " + host + " not found");
-                    }          
+                    }
                 } catch ( final IOException e ) {
                     Log.logException(e);
                 }

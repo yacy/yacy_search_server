@@ -481,7 +481,7 @@ public final class QueryParams {
         return matcher;
     }
 
-    private String idCacheAnon = null, idCache = null;
+    private volatile String idCacheAnon = null, idCache = null;
     final static private char asterisk = '*';
     public String id(final boolean anonymized) {
         if (anonymized) {
@@ -489,55 +489,49 @@ public final class QueryParams {
         } else {
             if (this.idCache != null) return this.idCache;
         }
-
-        // generate a string that identifies a search so results can be re-used in a cache
-        final StringBuilder context = new StringBuilder(120);
-        if (anonymized) {
-            context.append(anonymizedQueryHashes(this.queryHashes));
-            context.append('-');
-            context.append(anonymizedQueryHashes(this.excludeHashes));
-        } else {
-            context.append(hashSet2hashString(this.queryHashes));
-            context.append('-');
-            context.append(hashSet2hashString(this.excludeHashes));
+        synchronized (this) {
+            // do a Double-Checked Locking
+            if (anonymized) {
+                if (this.idCacheAnon != null) return this.idCacheAnon;
+            } else {
+                if (this.idCache != null) return this.idCache;
+            }
+            // generate a string that identifies a search so results can be re-used in a cache
+            final StringBuilder context = new StringBuilder(180);
+            if (anonymized) {
+                context.append(anonymizedQueryHashes(this.queryHashes));
+                context.append('-');
+                context.append(anonymizedQueryHashes(this.excludeHashes));
+            } else {
+                context.append(hashSet2hashString(this.queryHashes));
+                context.append('-');
+                context.append(hashSet2hashString(this.excludeHashes));
+            }
+            //context.append(asterisk);
+            //context.append(this.domType);
+            context.append(asterisk);
+            context.append(this.contentdom).append(asterisk);
+            context.append(this.zonecode).append(asterisk);
+            context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString()))).append(asterisk);
+            context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString())).append(asterisk);
+            context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString())).append(asterisk);
+            context.append(this.sitehash).append(asterisk);
+            context.append(this.siteexcludes).append(asterisk);
+            context.append(this.authorhash).append(asterisk);
+            context.append(this.targetlang).append(asterisk);
+            context.append(this.constraint).append(asterisk);
+            context.append(this.maxDistance).append(asterisk);
+            context.append(this.modifier.s).append(asterisk);
+            context.append(this.lat).append(asterisk).append(this.lon).append(asterisk).append(this.radius).append(asterisk);
+            context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
+            String result = context.toString();
+            if (anonymized) {
+                this.idCacheAnon = result;
+            } else {
+                this.idCache = result;
+            }
+            return result;
         }
-        //context.append(asterisk);
-        //context.append(this.domType);
-        context.append(asterisk);
-        context.append(this.contentdom);
-        context.append(asterisk);
-        context.append(this.zonecode);
-        context.append(asterisk);
-        context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString())));
-        context.append(asterisk);
-        context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString()));
-        context.append(asterisk);
-        context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString()));
-        context.append(asterisk);
-        context.append(this.sitehash);
-        context.append(asterisk);
-        context.append(this.siteexcludes);
-        context.append(asterisk);
-        context.append(this.authorhash);
-        context.append(asterisk);
-        context.append(this.targetlang);
-        context.append(asterisk);
-        context.append(this.constraint);
-        context.append(asterisk);
-        context.append(this.maxDistance);
-        context.append(asterisk);
-        context.append(this.modifier.s);
-        context.append(asterisk);
-        context.append(this.lat).append(asterisk).append(this.lon).append(asterisk).append(this.radius);
-        context.append(asterisk);
-        context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
-        String result = context.toString();
-        if (anonymized) {
-            this.idCacheAnon = result;
-        } else {
-            this.idCache = result;
-        }
-        return result;
     }
 
     /**

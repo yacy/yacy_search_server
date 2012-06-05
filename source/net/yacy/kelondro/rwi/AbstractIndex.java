@@ -94,6 +94,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         return c;
     }
 
+    @Override
     public synchronized TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(final byte[] startHash, final boolean rot, final boolean excludePrivate, int count) throws IOException {
         // creates a set of indexContainers
         // this does not use the cache
@@ -212,7 +213,6 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             final HandleSet urlselection,
             final ReferenceFactory<ReferenceType> termFactory,
             final int maxDistance) throws RowSpaceExceededException {
-
         return new TermSearch<ReferenceType>(this, queryHashes, excludeHashes, urlselection, termFactory, maxDistance);
     }
 

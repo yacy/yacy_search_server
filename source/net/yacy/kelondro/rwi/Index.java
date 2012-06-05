@@ -105,12 +105,20 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
 	public ReferenceContainer<ReferenceType> get(byte[] termHash, HandleSet referenceselection) throws IOException;
 
     /**
-     * delete all references for a word
+     * remove all references for a word
      * @param termHash
      * @return the deleted references
      * @throws IOException
      */
-	public ReferenceContainer<ReferenceType> delete(byte[] termHash) throws IOException;
+    public ReferenceContainer<ReferenceType> remove(byte[] termHash) throws IOException;
+
+    /**
+     * delete all references for a word
+     * the difference to 'remove' is, that the removed element is not returned
+     * @param termHash
+     * @throws IOException
+     */
+    public void delete(byte[] termHash) throws IOException;
 
 	/**
 	 * remove a specific reference entry
