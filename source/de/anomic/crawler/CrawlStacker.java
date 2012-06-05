@@ -67,7 +67,6 @@ public final class CrawlStacker {
     private final Log log = new Log("STACKCRAWL");
 
     private final WorkflowProcessor<Request>  fastQueue, slowQueue;
-    private long                    dnsMiss;
     private final CrawlQueues       nextQueue;
     private final CrawlSwitchboard  crawler;
     private final Segment           indexSegment;
@@ -89,8 +88,6 @@ public final class CrawlStacker {
         this.crawler = cs;
         this.indexSegment = indexSegment;
         this.peers = peers;
-        //this.dnsHit = 0;
-        this.dnsMiss = 0;
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
         this.domainList = domainList;
@@ -179,7 +176,6 @@ public final class CrawlStacker {
         } else {
             try {
                 this.slowQueue.enQueue(entry);
-                this.dnsMiss++;
             } catch (final InterruptedException e) {
                 Log.logException(e);
             }

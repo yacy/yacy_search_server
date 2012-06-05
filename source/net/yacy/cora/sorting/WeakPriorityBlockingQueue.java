@@ -25,6 +25,7 @@
 
 package net.yacy.cora.sorting;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -39,10 +40,11 @@ import java.util.concurrent.TimeUnit;
  * If the queue gets larger that the given maxsize, then elements from the tail of the queue
  * are drained (deleted).
  */
-public class WeakPriorityBlockingQueue<E> {
+public class WeakPriorityBlockingQueue<E> implements Serializable {
 
-    
-    private final TreeSet<Element<E>>   queue;    // object within the stack, ordered using a TreeSet
+	private static final long serialVersionUID = 4573442576760691887L;
+
+	private final TreeSet<Element<E>>   queue;    // object within the stack, ordered using a TreeSet
     private final Semaphore    enqueued; // semaphore for elements in the stack
     private final ArrayList<Element<E>> drained;  // objects that had been on the stack but had been removed
     protected int maxsize;
@@ -274,7 +276,7 @@ public class WeakPriorityBlockingQueue<E> {
         return this.drained.iterator();
     }
 
-    public interface Element<E> {
+    public interface Element<E> extends Serializable {
         public long getWeight();
         public E getElement();
         public boolean equals(Element<E> o);
@@ -284,9 +286,11 @@ public class WeakPriorityBlockingQueue<E> {
         public String toString();
     }
     
-    protected abstract static class AbstractElement<E> implements Element<E> {
+    protected abstract static class AbstractElement<E> implements Element<E>, Serializable {
 
-        public long weight;
+		private static final long serialVersionUID = -7026597258248026566L;
+
+		public long weight;
         public E element;
         
         public long getWeight() {
@@ -318,7 +322,9 @@ public class WeakPriorityBlockingQueue<E> {
      */
     public static class NaturalElement<E> extends AbstractElement<E> implements Element<E>, Comparable<NaturalElement<E>>, Comparator<NaturalElement<E>> {
 
-        public NaturalElement(final E element, final long weight) {
+		private static final long serialVersionUID = 6816543012966928794L;
+
+		public NaturalElement(final E element, final long weight) {
             this.element = element;
             this.weight = weight;
         }
@@ -347,7 +353,9 @@ public class WeakPriorityBlockingQueue<E> {
      */
     public static class ReverseElement<E> extends AbstractElement<E> implements Element<E>, Comparable<ReverseElement<E>>, Comparator<ReverseElement<E>> {
 
-        public ReverseElement(final E element, final long weight) {
+		private static final long serialVersionUID = -8166724491837508921L;
+
+		public ReverseElement(final E element, final long weight) {
             this.element = element;
             this.weight = weight;
         }

@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +52,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import de.anomic.crawler.retrieval.Response;
 
-public class OAIListFriendsLoader {
+public class OAIListFriendsLoader implements Serializable {
 
     private static final long serialVersionUID = -8705115274655024604L;
 
@@ -117,7 +118,7 @@ public class OAIListFriendsLoader {
     }
     
     // get a resumption token using a SAX xml parser from am input stream
-    private static class Parser extends DefaultHandler {
+    public static class Parser extends DefaultHandler {
 
         // class variables
         private final StringBuilder buffer;
@@ -161,6 +162,10 @@ public class OAIListFriendsLoader {
          <baseURL id="http://roar.eprints.org/id/eprint/1064">http://oai.repec.openlib.org/</baseURL>
          </BaseURLs>
          */
+        
+        public int getCounter() {
+        	return this.recordCounter;
+        }
 
         public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
             if ("baseURL".equals(tag)) {
