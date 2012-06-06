@@ -1,4 +1,4 @@
-// ProxyIndexingMonitor_p.java 
+// ProxyIndexingMonitor_p.java
 // ---------------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -33,7 +33,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-
 import de.anomic.crawler.Cache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -66,7 +65,7 @@ public class ProxyIndexingMonitor_p {
                 final boolean proxyYaCyOnly = post.containsKey("proxyYacyOnly");
                 env.setConfig(SwitchboardConstants.PROXY_YACY_ONLY, (proxyYaCyOnly) ? true : false);
                 int newProxyPrefetchDepth = post.getInt("proxyPrefetchDepth", 0);
-                if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0; 
+                if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0;
                 if (newProxyPrefetchDepth > 20) newProxyPrefetchDepth = 20; // self protection ?
                 env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
                 final boolean proxyStoreHTCache = post.containsKey("proxyStoreHTCache");
@@ -77,7 +76,7 @@ public class ProxyIndexingMonitor_p {
                 env.setConfig("proxyIndexingLocalText", proxyIndexingLocalText ? true : false);
                 final boolean proxyIndexingLocalMedia = post.containsKey("proxyIndexingLocalMedia");
                 env.setConfig("proxyIndexingLocalMedia", proxyIndexingLocalMedia ? true : false);
-                
+
                 // added proxyCache, proxyCacheSize - Borg-0300
                 // proxyCache - check and create the directory
                 oldProxyCachePath = env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
@@ -90,12 +89,12 @@ public class ProxyIndexingMonitor_p {
                 final File cache = env.getDataPath(SwitchboardConstants.HTCACHE_PATH, oldProxyCachePath);
                 if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
 
-                // proxyCacheSize 
+                // proxyCacheSize
                 oldProxyCacheSize = env.getConfigLong(SwitchboardConstants.PROXY_CACHE_SIZE, 64L);
                 newProxyCacheSize = post.getLong(SwitchboardConstants.PROXY_CACHE_SIZE, 64L);
                 if (newProxyCacheSize < 4) { newProxyCacheSize = 4; }
                 env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
-                Cache.setMaxCacheSize(newProxyCacheSize * 1024 * 1024);                
+                Cache.setMaxCacheSize(newProxyCacheSize * 1024L * 1024L);
 
                 // implant these settings also into the crawling profile for the proxy
                 if (sb.crawler.defaultProxyProfile == null) {
@@ -108,7 +107,7 @@ public class ProxyIndexingMonitor_p {
                     sb.crawler.defaultProxyProfile.put("indexText", proxyIndexingLocalText);
                     sb.crawler.defaultProxyProfile.put("indexMedia", proxyIndexingLocalMedia);
                     sb.crawler.putActive(sb.crawler.defaultProxyProfile.handle().getBytes(), sb.crawler.defaultProxyProfile);
-                    
+
                     prop.put("info", "2");//new proxyPrefetchdepth
                     prop.put("info_message", newProxyPrefetchDepth);
                     prop.put("info_caching", proxyStoreHTCache ? "1" : "0");

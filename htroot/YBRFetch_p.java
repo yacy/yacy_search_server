@@ -28,7 +28,7 @@ public class YBRFetch_p
         final servletProperties prop = new servletProperties();
         final Switchboard sb = (Switchboard) env;
 
-        if ( post == null || !post.containsKey("ghrt4") || MemoryControl.available() < 1024 * 1024 * 1024 ) {
+        if ( post == null || !post.containsKey("ghrt4") || MemoryControl.available() < 1024L * 1024L * 1024L ) {
             return prop;
         }
         final File hostIndexFile = new File(sb.queuesRoot, "hostIndex.blob");

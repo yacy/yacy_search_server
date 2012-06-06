@@ -98,6 +98,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         is.close();
         is = null;
         assert this.index.size() == file.length() / (keylength + idxbytes);
+        trim();
     }
 
     public void trim() {
@@ -415,6 +416,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
             return this.result.get();
         }
 
+        @Override
         public final HandleMap call() throws IOException {
             try {
                 finishloop: while (true) {
@@ -439,7 +441,8 @@ public final class HandleMap implements Iterable<Row.Entry> {
         }
     }
 
-	public Iterator<Row.Entry> iterator() {
+	@Override
+    public Iterator<Row.Entry> iterator() {
 		return rows(true, null);
 	}
 }

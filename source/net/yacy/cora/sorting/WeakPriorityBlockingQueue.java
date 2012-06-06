@@ -12,12 +12,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -72,7 +72,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         this.queue.clear();
         this.enqueued.drainPermits();
     }
-    
+
     /**
      * test if the queue is empty
      * @return true if the queue is empty, false if not
@@ -80,7 +80,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
     public boolean isEmpty() {
         return this.queue.isEmpty() & this.drained.isEmpty();
     }
-    
+
     /**
      * get the number of elements in the queue, waiting to be removed with take() or poll()
      * @return
@@ -91,7 +91,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
 
 
     /**
-     * get the number of elements that had been drained so far and are wainting
+     * get the number of elements that had been drained so far and are waiting
      * in a list to get enumerated with element()
      * @return
      */
@@ -105,9 +105,9 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
      * @return
      */
     public synchronized int sizeAvailable() {
-        return this.queue.size() + this.drained.size();
+        return Math.min(this.maxsize, this.queue.size() + this.drained.size());
     }
-    
+
     /**
      * put a element on the stack using a order of the weight
      * elements that had been on the stack cannot be put in again,
@@ -128,7 +128,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         }
         assert this.queue.size() >= this.enqueued.availablePermits() : "(put) queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
     }
-    
+
     /**
      * return the element with the smallest weight and remove it from the stack
      * @return null if no element is on the queue or the head of the queue
@@ -140,7 +140,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
             return takeUnsafe();
         }
     }
-    
+
     /**
      * Retrieves and removes the head of this queue, waiting if necessary
      * up to the specified wait time if no elements are present on this queue.
@@ -155,7 +155,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
             return takeUnsafe();
         }
     }
-    
+
     /**
      * Retrieves and removes the head of this queue, waiting if no elements are present on this queue.
      * @return the head element from the queue
@@ -167,17 +167,17 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
             return takeUnsafe();
         }
     }
-    
+
     private Element<E> takeUnsafe() {
         final Element<E> element = this.queue.first();
         assert element != null;
         this.queue.remove(element);
-        this.drained.add(element);
+        if (this.drained.size() < this.maxsize) this.drained.add(element);
         assert this.queue.size() >= this.enqueued.availablePermits() : "(take) queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
         return element;
     }
 
-    
+
     /**
      * return the element with the smallest weight, but do not remove it
      * @return null if no element is on the queue or the head of the queue
@@ -186,7 +186,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         if (this.queue.isEmpty()) return null;
         return this.queue.first();
     }
-    
+
     /**
      * all objects that have been returned by poll or take are stored in a back-up list
      * where they can be retrieved afterward. The elements from that list are stored in
@@ -216,7 +216,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
             return this.drained.get(position);
         }
     }
-    
+
     /**
      * retrieve an element from the drained queue but wait until a timeout
      * until returning null when no element will be available within the time
@@ -239,7 +239,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         if (position >= this.drained.size()) return null; // we still don't have that element
         return this.drained.get(position);
     }
-    
+
     /**
      * return the specific amount of entries as they would be retrievable with element()
      * if count is < 0 then all elements are taken
@@ -251,11 +251,11 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         if (count < 0) {
             return list();
         }
-        if (count > sizeAvailable()) throw new RuntimeException("list(" + count + ") exceeded avaiable number of elements (" + sizeAvailable() + ")"); 
+        if (count > sizeAvailable()) throw new RuntimeException("list(" + count + ") exceeded avaiable number of elements (" + sizeAvailable() + ")");
         while (count > this.drained.size()) this.poll();
         return this.drained;
     }
-    
+
     /**
      * return all entries as they would be retrievable with element()
      * @return a list of all elements in the stack
@@ -265,7 +265,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         while (!this.queue.isEmpty()) this.poll();
         return this.drained;
     }
-    
+
     /**
      * iterate over all elements available. All elements that are still in the queue are drained to recorded positions
      * @return an iterator over all drained positions.
@@ -285,22 +285,25 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         @Override
         public String toString();
     }
-    
+
     protected abstract static class AbstractElement<E> implements Element<E>, Serializable {
 
 		private static final long serialVersionUID = -7026597258248026566L;
 
 		public long weight;
         public E element;
-        
+
+        @Override
         public long getWeight() {
             return this.weight;
         }
-        
+
+        @Override
         public E getElement() {
             return this.element;
         }
-        
+
+        @Override
         public boolean equals(Element<E> o) {
             return this.element.equals(o.getElement());
         }
@@ -309,13 +312,13 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         public int hashCode() {
             return this.element.hashCode();
         }
-        
+
         @Override
         public String toString() {
-            return element.toString() + "/" + weight;
+            return this.element.toString() + "/" + this.weight;
         }
     }
-    
+
     /**
      * natural ordering elements, can be used as container of objects <E> in the priority queue
      * the elements with smallest ordering weights are first in the queue when elements are taken
@@ -329,10 +332,12 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
             this.weight = weight;
         }
 
+        @Override
         public int compare(NaturalElement<E> o1, NaturalElement<E> o2) {
             return o1.compareTo(o2);
         }
-        
+
+        @Override
         public int compareTo(NaturalElement<E> o) {
             if (this.element == o.getElement()) return 0;
             if (this.element.equals(o.getElement())) return 0;
@@ -344,9 +349,9 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
             if (o1h < o2h) return -1;
             return 0;
         }
-        
+
     }
-    
+
     /**
      * reverse ordering elements, can be used as container of objects <E> in the priority queue
      * the elements with highest ordering weights are first in the queue when elements are taken
@@ -360,10 +365,12 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
             this.weight = weight;
         }
 
+        @Override
         public int compare(ReverseElement<E> o1, ReverseElement<E> o2) {
             return o1.compareTo(o2);
         }
-        
+
+        @Override
         public int compareTo(ReverseElement<E> o) {
             if (this.element == o.getElement()) return 0;
             if (this.element.equals(o.getElement())) return 0;
@@ -376,7 +383,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
             return 0;
         }
     }
-    
+
     public static void main(String[] args) {
         final WeakPriorityBlockingQueue<String> a = new WeakPriorityBlockingQueue<String>(3);
         //final Element<String> REVERSE_POISON = new ReverseElement<String>("", Long.MIN_VALUE);

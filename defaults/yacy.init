@@ -245,8 +245,8 @@ sessionidNamesFile = defaults/sessionid.names
 proxyCache = DATA/HTCACHE
 
 # the maximum disc cache size for files in Cache in megabytes
-# default: 32 Gigabyte
-proxyCacheSize = 32768
+# default: 4 Gigabyte
+proxyCacheSize = 4096
 
 # a path to the surrogate input directory
 surrogates.in = DATA/SURROGATES/in

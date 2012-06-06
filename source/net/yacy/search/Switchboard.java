@@ -556,7 +556,7 @@ public final class Switchboard extends serverSwitch
             getDataPath(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
         this.log.logInfo("HTCACHE Path = " + this.htCachePath.getAbsolutePath());
         final long maxCacheSize =
-            1024 * 1024 * Long.parseLong(getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
+            1024L * 1024L * Long.parseLong(getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
         Cache.init(this.htCachePath, this.peers.mySeed().hash, maxCacheSize);
 
         // create the surrogates directories

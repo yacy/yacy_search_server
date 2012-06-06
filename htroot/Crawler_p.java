@@ -154,8 +154,14 @@ public class Crawler_p {
                 }
 
                 // remove crawlingFileContent before we record the call
-                final String crawlingFileName = post.get("crawlingFile");
-                final File crawlingFile = (crawlingFileName != null && crawlingFileName.length() > 0) ? new File(crawlingFileName) : null;
+                String crawlingFileName = post.get("crawlingFile");
+                final File crawlingFile;
+                if (crawlingFileName == null || crawlingFileName.length() == 0) {
+                    crawlingFile = null;
+                } else {
+                    if (crawlingFileName.startsWith("file://")) crawlingFileName = crawlingFileName.substring(7);
+                    crawlingFile = new File(crawlingFileName);
+                }
                 if (crawlingFile != null && crawlingFile.exists()) {
                     post.remove("crawlingFile$file");
                 }
@@ -644,7 +650,7 @@ public class Crawler_p {
         prop.put("crawlProfilesShow_list", count);
         prop.put("crawlProfilesShow", count == 0 ? 0 : 1);
 
-        
+
         // return rewrite properties
         return prop;
     }

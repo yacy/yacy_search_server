@@ -128,7 +128,7 @@ public class ArrayStack implements BLOB {
         		Runtime.getRuntime().availableProcessors(), 100,
         		TimeUnit.MILLISECONDS,
         		new LinkedBlockingQueue<Runnable>(),
-        		new NamePrefixThreadFactory(prefix));
+        		new NamePrefixThreadFactory(this.prefix));
 
         // check existence of the heap directory
         if (heapLocation.exists()) {
@@ -183,9 +183,9 @@ public class ArrayStack implements BLOB {
         File f;
         long maxtime = 0;
         for (final String file : files) {
-            if (file.length() >= 22 && file.startsWith(prefix) && file.endsWith(".blob")) {
+            if (file.length() >= 22 && file.charAt(this.prefix.length()) == '.' && file.endsWith(".blob")) {
                try {
-                   d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(prefix.length() + 1, prefix.length() + 18));
+                   d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(this.prefix.length() + 1, this.prefix.length() + 18));
                    time = d.getTime();
                    if (time > maxtime) maxtime = time;
                } catch (final ParseException e) {continue;}
@@ -194,9 +194,9 @@ public class ArrayStack implements BLOB {
 
         // open all blob files
         for (final String file : files) {
-            if (file.length() >= 22 && file.startsWith(prefix) && file.endsWith(".blob")) {
+            if (file.length() >= 22 && file.charAt(this.prefix.length()) == '.' && file.endsWith(".blob")) {
                 try {
-                   d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(prefix.length() + 1, prefix.length() + 18));
+                   d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(this.prefix.length() + 1, this.prefix.length() + 18));
                    f = new File(heapLocation, file);
                    time = d.getTime();
                    if (time == maxtime && !trimall) {

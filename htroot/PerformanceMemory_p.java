@@ -124,7 +124,7 @@ public class PerformanceMemory_p {
             c++;
         }
         prop.put("EcoList", c);
-        prop.putNum("EcoIndexTotalMem", totalmem / (1024 * 1024d));
+        prop.putNum("EcoIndexTotalMem", totalmem / (1024d * 1024d));
 
         // write object cache table
         final Iterator<Map.Entry<String, RAMIndex>> oi = RAMIndex.objects();
@@ -153,7 +153,7 @@ public class PerformanceMemory_p {
             c++;
         }
         prop.put("indexcache", c);
-        prop.putNum("indexcacheTotalMem", totalhitmem / (1024 * 1024d));
+        prop.putNum("indexcacheTotalMem", totalhitmem / (1024d * 1024d));
 
         // write object cache table
         i = Cache.filenames();
@@ -195,10 +195,10 @@ public class PerformanceMemory_p {
             c++;
         }
         prop.put("ObjectList", c);
-        prop.putNum("objectCacheStopGrow", Cache.getMemStopGrow() / (1024 * 1024d));
-        prop.putNum("objectCacheStartShrink", Cache.getMemStartShrink() / (1024 * 1024d));
-        prop.putNum("objectHitCacheTotalMem", totalhitmem / (1024 * 1024d));
-        prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024 * 1024d));
+        prop.putNum("objectCacheStopGrow", Cache.getMemStopGrow() / (1024d * 1024d));
+        prop.putNum("objectCacheStartShrink", Cache.getMemStartShrink() / (1024d * 1024d));
+        prop.putNum("objectHitCacheTotalMem", totalhitmem / (1024d * 1024d));
+        prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024d * 1024d));
 
         // other caching structures
         prop.putNum("namecacheHit.size", Domains.nameCacheHitSize());

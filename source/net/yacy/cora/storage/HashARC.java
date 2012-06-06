@@ -37,13 +37,13 @@ public final class HashARC<K, V> extends SimpleARC<K, V> implements Map<K, V>, I
 
     public HashARC(final int cacheSize) {
         this.cacheSize = cacheSize / 2;
-        super.levelA = Collections.synchronizedMap(new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
+        super.levelA = Collections.synchronizedMap(new LinkedHashMap<K, V>(1, 0.1f, accessOrder) {
             private static final long serialVersionUID = 1L;
             @Override protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
                 return size() > HashARC.this.cacheSize;
             }
         });
-        this.levelB = Collections.synchronizedMap(new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
+        this.levelB = Collections.synchronizedMap(new LinkedHashMap<K, V>(1, 0.1f, accessOrder) {
             private static final long serialVersionUID = 1L;
             @Override protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
                 return size() > HashARC.this.cacheSize;

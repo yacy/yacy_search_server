@@ -109,8 +109,8 @@ public class SnippetProcess {
 
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
-        this.result = new WeakPriorityBlockingQueue<ResultEntry>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
-        this.images = new WeakPriorityBlockingQueue<MediaSnippet>(-1);
+        this.result = new WeakPriorityBlockingQueue<ResultEntry>(Math.max(1000, 10 * query.itemsPerPage())); // this is the result, enriched with snippets, ranked and ordered by ranking
+        this.images = new WeakPriorityBlockingQueue<MediaSnippet>(Math.max(1000, 10 * query.itemsPerPage()));
 
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search

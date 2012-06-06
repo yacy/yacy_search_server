@@ -187,6 +187,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                     }
                 }
             }
+            this.index.trim();
 
             // open the file
             this.file = new BufferedRecords(new Records(tablefile, rowdef.objectsize), this.buffersize);
@@ -594,6 +595,7 @@ public class Table implements Index, Iterable<Row.Entry> {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public boolean put(final Entry row) throws IOException, RowSpaceExceededException {
         assert row != null;
         if (this.file == null || row == null) return true;
@@ -702,6 +704,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public boolean delete(final byte[] key) throws IOException {
         return remove(key) != null;
     }

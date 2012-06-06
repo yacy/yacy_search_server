@@ -45,7 +45,7 @@ public interface Localization {
      * @param locationexact - if true, then only exact matched with the location are returned. if false also partially matching names
      * @return a set of locations, ordered by population (if this information is given)
      */
-    public TreeSet<Location> find(String anyname, boolean locationexact);
+    public TreeSet<GeoLocation> find(String anyname, boolean locationexact);
 
     /**
      * produce a set of location names

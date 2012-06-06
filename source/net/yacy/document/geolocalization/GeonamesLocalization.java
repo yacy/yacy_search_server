@@ -69,7 +69,7 @@ public class GeonamesLocalization implements Localization
         modification date : date of last modification in yyyy-MM-dd format
      */
 
-    private final Map<Integer, Location> id2loc;
+    private final Map<Integer, GeoLocation> id2loc;
     private final TreeMap<StringBuilder, List<Integer>> name2ids;
     private final File file;
 
@@ -77,7 +77,7 @@ public class GeonamesLocalization implements Localization
         // this is a processing of the cities1000.zip file from http://download.geonames.org/export/dump/
 
         this.file = file;
-        this.id2loc = new HashMap<Integer, Location>();
+        this.id2loc = new HashMap<Integer, GeoLocation>();
         this.name2ids =
             new TreeMap<StringBuilder, List<Integer>>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
 
@@ -112,8 +112,8 @@ public class GeonamesLocalization implements Localization
                 for ( final String s : fields[3].split(",") ) {
                     locnames.add(new StringBuilder(s));
                 }
-                final Location c =
-                    new Location(Float.parseFloat(fields[5]), Float.parseFloat(fields[4]), fields[1]);
+                final GeoLocation c =
+                    new GeoLocation(Float.parseFloat(fields[4]), Float.parseFloat(fields[5]), fields[1]);
                 c.setPopulation((int) Long.parseLong(fields[14]));
                 this.id2loc.put(id, c);
                 for ( final StringBuilder name : locnames ) {
@@ -136,7 +136,7 @@ public class GeonamesLocalization implements Localization
     }
 
     @Override
-    public TreeSet<Location> find(final String anyname, final boolean locationexact) {
+    public TreeSet<GeoLocation> find(final String anyname, final boolean locationexact) {
         final Set<Integer> r = new HashSet<Integer>();
         List<Integer> c;
         final StringBuilder an = new StringBuilder(anyname);
@@ -155,9 +155,9 @@ public class GeonamesLocalization implements Localization
                 }
             }
         }
-        final TreeSet<Location> a = new TreeSet<Location>();
+        final TreeSet<GeoLocation> a = new TreeSet<GeoLocation>();
         for ( final Integer e : r ) {
-            final Location w = this.id2loc.get(e);
+            final GeoLocation w = this.id2loc.get(e);
             if ( w != null ) {
                 a.add(w);
             }
