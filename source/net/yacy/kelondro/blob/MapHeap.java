@@ -39,6 +39,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -57,8 +59,8 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class MapHeap implements Map<byte[], Map<String, String>> {
 
-    private BLOB blob;
-    private ARC<byte[], Map<String, String>> cache;
+    private final BLOB blob;
+    private final ARC<byte[], Map<String, String>> cache;
     private final char fillchar;
 
 
@@ -445,11 +447,10 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
      * close the Map table
      */
     public synchronized void close() {
-        this.cache = null;
+        this.cache.clear();
 
         // close file
         if (this.blob != null) this.blob.close(true);
-        this.blob = null;
     }
 
     @Override
@@ -513,6 +514,29 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             final Iterator<byte[]> i = this.blob.keys(true, false);
             while (i.hasNext()) set.add(i.next());
         } catch (final IOException e) {}
+        return set;
+    }
+
+    public final static byte[] POISON_QUEUE_ENTRY = "POISON".getBytes();
+    public BlockingQueue<byte[]> keyQueue(final int size) {
+        final ArrayBlockingQueue<byte[]> set = new ArrayBlockingQueue<byte[]>(size);
+        (new Thread() {
+            @Override
+            public void run() {
+                try {
+                    final Iterator<byte[]> i = MapHeap.this.blob.keys(true, false);
+                    while (i.hasNext())
+                        try {
+                            set.put(i.next());
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                } catch (final IOException e) {}
+                try {
+                    set.put(MapHeap.POISON_QUEUE_ENTRY);
+                } catch (InterruptedException e) {
+                }
+            }}).start();
         return set;
     }
 

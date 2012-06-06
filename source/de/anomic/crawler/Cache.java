@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -47,6 +48,7 @@ import net.yacy.kelondro.blob.Compressor;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -57,7 +59,7 @@ public final class Cache {
     private static final String RESPONSE_HEADER_DB_NAME = "responseHeader.heap";
     private static final String FILE_DB_NAME = "file.array";
 
-    private static Map<byte[], Map<String, String>> responseHeaderDB = null;
+    private static MapHeap responseHeaderDB = null;
     private static Compressor fileDB = null;
     private static ArrayStack fileDBunbuffered = null;
 
@@ -84,12 +86,60 @@ public final class Cache {
         } catch (final IOException e) {
             Log.logException(e);
         }
+        // open the cache file
         try {
             fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, 1024 * 1024 * 2, false);
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new Compressor(fileDBunbuffered, 6 * 1024 * 1024);
         } catch (final IOException e) {
             Log.logException(e);
+        }
+        Log.logInfo("Cache", "initialized cache database responseHeaderDB.size() = " + responseHeaderDB.size() + ", fileDB.size() = " + fileDB.size());
+
+        // clean up the responseHeaderDB which cannot be cleaned the same way as the cache files.
+        // We do this as a concurrent job only once after start-up silently
+        if (responseHeaderDB.size() != fileDB.size()) {
+            Log.logWarning("Cache", "file and metadata size is not equal, starting a cleanup thread...");
+            Thread startupCleanup = new Thread() {
+                @Override
+                public void run() {
+                    // enumerate the responseHeaderDB and find out all entries that are not inside the fileDBunbuffered
+                    BlockingQueue<byte[]> q = responseHeaderDB.keyQueue(1000);
+                    final HandleSet delkeys = new HandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
+                    Log.logInfo("Cache", "started cleanup thread to remove unused cache metadata");
+                    try {
+                        byte[] k;
+                        while (((k = q.take()) != MapHeap.POISON_QUEUE_ENTRY)) {
+                            if (!fileDB.containsKey(k)) try { delkeys.put(k); } catch (RowSpaceExceededException e) { break; }
+                        }
+                    } catch (InterruptedException e) {
+                    } finally {
+                        // delete the collected keys from the metadata
+                        Log.logInfo("Cache", "cleanup thread collected " + delkeys.size() + " unused metadata entries; now deleting them from the file...");
+                        for (byte[] k: delkeys) {
+                            try {
+                                responseHeaderDB.delete(k);
+                            } catch (IOException e) {
+                            }
+                        }
+                    }
+
+                    Log.logInfo("Cache", "running check to remove unused file cache data");
+                    delkeys.clear();
+                    for (byte[] k: fileDB) {
+                        if (!responseHeaderDB.containsKey(k)) try { delkeys.put(k); } catch (RowSpaceExceededException e) { break; }
+                    }
+                    Log.logInfo("Cache", "cleanup thread collected " + delkeys.size() + " unused cache entries; now deleting them from the file...");
+                    for (byte[] k: delkeys) {
+                        try {
+                            fileDB.delete(k);
+                        } catch (IOException e) {
+                        }
+                    }
+                    Log.logInfo("Cache", "terminated cleanup thread; responseHeaderDB.size() = " + responseHeaderDB.size() + ", fileDB.size() = " + fileDB.size());
+                }
+            };
+            startupCleanup.start();
         }
     }
 
@@ -131,9 +181,7 @@ public final class Cache {
      * close the databases
      */
     public static void close() {
-        if (responseHeaderDB instanceof MapHeap) {
-            ((MapHeap) responseHeaderDB).close();
-        }
+        responseHeaderDB.close();
         fileDB.close(true);
     }
 
@@ -156,12 +204,9 @@ public final class Cache {
         hm.putAll(responseHeader);
         hm.put("@@URL", url.toNormalform(true, false));
         try {
-            if (responseHeaderDB instanceof MapHeap) {
-                ((MapHeap) responseHeaderDB).insert(url.hash(), hm);
-            } else {
-                responseHeaderDB.put(url.hash(), hm);
-            }
+            responseHeaderDB.insert(url.hash(), hm);
         } catch (final Exception e) {
+            fileDB.delete(url.hash());
             throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
         if (log.isFine()) log.logFine("stored in cache: " + url.toNormalform(true, false));
@@ -184,11 +229,7 @@ public final class Cache {
         // if not both is there then we do a clean-up
         if (headerExists) try {
             log.logWarning("header but not content of urlhash " + ASCII.String(urlhash) + " in cache; cleaned up");
-            if (responseHeaderDB instanceof MapHeap) {
-                ((MapHeap) responseHeaderDB).delete(urlhash);
-            } else {
-                responseHeaderDB.remove(urlhash);
-            }
+            responseHeaderDB.delete(urlhash);
         } catch (final IOException e) {}
         if (fileExists) try {
             //log.logWarning("content but not header of url " + url.toString() + " in cache; cleaned up");
@@ -209,8 +250,14 @@ public final class Cache {
     public static ResponseHeader getResponseHeader(final byte[] hash) {
 
         // loading data from database
-        Map<String, String> hdb;
-        hdb = responseHeaderDB.get(hash);
+        Map<String, String> hdb = null;
+        try {
+            hdb = responseHeaderDB.get(hash);
+        } catch (IOException e) {
+            return null;
+        } catch (RowSpaceExceededException e) {
+            return null;
+        }
         if (hdb == null) return null;
 
         return new ResponseHeader(null, hdb);
@@ -251,11 +298,7 @@ public final class Cache {
      * @throws IOException
      */
     public static void delete(final byte[] hash) throws IOException {
-        if (responseHeaderDB instanceof MapHeap) {
-            ((MapHeap) responseHeaderDB).delete(hash);
-        } else {
-            responseHeaderDB.remove(hash);
-        }
+        responseHeaderDB.delete(hash);
         fileDB.delete(hash);
     }
 }
