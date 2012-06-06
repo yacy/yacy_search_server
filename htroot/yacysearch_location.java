@@ -28,7 +28,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.geolocalization.Location;
+import net.yacy.document.geolocalization.GeoLocation;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -67,11 +67,11 @@ public class yacysearch_location {
 
             int placemarkCounter = 0;
             if (query.length() > 0 && search_query) {
-                final Set<Location> locations = LibraryProvider.geoLoc.find(query, true);
+                final Set<GeoLocation> locations = LibraryProvider.geoLoc.find(query, true);
                 for (final String qp: query.split(" ")) {
                     locations.addAll(LibraryProvider.geoLoc.find(qp, true));
                 }
-                for (final Location location: locations) {
+                for (final GeoLocation location: locations) {
                     // write for all locations a point to this message
                     prop.put("kml_placemark_" + placemarkCounter + "_location", location.getName());
                     prop.put("kml_placemark_" + placemarkCounter + "_name", location.getName());

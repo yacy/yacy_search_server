@@ -53,7 +53,7 @@ public class OpenGeoDBLocalization implements Localization
 {
 
     private final Map<Integer, String> locTypeHash2locType;
-    private final Map<Integer, Location> id2loc;
+    private final Map<Integer, GeoLocation> id2loc;
     private final Map<Integer, Integer> id2locTypeHash;
     private final TreeMap<StringBuilder, List<Integer>> name2ids;
     private final TreeMap<StringBuilder, List<Integer>> kfz2ids;
@@ -65,7 +65,7 @@ public class OpenGeoDBLocalization implements Localization
 
         this.file = file;
         this.locTypeHash2locType = new HashMap<Integer, String>();
-        this.id2loc = new HashMap<Integer, Location>();
+        this.id2loc = new HashMap<Integer, GeoLocation>();
         this.id2locTypeHash = new HashMap<Integer, Integer>();
         this.name2ids =
             new TreeMap<StringBuilder, List<Integer>>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
@@ -112,7 +112,7 @@ public class OpenGeoDBLocalization implements Localization
                         lat = Float.parseFloat(v[2]);
                         lon = Float.parseFloat(v[3]);
                     }
-                    this.id2loc.put(Integer.parseInt(v[0]), new Location(lon, lat));
+                    this.id2loc.put(Integer.parseInt(v[0]), new GeoLocation(lat, lon));
                 }
                 if ( line.startsWith("geodb_textdata ") ) {
                     line = line.substring(15 + 7);
@@ -126,7 +126,7 @@ public class OpenGeoDBLocalization implements Localization
                         }
                         l.add(id);
                         this.name2ids.put(new StringBuilder(h), l);
-                        final Location loc = this.id2loc.get(id);
+                        final GeoLocation loc = this.id2loc.get(id);
                         if ( loc != null ) {
                             loc.setName(h);
                         }
@@ -200,7 +200,7 @@ public class OpenGeoDBLocalization implements Localization
      * @return
      */
     @Override
-    public TreeSet<Location> find(final String anyname, final boolean locationexact) {
+    public TreeSet<GeoLocation> find(final String anyname, final boolean locationexact) {
         final HashSet<Integer> r = new HashSet<Integer>();
         List<Integer> c;
         final StringBuilder an = new StringBuilder(anyname);
@@ -231,9 +231,9 @@ public class OpenGeoDBLocalization implements Localization
                 r.add(i);
             }
         }
-        final TreeSet<Location> a = new TreeSet<Location>();
+        final TreeSet<GeoLocation> a = new TreeSet<GeoLocation>();
         for ( final Integer e : r ) {
-            final Location w = this.id2loc.get(e);
+            final GeoLocation w = this.id2loc.get(e);
             if ( w != null ) {
                 a.add(w);
             }

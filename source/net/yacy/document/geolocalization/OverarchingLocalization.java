@@ -76,8 +76,8 @@ public class OverarchingLocalization implements Localization {
      * @return a set of locations, ordered by population (if this information is given)
      */
     @Override
-    public TreeSet<Location> find(final String anyname, final boolean locationexact) {
-        final TreeSet<Location> locations = new TreeSet<Location>();
+    public TreeSet<GeoLocation> find(final String anyname, final boolean locationexact) {
+        final TreeSet<GeoLocation> locations = new TreeSet<GeoLocation>();
         for (final Localization service: this.services.values()) {
             locations.addAll(service.find(anyname, locationexact));
         }

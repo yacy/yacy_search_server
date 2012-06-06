@@ -55,7 +55,7 @@ import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
-import net.yacy.document.geolocalization.Location;
+import net.yacy.document.geolocalization.GeoLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -909,12 +909,12 @@ public class yacysearch {
             }
 
             // find geographic info
-            final SortedSet<Location> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
+            final SortedSet<GeoLocation> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
             if ( coordinates == null || coordinates.isEmpty() || startRecord > 0 ) {
                 prop.put("geoinfo", "0");
             } else {
                 int i = 0;
-                for ( final Location c : coordinates ) {
+                for ( final GeoLocation c : coordinates ) {
                     prop.put("geoinfo_loc_" + i + "_lon", Math.round(c.lon() * 10000.0f) / 10000.0f);
                     prop.put("geoinfo_loc_" + i + "_lat", Math.round(c.lat() * 10000.0f) / 10000.0f);
                     prop.put("geoinfo_loc_" + i + "_name", c.getName());
