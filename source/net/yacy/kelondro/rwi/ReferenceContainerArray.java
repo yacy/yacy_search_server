@@ -473,6 +473,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 }
             }
         }
+        references.trim();
         System.out.println("CELL REFERENCE COLLECTION finished");
         return references;
     }

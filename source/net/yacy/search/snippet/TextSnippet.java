@@ -206,10 +206,10 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
                 if (de.anomic.crawler.Cache.has(url.hash())) {
                     // get the sentences from the cache
-                    final Request request = loader.request(url, true, reindexing);
+                    final Request request = loader == null ? null : loader.request(url, true, reindexing);
                     Response response;
                     try {
-                        response = loader == null ? null : loader.load(request, CacheStrategy.CACHEONLY, true);
+                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, true);
                     } catch (IOException e1) {
                         response = null;
                     }

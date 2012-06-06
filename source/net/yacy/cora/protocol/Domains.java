@@ -453,6 +453,7 @@ public class Domains {
             globalHosts = null;
         } else try {
             globalHosts = new KeyList(globalHostsnameCache);
+            Log.logInfo("Domains", "loaded globalHosts cache of hostnames, size = " + globalHosts.size());
         } catch (final IOException e) {
             globalHosts = null;
         }

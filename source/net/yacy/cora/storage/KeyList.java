@@ -76,6 +76,10 @@ public class KeyList implements Iterable<String> {
 
     }
 
+    public int size() {
+        return this.keys.size();
+    }
+
     public boolean contains(final String key) {
         return this.keys.containsKey(key.trim().toLowerCase());
     }
