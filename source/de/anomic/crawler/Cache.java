@@ -143,6 +143,10 @@ public final class Cache {
         }
     }
 
+    public static void commit() {
+    	fileDB.flushAll();
+    }
+    
     /**
      * clear the cache
      */

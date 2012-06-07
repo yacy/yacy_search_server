@@ -335,7 +335,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
         }
     }
 
-    private void flushAll() {
+    public void flushAll() {
         while (!this.buffer.isEmpty()) {
             if (!flushOne()) break;
         }
