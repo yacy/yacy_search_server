@@ -27,6 +27,7 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.ranking.BlockRank;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -37,6 +38,8 @@ public class yacyinteractive {
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+        BlockRank.ensureLoaded();
+        
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
         final String promoteSearchPageGreeting =
                 (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ?

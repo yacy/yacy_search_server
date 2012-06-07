@@ -31,6 +31,7 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.geolocalization.GeoLocation;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.ranking.BlockRank;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -40,7 +41,8 @@ public class yacysearch_location {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-
+        BlockRank.ensureLoaded();
+        
         prop.put("kml", 0);
 
         if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("kml") ||
