@@ -25,6 +25,7 @@
 
 package net.yacy.kelondro.blob;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 /**
  * a mapping from a column name to maps with the value of the columns to the primary keys where the entry exist in the table
  */
-public class MapColumnIndex {
+public class MapColumnIndex implements Serializable {
 
     private static final long serialVersionUID=-424741536889467566L;
 

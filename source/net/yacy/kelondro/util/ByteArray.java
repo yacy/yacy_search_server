@@ -44,12 +44,10 @@ import net.yacy.cora.order.ByteOrder;
 public class ByteArray {
 
     private final byte[] buffer;
-    private final int hash;
 
 
     public ByteArray(final byte[] bb) {
         this.buffer = bb;
-        this.hash = 0;
     }
 
     public int length() {

@@ -272,7 +272,6 @@ public final class RWIProcess extends Thread
                     || pattern.equals("smb://.*")
                     || pattern.equals("file://.*");
             long remaining;
-            int count = 0;
             pollloop: while ( true ) {
                 remaining = timeout - System.currentTimeMillis();
                 if (remaining <= 0) {
@@ -288,8 +287,6 @@ public final class RWIProcess extends Thread
                     break pollloop;
                 }
                 assert (iEntry.urlhash().length == index.row().primaryKeyLength);
-                //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
-                count++;
 
                 // increase flag counts
                 for ( int j = 0; j < 32; j++ ) {

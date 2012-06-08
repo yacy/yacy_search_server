@@ -56,7 +56,8 @@ import net.yacy.search.index.Segment;
 public class BlockRank {
 
     public static BinSearch[] ybrTables = null; // block-rank tables
-
+    private static File rankingPath;
+    private static int count;
 
     /**
      * collect host index information from other peers. All peers in the seed database are asked
@@ -214,6 +215,7 @@ public class BlockRank {
         byte[] hosth = new byte[6];
         String hosths, hostn;
         HostStat hs;
+        ensureLoaded();
         for (int ybr = 0; ybr < ybrTables.length; ybr++) {
             row: for (int i = 0; i < ybrTables[ybr].size(); i++) {
                 hosth = ybrTables[ybr].get(i, hosth);
@@ -240,11 +242,18 @@ public class BlockRank {
      * @param rankingPath
      * @param count
      */
-    public static void loadBlockRankTable(final File rankingPath, final int count) {
-        if (!rankingPath.exists()) return;
+    public static void loadBlockRankTable(final File rankingPath0, final int count0) {
+    	// lazy initialization to save memory during startup phase
+    	rankingPath = rankingPath0;
+    	count = count0;
+    }
+    
+    public static void ensureLoaded() {
+        if (ybrTables != null) return;
         ybrTables = new BinSearch[count];
         String ybrName;
         File f;
+        Log.logInfo("BlockRank", "loading block rank table from " + rankingPath.toString());
         try {
             for (int i = 0; i < count; i++) {
                 ybrName = "YBR-4-" + Digest.encodeHex(i, 2) + ".idx";
@@ -287,6 +296,7 @@ public class BlockRank {
      * @return
      */
     public static int ranking(final byte[] hash) {
+    	ensureLoaded();
         return ranking(hash, ybrTables);
     }
 

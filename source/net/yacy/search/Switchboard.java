@@ -1892,7 +1892,7 @@ public final class Switchboard extends serverSwitch
     }
 
     public int cleanupJobSize() {
-        int c = 0;
+        int c = 1; // "es gibt immer was zu tun"
         if ( (this.crawlQueues.delegatedURL.stackSize() > 1000) ) {
             c++;
         }
@@ -1909,6 +1909,9 @@ public final class Switchboard extends serverSwitch
 
     public boolean cleanupJob() {
         try {
+        	// flush the document compressor cache
+        	Cache.commit();
+        	
             // clear caches if necessary
             if ( !MemoryControl.request(8000000L, false) ) {
                 for ( final Segment indexSegment : this.indexSegments ) {

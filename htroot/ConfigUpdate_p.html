@@ -114,8 +114,9 @@
       </dl>
       </fieldset>
       ::
-      You installed YaCy with a package manager. To update YaCy, use the package manager:<p>
-      Debian: apt-get update &amp;&amp; apt-get install yacy</p>
+      <p>You installed YaCy with a package manager. To update YaCy, use the package manager:</p>
+      <p>manual update:<br/>apt-get update &amp;&amp; apt-get install yacy</p>
+      <p>automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy</p>
       ::
     #(/candeploy)#
     

@@ -59,7 +59,6 @@ public class ImportDump {
         	FileUtils.copy(dump, baos);
         	
         	String s = UTF8.String(baos.toByteArray());
-        	int batchSize = 0;
         	int p, q;
         	String t;
         	loop: while (s.length() > 0) {
@@ -78,11 +77,9 @@ public class ImportDump {
         		s = s.substring(p);
         		//if (batchSize + t.length() >= maxBatch) {
         			statement.executeBatch();
-        			batchSize = 0;
         		//}
     			System.out.println(t);
         		statement.addBatch(t);
-        		batchSize += t.length();
         	}
         	statement.executeBatch();
         } catch (SQLException e) {

@@ -461,7 +461,6 @@ public class SnippetProcess {
             final boolean nav_topics = SnippetProcess.this.query.navigators.equals("all") || SnippetProcess.this.query.navigators.indexOf("topics",0) >= 0;
             try {
                 //System.out.println("DEPLOYED WORKER " + id + " FOR " + this.neededResults + " RESULTS, timeoutd = " + (this.timeout - System.currentTimeMillis()));
-                int loops = 0;
                 while (this.shallrun && System.currentTimeMillis() < this.timeout) {
                     //Log.logInfo("SnippetProcess", "***** timeleft = " + (this.timeout - System.currentTimeMillis()));
                     this.lastLifeSign = System.currentTimeMillis();
@@ -509,7 +508,6 @@ public class SnippetProcess {
                         }
                     }
 
-                    loops++;
                     resultEntry = fetchSnippet(page, solrContent, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
                     if (resultEntry == null)
                      {

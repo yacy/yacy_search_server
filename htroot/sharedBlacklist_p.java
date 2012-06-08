@@ -210,7 +210,6 @@ public class sharedBlacklist_p {
                 prop.put("page", "1"); //result page
                 prop.put("status", STATUS_ENTRIES_ADDED); //list of added Entries
 
-                int count = 0;//couter of added entries
                 PrintWriter pw = null;
                 try {
                     // open the blacklist file
@@ -238,7 +237,6 @@ public class sharedBlacklist_p {
                             // append the item to the file
                             pw.println(newItem);
 
-                            count++;
                             if (Switchboard.urlBlacklist != null) {
                                 final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;
                                 final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
