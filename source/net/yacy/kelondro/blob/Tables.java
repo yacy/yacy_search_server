@@ -70,13 +70,29 @@ public class Tables implements Iterable<String> {
         this.keymaxlen = keymaxlen;
         this.tables = new ConcurrentHashMap<String, BEncodedHeap>();
         final String[] files = this.location.list();
-        String tablename;
         File file;
+        // lazy initialization: do not open the database files here
         for (final String f: files) {
             if (f.endsWith(suffix)) {
                 file = new File(this.location, f);
                 if (file.length() == 0) {
                     file.delete();
+                    continue;
+                }
+            }
+        }
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+        // we did a lazy initialization, but here we must discover all actually existing tables
+        String tablename;
+        File file;
+        final String[] files = this.location.list();
+        for (final String f: files) {
+            if (f.endsWith(suffix)) {
+                file = new File(this.location, f);
+                if (file.length() == 0) {
                     continue;
                 }
                 tablename = f.substring(0, f.length() - suffix.length());
@@ -86,10 +102,7 @@ public class Tables implements Iterable<String> {
                 }
             }
         }
-    }
-
-    @Override
-    public Iterator<String> iterator() {
+        // now the list of tables is enriched, return an iterator
         return this.tables.keySet().iterator();
     }
 
@@ -376,6 +389,7 @@ public class Tables implements Iterable<String> {
             this.i = heap.iterator();
         }
 
+        @Override
         protected Row next0() {
         	Row r;
             while (this.i.hasNext()) {
