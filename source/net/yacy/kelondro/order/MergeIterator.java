@@ -143,14 +143,44 @@ public class MergeIterator<E> implements CloneableIterator<E> {
     public static <A> CloneableIterator<A> cascade(final Collection<CloneableIterator<A>> iterators, final Order<A> c, final Method merger, final boolean up) {
         // this extends the ability to combine two iterators
         // to the ability of combining a set of iterators
-        if (iterators == null) return null;
-        if (iterators.isEmpty()) return null;
+        if (iterators == null || iterators.isEmpty()) return new CloneableIterator<A>(){
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+            @Override
+            public A next() {
+                return null;
+            }
+            @Override
+            public void remove() {
+            }
+            @Override
+            public CloneableIterator<A> clone(Object modifier) {
+                return this;
+            }
+        };
         return cascade(iterators.iterator(), c, merger, up);
     }
 
     private static <A> CloneableIterator<A> cascade(final Iterator<CloneableIterator<A>> iiterators, final Order<A> c, final Method merger, final boolean up) {
-        if (iiterators == null) return null;
-        if (!(iiterators.hasNext())) return null;
+        if (iiterators == null || !(iiterators.hasNext())) return new CloneableIterator<A>(){
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+            @Override
+            public A next() {
+                return null;
+            }
+            @Override
+            public void remove() {
+            }
+            @Override
+            public CloneableIterator<A> clone(Object modifier) {
+                return this;
+            }
+        };
         final CloneableIterator<A> one = iiterators.next();
         if (!(iiterators.hasNext())) return one;
         assert merger != null;
