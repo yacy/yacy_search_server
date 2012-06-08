@@ -302,12 +302,12 @@ public final class Switchboard extends serverSwitch
         initRemoteProxy();
 
         // memory configuration
-        this.useTailCache = getConfigBool("ramcopy", true);
-        if ( MemoryControl.available() > 1024 * 1024 * 1024 * 1 ) {
+        long tableCachingLimit = getConfigLong("tableCachingLimit", 419430400L);
+        if ( MemoryControl.available() > tableCachingLimit ) {
             this.useTailCache = true;
         }
         this.exceed134217727 = getConfigBool("exceed134217727", true);
-        if ( MemoryControl.available() > 1024 * 1024 * 1024 * 2 ) {
+        if ( MemoryControl.available() > 1024L * 1024L * 1024L * 2L ) {
             this.exceed134217727 = true;
         }
 
@@ -1911,6 +1911,7 @@ public final class Switchboard extends serverSwitch
         try {
         	// flush the document compressor cache
         	Cache.commit();
+        	Digest.cleanup(); // don't let caches become permanent memory leaks
         	
             // clear caches if necessary
             if ( !MemoryControl.request(8000000L, false) ) {

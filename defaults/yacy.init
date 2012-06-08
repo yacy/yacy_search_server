@@ -623,10 +623,11 @@ cleanup.failedSearchURLtimeout = 86400000
 javastart_Xmx=Xmx600m
 javastart_Xms=Xms600m
 
-# YaCy is able to use RAM copies of database tables. This needs a lot of RAM
-# To switch copying of file tables int RAM on, use this property
-# this value is automatically set to true, if more than one gigabyte RAM is available
-ramcopy=false
+# YaCy is able to use RAM copies of database tables. This needs a lot of RAM.
+# To switch on copying of file tables int RAM, there must be enough memory
+# The memory that is available at startup time is used to switch the feature on
+# The tableCachingLimit is the amount of free RAM at startup time to switch on the feature
+tableCachingLimit=419430400
 
 # some java versions may be limited to a specific array size
 # of 134217727 entries. To prevent that tables of that size are generated,

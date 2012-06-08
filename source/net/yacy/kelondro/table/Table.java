@@ -93,7 +93,7 @@ public class Table implements Index, Iterable<Row.Entry> {
 
         this.rowdef = rowdef;
         this.buffersize = buffersize;
-        this.minmemremaining = Math.max(400 * 1024 * 1024, MemoryControl.available() / 10);
+        this.minmemremaining = Math.max(200L * 1024L * 1024L, MemoryControl.available() / 10);
         //this.fail = 0;
         // define the taildef, a row like the rowdef but without the first column
         final Column[] cols = new Column[rowdef.columns() - 1];
@@ -123,19 +123,18 @@ public class Table implements Index, Iterable<Row.Entry> {
 
             // initialize index and copy table
             final int  records = Math.max(fileSize, initialSpace);
-            final long neededRAM4table = (records) * ((rowdef.objectsize) + 4L) * 3L;
-            this.table = ((exceed134217727 || neededRAM4table < maxarraylength) &&
-                     (useTailCache && MemoryControl.available() > neededRAM4table + 200 * 1024 * 1024)) ?
+            final long neededRAM4table = 200L * 1024L * 1024L + records * (rowdef.objectsize + rowdef.primaryKeyLength) * 3L / 2L;
+            this.table = ((exceed134217727 || neededRAM4table < maxarraylength) && useTailCache && MemoryControl.available() > neededRAM4table) ?
                     new RowSet(this.taildef, records) : null;
             Log.logInfo("TABLE", "initialization of " + tablefile.getName() + ". table copy: " + ((this.table == null) ? "no" : "yes") + ", available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, needed: " + (neededRAM4table/1024/1024 + 200) + "MB, allocating space for " + records + " entries");
-            final long neededRAM4index = 400 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
-            if (!MemoryControl.request(neededRAM4index, false)) {
+            final long neededRAM4index = 200L * 1024L * 1024L + records * rowdef.primaryKeyLength * 3L / 2L;
+            if (!MemoryControl.request(neededRAM4index, true)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
                 // for the index
-                Log.logSevere("TABLE", tablefile.getName() + ": not enough RAM (" + (MemoryControl.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
+                Log.logSevere("TABLE", tablefile.getName() + ": not enough RAM (" + (MemoryControl.available() / 1024L / 1024L) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
                 this.table = null; System.gc();
-                Log.logSevere("TABLE", tablefile.getName() + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
+                Log.logSevere("TABLE", tablefile.getName() + ": RAM after releasing the table: " + (MemoryControl.available() / 1024L / 1024L) + "MB");
             }
             this.index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, tablefile.getAbsolutePath());
             final HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records, tablefile.getAbsolutePath() + ".errors");
@@ -178,13 +177,13 @@ public class Table implements Index, Iterable<Row.Entry> {
                             this.table = null;
                             break;
                         }
-                        if (abandonTable()) {
-                            this.table = null;
-                            break;
-                        }
                     } else {
                         errors.putUnique(key, i++);
                     }
+                }
+                Runtime.getRuntime().gc();
+                if (abandonTable()) {
+                    this.table = null;
                 }
             }
             this.index.trim();

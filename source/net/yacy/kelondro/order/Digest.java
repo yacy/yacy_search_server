@@ -60,12 +60,19 @@ public class Digest {
     private static ARC<String, byte[]> md5Cache = null;
     static {
         try {
-            md5Cache = new ConcurrentARC<String, byte[]>(md5CacheSize, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()));
+            md5Cache = new ConcurrentARC<String, byte[]>(md5CacheSize, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
         } catch (final OutOfMemoryError e) {
-            md5Cache = new ConcurrentARC<String, byte[]>(1000, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
+            md5Cache = new ConcurrentARC<String, byte[]>(1000, Math.max(2, Runtime.getRuntime().availableProcessors()));
         }
     }
 
+    /**
+     * clean the md5 cache
+     */
+    public static void cleanup() {
+    	md5Cache.clear();
+    }
+    
     public static String encodeHex(final long in, final int length) {
         String s = Long.toHexString(in);
         while (s.length() < length) s = "0" + s;
@@ -114,7 +121,7 @@ public class Digest {
         // generate a hex representation from the md5 of a byte-array
         return encodeHex(encodeMD5Raw(b));
     }
-
+    
     public static byte[] encodeMD5Raw(final String key) {
 
         byte[] h = md5Cache.get(key);

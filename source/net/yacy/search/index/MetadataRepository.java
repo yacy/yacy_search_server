@@ -97,6 +97,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
 
     public void clearCache() {
         if (this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
+        if (this.statsDump != null) this.statsDump.clear();
         this.statsDump = null;
     }
 
