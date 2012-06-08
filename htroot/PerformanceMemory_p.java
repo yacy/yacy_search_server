@@ -61,11 +61,12 @@ public class PerformanceMemory_p {
             if (post.containsKey("gc")) {
                 System.gc();
                 prop.put("gc", "1");
+            } else {
+                MemoryControl.setSimulatedShortStatus(post.containsKey("simulatedshortmemory"));
+                final boolean std = post.containsKey("useStandardmemoryStrategy");
+                env.setConfig("memory.standardStrategy", std);
+                MemoryControl.setStandardStrategy(std);
             }
-            MemoryControl.setSimulatedShortStatus(post.containsKey("simulatedshortmemory"));
-            final boolean std = post.containsKey("useStandardmemoryStrategy");
-            env.setConfig("memory.standardStrategy", std);
-            MemoryControl.setStandardStrategy(std);
         }
 
         prop.put("simulatedshortmemory.checked", MemoryControl.getSimulatedShortStatus() ? 1 : 0);
