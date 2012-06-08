@@ -89,7 +89,6 @@ public class Table implements Index, Iterable<Row.Entry> {
     		boolean useTailCache,
     		final boolean exceed134217727,
     		final boolean warmUp) throws RowSpaceExceededException {
-        useTailCache = true; // fixed for testing
 
         this.rowdef = rowdef;
         this.buffersize = buffersize;

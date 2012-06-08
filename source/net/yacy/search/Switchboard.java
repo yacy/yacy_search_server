@@ -380,7 +380,7 @@ public final class Switchboard extends serverSwitch
                 mySeedFile,
                 redundancy,
                 partitionExponent,
-                this.useTailCache,
+                false,
                 this.exceed134217727);
 
         // initialize index
