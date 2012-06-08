@@ -106,6 +106,7 @@ public class BlockRank {
             this.seed = seed;
         }
 
+        @Override
         public void run() {
             final ReferenceContainerCache<HostReference> partialIndex = Protocol.loadIDXHosts(this.seed);
             if (partialIndex == null || partialIndex.size() == 0) return;
@@ -247,7 +248,7 @@ public class BlockRank {
     	rankingPath = rankingPath0;
     	count = count0;
     }
-    
+
     public static void ensureLoaded() {
         if (ybrTables != null) return;
         ybrTables = new BinSearch[count];
@@ -296,7 +297,6 @@ public class BlockRank {
      * @return
      */
     public static int ranking(final byte[] hash) {
-    	ensureLoaded();
         return ranking(hash, ybrTables);
     }
 

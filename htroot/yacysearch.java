@@ -78,7 +78,6 @@ import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
-import net.yacy.search.ranking.BlockRank;
 import net.yacy.search.ranking.RankingProfile;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.UserDB;
@@ -97,7 +96,6 @@ public class yacysearch {
         final Switchboard sb = (Switchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
 
-        BlockRank.ensureLoaded();
         final boolean searchAllowed =
             sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
 
