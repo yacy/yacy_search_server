@@ -392,17 +392,19 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             this.firstKey = firstKey;
             this.secondKey = secondKey;
             final CloneableIterator<byte[]> i = MapHeap.this.blob.keys(up, firstKey);
-            this.iterator = (rotating) ? new RotateIterator<byte[]>(i, secondKey, MapHeap.this.blob.size()) : i;
+            this.iterator = rotating ? new RotateIterator<byte[]>(i, secondKey, MapHeap.this.blob.size()) : i;
         }
 
         @Override
         public byte[] next() {
+            assert this.iterator != null;
+            if (this.iterator == null) return null;
             return removeFillchar(this.iterator.next());
         }
 
         @Override
         public boolean hasNext() {
-            return this.iterator.hasNext();
+            return this.iterator != null && this.iterator.hasNext();
         }
 
         @Override

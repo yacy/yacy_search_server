@@ -110,7 +110,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
     }
 
     private static final int spread(final int expectedspace) {
-        return Math.min(Runtime.getRuntime().availableProcessors(), Math.max(1, expectedspace / 3000));
+        return Math.min(Runtime.getRuntime().availableProcessors(), Math.max(Runtime.getRuntime().availableProcessors(), expectedspace / 8000));
     }
 
     public final int[] saturation() {

@@ -38,7 +38,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
     private long prevTreshold = 0L;
     private int tresholdCount = 0;
     private boolean proper = true;
-    
+
     public StandardMemoryStrategy() {
     	name = "Standard Memory Strategy";
     	error= false; //since this is the standard implementation we assume always false here
@@ -49,6 +49,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      * @param last time which must be passed since lased gc
      * @param info additional info for log
      */
+    @Override
     protected final synchronized boolean gc(final int last, final String info) { // thq
     	assert last >= 10000; // too many forced GCs will cause bad execution performance
         final long elapsed = System.currentTimeMillis() - lastGC;
@@ -58,8 +59,8 @@ public class StandardMemoryStrategy extends MemoryStrategy {
             System.gc();
             lastGC = System.currentTimeMillis();
             final long after = free();
-            gcs[gcs_pos++] = after - before;
-            if (gcs_pos >= gcs.length) gcs_pos = 0;
+            this.gcs[this.gcs_pos++] = after - before;
+            if (this.gcs_pos >= this.gcs.length) this.gcs_pos = 0;
 
             if (log.isFine()) log.logInfo("[gc] before: " + Formatter.bytesToString(before) +
                                               ", after: " + Formatter.bytesToString(after) +
@@ -80,7 +81,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
     protected final long getAverageGCFree() {
         long x = 0;
         int y = 0;
-        for (final long gc : gcs)
+        for (final long gc : this.gcs)
             if (gc != 0) {
                 x += gc;
                 y++;
@@ -92,14 +93,16 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      * memory that is free without increasing of total memory taken from os
      * @return bytes
      */
+    @Override
     protected final long free() {
-        return runtime.freeMemory();
+        return this.runtime.freeMemory();
     }
 
     /**
      * memory that is available including increasing total memory up to maximum
      * @return bytes
      */
+    @Override
     protected final long available() {
         return maxMemory() - total() + free();
     }
@@ -108,18 +111,20 @@ public class StandardMemoryStrategy extends MemoryStrategy {
 	 * maximum memory the Java virtual will allocate machine; may vary over time in some cases
 	 * @return bytes
 	 */
+    @Override
     protected final long maxMemory()
     {
-    	return runtime.maxMemory();
+    	return this.runtime.maxMemory();
     }
 
 	/**
 	 * currently allocated memory in the Java virtual machine; may vary over time
 	 * @return bytes
 	 */
+    @Override
     protected final long total()
 	{
-		return runtime.totalMemory();
+		return this.runtime.totalMemory();
 	}
 
 	/**
@@ -141,6 +146,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      * @param force specifies whether a GC should be run even in case former GCs didn't provide enough memory
      * @return whether enough memory could be freed (or is free) or not
      */
+    @Override
     protected boolean request(final long size, final boolean force, boolean shortStatus) {
         if (size <= 0) return true;
         final boolean r = request0(size, force);
@@ -181,42 +187,46 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      * memory that is currently bound in objects
      * @return used bytes
      */
+    @Override
     protected final long used() {
         return total() - free();
     }
 
+    @Override
     protected boolean properState() {
-    	return proper;
+    	return this.proper;
     }
 
+    @Override
     protected void resetProperState() {
-    	proper = true;
-    	tresholdCount = 0;
+    	this.proper = true;
+    	this.tresholdCount = 0;
     }
 
     /**
      * set the memory to be available
      */
+    @Override
     protected void setProperMbyte(final long mbyte) {
-    	properMbyte = mbyte;
-    	tresholdCount = 0;
+    	this.properMbyte = mbyte;
+    	this.tresholdCount = 0;
     }
 
     private void checkProper(final long available) {
     	// disable proper state if memory is less than treshold - 4 times, maximum 11 minutes between each detection
-    	if ((available >> 20) < properMbyte) {
+    	if ((available >> 20) < this.properMbyte) {
     		final long t = System.currentTimeMillis();
-    		if(prevTreshold + 11L /* minutes */ * 60000L > t) {
-    			tresholdCount++;
-    			if(tresholdCount > 3 /* occurencies - 1 */) proper = false;
+    		if(this.prevTreshold + 11L /* minutes */ * 60000L > t) {
+    			this.tresholdCount++;
+    			if(this.tresholdCount > 3 /* occurencies - 1 */) this.proper = false;
     		}
-    		else tresholdCount = 1;
+    		else this.tresholdCount = 1;
 
-    		prevTreshold = t;
+    		this.prevTreshold = t;
 
-			log.logInfo("checkProper: below treshold; tresholdCount: " + tresholdCount + "; proper: " + proper);
+			log.logInfo("checkProper: below treshold; tresholdCount: " + this.tresholdCount + "; proper: " + this.proper);
     	}
-    	else if (!proper && (available >> 20) > (properMbyte * 2L)) // we were wrong!
+    	else if (!this.proper && (available >> 20) > (this.properMbyte * 2L)) // we were wrong!
     		resetProperState();
     }
 

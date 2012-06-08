@@ -51,7 +51,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         this.cluster = new RAMIndex[clusterSize];
         this.rowdef = rowdef;
         for (int i = 0; i < clusterSize; i++) {
-            this.cluster[i] = new RAMIndex(name + "." + i, rowdef, 0);
+            this.cluster[i] = null; // lazy initialization, the actual initialization is at accessArray()
         }
     }
 
@@ -69,7 +69,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
     public RAMIndexCluster clone() {
         final RAMIndex[] a = new RAMIndex[this.cluster.length];
         for (int i = 0; i < this.cluster.length; i++) {
-            a[i] = this.cluster[i].clone();
+            a[i] = this.cluster[i] == null ? null : this.cluster[i].clone();
         }
         return new RAMIndexCluster(this.name + ".clone", this.rowdef, a);
     }
@@ -111,8 +111,11 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
     private final RAMIndex accessArray(final int i) {
         RAMIndex r = this.cluster[i];
         if (r == null) synchronized (this.cluster) {
-            r = new RAMIndex(this.name + "." + i, this.rowdef, 0);
-            this.cluster[i] = r;
+            r = this.cluster[i];
+            if (r == null) {
+                r = new RAMIndex(this.name + "." + i, this.rowdef, 0);
+                this.cluster[i] = r;
+            }
         }
         return r;
     }
@@ -295,15 +298,13 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
     @SuppressWarnings("unchecked")
     public final CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) {
         synchronized (this.cluster) {
-            final CloneableIterator<Entry>[] col = new CloneableIterator[this.cluster.length];
-            for (int i = 0; i < this.cluster.length; i++) {
-                if (this.cluster[i] == null) {
-                    col[i] = null;
-                } else {
-                    col[i] = this.cluster[i].rows(up, firstKey);
+            final List<CloneableIterator<Entry>> col = new ArrayList<CloneableIterator<Entry>>(this.cluster.length);
+            for (RAMIndex element : this.cluster) {
+                if (element != null) {
+                    col.add(element.rows(up, firstKey));
                 }
             }
-            return StackIterator.stack(col);
+            return StackIterator.stack(col.toArray(new CloneableIterator[col.size()]));
         }
     }
 

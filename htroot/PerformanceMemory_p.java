@@ -109,14 +109,14 @@ public class PerformanceMemory_p {
             prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
             prop.putNum("EcoList_" + c + "_tableSize", mapx.get(Table.StatKeys.tableSize));
 
-            assert mapx.get(Table.StatKeys.tableKeyMem) != null : mapx;
             String v = mapx.get(Table.StatKeys.tableKeyMem);
             mem = v == null ? 0 : Long.parseLong(v);
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableKeyMem", Formatter.bytesToString(mem));
             prop.put("EcoList_" + c + "_tableKeyChunkSize", mapx.get(Table.StatKeys.tableKeyChunkSize));
 
-            mem = Long.parseLong(mapx.get(Table.StatKeys.tableValueMem));
+            v = mapx.get(Table.StatKeys.tableValueMem);
+            mem = v == null ? 0 : Long.parseLong(v);
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableValueMem", Formatter.bytesToString(mem));
             prop.put("EcoList_" + c + "_tableValueChunkSize", mapx.get(Table.StatKeys.tableValueChunkSize));

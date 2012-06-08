@@ -28,10 +28,10 @@ import net.yacy.cora.order.CloneableIterator;
 
 
 public class StackIterator<E> implements CloneableIterator<E> {
-    
+
     private final CloneableIterator<E> a, b;
     private E na, nb;
-    
+
     public StackIterator(
             final CloneableIterator<E> a,
             final CloneableIterator<E> b) {
@@ -42,57 +42,76 @@ public class StackIterator<E> implements CloneableIterator<E> {
         nextb();
     }
 
+    @Override
     public StackIterator<E> clone(final Object modifier) {
-        return new StackIterator<E>(a.clone(modifier), b.clone(modifier));
+        return new StackIterator<E>(this.a.clone(modifier), this.b.clone(modifier));
     }
-    
+
     private void nexta() {
         try {
-            if ((a != null) && (a.hasNext())) na = a.next(); else na = null;
+            if ((this.a != null) && (this.a.hasNext())) this.na = this.a.next(); else this.na = null;
         } catch (final ConcurrentModificationException e) {
-            na = null;
+            this.na = null;
         }
     }
     private void nextb() {
         try {
-            if ((b != null) && (b.hasNext())) nb = b.next(); else nb = null;
+            if ((this.b != null) && (this.b.hasNext())) this.nb = this.b.next(); else this.nb = null;
         } catch (final ConcurrentModificationException e) {
-            nb = null;
+            this.nb = null;
         }
     }
-    
+
+    @Override
     public boolean hasNext() {
-        return (na != null) || (nb != null);
+        return (this.na != null) || (this.nb != null);
     }
-    
+
+    @Override
     public E next() {
         E s;
-        if (na == null) {
-            s = nb;
+        if (this.na == null) {
+            s = this.nb;
             nextb();
             return s;
         }
-        if (nb == null) {
-            s = na;
+        if (this.nb == null) {
+            s = this.na;
             nexta();
             return s;
         }
         // just stack the Objects
-        s = na;
+        s = this.na;
         nexta();
         return s;
     }
-    
+
+    @Override
     public void remove() {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
     }
-    
+
     @SuppressWarnings("unchecked")
     public static <A> CloneableIterator<A> stack(final CloneableIterator<A>[] iterators) {
         // this extends the ability to combine two iterators
         // to the ability of combining a set of iterators
-        if (iterators == null) return null;
-        if (iterators.length == 0) return null;
+        if (iterators == null || iterators.length == 0) return new CloneableIterator<A>() {
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+            @Override
+            public A next() {
+                return null;
+            }
+            @Override
+            public void remove() {
+            }
+            @Override
+            public CloneableIterator<A> clone(Object modifier) {
+                return null;
+            }
+        };
         if (iterators.length == 1) {
             return iterators[0];
         }
