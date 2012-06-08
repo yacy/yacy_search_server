@@ -82,8 +82,6 @@ public final class SearchEvent
         RESULTLIST;
     }
 
-    public static final int max_results_preparation = 420000;
-
     // class variables that may be implemented with an abstract class
     private long eventTime;
     private QueryParams query;
@@ -147,7 +145,7 @@ public final class SearchEvent
 
         // initialize a ranking process that is the target for data
         // that is generated concurrently from local and global search threads
-        this.rankingProcess = new RWIProcess(this.query, this.order, max_results_preparation, remote);
+        this.rankingProcess = new RWIProcess(this.query, this.order, remote);
 
         // start a local search concurrently
         this.rankingProcess.start();

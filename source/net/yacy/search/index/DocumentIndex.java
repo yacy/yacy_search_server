@@ -45,7 +45,6 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.RWIProcess;
-import net.yacy.search.query.SearchEvent;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.ranking.ReferenceOrder;
 
@@ -223,7 +222,7 @@ public class DocumentIndex extends Segment
         final QueryParams query =
             new QueryParams(querystring, count, null, this, textRankingDefault, "DocumentIndex");
         final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
-        final RWIProcess rankedCache = new RWIProcess(query, order, SearchEvent.max_results_preparation, false);
+        final RWIProcess rankedCache = new RWIProcess(query, order, false);
         rankedCache.start();
 
         // search is running; retrieve results

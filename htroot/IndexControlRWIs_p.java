@@ -731,7 +731,7 @@ public class IndexControlRWIs_p
         final QueryParams query =
             new QueryParams(ASCII.String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
         final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
-        final RWIProcess ranked = new RWIProcess(query, order, Integer.MAX_VALUE, false);
+        final RWIProcess ranked = new RWIProcess(query, order, false);
         ranked.run();
 
         if ( ranked.filteredCount() == 0 ) {

@@ -53,11 +53,11 @@ public class WeakPriorityBlockingQueue<E> {
      * weights that are preferred are returned first when a pop from the stack is made
      * @param maxsize the maximum size of the stack. When the stack exceeds this number, then entries are removed
      */
-    public WeakPriorityBlockingQueue(final int maxsize) {
+    public WeakPriorityBlockingQueue(final int maxsize, boolean drain) {
         // the maxsize is the maximum number of entries in the stack
         // if this is set to -1, the size is unlimited
         this.queue = new TreeSet<Element<E>>();
-        this.drained = new ArrayList<Element<E>>();
+        this.drained = drain ? new ArrayList<Element<E>>() : null;
         this.enqueued = new Semaphore(0);
         this.maxsize = maxsize;
     }
@@ -66,7 +66,7 @@ public class WeakPriorityBlockingQueue<E> {
      * clear the queue
      */
     public synchronized void clear() {
-        this.drained.clear();
+        if (this.drained != null) this.drained.clear();
         this.queue.clear();
         this.enqueued.drainPermits();
     }
@@ -76,7 +76,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @return true if the queue is empty, false if not
      */
     public boolean isEmpty() {
-        return this.queue.isEmpty() & this.drained.isEmpty();
+        return this.queue.isEmpty() & (this.drained == null || this.drained.isEmpty());
     }
 
     /**
@@ -94,7 +94,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @return
      */
     public synchronized int sizeDrained() {
-        return this.drained.size();
+        return this.drained == null ? 0 : this.drained.size();
     }
 
     /**
@@ -103,7 +103,9 @@ public class WeakPriorityBlockingQueue<E> {
      * @return
      */
     public synchronized int sizeAvailable() {
-        return Math.min(this.maxsize, this.queue.size() + this.drained.size());
+        return this.maxsize < 0 ?
+                        this.queue.size() + (this.drained == null ? 0 : this.drained.size()) :
+                        Math.min(this.maxsize, this.queue.size() + (this.drained == null ? 0 : this.drained.size()));
     }
 
     /**
@@ -116,7 +118,7 @@ public class WeakPriorityBlockingQueue<E> {
      */
     public synchronized void put(final Element<E> element) {
         // put the element on the stack
-        if (this.drained.contains(element)) return;
+        if (this.drained != null && this.drained.contains(element)) return;
         if (this.queue.size() == this.maxsize) {
             // remove last elements if stack is too large
             if (this.queue.add(element)) this.queue.remove(this.queue.last());
@@ -170,7 +172,7 @@ public class WeakPriorityBlockingQueue<E> {
         final Element<E> element = this.queue.first();
         assert element != null;
         this.queue.remove(element);
-        if (this.drained.size() < this.maxsize) this.drained.add(element);
+        if (this.drained != null && (this.maxsize == -1 || this.drained.size() < this.maxsize)) this.drained.add(element);
         assert this.queue.size() >= this.enqueued.availablePermits() : "(take) queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
         return element;
     }
@@ -197,6 +199,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @return the element from the recorded position or null if that position is not available
      */
     public Element<E> element(final int position) {
+        if (this.drained == null) return null;
         if (position < this.drained.size()) {
             return this.drained.get(position);
         }
@@ -225,6 +228,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @throws InterruptedException
      */
     public Element<E> element(final int position, long time) throws InterruptedException {
+        if (this.drained == null) return null;
         long timeout = System.currentTimeMillis() + time;
         if (position < this.drained.size()) {
             return this.drained.get(position);
@@ -246,6 +250,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @return a list of elements in the stack
      */
     public synchronized ArrayList<Element<E>> list(final int count) {
+        if (this.drained == null) return null;
         if (count < 0) {
             return list();
         }
@@ -259,6 +264,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @return a list of all elements in the stack
      */
     public synchronized ArrayList<Element<E>> list() {
+        if (this.drained == null) return null;
         // shift all elements
         while (!this.queue.isEmpty()) this.poll();
         return this.drained;
@@ -269,6 +275,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @return an iterator over all drained positions.
      */
     public synchronized Iterator<Element<E>> iterator() {
+        if (this.drained == null) return null;
         // shift all elements to the offstack
         while (!this.queue.isEmpty()) this.poll();
         return this.drained.iterator();
@@ -377,7 +384,7 @@ public class WeakPriorityBlockingQueue<E> {
     }
 
     public static void main(String[] args) {
-        final WeakPriorityBlockingQueue<String> a = new WeakPriorityBlockingQueue<String>(3);
+        final WeakPriorityBlockingQueue<String> a = new WeakPriorityBlockingQueue<String>(3, true);
         //final Element<String> REVERSE_POISON = new ReverseElement<String>("", Long.MIN_VALUE);
         new Thread(){
             @Override

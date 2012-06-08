@@ -44,6 +44,7 @@ import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.lod.SimpleVocabulary;
 import net.yacy.cora.protocol.Scanner;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
@@ -73,7 +74,7 @@ public final class RWIProcess extends Thread
 {
 
     private static final long maxWaitPerResult = 300;
-    private static final int maxDoubleDomAll = 1000, maxDoubleDomSpecial = 10000;
+    private static final int max_results_preparation = 3000, max_results_preparation_special = -1; // -1 means 'no limit'
 
     private final QueryParams query;
     private final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
@@ -109,13 +110,13 @@ public final class RWIProcess extends Thread
     private final ScoreMap<String> filetypeNavigator; // a counter for file types
     private final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies
 
-    public RWIProcess(final QueryParams query, final ReferenceOrder order, final int maxentries, final boolean remote) {
+    public RWIProcess(final QueryParams query, final ReferenceOrder order, final boolean remote) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.addRunning = true;
         this.localSearchInclusion = null;
-        this.stack = new WeakPriorityBlockingQueue<WordReferenceVars>(maxentries);
+        this.stack = new WeakPriorityBlockingQueue<WordReferenceVars>(query.snippetCacheStrategy == null || query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation, false);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
         this.query = query;
         this.order = order;
@@ -499,7 +500,7 @@ public final class RWIProcess extends Thread
                         m = this.doubleDomCache.get(hosthash);
                         if ( m == null ) {
                             // first appearance of dom. we create an entry to signal that one of that domain was already returned
-                            m = new WeakPriorityBlockingQueue<WordReferenceVars>(this.query.specialRights ? maxDoubleDomSpecial : maxDoubleDomAll);
+                            m = new WeakPriorityBlockingQueue<WordReferenceVars>(this.query.snippetCacheStrategy == null || this.query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation, false);
                             this.doubleDomCache.put(hosthash, m);
                             return rwi;
                         }
@@ -552,15 +553,16 @@ public final class RWIProcess extends Thread
 
         // finally remove the best entry from the doubledom cache
         m = this.doubleDomCache.get(bestEntry.getElement().hosthash());
-        bestEntry = m.poll();
-        if (m.sizeAvailable() == 0) {
-            synchronized ( this.doubleDomCache ) {
-                if (m.sizeAvailable() == 0) {
-                    this.doubleDomCache.remove(bestEntry.getElement().hosthash());
+        if (m != null) {
+            bestEntry = m.poll();
+            if (bestEntry != null && m.sizeAvailable() == 0) {
+                synchronized ( this.doubleDomCache ) {
+                    if (m.sizeAvailable() == 0) {
+                        this.doubleDomCache.remove(bestEntry.getElement().hosthash());
+                    }
                 }
             }
         }
-
         return bestEntry;
     }
 

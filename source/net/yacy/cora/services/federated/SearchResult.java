@@ -31,7 +31,7 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 public class SearchResult extends WeakPriorityBlockingQueue<Object> {
 
     public SearchResult(final int maxsize) {
-        super(maxsize);
+        super(maxsize, true);
     }
 
     private static final long serialVersionUID = -4865225874936938082L;
@@ -64,6 +64,7 @@ public class SearchResult extends WeakPriorityBlockingQueue<Object> {
         return this.maxScore;
     }
 
+    @Override
     public String toString() {
         return "{count=" + this.numFound + ", offset=" + this.start + (this.maxScore != null ? ", maxScore=" + this.maxScore : "") + ", docs=" + super.toString() + "}";
     }
