@@ -683,7 +683,7 @@ dc_rights
         final String language = dc_language();
         if (language != null && language.length() > 0) os.write("<dc:language>" + dc_language() + "</dc:language>\n");
         os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(date) + "</dc:date>\n");
-        if (this.lon != 0.0d && this.lat != 0.0d) os.write("<geo:Point><geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat></geo:Point>\n");
+        if (this.lon != 0.0f && this.lat != 0.0f) os.write("<geo:Point><geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat></geo:Point>\n");
         os.write("</record>\n");
     }
 
@@ -784,7 +784,7 @@ dc_rights
             anchors.putAll(doc.getAnchors());
             rss.putAll(doc.getRSS());
             ContentScraper.addAllImages(images, doc.getImages());
-            if (doc.lon() != 0.0d && doc.lat() != 0.0d) { lon = doc.lon(); lat = doc.lat(); }
+            if (doc.lon() != 0.0f && doc.lat() != 0.0f) { lon = doc.lon(); lat = doc.lat(); }
         }
         return new Document(
                 location,
