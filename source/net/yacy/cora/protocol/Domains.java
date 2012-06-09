@@ -610,14 +610,15 @@ public class Domains {
             }
             cacheMiss_Miss++;
 
-
             // do the dns lookup on the dns server
             //if (!matchesList(host, nameCacheNoCachingPatterns)) System.out.println("DNSLOOKUP " + host);
             try {
                 //final long t = System.currentTimeMillis();
-                ip = InetAddress.getByName(host); //TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
+                Thread.currentThread().setName("Domains: DNS resolve of '" + host + "'"); // thread dump show which host is resolved
+                ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
+                //ip = InetAddress.getByName(host); // this makes the DNS request to backbone
                 //.out.println("DNSLOOKUP-*LOOKUP* " + host + ", time = " + (System.currentTimeMillis() - t) + "ms");
-            } catch (final UnknownHostException e) {
+            } catch (final Throwable e) {
                 // add new entries
                 NAME_CACHE_MISS.insertIfAbsent(host, PRESENT);
                 cacheMiss_Insert++;
@@ -625,7 +626,15 @@ public class Domains {
                 return null;
             }
 
-            if (ip != null && !ip.isLoopbackAddress() && !matchesList(host, nameCacheNoCachingPatterns)) {
+            if (ip == null) {
+                // add new entries
+                NAME_CACHE_MISS.insertIfAbsent(host, PRESENT);
+                cacheMiss_Insert++;
+                LOOKUP_SYNC.remove(host);
+                return null;
+            }
+
+            if (!ip.isLoopbackAddress() && !matchesList(host, nameCacheNoCachingPatterns)) {
                 // add new ip cache entries
                 NAME_CACHE_HIT.insertIfAbsent(host, ip);
                 cacheHit_Insert++;
