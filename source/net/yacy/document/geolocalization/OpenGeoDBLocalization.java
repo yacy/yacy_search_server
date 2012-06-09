@@ -52,9 +52,7 @@ import net.yacy.kelondro.logging.Log;
 public class OpenGeoDBLocalization implements Localization
 {
 
-    private final Map<Integer, String> locTypeHash2locType;
     private final Map<Integer, GeoLocation> id2loc;
-    private final Map<Integer, Integer> id2locTypeHash;
     private final TreeMap<StringBuilder, List<Integer>> name2ids;
     private final TreeMap<StringBuilder, List<Integer>> kfz2ids;
     private final Map<String, List<Integer>> predial2ids;
@@ -64,13 +62,9 @@ public class OpenGeoDBLocalization implements Localization
     public OpenGeoDBLocalization(final File file, final boolean lonlat) {
 
         this.file = file;
-        this.locTypeHash2locType = new HashMap<Integer, String>();
         this.id2loc = new HashMap<Integer, GeoLocation>();
-        this.id2locTypeHash = new HashMap<Integer, Integer>();
-        this.name2ids =
-            new TreeMap<StringBuilder, List<Integer>>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-        this.kfz2ids =
-            new TreeMap<StringBuilder, List<Integer>>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+        this.name2ids = new TreeMap<StringBuilder, List<Integer>>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+        this.kfz2ids = new TreeMap<StringBuilder, List<Integer>>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
         this.predial2ids = new HashMap<String, List<Integer>>();
         this.zip2id = new HashMap<String, Integer>();
 
@@ -143,11 +137,13 @@ public class OpenGeoDBLocalization implements Localization
                         id = Integer.parseInt(v[0]);
                         h = removeQuotes(v[2]);
                         final Integer hc = h.hashCode();
-                        final String t = this.locTypeHash2locType.get(hc);
-                        if ( t == null ) {
-                            this.locTypeHash2locType.put(hc, h);
+                        /*
+                        final byte[] tb = this.locTypeHash2locType.get(hc);
+                        if ( tb == null ) {
+                            this.locTypeHash2locType.put(hc, UTF8.getBytes(h));
                         }
                         this.id2locTypeHash.put(id, hc);
+                        */
                     } else if ( v[1].equals("500300000") ) { // PLZ
                         this.zip2id.put(removeQuotes(v[2]), Integer.parseInt(v[0]));
                     } else if ( v[1].equals("500500000") ) { // KFZ-Kennzeichen

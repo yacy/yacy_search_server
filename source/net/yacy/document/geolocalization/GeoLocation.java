@@ -24,10 +24,12 @@ package net.yacy.document.geolocalization;
 
 import java.util.Comparator;
 
+import net.yacy.cora.document.UTF8;
+
 
 public class GeoLocation extends IntegerGeoPoint implements Comparable<GeoLocation>, Comparator<GeoLocation> {
 
-    private String name;
+    private byte[] name;
     private int population;
 
     public GeoLocation(double lat, double lon) {
@@ -38,15 +40,15 @@ public class GeoLocation extends IntegerGeoPoint implements Comparable<GeoLocati
 
     public GeoLocation(double lat, double lon, String name) {
         super(lat, lon);
-        this.name = name;
+        this.name = UTF8.getBytes(name);
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = UTF8.getBytes(name);
     }
 
     public String getName() {
-        return this.name;
+        return UTF8.String(this.name);
     }
 
     public void setPopulation(int population) {
@@ -61,7 +63,7 @@ public class GeoLocation extends IntegerGeoPoint implements Comparable<GeoLocati
     public boolean equals(Object loc) {
         if (!(loc instanceof GeoLocation)) return false;
         if (this.name == null || ((GeoLocation) loc).name == null) return super.equals(loc);
-        return super.equals(loc) && this.name.toLowerCase().equals(((GeoLocation) loc).name.toLowerCase());
+        return super.equals(loc) && this.getName().toLowerCase().equals(((GeoLocation) loc).getName().toLowerCase());
     }
 
     /**

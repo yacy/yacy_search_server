@@ -322,24 +322,13 @@ public final class Switchboard extends serverSwitch
             getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
         this.log.logConfig("HTDOCS Path:    " + this.htDocsPath.toString());
         this.workPath = getDataPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
+        this.workPath.mkdirs();
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         this.dictionariesPath =
             getDataPath(
                 SwitchboardConstants.DICTIONARY_SOURCE_PATH,
                 SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
         this.log.logConfig("Dictionaries Path:" + this.dictionariesPath.toString());
-
-        // init global host name cache
-        this.workPath.mkdirs();
-        Domains.init(new File(this.workPath, "globalhosts.list"));
-
-        // init sessionid name file
-        final String sessionidNamesFile = getConfig("sessionidNamesFile", "defaults/sessionid.names");
-        this.log.logConfig("Loading sessionid file " + sessionidNamesFile);
-        MultiProtocolURI.initSessionIDNames(FileUtils.loadList(new File(getAppPath(), sessionidNamesFile)));
-
-        // init tables
-        this.tables = new WorkTables(this.workPath);
 
         // init libraries
         this.log.logConfig("initializing libraries");
@@ -349,6 +338,17 @@ public final class Switchboard extends serverSwitch
                 LibraryProvider.initialize(Switchboard.this.dictionariesPath);
             }
         }.start();
+
+        // init global host name cache
+        Domains.init(new File(this.workPath, "globalhosts.list"));
+
+        // init sessionid name file
+        final String sessionidNamesFile = getConfig("sessionidNamesFile", "defaults/sessionid.names");
+        this.log.logConfig("Loading sessionid file " + sessionidNamesFile);
+        MultiProtocolURI.initSessionIDNames(FileUtils.loadList(new File(getAppPath(), sessionidNamesFile)));
+
+        // init tables
+        this.tables = new WorkTables(this.workPath);
 
         // set a high maximum cache size to current size; this is adopted later automatically
         final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
