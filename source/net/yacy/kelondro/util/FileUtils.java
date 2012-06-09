@@ -47,6 +47,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -506,6 +507,14 @@ public final class FileUtils
         }
     }
 
+    public static ConcurrentHashMap<String, byte[]> loadMapB(final File f) {
+        ConcurrentHashMap<String, String> m = loadMap(f);
+        if (m == null) return null;
+        ConcurrentHashMap<String, byte[]> mb = new ConcurrentHashMap<String, byte[]>();
+        for (Map.Entry<String, String> e: m.entrySet()) mb.put(e.getKey(), UTF8.getBytes(e.getValue()));
+        return mb;
+    }
+
     public static void saveMap(final File file, final Map<String, String> props, final String comment) {
         PrintWriter pw = null;
         final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
@@ -541,6 +550,12 @@ public final class FileUtils
         } catch ( IOException e ) {
             // ignore
         }
+    }
+
+    public static void saveMapB(final File file, final Map<String, byte[]> props, final String comment) {
+        HashMap<String, String> m = new HashMap<String, String>();
+        for (Map.Entry<String, byte[]> e: props.entrySet()) m.put(e.getKey(), UTF8.String(e.getValue()));
+        saveMap(file, m, comment);
     }
 
     public static Set<String> loadSet(final File file, final int chunksize, final boolean tree)

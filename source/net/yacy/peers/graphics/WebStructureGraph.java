@@ -74,8 +74,8 @@ public class WebStructureGraph
     private final static Log log = new Log("WebStructureGraph");
 
     private final File structureFile;
-    private final TreeMap<String, String> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
-    private final TreeMap<String, String> structure_new;
+    private final TreeMap<String, byte[]> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    private final TreeMap<String, byte[]> structure_new;
     private final BlockingQueue<leanrefObject> publicRefDNSResolvingQueue;
     private final PublicRefDNSResolvingProcess publicRefDNSResolvingWorker;
 
@@ -93,35 +93,36 @@ public class WebStructureGraph
     }
 
     public WebStructureGraph(final File structureFile) {
-        this.structure_old = new TreeMap<String, String>();
-        this.structure_new = new TreeMap<String, String>();
+        this.structure_old = new TreeMap<String, byte[]>();
+        this.structure_new = new TreeMap<String, byte[]>();
         this.structureFile = structureFile;
         this.publicRefDNSResolvingQueue = new LinkedBlockingQueue<leanrefObject>();
 
         // load web structure
-        Map<String, String> loadedStructure;
+        Map<String, byte[]> loadedStructureB;
         try {
-            loadedStructure =
+            loadedStructureB =
                 (this.structureFile.exists())
-                    ? FileUtils.loadMap(this.structureFile)
-                    : new TreeMap<String, String>();
+                    ? FileUtils.loadMapB(this.structureFile)
+                    : new TreeMap<String, byte[]>();
         } catch ( final OutOfMemoryError e ) {
-            loadedStructure = new TreeMap<String, String>();
+            loadedStructureB = new TreeMap<String, byte[]>();
         }
-        if ( loadedStructure != null ) {
-            this.structure_old.putAll(loadedStructure);
+        if ( loadedStructureB != null ) {
+            this.structure_old.putAll(loadedStructureB);
         }
 
         // delete out-dated entries in case the structure is too big
         if ( this.structure_old.size() > maxhosts ) {
             // fill a set with last-modified - dates of the structure
             final TreeSet<String> delset = new TreeSet<String>();
-            String key, value;
-            for ( final Map.Entry<String, String> entry : this.structure_old.entrySet() ) {
+            String key;
+            byte[] value;
+            for ( final Map.Entry<String, byte[]> entry : this.structure_old.entrySet() ) {
                 key = entry.getKey();
                 value = entry.getValue();
-                if ( value.length() >= 8 ) {
-                    delset.add(value.substring(0, 8) + key);
+                if ( value != null && value.length >= 8 ) {
+                    delset.add(UTF8.String(value).substring(0, 8) + key);
                 }
             }
             int delcount = this.structure_old.size() - (maxhosts * 9 / 10);
@@ -271,7 +272,7 @@ public class WebStructureGraph
     public StructureEntry outgoingReferences(final String hosthash) {
         // returns a map with a hosthash(String):refcount(Integer) relation
         assert hosthash.length() == 6;
-        SortedMap<String, String> tailMap;
+        SortedMap<String, byte[]> tailMap;
         Map<String, Integer> h = new HashMap<String, Integer>();
         String hostname = "";
         String date = "";
@@ -282,7 +283,7 @@ public class WebStructureGraph
                 final String key = tailMap.firstKey();
                 if ( key.startsWith(hosthash) ) {
                     hostname = key.substring(7);
-                    ref = tailMap.get(key);
+                    ref = UTF8.String(tailMap.get(key));
                     date = ref.substring(0, 8);
                     h = refstr2map(ref);
                 }
@@ -293,7 +294,7 @@ public class WebStructureGraph
             if ( !tailMap.isEmpty() ) {
                 final String key = tailMap.firstKey();
                 if ( key.startsWith(hosthash) ) {
-                    ref = tailMap.get(key);
+                    ref = UTF8.String(tailMap.get(key));
                     if ( hostname.length() == 0 ) {
                         hostname = key.substring(7);
                     }
@@ -533,14 +534,14 @@ public class WebStructureGraph
         if ( hosthash == null || hosthash.length() != 6 ) {
             return 0;
         }
-        SortedMap<String, String> tailMap;
+        SortedMap<String, byte[]> tailMap;
         int c = 0;
         synchronized ( this.structure_old ) {
             tailMap = this.structure_old.tailMap(hosthash);
             if ( !tailMap.isEmpty() ) {
                 final String key = tailMap.firstKey();
                 if ( key.startsWith(hosthash) ) {
-                    c = refstr2count(tailMap.get(key));
+                    c = refstr2count(UTF8.String(tailMap.get(key)));
                 }
             }
         }
@@ -549,7 +550,7 @@ public class WebStructureGraph
             if ( !tailMap.isEmpty() ) {
                 final String key = tailMap.firstKey();
                 if ( key.startsWith(hosthash) ) {
-                    c += refstr2count(tailMap.get(key));
+                    c += refstr2count(UTF8.String(tailMap.get(key)));
                 }
             }
         }
@@ -559,7 +560,7 @@ public class WebStructureGraph
     public String hostHash2hostName(final String hosthash) {
         // returns the host as string, null if unknown
         assert hosthash.length() == 6;
-        SortedMap<String, String> tailMap;
+        SortedMap<String, byte[]> tailMap;
         synchronized ( this.structure_old ) {
             tailMap = this.structure_old.tailMap(hosthash);
             if ( !tailMap.isEmpty() ) {
@@ -630,15 +631,15 @@ public class WebStructureGraph
 
         // store the map back to the structure
         synchronized ( this.structure_new ) {
-            this.structure_new.put(hosthash + "," + url.getHost(), map2refstr(refs));
+            this.structure_new.put(hosthash + "," + url.getHost(), UTF8.getBytes(map2refstr(refs)));
         }
     }
 
-    private static void joinStructure(final TreeMap<String, String> into, final TreeMap<String, String> from) {
-        for ( final Map.Entry<String, String> e : from.entrySet() ) {
+    private static void joinStructure(final TreeMap<String, byte[]> into, final TreeMap<String, byte[]> from) {
+        for ( final Map.Entry<String, byte[]> e : from.entrySet() ) {
             if ( into.containsKey(e.getKey()) ) {
-                final Map<String, Integer> s0 = refstr2map(into.get(e.getKey()));
-                final Map<String, Integer> s1 = refstr2map(e.getValue());
+                final Map<String, Integer> s0 = refstr2map(UTF8.String(into.get(e.getKey())));
+                final Map<String, Integer> s1 = refstr2map(UTF8.String(e.getValue()));
                 for ( final Map.Entry<String, Integer> r : s1.entrySet() ) {
                     if ( s0.containsKey(r.getKey()) ) {
                         s0.put(r.getKey(), s0.get(r.getKey()).intValue() + r.getValue().intValue());
@@ -646,7 +647,7 @@ public class WebStructureGraph
                         s0.put(r.getKey(), r.getValue().intValue());
                     }
                 }
-                into.put(e.getKey(), map2refstr(s0));
+                into.put(e.getKey(), UTF8.getBytes(map2refstr(s0)));
             } else {
                 into.put(e.getKey(), e.getValue());
             }
@@ -665,8 +666,8 @@ public class WebStructureGraph
         String maxhost = null;
         int refsize, maxref = 0;
         synchronized ( this.structure_old ) {
-            for ( final Map.Entry<String, String> entry : this.structure_old.entrySet() ) {
-                refsize = entry.getValue().length();
+            for ( final Map.Entry<String, byte[]> entry : this.structure_old.entrySet() ) {
+                refsize = entry.getValue().length;
                 if ( refsize > maxref ) {
                     maxref = refsize;
                     maxhost = entry.getKey().substring(7);
@@ -674,8 +675,8 @@ public class WebStructureGraph
             }
         }
         synchronized ( this.structure_new ) {
-            for ( final Map.Entry<String, String> entry : this.structure_new.entrySet() ) {
-                refsize = entry.getValue().length();
+            for ( final Map.Entry<String, byte[]> entry : this.structure_new.entrySet() ) {
+                refsize = entry.getValue().length;
                 if ( refsize > maxref ) {
                     maxref = refsize;
                     maxhost = entry.getKey().substring(7);
@@ -693,23 +694,22 @@ public class WebStructureGraph
         Iterator<StructureEntry>
     {
 
-        private final Iterator<Map.Entry<String, String>> i;
+        private final Iterator<Map.Entry<String, byte[]>> i;
 
         private StructureIterator(final boolean latest) {
-            this.i =
-                ((latest) ? WebStructureGraph.this.structure_new : WebStructureGraph.this.structure_old)
-                    .entrySet()
-                    .iterator();
+            this.i = ((latest) ? WebStructureGraph.this.structure_new : WebStructureGraph.this.structure_old).entrySet().iterator();
         }
 
         @Override
         public StructureEntry next0() {
-            Map.Entry<String, String> entry = null;
-            String dom = null, ref = "";
+            Map.Entry<String, byte[]> entry = null;
+            String dom = null;
+            byte[] ref = null;
+            String refs;
             while ( this.i.hasNext() ) {
                 entry = this.i.next();
                 ref = entry.getValue();
-                if ( (ref.length() - 8) % 10 != 0 ) {
+                if ( (ref.length - 8) % 10 != 0 ) {
                     continue;
                 }
                 dom = entry.getKey();
@@ -721,12 +721,13 @@ public class WebStructureGraph
             if ( entry == null || dom == null ) {
                 return null;
             }
-            assert (ref.length() - 8) % 10 == 0 : "refs = " + ref + ", length = " + ref.length();
+            assert (ref.length - 8) % 10 == 0 : "refs = " + ref + ", length = " + ref.length;
+            refs = UTF8.String(ref);
             return new StructureEntry(
                 dom.substring(0, 6),
                 dom.substring(7),
-                ref.substring(0, 8),
-                refstr2map(ref));
+                refs.substring(0, 8),
+                refstr2map(refs));
         }
     }
 
@@ -772,7 +773,7 @@ public class WebStructureGraph
             synchronized ( this.structure_old ) {
                 if ( this.structure_old.size() > 0 ) {
                     FileUtils
-                        .saveMap(
+                        .saveMapB(
                             this.structureFile,
                             this.structure_old,
                             "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
