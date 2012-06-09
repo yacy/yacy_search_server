@@ -25,7 +25,7 @@ package net.yacy.document.geolocalization;
 import java.util.Comparator;
 
 
-public class GeoLocation extends GeoPoint implements Comparable<GeoLocation>, Comparator<GeoLocation> {
+public class GeoLocation extends IntegerGeoPoint implements Comparable<GeoLocation>, Comparator<GeoLocation> {
 
     private String name;
     private int population;

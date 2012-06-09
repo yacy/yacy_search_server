@@ -22,70 +22,57 @@
 
 package net.yacy.document.geolocalization;
 
-
-public class GeoPoint {
+/**
+ * Geolocation storage may vary using different data structures for the points.
+ * The reason to have different implementation is to save memory for the point storage.
+ * With each version of a point storage comes a accuracy level which can be returned by the object.
+ */
+public interface GeoPoint {
 
     public static final double meter = 90.0d / 1.0e7d; // this is actually the definition of 'meter': 10 million meter shall be the distance from the equator to the pole
 
-    private final long latlon; // using one variable for the coordinate pair saves some space
+    /**
+     * get the latitude of the point
+     * @return
+     */
+    public double lat();
 
-    public GeoPoint(double lat, double lon) {
-        this.latlon = (((long) coord2int(lat)) << 32) | (coord2int(lon));
-    }
+    /**
+     * get the longitude of the point
+     * @return
+     */
+    public double lon();
 
+    /**
+     * get the implementation-dependent accuracy of the latitude
+     * @return
+     */
+    public double accuracyLat();
 
-    public GeoPoint(int lat, int lon) {
-        this.latlon = (((long) coord2int(lat / 1e6d)) << 32) | (coord2int(lon / 1e6d));
-    }
-
-    public double lon() {
-        return int2coord((int) (this.latlon & (Integer.MAX_VALUE)));
-    }
-
-    public double lat() {
-        return int2coord((int) (this.latlon >>> 32));
-    }
-
-    private static final double maxint = new Double(Integer.MAX_VALUE).doubleValue();
-    private static final double upscale = maxint / 360.0;
-
-    private static final int coord2int(double coord) {
-        return (int) ((coord + 180.0) * upscale);
-    }
-
-    private static final double int2coord(int z) {
-        return (z / upscale) - 180.0;
-    }
+    /**
+     * get the implementation-dependent accuracy of the longitude
+     * @return
+     */
+    public double accuracyLon();
 
     /**
      * compute the hash code of a coordinate
      * this produces identical hash codes for locations that are close to each other
      */
     @Override
-    public int hashCode() {
-        return (int) ((this.latlon & Integer.MAX_VALUE) >> 1) + (int) (this.latlon >> 33);
-    }
+    public int hashCode();
 
     /**
      * equality test that is needed to use the class inside HashMap/HashSet
      */
     @Override
-    public boolean equals(final Object o) {
-        if (!(o instanceof GeoPoint)) return false;
-        GeoPoint oo = (GeoPoint) o;
-        return (this.latlon == oo.latlon);
-    }
+    public boolean equals(final Object o);
 
+    /**
+     * printout format of the point
+     * @return
+     */
     @Override
-    public String toString() {
-        return "[" + this.lat() + "," + this.lon() + "]";
-    }
+    public String toString();
 
-    public static void main(String[] args) {
-        double lat = 13.419444d;
-        double lon = 52.548611d;
-        GeoPoint c = new GeoPoint(lat, lon);
-        System.out.println(c.toString() + " #" + c.hashCode());
-        System.out.println("error: lat: " + (Math.abs(c.lat() - lat) / meter) + " meter; lon: " + (Math.abs(c.lon() - lon) / meter) + " meter");
-    }
 }
