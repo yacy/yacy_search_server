@@ -71,7 +71,7 @@ public class Table implements Index, Iterable<Row.Entry> {
 
     // static tracker objects
     private final static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
-    private final static long maxarraylength = 134217727L; // that may be the maximum size of array length in some JVMs
+    private final static long maxarraylength = 134217727L; // (2^27-1) that may be the maximum size of array length in some JVMs
 
     private final long minmemremaining; // if less than this memory is remaininig, the memory copy of a table is abandoned
     private final int buffersize;
@@ -122,7 +122,7 @@ public class Table implements Index, Iterable<Row.Entry> {
 
             // initialize index and copy table
             final int  records = Math.max(fileSize, initialSpace);
-            final long neededRAM4table = 200L * 1024L * 1024L + records * (rowdef.objectsize + rowdef.primaryKeyLength) * 3L / 2L;
+            final long neededRAM4table = 200L * 1024L * 1024L + records * (this.taildef.objectsize + rowdef.primaryKeyLength + 4L) * 3L / 2L;
             this.table = null;
             try {
                 this.table = ((exceed134217727 || neededRAM4table < maxarraylength) &&
@@ -132,13 +132,13 @@ public class Table implements Index, Iterable<Row.Entry> {
             } catch (Throwable e) {
             	this.table = null;
             }
-            Log.logInfo("TABLE", "initialization of " + tablefile.getName() + ". table copy: " + ((this.table == null) ? "no" : "yes") + ", available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, needed: " + (neededRAM4table/1024/1024 + 200) + "MB, allocating space for " + records + " entries");
-            final long neededRAM4index = 200L * 1024L * 1024L + records * rowdef.primaryKeyLength * 3L / 2L;
+            Log.logInfo("TABLE", "initialization of " + tablefile.getName() + ". table copy: " + ((this.table == null) ? "no" : "yes") + ", available RAM: " + (MemoryControl.available() / 1024L / 1024L) + "MB, needed: " + (neededRAM4table / 1024L / 1024L) + "MB, allocating space for " + records + " entries");
+            final long neededRAM4index = 200L * 1024L * 1024L + records * (rowdef.primaryKeyLength + 4L) * 3L / 2L;
             if (!MemoryControl.request(neededRAM4index, true)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
                 // for the index
-                Log.logSevere("TABLE", tablefile.getName() + ": not enough RAM (" + (MemoryControl.available() / 1024L / 1024L) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
+                Log.logSevere("TABLE", tablefile.getName() + ": not enough RAM (" + (MemoryControl.available() / 1024L / 1024L) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024L / 1024L) + "MB)");
                 this.table = null; System.gc();
                 Log.logSevere("TABLE", tablefile.getName() + ": RAM after releasing the table: " + (MemoryControl.available() / 1024L / 1024L) + "MB");
             }
@@ -714,6 +714,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return remove(key) != null;
     }
 
+    @Override
     public synchronized Entry remove(final byte[] key) throws IOException {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();

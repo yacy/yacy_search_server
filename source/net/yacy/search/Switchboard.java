@@ -370,18 +370,6 @@ public final class Switchboard extends serverSwitch
         this.queuesRoot = new File(new File(indexPath, networkName), "QUEUES");
         this.networkRoot.mkdirs();
         this.queuesRoot.mkdirs();
-        final File mySeedFile = new File(this.networkRoot, SeedDB.DBFILE_OWN_SEED);
-        this.peers =
-            new SeedDB(
-                this.networkRoot,
-                "seed.new.heap",
-                "seed.old.heap",
-                "seed.pot.heap",
-                mySeedFile,
-                redundancy,
-                partitionExponent,
-                false,
-                this.exceed134217727);
 
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
@@ -396,6 +384,50 @@ public final class Switchboard extends serverSwitch
                 this.exceed134217727);
         // set the default segment names
         setDefaultSegments();
+
+        // prepare a solr index profile switch list
+        final File solrBackupProfile = new File("defaults/solr.keys.list");
+        final String schemename =
+            getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
+        final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/" + schemename);
+        if ( !solrWorkProfile.exists() ) {
+            FileUtils.copy(solrBackupProfile, solrWorkProfile);
+        }
+        final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile);
+        this.solrScheme = new SolrConfiguration(solrWorkProfile);
+
+        // update the working scheme with the backup scheme. This is necessary to include new features.
+        // new features are always activated by default (if activated in input-backupScheme)
+        this.solrScheme.fill(backupScheme, true);
+
+        // set up the solr interface
+        final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
+        final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
+
+        try {
+            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(
+                (usesolr) ? new SolrShardingConnector(
+                    solrurls,
+                    SolrShardingSelection.Method.MODULO_HOST_MD5,
+                    10000, true) : null);
+        } catch ( final IOException e ) {
+            Log.logException(e);
+            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
+        }
+
+        // initialize network database
+        final File mySeedFile = new File(this.networkRoot, SeedDB.DBFILE_OWN_SEED);
+        this.peers =
+            new SeedDB(
+                this.networkRoot,
+                "seed.new.heap",
+                "seed.old.heap",
+                "seed.pot.heap",
+                mySeedFile,
+                redundancy,
+                partitionExponent,
+                false,
+                this.exceed134217727);
 
         // load domainList
         try {
@@ -633,36 +665,6 @@ public final class Switchboard extends serverSwitch
         this.log.logConfig("Parser: Initializing Mime Type deny list");
         TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
         TextParser.setDenyExtension(getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
-
-        // prepare a solr index profile switch list
-        final File solrBackupProfile = new File("defaults/solr.keys.list");
-        final String schemename =
-            getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
-        final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/" + schemename);
-        if ( !solrWorkProfile.exists() ) {
-            FileUtils.copy(solrBackupProfile, solrWorkProfile);
-        }
-        final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile);
-        this.solrScheme = new SolrConfiguration(solrWorkProfile);
-
-        // update the working scheme with the backup scheme. This is necessary to include new features.
-        // new features are always activated by default (if activated in input-backupScheme)
-        this.solrScheme.fill(backupScheme, true);
-
-        // set up the solr interface
-        final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
-        final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
-
-        try {
-            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(
-                (usesolr) ? new SolrShardingConnector(
-                    solrurls,
-                    SolrShardingSelection.Method.MODULO_HOST_MD5,
-                    10000, true) : null);
-        } catch ( final IOException e ) {
-            Log.logException(e);
-            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
-        }
 
         // start a loader
         this.log.logConfig("Starting Crawl Loader");
@@ -1912,7 +1914,7 @@ public final class Switchboard extends serverSwitch
         	// flush the document compressor cache
         	Cache.commit();
         	Digest.cleanup(); // don't let caches become permanent memory leaks
-        	
+
             // clear caches if necessary
             if ( !MemoryControl.request(8000000L, false) ) {
                 for ( final Segment indexSegment : this.indexSegments ) {
