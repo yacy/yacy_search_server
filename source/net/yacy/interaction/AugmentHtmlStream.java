@@ -216,7 +216,7 @@ public class AugmentHtmlStream {
 		Switchboard sb = Switchboard.getSwitchboard();
 
 		boolean augmented = false;
-		
+
 		try {
 			Log.logInfo("AUGMENTATION", url.getName());
 		} catch (IOException e1) {
@@ -369,7 +369,12 @@ public class AugmentHtmlStream {
 
 					NodeList headchildren = ht.getChildren();
 
-					headchildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interactionparts/interaction.html", requestHeader)));
+					headchildren.add(new org.htmlparser.nodes.TextNode(loadInternal("env/templates/jqueryheader.template", requestHeader)));
+				//	headchildren.add(new org.htmlparser.nodes.TextNode("<script type='text/javascript'>"+loadInternal("interaction/formdata.js", requestHeader)+"</script>"));
+
+				//	headchildren.add(new org.htmlparser.nodes.TextNode("<script type='text/javascript'>"+loadInternal("interaction/interaction_sciety.js", requestHeader)+"</script>"));
+
+					headchildren.add(new org.htmlparser.nodes.TextNode("<script type='text/javascript'>"+loadInternal("interaction/interaction.js", requestHeader)+"</script>"));
 
 					augmented = true;
 
@@ -392,9 +397,13 @@ public class AugmentHtmlStream {
 
 					NodeList bodychildren = bt.getChildren();
 
+
 					bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/Footer.html", requestHeader)));
 
-					bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/OverlayInteraction.html?link="+url.toNormalform(true, false), requestHeader)));
+					// bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/OverlayReview.html?link="+url.toNormalform(true, false), requestHeader)));
+
+					bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/Overlay.html?link="+url.toNormalform(true, false), requestHeader)));
+
 
 					// ADD AUGMENTED INFO
 
