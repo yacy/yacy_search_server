@@ -306,9 +306,13 @@ public final class yacy {
             HTTPClient.setDefaultUserAgent(ClientIdentification.getUserAgent());
             
             // initial fill of the triplestore
-            mkdirIfNeseccary (new File(sb.getConfig("triplestore", new File (dataHome, "DATA/TRIPLESTORE").toString())));
-            if (sb.getConfigBool("triplestore.persistent", false) == true) {
-            	TripleStore.Load(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").toString())+"/local.rdf");
+            File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
+            mkdirIfNeseccary(triplestore);
+            for (String s: triplestore.list()) {
+            	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf")) TripleStore.Load(new File(triplestore, s).getAbsolutePath());
+            }
+            if (sb.getConfigBool("triplestore.persistent", false)) {
+            	TripleStore.Load(new File(triplestore, "local.rdf").getAbsolutePath());
             }
 
             // start main threads
@@ -430,8 +434,9 @@ public final class yacy {
         } finally {
         }
         
-        if (sb.getConfigBool("triplestore.persistent", false) == true) {
-        	TripleStore.Save(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").toString())+"/local.rdf");
+        if (sb.getConfigBool("triplestore.persistent", false)) {
+            File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
+        	TripleStore.Save(new File(triplestore, "local.rdf").getAbsolutePath());
         }
         
         Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");

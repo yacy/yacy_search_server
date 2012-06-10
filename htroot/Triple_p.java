@@ -1,11 +1,13 @@
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.TripleStore;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
 
@@ -69,11 +71,12 @@ public class Triple_p {
 								newurl = d.getProtocol()+"://"+HTTPDemon.getAlternativeResolver().resolve(d.getHost())+d.getPath();
 								System.out.println (newurl);
 							}
+							TripleStore.Load(newurl);
 						} catch (MalformedURLException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							Log.logException(e);
+						} catch (IOException e) {
+							Log.logException(e);
 						}
-						TripleStore.Load (newurl);
 					}					
 
 				}
