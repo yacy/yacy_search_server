@@ -23,6 +23,9 @@ public final class AugmentedBrowsingFilters_p {
 				env.setConfig("augmentation.reparse", "on".equals(post
 						.get("augmentedReparse")) ? true : false);
 				
+				env.setConfig("interaction.overlayinteraction.enabled", "on".equals(post
+						.get("overlayInteraction")) ? true : false);
+				
 //				env.setConfig("augmentation.reparse.adduniqueid", "on".equals(post
 //						.get("augmentedReparseAdduniqueid")) ? true : false);
 //				
@@ -44,6 +47,9 @@ public final class AugmentedBrowsingFilters_p {
 		
 		prop.put("augmentedReparse_checked",
 				env.getConfigBool("augmentation.reparse", true) ? "1" : "0");
+		
+		prop.put("overlayInteraction_checked",
+				env.getConfigBool("interaction.overlayinteraction.enabled", true) ? "1" : "0");
 		
 //		prop.put("augmentedReparseAdduniqueid_checked",
 //				env.getConfigBool("augmentation.reparse.adduniqueid", true) ? "1" : "0");
