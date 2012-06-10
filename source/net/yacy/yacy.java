@@ -136,6 +136,7 @@ public final class yacy {
      * {@link yacy#startup(String, long, long)} method.
      */
     private static Switchboard sb = null;
+	public static String homedir;
 
     /**
     * Starts up the whole application. Sets up all datastructures and starts
@@ -168,6 +169,8 @@ public final class yacy {
 				System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate.");
 				System.exit(-1);
 			}
+			
+			homedir = appHome.toString();
 
             // setting up logging
 			f = new File(dataHome, "DATA/LOG/");

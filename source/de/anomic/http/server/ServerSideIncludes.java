@@ -74,7 +74,7 @@ public class ServerSideIncludes {
         }
     }
 
-    private static void writeContent(String path, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) {
+    public static void writeContent(String path, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) {
         // check if there are arguments in path string
         String args = "";
         final int argpos = path.indexOf('?');

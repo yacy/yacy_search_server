@@ -49,5 +49,7 @@
 	<classpathentry kind="lib" path="lib/commons-compress-1.4.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
+	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
+	<classpathentry kind="lib" path="lib/htmlparser.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

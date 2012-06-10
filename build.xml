@@ -168,6 +168,8 @@
     	<pathelement location="${lib}/commons-logging-1.1.1.jar" />
     	<pathelement location="${lib}/fontbox-1.6.0.jar" />
         <pathelement location="${lib}/geronimo-stax-api_1.0_spec-1.0.1.jar" />
+        <pathelement location="${lib}/htmllexer.jar" />
+        <pathelement location="${lib}/htmlparser.jar" />
         <pathelement location="${lib}/httpclient-4.2.jar" />
         <pathelement location="${lib}/httpcore-4.2.jar" />
         <pathelement location="${lib}/httpmime-4.2.jar" />
