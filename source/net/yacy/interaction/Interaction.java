@@ -17,7 +17,6 @@ import org.apache.http.entity.mime.content.ContentBody;
 
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 
 public class Interaction {
@@ -449,64 +448,23 @@ public static String Contribution(String url, String comment, String from, Strin
 	return "";
 }
 
-public static String Triple(String url, String s, String p, String o) {
-	return Triple (url, s, p, o, "");
-}
-
-public static String Triple(String url, String s, String p, String o, String username) {
+public static String Triple(String url, String s, String p, String o, String from) {
 
 	final Switchboard sb = Switchboard.getSwitchboard();
 
-	if (username != "") {
-		username = "/"+username;
-	}
-
-	Resource r = TripleStore.model.getResource(s+username);
-	Property pr = TripleStore.model.getProperty(p);
-
-	TripleStore.model.removeAll(r, pr, (Resource) null);
-
+	Resource r = TripleStore.model.getResource(s);
+	Property pr = TripleStore.model.createProperty(p);
 
 	r.addProperty(pr, o);
 
 
-	Log.logInfo ("TRIPLESTORE", "PUT "+username+" / "+s+" - "+p+" - "+o);
-
-
 	return "";
-}
-
-public static String TripleGet(String s, String p) {
-	return TripleGet (s, p, "");
-}
-
-public static String TripleGet(String s, String p, String username) {
-
-	final Switchboard sb = Switchboard.getSwitchboard();
-
-	if (username != "") {
-		username = "/"+username;
-	}
-
-	Resource r = TripleStore.model.getResource(s+username);
-	Property pr = TripleStore.model.getProperty(p);
-
-	StmtIterator iter = TripleStore.model.listStatements(r, pr, (Resource) null);
-
-	Log.logInfo ("TRIPLESTORE", "GET "+username+" / "+s+" - "+p+" ... ");
-
-
-	while (iter.hasNext()) {
-		String obj = iter.nextStatement().getObject().toString();
-		Log.logInfo ("TRIPLESTORE", "GET "+username+" / "+s+" - "+p+" - "+obj);
-		return (obj);
-	}
-
-	return "";
-
 }
 
 public static String GetContribution(String url) {
+
+	final Switchboard sb = Switchboard.getSwitchboard();
+
 
 //	Boolean processlocal = false;
 //
