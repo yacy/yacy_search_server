@@ -26,7 +26,10 @@
   <li class="menugroup" id="menugroupInteraction">
     <h3>Interaction</h3>
     <ul class="menu">
-      <li><a href="/AugmentedBrowsing_p.html" class="MenuItemLink">Augmented Browsing</a></li>
+      <li><a href="/AugmentedBrowsing_p.html" class="MenuItemLink lock">Augmented Browsing</a></li>
+      <li><a href="/Autocrawler_p.html" class="MenuItemLink lock">Auto Crawler</a></li>
+      <li><a href="/Feedback_p.html" class="MenuItemLink lock">Feedback</a></li>     
+      <li><a href="/Triplestore_p.html" class="MenuItemLink lock">Triplestore</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupCrawlerControl">
