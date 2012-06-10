@@ -62,7 +62,7 @@ import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.ISO639;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.RWIProcess;
@@ -536,7 +536,7 @@ public class Segment {
                             urlHashs.put(entry.urlhash());
                         } else {
                             url = ue.url();
-                            if (url == null || Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
+                            if (url == null || Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, url)) {
                                 urlHashs.put(entry.urlhash());
                             }
                         }

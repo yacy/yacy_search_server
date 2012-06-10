@@ -96,6 +96,7 @@ import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.peers.graphics.WebStructureGraph.HostReference;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -700,7 +701,7 @@ public final class Protocol
             if ( urlEntry.hash().length != 12 ) {
                 continue; // bad url hash
             }
-            if ( blacklist.isListed(Blacklist.BLACKLIST_SEARCH, urlEntry.url()) ) {
+            if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry) ) {
                 if ( Network.log.isInfo() ) {
                     Network.log.logInfo("remote search: filtered blacklisted url "
                         + urlEntry.url()

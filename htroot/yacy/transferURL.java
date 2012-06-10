@@ -38,7 +38,7 @@ import net.yacy.peers.EventChannel;
 import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
 import de.anomic.crawler.ResultURLs;
@@ -122,8 +122,8 @@ public final class transferURL {
                 }
 
                 // check if the entry is blacklisted
-                if ((blockBlacklist) && (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, lEntry.url()))) {
-                    if (Network.log.isFine()) Network.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                if ((blockBlacklist) && (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, lEntry))) {
+                    Network.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;

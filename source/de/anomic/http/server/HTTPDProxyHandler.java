@@ -84,7 +84,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import de.anomic.crawler.Cache;
@@ -350,7 +350,7 @@ public final class HTTPDProxyHandler {
             // respond a 404 for all AGIS ("all you get is shit") servers
             final String hostlow = host.toLowerCase();
             if (args != null) { path = path + "?" + args; }
-            if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, hostlow, path)) {
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, hostlow, path)) {
                 log.logInfo("AGIS blocking of host '" + hostlow + "'");
                 HTTPDemon.sendRespondError(conProp,countedRespond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
@@ -814,7 +814,7 @@ public final class HTTPDProxyHandler {
             // re-calc the url path
             final String remotePath = (args == null) ? path : (path + "?" + args);
 
-            if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, hostlow, remotePath)) {
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, hostlow, remotePath)) {
                 HTTPDemon.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 log.logInfo("AGIS blocking of host '" + hostlow + "'");
@@ -1243,7 +1243,7 @@ public final class HTTPDProxyHandler {
         // blacklist idea inspired by [AS]:
         // respond a 404 for all AGIS ("all you get is shit") servers
         final String hostlow = host.toLowerCase();
-        if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, hostlow, path)) {
+        if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, hostlow, path)) {
             HTTPDemon.sendRespondError(conProp,clientOut,4,403,null,
                     "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
             log.logInfo("AGIS blocking of host '" + hostlow + "'");

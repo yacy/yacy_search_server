@@ -64,6 +64,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
@@ -621,6 +622,12 @@ public final class RWIProcess extends Thread
             if (this.query.contentdom != Classification.ContentDomain.ALL &&
                 page.url().getContentDomain() != Classification.ContentDomain.ALL &&
                 page.url().getContentDomain() != this.query.contentdom) {
+                this.sortout++;
+                continue;
+            }
+
+            // Check for blacklist
+            if ( Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page) ) {
                 this.sortout++;
                 continue;
             }

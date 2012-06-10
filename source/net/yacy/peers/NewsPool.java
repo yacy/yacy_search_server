@@ -56,7 +56,7 @@ import java.util.Set;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 
 public class NewsPool {
@@ -343,13 +343,13 @@ public class NewsPool {
         if (record.created().getTime() == 0) return;
         final Map<String, String> attributes = record.attributes();
         if (attributes.containsKey("url")){
-            if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, new DigestURI(attributes.get("url")))){
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, new DigestURI(attributes.get("url")))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("url"));
                 return;
             }
         }
         if (attributes.containsKey("startURL")){
-            if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, new DigestURI(attributes.get("startURL")))){
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, new DigestURI(attributes.get("startURL")))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("startURL"));
                 return;
             }
