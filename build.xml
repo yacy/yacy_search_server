@@ -158,6 +158,7 @@
     	<pathelement location="${lib}/activation.jar" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
         <pathelement location="${lib}/apache-solr-solrj-3.6.0.jar" />
+        <pathelement location="${lib}/arq-2.8.7.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-145.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-145.jar" />
     	<pathelement location="${lib}/commons-codec-1.6.jar" />
@@ -174,11 +175,13 @@
         <pathelement location="${lib}/httpcore-4.2.jar" />
         <pathelement location="${lib}/httpmime-4.2.jar" />
         <pathelement location="${lib}/icu4j-core.jar" />
+        <pathelement location="${lib}/iri-0.8.jar" />
         <pathelement location="${lib}/J7Zip-modified.jar" />
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
     	<pathelement location="${lib}/jcifs-1.3.15.jar" />
     	<pathelement location="${lib}/jcl-over-slf4j-1.6.1.jar" />
     	<pathelement location="${lib}/jempbox-1.6.0" />
+    	<pathelement location="${lib}/jena-2.6.4.jar" />
     	<pathelement location="${lib}/jsch-0.1.42.jar" />
     	<pathelement location="${lib}/json-simple-1.1.jar" />
     	<pathelement location="${lib}/log4j-1.2.16.jar" />
@@ -187,6 +190,7 @@
         <pathelement location="${lib}/pdfbox-1.6.0.jar" />
     	<pathelement location="${lib}/poi-3.6-20091214.jar" />
     	<pathelement location="${lib}/poi-scratchpad-3.6-20091214.jar" />
+    	<pathelement location="${lib}/sax-2.0.1.jar" />
         <pathelement location="${lib}/servlet-api.jar" />
         <pathelement location="${lib}/slf4j-api-1.6.1.jar" />
         <pathelement location="${lib}/slf4j-jdk14-1.6.1.jar" />
@@ -246,6 +250,8 @@
     <path id="project.class.path">
       <pathelement location="${build}" />
       <pathelement location="${htroot}" />
+      	<pathelement location="${lib}/arq-2.8.7.jar" />
+      	<pathelement location="${lib}/jena-2.6.4.jar" />
     </path>
 
     <!-- compile htroot, htroot/yacy and htroot/htdocsdefault -->

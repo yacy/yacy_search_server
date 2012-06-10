@@ -386,7 +386,7 @@ public class AugmentHtmlStream {
 
 					bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/Footer.html", requestHeader)));
 
-					bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/OverlayInteraction.html", requestHeader)));
+					bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/OverlayInteraction.html?link="+url.toNormalform(true, false), requestHeader)));
 
 					// ADD AUGMENTED INFO
 

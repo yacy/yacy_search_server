@@ -1051,3 +1051,37 @@ federated.service.solr.indexing.enabled = false
 federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.schemefile = solr.keys.default.list
+
+# RDF triplestore settings
+triplestore.persistent = false
+
+# Augmentation settings
+parserAugmentation = true
+proxyAugmentation = false
+augmentation.reflect = false
+augmentation.addDoctype = false
+augmentation.reparse = false
+
+# Interaction settings
+interaction.feedback.enabled = true
+interaction.feedback.url = 
+interaction.feedback.accept = false
+interaction.usertracking.enabled = true
+interaction.addcontent.enabled = false
+interaction.userlogon.enabled = false
+interaction.approvelist.enabled = false
+interaction.suggestrejected.enabled = false
+interaction.overlayinteraction.enabled = false
+
+interaction.globalmenu.enabled = true
+interaction.portalconfigbutton.enabled = true
+interaction.crawltraces.enabled = false
+interaction.userselfregistration.enabled = false
+interaction.forcebookmarkimport = 
+interaction.visiblecategories = all
+
+interaction.dontimportbookmarks = 
+
+interaction.autocrawler.enabled = false
+interaction.autocrawler.domainfilter = .*
+interaction.autocrawler.categoryfilter = .*

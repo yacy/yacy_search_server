@@ -50,6 +50,8 @@ public class OverlayInteraction {
         UserDB.Entry entry=null;
 
         prop.put("enabled_username", "anonymous");
+        
+        prop.put("enabled_link", post.get("link", ""));
 
         //identified via HTTPPassword
         entry=sb.userDB.proxyAuth((header.get(RequestHeader.AUTHORIZATION, "xxxxxx")));
