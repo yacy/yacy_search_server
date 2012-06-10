@@ -48,6 +48,7 @@ import net.yacy.document.parser.ooxmlParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.pptParser;
 import net.yacy.document.parser.psParser;
+import net.yacy.document.parser.rdfParser;
 import net.yacy.document.parser.rssParser;
 import net.yacy.document.parser.rtfParser;
 import net.yacy.document.parser.sevenzipParser;
@@ -59,7 +60,9 @@ import net.yacy.document.parser.vcfParser;
 import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
+import net.yacy.document.parser.augment.AugmentParser;
 import net.yacy.document.parser.images.genericImageParser;
+import net.yacy.document.parser.rdfa.impl.RDFaParser;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -81,7 +84,7 @@ public final class TextParser {
         initParser(new csvParser());
         initParser(new docParser());
         initParser(new gzipParser());
-        initParser(new htmlParser());
+        initParser(new htmlParser("HTML Parser"));
         initParser(new genericImageParser());
         initParser(new mmParser());
         initParser(new odtParser());
@@ -100,6 +103,11 @@ public final class TextParser {
         initParser(new vsdParser());
         initParser(new xlsParser());
         initParser(new zipParser());
+
+
+        initParser(new RDFaParser("RDFa Parser"));
+        initParser(new rdfParser());
+        initParser(new AugmentParser("Augment Parser"));
     }
 
     public static Set<Parser> parsers() {
