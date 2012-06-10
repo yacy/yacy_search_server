@@ -54,7 +54,7 @@ import net.yacy.kelondro.util.SetTools;
 
 public class Blacklist {
 
-    private static final File BLACKLIST_DHT_CACHEFILE = new File("DATA/WORK/BlacklistCache_DHT.ser");
+    private static final File BLACKLIST_DHT_CACHEFILE = new File("DATA/WORK/blacklistCache_DHT.ser");
 
     public enum BlacklistType {
     	DHT, CRAWLER, PROXY, SEARCH, SURFTIPS, NEWS;
@@ -117,6 +117,20 @@ public class Blacklist {
                 this.cachedUrlHashs.put(blacklistType, new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
             }
         }
+    }
+
+    /**
+     * Close (shutdown) this "sub-system", add more here for shutdown.
+     *
+     * @return void
+     */
+    public synchronized void close() {
+        Log.logFine("Blacklist", "Shutting down blacklists ...");
+
+        // Save DHT cache
+        saveDHTCache();
+
+        Log.logFine("Blacklist", "All blacklists has been shutdown.");
     }
 
     public final void setRootPath(final File rootPath) {
@@ -531,8 +545,7 @@ public class Blacklist {
                 final ObjectInputStream in = new ObjectInputStream(new FileInputStream(BLACKLIST_DHT_CACHEFILE));
                 this.cachedUrlHashs.put(BlacklistType.DHT, (HandleSet) in.readObject());
                 in.close();
-            } else {
-                this.cachedUrlHashs.put(BlacklistType.DHT, new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
+                return;
             }
         } catch (final ClassNotFoundException e) {
             Log.logException(e);
@@ -541,5 +554,6 @@ public class Blacklist {
         } catch (final IOException e) {
             Log.logException(e);
         }
+        this.cachedUrlHashs.put(BlacklistType.DHT, new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
     }
 }

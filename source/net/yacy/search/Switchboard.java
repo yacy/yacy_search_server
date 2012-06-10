@@ -1600,6 +1600,7 @@ public final class Switchboard extends serverSwitch
         this.tables.close();
         Domains.close();
         AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
+        Switchboard.urlBlacklist.close();
         UPnP.deletePortMapping();
         this.tray.remove();
         try {
