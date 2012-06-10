@@ -1056,7 +1056,8 @@ federated.service.solr.indexing.schemefile = solr.keys.default.list
 triplestore.persistent = false
 
 # Augmentation settings
-parserAugmentation = true
+parserAugmentation = false
+parserAugmentation.RDFa = false
 proxyAugmentation = false
 augmentation.reflect = false
 augmentation.addDoctype = false

@@ -66,6 +66,7 @@ import net.yacy.document.parser.rdfa.impl.RDFaParser;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.Switchboard;
 
 public final class TextParser {
 
@@ -103,11 +104,11 @@ public final class TextParser {
         initParser(new vsdParser());
         initParser(new xlsParser());
         initParser(new zipParser());
-
-
         initParser(new RDFaParser("RDFa Parser"));
         initParser(new rdfParser());
-        initParser(new AugmentParser("Augment Parser"));
+
+        if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation.RDFa", true)) initParser(new RDFaParser("RDFa Parser"));
+        if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation", true)) initParser(new AugmentParser("Augment Parser"));
     }
 
     public static Set<Parser> parsers() {
