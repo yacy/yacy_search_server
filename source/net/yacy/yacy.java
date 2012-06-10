@@ -138,6 +138,7 @@ public final class yacy {
      */
     private static Switchboard sb = null;
 	public static String homedir;
+	public static File dataHome_g;
 
     /**
     * Starts up the whole application. Sets up all datastructures and starts
@@ -163,6 +164,7 @@ public final class yacy {
 
             // ensure that there is a DATA directory, if not, create one and if that fails warn and die
             mkdirsIfNeseccary(dataHome);
+            dataHome_g = dataHome;
             mkdirsIfNeseccary(appHome);
             File f = new File(dataHome, "DATA/");
             mkdirsIfNeseccary(f);
@@ -462,7 +464,7 @@ public final class yacy {
 	 * @see File#mkdirs()
 	 * @param path
 	 */
-	private static void mkdirsIfNeseccary(final File path) {
+	public static void mkdirsIfNeseccary(final File path) {
 		if (!(path.exists()))
 			if(!path.mkdirs())
 				Log.logWarning("STARTUP", "could not create directories "+ path.toString());

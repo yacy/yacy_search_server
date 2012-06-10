@@ -1,3 +1,48 @@
+
+function newload (name, div) {
+
+$.get(name, function(data) {
+
+$('#'+div).html(data);
+});
+
+}
+
+function xmlToString (xmlData) {
+
+	var xmlString;
+	
+	if (window.ActiveXObject) {
+		xmlString = xmlData.xml;
+	}
+	
+	else {
+		xmlString = (new XMLSerializer()).serializeToString(xmlData);
+	}
+	
+	return xmlString;
+
+}
+
+function rdfload (datastore) {
+
+$.ajax({
+	type : "GET",
+	url: "/currentyacypeer/interaction/GetRDF.xml?global=true",
+	dataType: "xml",
+	success: function(xml) {
+		datastore.load(xml);
+
+	}
+
+
+});
+
+
+
+}
+
+
 function feedback (url, comment, from) {
 
 	$.getJSON('/currentyacypeer/interaction/Feedback.json?url='+url+'&comment='+comment+'&from='+from, function(data) {
