@@ -1,6 +1,6 @@
 package interaction;
 
-//ViewLog_p.java 
+//ViewLog_p.java
 //-----------------------
 //part of the AnomicHTTPD caching proxy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -32,23 +32,22 @@ package interaction;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class Triple {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-    	
+
     	final Switchboard sb = (Switchboard) env;
-    	
+
         final serverObjects prop = new serverObjects();
-        
+
         UserDB.Entry entry=null;
-        
-        
+
+
 
         //default values
         prop.put("enabled_logged_in", "0");
@@ -71,7 +70,7 @@ public class Triple {
                 }
             }
         }
-        
+
         //identified via userDB
         if(entry != null){
             prop.put("enabled_logged-in", "1");
@@ -97,47 +96,47 @@ public class Triple {
         }
 
         String url = "";
-        String s = "";        
+        String s = "";
         String p = "";
         String o = "";
-        
+
         Boolean global = false;
-        
+
         if(post != null){
 
             if(post.containsKey("url")){
                 url = post.get("url");
             }
-            
+
             if(post.containsKey("s")){
             	s = post.get("s");
             }
-            
+
             if(post.containsKey("p")){
             	p = post.get("p");
             }
-            
+
             if(post.containsKey("o")){
             	o = post.get("o");
             }
-                       
+
             global = post.containsKey("global");
-            
+
         }
-        
+
         if (post.containsKey("load")) {
-        	      	       	
+
         	o = Interaction.TripleGet(s, p, global ? "" : username);
-        	
+
         } else {
-        
+
         	Interaction.Triple(url, s, p, o, global ? "" : username);
-        }                
-        
+        }
+
         prop.put("result", o);
 
-        
-        
+
+
         return prop;
     }
 }

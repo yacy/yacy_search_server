@@ -467,8 +467,8 @@ public final class HTTPDProxyHandler {
             	port = sb.peers.myPort();
             	path = path.substring(16);
             }
-            
-         // point virtual directory to my peer 
+
+         // point virtual directory to my peer
             if (path.startsWith("/currentyacypeer/")) {
             	host = sb.peers.myIP();
             	port = sb.peers.myPort();
@@ -492,7 +492,7 @@ public final class HTTPDProxyHandler {
 
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
-            
+
             requestHeader.remove(HeaderFramework.HOST);
 
             final HTTPClient client = setupHttpClient(requestHeader, connectHost);
@@ -508,13 +508,13 @@ public final class HTTPDProxyHandler {
                 if (responseHeader.isEmpty()) {
                 	throw new Exception(client.getHttpResponse().getStatusLine().toString());
                 }
-                
+
                 if(AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
                     // enable chunk encoding, because we don't know the length after annotating
                     responseHeader.remove(HeaderFramework.CONTENT_LENGTH);
                     responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
 
-                } 
+                }
 
                 ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, client.getHttpResponse().getStatusLine().getStatusCode(), respond);
 
@@ -555,7 +555,7 @@ public final class HTTPDProxyHandler {
                 	// chunked encoding disables somewhere, add it again
                     responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
                 }
-                
+
                 // sending the respond header back to the client
                 if (chunkedOut != null) {
                     responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
@@ -584,10 +584,10 @@ public final class HTTPDProxyHandler {
                     final String storeError = response.shallStoreCacheForProxy();
                     final boolean storeHTCache = response.profile().storeHTCache();
                     final String supportError = TextParser.supports(response.url(), response.getMimeType());
-                    
+
                     if(AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
-                        outStream = new AugmentedHtmlStream(outStream, responseHeader.getCharSet(), url, url.hash(), requestHeader);
-                    } 
+                        outStream = new AugmentedHtmlStream(outStream, responseHeader.getCharSet(), url, requestHeader);
+                    }
                     if (
                             /*
                              * Now we store the response into the htcache directory if
@@ -655,7 +655,7 @@ public final class HTTPDProxyHandler {
 
                         conProp.put(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     }
-                    
+
                     outStream.close();
 
                     if (chunkedOut != null) {
@@ -745,9 +745,9 @@ public final class HTTPDProxyHandler {
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
 
                 if(AugmentedHtmlStream.supportsMime(cachedResponseHeader.mime())) {
-                    respond = new AugmentedHtmlStream(respond, cachedResponseHeader.getCharSet(), url, url.hash(), requestHeader);
+                    respond = new AugmentedHtmlStream(respond, cachedResponseHeader.getCharSet(), url, requestHeader);
                 }
-                
+
                 // send also the complete body now from the cache
                 // simply read the file and transfer to out socket
                 FileUtils.copy(cacheEntry, respond);
