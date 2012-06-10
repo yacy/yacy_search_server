@@ -42,6 +42,15 @@ function storevalue (s, p, o) {
 	
 }
 
+function storevalueglobal (s, p, o) {
+
+	$.getJSON('/currentyacypeer/interaction/Triple.json?global=true&url='+document.location.href+'&s='+s+'&p='+p+'&o='+o, function(data) {
+			
+	
+	});
+	
+}
+
 function loadvalue (s, p) {
 
 	var res = {result: ""};
@@ -49,6 +58,23 @@ function loadvalue (s, p) {
 	$.ajaxSetup({async: false});
 
 	$.getJSON('/currentyacypeer/interaction/Triple.json?s='+s+'&p='+p+'&load=true', function (data) {
+	
+		res = data;
+	
+	});
+	
+		
+	return res.result;
+	
+}
+
+function loadvalueglobal (s, p) {
+
+	var res = {result: ""};
+	
+	$.ajaxSetup({async: false});
+
+	$.getJSON('/currentyacypeer/interaction/Triple.json?global=true&s='+s+'&p='+p+'&load=true', function (data) {
 	
 		res = data;
 	

@@ -32,6 +32,7 @@ package interaction;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
 import de.anomic.server.serverObjects;
@@ -99,7 +100,8 @@ public class Triple {
         String s = "";        
         String p = "";
         String o = "";
-        String from = "";
+        
+        Boolean global = false;
         
         if(post != null){
 
@@ -118,20 +120,18 @@ public class Triple {
             if(post.containsKey("o")){
             	o = post.get("o");
             }
-            
-            if(post.containsKey("from")){
-            	from = post.get("from");
-            }
+                       
+            global = post.containsKey("global");
             
         }
         
         if (post.containsKey("load")) {
-        	
-        	o = Interaction.TripleGet(s, p, username);
+        	      	       	
+        	o = Interaction.TripleGet(s, p, global ? "" : username);
         	
         } else {
         
-        	Interaction.Triple(url, s, p, o, username);
+        	Interaction.Triple(url, s, p, o, global ? "" : username);
         }                
         
         prop.put("result", o);

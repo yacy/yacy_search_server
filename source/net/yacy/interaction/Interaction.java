@@ -449,21 +449,52 @@ public static String Contribution(String url, String comment, String from, Strin
 	return "";
 }
 
-public static String Triple(String url, String s, String p, String o, String from) {
-	Resource r = TripleStore.model.getResource(s+"/"+from);
+public static String Triple(String url, String s, String p, String o) {
+	return Triple (url, s, p, o, "");
+}
+
+public static String Triple(String url, String s, String p, String o, String username) {
+
+	final Switchboard sb = Switchboard.getSwitchboard();
+
+	if (username != "") {
+		username = "/"+username;
+	}
+
+	Resource r = TripleStore.model.getResource(s+username);
 	Property pr = TripleStore.model.getProperty(p);
+
 	TripleStore.model.removeAll(r, pr, (Resource) null);
+
+
 	r.addProperty(pr, o);
-	Log.logInfo ("TRIPLESTORE", "PUT "+from+" / "+s+" - "+p+" - "+o);
+
+
+	Log.logInfo ("TRIPLESTORE", "PUT "+username+" / "+s+" - "+p+" - "+o);
+
+
 	return "";
 }
 
+public static String TripleGet(String s, String p) {
+	return TripleGet (s, p, "");
+}
+
 public static String TripleGet(String s, String p, String username) {
-	Resource r = TripleStore.model.getResource(s+"/"+username);
+
+	final Switchboard sb = Switchboard.getSwitchboard();
+
+	if (username != "") {
+		username = "/"+username;
+	}
+
+	Resource r = TripleStore.model.getResource(s+username);
 	Property pr = TripleStore.model.getProperty(p);
 
 	StmtIterator iter = TripleStore.model.listStatements(r, pr, (Resource) null);
-	Log.logInfo ("TRIPLESTORE", "GET "+s+" - "+p);
+
+	Log.logInfo ("TRIPLESTORE", "GET "+username+" / "+s+" - "+p+" ... ");
+
 
 	while (iter.hasNext()) {
 		String obj = iter.nextStatement().getObject().toString();

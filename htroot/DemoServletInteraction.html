@@ -12,7 +12,7 @@
   <body id="index">
     
 	<p>
-		JavaScript example: Permanent storage of value
+		JavaScript example: Permanent storage of value, assigned to logged in user account
 	</p>
 	<br/>
 	
@@ -49,6 +49,36 @@
 	);
 	</script>
 
+	
+	</p>
+	
+	<br/>
+	<br/>
+	
+	<p>
+		JavaScript example: Load value from global RDF store
+	</p>
+	<br/>
+	
+	<br/>
+	
+	<p>
+	
+	<input id="output" type="text" name="output" value="--"/>
+	<input type="submit" name="sub" onclick="storevalueglobal ('http://virtual.x/global/entry1', 'http://virtual.x/global/hasvalue', document.getElementById('output').value)"/>
+	
+	l
+	
+	<script type="text/javascript" charset="utf-8">
+	
+	
+	var oldvalue = loadvalueglobal ('http://virtual.x/global/entry1', 'http://virtual.x/global/hasvalue');
+	
+	document.getElementById('output').value = oldvalue;
+	
+
+
+	</script>
 	
 	</p>
 	
