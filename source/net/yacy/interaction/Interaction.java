@@ -463,6 +463,23 @@ public static String Triple(String url, String s, String p, String o, String fro
 	return "";    
 }
 
+public static String getTriple(String s, String p) {
+
+	final Switchboard sb = Switchboard.getSwitchboard();
+
+	Resource r = TripleStore.model.getResource(s);
+	Property pr = TripleStore.model.getProperty(p);
+	
+	StmtIterator iter = TripleStore.model.listStatements(r, pr, (Resource) null);
+	
+	while (iter.hasNext()) {
+		return (iter.nextStatement().getObject().toString());
+	}
+	
+	return "";
+ 
+}
+
 public static String GetContribution(String url) {
 	
 	final Switchboard sb = Switchboard.getSwitchboard();

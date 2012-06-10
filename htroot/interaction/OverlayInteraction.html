@@ -52,9 +52,32 @@ border-bottom: 1px solid #ffffff;
 
 </div>
 
-<div id="sidebar-document" class="sci_panel" style="top: 110px;">
+<!-- <div id="sidebar-document" class="sci_panel" style="top: 110px;">
 
-<p>document</p> <img src="/currentyacypeer/env/grafics/bad.png" onclick="contribution (document.location.href, 'like document', '#[username]#'); return false">
+document <img src="/currentyacypeer/env/grafics/bad.png" width="16px" height="16px" onclick="contribution (document.location.href, 'like document', '#[username]#'); return false">
+
+</div> -->
+
+<div id="sidebar-element" class="sci_panel" style="top: 110px;">
+
+<input id="SliderSingle" type="slider" name="price" value="20" />
+
+<script type="text/javascript" charset="utf-8">
+	$("#SliderSingle").slider(
+		{
+			from: 0,
+			to: 100,
+			step: 2.5,
+			round: 1,
+			format: { format: '##.0', locale: 'de'},
+			dimension: '&nbsp;',
+			skin: 'round',
+			onstatechange: function(value) {
+				triple ('#[link]#', '#[link]#', 'http://virtual.x/hasvalue', value, '#[username]#');
+				}
+		}
+	);
+</script>
 
 </div>
 

@@ -34,6 +34,7 @@ import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
+import net.yacy.interaction.Interaction;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Formatter;
@@ -141,8 +142,44 @@ public class yacysearchitem {
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
-            prop.putHTML("content_link", resultUrlstring);
             prop.putHTML("content_showPictures_link", resultUrlstring);
+            //prop.putHTML("content_link", resultUrlstring);
+
+// START interaction
+            String modifyURL = resultUrlstring;
+			if (sb.getConfigBool("proxyURL.useforresults", false)) {
+				// check if url is allowed to view
+				if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("all")) {
+					modifyURL = "./proxy.html?url="+modifyURL;
+				}
+
+				// check if url is allowed to view
+				if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
+					try {
+						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI (modifyURL)) == null) {
+							modifyURL = "./proxy.html?url="+modifyURL;
+						}
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
+				if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("yacy")) {
+					try {
+						if ((new DigestURI (modifyURL).getHost().endsWith(".yacy"))) {
+							modifyURL = "./proxy.html?url="+modifyURL;
+						}
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+            prop.putHTML("content_link", modifyURL);
+            prop.putHTML("content_value", Interaction.getTriple(result.urlstring(), "http://virtual.x/hasvalue"));
+// END interaction
+
             prop.putHTML("content_target", target);
             if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading

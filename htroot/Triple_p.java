@@ -40,13 +40,13 @@ public class Triple_p {
 		prop.put("display", 1); // Fixed to 1
 		prop.putHTML("mode_output", "no query performed");
 		
-		String q = "PREFIX lln: <http://virtual.liebel-lab.org/n#>\n"+
+		String q = "PREFIX lln: <http://virtual.x/>\n"+
 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"+
 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n"+
 "SELECT ?resource ?pa\n"+
 "WHERE {\n"+
-	"?resource lln:percentageofarea ?pa .\n"+
-"FILTER (xsd:float (?pa) > 3.000)\n"+
+	"?resource lln:hasvalue ?pa .\n"+
+"FILTER (xsd:float (?pa) > 21.000)\n"+
 "}";
 
 		if (post != null) {
@@ -106,17 +106,29 @@ public class Triple_p {
 
 					prop.putHTML("mode_rdfdump", sos.toString());
 					
-
+					int scount = 0;
+					while (resultSet.hasNext()) {
+						QuerySolution s = resultSet.next();
+						prop.put("entries_"+scount+"_s", s.getResource(null).getURI());
+						prop.put("entries_"+scount+"_p", s.getResource(null).getURI());
+						prop.put("entries_"+scount+"_o", s.getResource(null).getURI());
+						scount ++;
+					}
 					
+					prop.putHTML("entries", ""+scount);
 					
 					for (String s: resultSet.getResultVars()) {
 						
 						prop.putHTML("mode_output_"+count+"_caption", s);
 						count ++;
 					}
+								
+					
 					 } catch (Exception e) {
 						 prop.putHTML("mode_rdfdump", "error");
 					 }
+					 
+					 
 									
 					prop.putHTML("mode_output", ""+count);
 
