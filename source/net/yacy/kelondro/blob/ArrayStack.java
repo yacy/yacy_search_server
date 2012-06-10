@@ -628,7 +628,7 @@ public class ArrayStack implements BLOB {
      */
     @Override
     public byte[] get(final byte[] key) throws IOException, RowSpaceExceededException {
-        if (this.blobs.size() == 0) return null;
+        if (this.blobs == null || this.blobs.size() == 0) return null;
         if (this.blobs.size() == 1) {
             final blobItem bi = this.blobs.get(0);
             return bi.blob.get(key);

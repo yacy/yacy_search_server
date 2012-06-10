@@ -10,18 +10,17 @@ import java.util.ArrayList;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-
 import de.anomic.http.server.RobotsTxtConfig;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
 public class robots {
-    
+
     public static servletProperties respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final RobotsTxtConfig rbc = ((Switchboard)env).robotstxtConfig;
-        
+
         if (rbc.isAllDisallowed()) {
             prop.put(RobotsTxtConfig.ALL, 1);
         } else {
@@ -35,7 +34,7 @@ public class robots {
             if (rbc.isSurftipsDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.SURFTIPS, "1");
             if (rbc.isWikiDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.WIKI, "1");
             if (rbc.isProfileDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.PROFILE, "1");
-            
+
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {
                 final ArrayList<String>[] p = getFiles(env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
                 if (rbc.isLockedDisallowed()) {
@@ -50,10 +49,10 @@ public class robots {
                 }
             }
         }
-        
+
         return prop;
     }
-    
+
     @SuppressWarnings("unchecked")
     private static ArrayList<String>[] getFiles(final String htrootPath) {
         final File htroot = new File(htrootPath);
@@ -75,6 +74,6 @@ public class robots {
                 htrootFiles.add(htroots[i]);
             }
         }
-        return new ArrayList[] { htrootFiles, htrootDirs };
+        return (ArrayList<String>[]) new Object[] { htrootFiles, htrootDirs };
     }
 }

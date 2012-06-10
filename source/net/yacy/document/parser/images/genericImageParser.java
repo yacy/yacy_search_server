@@ -87,6 +87,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         super("Generic Image Parser");
     }
 
+    @Override
     public Document[] parse(
             final MultiProtocolURI location,
             final String mimeType,
@@ -211,10 +212,12 @@ public class genericImageParser extends AbstractParser implements Parser {
              false)}; // images
     }
 
+    @Override
     public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
 
+    @Override
     public Set<String> supportedExtensions() {
         return SUPPORTED_EXTENSIONS;
     }
