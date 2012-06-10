@@ -1,0 +1,139 @@
+#(enabled)#::
+
+<style type="text/css" >
+/* Menu */
+
+.menugroup h3 {
+  -webkit-border-top-left-radius: 5px;
+  -webkit-border-top-right-radius: 5px;
+  -khtml-border-top-left-radius: 5px;
+  -khtml-border-top-right-radius: 5px;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-topright: 5px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+ 
+  background-color: #[color_tableheader]#;
+  color:white;
+}
+
+.SubMenugroup h3, .SubMenu h3 {
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+
+  background-color:#[color_tableheader]#;
+  color:white;
+}
+
+a.MenuItemLink, ul.SubMenu em {
+  background-color:#[color_tableitem]#;
+  color:#[color_text]#;
+}
+
+a:hover.MenuItemLink {
+  background-color:transparent;
+  color:#[color_text]#;
+}
+
+ul.SubMenu a.MenuItemLink {
+  margin-top:0;
+}
+
+a.MenuItemLink{
+  display:block;
+  text-decoration:none;
+  margin-top:1px;
+  margin-bottom:1px;
+  padding:1px 10px 1px 15px;
+  font-size:0.9em;
+  white-space:nowrap;
+}
+
+li.menugroup a {
+	white-space:normal;
+}
+
+a.MenuItemLink.lock{
+  background-image:url(/env/grafics/lock.gif);
+  background-position:2px center;
+  background-repeat:no-repeat;
+}
+
+a:hover.MenuItemLink {
+  text-decoration:none;
+}
+
+ul.SubMenu em {
+  margin-top:0;
+}
+
+ul.SubMenu em.lock {
+  background-image:url(/env/grafics/lock.gif);
+  background-position:2px center;
+  background-repeat:no-repeat;
+}
+
+ul.SubMenu em {
+  display:block;
+  text-decoration:none;
+  margin-top:1px;
+  margin-bottom:1px;
+  padding:1px 10px 1px 15px;
+  font-size:0.9em;
+}
+
+/*	<ul>, <li>	*/
+
+ul.tagList {
+  list-style:none;
+  padding:0;
+  margin-left:0;
+}
+
+
+
+ul.menu, ul.SubMenu {
+  clear:left;
+  padding:0;
+  margin:0;
+}
+
+ul.menu li, ul.SubMenu li {
+  list-style:none;
+  margin:0;
+  margin-top:1px;
+  padding:0;
+}
+
+ul.SubMenu li {
+  float:left;
+  margin-right:1px;
+  margin-top:0;
+}
+
+li.menugroup {
+  margin-left:5px;
+  margin-bottom:10px;
+  list-style:none;
+}
+</style>
+
+#(feedbackenabled)#::<!--#include virtual="/interaction/Feedback_part.html" -->#(/feedbackenabled)#
+#(addcontentenabled)#::<!--#include virtual="/interaction/Suggest_part.html" -->#(/addcontentenabled)#
+#(userlogonenabled)#::<!--#include virtual="/interaction/Login_part.html" -->#(/userlogonenabled)#
+
+<!--#include virtual="/interaction/Category_part.html" -->
+
+<div class="SubMenu" style="position: fixed; bottom: 0px; width: 100%;">
+
+<ul class="SubMenu">
+#(addcontentenabled)#::<li style="width:#[ratio]#%;"><a id="add_trigger" href="" class="MenuItemLink" style="color: #fff; background-color: #5A346E;" onclick="addclicker(); return false;">suggest a website</a></li>#(/addcontentenabled)#
+#(userlogonenabled)#::<li style="width:#[ratio]#%;"><!--#include virtual="/interaction/Loginbutton_part.html" --></li>#(/userlogonenabled)#
+#(feedbackenabled)#::<li style="width:#[ratio]#%;"><a id="feedback_trigger" href="" class="MenuItemLink" style="color: #fff; background-color: #5A346E;" onclick="clicker(); return false;">feedback</a></li>#(/feedbackenabled)#
+</ul>
+
+</div>
+
+#(/enabled)#

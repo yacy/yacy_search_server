@@ -384,7 +384,9 @@ public class AugmentHtmlStream {
 
 					NodeList bodychildren = bt.getChildren();
 
+					bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/Footer.html", requestHeader)));
 
+					bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/OverlayInteraction.html", requestHeader)));
 
 					// ADD AUGMENTED INFO
 
