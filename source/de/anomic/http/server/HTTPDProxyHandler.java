@@ -448,7 +448,7 @@ public final class HTTPDProxyHandler {
             final int reqID = requestHeader.hashCode();
 
             String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-            final String path =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
+            String path =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
             final String args =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
             final String ip =      (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
             final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); // the ip from the connecting peer
@@ -459,6 +459,13 @@ public final class HTTPDProxyHandler {
             } else {
                 port = Integer.parseInt(host.substring(pos + 1));
                 host = host.substring(0, pos);
+            }
+
+            // point virtual directory to my peer
+            if (path.startsWith("/currentyacypeer/")) {
+            	host = sb.peers.myIP();
+            	port = sb.peers.myPort();
+            	path = path.substring(16);
             }
 
             // resolve yacy and yacyh domains
@@ -478,8 +485,6 @@ public final class HTTPDProxyHandler {
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
 
-            requestHeader.remove(HeaderFramework.HOST);
-
             final HTTPClient client = setupHttpClient(requestHeader, connectHost);
 
             // send request
@@ -494,14 +499,7 @@ public final class HTTPDProxyHandler {
                 	throw new Exception(client.getHttpResponse().getStatusLine().toString());
                 }
 
-                if(AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
-                    // enable chunk encoding, because we don't know the length after annotating
-                    responseHeader.remove(HeaderFramework.CONTENT_LENGTH);
-                    responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
-
-                }
-
-                ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, client.getHttpResponse().getStatusLine().getStatusCode(), respond);
+                final ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, client.getHttpResponse().getStatusLine().getStatusCode(), respond);
 
                 // the cache does either not exist or is (supposed to be) stale
                 long sizeBeforeDelete = -1;
@@ -536,8 +534,8 @@ public final class HTTPDProxyHandler {
 //                prepareResponseHeader(responseHeader, res.getHttpVer());
                 prepareResponseHeader(responseHeader, client.getHttpResponse().getProtocolVersion().toString());
 
-                if(AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
-                	// chunked encoding disables somewhere, add it again
+                // sending the respond header back to the client
+                if (chunkedOut != null) {
                     responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
                 }
 
@@ -552,7 +550,7 @@ public final class HTTPDProxyHandler {
 
                 if (hasBody(client.getHttpResponse().getStatusLine().getStatusCode())) {
 
-                    OutputStream outStream = chunkedOut != null ? chunkedOut : respond;
+                    final OutputStream outStream = chunkedOut != null ? chunkedOut : respond;
                     final Response response = new Response(
                             request,
                             requestHeader,
@@ -564,10 +562,6 @@ public final class HTTPDProxyHandler {
                     final String storeError = response.shallStoreCacheForProxy();
                     final boolean storeHTCache = response.profile().storeHTCache();
                     final String supportError = TextParser.supports(response.url(), response.getMimeType());
-
-                    if(AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
-                        outStream = new AugmentedHtmlStream(outStream, responseHeader.getCharSet(), url, url.hash(), requestHeader);
-                    }
                     if (
                             /*
                              * Now we store the response into the htcache directory if
@@ -636,7 +630,6 @@ public final class HTTPDProxyHandler {
                         conProp.put(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     }
 
-                    outStream.close();
                     if (chunkedOut != null) {
                         chunkedOut.finish();
                         chunkedOut.flush();
@@ -686,7 +679,7 @@ public final class HTTPDProxyHandler {
             final RequestHeader requestHeader,
             final ResponseHeader cachedResponseHeader,
             final byte[] cacheEntry,
-            OutputStream respond
+            final OutputStream respond
     ) throws IOException {
 
         final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
@@ -722,10 +715,6 @@ public final class HTTPDProxyHandler {
                 // send cached header with replaced date and added length
                 HTTPDemon.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
-
-                if(AugmentedHtmlStream.supportsMime(cachedResponseHeader.mime())) {
-                    respond = new AugmentedHtmlStream(respond, cachedResponseHeader.getCharSet(), url, url.hash(), requestHeader);
-                }
 
                 // send also the complete body now from the cache
                 // simply read the file and transfer to out socket
@@ -1103,7 +1092,6 @@ public final class HTTPDProxyHandler {
                     forceConnectionClose(conProp);
                 } else {
                     chunkedOut = new ChunkedOutputStream(respond);
-                    responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
                 }
                 responseHeader.remove(HeaderFramework.CONTENT_LENGTH);
             }
@@ -1173,7 +1161,7 @@ public final class HTTPDProxyHandler {
         headers.remove(RequestHeader.X_CACHE_LOOKUP);
 
         // remove transfer encoding header
-        // headers.remove(HeaderFramework.TRANSFER_ENCODING);
+        headers.remove(HeaderFramework.TRANSFER_ENCODING);
 
         //removing yacy status headers
         headers.remove(HeaderFramework.X_YACY_KEEP_ALIVE_REQUEST_COUNT);

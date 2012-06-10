@@ -279,6 +279,10 @@ public final class HTTPDFileHandler {
                 return;
             }
 
+            // allow proper access to current peer via virtual directory
+            if (path.startsWith("/currentyacypeer/")) {
+            	path = path.substring(16);
+            }
 
             // cache settings
             boolean nocache = path.contains("?") || body != null;
