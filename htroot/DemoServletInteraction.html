@@ -23,7 +23,7 @@
 	
 	<script type="text/javascript" charset="utf-8">
 	
-	var oldvalue = loadvalue ('http://virtual.x/document/uniquenameDemo123', 'http://virtual.x/hasvalue');
+	var oldvalue = loadvalue_t ('http://virtual.x/document/uniquenameDemo123', 'http://virtual.x/hasvalue');
 	
 	if (oldvalue == "") {
 		oldvalue = "0";
@@ -42,7 +42,7 @@
 			skin: 'round',
 			onstatechange: function(value) {
 			
-				storevalue ('http://virtual.x/document/uniquenameDemo123', 'http://virtual.x/hasvalue', value);
+				storevalue_t ('http://virtual.x/document/uniquenameDemo123', 'http://virtual.x/hasvalue', value);
 				
 				}
 		}

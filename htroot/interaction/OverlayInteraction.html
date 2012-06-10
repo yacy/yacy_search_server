@@ -65,7 +65,7 @@ document <img src="/currentyacypeer/env/grafics/bad.png" width="16px" height="16
 
 	<script type="text/javascript" charset="utf-8">
 	
-	var oldvalue = loadvalue ('#[link]#', 'http://virtual.x/hastags');
+	var oldvalue = loadvalue_t ('#[link]#', 'http://virtual.x/hastags');
 	
 	document.getElementById('tags').value = oldvalue;
 	
@@ -78,7 +78,7 @@ document <img src="/currentyacypeer/env/grafics/bad.png" width="16px" height="16
  	   'maxChars' : 0,
  	   'placeholderColor' : '#666666',
  	   'onChange' : function () {
- 	   		storevalue ('#[link]#', 'http://virtual.x/hastags', document.getElementById('tags').value);
+ 	   		storevalue_t ('#[link]#', 'http://virtual.x/hastags', document.getElementById('tags').value);
  	   		}  	   
      }); 
      

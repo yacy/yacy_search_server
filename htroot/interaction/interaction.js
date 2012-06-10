@@ -33,6 +33,15 @@ function triple (url, s, p, o, username) {
 	
 }
 
+function storevalue_t (s, p, o) {
+
+	$.getJSON('/currentyacypeer/interaction/Table.json?url='+document.location.href+'&s='+s+'&p='+p+'&o='+o, function(data) {
+			
+	
+	});
+	
+}
+
 function storevalue (s, p, o) {
 
 	$.getJSON('/currentyacypeer/interaction/Triple.json?url='+document.location.href+'&s='+s+'&p='+p+'&o='+o, function(data) {
@@ -58,6 +67,23 @@ function loadvalue (s, p) {
 	$.ajaxSetup({async: false});
 
 	$.getJSON('/currentyacypeer/interaction/Triple.json?s='+s+'&p='+p+'&load=true', function (data) {
+	
+		res = data;
+	
+	});
+	
+		
+	return res.result;
+	
+}
+
+function loadvalue_t (s, p) {
+
+	var res = {result: ""};
+	
+	$.ajaxSetup({async: false});
+
+	$.getJSON('/currentyacypeer/interaction/Table.json?s='+s+'&p='+p+'&load=true', function (data) {
 	
 		res = data;
 	

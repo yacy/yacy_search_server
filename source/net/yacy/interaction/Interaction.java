@@ -3,10 +3,12 @@ package net.yacy.interaction;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -381,7 +383,46 @@ public static String Feedback(String url, String comment, String from, String pe
 		return "";
 }
 
-public static String Contribution(String url, String comment, String from, String peer) {
+
+
+public static String Contribution(String url, String value, String username, String peer) {
+	return Tableentry(url, "comment", value, username, peer);
+}
+
+
+public static String GetTableentry(String url, String type, String username, String peer) {
+
+	final Switchboard sb = Switchboard.getSwitchboard();
+
+	try {
+		Iterator<Row> it = sb.tables.iterator(username+"_contribution", "url", url.getBytes());
+
+		Log.logInfo ("TABLE", "GET "+username+" / "+url+" - "+type+" ...");
+
+		it = sb.tables.orderBy(it, -1, "timestamp_creation").iterator();
+
+		while (it.hasNext()) {
+			Row r = it.next();
+
+			if (!it.hasNext()) {
+
+			if (r.containsKey(type)) {
+				Log.logInfo ("TABLE", "GET "+username+" / "+url+" - "+type+" - "+r.get(type, ""));
+				return r.get(type, "");
+			}
+			}
+		}
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+
+	return "";
+
+
+}
+
+public static String Tableentry(String url, String type, String comment, String from, String peer) {
 
 	final Switchboard sb = Switchboard.getSwitchboard();
 
@@ -390,6 +431,7 @@ public static String Contribution(String url, String comment, String from, Strin
 	}
 
 	Boolean processlocal = false;
+	Log.logInfo ("TABLE", "PUT "+from+" / "+url+" - "+type+" - "+comment);
 
 	if (!sb.getConfig("interaction.contribution.accumulationpeer", "").equals("")) {
 		if (sb.getConfig("interaction.contribution.accumulationpeer", "").equals(sb.peers.myName())) {
@@ -432,11 +474,12 @@ public static String Contribution(String url, String comment, String from, Strin
         map.put("username", from.getBytes());
         map.put("peer", peer.getBytes());
         map.put("status", "new".getBytes());
-        map.put("comment", comment.getBytes());
+        map.put("type", type.getBytes());
+        map.put(type, comment.getBytes());
         map.put("timestamp_creation", date.getBytes());
 
         try {
-            sb.tables.insert("contribution", map);
+            sb.tables.insert(from+"_contribution", map);
         } catch (final IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {
