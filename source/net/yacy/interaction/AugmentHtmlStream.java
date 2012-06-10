@@ -325,7 +325,8 @@ public class AugmentHtmlStream {
 					document = Document.mergeDocuments(
 							url,
 							"text/html",
-							TextParser.parseSource(url, "text/html", null, data.length(), inputStream));
+							TextParser.parseSource(url, "text/html", null,
+									data.length(), inputStream));
 
 				} catch (Exception e) {
 
