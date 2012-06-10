@@ -87,7 +87,6 @@ public class ConfigNetwork_p
                 if ( !indexReceive ) {
                     // remove heuristics
                     sb.setConfig("heuristic.site", false);
-                    sb.setConfig("heuristic.scroogle", false);
                     sb.setConfig("heuristic.blekko", false);
                 }
                 final boolean robinsonmode = "robinson".equals(post.get("network", ""));
