@@ -431,6 +431,7 @@ public static String Tableentry(String url, String type, String comment, String 
 	}
 
 	Boolean processlocal = false;
+
 	Log.logInfo ("TABLE", "PUT "+from+" / "+url+" - "+type+" - "+comment);
 
 	if (!sb.getConfig("interaction.contribution.accumulationpeer", "").equals("")) {
