@@ -1427,11 +1427,11 @@ public final class HTTPDFileHandler {
 			final String strARGS = (String) conProp.get("ARGS");
 			if(strARGS.startsWith("url=")) {
 				final String strUrl = strARGS.substring(4); // strip url=
-				
+
 				try {
 				proxyurl = new URL(strUrl);
 				} catch (MalformedURLException e) {
-					proxyurl = new URL (URLDecoder.decode(strUrl));
+					proxyurl = new URL (URLDecoder.decode(strUrl, UTF8.charset.name()));
 
 				}
 			}
@@ -1486,7 +1486,7 @@ public final class HTTPDFileHandler {
 		String directory = "";
 		if (proxyurl.getPath().lastIndexOf('/') > 0)
 			directory = proxyurl.getPath().substring(0, proxyurl.getPath().lastIndexOf('/'));
-		
+
 		String location = "";
 
 		if (outgoingHeader.containsKey("Location")) {
