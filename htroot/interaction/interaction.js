@@ -32,3 +32,29 @@ function triple (url, s, p, o, username) {
 	});
 	
 }
+
+function storevalue (s, p, o) {
+
+	$.getJSON('/currentyacypeer/interaction/Triple.json?url='+document.location.href+'&s='+s+'&p='+p+'&o='+o, function(data) {
+			
+	
+	});
+	
+}
+
+function loadvalue (s, p) {
+
+	var res = {result: "no result"};
+	
+	$.ajaxSetup({async: false});
+
+	$.getJSON('/currentyacypeer/interaction/Triple.json?s='+s+'&p='+p+'&load=true', function (data) {
+	
+		res = data;
+	
+	});
+	
+		
+	return res.result;
+	
+}

@@ -73,16 +73,17 @@ public class Triple {
             
         }
         
-        if (post.containsKey("url")) {
-        
-      
-        	Interaction.Triple(url, s, p, o, from);
-        
+        if (post.containsKey("load")) {
+        	
+        	o = Interaction.TripleGet(s, p);
+        	
         } else {
-        	
-        	prop.putHTML("url", url);
-        	
-        }
+        
+        	Interaction.Triple(url, s, p, o, from);
+        }                
+        
+        prop.put("result", o);
+
         
         
         return prop;

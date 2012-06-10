@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Demo-Servlet</title>
+    
+    <!-- This element contains the jQuery libraries and interaction routines -->
+    #%env/templates/metas.template%#
+      
+  </head>
+  
+  
+  <body id="index">
+    
+	<p>
+		JavaScript example: Permanent storage of value
+	</p>
+	<br/>
+	
+
+	<p>
+	
+	<input id="SliderSingle" type="slider" name="price" value="0" />
+	
+	<script type="text/javascript" charset="utf-8">
+	
+	var oldvalue = loadvalue ('http://virtual.x/document/uniquenameDemo123', 'http://virtual.x/hasvalue');
+	
+	if (oldvalue == "") {
+		oldvalue = "0";
+	}
+	
+	document.getElementById('SliderSingle').value = oldvalue;
+	
+	$("#SliderSingle").slider(
+		{
+			from: 0,
+			to: 100,
+			step: 2.5,
+			round: 1,
+			format: { format: '##.0', locale: 'de'},
+			dimension: '&nbsp; points',
+			skin: 'round',
+			onstatechange: function(value) {
+			
+				storevalue ('http://virtual.x/document/uniquenameDemo123', 'http://virtual.x/hasvalue', value);
+				
+				}
+		}
+	);
+	</script>
+
+	
+	</p>
+
+  </body>
+  
+  
+</html>

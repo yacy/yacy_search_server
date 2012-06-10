@@ -1,4 +1,4 @@
 {
-	"url": "#[url]#"
-	"comment": "#[comment]#"
+	"url": "#[url]#",
+	"result": "#[result]#"
 }
