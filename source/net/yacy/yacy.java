@@ -309,7 +309,7 @@ public final class yacy {
             File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
             mkdirIfNeseccary(triplestore);
             for (String s: triplestore.list()) {
-            	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf")) TripleStore.Load(new File(triplestore, s).getAbsolutePath());
+            	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf") && !s.endsWith("_triplestore.rdf")) TripleStore.Load(new File(triplestore, s).getAbsolutePath());
             }
             if (sb.getConfigBool("triplestore.persistent", false)) {
             	TripleStore.Load(new File(triplestore, "local.rdf").getAbsolutePath());
