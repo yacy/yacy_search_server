@@ -58,26 +58,34 @@ document <img src="/currentyacypeer/env/grafics/bad.png" width="16px" height="16
 
 </div> -->
 
+
 <div id="sidebar-element" class="sci_panel" style="top: 110px;">
 
-<input id="SliderSingle" type="slider" name="price" value="20" />
+<input type="text" name="tags" id="tags" class="bm_input" size="80" />
 
-<script type="text/javascript" charset="utf-8">
-	$("#SliderSingle").slider(
-		{
-			from: 0,
-			to: 100,
-			step: 2.5,
-			round: 1,
-			format: { format: '##.0', locale: 'de'},
-			dimension: '&nbsp;',
-			skin: 'round',
-			onstatechange: function(value) {
-				triple ('#[link]#', '#[link]#', 'http://virtual.x/hasvalue', value, '#[username]#');
-				}
-		}
-	);
-</script>
+	<script type="text/javascript" charset="utf-8">
+	
+	var oldvalue = loadvalue ('#[link]#', 'http://virtual.x/hastags');
+	
+	document.getElementById('tags').value = oldvalue;
+	
+	$('#tags').tagsInput({
+  	   'height':'105px',
+ 	   'width':'270px',
+ 	   'interactive':true,
+ 	   'removeWithBackspace' : true,
+ 	   'minChars' : 0,
+ 	   'maxChars' : 0,
+ 	   'placeholderColor' : '#666666',
+ 	   'onChange' : function () {
+ 	   		storevalue ('#[link]#', 'http://virtual.x/hastags', document.getElementById('tags').value);
+ 	   		}  	   
+     }); 
+     
+     
+
+	</script>
+
 
 </div>
 

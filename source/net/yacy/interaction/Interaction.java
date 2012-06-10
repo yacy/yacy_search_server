@@ -450,33 +450,25 @@ public static String Contribution(String url, String comment, String from, Strin
 }
 
 public static String Triple(String url, String s, String p, String o, String from) {
-
-	final Switchboard sb = Switchboard.getSwitchboard();
-
-	Resource r = TripleStore.model.getResource(s);
-	Property pr = TripleStore.model.createProperty(p);
-
+	Resource r = TripleStore.model.getResource(s+"/"+from);
+	Property pr = TripleStore.model.getProperty(p);
+	TripleStore.model.removeAll(r, pr, (Resource) null);
 	r.addProperty(pr, o);
-
-	Log.logInfo ("TRIPLESTORE", "PUT "+s+"-"+p+"-"+o);
-
+	Log.logInfo ("TRIPLESTORE", "PUT "+from+" / "+s+" - "+p+" - "+o);
 	return "";
 }
 
-public static String TripleGet(String s, String p) {
-
-	final Switchboard sb = Switchboard.getSwitchboard();
-
-	Resource r = TripleStore.model.getResource(s);
+public static String TripleGet(String s, String p, String username) {
+	Resource r = TripleStore.model.getResource(s+"/"+username);
 	Property pr = TripleStore.model.getProperty(p);
 
 	StmtIterator iter = TripleStore.model.listStatements(r, pr, (Resource) null);
-
 	Log.logInfo ("TRIPLESTORE", "GET "+s+" - "+p);
 
 	while (iter.hasNext()) {
-
-		return (iter.nextStatement().getObject().toString());
+		String obj = iter.nextStatement().getObject().toString();
+		Log.logInfo ("TRIPLESTORE", "GET "+username+" / "+s+" - "+p+" - "+obj);
+		return (obj);
 	}
 
 	return "";
@@ -484,9 +476,6 @@ public static String TripleGet(String s, String p) {
 }
 
 public static String GetContribution(String url) {
-
-	final Switchboard sb = Switchboard.getSwitchboard();
-
 
 //	Boolean processlocal = false;
 //

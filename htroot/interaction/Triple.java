@@ -29,9 +29,11 @@ package interaction;
 //javac -classpath .:../classes ViewLog_p.java
 //if the shell's current path is HTROOT
 
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;
 import net.yacy.search.Switchboard;
+import de.anomic.data.UserDB;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -42,6 +44,56 @@ public class Triple {
     	final Switchboard sb = (Switchboard) env;
     	
         final serverObjects prop = new serverObjects();
+        
+        UserDB.Entry entry=null;
+        
+        
+
+        //default values
+        prop.put("enabled_logged_in", "0");
+        prop.put("enabled_logged-in_limit", "0");
+        String username = "anonymous";
+        prop.put("enabled_status", "0");
+        //identified via HTTPPassword
+        entry=sb.userDB.proxyAuth((header.get(RequestHeader.AUTHORIZATION, "xxxxxx")));
+        if(entry != null){
+        	prop.put("enabled_logged-in_identified-by", "1");
+        //try via cookie
+        }else{
+            entry=sb.userDB.cookieAuth(header.getHeaderCookies());
+            prop.put("enabled_logged-in_identified-by", "2");
+            //try via ip
+            if(entry == null){
+                entry=sb.userDB.ipAuth((header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
+                if(entry != null){
+                    prop.put("enabled_logged-in_identified-by", "0");
+                }
+            }
+        }
+        
+        //identified via userDB
+        if(entry != null){
+            prop.put("enabled_logged-in", "1");
+            username = entry.getUserName();
+            if(entry.getTimeLimit() > 0){
+                prop.put("enabled_logged-in_limit", "1");
+                final long limit=entry.getTimeLimit();
+                final long used=entry.getTimeUsed();
+                prop.put("enabled_logged-in_limit_timelimit", limit);
+                prop.put("enabled_logged-in_limit_timeused", used);
+                int percent=0;
+                if(limit!=0 && used != 0)
+                    percent=(int)((float)used/(float)limit*100);
+                prop.put("enabled_logged-in_limit_percent", percent/3);
+                prop.put("enabled_logged-in_limit_percent2", (100-percent)/3);
+            }
+        //logged in via static Password
+        }else if(sb.verifyAuthentication(header)){
+            prop.put("enabled_logged-in", "2");
+            username = "staticadmin";
+        //identified via form-login
+        //TODO: this does not work for a static admin, yet.
+        }
 
         String url = "";
         String s = "";        
@@ -75,11 +127,11 @@ public class Triple {
         
         if (post.containsKey("load")) {
         	
-        	o = Interaction.TripleGet(s, p);
+        	o = Interaction.TripleGet(s, p, username);
         	
         } else {
         
-        	Interaction.Triple(url, s, p, o, from);
+        	Interaction.Triple(url, s, p, o, username);
         }                
         
         prop.put("result", o);
