@@ -12,6 +12,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.vocabulary.Geo;
+import net.yacy.cora.lod.vocabulary.HttpHeader;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
@@ -27,6 +31,13 @@ import com.hp.hpl.jena.util.FileManager;
 public class JenaTripleStore {
 
 	public static Model model = ModelFactory.createDefaultModel();
+	static {
+        model.setNsPrefix(YaCyMetadata.PREFIX, YaCyMetadata.NAMESPACE);
+        model.setNsPrefix(Tagging.DEFAULT_PREFIX, Tagging.DEFAULT_NAMESPACE);
+        model.setNsPrefix(HttpHeader.PREFIX, HttpHeader.NAMESPACE);
+        model.setNsPrefix(Geo.PREFIX, Geo.NAMESPACE);
+        model.setNsPrefix("pnd", "http://dbpedia.org/ontology/individualisedPnd");
+	}
 
 	public static ConcurrentHashMap<String, Model> privatestorage = null;
 

@@ -34,18 +34,18 @@ public enum Geo implements Vocabulary {
     Long,
     Lat;
 
-    public final static String IDENTIFIER = "http://www.w3.org/2003/01/geo/wgs84_pos#";
+    public final static String NAMESPACE = "http://www.w3.org/2003/01/geo/wgs84_pos#";
     public final static String PREFIX = "geo";
 
     private final String predicate;
 
     private Geo() {
-        this.predicate = IDENTIFIER + this.name().toLowerCase();
+        this.predicate = NAMESPACE + this.name().toLowerCase();
     }
 
     @Override
     public String getURLStub() {
-        return IDENTIFIER;
+        return NAMESPACE;
     }
 
     @Override

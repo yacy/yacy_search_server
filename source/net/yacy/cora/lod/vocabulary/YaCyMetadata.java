@@ -76,7 +76,7 @@ public enum YaCyMetadata implements Vocabulary {
 
     public final static byte[] HASH_PREFIX = ASCII.getBytes("http://yacy.net/hash#");
     public final static int HASH_PREFIX_LENGTH = HASH_PREFIX.length;
-    public final static String IDENTIFIER = "http://yacy.net/vocabularies/yacymetadata#";
+    public final static String NAMESPACE = "http://yacy.net/vocabularies/yacymetadata#";
     public final static String PREFIX = "yacy";
 
     private final String predicate;
@@ -89,12 +89,12 @@ public enum YaCyMetadata implements Vocabulary {
     }
 
     private YaCyMetadata() {
-        this.predicate = IDENTIFIER +  this.name();
+        this.predicate = NAMESPACE +  this.name();
     }
 
     @Override
     public String getURLStub() {
-        return IDENTIFIER;
+        return NAMESPACE;
     }
 
     @Override

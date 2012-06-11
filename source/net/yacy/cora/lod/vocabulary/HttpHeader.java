@@ -86,18 +86,18 @@ public enum HttpHeader implements Vocabulary {
     via, // representing a Via header,
     warning; // representing a Warning header.
 
-    public final static String IDENTIFIER = "http://www.w3.org/WAI/ER/HTTP/WD-HTTP-in-RDF-20060131";
+    public final static String NAMESPACE = "http://www.w3.org/1999/xx/http#";
     public final static String PREFIX = "http";
 
     private final String predicate;
 
     private HttpHeader() {
-        this.predicate = IDENTIFIER +  this.name();
+        this.predicate = NAMESPACE +  this.name();
     }
 
     @Override
     public String getURLStub() {
-        return IDENTIFIER;
+        return NAMESPACE;
     }
 
     @Override

@@ -35,7 +35,8 @@ import net.yacy.document.geolocalization.Localization;
 
 public class Tagging {
 
-    private final static String DEFAULT_IDENTIFIER_STUB = "http://yacy.net/tagging#";
+    public final static String DEFAULT_NAMESPACE= "http://yacy.net/tagging#";
+    public final static String DEFAULT_PREFIX = "tag";
 
     private final String navigatorName;
     private final Map<String, String> synonym2term;
@@ -49,7 +50,7 @@ public class Tagging {
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
         this.synonym2synonyms = new ConcurrentHashMap<String, Set<String>>();
-        this.predicatePrefix = DEFAULT_IDENTIFIER_STUB;
+        this.predicatePrefix = DEFAULT_NAMESPACE;
         this.predicate = this.predicatePrefix + name;
         this.objectPrefix = "";
     }
