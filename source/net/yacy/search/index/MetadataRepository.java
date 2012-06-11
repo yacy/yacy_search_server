@@ -60,6 +60,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import de.anomic.crawler.CrawlStacker;
 
 public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
@@ -408,8 +409,8 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
                             remove(entry.hash());
                             continue;
                         }
-                        if (this.blacklist.isListed(Blacklist.BLACKLIST_CRAWLER, entry.url()) ||
-                            this.blacklist.isListed(Blacklist.BLACKLIST_DHT, entry.url()) ||
+                        if (this.blacklist.isListed(BlacklistType.CRAWLER, entry) ||
+                            this.blacklist.isListed(BlacklistType.DHT, entry) ||
                             (this.crawlStacker.urlInAcceptedDomain(entry.url()) != null)) {
                             this.lastBlacklistedUrl = entry.url().toNormalform(true, true);
                             this.lastBlacklistedHash = ASCII.String(entry.hash());

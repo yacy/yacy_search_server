@@ -4,7 +4,7 @@ import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 
 import de.anomic.data.ListManager;
 import de.anomic.server.serverObjects;
@@ -35,15 +35,14 @@ public class blacklists_p {
                         prop.put("lists_" + blacklistCount + "_shared", "0");
                     }
 
-                    final String[] types = Blacklist.BLACKLIST_TYPES_STRING.split(",");
                     int j = 0;
-                    for (final String type : types) {
-                        prop.putXML("lists_" + blacklistCount + "_types_" + j + "_name", type);
+                    for (final BlacklistType type : BlacklistType.values()) {
+                        prop.putXML("lists_" + blacklistCount + "_types_" + j + "_name", type.toString());
                         prop.put("lists_" + blacklistCount + "_types_" + j + "_value",
                                 ListManager.listSetContains(type + ".BlackLists", element) ? 1 : 0);
                         j++;
                     }
-                    prop.put("lists_" + blacklistCount + "_types", types.length);
+                    prop.put("lists_" + blacklistCount + "_types", BlacklistType.values().length);
 
                     if (!"1".equals(attrOnly) && !"true".equals(attrOnly)) {
                 	final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, element));

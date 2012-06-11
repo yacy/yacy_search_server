@@ -30,12 +30,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.repository.Blacklist.BlacklistType;
+
 public class BlacklistFile {
     
     private final String filename;
-    private final String type;
+    private final BlacklistType type;
     
-    public BlacklistFile(final String filename, final String type) {
+    public BlacklistFile(final String filename, final BlacklistType type) {
         this.filename = filename;
         this.type = type;
     }
@@ -53,5 +55,5 @@ public class BlacklistFile {
         return new HashSet<String>(Arrays.asList(this.filename.split(",")));
     }
     
-    public String getType() { return this.type; }
+    public BlacklistType getType() { return this.type; }
 }

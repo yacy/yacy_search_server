@@ -42,7 +42,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -136,7 +136,7 @@ public class Surftips {
 
                 url = row.getPrimaryKeyUTF8().trim();
                 try{
-                	if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new DigestURI(url)))
+                	if(Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS ,new DigestURI(url)))
                 		continue;
                 }catch(final MalformedURLException e){continue;};
                 title = row.getColUTF8(1);

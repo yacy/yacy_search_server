@@ -50,7 +50,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.SeedDB;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
@@ -405,8 +405,8 @@ public final class CrawlStacker {
         }
 
         // check blacklist
-        if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
-            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is in blacklist.");
+        if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, url)) {
+            this.log.logFine("URL '" + urlstring + "' is in blacklist.");
             return "url in blacklist";
         }
 

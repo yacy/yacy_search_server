@@ -35,6 +35,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
 import de.anomic.crawler.ResultURLs;
@@ -134,7 +135,15 @@ public final class crawlReceipt {
         // check if the entry is in our network domain
         final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(entry.url());
         if (urlRejectReason != null) {
-            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            prop.put("delay", "9999");
+            return prop;
+        }
+
+        // Check URL against DHT blacklist
+        if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, entry)) {
+            // URL is blacklisted
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (URL is blacklisted) for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true) + " from peer " + iam);
             prop.put("delay", "9999");
             return prop;
         }

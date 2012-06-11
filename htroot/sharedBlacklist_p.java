@@ -47,7 +47,7 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
 
@@ -238,10 +238,7 @@ public class sharedBlacklist_p {
                             pw.println(newItem);
 
                             if (Switchboard.urlBlacklist != null) {
-                                final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;
-                                final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
-
-                                for (final String supportedBlacklistType : supportedBlacklistTypes) {
+                                for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
                                     if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",selectedBlacklistName)) {
                                         Switchboard.urlBlacklist.add(supportedBlacklistType,newItem.substring(0, pos), newItem.substring(pos + 1));
                                     }

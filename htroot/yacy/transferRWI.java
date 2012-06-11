@@ -46,7 +46,7 @@ import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.dht.FlatWordPartitionScheme;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segments;
@@ -172,8 +172,8 @@ public final class transferRWI {
                 urlHash = iEntry.urlhash();
 
                 // block blacklisted entries
-                if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {
-                    if (Network.log.isFine()) Network.log.logFine("transferRWI: blocked blacklisted URLHash '" + ASCII.String(urlHash) + "' from peer " + otherPeerName);
+                if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(BlacklistType.DHT, urlHash))) {
+                    Network.log.logFine("transferRWI: blocked blacklisted URLHash '" + ASCII.String(urlHash) + "' from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }

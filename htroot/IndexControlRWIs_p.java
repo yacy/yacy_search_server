@@ -58,7 +58,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
@@ -441,7 +441,7 @@ public class IndexControlRWIs_p
                                         supportedBlacklistType + ".BlackLists",
                                         blacklist) ) {
                                         Switchboard.urlBlacklist.add(
-                                            supportedBlacklistType,
+                                            BlacklistType.valueOf(supportedBlacklistType),
                                             url.getHost(),
                                             url.getFile());
                                     }
@@ -457,7 +457,6 @@ public class IndexControlRWIs_p
                 if ( post.containsKey("blacklistdomains") ) {
                     PrintWriter pw;
                     try {
-                        final String[] supportedBlacklistTypes = Blacklist.BLACKLIST_TYPES_STRING.split(",");
                         pw =
                             new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklist), true));
                         DigestURI url;
@@ -472,7 +471,7 @@ public class IndexControlRWIs_p
                             if ( e != null ) {
                                 url = e.url();
                                 pw.println(url.getHost() + "/.*");
-                                for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
+                                for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
                                     if ( ListManager.listSetContains(
                                         supportedBlacklistType + ".BlackLists",
                                         blacklist) ) {
@@ -623,7 +622,7 @@ public class IndexControlRWIs_p
                                 ? "appears emphasized, "
                                 : "")
                             + ((DigestURI.probablyRootURL(entry.word().urlhash())) ? "probably root url" : ""));
-                if ( Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url) ) {
+                if ( Switchboard.urlBlacklist.isListed(BlacklistType.DHT, url) ) {
                     prop.put("genUrlList_urlList_" + i + "_urlExists_urlhxChecked", "1");
                 }
                 i++;

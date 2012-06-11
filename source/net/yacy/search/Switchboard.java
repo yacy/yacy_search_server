@@ -1190,7 +1190,6 @@ public final class Switchboard extends serverSwitch
 
             // remove heuristics
             setConfig("heuristic.site", false);
-            setConfig("heuristic.scroogle", false);
             setConfig("heuristic.blekko", false);
 
             // relocate
@@ -1601,6 +1600,7 @@ public final class Switchboard extends serverSwitch
         this.tables.close();
         Domains.close();
         AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
+        Switchboard.urlBlacklist.close();
         UPnP.deletePortMapping();
         this.tray.remove();
         try {
@@ -3167,58 +3167,6 @@ public final class Switchboard extends serverSwitch
                     }
                 } catch ( final Throwable e ) {
                     Log.logException(e);
-                } finally {
-                    searchEvent.getRankingResult().oneFeederTerminated();
-                }
-            }
-        }.start();
-    }
-
-    public final void heuristicScroogle(final SearchEvent searchEvent) {
-        new Thread() {
-            @Override
-            public void run() {
-                QueryParams query = searchEvent.getQuery();
-                String queryString = query.queryString(true);
-                final int meta = queryString.indexOf("heuristic:", 0);
-                if ( meta >= 0 ) {
-                    final int q = queryString.indexOf(' ', meta);
-                    queryString =
-                        (q >= 0)
-                            ? queryString.substring(0, meta) + queryString.substring(q + 1)
-                            : queryString.substring(0, meta);
-                }
-                final String urlString =
-                    "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw="
-                        + queryString.trim().replaceAll(" ", "+")
-                        + "&n=2";
-                final DigestURI url;
-                try {
-                    url = new DigestURI(MultiProtocolURI.unescape(urlString));
-                } catch ( final MalformedURLException e1 ) {
-                    Log.logWarning("heuristicScroogle", "url not well-formed: '" + urlString + "'");
-                    return;
-                }
-
-                Map<MultiProtocolURI, String> links = null;
-                searchEvent.getRankingResult().oneFeederStarted();
-                try {
-                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE);
-                    if ( links != null ) {
-                        final Iterator<MultiProtocolURI> i = links.keySet().iterator();
-                        while ( i.hasNext() ) {
-                            if ( i.next().toNormalform(false, false).indexOf("scroogle", 0) >= 0 ) {
-                                i.remove();
-                            }
-                        }
-                        Switchboard.this.log.logInfo("Heuristic: adding "
-                            + links.size()
-                            + " links from scroogle");
-                        // add all pages to the index
-                        addAllToIndex(null, links, searchEvent, "scroogle");
-                    }
-                } catch ( final Throwable e ) {
-                    //Log.logException(e);
                 } finally {
                     searchEvent.getRankingResult().oneFeederTerminated();
                 }

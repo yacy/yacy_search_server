@@ -1,6 +1,6 @@
 package interaction;
 
-//ViewLog_p.java 
+//ViewLog_p.java
 //-----------------------
 //part of the AnomicHTTPD caching proxy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -30,75 +30,65 @@ package interaction;
 //if the shell's current path is HTROOT
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 
-import com.hp.hpl.jena.rdf.model.Model;
-
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;
 import net.yacy.interaction.TripleStore;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
+
+import com.hp.hpl.jena.rdf.model.Model;
+
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class PutRDF {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-    	
-    	final Switchboard sb = (Switchboard) env;
-    	
+
+
         final serverObjects prop = new serverObjects();
 
-        String url = "";
-        String s = "";        
-        String p = "";
-        String o = "";
-        
         Boolean global = false;
-        
+
         if(post != null){
-                       
+
             global = post.containsKey("global");
-            
+
         }
 
-       	
+
         if (global) {
-        	
+
         	ByteArrayOutputStream fout;
-   			
-    			
+
+
     		fout = new ByteArrayOutputStream();
-    			
+
     		TripleStore.model.write(fout);
-    			
+
         	prop.put("resultXML", fout.toString());
-        	
+
         } else {
-        	
+
         	Model tmp = TripleStore.privatestorage.get(Interaction.GetLoggedOnUser(header));
-        	
+
         	if (tmp != null) {
-        		
-        		ByteArrayOutputStream fout;       			    		
-        		fout = new ByteArrayOutputStream();        			
+
+        		ByteArrayOutputStream fout;
+        		fout = new ByteArrayOutputStream();
         		tmp.write(fout);
-        		
+
         		prop.put("resultXML", fout.toString());
-        		
+
         	} else {
-        	
+
         		prop.put("resultXML", "");
         	}
         }
-        
-        
 
-        
-        
+
+
+
+
         return prop;
     }
 }

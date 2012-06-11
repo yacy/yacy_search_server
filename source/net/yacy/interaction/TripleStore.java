@@ -2,15 +2,16 @@
 
 package net.yacy.interaction;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
@@ -32,7 +33,7 @@ public class TripleStore {
 		if (filename.endsWith(".nt")) LoadNTriples(filename);
 		else LoadRDF(filename);
 	}
-	
+
 	public static void LoadRDF(String fileNameOrUri) throws IOException {
 		Model tmp  = ModelFactory.createDefaultModel();
 		Log.logInfo("TRIPLESTORE", "Loading from " + fileNameOrUri);
@@ -67,8 +68,7 @@ public class TripleStore {
 
 
 		try {
-            @SuppressWarnings("deprecation")
-			InputStream in = new StringBufferInputStream(rdffile);
+			InputStream in = new ByteArrayInputStream(UTF8.getBytes(rdffile));
 
             // read the RDF/XML file
             tmp.read(in, null);

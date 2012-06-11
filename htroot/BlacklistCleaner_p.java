@@ -49,6 +49,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistError;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
 import de.anomic.data.ListManager;
@@ -76,10 +77,6 @@ public class BlacklistCleaner_p {
         ListManager.listsPath = new File(env.getDataPath(), env.getConfig("listManager.listsPath", "DATA/LISTS"));
         String blacklistToUse = null;
 
-        // get the list of supported blacklist types
-        final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;
-        final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
-
         prop.put(DISABLED+"checked", "1");
 
         if (post != null) {
@@ -102,10 +99,10 @@ public class BlacklistCleaner_p {
 
                 if (post.containsKey("delete")) {
                     prop.put(RESULTS + "modified", "1");
-                    prop.put(RESULTS + "modified_delCount", removeEntries(blacklistToUse, supportedBlacklistTypes, getKeysByPrefix(post, "select", true)));
+                    prop.put(RESULTS + "modified_delCount", removeEntries(blacklistToUse, BlacklistType.values(), getKeysByPrefix(post, "select", true)));
                 } else if (post.containsKey("alter")) {
                     prop.put(RESULTS + "modified", "2");
-                    prop.put(RESULTS + "modified_alterCount", alterEntries(blacklistToUse, supportedBlacklistTypes, getKeysByPrefix(post, "select", false), getValuesByPrefix(post, "entry", false)));
+                    prop.put(RESULTS + "modified_alterCount", alterEntries(blacklistToUse, BlacklistType.values(), getKeysByPrefix(post, "select", false), getValuesByPrefix(post, "entry", false)));
                 }
 
                 // list illegal entries
@@ -275,7 +272,7 @@ public class BlacklistCleaner_p {
      * @param entries Array of entries to be deleted.
      * @return Length of the list of entries to be removed.
      */
-    private static int removeEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final String[] entries) {
+    private static int removeEntries(final String blacklistToUse, final BlacklistType[] supportedBlacklistTypes, final String[] entries) {
         // load blacklist data from file
         final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, blacklistToUse));
 
@@ -299,7 +296,7 @@ public class BlacklistCleaner_p {
             }
 
             // remove the entry from the running blacklist engine
-            for (final String supportedBlacklistType : supportedBlacklistTypes) {
+            for (final BlacklistType supportedBlacklistType : supportedBlacklistTypes) {
                 if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklistToUse)) {
                     final String host = (s.indexOf('/',0) == -1) ? s : s.substring(0, s.indexOf('/',0));
                     final String path = (s.indexOf('/',0) == -1) ? ".*" : s.substring(s.indexOf('/',0) + 1);
@@ -328,7 +325,7 @@ public class BlacklistCleaner_p {
      */
     private static int alterEntries(
             final String blacklistToUse,
-            final String[] supportedBlacklistTypes,
+            final BlacklistType[] supportedBlacklistTypes,
             final String[] oldEntry,
             final String[] newEntry) {
         removeEntries(blacklistToUse, supportedBlacklistTypes, oldEntry);
@@ -346,7 +343,7 @@ public class BlacklistCleaner_p {
                     path = n.substring(pos + 1);
                 }
                 pw.println(host + "/" + path);
-                for (final String s : supportedBlacklistTypes) {
+                for (final BlacklistType s : supportedBlacklistTypes) {
                     if (ListManager.listSetContains(s + ".BlackLists",blacklistToUse)) {
                         Switchboard.urlBlacklist.add(
                                 s,

@@ -52,6 +52,7 @@ import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
 import de.anomic.crawler.Cache;
@@ -189,7 +190,7 @@ public final class LoaderDispatcher {
         final String host = url.getHost();
 
         // check if url is in blacklist
-        if (checkBlacklist && host != null && Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, host.toLowerCase(), url.getFile())) {
+        if (checkBlacklist && Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, host.toLowerCase(), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
