@@ -32,6 +32,9 @@ public class JenaTripleStore {
 
 	public static Model model = ModelFactory.createDefaultModel();
 	static {
+	    init();
+	}
+	private final static void init() {
         model.setNsPrefix(YaCyMetadata.PREFIX, YaCyMetadata.NAMESPACE);
         model.setNsPrefix(Tagging.DEFAULT_PREFIX, Tagging.DEFAULT_NAMESPACE);
         model.setNsPrefix(HttpHeader.PREFIX, HttpHeader.NAMESPACE);
@@ -106,6 +109,14 @@ public class JenaTripleStore {
 			// TODO Auto-generated catch block
 			Log.logWarning("TRIPLESTORE", "Saving to " + filename+" failed");
 		}
+	}
+
+	/**
+	 * clear the triplestore
+	 */
+	public static void clear() {
+	    model = ModelFactory.createDefaultModel();
+	    init();
 	}
 
 	/**
