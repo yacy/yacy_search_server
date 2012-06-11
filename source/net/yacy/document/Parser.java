@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 public interface Parser {
 
@@ -35,13 +36,13 @@ public interface Parser {
      * @return a set of mime type strings that are supported
      */
     public Set<String> supportedMimeTypes();
-    
+
     /**
      * each parser must define a set of supported file extensions
      * @return a set of file name extensions that are supported
      */
     public Set<String> supportedExtensions();
-    
+
     /**
      * parse an input stream
      * @param url the url of the source
@@ -53,15 +54,15 @@ public interface Parser {
      * @throws InterruptedException
      */
     public Document[] parse(
-            MultiProtocolURI url,
+            DigestURI url,
             String mimeType,
             String charset,
             InputStream source
             ) throws Parser.Failure, InterruptedException;
 
-    
+
     // methods to that shall make it possible to put Parser objects into a hashtable
-    
+
     /**
      * get the name of the parser
      * @return the name of the parser
@@ -75,20 +76,20 @@ public interface Parser {
      */
     @Override
     public boolean equals(Object o);
-    
+
     /**
      * the hash code of a parser
      * @return the hash code of the parser name string
      */
     @Override
     public int hashCode();
-    
+
     /**
      * a parser warning
      * thrown as an exception
      */
     public class Failure extends Exception {
-        
+
         private static final long serialVersionUID = 2278214953869122883L;
         private MultiProtocolURI url = null;
         public Failure() {
@@ -99,12 +100,12 @@ public interface Parser {
             super(message + "; url = " + url.toNormalform(true, false));
             this.url = url;
         }
-        
+
         public Failure(final String message, final MultiProtocolURI url, Throwable e) {
             super(message + "; url = " + url.toNormalform(true, false), e);
             this.url = url;
         }
-        
+
         public MultiProtocolURI getURL() {
             return this.url;
         }

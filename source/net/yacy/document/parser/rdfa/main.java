@@ -9,9 +9,9 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.parser.rdfa.impl.RDFaParser;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 public class main {
 	/**
@@ -46,7 +46,7 @@ public class main {
 			if (aReader != null) {
 				RDFaParser aParser = new RDFaParser("html");
 				try {
-					aParser.parse(new MultiProtocolURI(args[0]),"","",aURL.openStream());
+					aParser.parse(new DigestURI(args[0]),"","",aURL.openStream());
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {

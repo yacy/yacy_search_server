@@ -35,16 +35,24 @@ import net.yacy.document.geolocalization.Localization;
 
 public class SimpleVocabulary {
 
+    public final static String DEFAULT_SUBJECT_PREFIX = "http://yacy.net/url/";
+    public final static String DEFAULT_PREDICATE_PREFIX = "http://yacy.net/voc/";
+
     private final String navigatorName;
     private final Map<String, String> synonym2term;
     private final Map<String, String> term2synonym;
     private final Map<String, Set<String>> synonym2synonyms;
+
+    private String predicate, predicatePrefix, objectPrefix;
 
     public SimpleVocabulary(String name) {
         this.navigatorName = name;
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
         this.synonym2synonyms = new ConcurrentHashMap<String, Set<String>>();
+        this.predicatePrefix = DEFAULT_PREDICATE_PREFIX;
+        this.predicate = this.predicatePrefix + name;
+        this.objectPrefix = "";
     }
 
     public SimpleVocabulary(String name, File propFile) throws IOException {
@@ -59,6 +67,16 @@ public class SimpleVocabulary {
 			    line = line.trim();
 			    p = line.indexOf('#');
 			    if (p >= 0) {
+			        String comment = line.substring(p + 1).trim();
+                    if (comment.startsWith("predicate-prefix:")) {
+                        this.predicatePrefix = comment.substring(17).trim();
+                        if (!this.predicatePrefix.endsWith("/")) this.predicatePrefix += "/";
+                        this.predicate = this.predicatePrefix + name;
+                    }
+                    if (comment.startsWith("object-prefix:")) {
+                        this.objectPrefix = comment.substring(14).trim();
+                        if (!this.objectPrefix.endsWith("/")) this.objectPrefix += "/";
+                    }
 			    	line = line.substring(0, p).trim();
 			    }
 			    if (line.length() == 0) {
@@ -104,16 +122,6 @@ public class SimpleVocabulary {
 		}
     }
 
-    private final String normalizeKey(String k) {
-        k = k.trim();
-        k = k.replaceAll(" \\+", ", "); // remove symbols that are bad in a query attribute
-        k = k.replaceAll(" /", ", ");
-        k = k.replaceAll("\\+", ",");
-        k = k.replaceAll("/", ",");
-        k = k.replaceAll("  ", " ");
-        return k;
-    }
-    
     public SimpleVocabulary(String name, Localization localization) {
         this(name);
         Set<String> locNames = localization.locationNames();
@@ -134,6 +142,36 @@ public class SimpleVocabulary {
         }
     }
 
+    private final String normalizeKey(String k) {
+        k = k.trim();
+        k = k.replaceAll(" \\+", ", "); // remove symbols that are bad in a query attribute
+        k = k.replaceAll(" /", ", ");
+        k = k.replaceAll("\\+", ",");
+        k = k.replaceAll("/", ",");
+        k = k.replaceAll("  ", " ");
+        return k;
+    }
+
+    /**
+     * get the RDF predicate name
+     * @return
+     */
+    public String getPredicate() {
+        return this.predicate;
+    }
+
+    /**
+     * get the prefix of the object name
+     * @return
+     */
+    public String getObjectPrefix() {
+        return this.objectPrefix;
+    }
+
+    /**
+     * get the name of the navigator; this is part of the RDF predicate name (see: getPredicate())
+     * @return
+     */
     public String getName() {
         return this.navigatorName;
     }
@@ -141,13 +179,13 @@ public class SimpleVocabulary {
     public Metatag getMetatag(char prefix, final String word) {
         String printname = this.synonym2term.get(word);
         if (printname == null) return null;
-        return new Metatag(prefix, this.navigatorName, printname);
+        return new Metatag(prefix, this.navigatorName, this.predicate, printname);
     }
 
     public Set<String> getSynonyms(String term) {
     	return this.synonym2synonyms.get(term);
     }
-    
+
     public Set<String> tags() {
         return this.synonym2term.keySet();
     }
@@ -170,15 +208,15 @@ public class SimpleVocabulary {
         word = PATTERN_SZ.matcher(word).replaceAll("ss");
         return word;
     }
-    
+
 	public static class Metatag {
-	    private final String vocName;
-	    private final String print;
+	    private final String vocName, predicate, object;
 	    private final char prefix;
-	    public Metatag(char prefix, String vocName, String print) {
+	    public Metatag(char prefix, String vocName, String predicate, String object) {
 	    	this.prefix = prefix;
 	        this.vocName = vocName;
-	        this.print = print;
+	        this.predicate = predicate;
+	        this.object = object;
 	    }
 	    public Metatag(char prefix, String metatag) throws RuntimeException {
 	    	this.prefix = prefix;
@@ -186,55 +224,60 @@ public class SimpleVocabulary {
 	        int p = metatag.indexOf(':');
 	        if (p < 0) throw new RuntimeException("bad metatag: metatag = " + metatag);
 	        this.vocName = metatag.substring(1, p);
-	        this.print = decodeMaskname(metatag.substring(p + 1));
+	        this.predicate = DEFAULT_PREDICATE_PREFIX + this.vocName;
+	        this.object = decodeMaskname(metatag.substring(p + 1));
 	    }
-	    
+
 	    public String getVocabularyName() {
 	        return this.vocName;
 	    }
-	    
-	    public String getPrintName() {
-	        return this.print;
-	    }
-	    
+
+        public String getPredicate() {
+            return this.predicate;
+        }
+
+        public String getObject() {
+            return this.object;
+        }
+
 	    @Override
 	    public String toString() {
-	        return this.prefix + this.vocName + ":" + encodePrintname(this.print);
+	        return this.prefix + this.vocName + ":" + encodePrintname(this.object);
 	    }
-	    
+
 	    @Override
 	    public boolean equals(Object m) {
 	        Metatag m0 = (Metatag) m;
-	        return this.vocName.equals(m0.vocName) && this.print.equals(m0.print);
+	        return this.vocName.equals(m0.vocName) && this.object.equals(m0.object);
 	    }
-	    
+
 	    @Override
 	    public int hashCode() {
-	        return this.vocName.hashCode() + this.print.hashCode();
-	    }
-	    
-	    private final static Pattern PATTERN_UL = Pattern.compile("_");
-	    private final static Pattern PATTERN_SP = Pattern.compile(" ");
-	
-	    public static final String encodePrintname(String printname) {
-	        return PATTERN_SP.matcher(printname).replaceAll("_");
-	    }
-	
-	    public static final String decodeMaskname(String maskname) {
-	        return PATTERN_UL.matcher(maskname).replaceAll(" ");
-	    }
-	
-	    public static String cleanTagFromAutotagging(char prefix, final String tagString) {
-	        if (tagString == null || tagString.length() == 0) return "";
-	        String[] tags = PATTERN_SP.split(tagString);
-	        StringBuilder sb = new StringBuilder(tagString.length());
-	        for (String tag : tags) {
-	            if (tag.length() > 0 && tag.charAt(0) != prefix) {
-	                sb.append(tag).append(' ');
-	            }
-	        }
-	        if (sb.length() == 0) return "";
-	        return sb.substring(0, sb.length() - 1);
+	        return this.vocName.hashCode() + this.object.hashCode();
 	    }
 	}
+
+    private final static Pattern PATTERN_UL = Pattern.compile("_");
+    private final static Pattern PATTERN_SP = Pattern.compile(" ");
+
+    public static final String encodePrintname(String printname) {
+        return PATTERN_SP.matcher(printname).replaceAll("_");
+    }
+
+    public static final String decodeMaskname(String maskname) {
+        return PATTERN_UL.matcher(maskname).replaceAll(" ");
+    }
+
+    public static String cleanTagFromAutotagging(char prefix, final String tagString) {
+        if (tagString == null || tagString.length() == 0) return "";
+        String[] tags = PATTERN_SP.split(tagString);
+        StringBuilder sb = new StringBuilder(tagString.length());
+        for (String tag : tags) {
+            if (tag.length() > 0 && tag.charAt(0) != prefix) {
+                sb.append(tag).append(' ');
+            }
+        }
+        if (sb.length() == 0) return "";
+        return sb.substring(0, sb.length() - 1);
+    }
 }

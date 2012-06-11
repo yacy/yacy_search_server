@@ -54,7 +54,7 @@ public class Autotagging {
         this.autotaggingPath = autotaggingPath;
         this.prefixChar = prefixChar;
         this.allTags = new ConcurrentHashMap<String, Object>();
-        reload();
+        init();
     }
 
 
@@ -66,7 +66,7 @@ public class Autotagging {
      * properties without values are allowed (the value is then set to the key)
      * also the value can be used as a tag
      */
-    public void reload() {
+    public void init() {
         this.vocabularies.clear();
         this.allTags.clear();
         if (this.autotaggingPath == null || !this.autotaggingPath.exists()) {
@@ -129,19 +129,19 @@ public class Autotagging {
         final WordTokenizer tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(text)), LibraryProvider.dymLib);
         String tag;
         while (tokens.hasMoreElements()) {
-            tag = getPrintTagFromWord(tokens.nextElement().toString());
+            tag = getTagFromWord(tokens.nextElement().toString()).toString();
             if (tag != null) as.add(tag);
         }
         return as;
     }
 
-    public String getPrintTagFromWord(String word) {
+    public SimpleVocabulary.Metatag getTagFromWord(String word) {
         if (this.vocabularies.isEmpty()) return null;
         SimpleVocabulary.Metatag tag;
         word = SimpleVocabulary.normalizeWord(word);
         for (Map.Entry<String, SimpleVocabulary> v: this.vocabularies.entrySet()) {
             tag = v.getValue().getMetatag(this.prefixChar, word);
-            if (tag != null) return tag.toString();
+            if (tag != null) return tag;
         }
         return null;
     }
@@ -153,19 +153,15 @@ public class Autotagging {
         }
         return false;
     }
-    
-    public SimpleVocabulary.Metatag metatag(String vocName, String print) {
-    	return new SimpleVocabulary.Metatag(this.prefixChar, vocName, print);
-    }
 
     public SimpleVocabulary.Metatag metatag(String metatag) {
     	return new SimpleVocabulary.Metatag(this.prefixChar, metatag);
     }
-    
+
     public String cleanTagFromAutotagging(String tagString) {
-    	return SimpleVocabulary.Metatag.cleanTagFromAutotagging(this.prefixChar, tagString);
+    	return SimpleVocabulary.cleanTagFromAutotagging(this.prefixChar, tagString);
     }
-    
+
     public static void main(String[] args) {
         Autotagging a = new Autotagging(new File("DATA/DICTIONARIES/" + LibraryProvider.path_to_autotagging_dictionaries), '$');
         for (Map.Entry<String, SimpleVocabulary> entry: a.vocabularies.entrySet()) {

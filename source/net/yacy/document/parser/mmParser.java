@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -28,28 +28,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 // this is a new implementation of this parser idiom using multiple documents as result set
 
 public class mmParser extends AbstractParser implements Parser {
 
-    public mmParser() {        
+    public mmParser() {
         super("FreeMind Parser");
-        SUPPORTED_EXTENSIONS.add("mm");
-        SUPPORTED_MIME_TYPES.add("application/freemind");
-        SUPPORTED_MIME_TYPES.add("application/x-freemind");
+        this.SUPPORTED_EXTENSIONS.add("mm");
+        this.SUPPORTED_MIME_TYPES.add("application/freemind");
+        this.SUPPORTED_MIME_TYPES.add("application/x-freemind");
     }
 
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
@@ -65,8 +67,8 @@ public class mmParser extends AbstractParser implements Parser {
     	}
     	return parser;
     }
-    
-    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+
+    public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException
     {
@@ -91,9 +93,9 @@ public class mmParser extends AbstractParser implements Parser {
             content = UTF8.getBytes(sb.toString());
 
         } catch (SAXException ex) {
-            log.logWarning(ex.getMessage());
+            this.log.logWarning(ex.getMessage());
         } catch (IOException ex) {
-            log.logWarning(ex.getMessage());
+            this.log.logWarning(ex.getMessage());
         }
 
         return new Document[]{new Document(
@@ -108,7 +110,7 @@ public class mmParser extends AbstractParser implements Parser {
             null,
             null,
             null,
-            0.0f, 0.0f, 
+            0.0f, 0.0f,
             content,
             null,
             null,
@@ -118,7 +120,7 @@ public class mmParser extends AbstractParser implements Parser {
 
     private class FreeMindHandler extends DefaultHandler {
 
-        private List<String> nodeText = new ArrayList<String>();
+        private final List<String> nodeText = new ArrayList<String>();
 
         @Override
         public void startElement(final String uri, final String localName,
@@ -126,13 +128,13 @@ public class mmParser extends AbstractParser implements Parser {
             if (qName.equals("node")) {
                 final String textValue = attributes.getValue("TEXT");
                 if (textValue != null) {
-                    nodeText.add(textValue);
+                    this.nodeText.add(textValue);
                 }
             }
         }
 
         protected List<String> getNodeText() {
-            return nodeText;
+            return this.nodeText;
         }
 
     }

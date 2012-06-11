@@ -756,7 +756,7 @@ public final class RWIProcess extends Thread
                         voc = new ConcurrentScoreMap<String>();
                         this.vocabularyNavigator.put(metatag.getVocabularyName(), voc);
                     }
-                    voc.inc(metatag.getPrintName());
+                    voc.inc(metatag.getObject());
                 } catch (RuntimeException e) {
                     // tag may not be well-formed
                 }

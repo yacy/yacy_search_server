@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package net.yacy.document.parser.rdfa.impl;
 
@@ -9,62 +9,61 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
-import net.yacy.document.Parser.Failure;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.rdfa.IRDFaTriple;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 /**
  * @author fgandon
- * 
+ *
  */
 public class RDFaParser extends htmlParser {
 
 	public RDFaParser(String name) {
 		super(name);
-		SUPPORTED_EXTENSIONS.remove("htm");
-		SUPPORTED_EXTENSIONS.remove("html");
-		SUPPORTED_EXTENSIONS.remove("shtml");
-		SUPPORTED_EXTENSIONS.remove("xhtml");
-		SUPPORTED_EXTENSIONS.remove("php");
-		SUPPORTED_EXTENSIONS.remove("php3");
-		SUPPORTED_EXTENSIONS.remove("php4");
-		SUPPORTED_EXTENSIONS.remove("php5");
-		SUPPORTED_EXTENSIONS.remove("cfm");
-		SUPPORTED_EXTENSIONS.remove("asp");
-		SUPPORTED_EXTENSIONS.remove("aspx");
-		SUPPORTED_EXTENSIONS.remove("tex");
-		SUPPORTED_EXTENSIONS.remove("txt");
-		SUPPORTED_EXTENSIONS.remove("jsp");
-		SUPPORTED_EXTENSIONS.remove("mf");
-		SUPPORTED_EXTENSIONS.remove("pl");
-		SUPPORTED_EXTENSIONS.remove("py");
-		SUPPORTED_MIME_TYPES.remove("text/html");
-		SUPPORTED_MIME_TYPES.remove("text/xhtml+xml");
-		SUPPORTED_MIME_TYPES.remove("application/xhtml+xml");
-		SUPPORTED_MIME_TYPES.remove("application/x-httpd-php");
-		SUPPORTED_MIME_TYPES.remove("application/x-tex");
-		SUPPORTED_MIME_TYPES.remove("text/plain");
-		SUPPORTED_MIME_TYPES.remove("text/sgml");
-		SUPPORTED_MIME_TYPES.remove("text/csv");
+		this.SUPPORTED_EXTENSIONS.remove("htm");
+		this.SUPPORTED_EXTENSIONS.remove("html");
+		this.SUPPORTED_EXTENSIONS.remove("shtml");
+		this.SUPPORTED_EXTENSIONS.remove("xhtml");
+		this.SUPPORTED_EXTENSIONS.remove("php");
+		this.SUPPORTED_EXTENSIONS.remove("php3");
+		this.SUPPORTED_EXTENSIONS.remove("php4");
+		this.SUPPORTED_EXTENSIONS.remove("php5");
+		this.SUPPORTED_EXTENSIONS.remove("cfm");
+		this.SUPPORTED_EXTENSIONS.remove("asp");
+		this.SUPPORTED_EXTENSIONS.remove("aspx");
+		this.SUPPORTED_EXTENSIONS.remove("tex");
+		this.SUPPORTED_EXTENSIONS.remove("txt");
+		this.SUPPORTED_EXTENSIONS.remove("jsp");
+		this.SUPPORTED_EXTENSIONS.remove("mf");
+		this.SUPPORTED_EXTENSIONS.remove("pl");
+		this.SUPPORTED_EXTENSIONS.remove("py");
+		this.SUPPORTED_MIME_TYPES.remove("text/html");
+		this.SUPPORTED_MIME_TYPES.remove("text/xhtml+xml");
+		this.SUPPORTED_MIME_TYPES.remove("application/xhtml+xml");
+		this.SUPPORTED_MIME_TYPES.remove("application/x-httpd-php");
+		this.SUPPORTED_MIME_TYPES.remove("application/x-tex");
+		this.SUPPORTED_MIME_TYPES.remove("text/plain");
+		this.SUPPORTED_MIME_TYPES.remove("text/sgml");
+		this.SUPPORTED_MIME_TYPES.remove("text/csv");
 
-		SUPPORTED_EXTENSIONS.add("html");
-		SUPPORTED_EXTENSIONS.add("php");
-		SUPPORTED_MIME_TYPES.add("text/html");
-		SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
-		SUPPORTED_EXTENSIONS.add("html");
-		SUPPORTED_EXTENSIONS.add("htm");
+		this.SUPPORTED_EXTENSIONS.add("html");
+		this.SUPPORTED_EXTENSIONS.add("php");
+		this.SUPPORTED_MIME_TYPES.add("text/html");
+		this.SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
+		this.SUPPORTED_EXTENSIONS.add("html");
+		this.SUPPORTED_EXTENSIONS.add("htm");
 	}
 
 	@Override
-	public Document[] parse(MultiProtocolURI url, String mimeType,
+	public Document[] parse(DigestURI url, String mimeType,
 			String charset, InputStream source) throws Failure,
 			InterruptedException {
 
 		Document[] htmlDocs = parseHtml(url, mimeType, charset, source);
-		
+
 		// TODO: current hardcoded restriction: apply rdfa parser only on selected sources.
 
 		if (url.toString().contains(".yacy") || url.toString().contains("experiments")) {
@@ -82,7 +81,7 @@ public class RDFaParser extends htmlParser {
 
 	}
 
-	private Document parseRDFa(MultiProtocolURI url, String mimeType,
+	private Document parseRDFa(DigestURI url, String mimeType,
 			String charset, InputStream source) {
 		RDFaTripleImpl triple;
 		IRDFaTriple[] allTriples = null;
@@ -111,7 +110,7 @@ public class RDFaParser extends htmlParser {
 
 	}
 
-	private Document[] parseHtml(MultiProtocolURI url, String mimeType,
+	private Document[] parseHtml(DigestURI url, String mimeType,
 			String charset, InputStream source) throws Failure,
 			InterruptedException {
 
@@ -127,7 +126,7 @@ public class RDFaParser extends htmlParser {
 
 	}
 
-	private Document convertAllTriplesToDocument(MultiProtocolURI url,
+	private Document convertAllTriplesToDocument(DigestURI url,
 			String mimeType, String charset, IRDFaTriple[] allTriples) {
 
 		Set<String> languages = new HashSet<String>(2);

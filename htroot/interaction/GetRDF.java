@@ -33,9 +33,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;
-import net.yacy.interaction.TripleStore;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
@@ -64,7 +64,7 @@ public class GetRDF {
 
     		fout = new ByteArrayOutputStream();
 
-    		TripleStore.model.write(fout);
+    		JenaTripleStore.model.write(fout);
 
         	try {
                 prop.put("resultXML", fout.toString(UTF8.charset.name()));
@@ -73,7 +73,7 @@ public class GetRDF {
 
         } else {
 
-        	Model tmp = TripleStore.privatestorage.get(Interaction.GetLoggedOnUser(header));
+        	Model tmp = JenaTripleStore.privatestorage.get(Interaction.GetLoggedOnUser(header));
 
         	if (tmp != null) {
 

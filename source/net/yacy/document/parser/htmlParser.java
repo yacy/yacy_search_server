@@ -43,6 +43,7 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.document.parser.html.TransformerWriter;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import com.ibm.icu.text.CharsetDetector;
@@ -85,7 +86,7 @@ public class htmlParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final MultiProtocolURI location,
+            final DigestURI location,
             final String mimeType,
             final String documentCharset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
@@ -109,7 +110,7 @@ public class htmlParser extends AbstractParser implements Parser {
      * @param scraper
      * @return
      */
-    private static Document transformScraper(final MultiProtocolURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
+    private static Document transformScraper(final DigestURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
         final String[] sections = new String[
                  scraper.getHeadlines(1).length +
                  scraper.getHeadlines(2).length +
@@ -294,9 +295,9 @@ public class htmlParser extends AbstractParser implements Parser {
 
     public static void main(final String[] args) {
         // test parsing of a url
-        MultiProtocolURI url;
+        DigestURI url;
         try {
-            url = new MultiProtocolURI(args[0]);
+            url = new DigestURI(args[0]);
             final byte[] content = url.get(ClientIdentification.getUserAgent(), 3000);
             final Document[] document = new htmlParser("HTML Parser").parse(url, "text/html", null, new ByteArrayInputStream(content));
             final String title = document[0].dc_title();

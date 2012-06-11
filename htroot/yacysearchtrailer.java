@@ -307,7 +307,7 @@ public class yacysearchtrailer {
                 while (i < 20 && navigatorIterator.hasNext()) {
                     name = navigatorIterator.next();
                     count = ve.getValue().get(name);
-                    nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURI.escape(SimpleVocabulary.Metatag.encodePrintname(name)).toString();
+                    nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURI.escape(SimpleVocabulary.encodePrintname(name)).toString();
                     queryStringForUrl = theQuery.queryStringForUrl();
                     p = queryStringForUrl.indexOf(nav);
                     if (p < 0) {

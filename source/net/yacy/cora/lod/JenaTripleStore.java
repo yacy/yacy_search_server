@@ -1,6 +1,6 @@
 // Author: DL
 
-package net.yacy.interaction;
+package net.yacy.cora.lod;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -17,10 +17,13 @@ import net.yacy.search.Switchboard;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileManager;
 
 
-public class TripleStore {
+public class JenaTripleStore {
 
 	public static Model model = ModelFactory.createDefaultModel();
 
@@ -29,12 +32,12 @@ public class TripleStore {
 	public static String file;
 
 
-	public static void Load(String filename) throws IOException {
+	public static void load(String filename) throws IOException {
 		if (filename.endsWith(".nt")) LoadNTriples(filename);
-		else LoadRDF(filename);
+		else loadRDF(filename);
 	}
 
-	public static void LoadRDF(String fileNameOrUri) throws IOException {
+	public static void loadRDF(String fileNameOrUri) throws IOException {
 		Model tmp  = ModelFactory.createDefaultModel();
 		Log.logInfo("TRIPLESTORE", "Loading from " + fileNameOrUri);
         InputStream is = FileManager.get().open(fileNameOrUri);
@@ -62,7 +65,7 @@ public class TripleStore {
 	    }
 	}
 
-	public static void Add (String rdffile) {
+	public static void addFile(String rdffile) {
 
 		Model tmp  = ModelFactory.createDefaultModel();
 
@@ -80,7 +83,7 @@ public class TripleStore {
 
 	}
 
-	public static void Save (String filename) {
+	public static void saveFile(String filename) {
 		Log.logInfo("TRIPLESTORE", "Saving triplestore with " + model.size() + " triples to " + filename);
     	FileOutputStream fout;
 		try {
@@ -93,6 +96,61 @@ public class TripleStore {
 		}
 	}
 
+	/**
+	 * Return a Resource instance with the given URI in this model.
+	 * @param uri
+	 * @return
+	 */
+	public static Resource getResource(String uri) {
+	    return model.getResource(uri);
+	}
+
+	/**
+	 * Return a Property instance in this model.
+	 * @param uri
+	 * @return
+	 */
+    public static Property getProperty(String uri) {
+        return model.getProperty(uri);
+    }
+
+    public static void deleteObjects(String subject, String predicate) {
+        Resource r = getResource(subject);
+        Property pr = getProperty(predicate);
+        JenaTripleStore.model.removeAll(r, pr, (Resource) null);
+    }
+
+    public static void addTriple(String subject, String predicate, String object) {
+        Resource r = getResource(subject);
+        Property pr = getProperty(predicate);
+        r.addProperty(pr, object);
+        Log.logInfo("TRIPLElSTORE", "ADD " + subject + " - " + predicate + " - " + object);
+    }
+
+    public static Iterator<String> getObjects(final String subject, final String predicate) {
+        Log.logInfo ("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ");
+        final Resource r = JenaTripleStore.getResource(subject);
+        final Property pr = JenaTripleStore.getProperty(predicate);
+        final StmtIterator iter = JenaTripleStore.model.listStatements(r, pr, (Resource) null);
+        return new Iterator<String>() {
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return iter.nextStatement().getObject().toString();
+            }
+
+            @Override
+            public void remove() {
+                iter.remove();
+            }
+
+        };
+    }
 
 	public static void initPrivateStores(Switchboard switchboard) {
 
@@ -134,9 +192,6 @@ public class TripleStore {
 			catch (Exception anyex) {
 
 			}
-
-
-
 		// create separate model
 
 	}

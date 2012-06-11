@@ -2,13 +2,10 @@ package net.yacy.document.parser.augment;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
 import net.yacy.document.parser.rdfa.impl.RDFaParser;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -58,7 +55,7 @@ public class AugmentParser extends RDFaParser {
 	}
 
 	@Override
-	public Document[] parse(MultiProtocolURI url, String mimeType,
+	public Document[] parse(DigestURI url, String mimeType,
 			String charset, InputStream source) throws Failure,
 			InterruptedException {
 
@@ -68,17 +65,6 @@ public class AugmentParser extends RDFaParser {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
-		String urlHash = String.valueOf(url.hashCode());
-
-		DigestURI durl;
-		try {
-			durl = new DigestURI(MultiProtocolURI.unescape(url.toString()));
-			urlHash = ASCII.String(durl.hash());
-		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
 
 		Document alreadyParsedDocument = htmlDocs[0];
@@ -102,7 +88,7 @@ public class AugmentParser extends RDFaParser {
 
 	}
 
-	private Document analyze (Document alreadyParsedDocument, MultiProtocolURI url,
+	private Document analyze (Document alreadyParsedDocument, DigestURI url,
 			String mimeType, String charset, InputStream source) {
 
 		Document newDoc = new Document(url, mimeType, charset, null, null, null, "", "",
@@ -123,7 +109,7 @@ public class AugmentParser extends RDFaParser {
 	}
 
 
-	private Document parseAndAugment(MultiProtocolURI url,
+	private Document parseAndAugment(DigestURI url,
 			String mimeType, String charset, InputStream source) {
 
 		String all = "";

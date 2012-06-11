@@ -63,6 +63,7 @@ import net.yacy.document.parser.zipParser;
 import net.yacy.document.parser.augment.AugmentParser;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.document.parser.rdfa.impl.RDFaParser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -148,7 +149,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final MultiProtocolURI location,
+            final DigestURI location,
             final String mimeType,
             final String charset,
             final File sourceFile
@@ -179,7 +180,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final MultiProtocolURI location,
+            final DigestURI location,
             String mimeType,
             final String charset,
             final byte[] content
@@ -202,7 +203,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final MultiProtocolURI location,
+            final DigestURI location,
             String mimeType,
             final String charset,
             final long contentLength,
@@ -241,7 +242,7 @@ public final class TextParser {
     }
 
     private static Document[] parseSource(
-            final MultiProtocolURI location,
+            final DigestURI location,
             final String mimeType,
             final Parser parser,
             final String charset,
@@ -264,7 +265,7 @@ public final class TextParser {
     }
 
     private static Document[] parseSource(
-            final MultiProtocolURI location,
+            final DigestURI location,
             final String mimeType,
             final List<Parser> parsers,
             final String charset,

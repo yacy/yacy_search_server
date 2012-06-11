@@ -40,6 +40,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.SimpleVocabulary;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.word.Word;
@@ -85,7 +86,7 @@ public final class Condenser {
 
     //private Properties analysis;
     private final Map<String, Word> words; // a string (the words) to (indexWord) - relation
-    private final Set<String> tags = new HashSet<String>(); // a set of tags, discovered from Autotagging
+    private final Set<SimpleVocabulary.Metatag> tags = new HashSet<SimpleVocabulary.Metatag>(); // a set of tags, discovered from Autotagging
 
     //public int RESULT_NUMB_TEXT_BYTES = -1;
     public int RESULT_NUMB_WORDS = -1;
@@ -235,7 +236,7 @@ public final class Condenser {
 
         // extend the tags in the document object with autotagging tags
         if (!this.tags.isEmpty()) {
-            document.addTags(this.tags);
+            document.addMetatags(this.tags);
         }
     }
 
@@ -298,7 +299,8 @@ public final class Condenser {
         assert is != null;
         final Set<String> currsentwords = new HashSet<String>();
         String word = "";
-        String k, tag;
+        String k;
+        SimpleVocabulary.Metatag tag;
         int wordlen;
         Word wsp;
         final Word wsp1;
@@ -321,7 +323,7 @@ public final class Condenser {
 
 	            // get tags from autotagging
 	            if (doAutotagging) {
-	                tag = LibraryProvider.autotagging.getPrintTagFromWord(word);
+	                tag = LibraryProvider.autotagging.getTagFromWord(word);
 	                if (tag != null) this.tags.add(tag);
 	            }
 

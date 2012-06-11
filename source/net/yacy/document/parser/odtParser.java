@@ -39,17 +39,17 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.SAXException;
-
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.xml.ODContentHandler;
 import net.yacy.document.parser.xml.ODMetaHandler;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
+
+import org.xml.sax.SAXException;
 
 public class odtParser extends AbstractParser implements Parser {
 
@@ -103,8 +103,8 @@ public class odtParser extends AbstractParser implements Parser {
     	}
     	return parser;
     }
-    
-    private Document[] parse(final MultiProtocolURI location, final String mimeType,
+
+    private Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final File dest)
             throws Parser.Failure, InterruptedException {
 
@@ -120,7 +120,7 @@ public class odtParser extends AbstractParser implements Parser {
             // opening the file as zip file
             final ZipFile zipFile = new ZipFile(dest);
             final Enumeration<? extends ZipEntry> zipEnum = zipFile.entries();
-            
+
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {
 
@@ -210,7 +210,7 @@ public class odtParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile

@@ -1,4 +1,4 @@
-//docParser.java 
+//docParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -28,30 +28,32 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
-import net.yacy.cora.document.MultiProtocolURI;
+
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
 public class docParser extends AbstractParser implements Parser {
 
     public docParser() {
         super("Word Document Parser");
-        SUPPORTED_EXTENSIONS.add("doc");
-        SUPPORTED_MIME_TYPES.add("application/msword");
-        SUPPORTED_MIME_TYPES.add("application/doc");
-        SUPPORTED_MIME_TYPES.add("appl/text");
-        SUPPORTED_MIME_TYPES.add("application/vnd.msword");
-        SUPPORTED_MIME_TYPES.add("application/vnd.ms-word");
-        SUPPORTED_MIME_TYPES.add("application/winword");
-        SUPPORTED_MIME_TYPES.add("application/word");
-        SUPPORTED_MIME_TYPES.add("application/x-msw6");
-        SUPPORTED_MIME_TYPES.add("application/x-msword");
+        this.SUPPORTED_EXTENSIONS.add("doc");
+        this.SUPPORTED_MIME_TYPES.add("application/msword");
+        this.SUPPORTED_MIME_TYPES.add("application/doc");
+        this.SUPPORTED_MIME_TYPES.add("appl/text");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.msword");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.ms-word");
+        this.SUPPORTED_MIME_TYPES.add("application/winword");
+        this.SUPPORTED_MIME_TYPES.add("application/word");
+        this.SUPPORTED_MIME_TYPES.add("application/x-msw6");
+        this.SUPPORTED_MIME_TYPES.add("application/x-msword");
     }
 
-    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+    public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
@@ -96,13 +98,13 @@ public class docParser extends AbstractParser implements Parser {
                   extractor.getDocSummaryInformation().getCompany(), // publisher
                   null,
                   null,
-                  0.0f, 0.0f, 
+                  0.0f, 0.0f,
                   UTF8.getBytes(contents.toString()),
                   null,
                   null,
                   null,
                   false)};
-          
+
         return docs;
     }
 
