@@ -42,7 +42,9 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.lod.SimpleVocabulary;
+import net.yacy.cora.lod.JenaTripleStore;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.sorting.ClusteredScoreMap;
@@ -50,7 +52,6 @@ import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
-import net.yacy.document.Autotagging;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -70,6 +71,9 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ResultEntry;
+
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 
 public final class RWIProcess extends Thread
 {
@@ -109,7 +113,8 @@ public final class RWIProcess extends Thread
     private final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     private final ScoreMap<String> protocolNavigator; // a counter for protocol types
     private final ScoreMap<String> filetypeNavigator; // a counter for file types
-    private final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies
+    private final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
+    private final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
 
     public RWIProcess(final QueryParams query, final ReferenceOrder order, final boolean remote) {
         // we collect the urlhashes and construct a list with urlEntry objects
@@ -147,6 +152,13 @@ public final class RWIProcess extends Thread
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.receivedRemoteReferences = new AtomicInteger(0);
         this.maxtime = query.maxtime;
+
+        // pre-calculate some values for navigation
+
+        this.taggingPredicates = new HashMap<String, String>();
+        for (Tagging t: LibraryProvider.autotagging.getVocabularies()) {
+            this.taggingPredicates.put(t.getName(), t.getPredicate());
+        }
     }
 
     public void addExpectedRemoteReferences(int x) {
@@ -354,6 +366,35 @@ public final class RWIProcess extends Thread
                     }
                     if ( noHttpButProtocolPattern && httpFlagSet ) {
                         continue pollloop;
+                    }
+                }
+
+                // check vocabulary constraint
+                String subject = YaCyMetadata.hashURI(iEntry.urlhash());
+                Resource resource = JenaTripleStore.getResource(subject);
+                if (this.query.metatags != null && this.query.metatags.size() > 0) {
+                    // all metatags must appear in the tags list
+                    for (Tagging.Metatag metatag: this.query.metatags) {
+                        Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, metatag.getPredicate());
+                        if (!ni.hasNext()) continue pollloop;
+                        String tags = ni.next().toString();
+                        if (tags.indexOf(metatag.getObject()) < 0) continue pollloop;
+                    }
+                }
+
+                // add navigators using the triplestore
+                for (Map.Entry<String, String> v: this.taggingPredicates.entrySet()) {
+                    Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, v.getValue());
+                    while (ni.hasNext()) {
+                        String[] tags = ni.next().toString().split(",");
+                        for (String tag: tags) {
+                            ScoreMap<String> voc = this.vocabularyNavigator.get(v.getKey());
+                            if (voc == null) {
+                                voc = new ConcurrentScoreMap<String>();
+                                this.vocabularyNavigator.put(v.getKey(), voc);
+                            }
+                            voc.inc(tag);
+                        }
                     }
                 }
 
@@ -678,11 +719,12 @@ public final class RWIProcess extends Thread
             }
 
             // check vocabulary constraint
+            /*
             final String tags = page.dc_subject();
             final String[] taglist = tags == null || tags.length() == 0 ? new String[0] : SPACE_PATTERN.split(page.dc_subject());
             if (this.query.metatags != null && this.query.metatags.size() > 0) {
                 // all metatags must appear in the tags list
-                for (SimpleVocabulary.Metatag metatag: this.query.metatags) {
+                for (Tagging.Metatag metatag: this.query.metatags) {
                     if (!Autotagging.metatagAppearIn(metatag, taglist)) {
                         this.sortout++;
                         //Log.logInfo("RWIProcess", "sorted out " + page.url());
@@ -690,6 +732,7 @@ public final class RWIProcess extends Thread
                     }
                 }
             }
+             */
 
             // evaluate information of metadata for navigation
             // author navigation:
@@ -747,10 +790,11 @@ public final class RWIProcess extends Thread
             }
 
             // vocabulary navigation
+            /*
             tagharvest: for (String tag: taglist) {
                 if (tag.length() < 1 || tag.charAt(0) != LibraryProvider.tagPrefix) continue tagharvest;
                 try {
-                	SimpleVocabulary.Metatag metatag = LibraryProvider.autotagging.metatag(tag);
+                	Tagging.Metatag metatag = LibraryProvider.autotagging.metatag(tag);
                     ScoreMap<String> voc = this.vocabularyNavigator.get(metatag.getVocabularyName());
                     if (voc == null) {
                         voc = new ConcurrentScoreMap<String>();
@@ -761,6 +805,7 @@ public final class RWIProcess extends Thread
                     // tag may not be well-formed
                 }
             }
+             */
 
             // accept url
             return page;

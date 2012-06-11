@@ -52,12 +52,13 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.JenaTripleStore;
-import net.yacy.cora.lod.SimpleVocabulary;
+import net.yacy.cora.lod.vocabulary.Owl;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -214,19 +215,24 @@ dc_rights
      * These keywords will appear in dc_subject
      * @param tags
      */
-    public void addMetatags(Set<SimpleVocabulary.Metatag> tags) {
+    public void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
         for (String s: this.keywords) {
             tags.remove(s);
         }
-        for (SimpleVocabulary.Metatag s: tags) {
-            String t = s.toString();
-            if (!this.keywords.contains(t)) {
-                this.keywords.add(t);
+        for (Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {
+            StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
+            for (Tagging.Metatag s: e.getValue()) {
+                String t = s.toString();
+                if (!this.keywords.contains(t)) {
+                    this.keywords.add(t);
+                }
+                sb.append(',').append(s.getObject());
             }
             // put to triplestore
-            String subject = SimpleVocabulary.DEFAULT_SUBJECT_PREFIX + ASCII.String(this.source.hash());
-            JenaTripleStore.addTriple(subject, s.getPredicate(), s.getObject());
-            JenaTripleStore.addTriple(subject, "http://www.w3.org/2002/07/owl#sameAs", this.source.toNormalform(true, false));
+            String subject = YaCyMetadata.hashURI(this.source.hash());
+            Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
+            JenaTripleStore.addTriple(subject, vocabulary.getPredicate(), sb.substring(1));
+            JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true, false));
         }
     }
 

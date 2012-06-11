@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.lod;
+package net.yacy.cora.lod.vocabulary;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,10 +33,9 @@ import net.yacy.cora.storage.Files;
 import net.yacy.document.WordCache.Dictionary;
 import net.yacy.document.geolocalization.Localization;
 
-public class SimpleVocabulary {
+public class Tagging {
 
-    public final static String DEFAULT_SUBJECT_PREFIX = "http://yacy.net/url/";
-    public final static String DEFAULT_PREDICATE_PREFIX = "http://yacy.net/voc/";
+    private final static String DEFAULT_IDENTIFIER_STUB = "http://yacy.net/tagging#";
 
     private final String navigatorName;
     private final Map<String, String> synonym2term;
@@ -45,17 +44,17 @@ public class SimpleVocabulary {
 
     private String predicate, predicatePrefix, objectPrefix;
 
-    public SimpleVocabulary(String name) {
+    public Tagging(String name) {
         this.navigatorName = name;
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
         this.synonym2synonyms = new ConcurrentHashMap<String, Set<String>>();
-        this.predicatePrefix = DEFAULT_PREDICATE_PREFIX;
+        this.predicatePrefix = DEFAULT_IDENTIFIER_STUB;
         this.predicate = this.predicatePrefix + name;
         this.objectPrefix = "";
     }
 
-    public SimpleVocabulary(String name, File propFile) throws IOException {
+    public Tagging(String name, File propFile) throws IOException {
         this(name);
         BlockingQueue<String> list = Files.concurentLineReader(propFile, 1000);
         String term, v;
@@ -122,7 +121,7 @@ public class SimpleVocabulary {
 		}
     }
 
-    public SimpleVocabulary(String name, Localization localization) {
+    public Tagging(String name, Localization localization) {
         this(name);
         Set<String> locNames = localization.locationNames();
         for (String loc: locNames) {
@@ -131,7 +130,7 @@ public class SimpleVocabulary {
         }
     }
 
-    public SimpleVocabulary(String name, Dictionary dictionary) {
+    public Tagging(String name, Dictionary dictionary) {
         this(name);
         Set<StringBuilder> words = dictionary.getWords();
         String s;
@@ -140,6 +139,14 @@ public class SimpleVocabulary {
             this.synonym2term.put(s.toLowerCase(), s);
             this.term2synonym.put(s, s.toLowerCase());
         }
+    }
+
+    /**
+     * get the predicate name which already contains the prefix url stub
+     * @return
+     */
+    public String getPredicate() {
+        return this.predicate;
     }
 
     private final String normalizeKey(String k) {
@@ -153,22 +160,6 @@ public class SimpleVocabulary {
     }
 
     /**
-     * get the RDF predicate name
-     * @return
-     */
-    public String getPredicate() {
-        return this.predicate;
-    }
-
-    /**
-     * get the prefix of the object name
-     * @return
-     */
-    public String getObjectPrefix() {
-        return this.objectPrefix;
-    }
-
-    /**
      * get the name of the navigator; this is part of the RDF predicate name (see: getPredicate())
      * @return
      */
@@ -176,10 +167,14 @@ public class SimpleVocabulary {
         return this.navigatorName;
     }
 
-    public Metatag getMetatag(char prefix, final String word) {
+    public Metatag getMetatagFromSynonym(char prefix, final String word) {
         String printname = this.synonym2term.get(word);
         if (printname == null) return null;
-        return new Metatag(prefix, this.navigatorName, this.predicate, printname);
+        return new Metatag(prefix, printname);
+    }
+
+    public Metatag getMetatagFromTerm(char prefix, final String word) {
+        return new Metatag(prefix, word);
     }
 
     public Set<String> getSynonyms(String term) {
@@ -188,6 +183,17 @@ public class SimpleVocabulary {
 
     public Set<String> tags() {
         return this.synonym2term.keySet();
+    }
+
+    @Override
+    public boolean equals(Object m) {
+        Tagging m0 = (Tagging) m;
+        return this.navigatorName.equals(m0.navigatorName);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.navigatorName.hashCode();
     }
 
     @Override
@@ -209,31 +215,20 @@ public class SimpleVocabulary {
         return word;
     }
 
-	public static class Metatag {
-	    private final String vocName, predicate, object;
+	public class Metatag {
+	    private final String object;
 	    private final char prefix;
-	    public Metatag(char prefix, String vocName, String predicate, String object) {
+	    public Metatag(char prefix, String object) {
 	    	this.prefix = prefix;
-	        this.vocName = vocName;
-	        this.predicate = predicate;
 	        this.object = object;
-	    }
-	    public Metatag(char prefix, String metatag) throws RuntimeException {
-	    	this.prefix = prefix;
-	        assert metatag.charAt(0) == prefix;
-	        int p = metatag.indexOf(':');
-	        if (p < 0) throw new RuntimeException("bad metatag: metatag = " + metatag);
-	        this.vocName = metatag.substring(1, p);
-	        this.predicate = DEFAULT_PREDICATE_PREFIX + this.vocName;
-	        this.object = decodeMaskname(metatag.substring(p + 1));
 	    }
 
 	    public String getVocabularyName() {
-	        return this.vocName;
+	        return Tagging.this.navigatorName;
 	    }
 
         public String getPredicate() {
-            return this.predicate;
+            return Tagging.this.predicate;
         }
 
         public String getObject() {
@@ -242,18 +237,18 @@ public class SimpleVocabulary {
 
 	    @Override
 	    public String toString() {
-	        return this.prefix + this.vocName + ":" + encodePrintname(this.object);
+	        return this.prefix + Tagging.this.navigatorName + ":" + encodePrintname(this.object);
 	    }
 
 	    @Override
 	    public boolean equals(Object m) {
 	        Metatag m0 = (Metatag) m;
-	        return this.vocName.equals(m0.vocName) && this.object.equals(m0.object);
+	        return Tagging.this.navigatorName.equals(m0.getVocabularyName()) && this.object.equals(m0.object);
 	    }
 
 	    @Override
 	    public int hashCode() {
-	        return this.vocName.hashCode() + this.object.hashCode();
+	        return Tagging.this.navigatorName.hashCode() + this.object.hashCode();
 	    }
 	}
 
@@ -280,4 +275,5 @@ public class SimpleVocabulary {
         if (sb.length() == 0) return "";
         return sb.substring(0, sb.length() - 1);
     }
+
 }

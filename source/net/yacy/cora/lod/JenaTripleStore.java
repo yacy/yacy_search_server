@@ -18,6 +18,7 @@ import net.yacy.search.Switchboard;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileManager;
@@ -124,31 +125,31 @@ public class JenaTripleStore {
         Resource r = getResource(subject);
         Property pr = getProperty(predicate);
         r.addProperty(pr, object);
-        Log.logInfo("TRIPLElSTORE", "ADD " + subject + " - " + predicate + " - " + object);
+        Log.logInfo("TRIPLESTORE", "ADD " + subject + " - " + predicate + " - " + object);
     }
 
-    public static Iterator<String> getObjects(final String subject, final String predicate) {
-        Log.logInfo ("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ");
+    public static Iterator<RDFNode> getObjects(final String subject, final String predicate) {
+        Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ");
         final Resource r = JenaTripleStore.getResource(subject);
+        return getObjects(r, predicate);
+    }
+
+    public static Iterator<RDFNode> getObjects(final Resource r, final String predicate) {
         final Property pr = JenaTripleStore.getProperty(predicate);
         final StmtIterator iter = JenaTripleStore.model.listStatements(r, pr, (Resource) null);
-        return new Iterator<String>() {
-
+        return new Iterator<RDFNode>() {
             @Override
             public boolean hasNext() {
                 return iter.hasNext();
             }
-
             @Override
-            public String next() {
-                return iter.nextStatement().getObject().toString();
+            public RDFNode next() {
+                return iter.nextStatement().getObject();
             }
-
             @Override
             public void remove() {
                 iter.remove();
             }
-
         };
     }
 

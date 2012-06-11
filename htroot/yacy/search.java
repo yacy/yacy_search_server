@@ -41,7 +41,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.lod.SimpleVocabulary;
+import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -236,7 +236,7 @@ public final class search {
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
-                    new HashSet<SimpleVocabulary.Metatag>(),
+                    new HashSet<Tagging.Metatag>(),
                     "", // no navigation
                     null, // no snippet computation
                     count,
@@ -299,7 +299,7 @@ public final class search {
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
-                    new HashSet<SimpleVocabulary.Metatag>(),
+                    new HashSet<Tagging.Metatag>(),
                     "", // no navigation
                     null, // no snippet computation
                     count,
