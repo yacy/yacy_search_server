@@ -377,10 +377,6 @@ public class AugmentHtmlStream {
 
                     NodeList bodychildren = bt.getChildren();
 
-                    bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/Footer.html", requestHeader)));
-
-                    
-
                     bt.setChildren(bodychildren);
 
                     augmented = true;
