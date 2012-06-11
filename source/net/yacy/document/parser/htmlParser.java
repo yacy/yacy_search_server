@@ -53,8 +53,8 @@ public class htmlParser extends AbstractParser implements Parser {
 
     private static final Pattern patternUnderline = Pattern.compile("_");
 
-    public htmlParser(String name) {
-        super(name);
+    public htmlParser() {
+        super("Streaming HTML Parser");
         this.SUPPORTED_EXTENSIONS.add("htm");
         this.SUPPORTED_EXTENSIONS.add("html");
         this.SUPPORTED_EXTENSIONS.add("phtml");
@@ -299,7 +299,7 @@ public class htmlParser extends AbstractParser implements Parser {
         try {
             url = new DigestURI(args[0]);
             final byte[] content = url.get(ClientIdentification.getUserAgent(), 3000);
-            final Document[] document = new htmlParser("HTML Parser").parse(url, "text/html", null, new ByteArrayInputStream(content));
+            final Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
             final String title = document[0].dc_title();
             System.out.println(title);
             System.out.println(CharacterCoding.unicode2html(title, false));
