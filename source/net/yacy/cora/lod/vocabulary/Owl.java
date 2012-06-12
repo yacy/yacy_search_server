@@ -43,12 +43,12 @@ public enum Owl implements Vocabulary {
     }
 
     @Override
-    public String getURLStub() {
+    public String getNamespace() {
         return IDENTIFIER;
     }
 
     @Override
-    public String getShortName() {
+    public String getNamespacePrefix() {
         return PREFIX;
     }
 

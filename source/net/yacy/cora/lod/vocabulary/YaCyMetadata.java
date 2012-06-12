@@ -74,9 +74,9 @@ public enum YaCyMetadata implements Vocabulary {
         "Cardinal lapp-2 {b256}",       // # of embedded links to applications
      */
 
-    public final static byte[] HASH_PREFIX = ASCII.getBytes("http://yacy.net/hash#");
+    public final static byte[] HASH_PREFIX = ASCII.getBytes("http://yacy.net/url#");
     public final static int HASH_PREFIX_LENGTH = HASH_PREFIX.length;
-    public final static String NAMESPACE = "http://yacy.net/vocabularies/yacymetadata#";
+    public final static String NAMESPACE = "http://yacy.net/md#";
     public final static String PREFIX = "yacy";
 
     private final String predicate;
@@ -93,12 +93,12 @@ public enum YaCyMetadata implements Vocabulary {
     }
 
     @Override
-    public String getURLStub() {
+    public String getNamespace() {
         return NAMESPACE;
     }
 
     @Override
-    public String getShortName() {
+    public String getNamespacePrefix() {
         return PREFIX;
     }
 

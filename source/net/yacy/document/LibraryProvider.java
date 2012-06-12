@@ -46,8 +46,7 @@ import net.yacy.document.geolocalization.OverarchingLocalization;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
-public class LibraryProvider
-{
+public class LibraryProvider {
 
     public static final char tagPrefix = '$';
     public static final String path_to_source_dictionaries = "source";

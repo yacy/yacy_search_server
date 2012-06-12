@@ -35,24 +35,24 @@ import net.yacy.document.geolocalization.Localization;
 
 public class Tagging {
 
-    public final static String DEFAULT_NAMESPACE= "http://yacy.net/tagging#";
-    public final static String DEFAULT_PREFIX = "tag";
+    public final static String DEFAULT_NAMESPACE= "http://yacy.net/autotagging#";
+    public final static String DEFAULT_PREFIX = "tags";
 
     private final String navigatorName;
     private final Map<String, String> synonym2term;
     private final Map<String, String> term2synonym;
     private final Map<String, Set<String>> synonym2synonyms;
 
-    private String predicate, predicatePrefix, objectPrefix;
+    private String predicate, namespace, objectspace;
 
     public Tagging(String name) {
         this.navigatorName = name;
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
         this.synonym2synonyms = new ConcurrentHashMap<String, Set<String>>();
-        this.predicatePrefix = DEFAULT_NAMESPACE;
-        this.predicate = this.predicatePrefix + name;
-        this.objectPrefix = "";
+        this.namespace = DEFAULT_NAMESPACE;
+        this.predicate = this.namespace + name;
+        this.objectspace = null;
     }
 
     public Tagging(String name, File propFile) throws IOException {
@@ -68,14 +68,14 @@ public class Tagging {
 			    p = line.indexOf('#');
 			    if (p >= 0) {
 			        String comment = line.substring(p + 1).trim();
-                    if (comment.startsWith("predicate-prefix:")) {
-                        this.predicatePrefix = comment.substring(17).trim();
-                        if (!this.predicatePrefix.endsWith("/")) this.predicatePrefix += "/";
-                        this.predicate = this.predicatePrefix + name;
+                    if (comment.startsWith("namespace:")) {
+                        this.namespace = comment.substring(10).trim();
+                        if (!this.namespace.endsWith("/") && !this.namespace.endsWith("#")) this.namespace += "#";
+                        this.predicate = this.namespace + name;
                     }
-                    if (comment.startsWith("object-prefix:")) {
-                        this.objectPrefix = comment.substring(14).trim();
-                        if (!this.objectPrefix.endsWith("/")) this.objectPrefix += "/";
+                    if (comment.startsWith("objectspace:")) {
+                        this.objectspace = comment.substring(12).trim();
+                        if (!this.objectspace.endsWith("/") && !this.objectspace.endsWith("#")) this.objectspace += "#";
                     }
 			    	line = line.substring(0, p).trim();
 			    }
@@ -148,6 +148,10 @@ public class Tagging {
      */
     public String getPredicate() {
         return this.predicate;
+    }
+
+    public String getObjectspace() {
+        return this.objectspace;
     }
 
     private final String normalizeKey(String k) {

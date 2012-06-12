@@ -37,13 +37,13 @@ public enum Foaf implements Vocabulary {
     ;
 
     @Override
-    public String getURLStub() {
+    public String getNamespace() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String getShortName() {
+    public String getNamespacePrefix() {
         // TODO Auto-generated method stub
         return null;
     }

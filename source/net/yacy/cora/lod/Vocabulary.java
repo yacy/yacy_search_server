@@ -41,13 +41,13 @@ public interface Vocabulary {
      * get the RDF identifier as an URL stub
      * @return
      */
-    public String getURLStub();
+    public String getNamespace();
 
     /**
      * get the prefix for the predicates of this vocabulary
      * @return
      */
-    public String getShortName();
+    public String getNamespacePrefix();
 
     /**
      * get the predicate name which already contains the prefix url stub

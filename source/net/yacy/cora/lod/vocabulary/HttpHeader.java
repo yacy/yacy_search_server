@@ -96,12 +96,12 @@ public enum HttpHeader implements Vocabulary {
     }
 
     @Override
-    public String getURLStub() {
+    public String getNamespace() {
         return NAMESPACE;
     }
 
     @Override
-    public String getShortName() {
+    public String getNamespacePrefix() {
         return PREFIX;
     }
 

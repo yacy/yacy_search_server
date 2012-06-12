@@ -56,6 +56,7 @@ import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.JenaTripleStore;
+import net.yacy.cora.lod.vocabulary.DCTerms;
 import net.yacy.cora.lod.vocabulary.Owl;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
@@ -216,10 +217,13 @@ dc_rights
      * @param tags
      */
     public void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
+        String subject = YaCyMetadata.hashURI(this.source.hash());
         for (String s: this.keywords) {
             tags.remove(s);
         }
         for (Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {
+            Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
+            String objectspace = vocabulary.getObjectspace();
             StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
             for (Tagging.Metatag s: e.getValue()) {
                 String t = s.toString();
@@ -227,10 +231,11 @@ dc_rights
                     this.keywords.add(t);
                 }
                 sb.append(',').append(s.getObject());
+                if (objectspace != null) {
+                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectspace + s.getObject());
+                }
             }
             // put to triplestore
-            String subject = YaCyMetadata.hashURI(this.source.hash());
-            Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
             JenaTripleStore.addTriple(subject, vocabulary.getPredicate(), sb.substring(1));
             JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true, false));
         }

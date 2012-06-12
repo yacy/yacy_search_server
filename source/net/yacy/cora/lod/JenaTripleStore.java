@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.vocabulary.DCTerms;
 import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.lod.vocabulary.HttpHeader;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -40,6 +41,7 @@ public class JenaTripleStore {
         model.setNsPrefix(HttpHeader.PREFIX, HttpHeader.NAMESPACE);
         model.setNsPrefix(Geo.PREFIX, Geo.NAMESPACE);
         model.setNsPrefix("pnd", "http://dbpedia.org/ontology/individualisedPnd");
+        model.setNsPrefix(DCTerms.PREFIX, DCTerms.NAMESPACE);
 	}
 
 	public static ConcurrentHashMap<String, Model> privatestorage = null;
