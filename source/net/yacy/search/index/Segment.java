@@ -62,6 +62,7 @@ import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.ISO639;
+import net.yacy.kelondro.util.LookAheadIterator;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
@@ -175,6 +176,69 @@ public class Segment {
 
     public boolean exists(final byte[] urlhash) {
         return this.urlMetadata.exists(urlhash);
+    }
+
+    /**
+     * discover all urls that belong to a specific host
+     * and return an iterator for the url hashes of those urls
+     * @param host
+     * @return an iterator for all url hashes that belong to a specific host
+     */
+    public Iterator<byte[]> hostSelector(String host) {
+        String hh = DigestURI.hosthash(host);
+        final HandleSet ref = new HandleSet(12, Base64Order.enhancedCoder, 100);
+        for (byte[] b: this.urlMetadata) {
+            if (hh.equals(ASCII.String(b, 6, 6))) {
+                try {
+                    ref.putUnique(b);
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                    break;
+                }
+            }
+        }
+        return ref.iterator();
+    }
+
+    /**
+     * discover all urls that start with a given url stub
+     * @param stub
+     * @return an iterator for all matching urls
+     */
+    public Iterator<DigestURI> urlSelector(MultiProtocolURI stub) {
+        final String host = stub.getHost();
+        final Iterator<byte[]> bi = hostSelector(host);
+        final String urlstub = stub.toNormalform(false, false);
+
+        // get all urls from the specific domain
+        final Iterator<DigestURI> urls = new Iterator<DigestURI>() {
+            @Override
+            public boolean hasNext() {
+                return bi.hasNext();
+            }
+            @Override
+            public DigestURI next() {
+                URIMetadataRow umr = Segment.this.urlMetadata.load(bi.next());
+                return umr.url();
+            }
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+
+        // now filter the stub from the iterated urls
+        return new LookAheadIterator<DigestURI>() {
+            @Override
+            protected DigestURI next0() {
+                DigestURI u;
+                while (urls.hasNext()) {
+                    u = urls.next();
+                    if (u.toNormalform(false, false).startsWith(urlstub)) return u;
+                }
+                return null;
+            }
+        };
     }
 
     public void clear() {

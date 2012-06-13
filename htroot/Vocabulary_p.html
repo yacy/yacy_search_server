@@ -17,26 +17,40 @@
     <form action="Vocabulary_p.html" method="get" accept-charset="UTF-8">
       <fieldset><legend>Vocabulary Selection</legend>
       <dl>
-        <dt>Select Vocabulary</dt>
+        <dt>Vocabulary Name</dt>
         <dd>
-          <select name="vocabulary" onchange='this.form.submit()'>
+          <select name="vocabulary" onchange="this.form.submit()">
             #{vocabularyset}#
             <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
             #{/vocabularyset}#
           </select>
         </dd>
-        <dt></dt>
-        <dd><input type="submit" name="view" value="View" /></dd>
+        <dt></dt><dd><input type="submit" name="view" value="View" /></dd>
       </dl>
     </fieldset>
     </form>
+    
+    #(create)#::
+    <form action="Vocabulary_p.html" method="get" accept-charset="UTF-8">
+      <fieldset><legend>Vocabulary Production</legend>
+      It is possible to produce a vocabulary out of the existing search index. This is done using a given 'objectspace' which you can enter as a URL Stub.
+      This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.
+      This works best with wikis. Try to use a wiki url as objectspace path.
+      <dl>
+        <dt>Vocabulary Name</dt><dd><input type="text" name="discovername" value="" size="16" maxlength="128" /></dd>
+        <dt>Objectspace</dt><dd><input type="text" name="discoverobjectspace" value="http://" size="78" maxlength="128" /></dd>
+        <dt></dt><dd><input type="submit" name="create" value="Create" /></dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/create)#
     
     #(edit)#::
     <form action="Vocabulary_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset><legend>Vocabulary Editor</legend>
       <dl>
+        <dt>Vocabulary Name</dt><dd>#[name]#</dd>
         <dt>File</dt><dd>#(editable)#[automatically generated, not stored, cannot be edited]::#[file]##(/editable)#</dd>
-        <dt>Name</dt><dd>#[name]#</dd>
         <dt>Namespace</dt><dd>#[namespace]#</dd>
         <dt>Predicate</dt><dd>#[predicate]#</dd>
         <dt>Prefix</dt><dd>#[prefix]#</dd>
@@ -58,22 +72,30 @@
       #{terms}#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
         <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="modify_#[term]#" id="modify_#[term]#" value="checked" disabled="disabled"/>#(/editable)#</td>
-        <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" onchange='this.form.submit()'/>#(/editable)#</td>
+        <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" onchange="this.form.submit()"/>#(/editable)#</td>
         <td align="left">#[term]#</td>
         <td align="left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="80" maxlength="1024" onclick="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''"/>#(/editable)#</td>
       </tr>
       #{/terms}#
       #(editable)#::
       <tr class="TableCellDark">
-        <td align="center" colspan="2"><input type="checkbox" name="modify_new" id="modify_new" value="checked" disabled="disabled"/><i>add</i></td>
-        <td align="left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onclick="document.getElementById('modify_new').checked='checked'; document.getElementById('modify_new').disabled=''"/></td>
+        <td align="center" colspan="2"><input type="checkbox" name="add_new" id="add_new" value="checked" disabled="disabled"/><i>add</i></td>
+        <td align="left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onclick="document.getElementById('add_new').checked='checked'; document.getElementById('add_new').disabled=''"/></td>
         <td align="left"><input type="text" name="newsynonyms" id="newsynonyms" value="" size="80" maxlength="1024"/></td>
+      </tr>
+      <tr class="TableCellDark">
+        <td colspan="3"></td>
+        <td align="right" class="TableCellSummary"><input type="checkbox" name="clear_table" id="clear_table" value="checked" /><i>clear table (remove all terms)</i></td>
+      </tr>
+      <tr class="TableCellDark">
+        <td colspan="3"></td>
+        <td align="right" class="TableCellSummary"><input type="checkbox" name="delete_vocabulary" id="delete_vocabulary" value="checked" /><i>delete vocabulary</i></td>
       </tr>
       #(/editable)#
       </table>
+      <input type="hidden" name="vocabulary" value="#[name]#" />
+      <input type="submit" name="set" value="Submit" />
     </fieldset>
-    <input type="hidden" name="vocabulary" value="#[name]#" />
-    <input type="submit" name="set" value="Set" />
     </form>
     #(/edit)#
     

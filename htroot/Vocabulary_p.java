@@ -18,18 +18,26 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.lod.vocabulary.DCTerms;
 import net.yacy.cora.lod.vocabulary.Owl;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.LibraryProvider;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segment;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -50,36 +58,81 @@ public class Vocabulary_p {
         }
         prop.put("vocabularyset", count);
 
-        if (post != null && vocabulary != null) {
+        if (post != null) {
             try {
-                // check if objectspace was set
-                vocabulary.setObjectspace(post.get("objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace()));
-
-                // check if a term was added
-                if (post.get("modify_new", "").equals("checked") && post.get("newterm", "").length() > 0) {
-                    vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""));
-                }
-
-                // check if a term was modified
-                for (Map.Entry<String, String> e : post.entrySet()) {
-                    if (e.getKey().startsWith("modify_") && e.getValue().equals("checked")) {
-                        String term = e.getKey().substring(7);
-                        String synonyms = post.get("synonyms_" + term, "");
-                        vocabulary.put(term, synonyms);
+                if (vocabulary == null) {
+                    // create a vocabulary
+                    String discovername = post.get("discovername", "");
+                    String discoverobjectspace = post.get("discoverobjectspace", "");
+                    MultiProtocolURI discoveruri = null;
+                    if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURI(discoverobjectspace);} catch (MalformedURLException e) {}
+                    if (discovername.length() > 0 && discoveruri != null) {
+                        String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
+                        Segment segment = sb.indexSegments.segment(segmentName);
+                        Iterator<DigestURI> ui = segment.urlSelector(discoveruri);
+                        Map<String,String> table = new TreeMap<String, String>();
+                        File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
+                        while (ui.hasNext()) {
+                            DigestURI u = ui.next();
+                            String t = u.toNormalform(false, false).substring(discoverobjectspace.length());
+                            if (t.indexOf('/') >= 0) continue;
+                            int p = t.indexOf('.');
+                            if (p >= 0) t = t.substring(0, p);
+                            while ((p = t.indexOf(':')) >= 0) t = t.substring(p + 1);
+                            while ((p = t.indexOf('=')) >= 0) t = t.substring(p + 1);
+                            if (p >= 0) t = t.substring(p + 1);
+                            if (t.length() == 0) continue;
+                            table.put(t, "");
+                        }
+                        if (table.size() > 0) {
+                            Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
+                            LibraryProvider.autotagging.addVocabulary(newvoc);
+                            vocabulary = newvoc;
+                        }
                     }
-                }
+                } else {
+                    // check if objectspace was set
+                    vocabulary.setObjectspace(post.get("objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace()));
 
-                // check if a term shall be deleted
-                for (Map.Entry<String, String> e : post.entrySet()) {
-                    if (e.getKey().startsWith("delete_") && e.getValue().equals("checked")) {
-                        String term = e.getKey().substring(7);
-                        vocabulary.delete(term);
+                    // check if a term was added
+                    if (post.get("add_new", "").equals("checked") && post.get("newterm", "").length() > 0) {
+                        vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""));
+                    }
+
+                    // check if a term was modified
+                    for (Map.Entry<String, String> e : post.entrySet()) {
+                        if (e.getKey().startsWith("modify_") && e.getValue().equals("checked")) {
+                            String term = e.getKey().substring(7);
+                            String synonyms = post.get("synonyms_" + term, "");
+                            vocabulary.put(term, synonyms);
+                        }
+                    }
+
+                    // check if a term shall be deleted
+                    for (Map.Entry<String, String> e : post.entrySet()) {
+                        if (e.getKey().startsWith("delete_") && e.getValue().equals("checked")) {
+                            String term = e.getKey().substring(7);
+                            vocabulary.delete(term);
+                        }
+                    }
+
+                    // check if the vocabulary shall be cleared
+                    if (post.get("clear_table", "").equals("checked") ) {
+                        vocabulary.clear();
+                    }
+
+                    // check if the vocabulary shall be deleted
+                    if (vocabulary != null && post.get("delete_vocabulary", "").equals("checked") ) {
+                        LibraryProvider.autotagging.deleteVocabulary(vocabularyName);
+                        vocabulary = null;
                     }
                 }
             } catch (IOException e) {
                 Log.logException(e);
             }
         }
+
+        prop.put("create", vocabularyName == null ? 1 : 0);
 
         if (vocabulary == null) {
             prop.put("edit", 0);

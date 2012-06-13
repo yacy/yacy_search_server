@@ -65,8 +65,29 @@ public class Tagging {
    public Tagging(String name, File propFile) throws IOException {
         this(name);
         this.propFile = propFile;
-        init(name);
+        init();
     }
+
+   /**
+    * initialize a new Tagging file with a given table and objectspace url stub
+    * @param name
+    * @param propFile
+    * @param objectspace
+    * @param table
+    * @throws IOException
+    */
+   public Tagging(String name, File propFile, String objectspace, Map<String,String> table) throws IOException {
+       this(name);
+       this.propFile = propFile;
+       this.objectspace = objectspace;
+       BufferedWriter w = new BufferedWriter(new FileWriter(propFile));
+       w.write("#objectspace:" + objectspace + "\n");
+       for (Map.Entry<String, String> e: table.entrySet()) {
+           w.write(e.getKey() + (e.getValue() == null || e.getValue().length() == 0 ? "" : ":" + e.getValue()) + "\n");
+       }
+       w.close();
+       init();
+   }
 
     public void updateTerm(String term, String[] synonyms) {
 
@@ -107,7 +128,7 @@ public class Tagging {
         w.close();
         this.propFile.delete();
         tmp.renameTo(this.propFile);
-        init(this.navigatorName);
+        init();
     }
 
     public void delete(String term) throws IOException {
@@ -135,7 +156,19 @@ public class Tagging {
         w.close();
         this.propFile.delete();
         tmp.renameTo(this.propFile);
-        init(this.navigatorName);
+        init();
+    }
+
+    public void clear() throws IOException {
+        if (this.propFile == null) return;
+        File tmp = tmpFile();
+        BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
+        if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
+        if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
+        w.close();
+        this.propFile.delete();
+        tmp.renameTo(this.propFile);
+        init();
     }
 
     public void setObjectspace(String os) throws IOException {
@@ -161,7 +194,7 @@ public class Tagging {
         w.close();
         this.propFile.delete();
         tmp.renameTo(this.propFile);
-        init(this.navigatorName);
+        init();
     }
 
     public Map<String, Set<String>> reconstructionSets() {
@@ -244,13 +277,13 @@ public class Tagging {
         return new String[]{line.substring(0, p), line.substring(p + 1)};
     }
 
-    public void init(String name) throws IOException {
+    public void init() throws IOException {
         if (this.propFile == null) return;
         this.synonym2term.clear();
         this.term2synonym.clear();
         this.synonym2synonyms.clear();
         this.namespace = DEFAULT_NAMESPACE;
-        this.predicate = this.namespace + name;
+        this.predicate = this.namespace + this.navigatorName;
         this.objectspace = null;
 
         BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
@@ -267,7 +300,7 @@ public class Tagging {
                     if (comment.startsWith("namespace:")) {
                         this.namespace = comment.substring(10).trim();
                         if (!this.namespace.endsWith("/") && !this.namespace.endsWith("#") && this.namespace.length() > 0) this.namespace += "#";
-                        this.predicate = this.namespace + name;
+                        this.predicate = this.namespace + this.navigatorName;
                     }
                     if (comment.startsWith("objectspace:")) {
                         this.objectspace = comment.substring(12).trim();

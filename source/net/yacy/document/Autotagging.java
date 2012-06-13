@@ -91,6 +91,16 @@ public class Autotagging {
         }
     }
 
+    public File getVocabularyFile(String name) {
+        return new File(this.autotaggingPath, name + ".vocabulary");
+    }
+
+    public void deleteVocabulary(String name) {
+        Tagging v = this.vocabularies.remove(name);
+        if (v == null) return;
+        v.getFile().delete();
+    }
+
     public Tagging getVocabulary(String name) {
         return this.vocabularies.get(name);
     }
@@ -101,6 +111,13 @@ public class Autotagging {
 
     public Set<String> allTags() {
         return this.allTags.keySet();
+    }
+
+    public void addVocabulary(Tagging voc) {
+        this.vocabularies.put(voc.getName(), voc);
+        for (String t: voc.tags()) {
+            this.allTags.put(t, PRESENT);
+        }
     }
 
     public void addDictionaries(Map<String, Dictionary> dictionaries) {
