@@ -73,10 +73,12 @@ public class Tagging {
     }
 
     private File tmpFile() {
+        if (this.propFile == null) return null;
         return new File(this.propFile.getAbsolutePath() + ".tmp");
     }
 
     public void put(String term, String synonyms) throws IOException {
+        if (this.propFile == null) return;
         File tmp = tmpFile();
         BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
         BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
@@ -109,6 +111,7 @@ public class Tagging {
     }
 
     public void delete(String term) throws IOException {
+        if (this.propFile == null) return;
         File tmp = tmpFile();
         BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
         BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
@@ -136,6 +139,7 @@ public class Tagging {
     }
 
     public void setObjectspace(String os) throws IOException {
+        if (this.propFile == null) return;
         if (os == null || (this.objectspace != null && this.objectspace.equals(os))) return;
         this.objectspace = os;
         File tmp = tmpFile();

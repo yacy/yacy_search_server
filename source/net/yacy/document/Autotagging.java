@@ -115,6 +115,10 @@ public class Autotagging {
 
     public void addLocalization(Localization localization) {
         Tagging voc = new Tagging("Locale", localization);
+        try {
+            voc.setObjectspace("http://dbpedia.org/resource/");
+        } catch (IOException e) {
+        }
         this.vocabularies.put("Locale", voc);
         for (String t: voc.tags()) {
             this.allTags.put(t, PRESENT);
