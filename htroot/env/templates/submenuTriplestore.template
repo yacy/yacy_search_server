@@ -1,7 +1,0 @@
-<div class="SubMenu">
-  <h3>Triplestore</h3>
-  <ul class="SubMenu">
-    <li><a href="Triplestore_p.html" class="MenuItemLink lock">Triplestore</a></li>    
-	<li><a href="Triple_p.html" class="MenuItemLink lock">Query</a></li>
-  </ul>
-</div>

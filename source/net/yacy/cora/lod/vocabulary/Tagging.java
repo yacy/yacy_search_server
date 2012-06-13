@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.lod;
+package net.yacy.cora.lod.vocabulary;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,21 +33,29 @@ import net.yacy.cora.storage.Files;
 import net.yacy.document.WordCache.Dictionary;
 import net.yacy.document.geolocalization.Localization;
 
-public class SimpleVocabulary {
+public class Tagging {
+
+    public final static String DEFAULT_NAMESPACE= "http://yacy.net/autotagging#";
+    public final static String DEFAULT_PREFIX = "tags";
 
     private final String navigatorName;
     private final Map<String, String> synonym2term;
     private final Map<String, String> term2synonym;
     private final Map<String, Set<String>> synonym2synonyms;
 
-    public SimpleVocabulary(String name) {
+    private String predicate, namespace, objectspace;
+
+    public Tagging(String name) {
         this.navigatorName = name;
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
         this.synonym2synonyms = new ConcurrentHashMap<String, Set<String>>();
+        this.namespace = DEFAULT_NAMESPACE;
+        this.predicate = this.namespace + name;
+        this.objectspace = null;
     }
 
-    public SimpleVocabulary(String name, File propFile) throws IOException {
+    public Tagging(String name, File propFile) throws IOException {
         this(name);
         BlockingQueue<String> list = Files.concurentLineReader(propFile, 1000);
         String term, v;
@@ -59,6 +67,16 @@ public class SimpleVocabulary {
 			    line = line.trim();
 			    p = line.indexOf('#');
 			    if (p >= 0) {
+			        String comment = line.substring(p + 1).trim();
+                    if (comment.startsWith("namespace:")) {
+                        this.namespace = comment.substring(10).trim();
+                        if (!this.namespace.endsWith("/") && !this.namespace.endsWith("#")) this.namespace += "#";
+                        this.predicate = this.namespace + name;
+                    }
+                    if (comment.startsWith("objectspace:")) {
+                        this.objectspace = comment.substring(12).trim();
+                        if (!this.objectspace.endsWith("/") && !this.objectspace.endsWith("#")) this.objectspace += "#";
+                    }
 			    	line = line.substring(0, p).trim();
 			    }
 			    if (line.length() == 0) {
@@ -104,17 +122,7 @@ public class SimpleVocabulary {
 		}
     }
 
-    private final String normalizeKey(String k) {
-        k = k.trim();
-        k = k.replaceAll(" \\+", ", "); // remove symbols that are bad in a query attribute
-        k = k.replaceAll(" /", ", ");
-        k = k.replaceAll("\\+", ",");
-        k = k.replaceAll("/", ",");
-        k = k.replaceAll("  ", " ");
-        return k;
-    }
-    
-    public SimpleVocabulary(String name, Localization localization) {
+    public Tagging(String name, Localization localization) {
         this(name);
         Set<String> locNames = localization.locationNames();
         for (String loc: locNames) {
@@ -123,7 +131,7 @@ public class SimpleVocabulary {
         }
     }
 
-    public SimpleVocabulary(String name, Dictionary dictionary) {
+    public Tagging(String name, Dictionary dictionary) {
         this(name);
         Set<StringBuilder> words = dictionary.getWords();
         String s;
@@ -134,22 +142,63 @@ public class SimpleVocabulary {
         }
     }
 
+    /**
+     * get the predicate name which already contains the prefix url stub
+     * @return
+     */
+    public String getPredicate() {
+        return this.predicate;
+    }
+
+    public String getObjectspace() {
+        return this.objectspace;
+    }
+
+    private final String normalizeKey(String k) {
+        k = k.trim();
+        k = k.replaceAll(" \\+", ", "); // remove symbols that are bad in a query attribute
+        k = k.replaceAll(" /", ", ");
+        k = k.replaceAll("\\+", ",");
+        k = k.replaceAll("/", ",");
+        k = k.replaceAll("  ", " ");
+        return k;
+    }
+
+    /**
+     * get the name of the navigator; this is part of the RDF predicate name (see: getPredicate())
+     * @return
+     */
     public String getName() {
         return this.navigatorName;
     }
 
-    public Metatag getMetatag(char prefix, final String word) {
+    public Metatag getMetatagFromSynonym(char prefix, final String word) {
         String printname = this.synonym2term.get(word);
         if (printname == null) return null;
-        return new Metatag(prefix, this.navigatorName, printname);
+        return new Metatag(prefix, printname);
+    }
+
+    public Metatag getMetatagFromTerm(char prefix, final String word) {
+        return new Metatag(prefix, word);
     }
 
     public Set<String> getSynonyms(String term) {
     	return this.synonym2synonyms.get(term);
     }
-    
+
     public Set<String> tags() {
         return this.synonym2term.keySet();
+    }
+
+    @Override
+    public boolean equals(Object m) {
+        Tagging m0 = (Tagging) m;
+        return this.navigatorName.equals(m0.navigatorName);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.navigatorName.hashCode();
     }
 
     @Override
@@ -170,71 +219,66 @@ public class SimpleVocabulary {
         word = PATTERN_SZ.matcher(word).replaceAll("ss");
         return word;
     }
-    
-	public static class Metatag {
-	    private final String vocName;
-	    private final String print;
+
+	public class Metatag {
+	    private final String object;
 	    private final char prefix;
-	    public Metatag(char prefix, String vocName, String print) {
+	    public Metatag(char prefix, String object) {
 	    	this.prefix = prefix;
-	        this.vocName = vocName;
-	        this.print = print;
+	        this.object = object;
 	    }
-	    public Metatag(char prefix, String metatag) throws RuntimeException {
-	    	this.prefix = prefix;
-	        assert metatag.charAt(0) == prefix;
-	        int p = metatag.indexOf(':');
-	        if (p < 0) throw new RuntimeException("bad metatag: metatag = " + metatag);
-	        this.vocName = metatag.substring(1, p);
-	        this.print = decodeMaskname(metatag.substring(p + 1));
-	    }
-	    
+
 	    public String getVocabularyName() {
-	        return this.vocName;
+	        return Tagging.this.navigatorName;
 	    }
-	    
-	    public String getPrintName() {
-	        return this.print;
-	    }
-	    
+
+        public String getPredicate() {
+            return Tagging.this.predicate;
+        }
+
+        public String getObject() {
+            return this.object;
+        }
+
 	    @Override
 	    public String toString() {
-	        return this.prefix + this.vocName + ":" + encodePrintname(this.print);
+	        return this.prefix + Tagging.this.navigatorName + ":" + encodePrintname(this.object);
 	    }
-	    
+
 	    @Override
 	    public boolean equals(Object m) {
 	        Metatag m0 = (Metatag) m;
-	        return this.vocName.equals(m0.vocName) && this.print.equals(m0.print);
+	        return Tagging.this.navigatorName.equals(m0.getVocabularyName()) && this.object.equals(m0.object);
 	    }
-	    
+
 	    @Override
 	    public int hashCode() {
-	        return this.vocName.hashCode() + this.print.hashCode();
-	    }
-	    
-	    private final static Pattern PATTERN_UL = Pattern.compile("_");
-	    private final static Pattern PATTERN_SP = Pattern.compile(" ");
-	
-	    public static final String encodePrintname(String printname) {
-	        return PATTERN_SP.matcher(printname).replaceAll("_");
-	    }
-	
-	    public static final String decodeMaskname(String maskname) {
-	        return PATTERN_UL.matcher(maskname).replaceAll(" ");
-	    }
-	
-	    public static String cleanTagFromAutotagging(char prefix, final String tagString) {
-	        if (tagString == null || tagString.length() == 0) return "";
-	        String[] tags = PATTERN_SP.split(tagString);
-	        StringBuilder sb = new StringBuilder(tagString.length());
-	        for (String tag : tags) {
-	            if (tag.length() > 0 && tag.charAt(0) != prefix) {
-	                sb.append(tag).append(' ');
-	            }
-	        }
-	        if (sb.length() == 0) return "";
-	        return sb.substring(0, sb.length() - 1);
+	        return Tagging.this.navigatorName.hashCode() + this.object.hashCode();
 	    }
 	}
+
+    private final static Pattern PATTERN_UL = Pattern.compile("_");
+    private final static Pattern PATTERN_SP = Pattern.compile(" ");
+
+    public static final String encodePrintname(String printname) {
+        return PATTERN_SP.matcher(printname).replaceAll("_");
+    }
+
+    public static final String decodeMaskname(String maskname) {
+        return PATTERN_UL.matcher(maskname).replaceAll(" ");
+    }
+
+    public static String cleanTagFromAutotagging(char prefix, final String tagString) {
+        if (tagString == null || tagString.length() == 0) return "";
+        String[] tags = PATTERN_SP.split(tagString);
+        StringBuilder sb = new StringBuilder(tagString.length());
+        for (String tag : tags) {
+            if (tag.length() > 0 && tag.charAt(0) != prefix) {
+                sb.append(tag).append(' ');
+            }
+        }
+        if (sb.length() == 0) return "";
+        return sb.substring(0, sb.length() - 1);
+    }
+
 }

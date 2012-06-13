@@ -41,12 +41,12 @@ public enum MetadataVocabulary implements Vocabulary {
     }
     
 	@Override
-	public String getIdentifier() {
+	public String getNamespace() {
 		return IDENTIFIER;
 	}
 
 	@Override
-	public String getPrefix() {
+	public String getNamespacePrefix() {
 		return PREFIX;
 	}
 

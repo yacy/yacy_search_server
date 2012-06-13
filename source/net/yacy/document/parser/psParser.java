@@ -1,4 +1,4 @@
-//psParser.java 
+//psParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -35,27 +35,27 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 
 public class psParser extends AbstractParser implements Parser {
-    
+
     private final static Object modeScan = new Object();
     private static boolean modeScanDone = false;
     private static String parserMode = "java";
-    
-    public psParser() {        
-        super("PostScript Document Parser"); 
-        SUPPORTED_EXTENSIONS.add("ps");
-        SUPPORTED_MIME_TYPES.add("application/postscript");
-        SUPPORTED_MIME_TYPES.add("application/ps");
-        SUPPORTED_MIME_TYPES.add("application/x-postscript");
-        SUPPORTED_MIME_TYPES.add("application/x-ps");
-        SUPPORTED_MIME_TYPES.add("application/x-postscript-not-eps");
+
+    public psParser() {
+        super("PostScript Document Parser");
+        this.SUPPORTED_EXTENSIONS.add("ps");
+        this.SUPPORTED_MIME_TYPES.add("application/postscript");
+        this.SUPPORTED_MIME_TYPES.add("application/ps");
+        this.SUPPORTED_MIME_TYPES.add("application/x-postscript");
+        this.SUPPORTED_MIME_TYPES.add("application/x-ps");
+        this.SUPPORTED_MIME_TYPES.add("application/x-postscript-not-eps");
         if (!modeScanDone) synchronized (modeScan) {
         	if (testForPs2Ascii()) parserMode = "ps2ascii";
         	else parserMode = "java";
@@ -67,7 +67,7 @@ public class psParser extends AbstractParser implements Parser {
         try {
             String procOutputLine = null;
             final StringBuilder procOutput = new StringBuilder(80);
-            
+
             final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", "--version"});
             final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
             while ((procOutputLine = stdOut.readLine()) != null) {
@@ -81,22 +81,22 @@ public class psParser extends AbstractParser implements Parser {
             return false;
         }
     }
-    
-    
-    private Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
-        
+
+
+    private Document[] parse(final DigestURI location, final String mimeType, final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
+
     	File outputFile = null;
-        try { 
+        try {
         	// creating a temp file for the output
         	outputFile = FileUtils.createTempFile(this.getClass(), "ascii.txt");
-        	
+
         	// decide with parser mode to use
             if (parserMode.equals("ps2ascii")) {
                 parseUsingPS2ascii(sourceFile,outputFile);
             } else {
                 parseUsingJava(sourceFile,outputFile);
             }
-            
+
             // return result
             final Document[] docs = new Document[]{new Document(
                     location, // url
@@ -110,44 +110,44 @@ public class psParser extends AbstractParser implements Parser {
                     "",       // publisher
                     null,     // sections
                     null,     // abstract
-                    0.0f, 0.0f, 
+                    0.0f, 0.0f,
                     outputFile, // fulltext
                     null,     // anchors
                     null,     // rss
                     null,     // images
                     false)};  // indexingdenied
-            
+
             return docs;
-        } catch (final Exception e) {            
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
-            
+
             // delete temp file
             if (outputFile != null) FileUtils.deletedelete(outputFile);
-            
+
             // throw exception
-            throw new Parser.Failure("Unexpected error while parsing ps file. " + e.getMessage(),location); 
-        } 
-    }    
-    
+            throw new Parser.Failure("Unexpected error while parsing ps file. " + e.getMessage(),location);
+        }
+    }
+
     private void parseUsingJava(final File inputFile, final File outputFile) throws Exception {
-        
+
         BufferedReader reader = null;
         BufferedWriter writer = null;
         try {
             reader = new BufferedReader(new FileReader(inputFile));
             writer = new BufferedWriter(new FileWriter(outputFile));
-            
+
             final String versionInfoLine = reader.readLine();
             final String version = (versionInfoLine == null) ? "" : versionInfoLine.substring(versionInfoLine.length()-3);
 
             int ichar = 0;
             boolean isComment = false;
             boolean isText = false;
-            
+
             if (version.length() > 0 && version.charAt(0) == '2') {
                 boolean isConnector = false;
-                
+
                 while ((ichar = reader.read()) > 0) {
                     if (isConnector) {
                         if (ichar < 108) {
@@ -155,7 +155,7 @@ public class psParser extends AbstractParser implements Parser {
                         }
                         isConnector = false;
                     } else if (ichar == '%') {
-                        isComment = true; 
+                        isComment = true;
                     } else if (ichar == '\n' && isComment) {
                         isComment = false;
                     } else if (ichar == ')' && isText ) {
@@ -167,13 +167,13 @@ public class psParser extends AbstractParser implements Parser {
                         isText = true;
                     }
                 }
-              
+
             } else if (version.length() > 0 && version.charAt(0) == '3') {
                 final StringBuilder stmt = new StringBuilder();
                 boolean isBMP = false;
                 boolean isStore = false;
                 int store = 0;
-                
+
                 while ((ichar = reader.read()) > 0) {
                     if (ichar == '%') {
                         isComment = true;
@@ -187,7 +187,7 @@ public class psParser extends AbstractParser implements Parser {
                         isText = true;
                     } else if (isStore) {
                         if (store == 9 || ichar == ' ' || ichar == 10) {
-                            isStore = false;                    
+                            isStore = false;
                             store = 0;
                             if (stmt.toString().equals("BEGINBITM")) {
                                 isText = false;
@@ -201,23 +201,23 @@ public class psParser extends AbstractParser implements Parser {
                             stmt.append((char)ichar);
                             store++;
                         }
-                    } else if (!isComment && !isStore && (ichar == 66 || ichar == 69)) {    
+                    } else if (!isComment && !isStore && (ichar == 66 || ichar == 69)) {
                         isStore = true;
                         stmt.append((char)ichar);
                         store++;
-                    }  
-                }                
+                    }
+                }
             } else {
                 throw new Exception("Unsupported Postscript version '" + version + "'.");
-            }            
+            }
         } finally {
             if (reader != null) try { reader.close(); } catch (final Exception e) {/* */}
             if (writer != null) try { writer.close(); } catch (final Exception e) {/* */}
         }
-              
+
 
     }
-    
+
     /**
      * This function requires the ghostscript-library
      * @param inputFile
@@ -249,29 +249,30 @@ public class psParser extends AbstractParser implements Parser {
             this.log.logSevere(errorMsg);
             throw new Exception(errorMsg);
     	}
-    	
+
     	if (execCode != 0) throw new Exception("Unable to convert ps to ascii. ps2ascii returned statuscode " + execCode + "\n" + procErr.toString());
     }
 
-    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+    @Override
+    public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
-        
+
         File tempFile = null;
         try {
             // creating a tempfile
             tempFile = FileUtils.createTempFile(this.getClass(), "temp.ps");
             tempFile.deleteOnExit();
-            
+
             // copying inputstream into file
             FileUtils.copy(source,tempFile);
-            
+
             // parsing the file
             return parse(location,mimeType,charset,tempFile);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof Parser.Failure) throw (Parser.Failure) e;        	
-        	
+            if (e instanceof Parser.Failure) throw (Parser.Failure) e;
+
             throw new Parser.Failure("Unable to parse the ps file. " + e.getMessage(), location);
         } finally {
             if (tempFile != null) FileUtils.deletedelete(tempFile);

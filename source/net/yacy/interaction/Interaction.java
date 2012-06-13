@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -561,16 +562,14 @@ public static String Triple(String url, String s, String p, String o) {
 
 public static String Triple(String url, String s, String p, String o, String username) {
 
-	final Switchboard sb = Switchboard.getSwitchboard();
-
 	if (username != "") {
 		username = "/"+username;
 	}
 
-	Resource r = TripleStore.model.getResource(s+username);
-	Property pr = TripleStore.model.getProperty(p);
+	Resource r = JenaTripleStore.getResource(s+username);
+	Property pr = JenaTripleStore.getProperty(p);
 
-	TripleStore.model.removeAll(r, pr, (Resource) null);
+	JenaTripleStore.model.removeAll(r, pr, (Resource) null);
 
 
 	r.addProperty(pr, o);
@@ -588,16 +587,14 @@ public static String TripleGet(String s, String p) {
 
 public static String TripleGet(String s, String p, String username) {
 
-	final Switchboard sb = Switchboard.getSwitchboard();
-
 	if (username != "") {
 		username = "/"+username;
 	}
 
-	Resource r = TripleStore.model.getResource(s+username);
-	Property pr = TripleStore.model.getProperty(p);
+	Resource r = JenaTripleStore.getResource(s+username);
+	Property pr = JenaTripleStore.getProperty(p);
 
-	StmtIterator iter = TripleStore.model.listStatements(r, pr, (Resource) null);
+	StmtIterator iter = JenaTripleStore.model.listStatements(r, pr, (Resource) null);
 
 	Log.logInfo ("TRIPLESTORE", "GET "+username+" / "+s+" - "+p+" ... ");
 

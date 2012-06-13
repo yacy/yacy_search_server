@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.lod.SimpleVocabulary;
+import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.document.LibraryProvider;
@@ -307,7 +307,7 @@ public class yacysearchtrailer {
                 while (i < 20 && navigatorIterator.hasNext()) {
                     name = navigatorIterator.next();
                     count = ve.getValue().get(name);
-                    nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURI.escape(SimpleVocabulary.Metatag.encodePrintname(name)).toString();
+                    nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURI.escape(Tagging.encodePrintname(name)).toString();
                     queryStringForUrl = theQuery.queryStringForUrl();
                     p = queryStringForUrl.indexOf(nav);
                     if (p < 0) {

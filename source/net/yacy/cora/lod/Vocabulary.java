@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -36,25 +36,25 @@ import java.util.Set;
  * http://stackoverflow.com/questions/1414755/java-extend-enum
  */
 public interface Vocabulary {
-    
+
     /**
-     * get the RDF identifier
+     * get the RDF identifier as an URL stub
      * @return
      */
-    public String getIdentifier();
+    public String getNamespace();
 
     /**
      * get the prefix for the predicates of this vocabulary
      * @return
      */
-    public String getPrefix();
-    
+    public String getNamespacePrefix();
+
     /**
-     * get the predicate name which already contains the prefix and the ':'
+     * get the predicate name which already contains the prefix url stub
      * @return
      */
     public String getPredicate();
-    
+
     /**
      * get a set of literals that are allowed for the predicate as values
      * @return
@@ -65,7 +65,7 @@ public interface Vocabulary {
      * the name method is identical to the java.lang.Enum method.
      * If an Enum class for vocabularies
      * implements this interface, the name() method is automatically implemented
-     * 
+     *
      * @return Returns the name of the enum constant as declared in the enum declaration.
      */
     public String name();

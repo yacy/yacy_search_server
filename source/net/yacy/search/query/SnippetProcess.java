@@ -532,7 +532,7 @@ public class SnippetProcess {
                     }
                 }
                 if (System.currentTimeMillis() >= this.timeout) {
-                    Log.logWarning("SnippetProcess", "worker ended with timoeout");
+                    Log.logWarning("SnippetProcess", "worker ended with timeout");
                 }
                 //System.out.println("FINISHED WORKER " + id + " FOR " + this.neededResults + " RESULTS, loops = " + loops);
             } catch (final Exception e) {

@@ -290,23 +290,7 @@ public class AugmentHtmlStream {
             } catch (Exception e) {
             }
 
-            String SCI_GUID = "";
 
-            String SCI_GUID_DOI = "";
-            String SCI_GUID_PMID = "";
-
-            String SCI_TITLE = "";
-            String SCI_CREATOR = "";
-            String SCI_DESCRIPTION = "";
-            String SCI_IDENTIFIER = "";
-
-            String SCI_WHITELIST = "";
-
-            String SCI_URL = "";
-
-            String SCI_HASH = "";
-
-            SCI_URL = url.toString();
 
             // System.out.println("Starting augmentation for " + url);
             // System.out.println("Content: " + Doc);
@@ -343,16 +327,15 @@ public class AugmentHtmlStream {
 
                     if (document.dc_format() == "text/html") {
 
-                        SCI_TITLE = document.dc_title();
-                        SCI_CREATOR = document.dc_creator();
-                        SCI_DESCRIPTION = document.dc_description();
-                        SCI_IDENTIFIER = document.dc_identifier();
+//                        SCI_TITLE = document.dc_title();
+//                        SCI_CREATOR = document.dc_creator();
+//                        SCI_DESCRIPTION = document.dc_description();
+//                        SCI_IDENTIFIER = document.dc_identifier();
 
                     }
 
                 }
 
-                SCI_HASH = "" + url.hashCode();
 
                 // ADD AUGMENTED HEADER INFORMATION
 
@@ -370,9 +353,8 @@ public class AugmentHtmlStream {
                     NodeList headchildren = ht.getChildren();
 
                     headchildren.add(new org.htmlparser.nodes.TextNode(loadInternal("env/templates/jqueryheader.template", requestHeader)));
-                    headchildren.add(new org.htmlparser.nodes.TextNode("<script type='text/javascript'>"+loadInternal("interaction/interaction.js", requestHeader)+"</script>"));
-                    headchildren.add(new org.htmlparser.nodes.TextNode("<script type='text/javascript'>"+loadInternal("interaction/interaction_sciety.js", requestHeader)+"</script>"));
-                    headchildren.add(new org.htmlparser.nodes.TextNode("<script type='text/javascript'>"+loadInternal("interaction/interaction_metadata.js", requestHeader)+"</script>"));
+                    headchildren.add(new org.htmlparser.nodes.TextNode("<script type='text/javascript'>"+loadInternal("interaction_elements/interaction.js", requestHeader)+"</script>"));
+                    headchildren.add(new org.htmlparser.nodes.TextNode("<script type='text/javascript'>"+loadInternal("interaction_elements/interaction_metadata.js", requestHeader)+"</script>"));
 
                     augmented = true;
 
@@ -394,39 +376,6 @@ public class AugmentHtmlStream {
                             .nextNode());
 
                     NodeList bodychildren = bt.getChildren();
-
-
-                    // bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/Footer.html", requestHeader)));
-
-                    bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/OverlayReview.html?link="+url.toNormalform(true, false), requestHeader)));
-
-                    bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/Sidepanel_part.html?link="+url.toNormalform(true, false), requestHeader)));
-
-                    // bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction/Overlay.html?link="+url.toNormalform(true, false), requestHeader)));
-
-
-                    // ADD AUGMENTED INFO
-
-                    org.htmlparser.tags.Div sci_aug = new org.htmlparser.tags.Div();
-
-                    sci_aug.setTagName("div");
-
-                    sci_aug.setAttribute("id", "sciety_augmented");
-                    sci_aug.setAttribute("style",
-                            "visibility: hidden; position: absolute; overflow: hidden;");
-
-                    org.htmlparser.util.NodeList childr = new org.htmlparser.util.NodeList();
-
-
-                    sci_aug.setChildren(childr);
-
-                    org.htmlparser.tags.Div sci_aug_endtag = new org.htmlparser.tags.Div();
-
-                    sci_aug_endtag.setTagName("/div");
-
-                    sci_aug.setEndTag(sci_aug_endtag);
-
-                    bodychildren.add(sci_aug);
 
                     bt.setChildren(bodychildren);
 

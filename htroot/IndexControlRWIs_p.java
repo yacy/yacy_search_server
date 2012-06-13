@@ -37,6 +37,7 @@ import java.util.TreeMap;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
@@ -188,6 +189,9 @@ public class IndexControlRWIs_p
                     sb.crawlQueues.clear();
                     sb.crawlStacker.clear();
                     ResultURLs.clearStacks();
+                }
+                if ( post.get("deleteTriplestore", "").equals("on") ) {
+                    JenaTripleStore.clear();
                 }
                 if ( post.get("deleteCache", "").equals("on") ) {
                     Cache.clear();

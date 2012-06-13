@@ -38,6 +38,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import pt.tumba.parser.swf.SWF2HTML;
 
 public class swfParser extends AbstractParser implements Parser {
@@ -56,7 +57,7 @@ public class swfParser extends AbstractParser implements Parser {
      * all extracted information about the parsed document
      */
     @Override
-    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+    public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException
     {

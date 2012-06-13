@@ -49,6 +49,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -89,7 +90,7 @@ public class genericImageParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final MultiProtocolURI location,
+            final DigestURI location,
             final String mimeType,
             final String documentCharset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
@@ -294,9 +295,9 @@ public class genericImageParser extends AbstractParser implements Parser {
     public static void main(final String[] args) {
         final File image = new File(args[0]);
         final genericImageParser parser = new genericImageParser();
-        MultiProtocolURI uri;
+        DigestURI uri;
         try {
-            uri = new MultiProtocolURI("http://localhost/" + image.getName());
+            uri = new DigestURI("http://localhost/" + image.getName());
             final Document[] document = parser.parse(uri, "image/" + uri.getFileExtension(), "UTF-8", new FileInputStream(image));
             System.out.println(document[0].toString());
         } catch (final MalformedURLException e) {

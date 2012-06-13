@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -38,13 +38,6 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -60,6 +53,13 @@ import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCountInputStream;
 
+import org.w3c.dom.CharacterData;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
 public class sitemapParser extends AbstractParser implements Parser {
 
     public sitemapParser() {
@@ -68,8 +68,9 @@ public class sitemapParser extends AbstractParser implements Parser {
         //SUPPORTED_EXTENSIONS.add("php");
         //SUPPORTED_EXTENSIONS.add("xml");
     }
-    
-    public Document[] parse(final MultiProtocolURI url, final String mimeType,
+
+    @Override
+    public Document[] parse(final DigestURI url, final String mimeType,
             final String charset, final InputStream source)
             throws Failure, InterruptedException {
         SitemapReader sitemap;
@@ -78,12 +79,12 @@ public class sitemapParser extends AbstractParser implements Parser {
         } catch (IOException e) {
             throw new Parser.Failure("Load error:" + e.getMessage(), url);
         }
-        
+
         final List<Document> docs = new ArrayList<Document>();
-        MultiProtocolURI uri;
+        DigestURI uri;
         Document doc;
         for (final URLEntry item: sitemap) try {
-            uri = new MultiProtocolURI(item.loc);
+            uri = new DigestURI(item.loc);
             doc = new Document(
                     uri,
                     TextParser.mimeOf(url),
@@ -96,7 +97,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     "",
                     new String[0],
                     "",
-                    0.0f, 0.0f, 
+                    0.0f, 0.0f,
                     null,
                     null,
                     null,
@@ -106,12 +107,12 @@ public class sitemapParser extends AbstractParser implements Parser {
         } catch (MalformedURLException e) {
             continue;
         }
-        
+
         Document[] da = new Document[docs.size()];
         docs.toArray(da);
         return da;
     }
-    
+
     public static SitemapReader parse(final DigestURI sitemapURL) throws IOException {
         // download document
         final RequestHeader requestHeader = new RequestHeader();
@@ -125,11 +126,11 @@ public class sitemapParser extends AbstractParser implements Parser {
                 throw new IOException("Unable to download the sitemap file " + sitemapURL +
                         "\nServer returned status: " + client.getHttpResponse().getStatusLine());
             }
-    
+
             // get some metadata
             final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
             final String contentMimeType = header.mime();
-    
+
             InputStream contentStream = client.getContentstream();
             if (contentMimeType != null && (contentMimeType.equals("application/x-gzip") || contentMimeType.equals("application/gzip"))) {
                 contentStream = new GZIPInputStream(contentStream);
@@ -142,7 +143,7 @@ public class sitemapParser extends AbstractParser implements Parser {
             client.finish();
         }
     }
-    
+
     public static SitemapReader parse(final InputStream stream) throws IOException {
         return new SitemapReader(stream);
     }
@@ -190,10 +191,10 @@ public class sitemapParser extends AbstractParser implements Parser {
         public String loc, lastmod, changefreq, priority;
 
         public URLEntry(final Element element) {
-            loc = val(element, "loc", "");
-            lastmod  = val(element, "lastmod", "");
-            changefreq  = val(element, "changefreq", "");
-            priority  = val(element, "priority", "");
+            this.loc = val(element, "loc", "");
+            this.lastmod  = val(element, "lastmod", "");
+            this.changefreq  = val(element, "changefreq", "");
+            this.priority  = val(element, "priority", "");
         }
 
         public String url() {
@@ -202,28 +203,28 @@ public class sitemapParser extends AbstractParser implements Parser {
 
         public Date lastmod(final Date dflt) {
             try {
-                return ISO8601Formatter.FORMATTER.parse(lastmod);
+                return ISO8601Formatter.FORMATTER.parse(this.lastmod);
             } catch (final ParseException e) {
                 return dflt;
             }
         }
     }
-    
+
     public static class SitemapEntry {
         public String loc, lastmod;
 
         public SitemapEntry(final Element element) {
-            loc = val(element, "loc", "");
-            lastmod  = val(element, "lastmod", "");
+            this.loc = val(element, "loc", "");
+            this.lastmod  = val(element, "lastmod", "");
         }
 
         public String url() {
             return this.loc;
         }
-        
+
         public Date lastmod(final Date dflt) {
             try {
-                return ISO8601Formatter.FORMATTER.parse(lastmod);
+                return ISO8601Formatter.FORMATTER.parse(this.lastmod);
             } catch (final ParseException e) {
                 return dflt;
             }

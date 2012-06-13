@@ -3,8 +3,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.interaction.TripleStore;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
@@ -58,7 +58,7 @@ public class Triple_p {
 								newurl = d.getProtocol()+"://"+HTTPDemon.getAlternativeResolver().resolve(d.getHost())+d.getPath();
 								System.out.println (newurl);
 							}
-							TripleStore.Load(newurl);
+							JenaTripleStore.load(newurl);
 						} catch (MalformedURLException e) {
 							Log.logException(e);
 						} catch (IOException e) {
@@ -70,7 +70,7 @@ public class Triple_p {
 
 				if (post.containsKey("rdffile")) {
 
-		            TripleStore.Add(post.get("rdffile$file"));
+		            JenaTripleStore.addFile(post.get("rdffile$file"));
 				}
 
 				if (post.containsKey("query")) {
@@ -87,7 +87,7 @@ public class Triple_p {
 					com.hp.hpl.jena.query.Query query = QueryFactory.create(queryString);
 
 					// Execute the query and obtain results
-					QueryExecution qe = QueryExecutionFactory.create(query, TripleStore.model);
+					QueryExecution qe = QueryExecutionFactory.create(query, JenaTripleStore.model);
 					ResultSet resultSet = qe.execSelect();
 
 					ByteArrayOutputStream sos = new ByteArrayOutputStream();
