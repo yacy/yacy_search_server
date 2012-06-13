@@ -30,7 +30,7 @@
       <li><a href="/Crawler_p.html" class="MenuItemLink lock">Creation Monitor</a></li>
       <li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Index Administration</a></li>
       <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklists</a></li>
-      <li><a href="/DictionaryLoader_p.html" class="MenuItemLink lock">Content Semantic</a></li>
+      <li><a href="/Vocabulary_p.html" class="MenuItemLink lock">Content Semantic</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupMonitoring">
