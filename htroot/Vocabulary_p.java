@@ -30,6 +30,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.lod.vocabulary.DCTerms;
 import net.yacy.cora.lod.vocabulary.Owl;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.LibraryProvider;
@@ -50,6 +51,7 @@ public class Vocabulary_p {
 
         String vocabularyName = (post == null) ? null : post.get("vocabulary", null);
         Tagging vocabulary = vocabularyName == null ? null : LibraryProvider.autotagging.getVocabulary(vocabularyName);
+        if (vocabulary == null) vocabularyName = null;
         int count = 0;
         for (Tagging v: vocs) {
             prop.put("vocabularyset_" + count + "_name", v.getName());
@@ -70,11 +72,12 @@ public class Vocabulary_p {
                         String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
                         Segment segment = sb.indexSegments.segment(segmentName);
                         Iterator<DigestURI> ui = segment.urlSelector(discoveruri);
-                        Map<String,String> table = new TreeMap<String, String>();
+                        Map<String, Tagging.SOTuple> table = new TreeMap<String, Tagging.SOTuple>();
                         File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
                         while (ui.hasNext()) {
                             DigestURI u = ui.next();
-                            String t = u.toNormalform(false, false).substring(discoverobjectspace.length());
+                            String u0 = u.toNormalform(false, false);
+                            String t = u0.substring(discoverobjectspace.length());
                             if (t.indexOf('/') >= 0) continue;
                             int p = t.indexOf('.');
                             if (p >= 0) t = t.substring(0, p);
@@ -82,7 +85,7 @@ public class Vocabulary_p {
                             while ((p = t.indexOf('=')) >= 0) t = t.substring(p + 1);
                             if (p >= 0) t = t.substring(p + 1);
                             if (t.length() == 0) continue;
-                            table.put(t, "");
+                            table.put(t, new Tagging.SOTuple("", u0));
                         }
                         if (table.size() > 0) {
                             Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
@@ -96,7 +99,7 @@ public class Vocabulary_p {
 
                     // check if a term was added
                     if (post.get("add_new", "").equals("checked") && post.get("newterm", "").length() > 0) {
-                        vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""));
+                        vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""), post.get("newobjectlink", ""));
                     }
 
                     // check if a term was modified
@@ -104,7 +107,8 @@ public class Vocabulary_p {
                         if (e.getKey().startsWith("modify_") && e.getValue().equals("checked")) {
                             String term = e.getKey().substring(7);
                             String synonyms = post.get("synonyms_" + term, "");
-                            vocabulary.put(term, synonyms);
+                            String objectlink = post.get("objectlink_" + term, "");
+                            vocabulary.put(term, synonyms, objectlink);
                         }
                     }
 
@@ -150,15 +154,16 @@ public class Vocabulary_p {
             prop.putHTML("edit_editable_objectspacepredicate", DCTerms.references.getPredicate());
             prop.putHTML("edit_triple1", "<" + yacyurl + "> <" + vocabulary.getPredicate() + "> \"[discovered-tags-commaseparated]\"");
             prop.putHTML("edit_triple2", "<" + yacyurl + "> <" + Owl.SameAs.getPredicate() + "> <[document-url]>");
-            prop.putHTML("edit_tripleN", vocabulary.getObjectspace() == null ? "none - missing objectspace" : "<" + yacyurl + "> <" + DCTerms.references.getPredicate() + "> \"" + vocabulary.getObjectspace() + "[discovered-tag]\"");
+            prop.putHTML("edit_tripleN", vocabulary.getObjectspace() == null ? "none - missing objectspace" : "<" + yacyurl + "> <" + DCTerms.references.getPredicate() + "> \"[reference-link]#[tag]\" .");
             int c = 0;
             boolean dark = false;
-            for (Map.Entry<String, String> entry: vocabulary.list().entrySet()) {
+            for (Map.Entry<String, SOTuple> entry: vocabulary.list().entrySet()) {
                 prop.put("edit_terms_" + c + "_editable", editable ? 1 : 0);
                 prop.put("edit_terms_" + c + "_dark", dark ? 1 : 0); dark = !dark;
                 prop.putHTML("edit_terms_" + c + "_term", entry.getKey());
                 prop.putHTML("edit_terms_" + c + "_editable_term", entry.getKey());
-                prop.putHTML("edit_terms_" + c + "_editable_synonyms", entry.getValue());
+                prop.putHTML("edit_terms_" + c + "_editable_synonyms", entry.getValue().getSynonymsCSV());
+                prop.putHTML("edit_terms_" + c + "_editable_objectlink", entry.getValue().getObjectlink());
                 c++;
             }
             prop.put("edit_terms", c);

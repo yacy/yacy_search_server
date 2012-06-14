@@ -218,11 +218,12 @@ dc_rights
      */
     public void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
         String subject = YaCyMetadata.hashURI(this.source.hash());
-        for (String s: this.keywords) {
-            tags.remove(s);
-        }
+        //for (String s: this.keywords) {
+        //    tags.remove(s);
+        //}
         for (Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {
             Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
+            if (vocabulary == null) continue;
             String objectspace = vocabulary.getObjectspace();
             StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
             for (Tagging.Metatag s: e.getValue()) {
@@ -231,8 +232,9 @@ dc_rights
                     this.keywords.add(t);
                 }
                 sb.append(',').append(s.getObject());
-                if (objectspace != null) {
-                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectspace + s.getObject());
+                String objectlink = vocabulary.getObjectlink(s.getObject());
+                if ((objectspace != null && objectspace.length() > 0) || (objectlink != null && objectlink.length() > 0)) {
+                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectlink == null || objectlink.length() == 0 ? objectspace + s.getObject() + "#" + s.getObject() : objectlink + "#" + s.getObject());
                 }
             }
             // put to triplestore
