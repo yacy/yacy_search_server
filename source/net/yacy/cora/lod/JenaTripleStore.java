@@ -34,6 +34,7 @@ public class JenaTripleStore {
 	public static Model model = ModelFactory.createDefaultModel();
 	static {
 	    init();
+	    
 	}
 	private final static void init() {
         model.setNsPrefix(YaCyMetadata.PREFIX, YaCyMetadata.NAMESPACE);
@@ -99,8 +100,12 @@ public class JenaTripleStore {
         }
 
 	}
+	
+	public static void saveFile(String filename) {		
+		saveFile(filename, model);
+	}
 
-	public static void saveFile(String filename) {
+	public static void saveFile(String filename, Model model) {
 		Log.logInfo("TRIPLESTORE", "Saving triplestore with " + model.size() + " triples to " + filename);
     	FileOutputStream fout;
 		try {
@@ -177,9 +182,13 @@ public class JenaTripleStore {
         };
     }
 
-	public static void initPrivateStores(Switchboard switchboard) {
+	public static void initPrivateStores() {
+		
+		Switchboard switchboard = Switchboard.getSwitchboard();
 
 		Log.logInfo("TRIPLESTORE", "Init private stores");
+		
+		if (privatestorage == null) privatestorage = new ConcurrentHashMap<String, Model>();
 
 		if (privatestorage != null) privatestorage.clear();
 
@@ -191,57 +200,69 @@ public class JenaTripleStore {
 				de.anomic.data.UserDB.Entry e = it.next();
 				String username = e.getUserName();
 
-				Log.logInfo("TRIPLESTORE", "Init " + username);
-
-				String filename = new File(switchboard.getConfig("dataRoot", ""), "DATA/TRIPLESTORE").toString()+"/"+username+"_triplestore.rdf";
-
-				Model tmp  = ModelFactory.createDefaultModel();
-
-				Log.logInfo("TRIPLESTORE", "Loading from " + filename);
-
-				try {
-		            InputStream in = FileManager.get().open(filename);
-
-		            // read the RDF/XML file
-		            tmp.read(in, null);
-		        }
-		        finally
-		        {
-		        	privatestorage.put(username, tmp);
-
-		        }
+				File triplestore = new File(switchboard.getConfig("triplestore", new File(switchboard.getDataPath(), "DATA/TRIPLESTORE").getAbsolutePath()));
+                
+                File currentuserfile = new File(triplestore, "private_store_"+username+".rdf");
+                
+                Log.logInfo("TRIPLESTORE", "Init " + username + " from "+currentuserfile.getAbsolutePath());
+                
+                Model tmp  = ModelFactory.createDefaultModel();
+                
+                tmp.setNsPrefix(YaCyMetadata.PREFIX, YaCyMetadata.NAMESPACE);
+                tmp.setNsPrefix(Tagging.DEFAULT_PREFIX, Tagging.DEFAULT_NAMESPACE);
+                tmp.setNsPrefix(HttpHeader.PREFIX, HttpHeader.NAMESPACE);
+                tmp.setNsPrefix(Geo.PREFIX, Geo.NAMESPACE);
+                tmp.setNsPrefix("pnd", "http://dbpedia.org/ontology/individualisedPnd");
+                tmp.setNsPrefix(DCTerms.PREFIX, DCTerms.NAMESPACE);
+        	
+                
+                if (currentuserfile.exists()) {
+                	
+                	
+            		Log.logInfo("TRIPLESTORE", "Loading from " + currentuserfile.getAbsolutePath());
+                    InputStream is = FileManager.get().open(currentuserfile.getAbsolutePath());
+            	    if (is != null) {
+            	    	// read the RDF/XML file
+            	    	tmp.read(is, null);
+            			Log.logInfo("TRIPLESTORE", "loaded " + tmp.size() + " triples from " + currentuserfile.getAbsolutePath());
+            			
+            			
+            	    } else {
+            	        throw new IOException("cannot read " + currentuserfile.getAbsolutePath());
+            	    }
+                }
+                
+                if (tmp != null) {
+                
+                	privatestorage.put(username, tmp);
+                
+                }
 
 			}
 
 			}
-			catch (Exception anyex) {
+		catch (Exception anyex) {
+			
+			Log.logException(anyex);
 
-			}
-		// create separate model
+		}
 
 	}
 
 	public static void savePrivateStores(Switchboard switchboard) {
+		
+		Log.logInfo("TRIPLESTORE", "Saving user triplestores");
 
 		if (privatestorage == null) return;
 
 		for (Entry<String, Model> s : privatestorage.entrySet()) {
+			
+			File triplestore = new File(switchboard.getConfig("triplestore", new File(switchboard.getDataPath(), "DATA/TRIPLESTORE").getAbsolutePath()));
+          
+            File currentuserfile = new File(triplestore, "private_store_"+s.getKey()+".rdf");
 
-			String filename = new File(switchboard.getConfig("dataRoot", ""), "DATA/TRIPLESTORE").toString()+"/"+s.getKey()+"_triplestore.rdf";
-
-			FileOutputStream fout;
-			try {
-
-
-				fout = new FileOutputStream(filename);
-
-				s.getValue().write(fout);
-
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				Log.logWarning("TRIPLESTORE", "Saving to " + filename+" failed");
-			}
-
+            saveFile (currentuserfile.getAbsolutePath(), s.getValue());
+				
 		}
 	}
 

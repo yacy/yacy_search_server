@@ -310,12 +310,13 @@ public final class yacy {
                 File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
                 mkdirIfNeseccary(triplestore);
                 for (String s: triplestore.list()) {
-                	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf") && !s.endsWith("_triplestore.rdf")) JenaTripleStore.load(new File(triplestore, s).getAbsolutePath());
+                	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf") && !s.endsWith("_triplestore.rdf") && !s.startsWith("private_store_")) JenaTripleStore.load(new File(triplestore, s).getAbsolutePath());
                 }
                 if (sb.getConfigBool("triplestore.persistent", false)) {
                     File local = new File(triplestore, "local.rdf");
                     if (local.exists()) JenaTripleStore.load(local.getAbsolutePath());
-                }
+                }                              
+                
             } catch (IOException e) {
                 Log.logException(e);
             }
@@ -442,6 +443,8 @@ public final class yacy {
         if (sb.getConfigBool("triplestore.persistent", false)) {
             File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
         	JenaTripleStore.saveFile(new File(triplestore, "local.rdf").getAbsolutePath());
+        	
+        	JenaTripleStore.savePrivateStores(sb);
         }
 
         Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
