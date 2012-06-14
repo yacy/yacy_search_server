@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.Files;
 import net.yacy.document.WordCache.Dictionary;
-import net.yacy.document.geolocalization.Localization;
+import net.yacy.document.geolocalization.Locations;
 
 public class Tagging {
 
@@ -345,7 +345,7 @@ public class Tagging {
 		}
     }
 
-    public Tagging(String name, Localization localization) {
+    public Tagging(String name, Locations localization) {
         this(name);
         Set<String> locNames = localization.locationNames();
         for (String loc: locNames) {

@@ -349,7 +349,7 @@ public class yacysearchtrailer {
 
         // category: location search
         // show only if there is a location database present and if there had been any search results
-        if (LibraryProvider.geoLoc.locations() == 0 ||
+        if (LibraryProvider.geoLoc.size() == 0 ||
             theSearch.getRankingResult().getLocalIndexCount() == 0) {
             prop.put("cat-location", 0);
         } else {

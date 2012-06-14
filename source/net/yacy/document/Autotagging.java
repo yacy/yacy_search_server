@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.document.WordCache.Dictionary;
-import net.yacy.document.geolocalization.Localization;
+import net.yacy.document.geolocalization.Locations;
 import net.yacy.kelondro.logging.Log;
 
 /**
@@ -130,13 +130,14 @@ public class Autotagging {
         }
     }
 
-    public void addLocalization(Localization localization) {
-        Tagging voc = new Tagging("Locale", localization);
+    public void addPlaces(Locations locations) {
+    	if (locations.size() == 0) return; // otherwise we get a navigation that does nothing
+        Tagging voc = new Tagging("Locations", locations);
         try {
             voc.setObjectspace("http://dbpedia.org/resource/");
         } catch (IOException e) {
         }
-        this.vocabularies.put("Locale", voc);
+        this.vocabularies.put("Locations", voc);
         for (String t: voc.tags()) {
             this.allTags.put(t, PRESENT);
         }
