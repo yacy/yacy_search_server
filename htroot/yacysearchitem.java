@@ -177,7 +177,7 @@ public class yacysearchitem {
 				}
 			}
             prop.putHTML("content_link", modifyURL);
-            prop.putHTML("content_value", Interaction.TripleGet(result.urlstring(), "http://virtual.x/hasvalue", "anonymous"));
+//            prop.putHTML("content_value", Interaction.TripleGet(result.urlstring(), "http://virtual.x/hasvalue", "anonymous"));
 // END interaction
 
             prop.putHTML("content_target", target);
