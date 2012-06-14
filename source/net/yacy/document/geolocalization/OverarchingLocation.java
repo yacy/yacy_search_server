@@ -28,14 +28,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class OverarchingLocalization implements Locations {
+public class OverarchingLocation implements Locations {
 
     private final Map<String, Locations> services;
 
     /**
      * create a new overarching localization object
      */
-    public OverarchingLocalization() {
+    public OverarchingLocation() {
         this.services = new HashMap<String, Locations>();
     }
 

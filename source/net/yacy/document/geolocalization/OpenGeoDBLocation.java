@@ -49,7 +49,7 @@ import net.yacy.kelondro.logging.Log;
  * of more than 100MB! This class will provide a super-fast access to the OpenGeoDB, since all request are
  * evaluated using data in the RAM.
  */
-public class OpenGeoDBLocalization implements Locations
+public class OpenGeoDBLocation implements Locations
 {
 
     private final Map<Integer, GeoLocation> id2loc;
@@ -59,7 +59,7 @@ public class OpenGeoDBLocalization implements Locations
     private final Map<String, Integer> zip2id;
     private final File file;
 
-    public OpenGeoDBLocalization(final File file, final boolean lonlat) {
+    public OpenGeoDBLocation(final File file, final boolean lonlat) {
 
         this.file = file;
         this.id2loc = new HashMap<Integer, GeoLocation>();
