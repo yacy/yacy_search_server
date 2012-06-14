@@ -29,6 +29,7 @@ package interaction;
 //javac -classpath .:../classes ViewLog_p.java
 //if the shell's current path is HTROOT
 
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;
@@ -126,11 +127,21 @@ public class Triple {
 
         if (post.containsKey("load")) {
 
-        	o = Interaction.TripleGet(s, p, global ? "" : username);
+        	if (global) {
+        		o = JenaTripleStore.getObject(s, p).toString();
+        	} else {
+        		o = JenaTripleStore.getObject(s, p, username).toString();
+        	}
+
 
         } else {
+        	
+        	if (global) {
+        		JenaTripleStore.addTriple(s, p, o);
+        	} else {
+        		JenaTripleStore.addTriple(s, p, o, username);
+        	}
 
-        	Interaction.Triple(url, s, p, o, global ? "" : username);
         }
 
         prop.put("result", o);
