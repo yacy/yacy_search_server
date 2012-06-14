@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -38,7 +38,7 @@ import net.yacy.cora.lod.Vocabulary;
  * http://creativecommons.org/ns#
  */
 public enum CreativeCommons implements Vocabulary {
-    
+
     // License Properties
     permits(new Literal[]{
         PermitLiteral.Reproduction,
@@ -58,7 +58,7 @@ public enum CreativeCommons implements Vocabulary {
     jurisdiction,
     legalcode,
     deprecatedOn,
-    
+
     // Work Properties
     license,
     morePermissions,
@@ -67,16 +67,16 @@ public enum CreativeCommons implements Vocabulary {
     useGuidelines;
 
     enum PermitLiteral implements Literal {
-        
+
         Reproduction("Reproduction", "http://creativecommons.org/ns#Permission", ".*"),
         Distribution("Distribution", "http://creativecommons.org/ns#Permission", ".*"),
         DerivativeWorks("Derivative Works", "http://creativecommons.org/ns#Permission", ".*"),
         Sharing("Sharing", "http://creativecommons.org/ns#Permission", ".*");
-        
+
         String terminal;
         MultiProtocolURI subject;
         Pattern discoveryPattern;
-        
+
         private PermitLiteral(
                 String terminal,
                 String subject,
@@ -89,7 +89,7 @@ public enum CreativeCommons implements Vocabulary {
             }
             this.discoveryPattern = Pattern.compile(discoveryPattern == null ? ".*" : discoveryPattern);
         }
-        
+
         @Override
         public String getTerminal() { return this.terminal; }
 
@@ -99,20 +99,20 @@ public enum CreativeCommons implements Vocabulary {
         @Override
         public Pattern getDiscoveryPattern() { return this.discoveryPattern; }
     }
-    
+
     enum RequirementLiteral implements Literal {
-        
+
         Notice("Notice", "http://creativecommons.org/ns#Requirement", ".*"),
         Attribution("Attribution", "http://creativecommons.org/ns#Requirement", ".*"),
         ShareAlike("Share Alike", "http://creativecommons.org/ns#Requirement", ".*"),
         SourceCode("Source Code", "http://creativecommons.org/ns#Requirement", ".*"),
         Copyleft("Copyleft", "http://creativecommons.org/ns#Requirement", ".*"),
         LesserCopyleft("Lesser Copyleft", "http://creativecommons.org/ns#Requirement", ".*");
-        
+
         String terminal;
         MultiProtocolURI subject;
         Pattern discoveryPattern;
-        
+
         private RequirementLiteral(
                 String terminal,
                 String subject,
@@ -125,7 +125,7 @@ public enum CreativeCommons implements Vocabulary {
             }
             this.discoveryPattern = Pattern.compile(discoveryPattern == null ? ".*" : discoveryPattern);
         }
-        
+
         @Override
         public String getTerminal() { return this.terminal; }
 
@@ -137,14 +137,14 @@ public enum CreativeCommons implements Vocabulary {
     }
 
     enum ProhibitionLiteral implements Literal {
-        
+
         CommercialUse("Commercial Use", "http://creativecommons.org/ns#Prohibition", ".*"),
         HighIncomeNationUse("High Income Nation Use", "http://creativecommons.org/ns#Prohibition", ".*");
-        
+
         String terminal;
         MultiProtocolURI subject;
         Pattern discoveryPattern;
-        
+
         private ProhibitionLiteral(
                 String terminal,
                 String subject,
@@ -157,7 +157,7 @@ public enum CreativeCommons implements Vocabulary {
             }
             this.discoveryPattern = Pattern.compile(discoveryPattern == null ? ".*" : discoveryPattern);
         }
-        
+
         @Override
         public String getTerminal() { return this.terminal; }
 
@@ -167,34 +167,34 @@ public enum CreativeCommons implements Vocabulary {
         @Override
         public Pattern getDiscoveryPattern() { return this.discoveryPattern; }
     }
-    
+
     public final static String IDENTIFIER = "http://creativecommons.org/ns#";
     public final static String PREFIX = "cc";
-    
+
     private final String predicate;
     private final Set<Literal> literals;
 
     private CreativeCommons() {
-        this.predicate = PREFIX + ":" +  this.name();
+        this.predicate = IDENTIFIER +  this.name();
         this.literals = null;
     }
-    
+
     private CreativeCommons(Literal[] literals) {
-        this.predicate = PREFIX + ":" +  this.name();
+        this.predicate = IDENTIFIER +  this.name();
         this.literals = new HashSet<Literal>();
         for (Literal l: literals) this.literals.add(l);
     }
 
     @Override
-    public String getIdentifier() {
+    public String getNamespace() {
         return IDENTIFIER;
     }
 
     @Override
-    public String getPrefix() {
+    public String getNamespacePrefix() {
         return PREFIX;
     }
-    
+
     @Override
     public Set<Literal> getLiterals() {
         return null;

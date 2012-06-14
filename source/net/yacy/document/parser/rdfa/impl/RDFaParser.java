@@ -1,70 +1,55 @@
 /**
- * 
+ *
  */
 package net.yacy.document.parser.rdfa.impl;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Parser.Failure;
+import net.yacy.document.Parser;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.rdfa.IRDFaTriple;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 /**
  * @author fgandon
- * 
+ *
  */
-public class RDFaParser extends htmlParser {
+public class RDFaParser extends AbstractParser implements Parser {
 
-	public RDFaParser(String name) {
-		super(name);
-		SUPPORTED_EXTENSIONS.remove("htm");
-		SUPPORTED_EXTENSIONS.remove("html");
-		SUPPORTED_EXTENSIONS.remove("shtml");
-		SUPPORTED_EXTENSIONS.remove("xhtml");
-		SUPPORTED_EXTENSIONS.remove("php");
-		SUPPORTED_EXTENSIONS.remove("php3");
-		SUPPORTED_EXTENSIONS.remove("php4");
-		SUPPORTED_EXTENSIONS.remove("php5");
-		SUPPORTED_EXTENSIONS.remove("cfm");
-		SUPPORTED_EXTENSIONS.remove("asp");
-		SUPPORTED_EXTENSIONS.remove("aspx");
-		SUPPORTED_EXTENSIONS.remove("tex");
-		SUPPORTED_EXTENSIONS.remove("txt");
-		SUPPORTED_EXTENSIONS.remove("jsp");
-		SUPPORTED_EXTENSIONS.remove("mf");
-		SUPPORTED_EXTENSIONS.remove("pl");
-		SUPPORTED_EXTENSIONS.remove("py");
-		SUPPORTED_MIME_TYPES.remove("text/html");
-		SUPPORTED_MIME_TYPES.remove("text/xhtml+xml");
-		SUPPORTED_MIME_TYPES.remove("application/xhtml+xml");
-		SUPPORTED_MIME_TYPES.remove("application/x-httpd-php");
-		SUPPORTED_MIME_TYPES.remove("application/x-tex");
-		SUPPORTED_MIME_TYPES.remove("text/plain");
-		SUPPORTED_MIME_TYPES.remove("text/sgml");
-		SUPPORTED_MIME_TYPES.remove("text/csv");
+    private final htmlParser hp;
 
-		SUPPORTED_EXTENSIONS.add("html");
-		SUPPORTED_EXTENSIONS.add("php");
-		SUPPORTED_MIME_TYPES.add("text/html");
-		SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
-		SUPPORTED_EXTENSIONS.add("html");
-		SUPPORTED_EXTENSIONS.add("htm");
+	public RDFaParser() {
+		super("RDFa Parser");
+		this.hp = new htmlParser();
+
+		this.SUPPORTED_EXTENSIONS.add("html");
+		this.SUPPORTED_EXTENSIONS.add("php");
+		this.SUPPORTED_MIME_TYPES.add("text/html");
+		this.SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
+		this.SUPPORTED_EXTENSIONS.add("html");
+		this.SUPPORTED_EXTENSIONS.add("htm");
 	}
 
 	@Override
-	public Document[] parse(MultiProtocolURI url, String mimeType,
+    public Document[] parse(DigestURI url, String mimeType,
 			String charset, InputStream source) throws Failure,
 			InterruptedException {
 
 		Document[] htmlDocs = parseHtml(url, mimeType, charset, source);
-		
+
 		// TODO: current hardcoded restriction: apply rdfa parser only on selected sources.
 
 		if (url.toString().contains(".yacy") || url.toString().contains("experiments")) {
@@ -82,7 +67,7 @@ public class RDFaParser extends htmlParser {
 
 	}
 
-	private Document parseRDFa(MultiProtocolURI url, String mimeType,
+	private Document parseRDFa(DigestURI url, String mimeType,
 			String charset, InputStream source) {
 		RDFaTripleImpl triple;
 		IRDFaTriple[] allTriples = null;
@@ -111,13 +96,13 @@ public class RDFaParser extends htmlParser {
 
 	}
 
-	private Document[] parseHtml(MultiProtocolURI url, String mimeType,
+	private Document[] parseHtml(DigestURI url, String mimeType,
 			String charset, InputStream source) throws Failure,
 			InterruptedException {
 
 		Document[] htmlDocs = null;
 		try {
-			htmlDocs = super.parse(url, mimeType, charset, source);
+			htmlDocs = this.hp.parse(url, mimeType, charset, source);
 			source.reset();
 
 		} catch (IOException e1) {
@@ -127,12 +112,12 @@ public class RDFaParser extends htmlParser {
 
 	}
 
-	private Document convertAllTriplesToDocument(MultiProtocolURI url,
+	private Document convertAllTriplesToDocument(DigestURI url,
 			String mimeType, String charset, IRDFaTriple[] allTriples) {
 
-		Set<String> languages = new HashSet<String>(2);
+		//Set<String> languages = new HashSet<String>(2);
 		Set<String> keywords = new HashSet<String>(allTriples.length);
-		Set<String> sections = new HashSet<String>(5);
+		//Set<String> sections = new HashSet<String>(5);
 		String all = "";
 
 		for (IRDFaTriple irdFaTriple : allTriples) {
@@ -167,4 +152,51 @@ public class RDFaParser extends htmlParser {
 		}
 	}
 
+	public static void main(String[] args) {
+        URL aURL = null;
+        if (args.length < 1) {
+            System.out
+                    .println("Usage: one and only one argument giving a file path or a URL.");
+        } else {
+            File aFile = new File(args[0]);
+            Reader aReader = null;
+            if (aFile.exists()) {
+                try {
+                    aReader = new FileReader(aFile);
+                } catch (FileNotFoundException e) {
+                    aReader = null;
+                }
+            } else {
+                try {
+                    aURL = new URL(args[0]);
+                    aReader = new InputStreamReader(aURL.openStream());
+                } catch (MalformedURLException e) {
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    aReader = null;
+                }
+
+            }
+
+            if (aReader != null) {
+                RDFaParser aParser = new RDFaParser();
+                try {
+                    aParser.parse(new DigestURI(args[0]),"","",aURL.openStream());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Failure e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } else
+                System.out.println("File or URL not recognized.");
+
+        }
+
+    }
 }

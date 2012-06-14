@@ -31,9 +31,9 @@ package interaction;
 
 import java.io.ByteArrayOutputStream;
 
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;
-import net.yacy.interaction.TripleStore;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
@@ -63,13 +63,13 @@ public class PutRDF {
 
     		fout = new ByteArrayOutputStream();
 
-    		TripleStore.model.write(fout);
+    		JenaTripleStore.model.write(fout);
 
         	prop.put("resultXML", fout.toString());
 
         } else {
 
-        	Model tmp = TripleStore.privatestorage.get(Interaction.GetLoggedOnUser(header));
+        	Model tmp = JenaTripleStore.privatestorage.get(Interaction.GetLoggedOnUser(header));
 
         	if (tmp != null) {
 

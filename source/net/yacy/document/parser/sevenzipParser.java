@@ -38,6 +38,7 @@ import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import SevenZip.ArchiveExtractCallback;
@@ -54,7 +55,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/x-7z-compressed");
     }
 
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final IInStream source) throws Parser.Failure, InterruptedException {
+    public Document parse(final DigestURI location, final String mimeType, final String charset, final IInStream source) throws Parser.Failure, InterruptedException {
         final Document doc = new Document(
                 location,
                 mimeType,
@@ -100,7 +101,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset,
+    public Document[] parse(final DigestURI location, final String mimeType, final String charset,
             final InputStream source) throws Parser.Failure, InterruptedException {
         try {
             final ByteArrayOutputStream cfos = new ByteArrayOutputStream();
@@ -165,7 +166,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
                      Document[] theDocs;
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
-                     final MultiProtocolURI url = MultiProtocolURI.newURL(this.doc.dc_source(), this.prefix + "/" + super.filePath);
+                     final DigestURI url = new DigestURI(MultiProtocolURI.newURL(this.doc.dc_source(), this.prefix + "/" + super.filePath));
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                      theDocs = TextParser.parseSource(url, mime, null, this.cfos.toByteArray());
 

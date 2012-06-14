@@ -40,14 +40,13 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.document.geolocalization.GeonamesLocalization;
-import net.yacy.document.geolocalization.OpenGeoDBLocalization;
-import net.yacy.document.geolocalization.OverarchingLocalization;
+import net.yacy.document.geolocalization.GeonamesLocation;
+import net.yacy.document.geolocalization.OpenGeoDBLocation;
+import net.yacy.document.geolocalization.OverarchingLocation;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
-public class LibraryProvider
-{
+public class LibraryProvider {
 
     public static final char tagPrefix = '$';
     public static final String path_to_source_dictionaries = "source";
@@ -58,7 +57,7 @@ public class LibraryProvider
 
     public static WordCache dymLib = new WordCache(null);
     public static Autotagging autotagging = new Autotagging(null, tagPrefix);
-    public static OverarchingLocalization geoLoc = new OverarchingLocalization();
+    public static OverarchingLocation geoLoc = new OverarchingLocation();
     private static File dictSource = null;
     private static File dictRoot = null;
 
@@ -114,7 +113,7 @@ public class LibraryProvider
         initAutotagging(tagPrefix);
         Set<String> allTags = new HashSet<String>() ;
         allTags.addAll(autotagging.allTags()); // we must copy this into a clone to prevent circularity
-        autotagging.addLocalization(geoLoc);
+        autotagging.addPlaces(geoLoc);
         //autotagging.addDictionaries(dymLib.getDictionaries()); // strange results with this: normal word lists are 'too full'
         WordCache.learn(allTags);
     }
@@ -126,11 +125,11 @@ public class LibraryProvider
             if ( geo0.exists() ) {
                 geo0.renameTo(Dictionary.GEODB0.fileDisabled());
             }
-            geoLoc.addLocalization(Dictionary.GEODB1.nickname, new OpenGeoDBLocalization(geo1, false));
+            geoLoc.addLocalization(Dictionary.GEODB1.nickname, new OpenGeoDBLocation(geo1, false));
             return;
         }
         if ( geo0.exists() ) {
-            geoLoc.addLocalization(Dictionary.GEODB0.nickname, new OpenGeoDBLocalization(geo0, false));
+            geoLoc.addLocalization(Dictionary.GEODB0.nickname, new OpenGeoDBLocation(geo0, false));
             return;
         }
     }
@@ -138,7 +137,7 @@ public class LibraryProvider
     public static void integrateGeonames() {
         final File geon = Dictionary.GEON0.file();
         if ( geon.exists() ) {
-            geoLoc.addLocalization(Dictionary.GEON0.nickname, new GeonamesLocalization(geon));
+            geoLoc.addLocalization(Dictionary.GEON0.nickname, new GeonamesLocation(geon));
             return;
         }
     }

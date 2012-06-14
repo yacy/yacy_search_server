@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -36,6 +36,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 /**
  * a parser for comma-separated values
@@ -46,10 +47,10 @@ public class csvParser extends AbstractParser implements Parser {
 
     public csvParser() {
         super("Comma Separated Value Parser");
-        SUPPORTED_EXTENSIONS.add("csv");
+        this.SUPPORTED_EXTENSIONS.add("csv");
     }
-    
-    public Document[] parse(MultiProtocolURI location, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
+
+    public Document[] parse(DigestURI location, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
         // construct a document using all cells of the document
         // the first row is used as headline
         // all lines are artificially terminated by a '.' to separate them as sentence for the condenser.
@@ -72,7 +73,7 @@ public class csvParser extends AbstractParser implements Parser {
                     "",
                     null,
                     null,
-                    0.0f, 0.0f, 
+                    0.0f, 0.0f,
                     sb.toString().getBytes(charset),
                     null,
                     null,
@@ -92,7 +93,7 @@ public class csvParser extends AbstractParser implements Parser {
         sb.append('.');
         return sb.toString();
     }
-    
+
     private List<String[]> getTable(MultiProtocolURI location, String mimeType, String charset, InputStream source) {
         final List<String[]> rows = new ArrayList<String[]>();
         BufferedReader reader;

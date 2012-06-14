@@ -41,6 +41,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.order.Base64Order;
 
 /**
@@ -60,7 +61,8 @@ public class vcfParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("text/x-vcalendar");
     }
 
-    public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, final InputStream source)
+    @Override
+    public Document[] parse(final DigestURI url, final String mimeType, final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
         try {

@@ -34,11 +34,11 @@ import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.MapStore;
 
-public class TripleStore {
+public class MapTripleStore {
 
     MapStore store;
     
-    public TripleStore(MapStore store) {
+    public MapTripleStore(MapStore store) {
         this.store = store;
     }
 
@@ -66,7 +66,7 @@ public class TripleStore {
         return new Node(Rdf.Description, n);
     }
 
-    public void putAll(TripleStore entries) {
+    public void putAll(MapTripleStore entries) {
         Iterator<Map.Entry<byte[], Node>> i = entries.iterator();
         Map.Entry<? extends byte[], ? extends Node> entry;
         while (i.hasNext()) {
@@ -98,7 +98,7 @@ public class TripleStore {
             public Map.Entry<byte[], Node> next() {
                 byte[] key = id.next();
                 if (key == null) return null;
-                return new AbstractMap.SimpleImmutableEntry<byte[], Node>(key, TripleStore.this.get(key));
+                return new AbstractMap.SimpleImmutableEntry<byte[], Node>(key, MapTripleStore.this.get(key));
             }
 
             @Override

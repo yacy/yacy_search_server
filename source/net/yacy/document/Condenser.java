@@ -40,6 +40,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.word.Word;
@@ -85,7 +86,7 @@ public final class Condenser {
 
     //private Properties analysis;
     private final Map<String, Word> words; // a string (the words) to (indexWord) - relation
-    private final Set<String> tags = new HashSet<String>(); // a set of tags, discovered from Autotagging
+    private final Map<String, Set<Tagging.Metatag>> tags = new HashMap<String, Set<Tagging.Metatag>>(); // a set of tags, discovered from Autotagging
 
     //public int RESULT_NUMB_TEXT_BYTES = -1;
     public int RESULT_NUMB_WORDS = -1;
@@ -235,7 +236,7 @@ public final class Condenser {
 
         // extend the tags in the document object with autotagging tags
         if (!this.tags.isEmpty()) {
-            document.addTags(this.tags);
+            document.addMetatags(this.tags);
         }
     }
 
@@ -298,7 +299,8 @@ public final class Condenser {
         assert is != null;
         final Set<String> currsentwords = new HashSet<String>();
         String word = "";
-        String k, tag;
+        String k;
+        Tagging.Metatag tag;
         int wordlen;
         Word wsp;
         final Word wsp1;
@@ -321,8 +323,17 @@ public final class Condenser {
 
 	            // get tags from autotagging
 	            if (doAutotagging) {
-	                tag = LibraryProvider.autotagging.getPrintTagFromWord(word);
-	                if (tag != null) this.tags.add(tag);
+	                tag = LibraryProvider.autotagging.getTagFromWord(word);
+	                if (tag != null) {
+	                    Set<Tagging.Metatag> tagset = this.tags.get(tag.getVocabularyName());
+	                    if (tagset == null) {
+	                        tagset = new HashSet<Tagging.Metatag>();
+	                        tagset.add(tag);
+	                        this.tags.put(tag.getVocabularyName(), tagset);
+	                    } else {
+	                        tagset.add(tag);
+	                    }
+	                }
 	            }
 
 	            // distinguish punctuation and words

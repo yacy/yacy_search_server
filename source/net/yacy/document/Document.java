@@ -55,8 +55,14 @@ import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.JenaTripleStore;
+import net.yacy.cora.lod.vocabulary.DCTerms;
+import net.yacy.cora.lod.vocabulary.Owl;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
@@ -65,7 +71,7 @@ import de.anomic.crawler.retrieval.Request;
 
 public class Document {
 
-    private final MultiProtocolURI source;      // the source url
+    private final DigestURI source;      // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
@@ -90,7 +96,7 @@ public class Document {
     private final double lon, lat;
     private final Object parserObject; // the source object that was used to create the Document
 
-    public Document(final MultiProtocolURI location, final String mimeType, final String charset,
+    public Document(final DigestURI location, final String mimeType, final String charset,
                     final Object parserObject,
                     final Set<String> languages,
                     final String[] keywords, final String title, final String author, final String publisher,
@@ -202,6 +208,36 @@ dc_rights
         }
         for (String s: tags) {
             this.keywords.add(s);
+        }
+    }
+
+    /**
+     * add the given words to the set of keywords.
+     * These keywords will appear in dc_subject
+     * @param tags
+     */
+    public void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
+        String subject = YaCyMetadata.hashURI(this.source.hash());
+        for (String s: this.keywords) {
+            tags.remove(s);
+        }
+        for (Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {
+            Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
+            String objectspace = vocabulary.getObjectspace();
+            StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
+            for (Tagging.Metatag s: e.getValue()) {
+                String t = s.toString();
+                if (!this.keywords.contains(t)) {
+                    this.keywords.add(t);
+                }
+                sb.append(',').append(s.getObject());
+                if (objectspace != null) {
+                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectspace + s.getObject());
+                }
+            }
+            // put to triplestore
+            JenaTripleStore.addTriple(subject, vocabulary.getPredicate(), sb.substring(1));
+            JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true, false));
         }
     }
 
@@ -725,7 +761,7 @@ dc_rights
      * @param docs
      * @return
      */
-    public static Document mergeDocuments(final MultiProtocolURI location,
+    public static Document mergeDocuments(final DigestURI location,
             final String globalMime, final Document[] docs)
     {
         if (docs == null || docs.length == 0) return null;

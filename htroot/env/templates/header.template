@@ -23,14 +23,6 @@
       <li><a href="/Wiki.html?display=1" class="MenuItemLink">Local Peer Wiki</a></li>
     </ul>
   </li>
-  <li class="menugroup" id="menugroupInteraction">
-    <h3>Interaction</h3>
-    <ul class="menu">
-      <li><a href="/AugmentedBrowsing_p.html" class="MenuItemLink lock">Augmented Browsing</a></li>
-      <li><a href="/AugmentedParsing_p.html" class="MenuItemLink lock">Augmented Parsing</a></li>
-      <li><a href="/Triplestore_p.html" class="MenuItemLink lock">Triplestore</a></li>
-    </ul>
-  </li>
   <li class="menugroup" id="menugroupCrawlerControl">
     <h3>Index&nbsp;Production</h3>
     <ul class="menu">
@@ -38,6 +30,7 @@
       <li><a href="/Crawler_p.html" class="MenuItemLink lock">Creation Monitor</a></li>
       <li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Index Administration</a></li>
       <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklists</a></li>
+      <li><a href="/Vocabulary_p.html" class="MenuItemLink lock">Content Semantic</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupMonitoring">

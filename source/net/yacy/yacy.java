@@ -51,6 +51,7 @@ import java.util.zip.ZipOutputStream;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -59,7 +60,6 @@ import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
-import net.yacy.interaction.TripleStore;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -172,7 +172,7 @@ public final class yacy {
 				System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate.");
 				System.exit(-1);
 			}
-			
+
 			homedir = appHome.toString();
 
             // setting up logging
@@ -304,15 +304,20 @@ public final class yacy {
 
             // set user-agent
             HTTPClient.setDefaultUserAgent(ClientIdentification.getUserAgent());
-            
+
             // initial fill of the triplestore
-            File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
-            mkdirIfNeseccary(triplestore);
-            for (String s: triplestore.list()) {
-            	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf") && !s.endsWith("_triplestore.rdf")) TripleStore.Load(new File(triplestore, s).getAbsolutePath());
-            }
-            if (sb.getConfigBool("triplestore.persistent", false)) {
-            	TripleStore.Load(new File(triplestore, "local.rdf").getAbsolutePath());
+            try {
+                File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
+                mkdirIfNeseccary(triplestore);
+                for (String s: triplestore.list()) {
+                	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf") && !s.endsWith("_triplestore.rdf")) JenaTripleStore.load(new File(triplestore, s).getAbsolutePath());
+                }
+                if (sb.getConfigBool("triplestore.persistent", false)) {
+                    File local = new File(triplestore, "local.rdf");
+                    if (local.exists()) JenaTripleStore.load(local.getAbsolutePath());
+                }
+            } catch (IOException e) {
+                Log.logException(e);
             }
 
             // start main threads
@@ -433,12 +438,12 @@ public final class yacy {
             Log.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
         }
-        
+
         if (sb.getConfigBool("triplestore.persistent", false)) {
             File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
-        	TripleStore.Save(new File(triplestore, "local.rdf").getAbsolutePath());
+        	JenaTripleStore.saveFile(new File(triplestore, "local.rdf").getAbsolutePath());
         }
-        
+
         Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         Log.shutdown();
         shutdownSemaphore.release(1000);

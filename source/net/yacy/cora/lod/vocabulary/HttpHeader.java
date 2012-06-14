@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -33,7 +33,7 @@ import net.yacy.cora.lod.Vocabulary;
 public enum HttpHeader implements Vocabulary {
 
     //The following properties may appear in nodes of type Request:
-    
+
     accept, // representing an Accept header,
     acceptCharset, // representing an Accept-Charset header,
     acceptEncoding, // representing an Accept-Encoding header,
@@ -85,26 +85,26 @@ public enum HttpHeader implements Vocabulary {
     upgrade, // representing an Upgrade header,
     via, // representing a Via header,
     warning; // representing a Warning header.
-    
-    public final static String IDENTIFIER = "http://www.w3.org/WAI/ER/HTTP/WD-HTTP-in-RDF-20060131";
+
+    public final static String NAMESPACE = "http://www.w3.org/1999/xx/http#";
     public final static String PREFIX = "http";
-    
+
     private final String predicate;
-    
+
     private HttpHeader() {
-        this.predicate = PREFIX + ":" +  this.name();
+        this.predicate = NAMESPACE +  this.name();
     }
 
     @Override
-    public String getIdentifier() {
-        return IDENTIFIER;
+    public String getNamespace() {
+        return NAMESPACE;
     }
 
     @Override
-    public String getPrefix() {
+    public String getNamespacePrefix() {
         return PREFIX;
     }
-    
+
     @Override
     public Set<Literal> getLiterals() {
         return null;

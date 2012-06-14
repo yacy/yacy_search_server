@@ -27,17 +27,17 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * localization interface
+ * location interface
  * @author Michael Peter Christen
  *
  */
-public interface Localization {
+public interface Locations {
 
     /**
      * the number of locations that this localization stores
      * @return the number of locations
      */
-    public int locations();
+    public int size();
 
     /**
      * find a location by name
