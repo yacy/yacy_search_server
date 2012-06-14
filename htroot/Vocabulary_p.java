@@ -76,7 +76,7 @@ public class Vocabulary_p {
                         File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
                         while (ui.hasNext()) {
                             DigestURI u = ui.next();
-                            String u0 = u.toNormalform(false, false);
+                            String u0 = u.toNormalform(true, false);
                             String t = u0.substring(discoverobjectspace.length());
                             if (t.indexOf('/') >= 0) continue;
                             int p = t.indexOf('.');
@@ -99,7 +99,11 @@ public class Vocabulary_p {
 
                     // check if a term was added
                     if (post.get("add_new", "").equals("checked") && post.get("newterm", "").length() > 0) {
-                        vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""), post.get("newobjectlink", ""));
+                    	String objectlink = post.get("newobjectlink", "");
+                    	if (objectlink.length() > 0) try {
+                    		objectlink = new MultiProtocolURI(objectlink).toNormalform(true, false);
+                    	} catch (MalformedURLException e) {}
+                        vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""), objectlink);
                     }
 
                     // check if a term was modified
