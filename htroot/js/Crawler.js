@@ -86,24 +86,6 @@ function handleStatus(){
     trafCrawlerSpan = document.getElementById("trafficCrawler");
     removeAllChildren(trafCrawlerSpan);
 	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawlerValue) / 1024 / 10.24) / 100));
-    
-	var wordCacheSize=getValue(getFirstChild(statusTag, "wordCacheSize"));
-	var wordCacheMaxSize=getValue(getFirstChild(statusTag, "wordCacheMaxSize"));
-
-	wordCacheSpan=document.getElementById("wordcacheSpan");
-	removeAllChildren(wordCacheSpan);
-	var img;
-	var percent=Math.round(wordCacheSize/wordCacheMaxSize*100);
-	for(i=0;i<percent*WORDCACHEBAR_LENGTH;i++){
-		img=document.createElement("img");
-		img.setAttribute("src", BAR_IMG2);
-		wordCacheSpan.appendChild(img);
-	}
-	for(i=0;i<(100-percent)*WORDCACHEBAR_LENGTH;i++){
-		img=document.createElement("img");
-		img.setAttribute("src", BAR_IMG1);
-		wordCacheSpan.appendChild(img);
-	}
 	
 	dbsize=getFirstChild(statusTag, "dbsize");
 	urlpublictextSize=getValue(getFirstChild(dbsize, "urlpublictext"));
