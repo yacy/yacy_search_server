@@ -65,33 +65,35 @@ public class Vocabulary_p {
                 if (vocabulary == null) {
                     // create a vocabulary
                     String discovername = post.get("discovername", "");
-                    String discoverobjectspace = post.get("discoverobjectspace", "");
-                    MultiProtocolURI discoveruri = null;
-                    if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURI(discoverobjectspace);} catch (MalformedURLException e) {}
-                    if (discovername.length() > 0 && discoveruri != null) {
-                        String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
-                        Segment segment = sb.indexSegments.segment(segmentName);
-                        Iterator<DigestURI> ui = segment.urlSelector(discoveruri);
+                    if (discovername.length() > 0) {
+                        String discoverobjectspace = post.get("discoverobjectspace", "");
+                        MultiProtocolURI discoveruri = null;
+                        if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURI(discoverobjectspace);} catch (MalformedURLException e) {}
+                        if (discoveruri == null) discoverobjectspace = "";
                         Map<String, Tagging.SOTuple> table = new TreeMap<String, Tagging.SOTuple>();
                         File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
-                        while (ui.hasNext()) {
-                            DigestURI u = ui.next();
-                            String u0 = u.toNormalform(true, false);
-                            String t = u0.substring(discoverobjectspace.length());
-                            if (t.indexOf('/') >= 0) continue;
-                            int p = t.indexOf('.');
-                            if (p >= 0) t = t.substring(0, p);
-                            while ((p = t.indexOf(':')) >= 0) t = t.substring(p + 1);
-                            while ((p = t.indexOf('=')) >= 0) t = t.substring(p + 1);
-                            if (p >= 0) t = t.substring(p + 1);
-                            if (t.length() == 0) continue;
-                            table.put(t, new Tagging.SOTuple("", u0));
+                        if (discoveruri != null) {
+                            String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
+                            Segment segment = sb.indexSegments.segment(segmentName);
+                            Iterator<DigestURI> ui = segment.urlSelector(discoveruri);
+                            while (ui.hasNext()) {
+                                DigestURI u = ui.next();
+                                String u0 = u.toNormalform(true, false);
+                                String t = u0.substring(discoverobjectspace.length());
+                                if (t.indexOf('/') >= 0) continue;
+                                int p = t.indexOf('.');
+                                if (p >= 0) t = t.substring(0, p);
+                                while ((p = t.indexOf(':')) >= 0) t = t.substring(p + 1);
+                                while ((p = t.indexOf('=')) >= 0) t = t.substring(p + 1);
+                                if (p >= 0) t = t.substring(p + 1);
+                                if (t.length() == 0) continue;
+                                table.put(t, new Tagging.SOTuple("", u0));
+                            }
                         }
-                        if (table.size() > 0) {
-                            Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
-                            LibraryProvider.autotagging.addVocabulary(newvoc);
-                            vocabulary = newvoc;
-                        }
+                        Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
+                        LibraryProvider.autotagging.addVocabulary(newvoc);
+                        vocabularyName = discovername;
+                        vocabulary = newvoc;
                     }
                 } else {
                     // check if objectspace was set
@@ -133,6 +135,7 @@ public class Vocabulary_p {
                     if (vocabulary != null && post.get("delete_vocabulary", "").equals("checked") ) {
                         LibraryProvider.autotagging.deleteVocabulary(vocabularyName);
                         vocabulary = null;
+                        vocabularyName = null;
                     }
                 }
             } catch (IOException e) {

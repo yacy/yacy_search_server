@@ -4,7 +4,7 @@
     <title>YaCy '#[clientname]#': Federated Index</title>
     #%env/templates/metas.template%#
   </head>
-  <body id="Vocabulary_p">
+  <body id="Vocabulary_p" onload="document.getElementById('newterm').focus()">
     #%env/templates/header.template%#
     #%env/templates/submenuSemantic.template%#
     <h2>Vocabulary Administration</h2>
@@ -75,15 +75,15 @@
         <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="modify_#[term]#" id="modify_#[term]#" value="checked" disabled="disabled"/>#(/editable)#</td>
         <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" onchange="this.form.submit()"/>#(/editable)#</td>
         <td align="left">#[term]#</td>
-        <td align="left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="60" maxlength="1024" onclick="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''"/>#(/editable)#</td>
-        <td align="left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onclick="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''"/>#(/editable)#</td>
+        <td align="left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="40" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''"/>#(/editable)#</td>
+        <td align="left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''"/>#(/editable)#</td>
       </tr>
       #{/terms}#
       #(editable)#::
       <tr class="TableCellDark">
         <td align="center" colspan="2"><input type="checkbox" name="add_new" id="add_new" value="checked" disabled="disabled"/><i>add</i></td>
-        <td align="left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onclick="document.getElementById('add_new').checked='checked'; document.getElementById('add_new').disabled=''"/></td>
-        <td align="left"><input type="text" name="newsynonyms" id="newsynonyms" value="" size="60" maxlength="1024"/></td>
+        <td align="left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onkeyup="document.getElementById('add_new').checked='checked'; document.getElementById('add_new').disabled=''"/></td>
+        <td align="left"><input type="text" name="newsynonyms" id="newsynonyms" value="" size="40" maxlength="1024"/></td>
         <td align="left"><input type="text" name="newobjectlink" id="newobjectlink" value="" size="60" maxlength="1024"/></td>
       </tr>
       <tr class="TableCellDark">
