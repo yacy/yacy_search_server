@@ -1054,7 +1054,7 @@ federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.schemefile = solr.keys.default.list
 
 # RDF triplestore settings
-triplestore.persistent = false
+triplestore.persistent = true
 
 # Augmentation settings
 parserAugmentation = false
