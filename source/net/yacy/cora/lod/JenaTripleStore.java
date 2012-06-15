@@ -44,11 +44,14 @@ public class JenaTripleStore {
         model.setNsPrefix("pnd", "http://dbpedia.org/ontology/individualisedPnd");
         model.setNsPrefix(DCTerms.PREFIX, DCTerms.NAMESPACE);
 	}
+	
+	public static long size() {
+		return model.size();
+	}
 
 	public static ConcurrentHashMap<String, Model> privatestorage = null;
 
 	public static String file;
-
 
 	public static void load(String filename) throws IOException {
 		if (filename.endsWith(".nt")) LoadNTriples(filename);
@@ -70,16 +73,20 @@ public class JenaTripleStore {
 	}
 
 	public static void LoadNTriples(String fileNameOrUri) throws IOException {
-	    Model tmp = ModelFactory.createDefaultModel();
-		Log.logInfo("TRIPLESTORE", "Loading N-Triples from " + fileNameOrUri);
+	    Log.logInfo("TRIPLESTORE", "Loading N-Triples from " + fileNameOrUri);
 	    InputStream is = FileManager.get().open(fileNameOrUri);
+	    LoadNTriples(is);
+	}
+	
+	public static void LoadNTriples(InputStream is) throws IOException {
+	    Model tmp = ModelFactory.createDefaultModel();
 	    if (is != null) {
 	    	tmp.read(is, null, "N-TRIPLE");
-			Log.logInfo("TRIPLESTORE", "loaded " + tmp.size() + " triples from " + fileNameOrUri);
+			Log.logInfo("TRIPLESTORE", "loaded " + tmp.size() + " triples");
         	model = model.union(tmp);
 	        //model.write(System.out, "TURTLE");
 	    } else {
-	        throw new IOException("cannot read " + fileNameOrUri);
+	        throw new IOException("cannot read input stream");
 	    }
 	}
 
@@ -174,7 +181,7 @@ public class JenaTripleStore {
     }
 
     public static void deleteObjects(String subject, String predicate) {
-        Resource r = getResource(subject);
+        Resource r = subject == null ? null : getResource(subject);
         Property pr = getProperty(predicate);
         JenaTripleStore.model.removeAll(r, pr, (Resource) null);
     }
