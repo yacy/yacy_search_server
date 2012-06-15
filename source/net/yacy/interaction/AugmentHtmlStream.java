@@ -12,6 +12,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 
 import net.yacy.yacy;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.document.Document;
@@ -376,6 +377,8 @@ public class AugmentHtmlStream {
                             .nextNode());
 
                     NodeList bodychildren = bt.getChildren();
+                    
+                    bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction_elements/OverlayInteraction.html?urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader)));
 
                     bt.setChildren(bodychildren);
 
