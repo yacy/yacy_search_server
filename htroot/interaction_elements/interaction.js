@@ -181,3 +181,21 @@ function loadvalueglobal (s, p) {
 	return res.result;
 	
 }
+
+
+function triple_get_prefix (sp, s, pp, p) {
+
+	var res = {result: ""};
+	
+	$.ajaxSetup({async: false});
+
+	$.getJSON('/currentyacypeer/interaction/Triple.json?sep=true&global=true&sp='+sp+'&s='+s+'&pp='+pp+'&p='+p+'&load=true', function (data) {
+	
+		res = data;
+	
+	});
+	
+		
+	return res.result;
+	
+}

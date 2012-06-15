@@ -107,9 +107,17 @@ public class Triple {
             if(post.containsKey("s")){
             	s = post.get("s");
             }
+            
+            if(post.containsKey("sp")){
+            	s = post.get("sp") + "#" + s;
+            }
 
             if(post.containsKey("p")){
             	p = post.get("p");
+            }
+            
+            if(post.containsKey("pp")){
+            	p = post.get("pp") + "#" + p;
             }
 
             if(post.containsKey("o")){
@@ -123,9 +131,9 @@ public class Triple {
         if (post.containsKey("load")) {
 
         	if (global) {
-        		o = JenaTripleStore.getObject(s, p).toString();
+        		o = JenaTripleStore.getObject(s, p);        		
         	} else {
-        		o = JenaTripleStore.getObject(s, p, username).toString();
+        		o = JenaTripleStore.getObject(s, p, username);
         	}
 
 

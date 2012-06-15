@@ -199,35 +199,27 @@ public class JenaTripleStore {
     }
     
     public static String getObject (final String subject, final String predicate) { 
-    	  
-    	Iterator<RDFNode> iter = getObjects (subject, predicate);
-    
-    	while (iter.hasNext()) {
-
-    		return (iter.next().toString());
-		
-    	}
+    		
+    	Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ");
     	
-    	return null;
+    	Iterator<RDFNode> ni = JenaTripleStore.getObjects (subject, predicate);
+        if (!ni.hasNext()) return "";
+        return ni.next().toString();
     
     }
     
     public static String getObject (final String subject, final String predicate, final String username) { 
   
-    	Iterator<RDFNode> iter = getObjects (subject, predicate, username);
-    
-    	while (iter.hasNext()) {
-
-    		return (iter.next().toString());
-		
-    	}
+    	Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ("+username+")");
     	
-    	return null;
+    	Iterator<RDFNode> ni = JenaTripleStore.getObjects (subject, predicate, username);
+        if (!ni.hasNext()) return "";
+        return ni.next().toString();
     
     }
     
     public static Iterator<RDFNode> getObjects(final String subject, final String predicate, final String username) {
-        Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ");
+
         final Resource r = JenaTripleStore.getResource(subject, username);
         
         if (privatestorage != null && privatestorage.containsKey(username)) {
@@ -238,8 +230,7 @@ public class JenaTripleStore {
 	    return null;
     }
 
-    public static Iterator<RDFNode> getObjects(final String subject, final String predicate) {
-        Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ");
+    public static Iterator<RDFNode> getObjects(final String subject, final String predicate) {        
         final Resource r = JenaTripleStore.getResource(subject);
         return getObjects(r, predicate);
     }
@@ -250,7 +241,8 @@ public class JenaTripleStore {
 
     public static Iterator<RDFNode> getObjects(final Resource r, final String predicate, final Model model) {
         final Property pr = JenaTripleStore.getProperty(predicate, model);
-        final StmtIterator iter = model.listStatements(r, pr, (Resource) null);
+        final StmtIterator iter = model.listStatements(r, pr, (Resource) null);                
+                
         return new Iterator<RDFNode>() {
             @Override
             public boolean hasNext() {
