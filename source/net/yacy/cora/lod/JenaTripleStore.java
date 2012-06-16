@@ -24,6 +24,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileManager;
@@ -44,11 +45,14 @@ public class JenaTripleStore {
         model.setNsPrefix("pnd", "http://dbpedia.org/ontology/individualisedPnd");
         model.setNsPrefix(DCTerms.PREFIX, DCTerms.NAMESPACE);
 	}
+	
+	public static long size() {
+		return model.size();
+	}
 
 	public static ConcurrentHashMap<String, Model> privatestorage = null;
 
 	public static String file;
-
 
 	public static void load(String filename) throws IOException {
 		if (filename.endsWith(".nt")) LoadNTriples(filename);
@@ -70,35 +74,33 @@ public class JenaTripleStore {
 	}
 
 	public static void LoadNTriples(String fileNameOrUri) throws IOException {
-	    Model tmp = ModelFactory.createDefaultModel();
-		Log.logInfo("TRIPLESTORE", "Loading N-Triples from " + fileNameOrUri);
+	    Log.logInfo("TRIPLESTORE", "Loading N-Triples from " + fileNameOrUri);
 	    InputStream is = FileManager.get().open(fileNameOrUri);
+	    LoadNTriples(is);
+	}
+	
+	public static void LoadNTriples(InputStream is) throws IOException {
+	    Model tmp = ModelFactory.createDefaultModel();
 	    if (is != null) {
 	    	tmp.read(is, null, "N-TRIPLE");
-			Log.logInfo("TRIPLESTORE", "loaded " + tmp.size() + " triples from " + fileNameOrUri);
+			Log.logInfo("TRIPLESTORE", "loaded " + tmp.size() + " triples");
         	model = model.union(tmp);
 	        //model.write(System.out, "TURTLE");
 	    } else {
-	        throw new IOException("cannot read " + fileNameOrUri);
+	        throw new IOException("cannot read input stream");
 	    }
 	}
 
 	public static void addFile(String rdffile) {
-
 		Model tmp  = ModelFactory.createDefaultModel();
-
-
 		try {
 			InputStream in = new ByteArrayInputStream(UTF8.getBytes(rdffile));
 
             // read the RDF/XML file
             tmp.read(in, null);
+        } finally {
+            model = model.union(tmp);
         }
-        finally
-        {
-            	model = model.union(tmp);
-        }
-
 	}
 	
 	public static void saveFile(String filename) {		
@@ -126,65 +128,25 @@ public class JenaTripleStore {
 	    init(model);
 	}
 
-	
-	public static Resource getResource(String uri, String username) {		
-		
-		if (privatestorage != null && privatestorage.containsKey(username)) {
-			
-			return getResource (uri, privatestorage.get(username));
-		}
-		
-	    return null;
-	}
-	
 	/**
 	 * Return a Resource instance with the given URI in this model.
 	 * @param uri
 	 * @return
 	 */
 	public static Resource getResource(String uri) {
-	    return getResource(uri, model);
-	}
-	
-	public static Resource getResource(String uri, Model model) {
 	    return model.getResource(uri);
 	}
 
-	public static Resource getProperty(String uri, String username) {		
-		
-		if (privatestorage != null && privatestorage.containsKey(username)) {
-			
-			return getProperty (uri, privatestorage.get(username));
-		}
-		
-	    return null;
-	}
-	
-	/**
-	 * Return a Property instance in this model.
-	 * @param uri
-	 * @return
-	 */
-    public static Property getProperty(String uri) {
-        return getProperty(uri, model);
-    }
-    
-    public static Property getProperty(String uri, Model model) {
-        return model.getProperty(uri);
-    }
-
     public static void deleteObjects(String subject, String predicate) {
-        Resource r = getResource(subject);
-        Property pr = getProperty(predicate);
+        Resource r = subject == null ? null : getResource(subject);
+        Property pr = model.getProperty(predicate);
         JenaTripleStore.model.removeAll(r, pr, (Resource) null);
     }
     
     public static void addTriple(String subject, String predicate, String object, String username) {
     	if (privatestorage != null && privatestorage.containsKey(username)) {
-			
     		addTriple (subject, predicate, object, privatestorage.get(username));
 		}
-		
     }
     
     public static void addTriple(String subject, String predicate, String object) {
@@ -192,55 +154,46 @@ public class JenaTripleStore {
     }
 
     public static void addTriple(String subject, String predicate, String object, Model model) {
-        Resource r = getResource(subject, model);
-        Property pr = getProperty(predicate, model);
+        Resource r = model.getResource(subject);
+        Property pr = model.getProperty(predicate);
         r.addProperty(pr, object);
         Log.logInfo("TRIPLESTORE", "ADD " + subject + " - " + predicate + " - " + object);
     }
     
-    public static String getObject (final String subject, final String predicate) { 
-    		
+    public static String getObject(final String subject, final String predicate) {
     	Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ");
     	
-    	Iterator<RDFNode> ni = JenaTripleStore.getObjects (subject, predicate);
+    	Iterator<RDFNode> ni = JenaTripleStore.getObjects(subject, predicate);
         if (!ni.hasNext()) return "";
         return ni.next().toString();
-    
-    }
-    
-    public static String getObject (final String subject, final String predicate, final String username) { 
-  
-    	Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ("+username+")");
-    	
-    	Iterator<RDFNode> ni = JenaTripleStore.getObjects (subject, predicate, username);
-        if (!ni.hasNext()) return "";
-        return ni.next().toString();
-    
-    }
-    
-    public static Iterator<RDFNode> getObjects(final String subject, final String predicate, final String username) {
-
-        final Resource r = JenaTripleStore.getResource(subject, username);
-        
-        if (privatestorage != null && privatestorage.containsKey(username)) {
-			
-			return getObjects(r, predicate, privatestorage.get(username));
-		}
-		
-	    return null;
     }
 
     public static Iterator<RDFNode> getObjects(final String subject, final String predicate) {        
-        final Resource r = JenaTripleStore.getResource(subject);
+        final Resource r = subject == null ? null : JenaTripleStore.getResource(subject);
         return getObjects(r, predicate);
+    }
+    
+    public static String getPrivateObject(final String subject, final String predicate, final String username) { 
+    	Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ("+username+")");
+    	
+    	Iterator<RDFNode> ni = JenaTripleStore.getPrivateObjects(subject, predicate, username);
+        if (!ni.hasNext()) return "";
+        return ni.next().toString();
+    }
+    
+    private static Iterator<RDFNode> getPrivateObjects(final String subject, final String predicate, final String username) {
+        if (privatestorage != null && privatestorage.containsKey(username)) {
+			return getObjects(privatestorage.get(username).getResource(subject), predicate, privatestorage.get(username));
+		}
+	    return null;
     }
         
     public static Iterator<RDFNode> getObjects(final Resource r, final String predicate) {
-    	return getObjects (r, predicate, model);
+    	return getObjects(r, predicate, model);
     }
 
-    public static Iterator<RDFNode> getObjects(final Resource r, final String predicate, final Model model) {
-        final Property pr = JenaTripleStore.getProperty(predicate, model);
+    private static Iterator<RDFNode> getObjects(final Resource r, final String predicate, final Model model) {
+        final Property pr = model.getProperty(predicate);
         final StmtIterator iter = model.listStatements(r, pr, (Resource) null);                
                 
         return new Iterator<RDFNode>() {
@@ -251,6 +204,30 @@ public class JenaTripleStore {
             @Override
             public RDFNode next() {
                 return iter.nextStatement().getObject();
+            }
+            @Override
+            public void remove() {
+                iter.remove();
+            }
+        };
+    }
+    
+    public static Iterator<Resource> getSubjects(final String predicate) {
+    	return getSubjects(predicate, model);
+    }
+
+    private static Iterator<Resource> getSubjects(final String predicate, final Model model) {
+        final Property pr = model.getProperty(predicate);
+        final ResIterator iter = model.listSubjectsWithProperty(pr);                
+                
+        return new Iterator<Resource>() {
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+            @Override
+            public Resource next() {
+                return iter.nextResource();
             }
             @Override
             public void remove() {

@@ -1,3 +1,4 @@
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -29,7 +30,7 @@ public final class Triplestore_p {
 		
 //		prop.put("acceptfeedbackenabled_checked",
 //				env.getConfigBool("interaction.feedback.accept", false) ? "1" : "0");
-
+		prop.put("size", JenaTripleStore.size());
 
 		// return rewrite properties
 		return prop;

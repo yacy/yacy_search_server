@@ -82,15 +82,58 @@ public class Tagging {
         this(name);
         this.propFile = propFile;
         this.objectspace = objectspace;
-        BufferedWriter w = new BufferedWriter(new FileWriter(propFile));
-        w.write("#objectspace:" + objectspace + "\n");
-        for (Map.Entry<String, SOTuple> e: table.entrySet()) {
-            String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
-            String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
-            w.write(e.getKey() + (s == null || s.length() == 0 ? "" : ":" + e.getValue()) + (o == null || o.length() == 0 || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
+        if (propFile == null) {
+            this.synonym2term.clear();
+            this.term2synonym.clear();
+            this.term2objectlink.clear();
+            this.synonym2synonyms.clear();
+            this.namespace = DEFAULT_NAMESPACE;
+            this.predicate = this.namespace + this.navigatorName;
+
+            String term, v;
+            String[] tags;
+        	vocloop: for (Map.Entry<String, SOTuple> e: table.entrySet()) {
+			    if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().length() == 0) {
+			        term = normalizeKey(e.getKey());
+			        v = normalizeWord(e.getKey());
+			        this.synonym2term.put(v, term);
+			        this.term2synonym.put(term, v);
+			        if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
+			        continue vocloop;
+			    }
+			    term = normalizeKey(e.getKey());
+			    tags = e.getValue().getSynonymsList();
+			    Set<String> synonyms = new HashSet<String>();
+			    synonyms.add(term);
+			    tagloop: for (String synonym: tags) {
+			        if (synonym.length() == 0) continue tagloop;
+				    synonyms.add(synonym);
+			    	synonym = normalizeWord(synonym);
+			        if (synonym.length() == 0) continue tagloop;
+				    synonyms.add(synonym);
+			        this.synonym2term.put(synonym, term);
+			        this.term2synonym.put(term, synonym);
+			    }
+			    String synonym = normalizeWord(term);
+			    this.synonym2term.put(synonym, term);
+			    this.term2synonym.put(term, synonym);
+                if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
+			    synonyms.add(synonym);
+			    for (String s: synonyms) {
+			    	this.synonym2synonyms.put(s, synonyms);
+			    }
+			}
+        } else {
+	        BufferedWriter w = new BufferedWriter(new FileWriter(propFile));
+	        if (objectspace != null && objectspace.length() > 0) w.write("#objectspace:" + objectspace + "\n");
+	        for (Map.Entry<String, SOTuple> e: table.entrySet()) {
+	            String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
+	            String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
+	            w.write(e.getKey() + (s == null || s.length() == 0 ? "" : ":" + e.getValue()) + (o == null || o.length() == 0 || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
+	        }
+	        w.close();
+	        init();
         }
-        w.close();
-        init();
     }
 
     /**

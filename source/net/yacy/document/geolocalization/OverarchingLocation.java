@@ -44,7 +44,7 @@ public class OverarchingLocation implements Locations {
      * @param nickname the nickname of the service
      * @param service the service
      */
-    public void addLocalization(final String nickname, final Locations service) {
+    public void activateLocalization(final String nickname, final Locations service) {
         this.services.put(nickname, service);
     }
 
@@ -52,7 +52,7 @@ public class OverarchingLocation implements Locations {
      * remove a localization service
      * @param nickname
      */
-    public void removeLocalization(final String nickname) {
+    public void deactivateLocalization(final String nickname) {
         this.services.remove(nickname);
     }
 
