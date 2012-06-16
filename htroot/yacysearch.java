@@ -480,7 +480,7 @@ public class yacysearch {
                 if (p > 0) {
                     String k = vocabulary.substring(0, p);
                     String v = vocabulary.substring(p + 1);
-                    metatags.add(LibraryProvider.autotagging.metatag(LibraryProvider.autotagging.prefixChar + k + ":" + v));
+                    metatags.add(LibraryProvider.autotagging.metatag(k, v));
                 }
             }
 

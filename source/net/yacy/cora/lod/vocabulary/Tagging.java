@@ -493,14 +493,14 @@ public class Tagging {
         return this.propFile;
     }
 
-    public Metatag getMetatagFromSynonym(char prefix, final String word) {
+    public Metatag getMetatagFromSynonym(final String word) {
         String printname = this.synonym2term.get(word);
         if (printname == null) return null;
-        return new Metatag(prefix, printname);
+        return new Metatag(printname);
     }
 
-    public Metatag getMetatagFromTerm(char prefix, final String word) {
-        return new Metatag(prefix, word);
+    public Metatag getMetatagFromTerm(final String word) {
+        return new Metatag(word);
     }
 
     public Set<String> getSynonyms(String term) {
@@ -543,9 +543,7 @@ public class Tagging {
 
 	public class Metatag {
 	    private final String object;
-	    private final char prefix;
-	    public Metatag(char prefix, String object) {
-	    	this.prefix = prefix;
+	    public Metatag(String object) {
 	        this.object = object;
 	    }
 
@@ -563,7 +561,7 @@ public class Tagging {
 
 	    @Override
 	    public String toString() {
-	        return this.prefix + Tagging.this.navigatorName + ":" + encodePrintname(this.object);
+	        return Tagging.this.navigatorName + ":" + encodePrintname(this.object);
 	    }
 
 	    @Override
@@ -589,12 +587,12 @@ public class Tagging {
         return PATTERN_UL.matcher(maskname).replaceAll(" ");
     }
 
-    public static String cleanTagFromAutotagging(char prefix, final String tagString) {
+    public static String cleanTagFromAutotagging(final String tagString) {
         if (tagString == null || tagString.length() == 0) return "";
         String[] tags = PATTERN_SP.split(tagString);
         StringBuilder sb = new StringBuilder(tagString.length());
         for (String tag : tags) {
-            if (tag.length() > 0 && tag.charAt(0) != prefix) {
+            if (tag.length() > 0) {
                 sb.append(tag).append(' ');
             }
         }

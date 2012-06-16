@@ -57,7 +57,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 public class LibraryProvider {
 
-    public static final char tagPrefix = '$';
     public static final String path_to_source_dictionaries = "source";
     public static final String path_to_did_you_mean_dictionaries = "didyoumean";
     public static final String path_to_autotagging_dictionaries = "autotagging";
@@ -116,7 +115,7 @@ public class LibraryProvider {
         dictRoot = rootPath;
 
         // initialize libraries
-        initAutotagging(tagPrefix);
+        initAutotagging();
         activateDeReWo();
         initDidYouMean();
         integrateOpenGeoDB();
@@ -161,12 +160,12 @@ public class LibraryProvider {
         dymLib = new WordCache(dymDict);
     }
 
-    public static void initAutotagging(char prefix) {
+    public static void initAutotagging() {
         final File autotaggingPath = new File(dictRoot, path_to_autotagging_dictionaries);
         if ( !autotaggingPath.exists() ) {
             autotaggingPath.mkdirs();
         }
-        autotagging = new Autotagging(autotaggingPath, prefix);
+        autotagging = new Autotagging(autotaggingPath);
     }
 
     public static void activateDeReWo() {
