@@ -42,7 +42,7 @@ import java.util.zip.ZipFile;
 import net.yacy.document.StringBuilderComparator;
 import net.yacy.kelondro.logging.Log;
 
-public class GeonamesLocalization implements Localization
+public class GeonamesLocation implements Locations
 {
 
     /*
@@ -73,7 +73,7 @@ public class GeonamesLocalization implements Localization
     private final TreeMap<StringBuilder, List<Integer>> name2ids;
     private final File file;
 
-    public GeonamesLocalization(final File file) {
+    public GeonamesLocation(final File file) {
         // this is a processing of the cities1000.zip file from http://download.geonames.org/export/dump/
 
         this.file = file;
@@ -131,7 +131,7 @@ public class GeonamesLocalization implements Localization
     }
 
     @Override
-    public int locations() {
+    public int size() {
         return this.id2loc.size();
     }
 
@@ -226,9 +226,9 @@ public class GeonamesLocalization implements Localization
 
     @Override
     public boolean equals(final Object other) {
-        if ( !(other instanceof Localization) ) {
+        if ( !(other instanceof Locations) ) {
             return false;
         }
-        return nickname().equals(((Localization) other).nickname());
+        return nickname().equals(((Locations) other).nickname());
     }
 }

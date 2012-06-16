@@ -20,18 +20,23 @@
 
 package net.yacy.cora.lod.vocabulary;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.Files;
 import net.yacy.document.WordCache.Dictionary;
-import net.yacy.document.geolocalization.Localization;
+import net.yacy.document.geolocalization.Locations;
 
 public class Tagging {
 
@@ -41,7 +46,9 @@ public class Tagging {
     private final String navigatorName;
     private final Map<String, String> synonym2term;
     private final Map<String, String> term2synonym;
+    private final Map<String, String> term2objectlink;
     private final Map<String, Set<String>> synonym2synonyms;
+    private File propFile;
 
     private String predicate, namespace, objectspace;
 
@@ -49,15 +56,324 @@ public class Tagging {
         this.navigatorName = name;
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
+        this.term2objectlink = new ConcurrentHashMap<String, String>();
         this.synonym2synonyms = new ConcurrentHashMap<String, Set<String>>();
         this.namespace = DEFAULT_NAMESPACE;
         this.predicate = this.namespace + name;
         this.objectspace = null;
+        this.propFile = null;
     }
 
     public Tagging(String name, File propFile) throws IOException {
         this(name);
-        BlockingQueue<String> list = Files.concurentLineReader(propFile, 1000);
+        this.propFile = propFile;
+        init();
+    }
+
+    /**
+     * initialize a new Tagging file with a given table and objectspace url stub
+     * @param name
+     * @param propFile
+     * @param objectspace
+     * @param table
+     * @throws IOException
+     */
+    public Tagging(String name, File propFile, String objectspace, Map<String, SOTuple> table) throws IOException {
+        this(name);
+        this.propFile = propFile;
+        this.objectspace = objectspace;
+        if (propFile == null) {
+            this.synonym2term.clear();
+            this.term2synonym.clear();
+            this.term2objectlink.clear();
+            this.synonym2synonyms.clear();
+            this.namespace = DEFAULT_NAMESPACE;
+            this.predicate = this.namespace + this.navigatorName;
+
+            String term, v;
+            String[] tags;
+        	vocloop: for (Map.Entry<String, SOTuple> e: table.entrySet()) {
+			    if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().length() == 0) {
+			        term = normalizeKey(e.getKey());
+			        v = normalizeWord(e.getKey());
+			        this.synonym2term.put(v, term);
+			        this.term2synonym.put(term, v);
+			        if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
+			        continue vocloop;
+			    }
+			    term = normalizeKey(e.getKey());
+			    tags = e.getValue().getSynonymsList();
+			    Set<String> synonyms = new HashSet<String>();
+			    synonyms.add(term);
+			    tagloop: for (String synonym: tags) {
+			        if (synonym.length() == 0) continue tagloop;
+				    synonyms.add(synonym);
+			    	synonym = normalizeWord(synonym);
+			        if (synonym.length() == 0) continue tagloop;
+				    synonyms.add(synonym);
+			        this.synonym2term.put(synonym, term);
+			        this.term2synonym.put(term, synonym);
+			    }
+			    String synonym = normalizeWord(term);
+			    this.synonym2term.put(synonym, term);
+			    this.term2synonym.put(term, synonym);
+                if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
+			    synonyms.add(synonym);
+			    for (String s: synonyms) {
+			    	this.synonym2synonyms.put(s, synonyms);
+			    }
+			}
+        } else {
+	        BufferedWriter w = new BufferedWriter(new FileWriter(propFile));
+	        if (objectspace != null && objectspace.length() > 0) w.write("#objectspace:" + objectspace + "\n");
+	        for (Map.Entry<String, SOTuple> e: table.entrySet()) {
+	            String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
+	            String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
+	            w.write(e.getKey() + (s == null || s.length() == 0 ? "" : ":" + e.getValue()) + (o == null || o.length() == 0 || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
+	        }
+	        w.close();
+	        init();
+        }
+    }
+
+    /**
+     * helper class: Synonym and Objectlink tuple
+     */
+    public static class SOTuple {
+        private final String synonyms;
+        private final String objectlink;
+
+        public SOTuple(String synonyms, String objectlink) {
+            this.synonyms = synonyms;
+            this.objectlink = objectlink;
+        }
+
+        public SOTuple(String[] synonyms, String objectlink) {
+            StringBuilder sb = new StringBuilder(synonyms.length * 10);
+            for (String s: synonyms) sb.append(',').append(s);
+            this.synonyms = sb.substring(1);
+            this.objectlink = objectlink;
+        }
+
+        public String getSynonymsCSV() {
+            return this.synonyms;
+        }
+
+        public String[] getSynonymsList() {
+            return this.synonyms.split(",");
+        }
+
+        public String getObjectlink() {
+            return this.objectlink;
+        }
+
+    }
+
+
+    public void updateTerm(String term, String[] synonyms) {
+
+    }
+
+    private File tmpFile() {
+        if (this.propFile == null) return null;
+        return new File(this.propFile.getAbsolutePath() + ".tmp");
+    }
+
+    public void put(String term, String synonyms, String objectlink) throws IOException {
+        if (this.propFile == null) return;
+        File tmp = tmpFile();
+        BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
+        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
+        if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
+        if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
+        String line;
+        boolean written = false;
+        try {
+            vocloop: while ((line = list.take()) != Files.POISON_LINE) {
+                String[] pl = parseLine(line);
+                if (pl == null) {
+                    continue vocloop;
+                }
+                if (pl[0].equals(term)) {
+                    w.write(term + (synonyms == null || synonyms.length() == 0 ? "" : ":" + synonyms) + (objectlink == null || objectlink.length() == 0 || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
+                    written = true;
+                } else {
+                    w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                }
+            }
+            if (!written) {
+                w.write(term + (synonyms == null || synonyms.length() == 0 ? "" : ":" + synonyms) + (objectlink == null || objectlink.length() == 0 || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
+            }
+        } catch (InterruptedException e) {
+        }
+        w.close();
+        this.propFile.delete();
+        tmp.renameTo(this.propFile);
+        init();
+    }
+
+    public void delete(String term) throws IOException {
+        if (this.propFile == null) return;
+        File tmp = tmpFile();
+        BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
+        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
+        if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
+        if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
+        String line;
+        try {
+            vocloop: while ((line = list.take()) != Files.POISON_LINE) {
+                String[] pl = parseLine(line);
+                if (pl == null) {
+                    continue vocloop;
+                }
+                if (pl[0].equals(term)) {
+                    continue vocloop;
+                } else {
+                    w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                }
+            }
+        } catch (InterruptedException e) {
+        }
+        w.close();
+        this.propFile.delete();
+        tmp.renameTo(this.propFile);
+        init();
+    }
+
+    public void clear() throws IOException {
+        if (this.propFile == null) return;
+        File tmp = tmpFile();
+        BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
+        if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
+        if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
+        w.close();
+        this.propFile.delete();
+        tmp.renameTo(this.propFile);
+        init();
+    }
+
+    public void setObjectspace(String os) throws IOException {
+        if (this.propFile == null) return;
+        if (os == null || (this.objectspace != null && this.objectspace.equals(os))) return;
+        this.objectspace = os;
+        File tmp = tmpFile();
+        BufferedWriter w = new BufferedWriter(new FileWriter(tmp));
+        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
+        if (this.namespace != null && !this.namespace.equals(DEFAULT_NAMESPACE)) w.write("#namespace:" + this.namespace + "\n");
+        if (this.objectspace != null && this.objectspace.length() > 0) w.write("#objectspace:" + this.objectspace + "\n");
+        String line;
+        try {
+            vocloop: while ((line = list.take()) != Files.POISON_LINE) {
+                String[] pl = parseLine(line);
+                if (pl == null) {
+                    continue vocloop;
+                }
+                w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+            }
+        } catch (InterruptedException e) {
+        }
+        w.close();
+        this.propFile.delete();
+        tmp.renameTo(this.propFile);
+        init();
+    }
+
+    public Map<String, Set<String>> reconstructionSets() {
+        Map<String, Set<String>> r = new TreeMap<String, Set<String>>();
+        for (Map.Entry<String, String> e: this.term2synonym.entrySet()) {
+            Set<String> s = r.get(e.getKey());
+            if (s == null) {
+                s = new TreeSet<String>();
+                r.put(e.getKey(), s);
+            }
+            if (e.getValue() != null && e.getValue().length() != 0) s.add(e.getValue());
+        }
+        for (Map.Entry<String, String> e: this.synonym2term.entrySet()) {
+            Set<String> s = r.get(e.getValue());
+            if (s == null) {
+                s = new TreeSet<String>();
+                r.put(e.getValue(), s);
+            }
+            s.add(e.getKey());
+        }
+        return r;
+    }
+
+    public Map<String, SOTuple> reconstructionLists() {
+        Map<String, Set<String>> r = reconstructionSets();
+        Map<String, SOTuple> map = new TreeMap<String, SOTuple>();
+        for (Map.Entry<String, Set<String>> e: r.entrySet()) {
+            String objectlink = this.term2objectlink.get(e.getKey());
+            map.put(e.getKey(), new SOTuple(e.getValue().toArray(new String[e.getValue().size()]), objectlink == null ? "" : objectlink));
+        }
+        return map;
+    }
+
+    public String getObjectlink(String term) {
+        return this.term2objectlink.get(term);
+    }
+
+    public Map<String, SOTuple> list() {
+        if (this.propFile == null) {
+            // create a virtual map for automatically generated vocabularies
+            return reconstructionLists();
+        }
+        Map<String, SOTuple> map = new LinkedHashMap<String, SOTuple>();
+        BlockingQueue<String> list;
+        try {
+            list=Files.concurentLineReader(this.propFile, 1000);
+        } catch (IOException e1) {
+            return map;
+        }
+        String line;
+        try {
+            vocloop: while ((line = list.take()) != Files.POISON_LINE) {
+                String[] pl = parseLine(line);
+                if (pl == null) {
+                    continue vocloop;
+                }
+                map.put(pl[0], new SOTuple(pl[1] == null || pl[1].length() == 0 ? "" : pl[1], pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : pl[2]));
+            }
+        } catch (InterruptedException e) {
+        }
+        return map;
+    }
+
+    private final static String[] parseLine(String line) {
+        line = line.trim();
+        int p = line.indexOf('#');
+        String c = "";
+        if (p >= 0) {
+            c = line.substring(p + 1);
+            line = line.substring(0, p).trim();
+        }
+        if (line.length() == 0) {
+            return null;
+        }
+        p = line.indexOf(':');
+        if (p < 0) {
+            p = line.indexOf('=');
+        }
+        if (p < 0) {
+            p = line.indexOf('\t');
+        }
+        if (p < 0) {
+            return new String[]{line, null, c};
+        }
+        return new String[]{line.substring(0, p), line.substring(p + 1), c};
+    }
+
+    public void init() throws IOException {
+        if (this.propFile == null) return;
+        this.synonym2term.clear();
+        this.term2synonym.clear();
+        this.term2objectlink.clear();
+        this.synonym2synonyms.clear();
+        this.namespace = DEFAULT_NAMESPACE;
+        this.predicate = this.namespace + this.navigatorName;
+        this.objectspace = null;
+
+        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
         String term, v;
         String[] tags;
         int p;
@@ -70,34 +386,30 @@ public class Tagging {
 			        String comment = line.substring(p + 1).trim();
                     if (comment.startsWith("namespace:")) {
                         this.namespace = comment.substring(10).trim();
-                        if (!this.namespace.endsWith("/") && !this.namespace.endsWith("#")) this.namespace += "#";
-                        this.predicate = this.namespace + name;
+                        if (!this.namespace.endsWith("/") && !this.namespace.endsWith("#") && this.namespace.length() > 0) this.namespace += "#";
+                        this.predicate = this.namespace + this.navigatorName;
+                        continue vocloop;
                     }
                     if (comment.startsWith("objectspace:")) {
                         this.objectspace = comment.substring(12).trim();
-                        if (!this.objectspace.endsWith("/") && !this.objectspace.endsWith("#")) this.objectspace += "#";
+                        if (!this.objectspace.endsWith("/") && !this.objectspace.endsWith("#") && this.objectspace.length() > 0) this.objectspace += "#";
+                        continue vocloop;
                     }
-			    	line = line.substring(0, p).trim();
 			    }
-			    if (line.length() == 0) {
+			    String[] pl = parseLine(line);
+			    if (pl == null) {
 			        continue vocloop;
 			    }
-			    p = line.indexOf(':');
-			    if (p < 0) {
-			        p = line.indexOf('=');
-			    }
-			    if (p < 0) {
-			        p = line.indexOf('\t');
-			    }
-			    if (p < 0) {
-			        term = normalizeKey(line);
-			        v = normalizeWord(line);
+			    if (pl[1] == null) {
+			        term = normalizeKey(pl[0]);
+			        v = normalizeWord(pl[0]);
 			        this.synonym2term.put(v, term);
 			        this.term2synonym.put(term, v);
+			        if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
 			        continue vocloop;
 			    }
-			    term = normalizeKey(line.substring(0, p));
-			    v = line.substring(p + 1);
+			    term = normalizeKey(pl[0]);
+			    v = pl[1];
 			    tags = v.split(",");
 			    Set<String> synonyms = new HashSet<String>();
 			    synonyms.add(term);
@@ -113,6 +425,7 @@ public class Tagging {
 			    String synonym = normalizeWord(term);
 			    this.synonym2term.put(synonym, term);
 			    this.term2synonym.put(term, synonym);
+                if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
 			    synonyms.add(synonym);
 			    for (String s: synonyms) {
 			    	this.synonym2synonyms.put(s, synonyms);
@@ -122,7 +435,7 @@ public class Tagging {
 		}
     }
 
-    public Tagging(String name, Localization localization) {
+    public Tagging(String name, Locations localization) {
         this(name);
         Set<String> locNames = localization.locationNames();
         for (String loc: locNames) {
@@ -150,6 +463,10 @@ public class Tagging {
         return this.predicate;
     }
 
+    public String getNamespace() {
+        return this.namespace;
+    }
+
     public String getObjectspace() {
         return this.objectspace;
     }
@@ -170,6 +487,10 @@ public class Tagging {
      */
     public String getName() {
         return this.navigatorName;
+    }
+
+    public File getFile() {
+        return this.propFile;
     }
 
     public Metatag getMetatagFromSynonym(char prefix, final String word) {

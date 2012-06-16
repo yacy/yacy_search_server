@@ -95,7 +95,6 @@ public class Table {
         //TODO: this does not work for a static admin, yet.
         }
 
-        String url = "";
         String s = "";
         String p = "";
         String o = "";
@@ -103,10 +102,6 @@ public class Table {
         Boolean global = false;
 
         if(post != null){
-
-            if(post.containsKey("url")){
-                url = post.get("url");
-            }
 
             if(post.containsKey("s")){
             	s = post.get("s");
@@ -135,8 +130,6 @@ public class Table {
         }
 
         prop.put("result", o);
-
-
 
         return prop;
     }

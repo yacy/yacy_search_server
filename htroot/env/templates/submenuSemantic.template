@@ -1,11 +1,12 @@
 <div class="SubMenu">
-  <h3>Semantic</h3>
+  <h3>Content Semantic</h3>
 </div>
 <div class="SubMenu">
   <div class="SubMenugroup">
     <h3>Automated Annotation</h3>
     <ul class="SubMenu">
-      <li><a href="/DictionaryLoader_p.html" class="MenuItemLink lock">Dictionary Loader</a></li>
+      <li><a href="/Vocabulary_p.html" class="MenuItemLink lock">Auto-Annotation Vocabulary Editor</a></li>
+      <li><a href="/DictionaryLoader_p.html" class="MenuItemLink lock">Knowledge Loader</a></li>
     </ul>
   </div>
   

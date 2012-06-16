@@ -28,15 +28,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class OverarchingLocalization implements Localization {
+public class OverarchingLocation implements Locations {
 
-    private final Map<String, Localization> services;
+    private final Map<String, Locations> services;
 
     /**
      * create a new overarching localization object
      */
-    public OverarchingLocalization() {
-        this.services = new HashMap<String, Localization>();
+    public OverarchingLocation() {
+        this.services = new HashMap<String, Locations>();
     }
 
     /**
@@ -44,7 +44,7 @@ public class OverarchingLocalization implements Localization {
      * @param nickname the nickname of the service
      * @param service the service
      */
-    public void addLocalization(final String nickname, final Localization service) {
+    public void activateLocalization(final String nickname, final Locations service) {
         this.services.put(nickname, service);
     }
 
@@ -52,7 +52,7 @@ public class OverarchingLocalization implements Localization {
      * remove a localization service
      * @param nickname
      */
-    public void removeLocalization(final String nickname) {
+    public void deactivateLocalization(final String nickname) {
         this.services.remove(nickname);
     }
 
@@ -61,10 +61,10 @@ public class OverarchingLocalization implements Localization {
      * @return the number of locations
      */
     @Override
-    public int locations() {
+    public int size() {
         int locations = 0;
-        for (final Localization service: this.services.values()) {
-            locations += service.locations();
+        for (final Locations service: this.services.values()) {
+            locations += service.size();
         }
         return locations;
     }
@@ -78,7 +78,7 @@ public class OverarchingLocalization implements Localization {
     @Override
     public TreeSet<GeoLocation> find(final String anyname, final boolean locationexact) {
         final TreeSet<GeoLocation> locations = new TreeSet<GeoLocation>();
-        for (final Localization service: this.services.values()) {
+        for (final Locations service: this.services.values()) {
             locations.addAll(service.find(anyname, locationexact));
         }
         return locations;
@@ -91,7 +91,7 @@ public class OverarchingLocalization implements Localization {
     @Override
     public Set<String> locationNames() {
         final Set<String> locations = new HashSet<String>();
-        for (final Localization service: this.services.values()) {
+        for (final Locations service: this.services.values()) {
             locations.addAll(service.locationNames());
         }
         return locations;
@@ -108,7 +108,7 @@ public class OverarchingLocalization implements Localization {
         if (s.length() == 0) {
             return recommendations;
         }
-        for (final Localization service: this.services.values()) {
+        for (final Locations service: this.services.values()) {
             recommendations.addAll(service.recommend(s));
         }
         return recommendations;
@@ -125,7 +125,7 @@ public class OverarchingLocalization implements Localization {
         if (s.length() == 0) {
             return recommendations;
         }
-        for (final Localization service: this.services.values()) {
+        for (final Locations service: this.services.values()) {
             recommendations.addAll(service.recommend(s));
         }
         return recommendations;
@@ -156,10 +156,10 @@ public class OverarchingLocalization implements Localization {
      */
     @Override
     public boolean equals(final Object other) {
-        if (!(other instanceof Localization)) {
+        if (!(other instanceof Locations)) {
             return false;
         }
-        return nickname().equals(((Localization) other).nickname());
+        return nickname().equals(((Locations) other).nickname());
     }
 
 }

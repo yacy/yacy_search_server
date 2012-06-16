@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.document.WordCache.Dictionary;
-import net.yacy.document.geolocalization.Localization;
+import net.yacy.document.geolocalization.Locations;
 import net.yacy.kelondro.logging.Log;
 
 /**
@@ -49,26 +49,20 @@ public class Autotagging {
     private final Map<String, Tagging> vocabularies; // mapping from vocabulary name to the tagging vocabulary
     private final Map<String, Object> allTags;
 
-    public Autotagging(final File autotaggingPath, char prefixChar) {
-        this.vocabularies = new ConcurrentHashMap<String, Tagging>();
-        this.autotaggingPath = autotaggingPath;
-        this.prefixChar = prefixChar;
-        this.allTags = new ConcurrentHashMap<String, Object>();
-        init();
-    }
-
-
     /**
-     * scan the input directory and load all tag tables (again)
-     * a tag table is a property file where
+     * create a Autotagging object:
+     * scan the input directory and load all tag tables.
+     * A tag table is a property file where
      * the key is the tag name
      * the value is the visible name for the tag (shown in a navigator)
      * properties without values are allowed (the value is then set to the key)
      * also the value can be used as a tag
      */
-    public void init() {
-        this.vocabularies.clear();
-        this.allTags.clear();
+    public Autotagging(final File autotaggingPath, char prefixChar) {
+        this.vocabularies = new ConcurrentHashMap<String, Tagging>();
+        this.autotaggingPath = autotaggingPath;
+        this.prefixChar = prefixChar;
+        this.allTags = new ConcurrentHashMap<String, Object>();
         if (this.autotaggingPath == null || !this.autotaggingPath.exists()) {
             return;
         }
@@ -91,6 +85,16 @@ public class Autotagging {
         }
     }
 
+    public File getVocabularyFile(String name) {
+        return new File(this.autotaggingPath, name + ".vocabulary");
+    }
+
+    public void deleteVocabulary(String name) {
+        Tagging v = this.vocabularies.remove(name);
+        if (v == null || v.getFile() == null) return;
+        v.getFile().delete();
+    }
+
     public Tagging getVocabulary(String name) {
         return this.vocabularies.get(name);
     }
@@ -103,6 +107,13 @@ public class Autotagging {
         return this.allTags.keySet();
     }
 
+    public void addVocabulary(Tagging voc) {
+        this.vocabularies.put(voc.getName(), voc);
+        for (String t: voc.tags()) {
+            this.allTags.put(t, PRESENT);
+        }
+    }
+
     public void addDictionaries(Map<String, Dictionary> dictionaries) {
         for (Map.Entry<String, Dictionary> entry: dictionaries.entrySet()) {
             Tagging voc = new Tagging(entry.getKey(), entry.getValue());
@@ -113,9 +124,14 @@ public class Autotagging {
         }
     }
 
-    public void addLocalization(Localization localization) {
-        Tagging voc = new Tagging("Locale", localization);
-        this.vocabularies.put("Locale", voc);
+    public void addPlaces(Locations locations) {
+    	if (locations.size() == 0) return; // otherwise we get a navigation that does nothing
+        Tagging voc = new Tagging("Locations", locations);
+        try {
+            voc.setObjectspace("http://dbpedia.org/resource/");
+        } catch (IOException e) {
+        }
+        this.vocabularies.put("Locations", voc);
         for (String t: voc.tags()) {
             this.allTags.put(t, PRESENT);
         }
@@ -133,18 +149,31 @@ public class Autotagging {
         final WordTokenizer tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(text)), LibraryProvider.dymLib);
         String tag;
         while (tokens.hasMoreElements()) {
-            tag = getTagFromWord(tokens.nextElement().toString()).toString();
+            tag = getTagFromTerm(tokens.nextElement().toString()).toString();
             if (tag != null) as.add(tag);
         }
         return as;
     }
+    
+    public int size() {
+    	return this.vocabularies.size();
+    }
+    
+    /**
+     * maximum number of compound tags (number of words in one tag)
+     * @return
+     */
+    public int getMaxWordsInTerm() {
+    	//TODO: calculate from database
+    	return 4;
+    }
 
-    public Tagging.Metatag getTagFromWord(String word) {
+    public Tagging.Metatag getTagFromTerm(String term) {
         if (this.vocabularies.isEmpty()) return null;
         Tagging.Metatag tag;
-        word = Tagging.normalizeWord(word);
+        term = Tagging.normalizeWord(term);
         for (Map.Entry<String, Tagging> v: this.vocabularies.entrySet()) {
-            tag = v.getValue().getMetatagFromSynonym(this.prefixChar, word);
+            tag = v.getValue().getMetatagFromSynonym(this.prefixChar, term);
             if (tag != null) return tag;
         }
         return null;

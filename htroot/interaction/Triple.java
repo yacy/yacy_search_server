@@ -29,6 +29,7 @@ package interaction;
 //javac -classpath .:../classes ViewLog_p.java
 //if the shell's current path is HTROOT
 
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;
@@ -95,7 +96,6 @@ public class Triple {
         //TODO: this does not work for a static admin, yet.
         }
 
-        String url = "";
         String s = "";
         String p = "";
         String o = "";
@@ -104,16 +104,20 @@ public class Triple {
 
         if(post != null){
 
-            if(post.containsKey("url")){
-                url = post.get("url");
-            }
-
             if(post.containsKey("s")){
             	s = post.get("s");
+            }
+            
+            if(post.containsKey("sp")){
+            	s = post.get("sp") + "#" + s;
             }
 
             if(post.containsKey("p")){
             	p = post.get("p");
+            }
+            
+            if(post.containsKey("pp")){
+            	p = post.get("pp") + "#" + p;
             }
 
             if(post.containsKey("o")){
@@ -126,16 +130,24 @@ public class Triple {
 
         if (post.containsKey("load")) {
 
-        	o = Interaction.TripleGet(s, p, global ? "" : username);
+        	if (global) {
+        		o = JenaTripleStore.getObject(s, p);        		
+        	} else {
+        		o = JenaTripleStore.getPrivateObject(s, p, username);
+        	}
+
 
         } else {
+        	
+        	if (global) {
+        		JenaTripleStore.addTriple(s, p, o);
+        	} else {
+        		JenaTripleStore.addTriple(s, p, o, username);
+        	}
 
-        	Interaction.Triple(url, s, p, o, global ? "" : username);
         }
 
         prop.put("result", o);
-
-
 
         return prop;
     }

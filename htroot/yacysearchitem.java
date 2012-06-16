@@ -34,7 +34,6 @@ import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
-import net.yacy.interaction.Interaction;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Formatter;
@@ -130,6 +129,8 @@ public class yacysearchitem {
             prop.put("content_showParser", sb.getConfigBool("search.result.show.parser", true) ? 1 : 0);
             prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
             prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) ? 1 : 0);
+            prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) ? 1 : 0);
+            prop.put("content_showTags", sb.getConfigBool("search.result.show.tags", false) ? 1 : 0);
             prop.put("content_authorized", authenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
             prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
@@ -177,7 +178,7 @@ public class yacysearchitem {
 				}
 			}
             prop.putHTML("content_link", modifyURL);
-            prop.putHTML("content_value", Interaction.TripleGet(result.urlstring(), "http://virtual.x/hasvalue", "anonymous"));
+//            prop.putHTML("content_value", Interaction.TripleGet(result.urlstring(), "http://virtual.x/hasvalue", "anonymous"));
 // END interaction
 
             prop.putHTML("content_target", target);
@@ -186,7 +187,10 @@ public class yacysearchitem {
             prop.put("content_urlhash", resulthashString);
             prop.put("content_ranking", result.ranking);
             prop.put("content_showMetadata_urlhash", resulthashString);
+            prop.put("content_showCache_link", resultUrlstring);
+            prop.put("content_showProxy_link", resultUrlstring);
             prop.put("content_showParser_urlhash", resulthashString);
+            prop.put("content_showTags_urlhash", resulthashString);
             prop.put("content_urlhexhash", Seed.b64Hash2hexHash(resulthashString));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));
             prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));

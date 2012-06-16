@@ -39,6 +39,7 @@ import java.util.Properties;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
@@ -343,6 +344,7 @@ public class ViewFile {
         prop.putNum("error_size", size);
         prop.put("error_mimeTypeAvailable", (response.getMimeType() == null) ? "0" : "1");
         prop.put("error_mimeTypeAvailable_mimeType", response.getMimeType());
+        prop.putXML("error_triples", JenaTripleStore.getMetadataByURLHash(url.hash()));
         return prop;
     }
 

@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Federated Index</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Vocabulary_p" onload="document.getElementById('newterm').focus()">
+    #%env/templates/header.template%#
+    #%env/templates/submenuSemantic.template%#
+    <h2>Vocabulary Administration</h2>
+    <p>
+      Vocabularies can be used to produce a search navigation. A vocabulary must be created before content is indexed.
+      The vocabulary is used to annotate the indexed content with a reference to the object that is denoted by the term of the vocabulary.
+      The object can be denoted by a url stub that, combined with the term, becomes the url for the object.
+    </p>
+    
+    <form action="Vocabulary_p.html" method="get" accept-charset="UTF-8">
+      <fieldset><legend>Vocabulary Selection</legend>
+      <dl>
+        <dt>Vocabulary Name</dt>
+        <dd>
+          <select name="vocabulary" onchange="this.form.submit()">
+            #{vocabularyset}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+            #{/vocabularyset}#
+          </select>
+        </dd>
+        <dt></dt><dd><input type="submit" name="view" value="View" /></dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+    #(create)#::
+    <form action="Vocabulary_p.html" method="get" accept-charset="UTF-8">
+      <fieldset><legend>Vocabulary Production</legend>
+      It is possible to produce a vocabulary out of the existing search index. This is done using a given 'objectspace' which you can enter as a URL Stub.
+      This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.
+      This works best with wikis. Try to use a wiki url as objectspace path.
+      <dl>
+        <dt>Vocabulary Name</dt><dd><input type="text" name="discovername" value="" size="16" maxlength="128" /></dd>
+        <dt>Objectspace</dt><dd><input type="text" name="discoverobjectspace" value="http://" size="78" maxlength="128" /></dd>
+        <dt></dt><dd><input type="submit" name="create" value="Create" /></dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/create)#
+    
+    #(edit)#::
+    <form action="Vocabulary_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset><legend>Vocabulary Editor</legend>
+      <dl>
+        <dt>Vocabulary Name</dt><dd>#[name]#</dd>
+        <dt>File</dt><dd>#(editable)#[automatically generated, not stored, cannot be edited]::#[file]##(/editable)#</dd>
+        <dt>Namespace</dt><dd>#[namespace]#</dd>
+        <dt>Predicate</dt><dd>#[predicate]#</dd>
+        <dt>Prefix</dt><dd>#[prefix]#</dd>
+        <dt>Objectspace</dt><dd>#(editable)##[objectspace]#::<input type="text" name="objectspace" value="#[objectspace]#" size="78" maxlength="128" /><br/>if set, uses the predicate <a href="#[objectspacepredicate]#">#[objectspacepredicate]#</a> for generated objects. Hint: use 'http://dbpedia.org/resource/' as default.#(/editable)#</dd>
+      </dl>
+      <p>This produces the following triples in the <a href="/interaction/GetRDF.xml?global=">triplestore</a> if a term or synonym matches in a document:</p>
+      <dl>
+        <dt>Triple #1</dt><dd>#[triple1]#</dd>
+        <dt>Triple #2</dt><dd>#[triple2]#</dd>
+        <dt>more Triples for linking into objectspace</dt><dd>#[tripleN]#</dd>
+      </dl>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Modify</td>
+        <td>Delete</td>
+        <td>Literal</td>
+        <td>Synonyms</td>
+        <td>Object Link</td>
+      </tr>
+      #{terms}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="modify_#[term]#" id="modify_#[term]#" value="checked" disabled="disabled"/>#(/editable)#</td>
+        <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" onchange="this.form.submit()"/>#(/editable)#</td>
+        <td align="left">#[term]#</td>
+        <td align="left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="40" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''"/>#(/editable)#</td>
+        <td align="left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''"/>#(/editable)#</td>
+      </tr>
+      #{/terms}#
+      #(editable)#::
+      <tr class="TableCellDark">
+        <td align="center" colspan="2"><input type="checkbox" name="add_new" id="add_new" value="checked" disabled="disabled"/><i>add</i></td>
+        <td align="left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onkeyup="document.getElementById('add_new').checked='checked'; document.getElementById('add_new').disabled=''"/></td>
+        <td align="left"><input type="text" name="newsynonyms" id="newsynonyms" value="" size="40" maxlength="1024"/></td>
+        <td align="left"><input type="text" name="newobjectlink" id="newobjectlink" value="" size="60" maxlength="1024"/></td>
+      </tr>
+      <tr class="TableCellDark">
+        <td colspan="3"></td>
+        <td colspan="2" align="right" class="TableCellSummary"><input type="checkbox" name="clear_table" id="clear_table" value="checked" /><i>clear table (remove all terms)</i></td>
+      </tr>
+      <tr class="TableCellDark">
+        <td colspan="3"></td>
+        <td colspan="2" align="right" class="TableCellSummary"><input type="checkbox" name="delete_vocabulary" id="delete_vocabulary" value="checked" /><i>delete vocabulary</i></td>
+      </tr>
+      #(/editable)#
+      </table>
+      <input type="hidden" name="vocabulary" value="#[name]#" />
+      <input type="submit" name="set" value="Submit" />
+    </fieldset>
+    </form>
+    #(/edit)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -83,6 +83,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
@@ -631,6 +632,9 @@ public final class Switchboard extends serverSwitch
             + " entries"
             + ", "
             + ppRamString(userDbFile.length() / 1024));
+        
+     // init user triplestores
+        JenaTripleStore.initPrivateStores();
 
         // init html parser evaluation scheme
         File parserPropertiesPath = new File("defaults/");
@@ -660,7 +664,7 @@ public final class Switchboard extends serverSwitch
                 }
             }
         }.start();
-
+        
         // define a realtime parsable mimetype list
         this.log.logConfig("Parser: Initializing Mime Type deny list");
         TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));

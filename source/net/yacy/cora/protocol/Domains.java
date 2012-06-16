@@ -663,7 +663,7 @@ public class Domains {
 
     public static final InetAddress parseInetAddress(String ip) {
         if (ip == null || ip.length() < 8) return null;
-        if (ip.equals("0:0:0:0:0:0:0:1%0")) ip = "127.0.0.1";
+        if (isLocalhost(ip)) ip = "127.0.0.1";
         final String[] ips = dotPattern.split(ip);
         if (ips.length != 4) return null;
         final byte[] ipb = new byte[4];
@@ -884,7 +884,9 @@ public class Domains {
         return (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
                 "127.0.0.1".equals(host) ||
                 "localhost".equals(host) ||
-                host.startsWith("0:0:0:0:0:0:0:1")
+                host.startsWith("0:0:0:0:0:0:0:1") ||
+                host.startsWith("::1/") ||
+                "::1".equals(host)
                 );
     }
 
@@ -908,7 +910,7 @@ public class Domains {
         // FIXME IPv4 only
         // check local ip addresses
         if (matchesList(host, INTRANET_PATTERNS)) return true;
-        if (host.startsWith("0:0:0:0:0:0:0:1")) return true;
+        if (isLocalhost(host)) return true;
 
         // check if there are other local IP addresses that are not in
         // the standard IP range

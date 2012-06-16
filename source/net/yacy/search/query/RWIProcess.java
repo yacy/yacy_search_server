@@ -285,7 +285,6 @@ public final class RWIProcess extends Thread
                     || pattern.equals("smb://.*")
                     || pattern.equals("file://.*");
             long remaining;
-            int count = 0;
             pollloop: while ( true ) {
                 remaining = timeout - System.currentTimeMillis();
                 if (remaining <= 0) {
@@ -302,7 +301,6 @@ public final class RWIProcess extends Thread
                 }
                 assert (iEntry.urlhash().length == index.row().primaryKeyLength);
                 //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
-                count++;
 
                 // increase flag counts
                 for ( int j = 0; j < 32; j++ ) {
@@ -623,7 +621,7 @@ public final class RWIProcess extends Thread
         final long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
         int p = -1;
         long timeleft;
-        takeloop: while ( (timeleft = timeout - System.currentTimeMillis()) > 0 ) {
+        while ( (timeleft = timeout - System.currentTimeMillis()) > 0 ) {
             //System.out.println("timeleft = " + timeleft);
             final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi = takeRWI(skipDoubleDom, timeleft);
             if ( obrwi == null ) {

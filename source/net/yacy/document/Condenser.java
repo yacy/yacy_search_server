@@ -299,6 +299,8 @@ public final class Condenser {
         assert is != null;
         final Set<String> currsentwords = new HashSet<String>();
         String word = "";
+        String[] wordcache = new String[LibraryProvider.autotagging.getMaxWordsInTerm() - 1];
+        for (int i = 0; i < wordcache.length; i++) wordcache[i] = "";
         String k;
         Tagging.Metatag tag;
         int wordlen;
@@ -312,7 +314,8 @@ public final class Condenser {
         int wordInSentenceCounter = 1;
         boolean comb_indexof = false, last_last = false, last_index = false;
         final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
-
+        if (LibraryProvider.autotagging.size() == 0) doAutotagging = false;
+        
         // read source
         final WordTokenizer wordenum = new WordTokenizer(is, meaningLib);
         try {
@@ -323,18 +326,33 @@ public final class Condenser {
 
 	            // get tags from autotagging
 	            if (doAutotagging) {
-	                tag = LibraryProvider.autotagging.getTagFromWord(word);
-	                if (tag != null) {
-	                    Set<Tagging.Metatag> tagset = this.tags.get(tag.getVocabularyName());
-	                    if (tagset == null) {
-	                        tagset = new HashSet<Tagging.Metatag>();
+	            	for (int wordc = 1; wordc <= wordcache.length + 1; wordc++) {
+	            		// wordc is number of words that are tested
+	            		StringBuilder sb = new StringBuilder();
+	            		if (wordc == 1) {
+	            			sb.append(word);
+	            		} else {
+	            			for (int w = 0; w < wordc - 1; w++) {
+	            				sb.append(wordcache[wordcache.length - wordc + w + 1]).append(' ');
+	            			}
+	            			sb.append(word);
+	            		}
+	            		String testterm = sb.toString().trim();
+	            		//System.out.println("Testing: " + testterm);
+		                tag = LibraryProvider.autotagging.getTagFromTerm(testterm);
+		                if (tag != null) {
+		                    Set<Tagging.Metatag> tagset = this.tags.get(tag.getVocabularyName());
+		                    if (tagset == null) {
+		                        tagset = new HashSet<Tagging.Metatag>();
+		                        this.tags.put(tag.getVocabularyName(), tagset);
+		                    }
 	                        tagset.add(tag);
-	                        this.tags.put(tag.getVocabularyName(), tagset);
-	                    } else {
-	                        tagset.add(tag);
-	                    }
-	                }
+		                }
+	            	}
 	            }
+	            // shift wordcache
+	            System.arraycopy(wordcache, 1, wordcache, 0, wordcache.length - 1);
+	            wordcache[wordcache.length - 1] = word;
 
 	            // distinguish punctuation and words
 	            wordlen = word.length();

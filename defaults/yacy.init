@@ -749,6 +749,8 @@ search.result.show.metadata = false
 search.result.show.parser = false
 search.result.show.pictures = false
 search.result.show.cache = true
+search.result.show.proxy = false
+search.result.show.tags = false
 
 # search navigators: comma-separated list of default values for search navigation.
 # can be temporary different if search string is given with differen navigation values
@@ -1052,7 +1054,7 @@ federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.schemefile = solr.keys.default.list
 
 # RDF triplestore settings
-triplestore.persistent = false
+triplestore.persistent = true
 
 # Augmentation settings
 parserAugmentation = false
