@@ -149,18 +149,31 @@ public class Autotagging {
         final WordTokenizer tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(text)), LibraryProvider.dymLib);
         String tag;
         while (tokens.hasMoreElements()) {
-            tag = getTagFromWord(tokens.nextElement().toString()).toString();
+            tag = getTagFromTerm(tokens.nextElement().toString()).toString();
             if (tag != null) as.add(tag);
         }
         return as;
     }
+    
+    public int size() {
+    	return this.vocabularies.size();
+    }
+    
+    /**
+     * maximum number of compound tags (number of words in one tag)
+     * @return
+     */
+    public int getMaxWordsInTerm() {
+    	//TODO: calculate from database
+    	return 4;
+    }
 
-    public Tagging.Metatag getTagFromWord(String word) {
+    public Tagging.Metatag getTagFromTerm(String term) {
         if (this.vocabularies.isEmpty()) return null;
         Tagging.Metatag tag;
-        word = Tagging.normalizeWord(word);
+        term = Tagging.normalizeWord(term);
         for (Map.Entry<String, Tagging> v: this.vocabularies.entrySet()) {
-            tag = v.getValue().getMetatagFromSynonym(this.prefixChar, word);
+            tag = v.getValue().getMetatagFromSynonym(this.prefixChar, term);
             if (tag != null) return tag;
         }
         return null;
