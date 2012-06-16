@@ -133,7 +133,7 @@ public class Triple {
         	if (global) {
         		o = JenaTripleStore.getObject(s, p);        		
         	} else {
-        		o = JenaTripleStore.getObject(s, p, username);
+        		o = JenaTripleStore.getPrivateObject(s, p, username);
         	}
 
 

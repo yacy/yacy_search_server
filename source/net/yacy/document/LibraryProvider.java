@@ -32,15 +32,22 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.lod.JenaTripleStore;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.storage.Files;
 import net.yacy.document.geolocalization.GeonamesLocation;
 import net.yacy.document.geolocalization.OpenGeoDBLocation;
@@ -204,12 +211,36 @@ public class LibraryProvider {
             }
         }
         // read the triplestore and generate a vocabulary
-        
+        Map<String, SOTuple> map = new HashMap<String, SOTuple>();
+        Iterator<Resource> i = JenaTripleStore.getSubjects("http://dbpedia.org/ontology/individualisedPnd");
+        while (i.hasNext()) {
+        	Resource resource = i.next();
+        	String subject = resource.toString();
+        	
+        	// prepare a propert term from the subject uri
+        	int p = subject.lastIndexOf('/');
+        	if (p < 0) continue;
+        	String term = subject.substring(p + 1);
+        	//String objectspace = subject.substring(0, p);
+        	p = term.indexOf('(');
+        	if (p >= 0) term = term.substring(0, p);
+        	term = term.replaceAll("_", " ").trim();
+        	if (term.length() == 0) continue;
+        	
+        	// store the term into the vocabulary map
+        	map.put(term, new SOTuple("", subject));
+        }
+        try {
+			Tagging pndVoc = new Tagging("Persons", null, "", map);
+			autotagging.addVocabulary(pndVoc);
+		} catch (IOException e) {
+		}
     }
 
     public static void deactivatePND() {
         // remove the PND Triples from the triplestore
     	JenaTripleStore.deleteObjects(null, "http://dbpedia.org/ontology/individualisedPnd");
+    	autotagging.deleteVocabulary("Persons");
     }
 
     /*

@@ -49,26 +49,20 @@ public class Autotagging {
     private final Map<String, Tagging> vocabularies; // mapping from vocabulary name to the tagging vocabulary
     private final Map<String, Object> allTags;
 
-    public Autotagging(final File autotaggingPath, char prefixChar) {
-        this.vocabularies = new ConcurrentHashMap<String, Tagging>();
-        this.autotaggingPath = autotaggingPath;
-        this.prefixChar = prefixChar;
-        this.allTags = new ConcurrentHashMap<String, Object>();
-        init();
-    }
-
-
     /**
-     * scan the input directory and load all tag tables (again)
-     * a tag table is a property file where
+     * create a Autotagging object:
+     * scan the input directory and load all tag tables.
+     * A tag table is a property file where
      * the key is the tag name
      * the value is the visible name for the tag (shown in a navigator)
      * properties without values are allowed (the value is then set to the key)
      * also the value can be used as a tag
      */
-    public void init() {
-        this.vocabularies.clear();
-        this.allTags.clear();
+    public Autotagging(final File autotaggingPath, char prefixChar) {
+        this.vocabularies = new ConcurrentHashMap<String, Tagging>();
+        this.autotaggingPath = autotaggingPath;
+        this.prefixChar = prefixChar;
+        this.allTags = new ConcurrentHashMap<String, Object>();
         if (this.autotaggingPath == null || !this.autotaggingPath.exists()) {
             return;
         }
