@@ -468,14 +468,6 @@ public final class HTTPDProxyHandler {
             	path = path.substring(16);
             }
 
-         // point virtual directory to my peer
-            if (path.startsWith("/currentyacypeer/")) {
-            	host = sb.peers.myIP();
-            	port = sb.peers.myPort();
-            	path = path.substring(16);
-            }
-
-
             // resolve yacy and yacyh domains
             String yAddress = resolveYacyDomains(host);
 

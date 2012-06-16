@@ -12,23 +12,24 @@ import java.nio.charset.Charset;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.AugmentHtmlStream;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.search.Switchboard;
 
 public class AugmentedHtmlStream extends FilterOutputStream {
-	private final Writer out;
-	private final ByteArrayOutputStream buffer;
-	private final Charset charset;
-	private final DigestURI url;
-	private final RequestHeader requestHeader;
+    private final Writer out;
+    private final ByteArrayOutputStream buffer;
+    private final Charset charset;
+    private final DigestURI url;
+    private final String urls;
+    private final RequestHeader requestHeader;
 
-	public AugmentedHtmlStream(OutputStream out, Charset charset, DigestURI url, RequestHeader requestHeader) {
-		super(out);
-		this.out = new BufferedWriter(new OutputStreamWriter(out, charset));
-		this.buffer = new ByteArrayOutputStream();
-		this.charset = charset;
-		this.url = url;
-		this.requestHeader = requestHeader;
-	}
+    public AugmentedHtmlStream(OutputStream out, Charset charset, DigestURI url, RequestHeader requestHeader) {
+        super(out);
+        this.out = new BufferedWriter(new OutputStreamWriter(out, charset));
+        this.buffer = new ByteArrayOutputStream();
+        this.charset = charset;
+        this.url = url;
+        this.urls = this.url.toNormalform(false, true);
+        this.requestHeader = requestHeader;
+    }
 
 	@Override
     public void write(int b) throws IOException {
@@ -48,22 +49,13 @@ public class AugmentedHtmlStream extends FilterOutputStream {
 		this.out.close();
 	}
 
-	public StringBuffer process(StringBuffer data) {
-
-		if (Switchboard.getSwitchboard().getConfigBool("proxyAugmentation", false) == true) {
-
-			if (!this.url.toNormalform(false, true).contains("currentyacypeer/")) {
-
-				return AugmentHtmlStream.process (data, this.charset, this.url, this.requestHeader);
-
-			} else {
-				return data;
-			}
-
-		} else {
-			return data;
-		}
-	}
+    public StringBuffer process(StringBuffer data) {
+        if (this.urls.contains("currentyacypeer/")) {
+            return data;
+        } else {
+            return AugmentHtmlStream.process (data, this.charset, this.url, this.requestHeader);
+        }
+    }
 
 	public static boolean supportsMime(String mime) {
 //		System.out.println("mime" +mime);
