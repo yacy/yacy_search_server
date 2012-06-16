@@ -40,6 +40,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import net.yacy.document.StringBuilderComparator;
+import net.yacy.document.WordCache;
 import net.yacy.kelondro.logging.Log;
 
 public class GeonamesLocation implements Locations
@@ -73,7 +74,7 @@ public class GeonamesLocation implements Locations
     private final TreeMap<StringBuilder, List<Integer>> name2ids;
     private final File file;
 
-    public GeonamesLocation(final File file) {
+    public GeonamesLocation(final File file, WordCache dymLib) {
         // this is a processing of the cities1000.zip file from http://download.geonames.org/export/dump/
 
         this.file = file;
@@ -117,6 +118,7 @@ public class GeonamesLocation implements Locations
                 c.setPopulation((int) Long.parseLong(fields[14]));
                 this.id2loc.put(id, c);
                 for ( final StringBuilder name : locnames ) {
+                    if (dymLib != null && dymLib.contains(name)) continue;
                     List<Integer> locs = this.name2ids.get(name);
                     if ( locs == null ) {
                         locs = new ArrayList<Integer>(1);

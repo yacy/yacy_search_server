@@ -40,6 +40,7 @@ import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.document.StringBuilderComparator;
+import net.yacy.document.WordCache;
 import net.yacy.kelondro.logging.Log;
 
 /**
@@ -59,7 +60,7 @@ public class OpenGeoDBLocation implements Locations
     private final Map<String, Integer> zip2id;
     private final File file;
 
-    public OpenGeoDBLocation(final File file, final boolean lonlat) {
+    public OpenGeoDBLocation(final File file, WordCache dymLib) {
 
         this.file = file;
         this.id2loc = new HashMap<Integer, GeoLocation>();
@@ -99,13 +100,8 @@ public class OpenGeoDBLocation implements Locations
                     line = line.substring(18 + 7);
                     v = line.split(",");
                     v = line.split(",");
-                    if ( lonlat ) {
-                        lon = Float.parseFloat(v[2]);
-                        lat = Float.parseFloat(v[3]);
-                    } else {
-                        lat = Float.parseFloat(v[2]);
-                        lon = Float.parseFloat(v[3]);
-                    }
+                    lat = Float.parseFloat(v[2]);
+                    lon = Float.parseFloat(v[3]);
                     this.id2loc.put(Integer.parseInt(v[0]), new GeoLocation(lat, lon));
                 }
                 if ( line.startsWith("geodb_textdata ") ) {
@@ -119,6 +115,7 @@ public class OpenGeoDBLocation implements Locations
                         id = Integer.parseInt(v[0]);
                         h = removeQuotes(v[2]);
                         if (h.length() < 2) continue;
+                        if (dymLib != null && dymLib.contains(new StringBuilder(h))) continue;
                         List<Integer> l = this.name2ids.get(new StringBuilder(h));
                         if ( l == null ) {
                             l = new ArrayList<Integer>(1);

@@ -135,11 +135,11 @@ public class LibraryProvider {
             if ( geo0.exists() ) {
                 geo0.renameTo(Dictionary.GEODB0.fileDisabled());
             }
-            geoLoc.activateLocalization(Dictionary.GEODB1.nickname, new OpenGeoDBLocation(geo1, false));
+            geoLoc.activateLocalization(Dictionary.GEODB1.nickname, new OpenGeoDBLocation(geo1, dymLib));
             return;
         }
         if ( geo0.exists() ) {
-            geoLoc.activateLocalization(Dictionary.GEODB0.nickname, new OpenGeoDBLocation(geo0, false));
+            geoLoc.activateLocalization(Dictionary.GEODB0.nickname, new OpenGeoDBLocation(geo0, dymLib));
             return;
         }
     }
@@ -147,7 +147,7 @@ public class LibraryProvider {
     public static void integrateGeonames() {
         final File geon = Dictionary.GEON0.file();
         if ( geon.exists() ) {
-            geoLoc.activateLocalization(Dictionary.GEON0.nickname, new GeonamesLocation(geon));
+            geoLoc.activateLocalization(Dictionary.GEON0.nickname, new GeonamesLocation(geon, dymLib));
             return;
         }
     }
@@ -219,7 +219,7 @@ public class LibraryProvider {
         	Resource resource = i.next();
         	String subject = resource.toString();
 
-        	// prepare a propert term from the subject uri
+        	// prepare a proper term from the subject uri
         	int p = subject.lastIndexOf('/');
         	if (p < 0) continue;
         	String term = subject.substring(p + 1);
@@ -228,9 +228,10 @@ public class LibraryProvider {
         	if (p >= 0) term = term.substring(0, p);
         	term = term.replaceAll("_", " ").trim();
         	if (term.length() == 0) continue;
+        	if (term.indexOf(' ') < 0) continue; // accept only names that have at least two parts
 
         	// store the term into the vocabulary map
-        	map.put(term, new SOTuple("", subject));
+        	map.put(term, new SOTuple("", Tagging.normalizeTerm(subject)));
         }
         try {
             Log.logInfo("LibraryProvider", "adding vocabulary to autotagging");

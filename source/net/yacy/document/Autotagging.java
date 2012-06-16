@@ -137,7 +137,7 @@ public class Autotagging {
     public Tagging.Metatag getTagFromTerm(String term) {
         if (this.vocabularies.isEmpty()) return null;
         Tagging.Metatag tag;
-        term = Tagging.normalizeWord(term);
+        term = Tagging.normalizeTerm(term);
         for (Map.Entry<String, Tagging> v: this.vocabularies.entrySet()) {
             tag = v.getValue().getMetatagFromSynonym(term);
             if (tag != null) return tag;

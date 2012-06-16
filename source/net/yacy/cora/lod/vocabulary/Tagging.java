@@ -95,7 +95,7 @@ public class Tagging {
         	vocloop: for (Map.Entry<String, SOTuple> e: table.entrySet()) {
 			    if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().length() == 0) {
 			        term = normalizeKey(e.getKey());
-			        v = normalizeWord(e.getKey());
+			        v = normalizeTerm(e.getKey());
 			        this.synonym2term.put(v, term);
 			        this.term2synonym.put(term, v);
 			        if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
@@ -108,13 +108,13 @@ public class Tagging {
 			    tagloop: for (String synonym: tags) {
 			        if (synonym.length() == 0) continue tagloop;
 				    synonyms.add(synonym);
-			    	synonym = normalizeWord(synonym);
+			    	synonym = normalizeTerm(synonym);
 			        if (synonym.length() == 0) continue tagloop;
 				    synonyms.add(synonym);
 			        this.synonym2term.put(synonym, term);
 			        this.term2synonym.put(term, synonym);
 			    }
-			    String synonym = normalizeWord(term);
+			    String synonym = normalizeTerm(term);
 			    this.synonym2term.put(synonym, term);
 			    this.term2synonym.put(term, synonym);
                 if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
@@ -402,7 +402,7 @@ public class Tagging {
 			    }
 			    if (pl[1] == null) {
 			        term = normalizeKey(pl[0]);
-			        v = normalizeWord(pl[0]);
+			        v = normalizeTerm(pl[0]);
 			        this.synonym2term.put(v, term);
 			        this.term2synonym.put(term, v);
 			        if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
@@ -416,13 +416,13 @@ public class Tagging {
 			    tagloop: for (String synonym: tags) {
 			        if (synonym.length() == 0) continue tagloop;
 				    synonyms.add(synonym);
-			    	synonym = normalizeWord(synonym);
+			    	synonym = normalizeTerm(synonym);
 			        if (synonym.length() == 0) continue tagloop;
 				    synonyms.add(synonym);
 			        this.synonym2term.put(synonym, term);
 			        this.term2synonym.put(term, synonym);
 			    }
-			    String synonym = normalizeWord(term);
+			    String synonym = normalizeTerm(term);
 			    this.synonym2term.put(synonym, term);
 			    this.term2synonym.put(term, synonym);
                 if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
@@ -532,7 +532,7 @@ public class Tagging {
     private final static Pattern PATTERN_UE = Pattern.compile("\u00FC");
     private final static Pattern PATTERN_SZ = Pattern.compile("\u00DF");
 
-    public static final String normalizeWord(String word) {
+    public static final String normalizeTerm(String word) {
         word = word.trim().toLowerCase();
         word = PATTERN_AE.matcher(word).replaceAll("ae");
         word = PATTERN_OE.matcher(word).replaceAll("oe");

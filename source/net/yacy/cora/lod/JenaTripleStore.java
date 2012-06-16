@@ -2,12 +2,14 @@
 
 package net.yacy.cora.lod;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,7 +40,7 @@ public class JenaTripleStore {
 	public static Model model = ModelFactory.createDefaultModel();
 	static {
 	    init(model);
-	    
+
 	}
 	private final static void init(Model model) {
         model.setNsPrefix(YaCyMetadata.PREFIX, YaCyMetadata.NAMESPACE);
@@ -48,7 +50,7 @@ public class JenaTripleStore {
         model.setNsPrefix("pnd", "http://dbpedia.org/ontology/individualisedPnd");
         model.setNsPrefix(DCTerms.PREFIX, DCTerms.NAMESPACE);
 	}
-	
+
 	public static long size() {
 		return model.size();
 	}
@@ -81,7 +83,7 @@ public class JenaTripleStore {
 	    InputStream is = FileManager.get().open(fileNameOrUri);
 	    LoadNTriples(is);
 	}
-	
+
 	public static void LoadNTriples(InputStream is) throws IOException {
 	    Model tmp = ModelFactory.createDefaultModel();
 	    if (is != null) {
@@ -105,20 +107,20 @@ public class JenaTripleStore {
             model = model.union(tmp);
         }
 	}
-	
-	public static void saveFile(String filename) {		
+
+	public static void saveFile(String filename) {
 		saveFile(filename, model);
 	}
 
 	public static void saveFile(String filename, Model model) {
 		Log.logInfo("TRIPLESTORE", "Saving triplestore with " + model.size() + " triples to " + filename);
-    	FileOutputStream fout;
+    	OutputStream fout;
 		try {
-			fout = new FileOutputStream(filename);
+			fout = new BufferedOutputStream(new FileOutputStream(filename));
 			model.write(fout);
+			fout.close();
 			Log.logInfo("TRIPLESTORE", "Saved triplestore with " + model.size() + " triples to " + filename);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			Log.logWarning("TRIPLESTORE", "Saving to " + filename+" failed");
 		}
 	}
@@ -145,13 +147,13 @@ public class JenaTripleStore {
         Property pr = model.getProperty(predicate);
         JenaTripleStore.model.removeAll(r, pr, (Resource) null);
     }
-    
+
     public static void addTriple(String subject, String predicate, String object, String username) {
     	if (privatestorage != null && privatestorage.containsKey(username)) {
     		addTriple (subject, predicate, object, privatestorage.get(username));
 		}
     }
-    
+
     public static void addTriple(String subject, String predicate, String object) {
     	addTriple (subject, predicate, object, model);
     }
@@ -162,43 +164,43 @@ public class JenaTripleStore {
         r.addProperty(pr, object);
         Log.logInfo("TRIPLESTORE", "ADD " + subject + " - " + predicate + " - " + object);
     }
-    
+
     public static String getObject(final String subject, final String predicate) {
     	Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ");
-    	
+
     	Iterator<RDFNode> ni = JenaTripleStore.getObjects(subject, predicate);
         if (!ni.hasNext()) return "";
         return ni.next().toString();
     }
 
-    public static Iterator<RDFNode> getObjects(final String subject, final String predicate) {        
+    public static Iterator<RDFNode> getObjects(final String subject, final String predicate) {
         final Resource r = subject == null ? null : JenaTripleStore.getResource(subject);
         return getObjects(r, predicate);
     }
-    
-    public static String getPrivateObject(final String subject, final String predicate, final String username) { 
+
+    public static String getPrivateObject(final String subject, final String predicate, final String username) {
     	Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ("+username+")");
-    	
+
     	Iterator<RDFNode> ni = JenaTripleStore.getPrivateObjects(subject, predicate, username);
         if (!ni.hasNext()) return "";
         return ni.next().toString();
     }
-    
+
     private static Iterator<RDFNode> getPrivateObjects(final String subject, final String predicate, final String username) {
         if (privatestorage != null && privatestorage.containsKey(username)) {
 			return getObjects(privatestorage.get(username).getResource(subject), predicate, privatestorage.get(username));
 		}
 	    return null;
     }
-        
+
     public static Iterator<RDFNode> getObjects(final Resource r, final String predicate) {
     	return getObjects(r, predicate, model);
     }
 
     private static Iterator<RDFNode> getObjects(final Resource r, final String predicate, final Model model) {
         final Property pr = model.getProperty(predicate);
-        final StmtIterator iter = model.listStatements(r, pr, (Resource) null);                
-                
+        final StmtIterator iter = model.listStatements(r, pr, (Resource) null);
+
         return new Iterator<RDFNode>() {
             @Override
             public boolean hasNext() {
@@ -214,15 +216,15 @@ public class JenaTripleStore {
             }
         };
     }
-    
+
     public static Iterator<Resource> getSubjects(final String predicate) {
     	return getSubjects(predicate, model);
     }
 
     private static Iterator<Resource> getSubjects(final String predicate, final Model model) {
         final Property pr = model.getProperty(predicate);
-        final ResIterator iter = model.listSubjectsWithProperty(pr);                
-                
+        final ResIterator iter = model.listSubjectsWithProperty(pr);
+
         return new Iterator<Resource>() {
             @Override
             public boolean hasNext() {
@@ -246,7 +248,7 @@ public class JenaTripleStore {
         m.setNsPrefix(DCTerms.PREFIX, DCTerms.NAMESPACE);
         return m;
     }
-    
+
     public static String getMetadataByURLHash(byte[] urlhash) {
         String subject = YaCyMetadata.hashURI(urlhash);
         Model model = JenaTripleStore.getSubmodelBySubject(subject);
@@ -254,13 +256,13 @@ public class JenaTripleStore {
         model.write(baos, "RDF/XML-ABBREV");
         return UTF8.String(baos.toByteArray());
     }
-    
+
 	public static void initPrivateStores() {
-		
+
 		Switchboard switchboard = Switchboard.getSwitchboard();
 
 		Log.logInfo("TRIPLESTORE", "Init private stores");
-		
+
 		if (privatestorage == null) privatestorage = new ConcurrentHashMap<String, Model>();
 
 		if (privatestorage != null) privatestorage.clear();
@@ -274,42 +276,42 @@ public class JenaTripleStore {
 				String username = e.getUserName();
 
 				File triplestore = new File(switchboard.getConfig("triplestore", new File(switchboard.getDataPath(), "DATA/TRIPLESTORE").getAbsolutePath()));
-                
+
                 File currentuserfile = new File(triplestore, "private_store_"+username+".rdf");
-                
+
                 Log.logInfo("TRIPLESTORE", "Init " + username + " from "+currentuserfile.getAbsolutePath());
-                
+
                 Model tmp  = ModelFactory.createDefaultModel();
-                
-                init (tmp);                      	
-                
+
+                init (tmp);
+
                 if (currentuserfile.exists()) {
-                	
-                	
+
+
             		Log.logInfo("TRIPLESTORE", "Loading from " + currentuserfile.getAbsolutePath());
                     InputStream is = FileManager.get().open(currentuserfile.getAbsolutePath());
             	    if (is != null) {
             	    	// read the RDF/XML file
             	    	tmp.read(is, null);
             			Log.logInfo("TRIPLESTORE", "loaded " + tmp.size() + " triples from " + currentuserfile.getAbsolutePath());
-            			
-            			
+
+
             	    } else {
             	        throw new IOException("cannot read " + currentuserfile.getAbsolutePath());
             	    }
                 }
-                
+
                 if (tmp != null) {
-                
+
                 	privatestorage.put(username, tmp);
-                
+
                 }
 
 			}
 
 			}
 		catch (Exception anyex) {
-			
+
 			Log.logException(anyex);
 
 		}
@@ -317,19 +319,19 @@ public class JenaTripleStore {
 	}
 
 	public static void savePrivateStores(Switchboard switchboard) {
-		
+
 		Log.logInfo("TRIPLESTORE", "Saving user triplestores");
 
 		if (privatestorage == null) return;
 
 		for (Entry<String, Model> s : privatestorage.entrySet()) {
-			
+
 			File triplestore = new File(switchboard.getConfig("triplestore", new File(switchboard.getDataPath(), "DATA/TRIPLESTORE").getAbsolutePath()));
-          
+
             File currentuserfile = new File(triplestore, "private_store_"+s.getKey()+".rdf");
 
             saveFile (currentuserfile.getAbsolutePath(), s.getValue());
-				
+
 		}
 	}
 
