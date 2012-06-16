@@ -112,8 +112,13 @@ public class OpenGeoDBLocation implements Locations
                     line = line.substring(15 + 7);
                     v = line.split(",");
                     if ( v[1].equals("500100000") ) { // Ortsname
+                        if (v.length > 10) {
+                            // a ',' is probably inside the location name
+                            v[2] = v[2] + "," + v[3];
+                        }
                         id = Integer.parseInt(v[0]);
                         h = removeQuotes(v[2]);
+                        if (h.length() < 2) continue;
                         List<Integer> l = this.name2ids.get(new StringBuilder(h));
                         if ( l == null ) {
                             l = new ArrayList<Integer>(1);
@@ -173,13 +178,12 @@ public class OpenGeoDBLocation implements Locations
     }
 
     private static final String removeQuotes(String s) {
-        if ( s.length() > 0 && s.charAt(0) != '\'' ) {
-            return s;
+        if ( s.length() > 0 && s.charAt(0) == '\'' ) {
+            s = s.substring(1);
         }
-        if ( s.charAt(s.length() - 1) != '\'' ) {
-            return s;
+        if ( s.charAt(s.length() - 1) == '\'' ) {
+            s = s.substring(0, s.length() - 1);
         }
-        s = s.substring(1, s.length() - 1);
         return s;
     }
 
