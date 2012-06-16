@@ -25,11 +25,24 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.ByteArrayOutputStream;
 import java.net.MalformedURLException;
+import java.util.Iterator;
+import java.util.Map;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.JenaTripleStore;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -71,9 +84,9 @@ public class yacydoc {
         prop.put("geo_long", "");
 
         prop.put("yacy_urlhash", "");
-        prop.putXML("yacy_loaddate", "");
-        prop.putXML("yacy_referrer_hash", "");
-        prop.putXML("yacy_referrer_url", "");
+        prop.put("yacy_loaddate", "");
+        prop.put("yacy_referrer_hash", "");
+        prop.put("yacy_referrer_url", "");
         prop.put("yacy_size", "");
         prop.put("yacy_words", "");
         prop.put("yacy_citations", "");
@@ -126,6 +139,9 @@ public class yacydoc {
         prop.put("yacy_citations", sb.indexSegments.segment(Segments.Process.PUBLIC).urlCitation().count(entry.hash()));
         prop.put("yacy_inbound", entry.llocal());
         prop.put("yacy_outbound", entry.lother());
+        
+        // extract the submodel from the triplestore
+        prop.putXML("triples", JenaTripleStore.getMetadataByURLHash(entry.hash()));
 
         // return rewrite properties
         return prop;

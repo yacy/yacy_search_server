@@ -91,7 +91,7 @@ public class Autotagging {
 
     public void deleteVocabulary(String name) {
         Tagging v = this.vocabularies.remove(name);
-        if (v == null) return;
+        if (v == null || v.getFile() == null) return;
         v.getFile().delete();
     }
 

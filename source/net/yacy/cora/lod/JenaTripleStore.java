@@ -3,6 +3,7 @@
 package net.yacy.cora.lod;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,6 +27,8 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Selector;
+import com.hp.hpl.jena.rdf.model.SimpleSelector;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileManager;
 
@@ -236,6 +239,22 @@ public class JenaTripleStore {
         };
     }
 
+    public static Model getSubmodelBySubject(String subject) {
+    	Selector q = new SimpleSelector(model.getResource(subject), (Property) null, (RDFNode) null);
+        final Model m = model.query(q);
+        m.setNsPrefix(Tagging.DEFAULT_PREFIX, Tagging.DEFAULT_NAMESPACE);
+        m.setNsPrefix(DCTerms.PREFIX, DCTerms.NAMESPACE);
+        return m;
+    }
+    
+    public static String getMetadataByURLHash(byte[] urlhash) {
+        String subject = YaCyMetadata.hashURI(urlhash);
+        Model model = JenaTripleStore.getSubmodelBySubject(subject);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        model.write(baos, "RDF/XML-ABBREV");
+        return UTF8.String(baos.toByteArray());
+    }
+    
 	public static void initPrivateStores() {
 		
 		Switchboard switchboard = Switchboard.getSwitchboard();
