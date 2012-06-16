@@ -172,7 +172,7 @@ public class Vocabulary_p {
                 prop.putHTML("edit_terms_" + c + "_editable_synonyms", entry.getValue().getSynonymsCSV());
                 prop.putHTML("edit_terms_" + c + "_editable_objectlink", entry.getValue().getObjectlink());
                 c++;
-                if (c > 1000) break;
+                if (c > 3000) break;
             }
             prop.put("edit_terms", c);
         }

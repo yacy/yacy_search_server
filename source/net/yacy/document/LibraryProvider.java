@@ -42,8 +42,6 @@ import java.util.TreeSet;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import com.hp.hpl.jena.rdf.model.Resource;
-
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -55,6 +53,8 @@ import net.yacy.document.geolocalization.OverarchingLocation;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 public class LibraryProvider {
 
     public static final char tagPrefix = '$';
@@ -65,7 +65,7 @@ public class LibraryProvider {
     public static final String disabledExtension = ".disabled";
 
     public static WordCache dymLib = new WordCache(null);
-    public static Autotagging autotagging = new Autotagging(null, tagPrefix);
+    public static Autotagging autotagging = null;
     public static OverarchingLocation geoLoc = new OverarchingLocation();
     private static File dictSource = null;
     private static File dictRoot = null;
@@ -116,12 +116,12 @@ public class LibraryProvider {
         dictRoot = rootPath;
 
         // initialize libraries
+        initAutotagging(tagPrefix);
         activateDeReWo();
         initDidYouMean();
         integrateOpenGeoDB();
         integrateGeonames();
         activatePND();
-        initAutotagging(tagPrefix);
         Set<String> allTags = new HashSet<String>() ;
         allTags.addAll(autotagging.allTags()); // we must copy this into a clone to prevent circularity
         autotagging.addPlaces(geoLoc);
@@ -194,7 +194,7 @@ public class LibraryProvider {
         final File derewoOutput = new File(dymDict, derewoInput.getName() + ".words");
         FileUtils.deletedelete(derewoOutput);
     }
-    
+
     public static void activatePND() {
         // translate input files (once..)
         final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
@@ -212,27 +212,32 @@ public class LibraryProvider {
         }
         // read the triplestore and generate a vocabulary
         Map<String, SOTuple> map = new HashMap<String, SOTuple>();
+        Log.logInfo("LibraryProvider", "retrieving PND data from triplestore");
         Iterator<Resource> i = JenaTripleStore.getSubjects("http://dbpedia.org/ontology/individualisedPnd");
+        Log.logInfo("LibraryProvider", "creating vocabulary map from PND triplestore");
+        String objectspace = "";
         while (i.hasNext()) {
         	Resource resource = i.next();
         	String subject = resource.toString();
-        	
+
         	// prepare a propert term from the subject uri
         	int p = subject.lastIndexOf('/');
         	if (p < 0) continue;
         	String term = subject.substring(p + 1);
-        	//String objectspace = subject.substring(0, p);
+        	objectspace = subject.substring(0, p + 1);
         	p = term.indexOf('(');
         	if (p >= 0) term = term.substring(0, p);
         	term = term.replaceAll("_", " ").trim();
         	if (term.length() == 0) continue;
-        	
+
         	// store the term into the vocabulary map
         	map.put(term, new SOTuple("", subject));
         }
         try {
-			Tagging pndVoc = new Tagging("Persons", null, "", map);
+            Log.logInfo("LibraryProvider", "adding vocabulary to autotagging");
+			Tagging pndVoc = new Tagging("Persons", null, objectspace, map);
 			autotagging.addVocabulary(pndVoc);
+            Log.logInfo("LibraryProvider", "added pnd vocabulary to autotagging");
 		} catch (IOException e) {
 		}
     }

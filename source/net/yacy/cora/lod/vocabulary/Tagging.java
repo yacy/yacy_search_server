@@ -303,7 +303,8 @@ public class Tagging {
         Map<String, Set<String>> r = reconstructionSets();
         Map<String, SOTuple> map = new TreeMap<String, SOTuple>();
         for (Map.Entry<String, Set<String>> e: r.entrySet()) {
-            map.put(e.getKey(), new SOTuple(e.getValue().toArray(new String[e.getValue().size()]), ""));
+            String objectlink = this.term2objectlink.get(e.getKey());
+            map.put(e.getKey(), new SOTuple(e.getValue().toArray(new String[e.getValue().size()]), objectlink == null ? "" : objectlink));
         }
         return map;
     }
