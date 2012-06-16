@@ -47,9 +47,9 @@ import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.storage.Files;
-import net.yacy.document.geolocalization.GeonamesLocation;
-import net.yacy.document.geolocalization.OpenGeoDBLocation;
-import net.yacy.document.geolocalization.OverarchingLocation;
+import net.yacy.document.geolocation.GeonamesLocation;
+import net.yacy.document.geolocation.OpenGeoDBLocation;
+import net.yacy.document.geolocation.OverarchingLocation;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 

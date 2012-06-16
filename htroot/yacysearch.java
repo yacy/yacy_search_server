@@ -55,7 +55,7 @@ import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
-import net.yacy.document.geolocalization.GeoLocation;
+import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;

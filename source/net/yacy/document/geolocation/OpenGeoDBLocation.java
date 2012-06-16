@@ -20,7 +20,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.document.geolocalization;
+package net.yacy.document.geolocation;
 
 import java.io.BufferedReader;
 import java.io.File;

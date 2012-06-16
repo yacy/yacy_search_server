@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.Files;
 import net.yacy.document.WordCache.Dictionary;
-import net.yacy.document.geolocalization.Locations;
+import net.yacy.document.geolocation.Locations;
 
 public class Tagging {
 
