@@ -179,11 +179,11 @@ public class JenaTripleStore {
     }
 
     public static String getObject(final String subject, final String predicate) {
-    	Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ");
-
     	Iterator<RDFNode> ni = JenaTripleStore.getObjects(subject, predicate);
-        if (!ni.hasNext()) return "";
-        return ni.next().toString();
+    	String object = "";
+        if (ni.hasNext()) object = ni.next().toString();
+        Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " - " + object);
+        return object;
     }
 
     public static Iterator<RDFNode> getObjects(final String subject, final String predicate) {
@@ -192,11 +192,11 @@ public class JenaTripleStore {
     }
 
     public static String getPrivateObject(final String subject, final String predicate, final String username) {
-    	Log.logInfo("TRIPLESTORE", "GET " + subject + " - " + predicate + " ... ("+username+")");
-
     	Iterator<RDFNode> ni = JenaTripleStore.getPrivateObjects(subject, predicate, username);
-        if (!ni.hasNext()) return "";
-        return ni.next().toString();
+        String object = "";
+        if (ni.hasNext()) object = ni.next().toString();
+        Log.logInfo("TRIPLESTORE", "GET (" + username + ") " + subject + " - " + predicate + " - " + object);
+        return object;
     }
 
     private static Iterator<RDFNode> getPrivateObjects(final String subject, final String predicate, final String username) {

@@ -98,55 +98,37 @@ public class Triple {
         String s = "";
         String p = "";
         String o = "";
+        String result = "";
 
         Boolean global = false;
 
-        if(post != null){
+        if (post != null) {
 
-            if(post.containsKey("s")){
-            	s = post.get("s");
-            }
+            s = post.get("s", "");
+            p = post.get("p", "");
+            o = post.get("o", "");
 
-            if(post.containsKey("sp")){
-            	s = post.get("sp") + "#" + s;
-            }
-
-            if(post.containsKey("p")){
-            	p = post.get("p");
-            }
-
-            if(post.containsKey("pp")){
-            	p = post.get("pp") + "#" + p;
-            }
-
-            if(post.containsKey("o")){
-            	o = post.get("o");
-            }
+            if (post.containsKey("sp")) s = post.get("sp") + "#" + s;
+            if (post.containsKey("pp")) p = post.get("pp") + "#" + p;
 
             global = post.containsKey("global");
 
+            if (post.containsKey("load")) {
+                if (global) {
+                    result = JenaTripleStore.getObject(s, p);
+                } else {
+                    result = JenaTripleStore.getPrivateObject(s, p, username);
+                }
+            } else {
+                if (global) {
+                    JenaTripleStore.addTriple(s, p, o);
+                } else {
+                    JenaTripleStore.addTriple(s, p, o, username);
+                }
+            }
         }
 
-        if (post.containsKey("load")) {
-
-        	if (global) {
-        		o = JenaTripleStore.getObject(s, p);
-        	} else {
-        		o = JenaTripleStore.getPrivateObject(s, p, username);
-        	}
-
-
-        } else {
-
-        	if (global) {
-        		JenaTripleStore.addTriple(s, p, o);
-        	} else {
-        		JenaTripleStore.addTriple(s, p, o, username);
-        	}
-
-        }
-
-        prop.put("result", o);
+        prop.put("result", result);
 
         return prop;
     }
