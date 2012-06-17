@@ -231,7 +231,7 @@ public class LibraryProvider {
         	if (term.indexOf(' ') < 0) continue; // accept only names that have at least two parts
 
         	// store the term into the vocabulary map
-        	map.put(term, new SOTuple("", Tagging.normalizeTerm(subject)));
+        	map.put(term, new SOTuple(Tagging.normalizeTerm(term), subject));
         }
         try {
             Log.logInfo("LibraryProvider", "adding vocabulary to autotagging");
