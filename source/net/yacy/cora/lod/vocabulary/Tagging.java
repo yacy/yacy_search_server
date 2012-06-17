@@ -169,9 +169,8 @@ public class Tagging {
 
     }
 
-
-    public void updateTerm(String term, String[] synonyms) {
-
+    public int size() {
+        return this.term2objectlink.size();
     }
 
     private File tmpFile() {

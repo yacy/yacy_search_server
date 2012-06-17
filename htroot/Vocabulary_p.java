@@ -90,6 +90,7 @@ public class Vocabulary_p {
                                 if (discoverFromTitle || discoverFromTitleSplitted) {
                                     URIMetadataRow m = segment.urlMetadata().load(u.hash());
                                     if (m != null) t = m.dc_title();
+                                    if (t.endsWith(".jpg") || t.endsWith(".gif")) continue;
                                 }
                                 if (discoverFromAuthor) {
                                     URIMetadataRow m = segment.urlMetadata().load(u.hash());
@@ -101,6 +102,7 @@ public class Vocabulary_p {
                                     String[] ts = t.split(" ");
                                     for (String s: ts) {
                                         if (s.length() == 0) continue;
+                                        if (s.endsWith(".jpg") || s.endsWith(".gif")) continue;
                                         table.put(s, new Tagging.SOTuple("", u0));
                                     }
                                 } else if (discoverFromAuthor) {
@@ -189,6 +191,7 @@ public class Vocabulary_p {
             prop.putHTML("edit_editable_file", editable ? vocabulary.getFile().getAbsolutePath() : "");
             prop.putHTML("edit_name", vocabulary.getName());
             prop.putHTML("edit_namespace", vocabulary.getNamespace());
+            prop.put("edit_size", vocabulary.size());
             prop.putHTML("edit_predicate", vocabulary.getPredicate());
             prop.putHTML("edit_prefix", Tagging.DEFAULT_PREFIX);
             prop.putHTML("edit_editable_objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace());
