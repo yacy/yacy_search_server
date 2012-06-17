@@ -138,8 +138,8 @@ public class OpenGeoDBLocation implements Locations
                     } else if ( v[1].equals("400300000") ) { // Ortstyp
                         id = Integer.parseInt(v[0]);
                         h = removeQuotes(v[2]);
-                        final Integer hc = h.hashCode();
                         /*
+                        final Integer hc = h.hashCode();
                         final byte[] tb = this.locTypeHash2locType.get(hc);
                         if ( tb == null ) {
                             this.locTypeHash2locType.put(hc, UTF8.getBytes(h));

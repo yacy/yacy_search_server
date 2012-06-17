@@ -32,7 +32,6 @@ package interaction;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.interaction.Interaction;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
 import de.anomic.server.serverObjects;
@@ -107,7 +106,7 @@ public class Triple {
             if(post.containsKey("s")){
             	s = post.get("s");
             }
-            
+
             if(post.containsKey("sp")){
             	s = post.get("sp") + "#" + s;
             }
@@ -115,7 +114,7 @@ public class Triple {
             if(post.containsKey("p")){
             	p = post.get("p");
             }
-            
+
             if(post.containsKey("pp")){
             	p = post.get("pp") + "#" + p;
             }
@@ -131,14 +130,14 @@ public class Triple {
         if (post.containsKey("load")) {
 
         	if (global) {
-        		o = JenaTripleStore.getObject(s, p);        		
+        		o = JenaTripleStore.getObject(s, p);
         	} else {
         		o = JenaTripleStore.getPrivateObject(s, p, username);
         	}
 
 
         } else {
-        	
+
         	if (global) {
         		JenaTripleStore.addTriple(s, p, o);
         	} else {

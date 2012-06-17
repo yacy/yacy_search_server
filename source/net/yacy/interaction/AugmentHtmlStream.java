@@ -23,7 +23,6 @@ import net.yacy.search.Switchboard;
 
 import org.htmlparser.Tag;
 import org.htmlparser.Text;
-import org.htmlparser.tags.LinkTag;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.visitors.NodeVisitor;
 
@@ -58,7 +57,7 @@ public class AugmentHtmlStream {
                 // Link
                 Log.logInfo("AUGMENTATION", tag.getAttribute("href"));
 
-                LinkTag lt = (LinkTag)tag;
+                //LinkTag lt = (LinkTag)tag;
 
             }
 
@@ -90,7 +89,7 @@ public class AugmentHtmlStream {
         private int counter;
 
         public VisitorText() {
-            this.setCounter(0);
+            this.counter = 0;
         }
 
         @Override
@@ -377,7 +376,7 @@ public class AugmentHtmlStream {
                             .nextNode());
 
                     NodeList bodychildren = bt.getChildren();
-                    
+
                     bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction_elements/OverlayInteraction.html?urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader)));
 
                     bt.setChildren(bodychildren);
