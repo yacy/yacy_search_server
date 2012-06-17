@@ -21,7 +21,7 @@
  */
 
 
-package net.yacy.document.geolocalization;
+package net.yacy.document.geolocation;
 
 import java.util.Set;
 import java.util.TreeSet;

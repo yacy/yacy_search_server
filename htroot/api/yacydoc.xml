@@ -33,6 +33,5 @@ you can validate it with http://www.stg.brown.edu/service/xmlvalid/
   <yacy:inbound>#[yacy_inbound]#</yacy:inbound>
   <yacy:outbound>#[yacy_outbound]#</yacy:outbound>
   <yacy:citations>#[yacy_citations]#</yacy:citations>
-  
   </record>
 </metadata>

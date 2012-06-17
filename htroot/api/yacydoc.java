@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -71,9 +72,9 @@ public class yacydoc {
         prop.put("geo_long", "");
 
         prop.put("yacy_urlhash", "");
-        prop.putXML("yacy_loaddate", "");
-        prop.putXML("yacy_referrer_hash", "");
-        prop.putXML("yacy_referrer_url", "");
+        prop.put("yacy_loaddate", "");
+        prop.put("yacy_referrer_hash", "");
+        prop.put("yacy_referrer_url", "");
         prop.put("yacy_size", "");
         prop.put("yacy_words", "");
         prop.put("yacy_citations", "");
@@ -126,6 +127,9 @@ public class yacydoc {
         prop.put("yacy_citations", sb.indexSegments.segment(Segments.Process.PUBLIC).urlCitation().count(entry.hash()));
         prop.put("yacy_inbound", entry.llocal());
         prop.put("yacy_outbound", entry.lother());
+
+        // extract the submodel from the triplestore
+        prop.putXML("triples", JenaTripleStore.getMetadataByURLHash(entry.hash()));
 
         // return rewrite properties
         return prop;

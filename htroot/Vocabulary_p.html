@@ -3,6 +3,59 @@
   <head>
     <title>YaCy '#[clientname]#': Federated Index</title>
     #%env/templates/metas.template%#
+  <script type="text/javascript">
+//<![CDATA[
+function xmlhttpPost() {
+    var searchform = document.getElementById('searchform');
+    search(searchform.discoverobjectspace.value);
+}
+
+function search(query) {
+    var xmlHttpReq = false;
+    var self = this;
+    if (window.XMLHttpRequest) { // Mozilla/Safari
+        self.xmlHttpReq = new XMLHttpRequest(); 
+    }
+    else if (window.ActiveXObject) { // IE
+        self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&maximumRecords=100&nav=none&query=" + query + "+inurl:" + query, true);
+    self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    self.xmlHttpReq.onreadystatechange = function() {
+        if (self.xmlHttpReq.readyState == 4) {
+            updatepage(self.xmlHttpReq.responseText);
+        }
+    }
+    self.xmlHttpReq.send(null);
+}
+
+function updatepage(str) {
+  var raw = document.getElementById("raw");
+  if (raw != null) raw.innerHTML = str;
+  var rsp = eval("("+str+")");
+  var firstChannel = rsp.channels[0];
+  var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
+  var startIndex = firstChannel.startIndex;
+  var itemsPerPage = firstChannel.itemsPerPage;
+  var navigation = firstChannel.navigation;
+  
+  var html = "";
+  
+  if (totalResults > 0 && firstChannel.items.length > 0) {
+    var item;
+    html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<tr class=\"TableHeader\" valign=\"bottom\">";
+    html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
+    for (var i = 0; i < firstChannel.items.length; i++) {
+        item = firstChannel.items[i];
+        html += "<tr class=\"TableCellLight\"><td align=\"left\" onclick=\"document.getElementById('searchform').value='" + item.link + "';\">" + item.link + "<\/td>";
+    }
+    html += "<\/table>";
+  }
+  document.getElementById("searchresults").innerHTML = html;
+}
+//]]>
+</script>
   </head>
   <body id="Vocabulary_p" onload="document.getElementById('newterm').focus()">
     #%env/templates/header.template%#
@@ -31,14 +84,17 @@
     </form>
     
     #(create)#::
-    <form action="Vocabulary_p.html" method="get" accept-charset="UTF-8">
+    <!--<form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" onkeyup="xmlhttpPost(); return false;">-->
+    <form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" >
       <fieldset><legend>Vocabulary Production</legend>
       It is possible to produce a vocabulary out of the existing search index. This is done using a given 'objectspace' which you can enter as a URL Stub.
       This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.
       This works best with wikis. Try to use a wiki url as objectspace path.
       <dl>
         <dt>Vocabulary Name</dt><dd><input type="text" name="discovername" value="" size="16" maxlength="128" /></dd>
-        <dt>Objectspace</dt><dd><input type="text" name="discoverobjectspace" value="http://" size="78" maxlength="128" /></dd>
+        <dt>Objectspace</dt><dd><input type="text" name="discoverobjectspace" value="http://" size="78" maxlength="128" />
+            <div id="searchresults"></div></dd>
+        <dt>Discover Terms from</dt><dd><input type="radio" name="discovermethod" value="path" checked="checked" />object link file name&nbsp;&nbsp;<input type="radio" name="discovermethod" value="title" />object page title&nbsp;&nbsp;<input type="radio" name="discovermethod" value="titlesplitted" />object page title (splitted)&nbsp;&nbsp;<input type="radio" name="discovermethod" value="author" />object page author</dd>
         <dt></dt><dd><input type="submit" name="create" value="Create" /></dd>
       </dl>
     </fieldset>
@@ -51,6 +107,7 @@
       <dl>
         <dt>Vocabulary Name</dt><dd>#[name]#</dd>
         <dt>File</dt><dd>#(editable)#[automatically generated, not stored, cannot be edited]::#[file]##(/editable)#</dd>
+        <dt>Size</dt><dd>#[size]#</dd>
         <dt>Namespace</dt><dd>#[namespace]#</dd>
         <dt>Predicate</dt><dd>#[predicate]#</dd>
         <dt>Prefix</dt><dd>#[prefix]#</dd>

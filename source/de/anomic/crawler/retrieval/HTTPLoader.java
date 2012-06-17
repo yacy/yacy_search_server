@@ -67,7 +67,7 @@ public final class HTTPLoader {
         this.log = theLog;
 
         // refreshing timeout value
-        this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 10000);
+        this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 30000);
     }
 
     public Response load(final Request entry, final int maxFileSize, final boolean checkBlacklist) throws IOException {

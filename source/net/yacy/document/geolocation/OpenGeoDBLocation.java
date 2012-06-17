@@ -20,7 +20,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.document.geolocalization;
+package net.yacy.document.geolocation;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +40,7 @@ import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.document.StringBuilderComparator;
+import net.yacy.document.WordCache;
 import net.yacy.kelondro.logging.Log;
 
 /**
@@ -59,7 +60,7 @@ public class OpenGeoDBLocation implements Locations
     private final Map<String, Integer> zip2id;
     private final File file;
 
-    public OpenGeoDBLocation(final File file, final boolean lonlat) {
+    public OpenGeoDBLocation(final File file, WordCache dymLib) {
 
         this.file = file;
         this.id2loc = new HashMap<Integer, GeoLocation>();
@@ -99,21 +100,22 @@ public class OpenGeoDBLocation implements Locations
                     line = line.substring(18 + 7);
                     v = line.split(",");
                     v = line.split(",");
-                    if ( lonlat ) {
-                        lon = Float.parseFloat(v[2]);
-                        lat = Float.parseFloat(v[3]);
-                    } else {
-                        lat = Float.parseFloat(v[2]);
-                        lon = Float.parseFloat(v[3]);
-                    }
+                    lat = Float.parseFloat(v[2]);
+                    lon = Float.parseFloat(v[3]);
                     this.id2loc.put(Integer.parseInt(v[0]), new GeoLocation(lat, lon));
                 }
                 if ( line.startsWith("geodb_textdata ") ) {
                     line = line.substring(15 + 7);
                     v = line.split(",");
                     if ( v[1].equals("500100000") ) { // Ortsname
+                        if (v.length > 10) {
+                            // a ',' is probably inside the location name
+                            v[2] = v[2] + "," + v[3];
+                        }
                         id = Integer.parseInt(v[0]);
                         h = removeQuotes(v[2]);
+                        if (h.length() < OverarchingLocation.MINIMUM_NAME_LENGTH) continue;
+                        if (dymLib != null && dymLib.contains(new StringBuilder(h))) continue;
                         List<Integer> l = this.name2ids.get(new StringBuilder(h));
                         if ( l == null ) {
                             l = new ArrayList<Integer>(1);
@@ -136,8 +138,8 @@ public class OpenGeoDBLocation implements Locations
                     } else if ( v[1].equals("400300000") ) { // Ortstyp
                         id = Integer.parseInt(v[0]);
                         h = removeQuotes(v[2]);
-                        final Integer hc = h.hashCode();
                         /*
+                        final Integer hc = h.hashCode();
                         final byte[] tb = this.locTypeHash2locType.get(hc);
                         if ( tb == null ) {
                             this.locTypeHash2locType.put(hc, UTF8.getBytes(h));
@@ -173,13 +175,12 @@ public class OpenGeoDBLocation implements Locations
     }
 
     private static final String removeQuotes(String s) {
-        if ( s.length() > 0 && s.charAt(0) != '\'' ) {
-            return s;
+        if ( s.length() > 0 && s.charAt(0) == '\'' ) {
+            s = s.substring(1);
         }
-        if ( s.charAt(s.length() - 1) != '\'' ) {
-            return s;
+        if ( s.charAt(s.length() - 1) == '\'' ) {
+            s = s.substring(0, s.length() - 1);
         }
-        s = s.substring(1, s.length() - 1);
         return s;
     }
 

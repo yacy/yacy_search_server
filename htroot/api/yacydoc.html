@@ -12,6 +12,12 @@ you can validate it with http://validator.w3.org/
        
   <head profile="http://www.w3.org/2003/g/data-view">
     <link rel="transformation" href="http://www-sop.inria.fr/acacia/soft/RDFa2RDFXML.xsl"/>
+<div id="api">
+<a href="yacydoc.xml"><img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
+<span>This search result can also be retrieved as XML.
+Click the API icon to see an example call to the search rss API.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
+</div>	
     #%env/templates/metas.template%#
     <title>#[dc_title]#</title>
   </head>
@@ -45,6 +51,7 @@ you can validate it with http://validator.w3.org/
   <dt>Incoming Links (citation)</dt><dd property="yacy:citations">#[yacy_citations]#</dd>
         
   <dt>Location</dt><dd><a href="/osm.png?lon=#[geo_long]#&lat=#[geo_lat]#&zoom=14" onclick="return hs.expand(this)">lat=#[geo_lat]#, lon=#[geo_long]#</a></dd>
+  <dt>Metadata Triplestore</dt><dd><pre>#[triples]#</pre></dd>
 	  
   </dl>
   </fieldset>

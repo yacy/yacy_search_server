@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.document.LibraryProvider;
+import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Row;
@@ -230,7 +230,7 @@ public class URIMetadataRow implements URIMetadata {
         String descr = crypt.simpleDecode(prop.getProperty("descr", ""), null); if (descr == null) descr = "";
         String dc_creator = crypt.simpleDecode(prop.getProperty("author", ""), null); if (dc_creator == null) dc_creator = "";
         String tags = crypt.simpleDecode(prop.getProperty("tags", ""), null); if (tags == null) tags = "";
-        tags = LibraryProvider.autotagging.cleanTagFromAutotagging(tags);
+        tags = Tagging.cleanTagFromAutotagging(tags);
         String dc_publisher = crypt.simpleDecode(prop.getProperty("publisher", ""), null); if (dc_publisher == null) dc_publisher = "";
         String lons = crypt.simpleDecode(prop.getProperty("lon", "0.0"), null); if (lons == null) lons = "0.0";
         String lats = crypt.simpleDecode(prop.getProperty("lat", "0.0"), null); if (lats == null) lats = "0.0";
@@ -313,7 +313,7 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",author=").append(crypt.simpleEncode(metadata.dc_creator()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",tags=").append(crypt.simpleEncode(LibraryProvider.autotagging.cleanTagFromAutotagging(metadata.dc_subject())));
+            s.append(",tags=").append(crypt.simpleEncode(Tagging.cleanTagFromAutotagging(metadata.dc_subject())));
             assert (s.toString().indexOf(0) < 0);
             s.append(",publisher=").append(crypt.simpleEncode(metadata.dc_publisher()));
             assert (s.toString().indexOf(0) < 0);

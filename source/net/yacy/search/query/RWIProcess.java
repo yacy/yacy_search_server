@@ -285,7 +285,6 @@ public final class RWIProcess extends Thread
                     || pattern.equals("smb://.*")
                     || pattern.equals("file://.*");
             long remaining;
-            int count = 0;
             pollloop: while ( true ) {
                 remaining = timeout - System.currentTimeMillis();
                 if (remaining <= 0) {
@@ -302,7 +301,6 @@ public final class RWIProcess extends Thread
                 }
                 assert (iEntry.urlhash().length == index.row().primaryKeyLength);
                 //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
-                count++;
 
                 // increase flag counts
                 for ( int j = 0; j < 32; j++ ) {
@@ -623,7 +621,7 @@ public final class RWIProcess extends Thread
         final long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
         int p = -1;
         long timeleft;
-        takeloop: while ( (timeleft = timeout - System.currentTimeMillis()) > 0 ) {
+        while ( (timeleft = timeout - System.currentTimeMillis()) > 0 ) {
             //System.out.println("timeleft = " + timeleft);
             final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi = takeRWI(skipDoubleDom, timeleft);
             if ( obrwi == null ) {
@@ -718,22 +716,6 @@ public final class RWIProcess extends Thread
                 }
             }
 
-            // check vocabulary constraint
-            /*
-            final String tags = page.dc_subject();
-            final String[] taglist = tags == null || tags.length() == 0 ? new String[0] : SPACE_PATTERN.split(page.dc_subject());
-            if (this.query.metatags != null && this.query.metatags.size() > 0) {
-                // all metatags must appear in the tags list
-                for (Tagging.Metatag metatag: this.query.metatags) {
-                    if (!Autotagging.metatagAppearIn(metatag, taglist)) {
-                        this.sortout++;
-                        //Log.logInfo("RWIProcess", "sorted out " + page.url());
-                        continue takeloop;
-                    }
-                }
-            }
-             */
-
             // evaluate information of metadata for navigation
             // author navigation:
             if ( pageauthor != null && pageauthor.length() > 0 ) {
@@ -788,24 +770,6 @@ public final class RWIProcess extends Thread
             if ( fileext.length() > 0 ) {
                 this.filetypeNavigator.inc(fileext);
             }
-
-            // vocabulary navigation
-            /*
-            tagharvest: for (String tag: taglist) {
-                if (tag.length() < 1 || tag.charAt(0) != LibraryProvider.tagPrefix) continue tagharvest;
-                try {
-                	Tagging.Metatag metatag = LibraryProvider.autotagging.metatag(tag);
-                    ScoreMap<String> voc = this.vocabularyNavigator.get(metatag.getVocabularyName());
-                    if (voc == null) {
-                        voc = new ConcurrentScoreMap<String>();
-                        this.vocabularyNavigator.put(metatag.getVocabularyName(), voc);
-                    }
-                    voc.inc(metatag.getObject());
-                } catch (RuntimeException e) {
-                    // tag may not be well-formed
-                }
-            }
-             */
 
             // accept url
             return page;

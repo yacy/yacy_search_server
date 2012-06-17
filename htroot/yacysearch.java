@@ -55,7 +55,7 @@ import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
-import net.yacy.document.geolocalization.GeoLocation;
+import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -480,7 +480,7 @@ public class yacysearch {
                 if (p > 0) {
                     String k = vocabulary.substring(0, p);
                     String v = vocabulary.substring(p + 1);
-                    metatags.add(LibraryProvider.autotagging.metatag(LibraryProvider.autotagging.prefixChar + k + ":" + v));
+                    metatags.add(LibraryProvider.autotagging.metatag(k, v));
                 }
             }
 

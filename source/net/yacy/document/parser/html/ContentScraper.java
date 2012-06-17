@@ -99,7 +99,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         strong(TagType.pair),
         i(TagType.pair),
         li(TagType.pair),
-        script(TagType.pair);
+        script(TagType.pair),
+        style(TagType.pair);
 
         public TagType type;
         private Tag(final TagType type) {
@@ -201,6 +202,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     @Override
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + UTF8.String(newtext));
+        if (insideTag != null && ("script".equals(insideTag) || "style".equals(insideTag))) return;
         int p, pl, q, s = 0;
 
         // match evaluation pattern
@@ -434,7 +436,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     @Override
-    public void scrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
+    public void scrapeTag1(final String tagname, final Properties tagopts, char[] text) {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + UTF8.String(text));
         if (tagname.equalsIgnoreCase("a") && text.length < 2048) {
             final String href = tagopts.getProperty("href", EMPTY_STRING);
