@@ -191,6 +191,7 @@ public class Vocabulary_p {
             prop.putHTML("edit_editable_file", editable ? vocabulary.getFile().getAbsolutePath() : "");
             prop.putHTML("edit_name", vocabulary.getName());
             prop.putHTML("edit_namespace", vocabulary.getNamespace());
+            prop.put("edit_size", vocabulary.size());
             prop.putHTML("edit_predicate", vocabulary.getPredicate());
             prop.putHTML("edit_prefix", Tagging.DEFAULT_PREFIX);
             prop.putHTML("edit_editable_objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace());

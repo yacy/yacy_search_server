@@ -2,7 +2,7 @@
 function getMetadata (url) {
 
 
-	var res = {"item": ""};
+	var res = {"item": {"title": "no title"}};
 	
 	$.ajaxSetup({async: false});
 
