@@ -602,7 +602,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
 
         // setting other connection properties
-        prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, session.userAddress.isAnyLocalAddress() ? "localhost" : session.userAddress.getHostAddress());
+        prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, session.userAddress.isAnyLocalAddress() || session.userAddress.isLinkLocalAddress() || session.userAddress.isLoopbackAddress() ? "localhost" : session.userAddress.getHostAddress());
         prop.put(HeaderFramework.CONNECTION_PROP_METHOD, HeaderFramework.METHOD_CONNECT);
         prop.put(HeaderFramework.CONNECTION_PROP_PATH, "/");
         prop.put(HeaderFramework.CONNECTION_PROP_EXT, "");
