@@ -27,6 +27,7 @@ import java.io.IOException;
 
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
@@ -47,6 +48,7 @@ public class OAIPMHLoader {
         this.source = source;
 
         // load the file from the net
+        Log.logInfo("OAIPMHLoader", "loading record from " + source.toNormalform(true, false));
         final Response response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, true);
         final byte[] b = response.getContent();
         this.resumptionToken = new ResumptionToken(source, b);
