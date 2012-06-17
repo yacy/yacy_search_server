@@ -119,6 +119,7 @@ public class GeonamesLocation implements Locations
                 this.id2loc.put(id, c);
                 for ( final StringBuilder name : locnames ) {
                     if (dymLib != null && dymLib.contains(name)) continue;
+                    if (name.length() < OverarchingLocation.MINIMUM_NAME_LENGTH) continue;
                     List<Integer> locs = this.name2ids.get(name);
                     if ( locs == null ) {
                         locs = new ArrayList<Integer>(1);

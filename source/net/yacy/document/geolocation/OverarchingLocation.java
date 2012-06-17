@@ -30,6 +30,7 @@ import java.util.TreeSet;
 
 public class OverarchingLocation implements Locations {
 
+    public static int MINIMUM_NAME_LENGTH = 4;
     private final Map<String, Locations> services;
 
     /**
@@ -44,7 +45,7 @@ public class OverarchingLocation implements Locations {
      * @param nickname the nickname of the service
      * @param service the service
      */
-    public void activateLocalization(final String nickname, final Locations service) {
+    public void activateLocation(final String nickname, final Locations service) {
         this.services.put(nickname, service);
     }
 

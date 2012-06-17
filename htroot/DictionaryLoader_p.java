@@ -68,7 +68,7 @@ public class DictionaryLoader_p {
                 final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON0.file());
-                LibraryProvider.geoLoc.activateLocalization(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null));
+                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null));
                 LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geon0Status", LibraryProvider.Dictionary.GEON0.file().exists() ? 1 : 0);
                 prop.put("geon0ActionLoaded", 1);
@@ -98,7 +98,7 @@ public class DictionaryLoader_p {
 
         if (post.containsKey("geon0Activate")) {
             LibraryProvider.Dictionary.GEON0.fileDisabled().renameTo(LibraryProvider.Dictionary.GEON0.file());
-            LibraryProvider.geoLoc.activateLocalization(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null));
+            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null));
             LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
             prop.put("geon0ActionActivated", 1);
         }
@@ -111,7 +111,7 @@ public class DictionaryLoader_p {
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEODB1.file());
                 LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEODB0.nickname);
-                LibraryProvider.geoLoc.activateLocalization(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocation(LibraryProvider.Dictionary.GEODB1.file(), null));
+                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocation(LibraryProvider.Dictionary.GEODB1.file(), null));
                 LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geo1Status", LibraryProvider.Dictionary.GEODB1.file().exists() ? 1 : 0);
                 prop.put("geo1ActionLoaded", 1);
@@ -141,7 +141,7 @@ public class DictionaryLoader_p {
 
         if (post.containsKey("geo1Activate")) {
             LibraryProvider.Dictionary.GEODB1.fileDisabled().renameTo(LibraryProvider.Dictionary.GEODB1.file());
-            LibraryProvider.geoLoc.activateLocalization(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocation(LibraryProvider.Dictionary.GEODB1.file(), null));
+            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocation(LibraryProvider.Dictionary.GEODB1.file(), null));
             LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
             prop.put("geo1ActionActivated", 1);
         }

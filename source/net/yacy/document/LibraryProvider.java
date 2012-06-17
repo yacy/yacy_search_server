@@ -135,11 +135,11 @@ public class LibraryProvider {
             if ( geo0.exists() ) {
                 geo0.renameTo(Dictionary.GEODB0.fileDisabled());
             }
-            geoLoc.activateLocalization(Dictionary.GEODB1.nickname, new OpenGeoDBLocation(geo1, dymLib));
+            geoLoc.activateLocation(Dictionary.GEODB1.nickname, new OpenGeoDBLocation(geo1, dymLib));
             return;
         }
         if ( geo0.exists() ) {
-            geoLoc.activateLocalization(Dictionary.GEODB0.nickname, new OpenGeoDBLocation(geo0, dymLib));
+            geoLoc.activateLocation(Dictionary.GEODB0.nickname, new OpenGeoDBLocation(geo0, dymLib));
             return;
         }
     }
@@ -147,7 +147,7 @@ public class LibraryProvider {
     public static void integrateGeonames() {
         final File geon = Dictionary.GEON0.file();
         if ( geon.exists() ) {
-            geoLoc.activateLocalization(Dictionary.GEON0.nickname, new GeonamesLocation(geon, dymLib));
+            geoLoc.activateLocation(Dictionary.GEON0.nickname, new GeonamesLocation(geon, dymLib));
             return;
         }
     }

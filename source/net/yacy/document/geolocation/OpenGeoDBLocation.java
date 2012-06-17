@@ -114,7 +114,7 @@ public class OpenGeoDBLocation implements Locations
                         }
                         id = Integer.parseInt(v[0]);
                         h = removeQuotes(v[2]);
-                        if (h.length() < 2) continue;
+                        if (h.length() < OverarchingLocation.MINIMUM_NAME_LENGTH) continue;
                         if (dymLib != null && dymLib.contains(new StringBuilder(h))) continue;
                         List<Integer> l = this.name2ids.get(new StringBuilder(h));
                         if ( l == null ) {

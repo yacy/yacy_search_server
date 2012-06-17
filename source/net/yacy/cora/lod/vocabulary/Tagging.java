@@ -439,8 +439,9 @@ public class Tagging {
         this(name);
         Set<String> locNames = localization.locationNames();
         for (String loc: locNames) {
-            this.synonym2term.put(loc.toLowerCase(), loc);
-            this.term2synonym.put(loc, loc.toLowerCase());
+            String syn = normalizeTerm(loc);
+            this.synonym2term.put(syn, loc);
+            this.term2synonym.put(loc, syn);
         }
     }
 
@@ -532,13 +533,18 @@ public class Tagging {
     private final static Pattern PATTERN_UE = Pattern.compile("\u00FC");
     private final static Pattern PATTERN_SZ = Pattern.compile("\u00DF");
 
-    public static final String normalizeTerm(String word) {
-        word = word.trim().toLowerCase();
-        word = PATTERN_AE.matcher(word).replaceAll("ae");
-        word = PATTERN_OE.matcher(word).replaceAll("oe");
-        word = PATTERN_UE.matcher(word).replaceAll("ue");
-        word = PATTERN_SZ.matcher(word).replaceAll("ss");
-        return word;
+    public static final String normalizeTerm(String term) {
+        term = term.trim().toLowerCase();
+        term = PATTERN_AE.matcher(term).replaceAll("ae");
+        term = PATTERN_OE.matcher(term).replaceAll("oe");
+        term = PATTERN_UE.matcher(term).replaceAll("ue");
+        term = PATTERN_SZ.matcher(term).replaceAll("ss");
+        // remove comma
+        int p;
+        while ((p = term.indexOf(',')) >= 0) {
+            term = term.substring(p + 1).trim() + " " + term.substring(0, p);
+        }
+        return term;
     }
 
 	public class Metatag {
