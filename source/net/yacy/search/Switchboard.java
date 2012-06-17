@@ -632,7 +632,7 @@ public final class Switchboard extends serverSwitch
             + " entries"
             + ", "
             + ppRamString(userDbFile.length() / 1024));
-        
+
      // init user triplestores
         JenaTripleStore.initPrivateStores();
 
@@ -664,7 +664,7 @@ public final class Switchboard extends serverSwitch
                 }
             }
         }.start();
-        
+
         // define a realtime parsable mimetype list
         this.log.logConfig("Parser: Initializing Mime Type deny list");
         TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
@@ -2220,6 +2220,11 @@ public final class Switchboard extends serverSwitch
             if ( getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
                 && this.peers.mySeed().getFlagAcceptRemoteIndex() ) {
                 this.tables.cleanFailURLS(getConfigLong("cleanup.failedSearchURLtimeout", -1));
+            }
+
+            // periodically store the triple store
+            if (getConfigBool("triplestore.persistent", false)) {
+                JenaTripleStore.saveAll();
             }
 
             return true;

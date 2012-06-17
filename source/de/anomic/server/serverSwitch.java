@@ -61,7 +61,7 @@ public class serverSwitch
     // configuration management
     private final File configFile;
     private final String configComment;
-    private final File dataPath;
+    public final File dataPath;
     public final File appPath;
     protected boolean firstInit;
     protected Log log;
@@ -167,7 +167,7 @@ public class serverSwitch
 
     /**
      * get my public IP, either set statically or figure out dynamic
-     * @return 
+     * @return
      */
     public String myPublicIP() {
         // if a static IP was configured, we have to return it here ...
@@ -191,7 +191,7 @@ public class serverSwitch
 
     /**
      * add whole map of key-value pairs to config
-     * @param otherConfigs 
+     * @param otherConfigs
      */
     public void setConfig(final Map<String, String> otherConfigs) {
         final Iterator<Map.Entry<String, String>> i = otherConfigs.entrySet().iterator();
@@ -228,7 +228,7 @@ public class serverSwitch
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key name of the configuration parameter
      * @param dflt default value which will be used in case parameter can not be found or if it is invalid
      * @return value if the parameter or default value
@@ -246,7 +246,7 @@ public class serverSwitch
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key name of the configuration parameter
      * @param dflt default value which will be used in case parameter can not be found or if it is invalid
      * @return value if the parameter or default value
@@ -261,7 +261,7 @@ public class serverSwitch
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key name of the configuration parameter
      * @param dflt default value which will be used in case parameter can not be found or if it is invalid
      * @return value if the parameter or default value
@@ -276,7 +276,7 @@ public class serverSwitch
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key name of the configuration parameter
      * @param dflt default value which will be used in case parameter can not be found or if it is invalid
      * @return value if the parameter or default value
@@ -291,7 +291,7 @@ public class serverSwitch
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key name of the configuration parameter
      * @param dflt default value which will be used in case parameter can not be found or if it is invalid
      * @return value if the parameter or default value
@@ -302,7 +302,7 @@ public class serverSwitch
 
     /**
      * Create a File instance for a configuration setting specifying a path.
-     * 
+     *
      * @param key config key
      * @param dflt default path value, that is used when there is no value <code>key</code> in the
      *        configuration.
@@ -311,19 +311,19 @@ public class serverSwitch
      *         the relative path setting.
      */
     public File getDataPath(final String key, final String dflt) {
-        return getFileByPath(key, dflt, dataPath);
+        return getFileByPath(key, dflt, this.dataPath);
     }
 
     /**
      * return file at path from config entry "key", or fallback to default dflt
      * @param key
      * @param dflt
-     * @return 
+     * @return
      */
     public File getAppPath(final String key, final String dflt) {
-        return getFileByPath(key, dflt, appPath);
+        return getFileByPath(key, dflt, this.appPath);
     }
-    
+
     private File getFileByPath(String key, String dflt, File prefix) {
         final String path = getConfig(key, dflt).replace('\\', '/');
         final File f = new File(path);
@@ -345,7 +345,7 @@ public class serverSwitch
 
     /**
      * Gets configuration parameters which have been removed during initialization.
-     * 
+     *
      * @return contains parameter name as key and parameter value as value
      */
     public ConcurrentMap<String, String> getRemoved() {
@@ -613,7 +613,7 @@ public class serverSwitch
     /**
      * Retrieve text data (e. g. config file) from file file may be an url or a filename with path relative to
      * rootPath parameter
-     * 
+     *
      * @param file url or filename
      * @param rootPath searchpath for file
      * @param file file to use when remote fetching fails (null if unused)
@@ -665,7 +665,7 @@ public class serverSwitch
 
     /**
      * Generates a random password.
-     * 
+     *
      * @return random password which is 20 characters long.
      */
     public String genRandomPassword() {
@@ -674,7 +674,7 @@ public class serverSwitch
 
     /**
      * Generates a random password of a given length.
-     * 
+     *
      * @param length length o password
      * @return password of given length
      */

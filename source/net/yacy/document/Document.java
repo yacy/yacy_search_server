@@ -227,10 +227,6 @@ dc_rights
             String objectspace = vocabulary.getObjectspace();
             StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
             for (Tagging.Metatag s: e.getValue()) {
-                String t = s.toString();
-                if (!this.keywords.contains(t)) {
-                    this.keywords.add(t);
-                }
                 sb.append(',').append(s.getObject());
                 String objectlink = vocabulary.getObjectlink(s.getObject());
                 if ((objectspace != null && objectspace.length() > 0) || (objectlink != null && objectlink.length() > 0)) {

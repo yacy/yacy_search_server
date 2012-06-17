@@ -1,4 +1,4 @@
-package net.yacy.document.geolocalization;
+package net.yacy.document.geolocation;
 
 /**
  * GeoPoint implementation with Integer accuracy

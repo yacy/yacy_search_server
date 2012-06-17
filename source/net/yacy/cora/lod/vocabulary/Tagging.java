@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.Files;
 import net.yacy.document.WordCache.Dictionary;
-import net.yacy.document.geolocalization.Locations;
+import net.yacy.document.geolocation.Locations;
 
 public class Tagging {
 
@@ -95,7 +95,7 @@ public class Tagging {
         	vocloop: for (Map.Entry<String, SOTuple> e: table.entrySet()) {
 			    if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().length() == 0) {
 			        term = normalizeKey(e.getKey());
-			        v = normalizeWord(e.getKey());
+			        v = normalizeTerm(e.getKey());
 			        this.synonym2term.put(v, term);
 			        this.term2synonym.put(term, v);
 			        if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
@@ -108,13 +108,13 @@ public class Tagging {
 			    tagloop: for (String synonym: tags) {
 			        if (synonym.length() == 0) continue tagloop;
 				    synonyms.add(synonym);
-			    	synonym = normalizeWord(synonym);
+			    	synonym = normalizeTerm(synonym);
 			        if (synonym.length() == 0) continue tagloop;
 				    synonyms.add(synonym);
 			        this.synonym2term.put(synonym, term);
 			        this.term2synonym.put(term, synonym);
 			    }
-			    String synonym = normalizeWord(term);
+			    String synonym = normalizeTerm(term);
 			    this.synonym2term.put(synonym, term);
 			    this.term2synonym.put(term, synonym);
                 if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
@@ -169,9 +169,8 @@ public class Tagging {
 
     }
 
-
-    public void updateTerm(String term, String[] synonyms) {
-
+    public int size() {
+        return this.term2objectlink.size();
     }
 
     private File tmpFile() {
@@ -402,7 +401,7 @@ public class Tagging {
 			    }
 			    if (pl[1] == null) {
 			        term = normalizeKey(pl[0]);
-			        v = normalizeWord(pl[0]);
+			        v = normalizeTerm(pl[0]);
 			        this.synonym2term.put(v, term);
 			        this.term2synonym.put(term, v);
 			        if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
@@ -416,13 +415,13 @@ public class Tagging {
 			    tagloop: for (String synonym: tags) {
 			        if (synonym.length() == 0) continue tagloop;
 				    synonyms.add(synonym);
-			    	synonym = normalizeWord(synonym);
+			    	synonym = normalizeTerm(synonym);
 			        if (synonym.length() == 0) continue tagloop;
 				    synonyms.add(synonym);
 			        this.synonym2term.put(synonym, term);
 			        this.term2synonym.put(term, synonym);
 			    }
-			    String synonym = normalizeWord(term);
+			    String synonym = normalizeTerm(term);
 			    this.synonym2term.put(synonym, term);
 			    this.term2synonym.put(term, synonym);
                 if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
@@ -439,8 +438,9 @@ public class Tagging {
         this(name);
         Set<String> locNames = localization.locationNames();
         for (String loc: locNames) {
-            this.synonym2term.put(loc.toLowerCase(), loc);
-            this.term2synonym.put(loc, loc.toLowerCase());
+            String syn = normalizeTerm(loc);
+            this.synonym2term.put(syn, loc);
+            this.term2synonym.put(loc, syn);
         }
     }
 
@@ -493,14 +493,14 @@ public class Tagging {
         return this.propFile;
     }
 
-    public Metatag getMetatagFromSynonym(char prefix, final String word) {
+    public Metatag getMetatagFromSynonym(final String word) {
         String printname = this.synonym2term.get(word);
         if (printname == null) return null;
-        return new Metatag(prefix, printname);
+        return new Metatag(printname);
     }
 
-    public Metatag getMetatagFromTerm(char prefix, final String word) {
-        return new Metatag(prefix, word);
+    public Metatag getMetatagFromTerm(final String word) {
+        return new Metatag(word);
     }
 
     public Set<String> getSynonyms(String term) {
@@ -532,20 +532,23 @@ public class Tagging {
     private final static Pattern PATTERN_UE = Pattern.compile("\u00FC");
     private final static Pattern PATTERN_SZ = Pattern.compile("\u00DF");
 
-    public static final String normalizeWord(String word) {
-        word = word.trim().toLowerCase();
-        word = PATTERN_AE.matcher(word).replaceAll("ae");
-        word = PATTERN_OE.matcher(word).replaceAll("oe");
-        word = PATTERN_UE.matcher(word).replaceAll("ue");
-        word = PATTERN_SZ.matcher(word).replaceAll("ss");
-        return word;
+    public static final String normalizeTerm(String term) {
+        term = term.trim().toLowerCase();
+        term = PATTERN_AE.matcher(term).replaceAll("ae");
+        term = PATTERN_OE.matcher(term).replaceAll("oe");
+        term = PATTERN_UE.matcher(term).replaceAll("ue");
+        term = PATTERN_SZ.matcher(term).replaceAll("ss");
+        // remove comma
+        int p;
+        while ((p = term.indexOf(',')) >= 0) {
+            term = term.substring(p + 1).trim() + " " + term.substring(0, p);
+        }
+        return term;
     }
 
 	public class Metatag {
 	    private final String object;
-	    private final char prefix;
-	    public Metatag(char prefix, String object) {
-	    	this.prefix = prefix;
+	    public Metatag(String object) {
 	        this.object = object;
 	    }
 
@@ -563,7 +566,7 @@ public class Tagging {
 
 	    @Override
 	    public String toString() {
-	        return this.prefix + Tagging.this.navigatorName + ":" + encodePrintname(this.object);
+	        return Tagging.this.navigatorName + ":" + encodePrintname(this.object);
 	    }
 
 	    @Override
@@ -589,12 +592,12 @@ public class Tagging {
         return PATTERN_UL.matcher(maskname).replaceAll(" ");
     }
 
-    public static String cleanTagFromAutotagging(char prefix, final String tagString) {
+    public static String cleanTagFromAutotagging(final String tagString) {
         if (tagString == null || tagString.length() == 0) return "";
         String[] tags = PATTERN_SP.split(tagString);
         StringBuilder sb = new StringBuilder(tagString.length());
         for (String tag : tags) {
-            if (tag.length() > 0 && tag.charAt(0) != prefix) {
+            if (tag.length() > 0) {
                 sb.append(tag).append(' ');
             }
         }

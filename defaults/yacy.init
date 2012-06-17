@@ -691,7 +691,7 @@ crawlPause.localsearch=50
 crawlPause.remotesearch=10
 
 # Some configuration values for the crawler
-crawler.clientTimeout=9000
+crawler.clientTimeout=30000
 
 # http crawler specific settings; size in bytes
 crawler.http.accept=text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8

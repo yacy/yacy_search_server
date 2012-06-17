@@ -306,19 +306,26 @@ public final class yacy {
             HTTPClient.setDefaultUserAgent(ClientIdentification.getUserAgent());
 
             // initial fill of the triplestore
-            try {
-                File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
-                mkdirIfNeseccary(triplestore);
-                for (String s: triplestore.list()) {
-                	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf") && !s.endsWith("_triplestore.rdf") && !s.startsWith("private_store_")) JenaTripleStore.load(new File(triplestore, s).getAbsolutePath());
+            File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
+            mkdirIfNeseccary(triplestore);
+            for (String s: triplestore.list()) {
+            	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf") && !s.endsWith("_triplestore.rdf") && !s.startsWith("private_store_")) {
+                    try {
+                        JenaTripleStore.load(new File(triplestore, s).getAbsolutePath());
+                    } catch (IOException e) {
+                        Log.logException(e);
+                    }
+            	}
+            }
+            if (sb.getConfigBool("triplestore.persistent", false)) {
+                File local = new File(triplestore, "local.rdf");
+                if (local.exists()) {
+                    try {
+                        JenaTripleStore.load(local.getAbsolutePath());
+                    } catch (IOException e) {
+                        Log.logException(e);
+                    }
                 }
-                if (sb.getConfigBool("triplestore.persistent", false)) {
-                    File local = new File(triplestore, "local.rdf");
-                    if (local.exists()) JenaTripleStore.load(local.getAbsolutePath());
-                }                              
-                
-            } catch (IOException e) {
-                Log.logException(e);
             }
 
             // start main threads
@@ -407,26 +414,11 @@ public final class yacy {
                 server.terminate(false);
                 server.interrupt();
                 server.close();
-                /*
-                if (server.isAlive()) try {
-                    // TODO only send request, don't read response (cause server is already down resulting in error)
-                    final DigestURI u = new DigestURI((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
-                    Client.wget(u.toString(), null, 10000); // kick server
-                    Log.logConfig("SHUTDOWN", "sent termination signal to server socket");
-                } catch (final IOException ee) {
-                    Log.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
-                }
-                */
-//                Client.closeAllConnections();
-//                MultiThreadedHttpConnectionManager.shutdownAll();
 
                 // idle until the processes are down
                 if (server.isAlive()) {
-                    //Thread.sleep(2000); // wait a while
                     server.interrupt();
-//                    MultiThreadedHttpConnectionManager.shutdownAll();
                 }
-//                MultiThreadedHttpConnectionManager.shutdownAll();
                 Log.logConfig("SHUTDOWN", "server has terminated");
                 sb.close();
             } catch (final Exception e) {
@@ -440,11 +432,9 @@ public final class yacy {
         } finally {
         }
 
+        // save the triple store
         if (sb.getConfigBool("triplestore.persistent", false)) {
-            File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
-        	JenaTripleStore.saveFile(new File(triplestore, "local.rdf").getAbsolutePath());
-        	
-        	JenaTripleStore.savePrivateStores(sb);
+            JenaTripleStore.saveAll();
         }
 
         Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
