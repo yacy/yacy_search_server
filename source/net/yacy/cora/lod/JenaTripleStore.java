@@ -113,12 +113,25 @@ public class JenaTripleStore {
 	}
 
 	public static void saveFile(String filename, Model model) {
+        File f = new File(filename);
+        File ftmp = new File(filename + "." + System.currentTimeMillis());
+	    if (model.size() == 0 && !f.exists()) {
+	        // we don't store zero-size models if they did not exist before
+	        Log.logInfo("TRIPLESTORE", "NOT saving triplestore with " + model.size() + " triples to " + filename);
+	        return;
+	    }
 		Log.logInfo("TRIPLESTORE", "Saving triplestore with " + model.size() + " triples to " + filename);
     	OutputStream fout;
 		try {
-			fout = new BufferedOutputStream(new FileOutputStream(filename));
+			fout = new BufferedOutputStream(new FileOutputStream(ftmp));
 			model.write(fout);
 			fout.close();
+			// if something went wrong until here, the original file is not overwritten
+			// since we are happy here, we can remove the old file and replace it with the new one
+			f.delete();
+			if (!f.exists()) {
+			    ftmp.renameTo(f);
+			}
 			Log.logInfo("TRIPLESTORE", "Saved triplestore with " + model.size() + " triples to " + filename);
 		} catch (Exception e) {
 			Log.logWarning("TRIPLESTORE", "Saving to " + filename+" failed");
@@ -258,81 +271,64 @@ public class JenaTripleStore {
     }
 
 	public static void initPrivateStores() {
-
 		Switchboard switchboard = Switchboard.getSwitchboard();
-
 		Log.logInfo("TRIPLESTORE", "Init private stores");
-
 		if (privatestorage == null) privatestorage = new ConcurrentHashMap<String, Model>();
-
 		if (privatestorage != null) privatestorage.clear();
 
 		try {
-
 			Iterator<de.anomic.data.UserDB.Entry> it = switchboard.userDB.iterator(true);
-
 			while (it.hasNext()) {
 				de.anomic.data.UserDB.Entry e = it.next();
 				String username = e.getUserName();
-
 				File triplestore = new File(switchboard.getConfig("triplestore", new File(switchboard.getDataPath(), "DATA/TRIPLESTORE").getAbsolutePath()));
-
                 File currentuserfile = new File(triplestore, "private_store_"+username+".rdf");
-
                 Log.logInfo("TRIPLESTORE", "Init " + username + " from "+currentuserfile.getAbsolutePath());
-
                 Model tmp  = ModelFactory.createDefaultModel();
-
                 init (tmp);
 
                 if (currentuserfile.exists()) {
-
-
             		Log.logInfo("TRIPLESTORE", "Loading from " + currentuserfile.getAbsolutePath());
                     InputStream is = FileManager.get().open(currentuserfile.getAbsolutePath());
             	    if (is != null) {
             	    	// read the RDF/XML file
             	    	tmp.read(is, null);
             			Log.logInfo("TRIPLESTORE", "loaded " + tmp.size() + " triples from " + currentuserfile.getAbsolutePath());
-
-
             	    } else {
             	        throw new IOException("cannot read " + currentuserfile.getAbsolutePath());
             	    }
                 }
 
                 if (tmp != null) {
-
                 	privatestorage.put(username, tmp);
-
                 }
-
 			}
-
-			}
-		catch (Exception anyex) {
-
+		} catch (Exception anyex) {
 			Log.logException(anyex);
-
 		}
-
 	}
 
-	public static void savePrivateStores(Switchboard switchboard) {
-
+	public static void savePrivateStores() {
+        Switchboard switchboard = Switchboard.getSwitchboard();
 		Log.logInfo("TRIPLESTORE", "Saving user triplestores");
-
 		if (privatestorage == null) return;
-
 		for (Entry<String, Model> s : privatestorage.entrySet()) {
-
 			File triplestore = new File(switchboard.getConfig("triplestore", new File(switchboard.getDataPath(), "DATA/TRIPLESTORE").getAbsolutePath()));
-
             File currentuserfile = new File(triplestore, "private_store_"+s.getKey()+".rdf");
-
             saveFile (currentuserfile.getAbsolutePath(), s.getValue());
-
 		}
+	}
+
+	private static long lastModelSizeStored = -1;
+
+	public static void saveAll() {
+        Switchboard sb = Switchboard.getSwitchboard();
+        File triplestore = new File(sb.getConfig("triplestore", new File(sb.dataPath, "DATA/TRIPLESTORE").getAbsolutePath()));
+        if (model.size() != lastModelSizeStored){
+            JenaTripleStore.saveFile(new File(triplestore, "local.rdf").getAbsolutePath());
+            lastModelSizeStored = model.size();
+        }
+        JenaTripleStore.savePrivateStores();
 	}
 
 }
