@@ -163,7 +163,7 @@ public class Tagging {
 	        for (Map.Entry<String, SOTuple> e: table.entrySet()) {
 	            String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
 	            String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
-	            w.write(e.getKey() + (s == null || s.length() == 0 ? "" : ":" + e.getValue()) + (o == null || o.length() == 0 || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
+	            w.write(e.getKey() + (s == null || s.length() == 0 ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.length() == 0 || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
 	        }
 	        w.close();
 	        init();

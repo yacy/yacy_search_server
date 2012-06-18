@@ -96,14 +96,14 @@ public class Vocabulary_p {
                                     URIMetadataRow m = segment.urlMetadata().load(u.hash());
                                     if (m != null) t = m.dc_creator();
                                 }
-                                t = t.replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();
+                                t = t.replaceAll("_", " ").replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();
                                 if (t.length() == 0) continue;
                                 if (discoverFromTitleSplitted) {
                                     String[] ts = t.split(" ");
                                     for (String s: ts) {
                                         if (s.length() == 0) continue;
                                         if (s.endsWith(".jpg") || s.endsWith(".gif")) continue;
-                                        table.put(s, new Tagging.SOTuple("", u0));
+                                        table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
                                     }
                                 } else if (discoverFromAuthor) {
                                     String[] ts = t.split(";"); // author names are often separated by ';'
@@ -111,10 +111,10 @@ public class Vocabulary_p {
                                         if (s.length() == 0) continue;
                                         int p = s.indexOf(','); // check if there is a reversed method to mention the name
                                         if (p >= 0) s = s.substring(p + 1).trim() + " " + s.substring(0, p).trim();
-                                        table.put(s, new Tagging.SOTuple("", u0));
+                                        table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
                                     }
                                 } else {
-                                    table.put(t, new Tagging.SOTuple("", u0));
+                                    table.put(t, new Tagging.SOTuple(Tagging.normalizeTerm(t), u0));
                                 }
                             }
                         }
