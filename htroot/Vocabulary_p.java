@@ -201,7 +201,9 @@ public class Vocabulary_p {
             prop.putHTML("edit_tripleN", vocabulary.getObjectspace() == null ? "none - missing objectspace" : "<" + yacyurl + "> <" + DCTerms.references.getPredicate() + "> \"[reference-link]#[tag]\" .");
             int c = 0;
             boolean dark = false;
-            for (Map.Entry<String, SOTuple> entry: vocabulary.list().entrySet()) {
+            Map<String, SOTuple> list = vocabulary.list();
+            prop.put("edit_size", list.size());
+            for (Map.Entry<String, SOTuple> entry: list.entrySet()) {
                 prop.put("edit_terms_" + c + "_editable", editable ? 1 : 0);
                 prop.put("edit_terms_" + c + "_dark", dark ? 1 : 0); dark = !dark;
                 prop.putHTML("edit_terms_" + c + "_term", entry.getKey());
@@ -212,6 +214,7 @@ public class Vocabulary_p {
                 if (c > 3000) break;
             }
             prop.put("edit_terms", c);
+            
         }
 
         // return rewrite properties

@@ -233,7 +233,7 @@ public class LibraryProvider {
         	// store the term into the vocabulary map
         	map.put(term, new SOTuple(Tagging.normalizeTerm(term), subject));
         }
-        try {
+        if (map.size() > 0) try {
             Log.logInfo("LibraryProvider", "adding vocabulary to autotagging");
 			Tagging pndVoc = new Tagging("Persons", null, objectspace, map);
 			autotagging.addVocabulary(pndVoc);

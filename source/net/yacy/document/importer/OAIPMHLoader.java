@@ -48,9 +48,10 @@ public class OAIPMHLoader {
         this.source = source;
 
         // load the file from the net
+        Log.logInfo("OAIPMHLoader", "loading record from " + source.toNormalform(true, false));
         Response response = null;
         IOException ee = null;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             // make some retries if first attempt fails
             try {
                 response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, true);

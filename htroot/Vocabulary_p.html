@@ -130,10 +130,10 @@ function updatepage(str) {
       #{terms}#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
         <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="modify_#[term]#" id="modify_#[term]#" value="checked" disabled="disabled"/>#(/editable)#</td>
-        <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" onchange="this.form.submit()"/>#(/editable)#</td>
+        <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" />#(/editable)#</td>
         <td align="left">#[term]#</td>
-        <td align="left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="40" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''"/>#(/editable)#</td>
-        <td align="left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''"/>#(/editable)#</td>
+        <td align="left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="40" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
+        <td align="left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
       </tr>
       #{/terms}#
       #(editable)#::
