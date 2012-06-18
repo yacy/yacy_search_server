@@ -73,8 +73,7 @@ public class GeonamesLocation implements Locations
     private final Map<Integer, GeoLocation> id2loc;
     private final TreeMap<StringBuilder, List<Integer>> name2ids;
     private final File file;
-
-    public GeonamesLocation(final File file, WordCache dymLib) {
+    public GeonamesLocation(final File file, WordCache dymLib, long minPopulation) {
         // this is a processing of the cities1000.zip file from http://download.geonames.org/export/dump/
 
         this.file = file;
@@ -88,7 +87,9 @@ public class GeonamesLocation implements Locations
         BufferedReader reader;
         try {
             final ZipFile zf = new ZipFile(file);
-            final ZipEntry ze = zf.getEntry("cities1000.txt");
+            String entryName = file.getName();
+            entryName = entryName.substring(0, entryName.length() - 3) + "txt";
+            final ZipEntry ze = zf.getEntry(entryName);
             final InputStream is = zf.getInputStream(ze);
             reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         } catch ( final IOException e ) {
@@ -97,6 +98,28 @@ public class GeonamesLocation implements Locations
         }
 
         // when an error occurs after this line, just accept it and work on
+/* parse this fields:
+---------------------------------------------------
+00 geonameid         : integer id of record in geonames database
+01 name              : name of geographical point (utf8) varchar(200)
+02 asciiname         : name of geographical point in plain ascii characters, varchar(200)
+03 alternatenames    : alternatenames, comma separated varchar(5000)
+04 latitude          : latitude in decimal degrees (wgs84)
+05 longitude         : longitude in decimal degrees (wgs84)
+06 feature class     : see http://www.geonames.org/export/codes.html, char(1)
+07 feature code      : see http://www.geonames.org/export/codes.html, varchar(10)
+08 country code      : ISO-3166 2-letter country code, 2 characters
+09 cc2               : alternate country codes, comma separated, ISO-3166 2-letter country code, 60 characters
+10 admin1 code       : fipscode (subject to change to iso code), see exceptions below, see file admin1Codes.txt for display names of this code; varchar(20)
+11 admin2 code       : code for the second administrative division, a county in the US, see file admin2Codes.txt; varchar(80)
+12 admin3 code       : code for third level administrative division, varchar(20)
+13 admin4 code       : code for fourth level administrative division, varchar(20)
+14 population        : bigint (8 byte int)
+15 elevation         : in meters, integer
+16 dem               : digital elevation model, srtm3 or gtopo30, average elevation of 3''x3'' (ca 90mx90m) or 30''x30'' (ca 900mx900m) area in meters, integer. srtm processed by cgiar/ciat.
+17 timezone          : the timezone id (see file timeZone.txt) varchar(40)
+18 modification date : date of last modification in yyyy-MM-dd format
+*/
         try {
             String line;
             String[] fields;
@@ -106,7 +129,9 @@ public class GeonamesLocation implements Locations
                     continue;
                 }
                 fields = line.split("\t");
-                final int id = Integer.parseInt(fields[0]);
+                final long population = Long.parseLong(fields[14]);
+                if (minPopulation > 0 && population < minPopulation) continue;
+                final int geonameid = Integer.parseInt(fields[0]);
                 locnames = new HashSet<StringBuilder>();
                 locnames.add(new StringBuilder(fields[1]));
                 locnames.add(new StringBuilder(fields[2]));
@@ -116,7 +141,7 @@ public class GeonamesLocation implements Locations
                 final GeoLocation c =
                     new GeoLocation(Float.parseFloat(fields[4]), Float.parseFloat(fields[5]), fields[1]);
                 c.setPopulation((int) Long.parseLong(fields[14]));
-                this.id2loc.put(id, c);
+                this.id2loc.put(geonameid, c);
                 for ( final StringBuilder name : locnames ) {
                     if (dymLib != null && dymLib.contains(name)) continue;
                     if (name.length() < OverarchingLocation.MINIMUM_NAME_LENGTH) continue;
@@ -124,7 +149,7 @@ public class GeonamesLocation implements Locations
                     if ( locs == null ) {
                         locs = new ArrayList<Integer>(1);
                     }
-                    locs.add(id);
+                    locs.add(geonameid);
                     this.name2ids.put(name, locs);
                 }
             }

@@ -75,6 +75,8 @@ public class LibraryProvider {
             "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz" ),
         GEODB1( "geo1", "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02624_2011-10-17.sql.gz" ),
         GEON0( "geon0", "http://download.geonames.org/export/dump/cities1000.zip" ),
+        GEON1( "geon1", "http://download.geonames.org/export/dump/cities5000.zip" ),
+        GEON2( "geon2", "http://download.geonames.org/export/dump/cities15000.zip" ),
         DRW0( "drw0", "http://www.ids-mannheim.de/kl/derewo/derewo-v-100000t-2009-04-30-0.1.zip" ),
         PND0( "pnd0", "http://downloads.dbpedia.org/3.7-i18n/de/pnd_de.nt.bz2" );
 
@@ -119,7 +121,9 @@ public class LibraryProvider {
         activateDeReWo();
         initDidYouMean();
         integrateOpenGeoDB();
-        integrateGeonames();
+        integrateGeonames0(-1);
+        integrateGeonames1(-1);
+        integrateGeonames2(100000);
         activatePND();
         Set<String> allTags = new HashSet<String>() ;
         allTags.addAll(autotagging.allTags()); // we must copy this into a clone to prevent circularity
@@ -144,10 +148,24 @@ public class LibraryProvider {
         }
     }
 
-    public static void integrateGeonames() {
+    public static void integrateGeonames0(long minPopulation) {
         final File geon = Dictionary.GEON0.file();
         if ( geon.exists() ) {
-            geoLoc.activateLocation(Dictionary.GEON0.nickname, new GeonamesLocation(geon, dymLib));
+            geoLoc.activateLocation(Dictionary.GEON0.nickname, new GeonamesLocation(geon, dymLib, minPopulation));
+            return;
+        }
+    }
+    public static void integrateGeonames1(long minPopulation) {
+        final File geon = Dictionary.GEON1.file();
+        if ( geon.exists() ) {
+            geoLoc.activateLocation(Dictionary.GEON1.nickname, new GeonamesLocation(geon, dymLib, minPopulation));
+            return;
+        }
+    }
+    public static void integrateGeonames2(long minPopulation) {
+        final File geon = Dictionary.GEON2.file();
+        if ( geon.exists() ) {
+            geoLoc.activateLocation(Dictionary.GEON2.nickname, new GeonamesLocation(geon, dymLib, minPopulation));
             return;
         }
     }
@@ -296,13 +314,6 @@ public class LibraryProvider {
         InputStream derewoTxtEntry;
         try {
             final ZipFile zip = new ZipFile(file);
-            /*
-            final Enumeration<? extends ZipEntry> i = zip.entries();
-            while (i.hasMoreElements()) {
-                final ZipEntry e = i.nextElement();
-                System.out.println("loadDeReWo: " + e.getName());
-            }
-            */
             derewoTxtEntry = zip.getInputStream(zip.getEntry("derewo-v-100000t-2009-04-30-0.1"));
         } catch ( final ZipException e ) {
             Log.logException(e);

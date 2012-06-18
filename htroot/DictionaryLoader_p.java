@@ -68,7 +68,7 @@ public class DictionaryLoader_p {
                 final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON0.file());
-                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null));
+                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null, -1));
                 LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geon0Status", LibraryProvider.Dictionary.GEON0.file().exists() ? 1 : 0);
                 prop.put("geon0ActionLoaded", 1);
@@ -98,9 +98,93 @@ public class DictionaryLoader_p {
 
         if (post.containsKey("geon0Activate")) {
             LibraryProvider.Dictionary.GEON0.fileDisabled().renameTo(LibraryProvider.Dictionary.GEON0.file());
-            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null));
+            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null, -1));
             LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
             prop.put("geon0ActionActivated", 1);
+        }
+
+        // GEON1
+        if (post.containsKey("geon1Load")) {
+            // load from the net
+            try {
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final byte[] b = response.getContent();
+                FileUtils.copy(b, LibraryProvider.Dictionary.GEON1.file());
+                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON1.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON1.file(), null, -1));
+                LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
+                prop.put("geon1Status", LibraryProvider.Dictionary.GEON1.file().exists() ? 1 : 0);
+                prop.put("geon1ActionLoaded", 1);
+            } catch (final MalformedURLException e) {
+                Log.logException(e);
+                prop.put("geon1ActionLoaded", 2);
+                prop.put("geon1ActionLoaded_error", e.getMessage());
+            } catch (final IOException e) {
+                Log.logException(e);
+                prop.put("geon1ActionLoaded", 2);
+                prop.put("geon1ActionLoaded_error", e.getMessage());
+            }
+        }
+
+        if (post.containsKey("geon1Remove")) {
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON1.file());
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON1.fileDisabled());
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON1.nickname);
+            prop.put("geon1ActionRemoved", 1);
+        }
+
+        if (post.containsKey("geon1Deactivate")) {
+            LibraryProvider.Dictionary.GEON1.file().renameTo(LibraryProvider.Dictionary.GEON1.fileDisabled());
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON1.nickname);
+            prop.put("geon1ActionDeactivated", 1);
+        }
+
+        if (post.containsKey("geon1Activate")) {
+            LibraryProvider.Dictionary.GEON1.fileDisabled().renameTo(LibraryProvider.Dictionary.GEON1.file());
+            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON1.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON1.file(), null, -1));
+            LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
+            prop.put("geon1ActionActivated", 1);
+        }
+
+        // GEON2
+        if (post.containsKey("geon2Load")) {
+            // load from the net
+            try {
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON2.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final byte[] b = response.getContent();
+                FileUtils.copy(b, LibraryProvider.Dictionary.GEON2.file());
+                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON2.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON2.file(), null, 100000));
+                LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
+                prop.put("geon2Status", LibraryProvider.Dictionary.GEON2.file().exists() ? 1 : 0);
+                prop.put("geon2ActionLoaded", 1);
+            } catch (final MalformedURLException e) {
+                Log.logException(e);
+                prop.put("geon2ActionLoaded", 2);
+                prop.put("geon2ActionLoaded_error", e.getMessage());
+            } catch (final IOException e) {
+                Log.logException(e);
+                prop.put("geon2ActionLoaded", 2);
+                prop.put("geon2ActionLoaded_error", e.getMessage());
+            }
+        }
+
+        if (post.containsKey("geon2Remove")) {
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON2.file());
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON2.fileDisabled());
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON2.nickname);
+            prop.put("geon2ActionRemoved", 1);
+        }
+
+        if (post.containsKey("geon2Deactivate")) {
+            LibraryProvider.Dictionary.GEON2.file().renameTo(LibraryProvider.Dictionary.GEON2.fileDisabled());
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON2.nickname);
+            prop.put("geon2ActionDeactivated", 1);
+        }
+
+        if (post.containsKey("geon2Activate")) {
+            LibraryProvider.Dictionary.GEON2.fileDisabled().renameTo(LibraryProvider.Dictionary.GEON2.file());
+            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON2.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON2.file(), null, 100000));
+            LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
+            prop.put("geon2ActionActivated", 1);
         }
 
         // GEO1
@@ -110,7 +194,7 @@ public class DictionaryLoader_p {
                 final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEODB1.file());
-                LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEODB0.nickname);
+                LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
                 LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocation(LibraryProvider.Dictionary.GEODB1.file(), null));
                 LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geo1Status", LibraryProvider.Dictionary.GEODB1.file().exists() ? 1 : 0);

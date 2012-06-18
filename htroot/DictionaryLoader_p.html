@@ -65,9 +65,11 @@
         Geolocalization will enable YaCy to present locations from OpenStreetMap according to given search words.
         
         <h4>GeoNames</h4>
-	    <p>With this file it is possible to find cities with a population > 1000 all over the world.</p>
+	    <p>With this file it is possible to find cities all over the world.</p>
         
         <dl>
+          <dt>Content</dt>
+          <dd>cities with a population > 1000 all over the world</dd>
           <dt><label>Download from</label></dt>
           <dd>#[geon0URL]#</dd>
           <dt><label>Storage location</label></dt>
@@ -98,6 +100,74 @@
           <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
           <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
           #(/geon0ActionActivated)#        
+        </dl>
+        <dl>
+          <dt>Content</dt>
+          <dd>cities with a population > 5000 all over the world</dd>
+          <dt><label>Download from</label></dt>
+          <dd>#[geon1URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[geon1Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(geon1Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/geon1Status)#</dd>
+          <dt>Action</dt>
+          <dd>#(geon1Status)#
+          <input type="submit" name="geon1Load" value="Load" />::
+          <input type="submit" name="geon1Deactivate" value="Deactivate" />
+          <input type="submit" name="geon1Remove" value="Remove" />::
+          <input type="submit" name="geon1Activate" value="Activate" />
+          <input type="submit" name="geon1Remove" value="Remove" />
+          #(/geon1Status)#</dd>
+          #(geon1ActionLoaded)#::
+          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
+          #(/geon1ActionLoaded)#
+          #(geon1ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geon1ActionRemoved)#
+          #(geon1ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot deactivate dictionary file: #[error]#</div></dd>
+          #(/geon1ActionDeactivated)#
+          #(geon1ActionActivated)#::
+          <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
+          #(/geon1ActionActivated)#        
+        </dl>
+        <dl>
+          <dt>Content</dt>
+          <dd>cities with a population > 100000 all over the world (the set is is reduced to cities > 100000)</dd>
+          <dt><label>Download from</label></dt>
+          <dd>#[geon2URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[geon2Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(geon2Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/geon2Status)#</dd>
+          <dt>Action</dt>
+          <dd>#(geon2Status)#
+          <input type="submit" name="geon2Load" value="Load" />::
+          <input type="submit" name="geon2Deactivate" value="Deactivate" />
+          <input type="submit" name="geon2Remove" value="Remove" />::
+          <input type="submit" name="geon2Activate" value="Activate" />
+          <input type="submit" name="geon2Remove" value="Remove" />
+          #(/geon2Status)#</dd>
+          #(geon2ActionLoaded)#::
+          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
+          #(/geon2ActionLoaded)#
+          #(geon2ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geon2ActionRemoved)#
+          #(geon2ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot deactivate dictionary file: #[error]#</div></dd>
+          #(/geon2ActionDeactivated)#
+          #(geon2ActionActivated)#::
+          <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
+          #(/geon2ActionActivated)#        
         </dl>
         
         <h4>OpenGeoDB</h4>
