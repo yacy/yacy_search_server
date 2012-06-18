@@ -1,9 +1,10 @@
 
 function newload (name, div) {
 
-$.get(name, function(data) {
+$.ajaxSetup({async: false});
 
-$('#'+div).html(data);
+$.get(name, function(data) {
+document.getElementById(div).innerHTML = data;
 });
 
 }

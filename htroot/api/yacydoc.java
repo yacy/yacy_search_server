@@ -26,6 +26,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
+import java.util.Iterator;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
@@ -42,6 +43,7 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -138,6 +140,19 @@ public class yacydoc {
         String rdf = JenaTripleStore.getRDFByModel(model);
         prop.putXML("triples", rdf);
         prop.put("rdf", header.fileType() == FileType.XML ? rdf : "");
+        
+        
+        String references = "";
+        Iterator<RDFNode> t = JenaTripleStore.getObjects("http://yacy.net/url#"+urlhash, "http://purl.org/dc/terms/references");
+        
+        while (t.hasNext()) {
+            RDFNode r = t.next();
+            references += r.toString()+",";
+        }
+        
+        Log.logInfo ("TRIPLESTORE", references);
+        
+        prop.put("taglinks", references);
 
         // return rewrite properties
         return prop;

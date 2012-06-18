@@ -28,6 +28,8 @@ color: #5a346e;
 
 <div id="sci_tags_#[hash]#_box" class="sci_panel" style="top: 50px; display: none;">
 
+	<div id="rdfcontent_#[hash]#" class="rdfcontent_#[hash]#" style="display:none;"></div>
+
 	<input type="text" id="tags_#[hash]#" name="tags_#[hash]#" class="bm_input" size="80" />
 
 	<script type="text/javascript" charset="utf-8">
@@ -37,12 +39,45 @@ color: #5a346e;
 	var vocs = vocabularies_string.split (",");
 	
 	var existingtags = "";
+
+	$.ajaxSetup({async: false});
 	
+	var resultstring = "";
+
+$.getJSON('/currentyacypeer/api/yacydoc.htm?urlhash=#[hash]#', function(data) {
+
+	resultstring = data.result;
+});
+
+	
+	
+
 	vocs.forEach (function(voc) {
 		
 		var currenttags = triple_get_prefix ('http://yacy.net/url', '#[hash]#', 'http://yacy.net/autotagging', voc);
+		var finaltags  = "";
+		currenttags.split(',').forEach (function(tag) {
+			var link = "";
+			
+			resultstring.split(',').forEach (function(hyperlink) {
+			
+				var h_url = hyperlink.substring (0, hyperlink.indexOf('#'));
+				var h_tag = hyperlink.substring (hyperlink.indexOf('#')+1);
+				
+				if (h_tag == tag) link = h_url;
+			});
+			
+			
+			if (link != "") {
+				finaltags = finaltags + '<a href="'+ link +'" target="_blank">' + tag + '</a>&nbsp;';
+			}	
+			else {
+				finaltags = finaltags + tag + '&nbsp';
+			}
+		});
+		
 		if (existingtags != "" && currenttags != "") existingtags += " - ";
-		if (currenttags != "") existingtags += voc+":"+ currenttags;
+		if (currenttags != "") existingtags += voc+":"+ finaltags;
 	});
 	
 
