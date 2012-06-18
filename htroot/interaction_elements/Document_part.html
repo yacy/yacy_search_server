@@ -6,35 +6,17 @@
 
 <style type="text/css" >
 
-.sci_panel {
+.sci_doc {
 	
 font: arial,helvetica,sans-serif;
 font-size: 10px;
 position: fixed;
-right: 0;
-background: #ffffff;
-border:1px solid #5a346e;
 
-width: 210px;
-height: auto;
-padding: 30px 110px 30px 30px;
-
-z-index:99998;
-
-color: #5a346e;
-}
-
-.sci_document {
-	
-font: arial,helvetica,sans-serif;
-font-size: 10px;
-position: fixed;
-right: 100px;
 top: 0;
 background: #ffffff;
 border:0px;
 
-width: 65px;
+width: 150px;
 height: 20px;
 padding: 5px 5px 5px 5px;
 
@@ -53,8 +35,9 @@ color: #5a346e;
 	
 		document.getElementById('sci_doc_#[hash]#').style.display = "";
 		var metajson = getMetadata('#[url]#');
+		var title = metajson.item.title.substring(0, 20)+"...";
 		
-		document.getElementById('sci_doc_#[hash]#_title').innerHTML = metajson.item.title;	
+		document.getElementById('sci_doc_#[hash]#_title').innerHTML = title;	
 	
 	</script>
 	
