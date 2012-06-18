@@ -31,6 +31,7 @@ import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -129,7 +130,9 @@ public class yacydoc {
         prop.put("yacy_outbound", entry.lother());
 
         // extract the submodel from the triplestore
-        prop.putXML("triples", JenaTripleStore.getMetadataByURLHash(entry.hash()));
+        String rdf = JenaTripleStore.getMetadataByURLHash(entry.hash());
+        prop.putXML("triples", rdf);
+        prop.put("rdf", header.fileType() == FileType.XML ? rdf : "");
 
         // return rewrite properties
         return prop;
