@@ -1423,9 +1423,15 @@ public final class HTTPDFileHandler {
     private static void doURLProxy(final serverObjects args, final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream out) throws IOException {
         final String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
 		URL proxyurl = null;
+		String action = "";
 
 		if(conProp != null && conProp.containsKey("ARGS")) {
-			final String strARGS = (String) conProp.get("ARGS");
+			String strARGS = (String) conProp.get("ARGS");
+			if(strARGS.startsWith("action=")) {
+				int detectnextargument = strARGS.indexOf("&");
+				action = strARGS.substring (7, detectnextargument);				
+				strARGS = strARGS.substring(detectnextargument+1);				
+			}
 			if(strARGS.startsWith("url=")) {
 				final String strUrl = strARGS.substring(4); // strip url=
 
@@ -1461,6 +1467,9 @@ public final class HTTPDFileHandler {
 		requestHeader.remove("Authorization");
 		requestHeader.remove("Connection");
 		requestHeader.put(HeaderFramework.HOST, proxyurl.getHost());
+		
+		// temporarily add argument to header to pass it on to augmented browsing
+		requestHeader.put("YACYACTION", action);
 
 		final ByteArrayOutputStream o = new ByteArrayOutputStream();
 		HTTPDProxyHandler.doGet(prop, requestHeader, o);
@@ -1494,9 +1503,9 @@ public final class HTTPDFileHandler {
 			// rewrite location header
 			location = outgoingHeader.get("Location");
 			if (location.startsWith("http")) {
-				location = "/proxy.html?url=" + location;
+				location = "/proxy.html?action="+action+"&url=" + location;
 			} else {
-				location = "/proxy.html?url=http://" + proxyurl.getHost() + "/" + location;
+				location = "/proxy.html?action="+action+"&url=http://" + proxyurl.getHost() + "/" + location;
 			}
 			outgoingHeader.put("Location", location);
 		}

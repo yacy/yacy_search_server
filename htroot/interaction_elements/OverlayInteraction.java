@@ -15,6 +15,8 @@ public class OverlayInteraction {
         prop.put("enabled_url", post.get("url", ""));
 
         prop.put("enabled_urlhash", post.get("urlhash", ""));
+        
+        prop.put("enabled_action", post.get("action", ""));
 
         return prop;
     }

@@ -16,6 +16,8 @@ public class Tag_part {
         final serverObjects prop = new serverObjects();
 
         prop.put("hash", post.get("hash", ""));
+        prop.put("url", post.get("url", ""));
+        prop.put("action", post.get("action", ""));
 
         String vocabularies = "";
 
