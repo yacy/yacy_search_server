@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.Files;
 import net.yacy.document.WordCache.Dictionary;
+import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.document.geolocation.Locations;
 
 public class Tagging {
@@ -51,6 +52,39 @@ public class Tagging {
     private File propFile;
 
     private String predicate, namespace, objectspace;
+
+    /**
+     * helper class: Synonym and Objectlink tuple
+     */
+    public static class SOTuple {
+        private final String synonyms;
+        private final String objectlink;
+
+        public SOTuple(String synonyms, String objectlink) {
+            this.synonyms = synonyms;
+            this.objectlink = objectlink;
+        }
+
+        public SOTuple(String[] synonyms, String objectlink) {
+            StringBuilder sb = new StringBuilder(synonyms.length * 10);
+            for (String s: synonyms) sb.append(',').append(s);
+            this.synonyms = sb.substring(1);
+            this.objectlink = objectlink;
+        }
+
+        public String getSynonymsCSV() {
+            return this.synonyms;
+        }
+
+        public String[] getSynonymsList() {
+            return this.synonyms.split(",");
+        }
+
+        public String getObjectlink() {
+            return this.objectlink;
+        }
+
+    }
 
     public Tagging(String name) {
         this.navigatorName = name;
@@ -136,37 +170,104 @@ public class Tagging {
         }
     }
 
-    /**
-     * helper class: Synonym and Objectlink tuple
-     */
-    public static class SOTuple {
-        private final String synonyms;
-        private final String objectlink;
-
-        public SOTuple(String synonyms, String objectlink) {
-            this.synonyms = synonyms;
-            this.objectlink = objectlink;
+    public Tagging(String name, Locations location) {
+        this(name);
+        Set<String> locNames = location.locationNames();
+        TreeSet<GeoLocation> geo;
+        GeoLocation g;
+        for (String loc: locNames) {
+            String syn = normalizeTerm(loc);
+            this.synonym2term.put(syn, loc);
+            this.term2synonym.put(loc, syn);
+            geo = location.find(loc, true);
+            if (geo.size() > 0) {
+                g = geo.iterator().next();
+                this.term2objectlink.put(loc, "http://www.openstreetmap.org/?lat=" + g.lat() + "&lon=" + g.lon() + "&zoom=16");
+            }
         }
+    }
 
-        public SOTuple(String[] synonyms, String objectlink) {
-            StringBuilder sb = new StringBuilder(synonyms.length * 10);
-            for (String s: synonyms) sb.append(',').append(s);
-            this.synonyms = sb.substring(1);
-            this.objectlink = objectlink;
+    public Tagging(String name, Dictionary dictionary) {
+        this(name);
+        Set<StringBuilder> words = dictionary.getWords();
+        String s;
+        for (StringBuilder word: words) {
+            s = word.toString();
+            this.synonym2term.put(s.toLowerCase(), s);
+            this.term2synonym.put(s, s.toLowerCase());
         }
+    }
 
-        public String getSynonymsCSV() {
-            return this.synonyms;
+    public void init() throws IOException {
+        if (this.propFile == null) return;
+        this.synonym2term.clear();
+        this.term2synonym.clear();
+        this.term2objectlink.clear();
+        this.synonym2synonyms.clear();
+        this.namespace = DEFAULT_NAMESPACE;
+        this.predicate = this.namespace + this.navigatorName;
+        this.objectspace = null;
+
+        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
+        String term, v;
+        String[] tags;
+        int p;
+        String line;
+        try {
+            vocloop: while ((line = list.take()) != Files.POISON_LINE) {
+                line = line.trim();
+                p = line.indexOf('#');
+                if (p >= 0) {
+                    String comment = line.substring(p + 1).trim();
+                    if (comment.startsWith("namespace:")) {
+                        this.namespace = comment.substring(10).trim();
+                        if (!this.namespace.endsWith("/") && !this.namespace.endsWith("#") && this.namespace.length() > 0) this.namespace += "#";
+                        this.predicate = this.namespace + this.navigatorName;
+                        continue vocloop;
+                    }
+                    if (comment.startsWith("objectspace:")) {
+                        this.objectspace = comment.substring(12).trim();
+                        if (!this.objectspace.endsWith("/") && !this.objectspace.endsWith("#") && this.objectspace.length() > 0) this.objectspace += "#";
+                        continue vocloop;
+                    }
+                }
+                String[] pl = parseLine(line);
+                if (pl == null) {
+                    continue vocloop;
+                }
+                if (pl[1] == null) {
+                    term = normalizeKey(pl[0]);
+                    v = normalizeTerm(pl[0]);
+                    this.synonym2term.put(v, term);
+                    this.term2synonym.put(term, v);
+                    if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
+                    continue vocloop;
+                }
+                term = normalizeKey(pl[0]);
+                v = pl[1];
+                tags = v.split(",");
+                Set<String> synonyms = new HashSet<String>();
+                synonyms.add(term);
+                tagloop: for (String synonym: tags) {
+                    if (synonym.length() == 0) continue tagloop;
+                    synonyms.add(synonym);
+                    synonym = normalizeTerm(synonym);
+                    if (synonym.length() == 0) continue tagloop;
+                    synonyms.add(synonym);
+                    this.synonym2term.put(synonym, term);
+                    this.term2synonym.put(term, synonym);
+                }
+                String synonym = normalizeTerm(term);
+                this.synonym2term.put(synonym, term);
+                this.term2synonym.put(term, synonym);
+                if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
+                synonyms.add(synonym);
+                for (String s: synonyms) {
+                    this.synonym2synonyms.put(s, synonyms);
+                }
+            }
+        } catch (InterruptedException e) {
         }
-
-        public String[] getSynonymsList() {
-            return this.synonyms.split(",");
-        }
-
-        public String getObjectlink() {
-            return this.objectlink;
-        }
-
     }
 
     public int size() {
@@ -360,99 +461,6 @@ public class Tagging {
             return new String[]{line, null, c};
         }
         return new String[]{line.substring(0, p), line.substring(p + 1), c};
-    }
-
-    public void init() throws IOException {
-        if (this.propFile == null) return;
-        this.synonym2term.clear();
-        this.term2synonym.clear();
-        this.term2objectlink.clear();
-        this.synonym2synonyms.clear();
-        this.namespace = DEFAULT_NAMESPACE;
-        this.predicate = this.namespace + this.navigatorName;
-        this.objectspace = null;
-
-        BlockingQueue<String> list = Files.concurentLineReader(this.propFile, 1000);
-        String term, v;
-        String[] tags;
-        int p;
-        String line;
-        try {
-        	vocloop: while ((line = list.take()) != Files.POISON_LINE) {
-			    line = line.trim();
-			    p = line.indexOf('#');
-			    if (p >= 0) {
-			        String comment = line.substring(p + 1).trim();
-                    if (comment.startsWith("namespace:")) {
-                        this.namespace = comment.substring(10).trim();
-                        if (!this.namespace.endsWith("/") && !this.namespace.endsWith("#") && this.namespace.length() > 0) this.namespace += "#";
-                        this.predicate = this.namespace + this.navigatorName;
-                        continue vocloop;
-                    }
-                    if (comment.startsWith("objectspace:")) {
-                        this.objectspace = comment.substring(12).trim();
-                        if (!this.objectspace.endsWith("/") && !this.objectspace.endsWith("#") && this.objectspace.length() > 0) this.objectspace += "#";
-                        continue vocloop;
-                    }
-			    }
-			    String[] pl = parseLine(line);
-			    if (pl == null) {
-			        continue vocloop;
-			    }
-			    if (pl[1] == null) {
-			        term = normalizeKey(pl[0]);
-			        v = normalizeTerm(pl[0]);
-			        this.synonym2term.put(v, term);
-			        this.term2synonym.put(term, v);
-			        if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
-			        continue vocloop;
-			    }
-			    term = normalizeKey(pl[0]);
-			    v = pl[1];
-			    tags = v.split(",");
-			    Set<String> synonyms = new HashSet<String>();
-			    synonyms.add(term);
-			    tagloop: for (String synonym: tags) {
-			        if (synonym.length() == 0) continue tagloop;
-				    synonyms.add(synonym);
-			    	synonym = normalizeTerm(synonym);
-			        if (synonym.length() == 0) continue tagloop;
-				    synonyms.add(synonym);
-			        this.synonym2term.put(synonym, term);
-			        this.term2synonym.put(term, synonym);
-			    }
-			    String synonym = normalizeTerm(term);
-			    this.synonym2term.put(synonym, term);
-			    this.term2synonym.put(term, synonym);
-                if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
-			    synonyms.add(synonym);
-			    for (String s: synonyms) {
-			    	this.synonym2synonyms.put(s, synonyms);
-			    }
-			}
-		} catch (InterruptedException e) {
-		}
-    }
-
-    public Tagging(String name, Locations localization) {
-        this(name);
-        Set<String> locNames = localization.locationNames();
-        for (String loc: locNames) {
-            String syn = normalizeTerm(loc);
-            this.synonym2term.put(syn, loc);
-            this.term2synonym.put(loc, syn);
-        }
-    }
-
-    public Tagging(String name, Dictionary dictionary) {
-        this(name);
-        Set<StringBuilder> words = dictionary.getWords();
-        String s;
-        for (StringBuilder word: words) {
-            s = word.toString();
-            this.synonym2term.put(s.toLowerCase(), s);
-            this.term2synonym.put(s, s.toLowerCase());
-        }
     }
 
     /**

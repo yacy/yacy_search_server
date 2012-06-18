@@ -190,31 +190,45 @@ public class Vocabulary_p {
             prop.put("edit_editable", editable ? 1 : 0);
             prop.putHTML("edit_editable_file", editable ? vocabulary.getFile().getAbsolutePath() : "");
             prop.putHTML("edit_name", vocabulary.getName());
+            prop.putXML("edit_namexml", vocabulary.getName());
             prop.putHTML("edit_namespace", vocabulary.getNamespace());
             prop.put("edit_size", vocabulary.size());
             prop.putHTML("edit_predicate", vocabulary.getPredicate());
             prop.putHTML("edit_prefix", Tagging.DEFAULT_PREFIX);
             prop.putHTML("edit_editable_objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace());
             prop.putHTML("edit_editable_objectspacepredicate", DCTerms.references.getPredicate());
-            prop.putHTML("edit_triple1", "<" + yacyurl + "> <" + vocabulary.getPredicate() + "> \"[discovered-tags-commaseparated]\"");
-            prop.putHTML("edit_triple2", "<" + yacyurl + "> <" + Owl.SameAs.getPredicate() + "> <[document-url]>");
-            prop.putHTML("edit_tripleN", vocabulary.getObjectspace() == null ? "none - missing objectspace" : "<" + yacyurl + "> <" + DCTerms.references.getPredicate() + "> \"[reference-link]#[tag]\" .");
+            prop.putXML("edit_triple1", "<" + yacyurl + "> <" + vocabulary.getPredicate() + "> \"[discovered-tags-commaseparated]\"");
+            prop.putXML("edit_triple2", "<" + yacyurl + "> <" + Owl.SameAs.getPredicate() + "> <[document-url]>");
+            prop.putXML("edit_tripleN", vocabulary.getObjectspace() == null ? "none - missing objectspace" : "<" + yacyurl + "> <" + DCTerms.references.getPredicate() + "> \"[object-link]#[tag]\" .");
             int c = 0;
             boolean dark = false;
+            int osl = vocabulary.getObjectspace() == null ? 0 : vocabulary.getObjectspace().length();
             Map<String, SOTuple> list = vocabulary.list();
             prop.put("edit_size", list.size());
             for (Map.Entry<String, SOTuple> entry: list.entrySet()) {
                 prop.put("edit_terms_" + c + "_editable", editable ? 1 : 0);
                 prop.put("edit_terms_" + c + "_dark", dark ? 1 : 0); dark = !dark;
+                prop.putXML("edit_terms_" + c + "_label", osl > entry.getValue().getObjectlink().length() ? entry.getKey() : entry.getValue().getObjectlink().substring(osl));
                 prop.putHTML("edit_terms_" + c + "_term", entry.getKey());
+                prop.putXML("edit_terms_" + c + "_termxml", entry.getKey());
                 prop.putHTML("edit_terms_" + c + "_editable_term", entry.getKey());
-                prop.putHTML("edit_terms_" + c + "_editable_synonyms", entry.getValue().getSynonymsCSV());
-                prop.putHTML("edit_terms_" + c + "_editable_objectlink", entry.getValue().getObjectlink());
+                String synonymss = entry.getValue().getSynonymsCSV();
+                prop.putHTML("edit_terms_" + c + "_editable_synonyms", synonymss);
+                if (synonymss.length() > 0) {
+                    String[] synonymsa = entry.getValue().getSynonymsList();
+                    for (int i = 0; i < synonymsa.length; i++) {
+                        prop.put("edit_terms_" + c + "_synonyms_" + i + "_altLabel", synonymsa[i]);
+                    }
+                    prop.put("edit_terms_" + c + "_synonyms", synonymsa.length);
+                } else {
+                    prop.put("edit_terms_" + c + "_synonyms", 0);
+                }
+                prop.putXML("edit_terms_" + c + "_editable_objectlink", entry.getValue().getObjectlink());
                 c++;
                 if (c > 3000) break;
             }
             prop.put("edit_terms", c);
-            
+
         }
 
         // return rewrite properties
