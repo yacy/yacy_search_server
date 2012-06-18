@@ -57,7 +57,22 @@ function updatepage(str) {
 //]]>
 </script>
   </head>
-  <body id="Vocabulary_p" onload="document.getElementById('newterm').focus()">
+  <body id="Vocabulary_p">
+
+#(edit)#::
+<div id="api">
+<a href="Vocabulary_p.xml" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<script type="text/javascript">
+//<![CDATA[
+document.getElementById('apilink').setAttribute('href', 'Vocabulary_p.xml?' + window.location.search.substring(1));
+//]]>
+</script>
+<span>The information that is presented on this page can also be retrieved as XML
+Click the API icon to see the XML.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
+</div>
+#(/edit)#
+    
     #%env/templates/header.template%#
     #%env/templates/submenuSemantic.template%#
     <h2>Vocabulary Administration</h2>
