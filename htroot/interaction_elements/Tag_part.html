@@ -39,16 +39,20 @@ color: #5a346e;
 	var vocs = vocabularies_string.split (",");
 	
 	var existingtags = "";
-
-	$.ajaxSetup({async: false});
 	
 	var resultstring = "";
+	
+	if (vocabularies_string != "") {
 
-$.getJSON('/currentyacypeer/api/yacydoc.htm?urlhash=#[hash]#', function(data) {
+		$.ajaxSetup({async: false});
+	
+	
 
-	resultstring = data.result;
-});
+		$.getJSON('/currentyacypeer/api/yacydoc.htm?urlhash=#[hash]#', function(data) {
 
+			resultstring = data.result;
+		});
+	}
 	
 	
 
