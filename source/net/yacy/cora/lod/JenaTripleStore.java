@@ -262,9 +262,7 @@ public class JenaTripleStore {
         return m;
     }
 
-    public static String getMetadataByURLHash(byte[] urlhash) {
-        String subject = YaCyMetadata.hashURI(urlhash);
-        Model model = JenaTripleStore.getSubmodelBySubject(subject);
+    public static String getRDFByModel(Model model) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         model.write(baos, "RDF/XML-ABBREV");
         return UTF8.String(baos.toByteArray());

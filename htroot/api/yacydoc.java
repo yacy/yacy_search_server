@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.lod.JenaTripleStore;
+import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -39,6 +40,9 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segments;
+
+import com.hp.hpl.jena.rdf.model.Model;
+
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -130,7 +134,8 @@ public class yacydoc {
         prop.put("yacy_outbound", entry.lother());
 
         // extract the submodel from the triplestore
-        String rdf = JenaTripleStore.getMetadataByURLHash(entry.hash());
+        Model model = JenaTripleStore.getSubmodelBySubject(YaCyMetadata.hashURI(entry.hash()));
+        String rdf = JenaTripleStore.getRDFByModel(model);
         prop.putXML("triples", rdf);
         prop.put("rdf", header.fileType() == FileType.XML ? rdf : "");
 
