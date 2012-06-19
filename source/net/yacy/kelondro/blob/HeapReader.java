@@ -663,13 +663,7 @@ public class HeapReader {
      * @return the length of the key
      */
     public int keylength() {
-        assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
-        if (this.index == null) {
-            Log.logSevere("HeapReader", "this.index == null in keylength(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
-            return 0;
-        }
-        if (this.index == null) return 0;
-        return this.index.row().primaryKeyLength;
+        return this.keylength;
     }
 
     /**
