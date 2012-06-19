@@ -202,7 +202,7 @@ public final class TransformerWriter extends Writer {
 
             if (tag == null) {
                 // case (1): this is not a tag opener/closer
-                if (this.scraper != null) this.scraper.scrapeText(content, null);
+                if (this.scraper != null && content.length > 0) this.scraper.scrapeText(content, null);
                 if (this.transformer != null) return this.transformer.transformText(content);
                 return content;
             }
@@ -222,7 +222,9 @@ public final class TransformerWriter extends Writer {
         // we are collection tag text for the tag 'filterTag' -> case (4) - (7)
         if (tag == null || tag.equals("!")) {
             // case (4): getting no tag, go on collecting content
-            if (this.scraper != null) this.scraper.scrapeText(content, this.filterTag);
+            if (this.scraper != null) {
+                this.scraper.scrapeText(content, this.filterTag);
+            }
             if (this.transformer != null) {
                 this.filterCont.append(this.transformer.transformText(content));
             } else {
@@ -330,7 +332,7 @@ public final class TransformerWriter extends Writer {
             if (in[1] == '/') {
                 // a closing tag
                 tagend = tagEnd(in, 2);
-                tag = new String(in, 2, tagend - 2);
+                tag = new String(in, 2, tagend - 2).toLowerCase();
                 final char[] text = new char[in.length - tagend - 1];
                 System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
                 return filterTag(tag, false, text, quotechar);
@@ -338,7 +340,7 @@ public final class TransformerWriter extends Writer {
 
             // an opening tag
             tagend = tagEnd(in, 1);
-            tag = new String(in, 1, tagend - 1);
+            tag = new String(in, 1, tagend - 1).toLowerCase();
             final char[] text = new char[in.length - tagend - 1];
             System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
             return filterTag(tag, true, text, quotechar);

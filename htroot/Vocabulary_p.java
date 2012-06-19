@@ -35,6 +35,7 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -50,44 +51,71 @@ public class Vocabulary_p {
         Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
 
         String vocabularyName = (post == null) ? null : post.get("vocabulary", null);
+        String discovername = (post == null) ? null : post.get("discovername", null);
         Tagging vocabulary = vocabularyName == null ? null : LibraryProvider.autotagging.getVocabulary(vocabularyName);
         if (vocabulary == null) vocabularyName = null;
-        int count = 0;
-        for (Tagging v: vocs) {
-            prop.put("vocabularyset_" + count + "_name", v.getName());
-            prop.put("vocabularyset_" + count + "_selected", (vocabularyName != null && vocabularyName.equals(v.getName())) ? 1 : 0);
-            count++;
-        }
-        prop.put("vocabularyset", count);
-
         if (post != null) {
             try {
                 if (vocabulary == null) {
                     // create a vocabulary
-                    String discovername = post.get("discovername", "");
-                    if (discovername.length() > 0) {
+                    if (discovername != null && discovername.length() > 0) {
                         String discoverobjectspace = post.get("discoverobjectspace", "");
                         MultiProtocolURI discoveruri = null;
                         if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURI(discoverobjectspace);} catch (MalformedURLException e) {}
                         if (discoveruri == null) discoverobjectspace = "";
                         Map<String, Tagging.SOTuple> table = new TreeMap<String, Tagging.SOTuple>();
                         File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
+                        boolean discoverFromPath = post.get("discovermethod", "").equals("path");
+                        boolean discoverFromTitle = post.get("discovermethod", "").equals("title");
+                        boolean discoverFromTitleSplitted = post.get("discovermethod", "").equals("titlesplitted");
+                        boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
                         if (discoveruri != null) {
                             String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
                             Segment segment = sb.indexSegments.segment(segmentName);
                             Iterator<DigestURI> ui = segment.urlSelector(discoveruri);
+                            String t;
                             while (ui.hasNext()) {
                                 DigestURI u = ui.next();
                                 String u0 = u.toNormalform(true, false);
-                                String t = u0.substring(discoverobjectspace.length());
-                                if (t.indexOf('/') >= 0) continue;
-                                int p = t.indexOf('.');
-                                if (p >= 0) t = t.substring(0, p);
-                                while ((p = t.indexOf(':')) >= 0) t = t.substring(p + 1);
-                                while ((p = t.indexOf('=')) >= 0) t = t.substring(p + 1);
-                                if (p >= 0) t = t.substring(p + 1);
+                                t = "";
+                                if (discoverFromPath) {
+                                    t = u0.substring(discoverobjectspace.length());
+                                    if (t.indexOf('/') >= 0) continue;
+                                    int p = t.indexOf('.');
+                                    if (p >= 0) t = t.substring(0, p);
+                                    while ((p = t.indexOf(':')) >= 0) t = t.substring(p + 1);
+                                    while ((p = t.indexOf('=')) >= 0) t = t.substring(p + 1);
+                                    if (p >= 0) t = t.substring(p + 1);
+                                }
+                                if (discoverFromTitle || discoverFromTitleSplitted) {
+                                    URIMetadataRow m = segment.urlMetadata().load(u.hash());
+                                    if (m != null) t = m.dc_title();
+                                    if (t.endsWith(".jpg") || t.endsWith(".gif")) continue;
+                                }
+                                if (discoverFromAuthor) {
+                                    URIMetadataRow m = segment.urlMetadata().load(u.hash());
+                                    if (m != null) t = m.dc_creator();
+                                }
+                                t = t.replaceAll("_", " ").replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();
                                 if (t.length() == 0) continue;
-                                table.put(t, new Tagging.SOTuple("", u0));
+                                if (discoverFromTitleSplitted) {
+                                    String[] ts = t.split(" ");
+                                    for (String s: ts) {
+                                        if (s.length() == 0) continue;
+                                        if (s.endsWith(".jpg") || s.endsWith(".gif")) continue;
+                                        table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
+                                    }
+                                } else if (discoverFromAuthor) {
+                                    String[] ts = t.split(";"); // author names are often separated by ';'
+                                    for (String s: ts) {
+                                        if (s.length() == 0) continue;
+                                        int p = s.indexOf(','); // check if there is a reversed method to mention the name
+                                        if (p >= 0) s = s.substring(p + 1).trim() + " " + s.substring(0, p).trim();
+                                        table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
+                                    }
+                                } else {
+                                    table.put(t, new Tagging.SOTuple(Tagging.normalizeTerm(t), u0));
+                                }
                             }
                         }
                         Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
@@ -143,6 +171,14 @@ public class Vocabulary_p {
             }
         }
 
+        int count = 0;
+        for (Tagging v: vocs) {
+            prop.put("vocabularyset_" + count + "_name", v.getName());
+            prop.put("vocabularyset_" + count + "_selected", ((vocabularyName != null && vocabularyName.equals(v.getName())) || (discovername != null && discovername.equals(v.getName()))) ? 1 : 0);
+            count++;
+        }
+        prop.put("vocabularyset", count);
+
         prop.put("create", vocabularyName == null ? 1 : 0);
 
         if (vocabulary == null) {
@@ -154,27 +190,45 @@ public class Vocabulary_p {
             prop.put("edit_editable", editable ? 1 : 0);
             prop.putHTML("edit_editable_file", editable ? vocabulary.getFile().getAbsolutePath() : "");
             prop.putHTML("edit_name", vocabulary.getName());
+            prop.putXML("edit_namexml", vocabulary.getName());
             prop.putHTML("edit_namespace", vocabulary.getNamespace());
+            prop.put("edit_size", vocabulary.size());
             prop.putHTML("edit_predicate", vocabulary.getPredicate());
             prop.putHTML("edit_prefix", Tagging.DEFAULT_PREFIX);
             prop.putHTML("edit_editable_objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace());
             prop.putHTML("edit_editable_objectspacepredicate", DCTerms.references.getPredicate());
-            prop.putHTML("edit_triple1", "<" + yacyurl + "> <" + vocabulary.getPredicate() + "> \"[discovered-tags-commaseparated]\"");
-            prop.putHTML("edit_triple2", "<" + yacyurl + "> <" + Owl.SameAs.getPredicate() + "> <[document-url]>");
-            prop.putHTML("edit_tripleN", vocabulary.getObjectspace() == null ? "none - missing objectspace" : "<" + yacyurl + "> <" + DCTerms.references.getPredicate() + "> \"[reference-link]#[tag]\" .");
+            prop.putXML("edit_triple1", "<" + yacyurl + "> <" + vocabulary.getPredicate() + "> \"[discovered-tags-commaseparated]\"");
+            prop.putXML("edit_triple2", "<" + yacyurl + "> <" + Owl.SameAs.getPredicate() + "> <[document-url]>");
+            prop.putXML("edit_tripleN", vocabulary.getObjectspace() == null ? "none - missing objectspace" : "<" + yacyurl + "> <" + DCTerms.references.getPredicate() + "> \"[object-link]#[tag]\" .");
             int c = 0;
             boolean dark = false;
-            for (Map.Entry<String, SOTuple> entry: vocabulary.list().entrySet()) {
+            int osl = vocabulary.getObjectspace() == null ? 0 : vocabulary.getObjectspace().length();
+            Map<String, SOTuple> list = vocabulary.list();
+            prop.put("edit_size", list.size());
+            for (Map.Entry<String, SOTuple> entry: list.entrySet()) {
                 prop.put("edit_terms_" + c + "_editable", editable ? 1 : 0);
                 prop.put("edit_terms_" + c + "_dark", dark ? 1 : 0); dark = !dark;
+                prop.putXML("edit_terms_" + c + "_label", osl > entry.getValue().getObjectlink().length() ? entry.getKey() : entry.getValue().getObjectlink().substring(osl));
                 prop.putHTML("edit_terms_" + c + "_term", entry.getKey());
+                prop.putXML("edit_terms_" + c + "_termxml", entry.getKey());
                 prop.putHTML("edit_terms_" + c + "_editable_term", entry.getKey());
-                prop.putHTML("edit_terms_" + c + "_editable_synonyms", entry.getValue().getSynonymsCSV());
-                prop.putHTML("edit_terms_" + c + "_editable_objectlink", entry.getValue().getObjectlink());
+                String synonymss = entry.getValue().getSynonymsCSV();
+                prop.putHTML("edit_terms_" + c + "_editable_synonyms", synonymss);
+                if (synonymss.length() > 0) {
+                    String[] synonymsa = entry.getValue().getSynonymsList();
+                    for (int i = 0; i < synonymsa.length; i++) {
+                        prop.put("edit_terms_" + c + "_synonyms_" + i + "_altLabel", synonymsa[i]);
+                    }
+                    prop.put("edit_terms_" + c + "_synonyms", synonymsa.length);
+                } else {
+                    prop.put("edit_terms_" + c + "_synonyms", 0);
+                }
+                prop.putXML("edit_terms_" + c + "_editable_objectlink", entry.getValue().getObjectlink());
                 c++;
                 if (c > 3000) break;
             }
             prop.put("edit_terms", c);
+
         }
 
         // return rewrite properties

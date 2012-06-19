@@ -25,12 +25,12 @@ color: #5a346e;
 font: arial,helvetica,sans-serif;
 font-size: 10px;
 position: fixed;
-right: 10px;
+right: 200px;
 top: 0;
 background: #ffffff;
 border:0px;
 
-width: 65px;
+width: 200px;
 height: 20px;
 padding: 5px 5px 5px 5px;
 
@@ -51,7 +51,7 @@ top: 0;
 background: #ffffff;
 border:0px;
 
-width: 30px;
+width: 100px;
 height: 20px;
 padding: 5px 5px 5px 5px;
 
@@ -178,12 +178,16 @@ z-index:99999;
 
 	<div id="sidebar-logo" class="sci_left" style="">
 
-		<img src="/currentyacypeer/env/grafics/yacy.png" height="20px" width="36px"/>
-		<!--#include virtual="/currentyacypeer/interaction_elements/Tag_part.html?hash=#[urlhash]#" -->
+		<img src="/currentyacypeer/env/grafics/yacy.png" height="20px" width="36px"/>		
+		<img src="/currentyacypeer/env/grafics/empty.gif" height="20px" width="20px"/>
+		<!--#include virtual="/currentyacypeer/interaction_elements/Tag_part.html?action=#[action]#&hash=#[urlhash]#&url=#[url]#" -->	
 
 	</div>
 
-	<div id="sidebar-tags" class="sci_right" style="">
+	<div id="sidebar-document" class="sci_right" style="">
+	
+		<img src="/currentyacypeer/env/grafics/empty.gif" height="20px" width="20px"/>
+		<!--#include virtual="/currentyacypeer/interaction_elements/Document_part.html?action=#[action]#&hash=#[urlhash]#&url=#[url]#" -->
 
 	</div>
 	

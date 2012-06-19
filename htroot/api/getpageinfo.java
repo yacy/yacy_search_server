@@ -102,7 +102,7 @@ public class getpageinfo {
                 }
                 if (scraper != null) {
                     // put the document title
-                    prop.putXML("title", scraper.dc_title());
+                    prop.putXML("title", removelinebreaks(scraper.dc_title()));
 
                     // put the favicon that belongs to the document
                     prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
@@ -119,7 +119,7 @@ public class getpageinfo {
                     }
                     prop.put("tags", count);
                     // put description
-                    prop.putXML("desc", scraper.dc_description());
+                    prop.putXML("desc", removelinebreaks(scraper.dc_description()));
                     // put language
                     final Set<String> languages = scraper.getContentLanguages();
                     prop.putXML("lang", (languages == null) ? "unknown" : languages.iterator().next());
@@ -185,7 +185,14 @@ public class getpageinfo {
         return prop;
     }
 
-    private static String checkOAI(final String url) {
+    private static String removelinebreaks(String dc_title) {
+		String newtitle = dc_title.replace ("\r", "");
+		newtitle = newtitle.replace ("\n", "");
+		newtitle = newtitle.replace ("\r\n", "");
+		return newtitle;
+	}
+
+	private static String checkOAI(final String url) {
 		final DocumentBuilderFactory factory = DocumentBuilderFactory
 				.newInstance();
 		try {

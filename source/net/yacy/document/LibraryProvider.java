@@ -47,9 +47,9 @@ import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.storage.Files;
-import net.yacy.document.geolocalization.GeonamesLocation;
-import net.yacy.document.geolocalization.OpenGeoDBLocation;
-import net.yacy.document.geolocalization.OverarchingLocation;
+import net.yacy.document.geolocation.GeonamesLocation;
+import net.yacy.document.geolocation.OpenGeoDBLocation;
+import net.yacy.document.geolocation.OverarchingLocation;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -57,7 +57,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 public class LibraryProvider {
 
-    public static final char tagPrefix = '$';
     public static final String path_to_source_dictionaries = "source";
     public static final String path_to_did_you_mean_dictionaries = "didyoumean";
     public static final String path_to_autotagging_dictionaries = "autotagging";
@@ -76,6 +75,8 @@ public class LibraryProvider {
             "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz" ),
         GEODB1( "geo1", "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02624_2011-10-17.sql.gz" ),
         GEON0( "geon0", "http://download.geonames.org/export/dump/cities1000.zip" ),
+        GEON1( "geon1", "http://download.geonames.org/export/dump/cities5000.zip" ),
+        GEON2( "geon2", "http://download.geonames.org/export/dump/cities15000.zip" ),
         DRW0( "drw0", "http://www.ids-mannheim.de/kl/derewo/derewo-v-100000t-2009-04-30-0.1.zip" ),
         PND0( "pnd0", "http://downloads.dbpedia.org/3.7-i18n/de/pnd_de.nt.bz2" );
 
@@ -116,11 +117,13 @@ public class LibraryProvider {
         dictRoot = rootPath;
 
         // initialize libraries
-        initAutotagging(tagPrefix);
+        initAutotagging();
         activateDeReWo();
         initDidYouMean();
         integrateOpenGeoDB();
-        integrateGeonames();
+        integrateGeonames0(-1);
+        integrateGeonames1(-1);
+        integrateGeonames2(100000);
         activatePND();
         Set<String> allTags = new HashSet<String>() ;
         allTags.addAll(autotagging.allTags()); // we must copy this into a clone to prevent circularity
@@ -136,19 +139,33 @@ public class LibraryProvider {
             if ( geo0.exists() ) {
                 geo0.renameTo(Dictionary.GEODB0.fileDisabled());
             }
-            geoLoc.activateLocalization(Dictionary.GEODB1.nickname, new OpenGeoDBLocation(geo1, false));
+            geoLoc.activateLocation(Dictionary.GEODB1.nickname, new OpenGeoDBLocation(geo1, dymLib));
             return;
         }
         if ( geo0.exists() ) {
-            geoLoc.activateLocalization(Dictionary.GEODB0.nickname, new OpenGeoDBLocation(geo0, false));
+            geoLoc.activateLocation(Dictionary.GEODB0.nickname, new OpenGeoDBLocation(geo0, dymLib));
             return;
         }
     }
 
-    public static void integrateGeonames() {
+    public static void integrateGeonames0(long minPopulation) {
         final File geon = Dictionary.GEON0.file();
         if ( geon.exists() ) {
-            geoLoc.activateLocalization(Dictionary.GEON0.nickname, new GeonamesLocation(geon));
+            geoLoc.activateLocation(Dictionary.GEON0.nickname, new GeonamesLocation(geon, dymLib, minPopulation));
+            return;
+        }
+    }
+    public static void integrateGeonames1(long minPopulation) {
+        final File geon = Dictionary.GEON1.file();
+        if ( geon.exists() ) {
+            geoLoc.activateLocation(Dictionary.GEON1.nickname, new GeonamesLocation(geon, dymLib, minPopulation));
+            return;
+        }
+    }
+    public static void integrateGeonames2(long minPopulation) {
+        final File geon = Dictionary.GEON2.file();
+        if ( geon.exists() ) {
+            geoLoc.activateLocation(Dictionary.GEON2.nickname, new GeonamesLocation(geon, dymLib, minPopulation));
             return;
         }
     }
@@ -161,12 +178,12 @@ public class LibraryProvider {
         dymLib = new WordCache(dymDict);
     }
 
-    public static void initAutotagging(char prefix) {
+    public static void initAutotagging() {
         final File autotaggingPath = new File(dictRoot, path_to_autotagging_dictionaries);
         if ( !autotaggingPath.exists() ) {
             autotaggingPath.mkdirs();
         }
-        autotagging = new Autotagging(autotaggingPath, prefix);
+        autotagging = new Autotagging(autotaggingPath);
     }
 
     public static void activateDeReWo() {
@@ -220,7 +237,7 @@ public class LibraryProvider {
         	Resource resource = i.next();
         	String subject = resource.toString();
 
-        	// prepare a propert term from the subject uri
+        	// prepare a proper term from the subject uri
         	int p = subject.lastIndexOf('/');
         	if (p < 0) continue;
         	String term = subject.substring(p + 1);
@@ -229,11 +246,12 @@ public class LibraryProvider {
         	if (p >= 0) term = term.substring(0, p);
         	term = term.replaceAll("_", " ").trim();
         	if (term.length() == 0) continue;
+        	if (term.indexOf(' ') < 0) continue; // accept only names that have at least two parts
 
         	// store the term into the vocabulary map
-        	map.put(term, new SOTuple("", subject));
+        	map.put(term, new SOTuple(Tagging.normalizeTerm(term), subject));
         }
-        try {
+        if (map.size() > 0) try {
             Log.logInfo("LibraryProvider", "adding vocabulary to autotagging");
 			Tagging pndVoc = new Tagging("Persons", null, objectspace, map);
 			autotagging.addVocabulary(pndVoc);
@@ -296,13 +314,6 @@ public class LibraryProvider {
         InputStream derewoTxtEntry;
         try {
             final ZipFile zip = new ZipFile(file);
-            /*
-            final Enumeration<? extends ZipEntry> i = zip.entries();
-            while (i.hasMoreElements()) {
-                final ZipEntry e = i.nextElement();
-                System.out.println("loadDeReWo: " + e.getName());
-            }
-            */
             derewoTxtEntry = zip.getInputStream(zip.getEntry("derewo-v-100000t-2009-04-30-0.1"));
         } catch ( final ZipException e ) {
             Log.logException(e);

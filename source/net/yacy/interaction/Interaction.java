@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -22,10 +21,6 @@ import net.yacy.search.Switchboard;
 
 import org.apache.http.entity.mime.content.ContentBody;
 
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-
 import de.anomic.data.UserDB;
 
 
@@ -36,7 +31,7 @@ public class Interaction {
 
 		UserDB.Entry entry = null;
 
-        String result = "anonymous";
+        //String result = "anonymous";
 
         entry = Switchboard.getSwitchboard().userDB.proxyAuth((requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
@@ -126,8 +121,8 @@ public class Interaction {
 
 	}
 
-	
-	
+
+
 
 public static String GetTableentry(String url, String type, String username, String peer) {
 

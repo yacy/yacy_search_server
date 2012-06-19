@@ -116,6 +116,7 @@ public class RequestHeader extends HeaderFramework {
         path = path.toLowerCase();
         if (path.endsWith(".json")) return FileType.JSON;
         if (path.endsWith(".xml")) return FileType.XML;
+        if (path.endsWith(".rdf")) return FileType.XML;
         if (path.endsWith(".rss")) return FileType.XML;
         return FileType.HTML;
     }

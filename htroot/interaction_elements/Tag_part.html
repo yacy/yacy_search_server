@@ -6,37 +6,16 @@
 
 <style type="text/css" >
 
-.sci_panel {
+.sci_tag {
 	
 font: arial,helvetica,sans-serif;
 font-size: 10px;
-position: fixed;
-right: 0;
-background: #ffffff;
-border:1px solid #5a346e;
-
-width: 210px;
-height: auto;
-padding: 30px 110px 30px 30px;
-
-z-index:99998;
-
-color: #5a346e;
-}
-
-.sci_tags {
-	
-font: arial,helvetica,sans-serif;
-font-size: 10px;
-position: fixed;
-right: 100px;
-top: 0;
 background: #ffffff;
 border:0px;
 
 width: 65px;
 height: 20px;
-padding: 5px 5px 5px 5px;
+
 
 z-index:99998;
 
@@ -49,6 +28,8 @@ color: #5a346e;
 
 <div id="sci_tags_#[hash]#_box" class="sci_panel" style="top: 50px; display: none;">
 
+	<div id="rdfcontent_#[hash]#" class="rdfcontent_#[hash]#" style="display:none;"></div>
+
 	<input type="text" id="tags_#[hash]#" name="tags_#[hash]#" class="bm_input" size="80" />
 
 	<script type="text/javascript" charset="utf-8">
@@ -59,11 +40,48 @@ color: #5a346e;
 	
 	var existingtags = "";
 	
+	var resultstring = "";
+	
+	if (vocabularies_string != "") {
+
+		$.ajaxSetup({async: false});
+	
+	
+
+		$.getJSON('/currentyacypeer/api/yacydoc.htm?urlhash=#[hash]#', function(data) {
+
+			resultstring = data.result;
+		});
+	}
+	
+	
+
 	vocs.forEach (function(voc) {
 		
 		var currenttags = triple_get_prefix ('http://yacy.net/url', '#[hash]#', 'http://yacy.net/autotagging', voc);
+		var finaltags  = "";
+		currenttags.split(',').forEach (function(tag) {
+			var link = "";
+			
+			resultstring.split(',').forEach (function(hyperlink) {
+			
+				var h_url = hyperlink.substring (0, hyperlink.indexOf('#'));
+				var h_tag = hyperlink.substring (hyperlink.indexOf('#')+1);
+				
+				if (h_tag == tag) link = h_url;
+			});
+			
+			
+			if (link != "") {
+				finaltags = finaltags + '<a href="'+ link +'" target="_blank">' + tag + '</a>&nbsp;';
+			}	
+			else {
+				finaltags = finaltags + tag + '&nbsp';
+			}
+		});
+		
 		if (existingtags != "" && currenttags != "") existingtags += " - ";
-		if (currenttags != "") existingtags += voc+":"+ currenttags;
+		if (currenttags != "") existingtags += voc+":"+ finaltags;
 	});
 	
 

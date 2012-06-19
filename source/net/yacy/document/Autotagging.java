@@ -20,19 +20,15 @@
 
 package net.yacy.document;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.document.WordCache.Dictionary;
-import net.yacy.document.geolocalization.Locations;
+import net.yacy.document.geolocation.Locations;
 import net.yacy.kelondro.logging.Log;
 
 /**
@@ -44,7 +40,6 @@ public class Autotagging {
 
     private final static Object PRESENT = new Object();
 
-    public final char prefixChar;
     private final File autotaggingPath;
     private final Map<String, Tagging> vocabularies; // mapping from vocabulary name to the tagging vocabulary
     private final Map<String, Object> allTags;
@@ -58,10 +53,9 @@ public class Autotagging {
      * properties without values are allowed (the value is then set to the key)
      * also the value can be used as a tag
      */
-    public Autotagging(final File autotaggingPath, char prefixChar) {
+    public Autotagging(final File autotaggingPath) {
         this.vocabularies = new ConcurrentHashMap<String, Tagging>();
         this.autotaggingPath = autotaggingPath;
-        this.prefixChar = prefixChar;
         this.allTags = new ConcurrentHashMap<String, Object>();
         if (this.autotaggingPath == null || !this.autotaggingPath.exists()) {
             return;
@@ -114,16 +108,6 @@ public class Autotagging {
         }
     }
 
-    public void addDictionaries(Map<String, Dictionary> dictionaries) {
-        for (Map.Entry<String, Dictionary> entry: dictionaries.entrySet()) {
-            Tagging voc = new Tagging(entry.getKey(), entry.getValue());
-            this.vocabularies.put(entry.getKey(), voc);
-            for (String t: voc.tags()) {
-                this.allTags.put(t, PRESENT);
-            }
-        }
-    }
-
     public void addPlaces(Locations locations) {
     	if (locations.size() == 0) return; // otherwise we get a navigation that does nothing
         Tagging voc = new Tagging("Locations", locations);
@@ -137,28 +121,10 @@ public class Autotagging {
         }
     }
 
-    /**
-     * produce a set of tags for a given text.
-     * The set contains the names of the tags with a prefix character at the front
-     * @param text
-     * @return
-     */
-    public Set<String> getPrintTagsFromText(String text) {
-        Set<String> as = new HashSet<String>();
-        if (this.vocabularies.isEmpty()) return as;
-        final WordTokenizer tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(text)), LibraryProvider.dymLib);
-        String tag;
-        while (tokens.hasMoreElements()) {
-            tag = getTagFromTerm(tokens.nextElement().toString()).toString();
-            if (tag != null) as.add(tag);
-        }
-        return as;
-    }
-    
     public int size() {
     	return this.vocabularies.size();
     }
-    
+
     /**
      * maximum number of compound tags (number of words in one tag)
      * @return
@@ -171,41 +137,17 @@ public class Autotagging {
     public Tagging.Metatag getTagFromTerm(String term) {
         if (this.vocabularies.isEmpty()) return null;
         Tagging.Metatag tag;
-        term = Tagging.normalizeWord(term);
+        term = Tagging.normalizeTerm(term);
         for (Map.Entry<String, Tagging> v: this.vocabularies.entrySet()) {
-            tag = v.getValue().getMetatagFromSynonym(this.prefixChar, term);
+            tag = v.getValue().getMetatagFromSynonym(term);
             if (tag != null) return tag;
         }
         return null;
     }
 
-    public static boolean metatagAppearIn(final Tagging.Metatag metatag, final String[] tags) {
-        String tag = metatag.toString();
-        for (String s: tags) {
-            if (tag.equals(s)) return true;
-        }
-        return false;
-    }
-
-    public Tagging.Metatag metatag(String metatag) {
-        int p = metatag.indexOf(':');
-        if (p < 0) throw new RuntimeException("bad metatag: metatag = " + metatag);
-        String vocName = metatag.substring(1, p);
+    public Tagging.Metatag metatag(String vocName, String term) {
         Tagging tagging = this.vocabularies.get(vocName);
-        return tagging.getMetatagFromTerm(this.prefixChar, Tagging.decodeMaskname(metatag.substring(p + 1)));
-    }
-
-    public String cleanTagFromAutotagging(String tagString) {
-    	return Tagging.cleanTagFromAutotagging(this.prefixChar, tagString);
-    }
-
-    public static void main(String[] args) {
-        Autotagging a = new Autotagging(new File("DATA/DICTIONARIES/" + LibraryProvider.path_to_autotagging_dictionaries), '$');
-        for (Map.Entry<String, Tagging> entry: a.vocabularies.entrySet()) {
-            System.out.println(entry);
-        }
-        Set<String> tags = a.getPrintTagsFromText("In die Tueren und Fluchttueren muessen noch Schloesser eingebaut werden");
-        System.out.println(tags);
+        return tagging.getMetatagFromTerm(Tagging.decodeMaskname(term));
     }
 
 }

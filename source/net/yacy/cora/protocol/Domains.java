@@ -885,6 +885,7 @@ public class Domains {
                 "127.0.0.1".equals(host) ||
                 "localhost".equals(host) ||
                 host.startsWith("0:0:0:0:0:0:0:1") ||
+                host.startsWith("fe80:0:0:0:0:0:0:1") || // used by my mac as localhost
                 host.startsWith("::1/") ||
                 "::1".equals(host)
                 );
