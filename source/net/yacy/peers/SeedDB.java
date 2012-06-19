@@ -164,8 +164,6 @@ public final class SeedDB implements AlternativeDomainNames {
         final String peername = myName();
         this.mySeed = null; // my own seed
         this.myOwnSeedFile = new File(newNetworkRoot, SeedDB.DBFILE_OWN_SEED);
-        initMySeed();
-        this.mySeed.setName(peername);
 
         this.netRedundancy = redundancy;
         this.scheme = new VerticalWordPartitionScheme(partitionExponent);
@@ -174,6 +172,9 @@ public final class SeedDB implements AlternativeDomainNames {
         this.seedActiveDB = openSeedTable(this.seedActiveDBFile);
         this.seedPassiveDB = openSeedTable(this.seedPassiveDBFile);
         this.seedPotentialDB = openSeedTable(this.seedPotentialDBFile);
+
+        initMySeed();
+        this.mySeed.setName(peername);
 
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
