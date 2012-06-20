@@ -70,7 +70,8 @@ public class RobotsTxt {
         this.syncObjects = new ConcurrentHashMap<String, DomSync>();
         this.tables = worktables;
         try {
-            log.info("initiated robots table: " + this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).getFile());
+            this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
+            //log.info("initiated robots table: " + this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).getFile());
         } catch (final IOException e) {
             try {
                 this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).clear();

@@ -73,8 +73,6 @@ for option in $options;do
 				;;
 			-l|--logging) 
 				LOGGING=1
-                # enable asserts
-                JAVA_ARGS="$JAVA_ARGS -ea"
 				if [ $DEBUG -eq 1 ];then
 					echo "can not combine -l and -d"
 					exit 1;
