@@ -59,7 +59,7 @@ public class ConfigPortal {
                 } else {
                     sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
                 }
-                sb.setConfig(SwitchboardConstants.BROWSER_DEFAULT, sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
+                sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
                 HTTPDFileHandler.initDefaultPath();
             }
             if (post.containsKey("searchpage_set")) {
@@ -80,6 +80,8 @@ public class ConfigPortal {
                 sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu", true));
                 sb.setConfig("publicSearchpage", post.getBoolean("publicSearchpage", true));
                 sb.setConfig("search.options", post.getBoolean("search.options", false));
+                
+                sb.setConfig("interaction.userlogon.enabled", post.getBoolean("interaction.userlogon", false));
 
                 sb.setConfig("search.text", post.getBoolean("search.text", false));
                 sb.setConfig("search.image", post.getBoolean("search.image", false));
@@ -129,6 +131,7 @@ public class ConfigPortal {
                 sb.setConfig("publicSearchpage", true);
                 sb.setConfig("search.navigation", "hosts,authors,namespace,topics");
                 sb.setConfig("search.options", true);
+                sb.setConfig("interaction.userlogon.enabled", false);
                 sb.setConfig("search.text", true);
                 sb.setConfig("search.image", true);
                 sb.setConfig("search.audio", false);
@@ -160,6 +163,8 @@ public class ConfigPortal {
         prop.put("publicSearchpage", sb.getConfigBool("publicSearchpage", false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
 
+        prop.put("interaction.userlogon", sb.getConfigBool("interaction.userlogon.enabled", false) ? 1 : 0);
+        
         prop.put("search.text", sb.getConfigBool("search.text", false) ? 1 : 0);
         prop.put("search.image", sb.getConfigBool("search.image", false) ? 1 : 0);
         prop.put("search.audio", sb.getConfigBool("search.audio", false) ? 1 : 0);

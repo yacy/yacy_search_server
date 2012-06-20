@@ -135,7 +135,7 @@ public final class TextParser {
         if (prototypeMime != null) for (String ext: parser.supportedExtensions()) {
             ext = ext.toLowerCase();
             final String s = ext2mime.get(ext);
-            if (s != null && !s.equals(prototypeMime)) log.logWarning("parser for extension '" + ext + "' was set to mime '" + s + "', overwriting with new mime '" + prototypeMime + "'.");
+            if (s != null && !s.equals(prototypeMime)) Log.logInfo("PARSER", "Parser for extension '" + ext + "' was set to mime '" + s + "', overwriting with new mime '" + prototypeMime + "'.");
             ext2mime.put(ext, prototypeMime);
         }
 
@@ -261,7 +261,7 @@ public final class TextParser {
         if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
         try {
             final Document[] docs = parser.parse(location, mimeType, documentCharset, sourceStream);
-            for (final Document d: docs) { assert d.getText() != null; } // verify docs
+            for (final Document d: docs) { assert d != null && d.getText() != null; } // verify docs
             return docs;
         } catch (final Exception e) {
             throw new Parser.Failure("parser failed: " + parser.getName(), location);
