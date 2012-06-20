@@ -59,7 +59,7 @@ public class ConfigPortal {
                 } else {
                     sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
                 }
-                sb.setConfig(SwitchboardConstants.BROWSER_DEFAULT, sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
+                sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
                 HTTPDFileHandler.initDefaultPath();
             }
             if (post.containsKey("searchpage_set")) {
