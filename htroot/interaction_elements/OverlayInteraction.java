@@ -17,6 +17,8 @@ public class OverlayInteraction {
         prop.put("enabled_urlhash", post.get("urlhash", ""));
         
         prop.put("enabled_action", post.get("action", ""));
+        
+        prop.put("enabled_color", env.getConfig("color_tableheader", "")); 
 
         return prop;
     }
