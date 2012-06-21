@@ -301,12 +301,6 @@
                includes="**/*"/>
     </copy>
 
-  	<!-- copy RDFaParser -->
-    <copy todir="${release_main}/RDFaParser">
-      <fileset dir="${RDFaParser}" 
-               includes="**/*"/>
-    </copy>
-
   	<!-- copy Unix wrappers -->
     <copy todir="${release_main}">
       <fileset dir=".">
