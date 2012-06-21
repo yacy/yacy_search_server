@@ -44,7 +44,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 
 
-public class SolrSingleConnector extends AbstractSolrConnector implements SolrConnector {
+public class SingleSolrConnector extends AbstractSolrConnector implements SolrConnector {
 
     private final String solrurl, host, solrpath, solraccount, solrpw;
     private final int port;
@@ -55,7 +55,7 @@ public class SolrSingleConnector extends AbstractSolrConnector implements SolrCo
      * @param scheme
      * @throws IOException
      */
-    public SolrSingleConnector(final String url) throws IOException {
+    public SingleSolrConnector(final String url) throws IOException {
         super();
         this.solrurl = url;
 
@@ -113,9 +113,9 @@ public class SolrSingleConnector extends AbstractSolrConnector implements SolrCo
     }
 
     public static void main(final String args[]) {
-        SolrSingleConnector solr;
+        SingleSolrConnector solr;
         try {
-            solr = new SolrSingleConnector("http://127.0.0.1:8983/solr");
+            solr = new SingleSolrConnector("http://127.0.0.1:8983/solr");
             solr.clear();
             final File exampleDir = new File("test/parsertest/");
             long t, t0, a = 0;

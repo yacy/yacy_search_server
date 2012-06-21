@@ -8,7 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
-public class SolrMultipleConnector implements SolrConnector {
+public class MultipleSolrConnector implements SolrConnector {
 
     private final static SolrDoc POISON_DOC = new SolrDoc();
 
@@ -16,8 +16,8 @@ public class SolrMultipleConnector implements SolrConnector {
     private final AddWorker[] worker;
     private final SolrConnector solr;
 
-    public SolrMultipleConnector(final String url, int connections) throws IOException {
-        this.solr = new SolrSingleConnector(url);
+    public MultipleSolrConnector(final String url, int connections) throws IOException {
+        this.solr = new SingleSolrConnector(url);
         this.queue = new ArrayBlockingQueue<SolrDoc>(1000);
         this.worker = new AddWorker[connections];
         for (int i = 0; i < connections; i++) {
@@ -29,13 +29,13 @@ public class SolrMultipleConnector implements SolrConnector {
     private class AddWorker extends Thread {
         private final SolrConnector solr;
         public AddWorker(final String url) throws IOException {
-            this.solr = new SolrSingleConnector(url);
+            this.solr = new SingleSolrConnector(url);
         }
         @Override
         public void run() {
             SolrDoc doc;
             try {
-                while ((doc = SolrMultipleConnector.this.queue.take()) != POISON_DOC) {
+                while ((doc = MultipleSolrConnector.this.queue.take()) != POISON_DOC) {
                     try {
                         this.solr.add(doc);
                     } catch (SolrException e) {

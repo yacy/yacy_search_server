@@ -94,8 +94,8 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.services.federated.solr.SolrDoc;
-import net.yacy.cora.services.federated.solr.SolrShardingConnector;
-import net.yacy.cora.services.federated.solr.SolrShardingSelection;
+import net.yacy.cora.services.federated.solr.ShardSolrConnector;
+import net.yacy.cora.services.federated.solr.ShardSelection;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -407,9 +407,9 @@ public final class Switchboard extends serverSwitch
 
         try {
             this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(
-                (usesolr) ? new SolrShardingConnector(
+                (usesolr) ? new ShardSolrConnector(
                     solrurls,
-                    SolrShardingSelection.Method.MODULO_HOST_MD5,
+                    ShardSelection.Method.MODULO_HOST_MD5,
                     10000, true) : null);
         } catch ( final IOException e ) {
             Log.logException(e);
