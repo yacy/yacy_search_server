@@ -27,13 +27,9 @@ package net.yacy.cora.services.federated.solr;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.kelondro.logging.Log;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -45,22 +41,13 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
-import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
-import net.yacy.search.index.SolrField;
 
 
-public class SolrSingleConnector implements SolrConnector {
+public class SolrSingleConnector extends AbstractSolrConnector implements SolrConnector {
 
     private final String solrurl, host, solrpath, solraccount, solrpw;
     private final int port;
-    private HttpSolrServer server;
 
     /**
      * create a new solr connector
@@ -69,6 +56,7 @@ public class SolrSingleConnector implements SolrConnector {
      * @throws IOException
      */
     public SolrSingleConnector(final String url) throws IOException {
+        super();
         this.solrurl = url;
 
         // connect using authentication
@@ -87,6 +75,7 @@ public class SolrSingleConnector implements SolrConnector {
                 this.solraccount = userinfo.substring(0, p); this.solrpw = userinfo.substring(p + 1);
             }
         }
+        HttpSolrServer s;
         if (this.solraccount.length() > 0) {
             final DefaultHttpClient client = new DefaultHttpClient() {
                 @Override
@@ -103,154 +92,16 @@ public class SolrSingleConnector implements SolrConnector {
             BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(new AuthScope(this.host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(this.solraccount, this.solrpw));
             client.setCredentialsProvider(credsProvider);
-            this.server = new HttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, client);
+            s = new HttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, client);
         } else {
-            this.server = new HttpSolrServer(this.solrurl);
+            s = new HttpSolrServer(this.solrurl);
         }
-        this.server.setAllowCompression(true);
-        this.server.setConnectionTimeout(60000);
-        this.server.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
-        this.server.setSoTimeout(60000);
+        s.setAllowCompression(true);
+        s.setConnectionTimeout(60000);
+        s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
+        s.setSoTimeout(60000);
+        super.init(s);
     }
-
-    @Override
-    public synchronized void close() {
-        try {
-            this.server.commit();
-        } catch (SolrServerException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public long getSize() {
-        try {
-            final SolrDocumentList list = get("*:*", 0, 1);
-            return list.getNumFound();
-        } catch (final Throwable e) {
-            Log.logException(e);
-            return 0;
-        }
-    }
-
-    /**
-     * delete everything in the solr index
-     * @throws IOException
-     */
-    @Override
-    public void clear() throws IOException {
-        try {
-            this.server.deleteByQuery("*:*");
-            this.server.commit();
-        } catch (final Throwable e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public void delete(final String id) throws IOException {
-        try {
-            this.server.deleteById(id);
-        } catch (final Throwable e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public void delete(final List<String> ids) throws IOException {
-        try {
-            this.server.deleteById(ids);
-        } catch (final Throwable e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public boolean exists(final String id) throws IOException {
-        try {
-            final SolrDocumentList list = get(SolrField.id.getSolrFieldName() + ":" + id, 0, 1);
-            return list.getNumFound() > 0;
-        } catch (final Throwable e) {
-            Log.logException(e);
-            return false;
-        }
-    }
-
-    public void add(final File file, final String solrId) throws IOException {
-        final ContentStreamUpdateRequest up = new ContentStreamUpdateRequest("/update/extract");
-        up.addFile(file);
-        up.setParam("literal.id", solrId);
-        up.setParam("uprefix", "attr_");
-        up.setParam("fmap.content", "attr_content");
-        //up.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
-        try {
-            this.server.request(up);
-            this.server.commit();
-        } catch (final Throwable e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public void add(final SolrDoc solrdoc) throws IOException, SolrException {
-        try {
-            this.server.add(solrdoc,180000); // commitWithIn 180s
-            //this.server.commit();
-        } catch (SolrServerException e) {
-            Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdoc.toString());
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
-        ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
-        for (SolrDoc d: solrdocs) l.add(d);
-        try {
-            this.server.add(l,180000); // commitWithIn 120s
-            //this.server.commit();
-        } catch (SolrServerException e) {
-            Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdocs.toString());
-            throw new IOException(e);
-        }
-    }
-
-    /**
-     * get a query result from solr
-     * to get all results set the query String to "*:*"
-     * @param querystring
-     * @throws IOException
-     */
-    @Override
-    public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException {
-        // construct query
-        final SolrQuery query = new SolrQuery();
-        query.setQuery(querystring);
-        query.setRows(count);
-        query.setStart(offset);
-        //query.addSortField( "price", SolrQuery.ORDER.asc );
-
-        // query the server
-        //SearchResult result = new SearchResult(count);
-        try {
-            final QueryResponse rsp = this.server.query( query );
-            final SolrDocumentList docs = rsp.getResults();
-            return docs;
-            // add the docs into the YaCy search result container
-            /*
-            for (SolrDocument doc: docs) {
-                result.put(element)
-            }
-            */
-        } catch (final Throwable e) {
-            throw new IOException(e);
-        }
-
-        //return result;
-    }
-
 
     public String getAdminInterface() {
         final InetAddress localhostExternAddress = Domains.myPublicLocalIP();

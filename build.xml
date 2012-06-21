@@ -157,6 +157,7 @@
         <pathelement location="${htroot}" />
     	<pathelement location="${lib}/activation.jar" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
+        <pathelement location="${lib}/apache-solr-core-3.6.0.jar" />
         <pathelement location="${lib}/apache-solr-solrj-3.6.0.jar" />
         <pathelement location="${lib}/arq-2.8.7.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-145.jar" />
@@ -166,9 +167,11 @@
     	<pathelement location="${lib}/commons-fileupload-1.2.2.jar" />
     	<pathelement location="${lib}/commons-io-2.1.jar" />
     	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
+    	<pathelement location="${lib}/commons-lang-2.6.jar" />
     	<pathelement location="${lib}/commons-logging-1.1.1.jar" />
     	<pathelement location="${lib}/fontbox-1.6.0.jar" />
         <pathelement location="${lib}/geronimo-stax-api_1.0_spec-1.0.1.jar" />
+        <pathelement location="${lib}/guava-r05.jar" />
         <pathelement location="${lib}/htmllexer.jar" />
         <pathelement location="${lib}/htmlparser.jar" />
         <pathelement location="${lib}/httpclient-4.2.jar" />
@@ -185,6 +188,7 @@
     	<pathelement location="${lib}/jsch-0.1.42.jar" />
     	<pathelement location="${lib}/json-simple-1.1.jar" />
     	<pathelement location="${lib}/log4j-1.2.16.jar" />
+    	<pathelement location="${lib}/log4j-over-slf4j-1.6.1.jar" />
     	<pathelement location="${lib}/metadata-extractor-2.4.0-beta-1.jar" />
     	<pathelement location="${lib}/mysql-connector-java-5.1.12-bin.jar" />
         <pathelement location="${lib}/pdfbox-1.6.0.jar" />

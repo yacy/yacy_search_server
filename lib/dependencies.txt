@@ -1,12 +1,28 @@
 list of library-dependencies:
 
-* apache-solr-solrj-3.4.0.jar depens on:
+* apache-solr-solrj-3.4.0.jar depends on:
 commons-codec-1.4.jar
 commons-httpclient-3.1.jar
 commons-io-1.4.jar
 geronimo-stax-api_1.0_spec-1.0.1.jar
 jcl-over-slf4j-1.6.1.jar
 slf4j-api-1.6.1.jar
+wstx-asl-3.2.7.jar
+
+* apache-solr-core-3.6.0.jar depends on
+commons-codec-1.6.jar
+commons-fileupload-1.2.1.jar
+commons-httpclient-3.1.jar
+commons-io-2.1.jar
+commons-lang-2.6.jar
+geronimo-stax-api_1.0_spec-1.0.1.jar
+guava-r05.jar
+httpclient-4.2.jar
+httpcore-4.2.jar
+jcl-over-slf4j-1.6.1.jar
+log4j-over-slf4j-1.6.1.jar
+slf4j-api-1.6.1.jar
+slf4j-jdk14-1.6.1.jar
 wstx-asl-3.2.7.jar
 
 * pdfbox-1.6.0.jar depends on:
