@@ -26,15 +26,6 @@ public final class AugmentedBrowsingFilters_p {
 				env.setConfig("interaction.overlayinteraction.enabled", "on".equals(post
 						.get("overlayInteraction")) ? true : false);
 				
-//				env.setConfig("augmentation.reparse.adduniqueid", "on".equals(post
-//						.get("augmentedReparseAdduniqueid")) ? true : false);
-//				
-//				env.setConfig("augmentation.reparse.addserverinfo", "on".equals(post
-//						.get("augmentedReparseAddserver")) ? true : false);
-//				
-//				env.setConfig("augmentation.reparse.addrdf", "on".equals(post
-//						.get("augmentedReparseAddrdf")) ? true : false);
-
 			}
 
 		}
@@ -49,17 +40,7 @@ public final class AugmentedBrowsingFilters_p {
 				env.getConfigBool("augmentation.reparse", true) ? "1" : "0");
 		
 		prop.put("overlayInteraction_checked",
-				env.getConfigBool("interaction.overlayinteraction.enabled", true) ? "1" : "0");
-		
-//		prop.put("augmentedReparseAdduniqueid_checked",
-//				env.getConfigBool("augmentation.reparse.adduniqueid", true) ? "1" : "0");
-//		
-//		prop.put("augmentedReparseAddserver_checked",
-//				env.getConfigBool("augmentation.reparse.addserverinfo", true) ? "1" : "0");
-//		
-//		prop.put("augmentedReparseAddrdf_checked",
-//				env.getConfigBool("augmentation.reparse.addrdf", true) ? "1" : "0");
-		
+				env.getConfigBool("interaction.overlayinteraction.enabled", true) ? "1" : "0");		
 
 
 		// return rewrite properties

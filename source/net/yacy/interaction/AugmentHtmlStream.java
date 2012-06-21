@@ -381,6 +381,8 @@ public class AugmentHtmlStream {
                     NodeList bodychildren = bt.getChildren();
 
                     bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction_elements/OverlayInteraction.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader)));
+                    
+                    bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction_elements/Footer.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader)));
 
                     bt.setChildren(bodychildren);
 

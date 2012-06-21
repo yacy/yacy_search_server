@@ -58,6 +58,7 @@
   <property name="release_mac" location="${release}/MAC"/>
   <property name="git" location=".git"/>
   <property name="defaults" location="defaults"/>
+  <property name="RDFaParser" location="RDFaParser"/>
 
   <!-- pseudo default releaseNr as fallback --> 
   <property name="releaseNr" value="9000" />
@@ -297,6 +298,12 @@
   	<!-- copy defaults -->
     <copy todir="${release_main}/defaults">
       <fileset dir="${defaults}" 
+               includes="**/*"/>
+    </copy>
+
+  	<!-- copy RDFaParser -->
+    <copy todir="${release_main}/RDFaParser">
+      <fileset dir="${RDFaParser}" 
                includes="**/*"/>
     </copy>
 
