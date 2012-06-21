@@ -28,31 +28,67 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.services.federated.solr.AbstractSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
+import net.yacy.kelondro.logging.Log;
 
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
 import org.xml.sax.SAXException;
 
+import com.google.common.io.Files;
+
 public class EmbeddedSolrConnector extends AbstractSolrConnector implements SolrConnector {
 
     private final CoreContainer core;
+    private final static String[] confFiles = {"solrconfig.xml", "schema.xml", "stopwords.txt", "synonyms.txt", "protwords.txt", "currency.xml", "elevate.xml", "lang/"};
+    //private final static String[] confFiles = {"solrconfig.xml", "schema.xml", "stopwords.txt", "synonyms.txt", "protwords.txt", "currency.xml", "elevate.xml", "lang/"};
 
-    public EmbeddedSolrConnector(File storagePath,  File configFile) throws IOException {
+    public EmbeddedSolrConnector(File storagePath, File solr_config) throws IOException {
         super();
+        // copy the solrconfig.xml to the storage path
+        File conf = new File(storagePath, "conf");
+        conf.mkdirs();
+        File source, target;
+        for (String cf: confFiles) {
+            source = new File(solr_config, cf);
+            if (source.isDirectory()) {
+                target = new File(conf, cf);
+                target.mkdirs();
+                for (String cfl: source.list()) {
+                    Files.copy(new File(source, cfl), new File(target, cfl));
+                }
+            } else {
+                target = new File(conf, cf);
+                target.getParentFile().mkdirs();
+                Files.copy(source, target);
+            }
+        }
         try {
-            this.core = new CoreContainer(storagePath.getAbsolutePath(), configFile);
+            this.core = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
         } catch (ParserConfigurationException e) {
             throw new IOException(e.getMessage(), e);
         } catch (SAXException e) {
             throw new IOException(e.getMessage(), e);
         }
-        super.init(new EmbeddedSolrServer(this.core, "metadata"));
+        super.init(new EmbeddedSolrServer(this.core, "collection1"));
     }
 
     @Override
     public void close() {
         super.close();
         this.core.shutdown();
+    }
+
+    public static void main(String[] args) {
+        File solr_config = new File("defaults/solr");
+        File storage = new File("DATA/INDEX/webportal/SEGMENTS/text/solr/");
+        storage.mkdirs();
+        try {
+            EmbeddedSolrConnector solr = new EmbeddedSolrConnector(storage, solr_config);
+            solr.close();
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+
     }
 
 }
