@@ -48,6 +48,9 @@
 	<classpathentry kind="lib" path="lib/apache-solr-solrj-3.6.0.jar" sourcepath="/Users/admin/git/lucene-solr/solr/solrj/src/java"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/apache-solr-core-3.6.0.jar" sourcepath="/Users/admin/git/lucene-solr/solr/core/src/java/"/>
+	<classpathentry kind="lib" path="lib/guava-r05.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
