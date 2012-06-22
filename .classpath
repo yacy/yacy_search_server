@@ -29,9 +29,6 @@
 	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar" sourcepath="/Users/admin/.m2/repository/commons-fileupload/commons-fileupload/1.2.2/commons-fileupload-1.2.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/fontbox-1.6.0.jar"/>
-	<classpathentry kind="lib" path="lib/jempbox-1.6.0.jar"/>
-	<classpathentry kind="lib" path="lib/pdfbox-1.6.0.jar" sourcepath="/Users/admin/.m2/repository/org/apache/pdfbox/pdfbox/1.6.0/pdfbox-1.6.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
@@ -59,6 +56,9 @@
 	<classpathentry kind="lib" path="lib/servlet-api-2.5-20081211.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-6.1.26-patched-JETTY-1340.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-util-6.1.26-patched-JETTY-1340.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-1.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-1.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/jempbox-1.7.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
