@@ -1,4 +1,4 @@
-// Messages_p.java 
+// Messages_p.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -35,9 +35,10 @@ import java.util.TreeMap;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+
+import com.google.common.io.Files;
 
 import de.anomic.data.MessageBoard;
 import de.anomic.server.serverObjects;
@@ -98,7 +99,7 @@ public class Messages_p {
         final File notifierSource = new File(sb.getAppPath(), sb.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
         final File notifierDest = new File(sb.getDataPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
         try {
-            FileUtils.copy(notifierSource, notifierDest);
+            Files.copy(notifierSource, notifierDest);
         } catch (final IOException e) {
         }
 

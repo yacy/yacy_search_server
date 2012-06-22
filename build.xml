@@ -258,14 +258,6 @@
 
   
   <target name="compile" depends="compile-core" description="compile YaCy core and YaCy servlets">
-    <!-- defining the classpath that should be used for compiling -->
-    <path id="project.class.path">
-      <pathelement location="${build}" />
-      <pathelement location="${htroot}" />
-      	<pathelement location="${lib}/arq-2.8.7.jar" />
-      	<pathelement location="${lib}/jena-2.6.4.jar" />
-    </path>
-
     <!-- compile htroot, htroot/yacy and htroot/htdocsdefault -->
     <javac srcdir="${htroot}/"
     	   excludes="processing/**"

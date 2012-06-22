@@ -1,4 +1,4 @@
-// ConfigAppearance_p.java 
+// ConfigAppearance_p.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -14,7 +14,7 @@
 //$LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +45,10 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 
+import com.google.common.io.Files;
+
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import java.util.Collections;
 
 public class ConfigAppearance_p {
 
@@ -77,7 +79,7 @@ public class ConfigAppearance_p {
                 if (skinFiles.contains(selectedSkin)) {
                     changeSkin(sb, skinPath, selectedSkin);
                 }
-                
+
             }
 
             if (post.containsKey("delete_button")) {
@@ -91,7 +93,7 @@ public class ConfigAppearance_p {
                     FileUtils.deletedelete(skinfile);
                 }
             }
-            
+
             if (post.containsKey("install_button")) {
                 // load skin from URL
                 final String url = post.get("url");
@@ -112,7 +114,7 @@ public class ConfigAppearance_p {
                     while (it.hasNext()) {
                         bw.write(it.next() + "\n");
                     }
-                    
+
                     bw.close();
                 } catch (final IOException e) {
                     prop.put("status", "2");// error saving the skin
@@ -148,7 +150,7 @@ public class ConfigAppearance_p {
         }
         prop.put("skinlist", count);
         prop.putHTML("currentskin", env.getConfig("currentSkin", "default"));
-        
+
         // write colors from generic skin
         Iterator<String> i = env.configKeys();
         while (i.hasNext()) {
@@ -165,7 +167,7 @@ public class ConfigAppearance_p {
 
         styleFile.getParentFile().mkdirs();
         try {
-            FileUtils.copy(skinFile, styleFile);
+            Files.copy(skinFile, styleFile);
             sb.setConfig("currentSkin", skin.substring(0, skin.length() - 4));
             return true;
         } catch (final IOException e) {

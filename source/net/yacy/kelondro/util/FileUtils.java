@@ -64,6 +64,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.storage.Files;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
@@ -274,41 +275,6 @@ public final class FileUtils
             if ( fis != null ) {
                 try {
                     fis.close();
-                } catch ( final Exception e ) {
-                }
-            }
-        }
-    }
-
-    /**
-     * Copies a File to a File.
-     *
-     * @param source File
-     * @param dest File
-     * @param count the amount of bytes to copy
-     * @throws IOException
-     * @see #copy(InputStream source, OutputStream dest)
-     * @see #copy(InputStream source, File dest)
-     * @see #copyRange(File source, OutputStream dest, int start)
-     * @see #copy(File source, OutputStream dest)
-     */
-    public static void copy(final File source, final File dest) throws IOException {
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-        try {
-            fis = new FileInputStream(source);
-            fos = new FileOutputStream(dest);
-            copy(fis, fos, -1);
-        } finally {
-            if ( fis != null ) {
-                try {
-                    fis.close();
-                } catch ( final Exception e ) {
-                }
-            }
-            if ( fos != null ) {
-                try {
-                    fos.close();
                 } catch ( final Exception e ) {
                 }
             }
@@ -957,7 +923,7 @@ public final class FileUtils
     private static void forceMove(final File from, final File to) throws IOException {
         if ( !(to.delete() && from.renameTo(to)) ) {
             // do it manually
-            copy(from, to);
+            Files.copy(from, to);
             FileUtils.deletedelete(from);
         }
     }

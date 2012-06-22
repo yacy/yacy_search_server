@@ -1,4 +1,4 @@
-//yacySeedUploadFile.java 
+//yacySeedUploadFile.java
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -27,30 +27,32 @@ package net.yacy.peers.operation;
 
 import java.io.File;
 
-import net.yacy.kelondro.util.FileUtils;
+import com.google.common.io.Files;
 
 import de.anomic.server.serverSwitch;
 
 public class yacySeedUploadFile implements yacySeedUploader {
-    
+
     public static final String CONFIG_FILE_PATH = "seedFilePath";
 
+    @Override
     public String uploadSeedFile(final serverSwitch sb, final File seedFile) throws Exception {
-        
+
         String seedFilePath = "";
         try {
             seedFilePath = sb.getConfig(CONFIG_FILE_PATH,"");
             if (seedFilePath.length() == 0) throw new Exception("Path to seed file is not configured properly");
-            
-            final File publicSeedFile = new File(seedFilePath);            
-            FileUtils.copy(seedFile,publicSeedFile);
-            
+
+            final File publicSeedFile = new File(seedFilePath);
+            Files.copy(seedFile,publicSeedFile);
+
             return "Seed-List file stored successfully";
         } catch (final Exception e) {
             throw new Exception("Unable to store the seed-list file into the filesystem using path '" + seedFilePath + "'. " + e.getMessage());
         }
     }
 
+    @Override
     public String[] getConfigurationOptions() {
         return new String[]{CONFIG_FILE_PATH};
         }
