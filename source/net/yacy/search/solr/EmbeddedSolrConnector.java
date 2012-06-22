@@ -28,9 +28,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.services.federated.solr.AbstractSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
+import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.index.SolrField;
 
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.core.CoreContainer;
 import org.xml.sax.SAXException;
 
@@ -84,7 +88,26 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
         storage.mkdirs();
         try {
             EmbeddedSolrConnector solr = new EmbeddedSolrConnector(storage, solr_config);
+            SolrDoc solrdoc = new SolrDoc();
+            solrdoc.addSolr(SolrField.id, "ABCD0000abcd");
+            solrdoc.addSolr(SolrField.title, "Lorem ipsum");
+            solrdoc.addSolr(SolrField.text_t, "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+            solr.add(solrdoc);
+            SolrDocumentList searchresult = solr.get(SolrField.text_t.name() + ":tempor", 0, 10);
+            for (SolrDocument d: searchresult) {
+                System.out.println(d.toString());
+            }
             solr.close();
+            /*
+            JettySolrRunner solrJetty = new JettySolrRunner("/solr", 8090, solr_config.getAbsolutePath());
+            try {
+                solrJetty.start();
+                String url = "http://localhost:" + solrJetty.getLocalPort() + "/solr";
+                SolrServer server = new HttpSolrServer(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            */
         } catch (IOException e) {
             Log.logException(e);
         }

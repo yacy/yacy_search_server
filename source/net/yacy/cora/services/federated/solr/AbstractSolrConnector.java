@@ -50,6 +50,10 @@ public class AbstractSolrConnector implements SolrConnector {
         this.server = server;
     }
 
+    public SolrServer getServer() {
+        return this.server;
+    }
+
     @Override
     public synchronized void close() {
         try {
