@@ -1,5 +1,10 @@
 list of library-dependencies:
 
+* jetty (these files were taken from the solr 3.6.0 example)
+jetty-6.1.26-patched-JETTY-1340.jar
+jetty-util-6.1.26-patched-JETTY-1340.jar
+servlet-api-2.5-20081211.jar
+
 * apache-solr-solrj-3.4.0.jar depends on:
 commons-codec-1.4.jar
 commons-httpclient-3.1.jar

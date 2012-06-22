@@ -68,6 +68,8 @@
 			<string>$JAVAROOT/lib/jcl-over-slf4j-1.6.1.jar</string>
 			<string>$JAVAROOT/lib/jempbox-1.6.0.jar</string>
 			<string>$JAVAROOT/lib/jena-2.6.4.jar</string>
+			<string>$JAVAROOT/lib/jetty-6.1.26-patched-JETTY-1340.jar</string>
+			<string>$JAVAROOT/lib/jetty-util-6.1.26-patched-JETTY-1340.jar</string>
 			<string>$JAVAROOT/lib/jsch-0.1.42.jar</string>
 			<string>$JAVAROOT/lib/json-simple-1.1.jar</string>
 			<string>$JAVAROOT/lib/log4j-1.2.16.jar</string>
@@ -84,7 +86,7 @@
 			<string>$JAVAROOT/lib/poi-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/poi-scratchpad-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/sax-2.0.1.jar</string>
-			<string>$JAVAROOT/lib/servlet-api.jar</string>
+			<string>$JAVAROOT/lib/servlet-api-2.5-20081211.jar</string>
 			<string>$JAVAROOT/lib/slf4j-api-1.6.1.jar</string>
 			<string>$JAVAROOT/lib/slf4j-jdk14-1.6.1.jar</string>
 			<string>$JAVAROOT/lib/webcat-0.1-swf.jar</string>

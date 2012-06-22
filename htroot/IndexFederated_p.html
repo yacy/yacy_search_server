@@ -21,8 +21,8 @@
     <form action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
-        <input type="checkbox" name="yacy.indexing.enabled" id="yacy.indexing.enabled" #(yacy.indexing.enabled.checked)#:: checked="checked"#(/yacy.indexing.enabled.checked)# />
-        <label for="p2p">YaCy Embedded Index Engine</label>
+        <input type="checkbox" name="yacy.indexing.classic" id="yacy.indexing.classic" #(yacy.indexing.classic.checked)#:: checked="checked"#(/yacy.indexing.classic.checked)# />
+        <label for="p2p">Embedded 'Classic YaCy' Search Index</label>
       </legend>
         You can just switch on or off this index. If you switch it off, you will not be able to search with YaCy any more.
       </fieldset>
@@ -30,8 +30,17 @@
       
       <fieldset>
       <legend>
-        <input type="checkbox" name="solr.indexing.enabled" id="solr.indexing.enabled" #(solr.indexing.enabled.checked)#:: checked="checked"#(/solr.indexing.enabled.checked)# />
-        <label for="p2p">Remote Solr Index</label>
+        <input type="checkbox" name="yacy.indexing.solrembedded" id=""yacy.indexing.solrembedded" #("yacy.indexing.solrembedded.checked)#:: checked="checked"#(/"yacy.indexing.solrembedded.checked)# />
+        <label for="p2p">Embedded Solr Search Index</label>
+      </legend>
+        Experimental embedded solr index.
+      </fieldset>
+      <input type="submit" name="set" value="Set" />
+      
+      <fieldset>
+      <legend>
+        <input type="checkbox" name="solr.indexing.solrremote" id="solr.indexing.solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# />
+        <label for="p2p">Remote Solr Search Index</label>
       </legend>
       You can set one or more Solr targets here. If you wish to set several targets, then list them in the 'Solr URL' field using a ',' (comma) as separator.
 

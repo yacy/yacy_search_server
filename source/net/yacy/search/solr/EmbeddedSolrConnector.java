@@ -32,7 +32,10 @@ import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.index.SolrField;
 
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.embedded.JettySolrRunner;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.core.CoreContainer;
@@ -99,7 +102,7 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
             }
             solr.close();
             /*
-            JettySolrRunner solrJetty = new JettySolrRunner("/solr", 8090, solr_config.getAbsolutePath());
+            JettySolrRunner solrJetty = new JettySolrRunner("/solr", 8091, storage.getAbsolutePath());
             try {
                 solrJetty.start();
                 String url = "http://localhost:" + solrJetty.getLocalPort() + "/solr";

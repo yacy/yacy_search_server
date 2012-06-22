@@ -12,7 +12,6 @@
 	<classpathentry kind="src" path="htroot/api/bookmarks/xbel"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
 	<classpathentry kind="lib" path="lib/activation.jar"/>
@@ -57,6 +56,9 @@
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-highlighter-3.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-3.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/servlet-api-2.5-20081211.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-6.1.26-patched-JETTY-1340.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-6.1.26-patched-JETTY-1340.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
