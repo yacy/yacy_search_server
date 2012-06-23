@@ -38,7 +38,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
-import net.yacy.cora.services.federated.solr.SolrShardingConnector;
+import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
@@ -114,7 +114,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         this.stack = new LinkedBlockingQueue<byte[]>();
     }
 
-    public ZURL(final SolrShardingConnector solrConnector,
+    public ZURL(final ShardSolrConnector solrConnector,
                     final SolrConfiguration solrConfiguration) {
         this.solrConnector = solrConnector;
         this.solrConfiguration = solrConfiguration;

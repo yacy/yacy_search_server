@@ -43,7 +43,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -53,6 +56,10 @@ import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
+
+import com.google.common.net.InetAddresses;
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.common.util.concurrent.TimeLimiter;
 
 public class Domains {
 
@@ -553,14 +560,16 @@ public class Domains {
         cacheHit_Insert++;
     }
 
+    final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newFixedThreadPool(20));
+
     /**
      * resolve a host address using a local DNS cache and a DNS lookup if necessary
      * @param host
      * @return the hosts InetAddress or null if the address cannot be resolved
      */
-    public static InetAddress dnsResolve(String host) {
-        if ((host == null) || (host.length() == 0)) return null;
-        host = host.toLowerCase().trim();
+    public static InetAddress dnsResolve(final String host0) {
+        if ((host0 == null) || (host0.length() == 0)) return null;
+        final String host = host0.toLowerCase().trim();
         // try to simply parse the address
         InetAddress ip = parseInetAddress(host);
         if (ip != null) return ip;
@@ -615,8 +624,23 @@ public class Domains {
             try {
                 //final long t = System.currentTimeMillis();
                 Thread.currentThread().setName("Domains: DNS resolve of '" + host + "'"); // thread dump show which host is resolved
-                ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
-                //ip = InetAddress.getByName(host); // this makes the DNS request to backbone
+                if (InetAddresses.isInetAddress(host)) {
+                    try {
+                        ip = InetAddresses.forString(host);
+                        Log.logInfo("Domains", "using guava for host resolution:"  + host);
+                    } catch (IllegalArgumentException e) {
+                        ip = null;
+                    }
+                }
+                if (ip == null) {
+                    ip = timeLimiter.callWithTimeout(new Callable<InetAddress>() {
+                        @Override
+                        public InetAddress call() throws Exception {
+                            return InetAddress.getByName(host);
+                        }
+                    }, 1000L, TimeUnit.MILLISECONDS, false);
+                    //ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
+                }
                 //.out.println("DNSLOOKUP-*LOOKUP* " + host + ", time = " + (System.currentTimeMillis() - t) + "ms");
             } catch (final Throwable e) {
                 // add new entries

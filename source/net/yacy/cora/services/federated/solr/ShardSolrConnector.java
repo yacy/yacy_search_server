@@ -37,22 +37,22 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
 
-public class SolrShardingConnector implements SolrConnector {
+public class ShardSolrConnector implements SolrConnector {
 
     private final List<SolrConnector> connectors;
-    private final SolrShardingSelection sharding;
+    private final ShardSelection sharding;
     private final String[] urls;
 
-    public SolrShardingConnector(final String urlList, final SolrShardingSelection.Method method, final long timeout, boolean multipleConnections) throws IOException {
+    public ShardSolrConnector(final String urlList, final ShardSelection.Method method, final long timeout, boolean multipleConnections) throws IOException {
         urlList.replace(' ', ',');
         this.urls = urlList.split(",");
         this.connectors = new ArrayList<SolrConnector>();
         SolrConnector s;
         for (final String u: this.urls) {
-            s = multipleConnections ? new SolrMultipleConnector(u.trim(), 2) : new SolrSingleConnector(u.trim());
-            this.connectors.add(new SolrRetryConnector(s, timeout));
+            s = multipleConnections ? new MultipleSolrConnector(u.trim(), 2) : new SingleSolrConnector(u.trim());
+            this.connectors.add(new RetrySolrConnector(s, timeout));
         }
-        this.sharding = new SolrShardingSelection(method, this.urls.length);
+        this.sharding = new ShardSelection(method, this.urls.length);
     }
 
     @Override

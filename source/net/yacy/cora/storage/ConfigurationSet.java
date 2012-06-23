@@ -38,7 +38,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.yacy.cora.storage.ConfigurationSet.Entry;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.index.SolrField;
 /**
  * this class reads configuration attributes as a list of keywords from a list
@@ -199,7 +198,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         if (this.file == null) return;
         // create a temporary bak file, use it as template to preserve user comments
         File bakfile = new File (this.file.getAbsolutePath() + ".bak");
-        FileUtils.copy (this.file, bakfile);
+        Files.copy (this.file, bakfile);
 
         @SuppressWarnings("unchecked")
         TreeMap<String,Entry> tclone = (TreeMap<String,Entry>) this.clone(); // clone to write appended entries

@@ -14,13 +14,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import net.yacy.yacy;
 import net.yacy.document.parser.rdfa.IRDFaTriple;
 import net.yacy.kelondro.logging.Log;
 
-import net.yacy.yacy;
-
 public class RDFaTripleImpl{
-	
+
 	private static Templates templates = null;
 	private String propertyURI = null;
 	private String subjectURI = null;
@@ -30,59 +29,52 @@ public class RDFaTripleImpl{
 	private String value = null;
 	private String dataType = null;
 	private String language = null;
-	private Reader in;
-	private Transformer aTransformer;
-	private ArrayList<IRDFaTriple> allRDFaTriples = new ArrayList<IRDFaTriple>();
+	private final Reader in;
+	private final Transformer aTransformer;
+	private final ArrayList<IRDFaTriple> allRDFaTriples = new ArrayList<IRDFaTriple>();
 
 
 	public RDFaTripleImpl(Reader in, String base) throws IOException,
 			TransformerException, TransformerConfigurationException {
-		
+
 		BufferedReader bufReader = new BufferedReader(in);
 		String readLine = bufReader.readLine();
 		if (!readLine.toLowerCase().contains("<!doctype")){
 			bufReader.reset();
 		}
-		
-		
+
 		if (templates == null) {
-			
-			try{
-				File f = new File (yacy.homedir+File.separatorChar+"RDFaParser"+File.separatorChar+"RDFaParser.xsl");
-				
-				
+            File f = new File (yacy.homedir + File.separatorChar + "defaults" + File.separatorChar + "RDFaParser.xsl");
+			try {
 				StreamSource aSource = new StreamSource(f);
-				
-			
-				TransformerFactory aFactory = TransformerFactory.newInstance();		
-				templates = aFactory.newTemplates(aSource); 
-			}
-			catch(Exception e){
-				Log.logSevere("RDFA PARSER", "XSL template could not be loaded from "+yacy.homedir+File.separatorChar+"RDFaParser"+File.separatorChar+"RDFaParser.xsl");
+				TransformerFactory aFactory = TransformerFactory.newInstance();
+				templates = aFactory.newTemplates(aSource);
+			} catch(Exception e){
+				Log.logSevere("RDFA PARSER", "XSL template could not be loaded from " + f.toString());
 			}
 		}
-		this.aTransformer = templates.newTransformer();		
-		aTransformer.setParameter("parser", this);
-		aTransformer.setParameter("url", base);
-		
+		this.aTransformer = templates.newTransformer();
+		this.aTransformer.setParameter("parser", this);
+		this.aTransformer.setParameter("url", base);
+
 		this.in = bufReader;
 	}
 
 	public IRDFaTriple[] parse() {
 		try {
-			aTransformer.transform(new StreamSource(in), new StreamResult(System.out));
+			this.aTransformer.transform(new StreamSource(this.in), new StreamResult(System.out));
 		} catch (TransformerException e) {
 			Log.logWarning("RDFA PARSER", "Error while reading RDFa");
 //			e.printStackTrace();
 		}
-		
-		return allRDFaTriples .toArray(new IRDFaTriple[]{});
-		
+
+		return this.allRDFaTriples .toArray(new IRDFaTriple[]{});
+
 	}
 
 	public static boolean flushDataProperty(Object oparser) {
 		RDFaTripleImpl parser = ((RDFaTripleImpl)oparser);
-		
+
 		parser.reportDataProperty(parser.subjectURI, parser.subjectNodeURI, parser.propertyURI,
 				parser.value, parser.dataType, parser.language, parser.objectNodeURI, parser.objectURI);
 		nullAllValues(parser);
@@ -93,7 +85,7 @@ public class RDFaTripleImpl{
 			String propertyURI, String value, String dataType,
 			String language, String objectNodeURI, String objectURI) {
 			IRDFaTriple triple = new RDFaTripleContent(subjectURI,subjectNodeURI,propertyURI,value,dataType,language, objectNodeURI,objectURI);
-			allRDFaTriples.add(triple);
+			this.allRDFaTriples.add(triple);
 	}
 
 	private static void nullAllValues(RDFaTripleImpl parser) {
@@ -104,7 +96,7 @@ public class RDFaTripleImpl{
 		parser.objectNodeURI = null;
 		parser.value = null;
 		parser.dataType = null;
-		parser.language = null;		
+		parser.language = null;
 	}
 
 	public static boolean flushObjectProperty(Object oparser) {
@@ -151,7 +143,7 @@ public class RDFaTripleImpl{
 		((RDFaTripleImpl)parser).subjectURI = theSubjectURI;
 		return true;
 	}
-	
+
 	public static boolean setTheValue(Object parser, String theValue) {
 		((RDFaTripleImpl)parser).value = theValue;
 		return true;

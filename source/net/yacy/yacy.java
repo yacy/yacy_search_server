@@ -80,6 +80,9 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.MetadataRepository;
 import net.yacy.search.index.Segment;
+
+import com.google.common.io.Files;
+
 import de.anomic.data.Translator;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.server.serverCore;
@@ -181,7 +184,7 @@ public final class yacy {
 			f = new File(dataHome, "DATA/LOG/yacy.logging");
 			final File f0 = new File(appHome, "defaults/yacy.logging");
 			if (!f.exists() || f0.lastModified() > f.lastModified()) try {
-			    FileUtils.copy(f0, f);
+			    Files.copy(f0, f);
             } catch (final IOException e){
                 System.out.println("could not copy yacy.logging");
             }
@@ -268,7 +271,7 @@ public final class yacy {
             // create default notifier picture
             //TODO: Use templates instead of copying images ...
             if (!((new File(htDocsPath, "notifier.gif")).exists())) try {
-                FileUtils.copy(new File(htRootPath, "env/grafics/empty.gif"),
+                Files.copy(new File(htRootPath, "env/grafics/empty.gif"),
                                      new File(htDocsPath, "notifier.gif"));
             } catch (final IOException e) {}
 

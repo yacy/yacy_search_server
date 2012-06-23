@@ -31,12 +31,12 @@ import java.util.List;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
-public class SolrRetryConnector implements SolrConnector {
+public class RetrySolrConnector implements SolrConnector {
 
     private final SolrConnector solrConnector;
     private final long retryMaxTime;
 
-    public SolrRetryConnector(final SolrConnector solrConnector, final long retryMaxTime) {
+    public RetrySolrConnector(final SolrConnector solrConnector, final long retryMaxTime) {
         this.solrConnector = solrConnector;
         this.retryMaxTime = retryMaxTime;
     }

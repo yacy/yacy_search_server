@@ -33,7 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicLong;
 import net.yacy.search.index.SolrField;
 
-public class SolrShardingSelection {
+public class ShardSelection {
 
     public final static Charset charsetUTF8;
     static {
@@ -47,7 +47,7 @@ public class SolrShardingSelection {
         MODULO_HOST_MD5, ROUND_ROBIN;
     }
 
-    public SolrShardingSelection(final Method method, final int dimension) {
+    public ShardSelection(final Method method, final int dimension) {
         this.method = method;
         this.dimension = dimension;
         this.chardID = new AtomicLong(0);

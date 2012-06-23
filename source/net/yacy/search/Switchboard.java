@@ -93,9 +93,9 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
+import net.yacy.cora.services.federated.solr.ShardSelection;
+import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
-import net.yacy.cora.services.federated.solr.SolrShardingConnector;
-import net.yacy.cora.services.federated.solr.SolrShardingSelection;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -151,6 +151,9 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
 import net.yacy.search.ranking.RankingProfile;
+
+import com.google.common.io.Files;
+
 import de.anomic.crawler.Cache;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
@@ -392,7 +395,7 @@ public final class Switchboard extends serverSwitch
             getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
         final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/" + schemename);
         if ( !solrWorkProfile.exists() ) {
-            FileUtils.copy(solrBackupProfile, solrWorkProfile);
+            Files.copy(solrBackupProfile, solrWorkProfile);
         }
         final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile);
         this.solrScheme = new SolrConfiguration(solrWorkProfile);
@@ -407,9 +410,9 @@ public final class Switchboard extends serverSwitch
 
         try {
             this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(
-                (usesolr) ? new SolrShardingConnector(
+                (usesolr) ? new ShardSolrConnector(
                     solrurls,
-                    SolrShardingSelection.Method.MODULO_HOST_MD5,
+                    ShardSelection.Method.MODULO_HOST_MD5,
                     10000, true) : null);
         } catch ( final IOException e ) {
             Log.logException(e);
@@ -731,7 +734,7 @@ public final class Switchboard extends serverSwitch
                 getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT),
                 "notifier.gif");
         try {
-            FileUtils.copy(notifierSource, notifierDest);
+            Files.copy(notifierSource, notifierDest);
         } catch ( final IOException e ) {
         }
 

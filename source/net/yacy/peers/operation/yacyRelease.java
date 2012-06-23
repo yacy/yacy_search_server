@@ -52,6 +52,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.Files;
 import net.yacy.document.Document;
 import net.yacy.document.parser.tarParser;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -495,7 +496,7 @@ public final class yacyRelease extends yacyVersion {
                 final File InfoPlistSource = new File(sb.getDataPath(), "DATA/RELEASE/yacy/addon/YaCy.app/Contents/Info.plist");
                 final File InfoPlistDestination = new File(sb.getAppPath(), "addon/YaCy.app/Contents/Info.plist");
                 if (InfoPlistSource.exists() && InfoPlistDestination.exists()) {
-                    FileUtils.copy(InfoPlistSource, InfoPlistDestination);
+                    Files.copy(InfoPlistSource, InfoPlistDestination);
                     Log.logInfo("UPDATE", "replaced Info.plist");
                 }
             }
