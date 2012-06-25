@@ -570,7 +570,7 @@ public class Domains {
      * @return the hosts InetAddress or null if the address cannot be resolved
      */
     public static InetAddress dnsResolve(final String host0) {
-        if ((host0 == null) || (host0.length() == 0)) return null;
+        if (host0 == null || host0.length() == 0) return null;
         final String host = host0.toLowerCase().trim();
         // try to simply parse the address
         InetAddress ip = parseInetAddress(host);
@@ -689,7 +689,9 @@ public class Domains {
 
     public static final InetAddress parseInetAddress(String ip) {
         if (ip == null || ip.length() < 8) return null;
-        if (isLocalhost(ip)) ip = LOCALHOST;
+        ip = ip.trim();
+        if (ip.charAt(0) == '[' && ip.charAt(ip.length() - 1) == ']') ip = ip.substring(1, ip.length() - 1);
+        if (isLocalhost(ip)) ip = "127.0.0.1"; // normalize to IPv4 here since that is the way to calculate the InetAddress
         final String[] ips = dotPattern.split(ip);
         if (ips.length != 4) return null;
         final byte[] ipb = new byte[4];
