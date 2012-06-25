@@ -56,6 +56,20 @@ public class ShardSolrConnector implements SolrConnector {
     }
 
     @Override
+    public int getCommitWithinMs() {
+        return this.connectors.get(0).getCommitWithinMs();
+    }
+
+    /**
+     * set the solr autocommit delay
+     * @param c the maximum waiting time after a solr command until it is transported to the server
+     */
+    @Override
+    public void setCommitWithinMs(int c) {
+        for (final SolrConnector connector: this.connectors) connector.setCommitWithinMs(c);
+    }
+
+    @Override
     public synchronized void close() {
         for (final SolrConnector connector: this.connectors) connector.close();
     }

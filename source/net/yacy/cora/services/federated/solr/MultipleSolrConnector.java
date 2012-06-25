@@ -15,11 +15,13 @@ public class MultipleSolrConnector implements SolrConnector {
     private final ArrayBlockingQueue<SolrDoc> queue;
     private final AddWorker[] worker;
     private final SolrConnector solr;
+    private int commitWithinMs;
 
     public MultipleSolrConnector(final String url, int connections) throws IOException {
         this.solr = new SingleSolrConnector(url);
         this.queue = new ArrayBlockingQueue<SolrDoc>(1000);
         this.worker = new AddWorker[connections];
+        this.commitWithinMs = 180000;
         for (int i = 0; i < connections; i++) {
             this.worker[i] = new AddWorker(url);
             this.worker[i].start();
@@ -30,6 +32,7 @@ public class MultipleSolrConnector implements SolrConnector {
         private final SolrConnector solr;
         public AddWorker(final String url) throws IOException {
             this.solr = new SingleSolrConnector(url);
+            this.solr.setCommitWithinMs(MultipleSolrConnector.this.commitWithinMs);
         }
         @Override
         public void run() {
@@ -52,6 +55,22 @@ public class MultipleSolrConnector implements SolrConnector {
     }
 
     @Override
+    public int getCommitWithinMs() {
+        return this.commitWithinMs;
+    }
+
+    /**
+     * set the solr autocommit delay
+     * @param c the maximum waiting time after a solr command until it is transported to the server
+     */
+    @Override
+    public void setCommitWithinMs(int c) {
+        this.commitWithinMs = c;
+        this.solr.setCommitWithinMs(c);
+        for (AddWorker w: this.worker) w.solr.setCommitWithinMs(c);
+    }
+
+    @Override
     public void close() {
         for (@SuppressWarnings("unused") AddWorker element : this.worker) {
             try {
@@ -59,8 +78,8 @@ public class MultipleSolrConnector implements SolrConnector {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            this.solr.close();
         }
+        this.solr.close();
     }
 
     @Override

@@ -41,9 +41,11 @@ import org.apache.solr.common.SolrInputDocument;
 public class AbstractSolrConnector implements SolrConnector {
 
     protected SolrServer server;
+    protected int commitWithinMs; // max time (in ms) before a commit will happen
 
     protected AbstractSolrConnector() {
         this.server = null;
+        this.commitWithinMs = 180000;
     }
 
     protected void init(SolrServer server) {
@@ -52,6 +54,24 @@ public class AbstractSolrConnector implements SolrConnector {
 
     public SolrServer getServer() {
         return this.server;
+    }
+
+    /**
+     * get the solr autocommit delay
+     * @return the maximum waiting time after a solr command until it is transported to the server
+     */
+    @Override
+    public int getCommitWithinMs() {
+        return this.commitWithinMs;
+    }
+
+    /**
+     * set the solr autocommit delay
+     * @param c the maximum waiting time after a solr command until it is transported to the server
+     */
+    @Override
+    public void setCommitWithinMs(int c) {
+        this.commitWithinMs = c;
     }
 
     @Override
@@ -137,7 +157,7 @@ public class AbstractSolrConnector implements SolrConnector {
     @Override
     public void add(final SolrDoc solrdoc) throws IOException, SolrException {
         try {
-            this.server.add(solrdoc,180000); // commitWithIn 180s
+            this.server.add(solrdoc, this.commitWithinMs);
             //this.server.commit();
         } catch (SolrServerException e) {
             Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdoc.toString());
@@ -150,7 +170,7 @@ public class AbstractSolrConnector implements SolrConnector {
         ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
         for (SolrDoc d: solrdocs) l.add(d);
         try {
-            this.server.add(l,180000); // commitWithIn 120s
+            this.server.add(l, this.commitWithinMs);
             //this.server.commit();
         } catch (SolrServerException e) {
             Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdocs.toString());

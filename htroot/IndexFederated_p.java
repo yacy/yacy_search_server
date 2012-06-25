@@ -59,6 +59,7 @@ public class IndexFederated_p {
             final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.solrremote", false);
             env.setConfig("federated.service.solr.indexing.enabled", solrIsOnAfterwards);
             String solrurls = post.get("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr"));
+            int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000));
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
             final StringBuilder s = new StringBuilder();
             String s0;
@@ -76,6 +77,7 @@ public class IndexFederated_p {
             }
             solrurls = s.toString().trim();
             env.setConfig("federated.service.solr.indexing.url", solrurls);
+            env.setConfig("federated.service.solr.indexing.commitWithinMs", commitWithinMs);
             env.setConfig("federated.service.solr.indexing.sharding", post.get("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5")));
             final String schemename = post.get("solr.indexing.schemefile", env.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list"));
             env.setConfig("federated.service.solr.indexing.schemefile", schemename);
@@ -90,7 +92,13 @@ public class IndexFederated_p {
                 // switch on
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
                 try {
-                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr((usesolr) ? new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true) : null);
+                    if (usesolr) {
+                        SolrConnector solr = new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true);
+                        solr.setCommitWithinMs(commitWithinMs);
+                        sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(solr);
+                    } else {
+                        sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(null);
+                    }
                 } catch (final IOException e) {
                     Log.logException(e);
                     sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(null);
@@ -179,6 +187,7 @@ public class IndexFederated_p {
         prop.put("yacy.indexing.engine.off.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("off") ? 1 : 0);
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool("federated.service.solr.indexing.enabled", false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr").replace(",", "\n"));
+        prop.put("solr.indexing.commitWithinMs", env.getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000));
         prop.put("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5"));
         prop.put("solr.indexing.schemefile", schemename);
 

@@ -95,6 +95,7 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.services.federated.solr.ShardSelection;
 import net.yacy.cora.services.federated.solr.ShardSolrConnector;
+import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
@@ -407,14 +408,16 @@ public final class Switchboard extends serverSwitch
         // set up the solr interface
         final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
+        int commitWithinMs = getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000);
 
         if (usesolr && solrurls != null && solrurls.length() > 0) {
             try {
-                this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(
-                                new ShardSolrConnector(
-                                                solrurls,
-                                                ShardSelection.Method.MODULO_HOST_MD5,
-                                                10000, true));
+                SolrConnector solr = new ShardSolrConnector(
+                                solrurls,
+                                ShardSelection.Method.MODULO_HOST_MD5,
+                                10000, true);
+                solr.setCommitWithinMs(commitWithinMs);
+                this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(solr);
             } catch ( final IOException e ) {
                 Log.logException(e);
             }
