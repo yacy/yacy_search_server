@@ -78,6 +78,7 @@ public class AbstractSolrConnector implements SolrConnector {
     public synchronized void close() {
         try {
             this.server.commit();
+            this.server = null;
         } catch (SolrServerException e) {
             Log.logException(e);
         } catch (IOException e) {

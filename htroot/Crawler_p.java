@@ -455,7 +455,7 @@ public class Crawler_p {
                         prop.put("info", "6"); // Error with url
                         prop.putHTML("info_crawlingStart", crawlingStart);
                         prop.putHTML("info_error", e.getMessage());
-                        Log.logException(e);
+                        Log.logInfo("Crawler_p", "start url rejected: " + e.getMessage());
                     }
 
                 } else if ("file".equals(crawlingMode)) {

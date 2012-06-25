@@ -1807,7 +1807,7 @@ public final class Switchboard extends serverSwitch
                     0,
                     0,
                     0);
-            response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile, false);
+            response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false);
             final indexingQueueEntry queueEntry =
                 new indexingQueueEntry(Segments.Process.SURROGATES, response, new Document[] {
                     document
@@ -3357,7 +3357,8 @@ public final class Switchboard extends serverSwitch
                     url = new DigestURI(seedListFileURL);
                     //final long start = System.currentTimeMillis();
                     client.HEADResponse(url.toString());
-                    header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+                    int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+                    header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
                     //final long loadtime = System.currentTimeMillis() - start;
                     /*if (header == null) {
                         if (loadtime > getConfigLong("bootstrapLoadTimeout", 6000)) {

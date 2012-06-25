@@ -112,7 +112,7 @@ public class User{
                 cookie=sb.userDB.getAdminCookie();
 
             if(entry != null || staticAdmin){
-                final ResponseHeader outgoingHeader=new ResponseHeader();
+                final ResponseHeader outgoingHeader=new ResponseHeader(200);
                 outgoingHeader.setCookie("login", cookie);
                 prop.setOutgoingHeader(outgoingHeader);
 

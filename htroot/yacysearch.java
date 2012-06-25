@@ -205,7 +205,7 @@ public class yacysearch {
 
         // Adding CORS Access header for yacysearch.rss output
         if ( rss ) {
-            final ResponseHeader outgoingHeader = new ResponseHeader();
+            final ResponseHeader outgoingHeader = new ResponseHeader(200);
             outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
             prop.setOutgoingHeader(outgoingHeader);
         }

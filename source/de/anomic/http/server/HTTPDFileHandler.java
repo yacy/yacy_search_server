@@ -227,7 +227,7 @@ public final class HTTPDFileHandler {
     }
 
     private static final ResponseHeader getDefaultHeaders(final String path) {
-        final ResponseHeader headers = new ResponseHeader();
+        final ResponseHeader headers = new ResponseHeader(200);
         String ext;
         int pos;
         if ((pos = path.lastIndexOf('.')) < 0) {
@@ -526,7 +526,7 @@ public final class HTTPDFileHandler {
                     aBuffer.append("  </ul>\n</body>\n</html>\n");
 
                     // write the list to the client
-                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html; charset=UTF-8", aBuffer.length(), new Date(targetFile.lastModified()), null, new ResponseHeader(), null, null, true);
+                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html; charset=UTF-8", aBuffer.length(), new Date(targetFile.lastModified()), null, new ResponseHeader(200), null, null, true);
                     if (!method.equals(HeaderFramework.METHOD_HEAD)) {
                         out.write(UTF8.getBytes(aBuffer.toString()));
                     }
@@ -1075,9 +1075,10 @@ public final class HTTPDFileHandler {
                         // apply templates
                         TemplateEngine.writeTemplate(fis, o, templatePatterns, UNRESOLVED_PATTERN);
                         fis.close();
+                        ResponseHeader rh = (templatePatterns == null) ? new ResponseHeader(200) : templatePatterns.getOutgoingHeader();
                         HTTPDemon.sendRespondHeader(conProp, out,
-                                httpVersion, 200, null, mimeType, -1,
-                                targetDate, expireDate, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                httpVersion, rh.getStatusCode(), null, mimeType, -1,
+                                targetDate, expireDate, rh,
                                 null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
                         final ChunkedOutputStream chos = new ChunkedOutputStream(out);
@@ -1107,16 +1108,17 @@ public final class HTTPDFileHandler {
                             ServerSideIncludes.writeSSI(o1, o, realmProp, clientIP, requestHeader);
                             //httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         }
+                        ResponseHeader rh = (templatePatterns == null) ? new ResponseHeader(200) : templatePatterns.getOutgoingHeader();
                         if (method.equals(HeaderFramework.METHOD_HEAD)) {
                             HTTPDemon.sendRespondHeader(conProp, out,
-                                    httpVersion, 200, null, mimeType, o.length(),
-                                    targetDate, expireDate, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                    httpVersion, rh.getStatusCode(), null, mimeType, o.length(),
+                                    targetDate, expireDate, rh,
                                     contentEncoding, null, nocache);
                         } else {
                             final byte[] result = o.getBytes(); // this interrupts streaming (bad idea!)
                             HTTPDemon.sendRespondHeader(conProp, out,
-                                    httpVersion, 200, null, mimeType, result.length,
-                                    targetDate, expireDate, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                    httpVersion, rh.getStatusCode(), null, mimeType, result.length,
+                                    targetDate, expireDate, rh,
                                     contentEncoding, null, nocache);
                             FileUtils.copy(result, out);
                         }
@@ -1125,7 +1127,7 @@ public final class HTTPDFileHandler {
 
                     int statusCode = 200;
                     int rangeStartOffset = 0;
-                    final ResponseHeader header = new ResponseHeader();
+                    final ResponseHeader header = new ResponseHeader(statusCode);
 
                     // adding the accept ranges header
                     header.put(HeaderFramework.ACCEPT_RANGES, "bytes");
@@ -1429,8 +1431,8 @@ public final class HTTPDFileHandler {
 			String strARGS = (String) conProp.get("ARGS");
 			if(strARGS.startsWith("action=")) {
 				int detectnextargument = strARGS.indexOf("&");
-				action = strARGS.substring (7, detectnextargument);				
-				strARGS = strARGS.substring(detectnextargument+1);				
+				action = strARGS.substring (7, detectnextargument);
+				strARGS = strARGS.substring(detectnextargument+1);
 			}
 			if(strARGS.startsWith("url=")) {
 				final String strUrl = strARGS.substring(4); // strip url=
@@ -1467,7 +1469,7 @@ public final class HTTPDFileHandler {
 		requestHeader.remove("Authorization");
 		requestHeader.remove("Connection");
 		requestHeader.put(HeaderFramework.HOST, proxyurl.getHost());
-		
+
 		// temporarily add argument to header to pass it on to augmented browsing
 		requestHeader.put("YACYACTION", action);
 
@@ -1475,7 +1477,7 @@ public final class HTTPDFileHandler {
 		HTTPDProxyHandler.doGet(prop, requestHeader, o);
 
 		// reparse header to extract content-length and mimetype
-		final ResponseHeader outgoingHeader = new ResponseHeader();
+		final ResponseHeader outgoingHeader = new ResponseHeader(200);
 		final InputStream in = new ByteArrayInputStream(o.toByteArray());
 		String line = readLine(in);
 		while(line != null && !line.equals("")) {

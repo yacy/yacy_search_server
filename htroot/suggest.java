@@ -120,7 +120,7 @@ public class suggest {
 
         // Adding CORS Access header for xml output
         if (xml) {
-            final ResponseHeader outgoingHeader = new ResponseHeader();
+            final ResponseHeader outgoingHeader = new ResponseHeader(200);
             outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
             prop.setOutgoingHeader(outgoingHeader);
         }

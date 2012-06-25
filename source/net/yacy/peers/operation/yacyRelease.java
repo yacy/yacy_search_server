@@ -309,7 +309,8 @@ public final class yacyRelease extends yacyVersion {
             }
             client.setTimout(120000);
             client.GET(getUrl().toString());
-            final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+            int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+            final ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
 
             final boolean unzipped = header.gzip() && (header.mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
             if (unzipped && name.endsWith(".tar.gz")) {

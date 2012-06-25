@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.protocol.ResponseHeader;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -39,7 +38,7 @@ import de.anomic.server.servletProperties;
 public class CookieTest_p {
 
     public static serverObjects respond(final ResponseHeader header, final serverObjects post, final serverSwitch env) {
-      
+
 
         // case if no values are requested
         if (post == null || env == null) {
@@ -48,10 +47,10 @@ public class CookieTest_p {
             final serverObjects prop = new serverObjects();
             return prop;
         }
-        
+
         final servletProperties prop = new servletProperties();
         if (post.containsKey("act") && "clear_cookie".equals(post.get("act"))) {
-            final ResponseHeader outgoingHeader = new ResponseHeader();
+            final ResponseHeader outgoingHeader = new ResponseHeader(200);
             final Iterator<Map.Entry<String, String>> it = header.entrySet().iterator();
             Map.Entry<String, String> e;
             while (it.hasNext()) {
@@ -65,15 +64,15 @@ public class CookieTest_p {
                     }
                 }
             }
-        	
+
             prop.setOutgoingHeader(outgoingHeader);
             prop.put("coockiesout", "0");
             //header.
-         
+
         } else if (post.containsKey("act") && "set_cookie".equals(post.get("act"))) {
             final String cookieName = post.get("cookie_name").trim();
             final String cookieValue = post.get("cookie_value").trim();
-            final ResponseHeader outgoingHeader = new ResponseHeader();
+            final ResponseHeader outgoingHeader = new ResponseHeader(200);
 
             outgoingHeader.setCookie(cookieName,cookieValue);
             prop.setOutgoingHeader(outgoingHeader);

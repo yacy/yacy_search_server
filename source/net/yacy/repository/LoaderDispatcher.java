@@ -217,7 +217,6 @@ public final class LoaderDispatcher {
                         request,
                         requestHeader,
                         cachedResponse,
-                        "200",
                         crawlProfile,
                         true,
                         content);
