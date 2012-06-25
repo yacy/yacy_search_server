@@ -305,8 +305,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * @return the IP or null
      */
     public final String getIP() {
-        final String ip = get(Seed.IP, "127.0.0.1");
-        return (ip == null || ip.length() == 0) ? "127.0.0.1" : ip;
+        final String ip = get(Seed.IP, Domains.LOCALHOST);
+        return (ip == null || ip.length() == 0) ? Domains.LOCALHOST : ip;
     }
 
     /**
@@ -563,7 +563,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final String getPublicAddress() {
         String ip = getIP();
         if ( ip == null || ip.length() < 8 || ip.length() > 60 ) {
-            ip = "127.0.0.1";
+            ip = Domains.LOCALHOST;
         }
 
         final String port = this.dna.get(Seed.PORT);

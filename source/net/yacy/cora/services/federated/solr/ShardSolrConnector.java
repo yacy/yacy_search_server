@@ -189,9 +189,11 @@ public class ShardSolrConnector implements SolrConnector {
         final String[] urlAdmin = new String[this.connectors.size()];
         int i = 0;
         final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
-        final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();
+        final String localhostExtern = localhostExternAddress == null ? Domains.LOCALHOST : localhostExternAddress.getHostAddress();
         for (String u: this.urls) {
-            int p = u.indexOf("localhost",0); if (p < 0) p = u.indexOf("127.0.0.1",0);
+            int p = u.indexOf("localhost",0);
+            if (p < 0) p = u.indexOf("127.0.0.1",0);
+            if (p < 0) p = u.indexOf("0:0:0:0:0:0:0:1",0);
             if (p >= 0) u = u.substring(0, p) + localhostExtern + u.substring(p + 9);
             urlAdmin[i++] = u + (u.endsWith("/") ? "admin/" : "/admin/");
         }

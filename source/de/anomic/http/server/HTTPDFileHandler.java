@@ -546,7 +546,7 @@ public final class HTTPDFileHandler {
 
             // implement proxy via url (not in servlet, because we need binary access on ouputStream)
             if (path.equals("/proxy.html")) {
-            	final List<Pattern> urlProxyAccess = Domains.makePatterns(sb.getConfig("proxyURL.access", "127.0.0.1"));
+            	final List<Pattern> urlProxyAccess = Domains.makePatterns(sb.getConfig("proxyURL.access", Domains.LOCALHOST));
                 final UserDB.Entry user = sb.userDB.getUser(requestHeader);
                 final boolean user_may_see_proxyurl = Domains.matchesList(clientIP, urlProxyAccess) || (user!=null && user.hasRight(UserDB.AccessRight.PROXY_RIGHT));
             	if (sb.getConfigBool("proxyURL", false) && user_may_see_proxyurl) {

@@ -33,6 +33,7 @@ import java.net.MalformedURLException;
 import java.util.Date;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
@@ -88,7 +89,7 @@ public class QuickCrawlLink_p {
                 //host = hostSocket.substring(0, pos);
             }
 
-            prop.put("mode_host", "localhost");
+            prop.put("mode_host", Domains.LOCALHOST);
             prop.put("mode_port", port);
 
             return prop;

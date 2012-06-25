@@ -46,6 +46,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -142,7 +143,7 @@ public class BlogBoardComments {
             record = null;
         }
         return (record == null) ?
-            newEntry(copyOfKey, new byte[0], UTF8.getBytes("anonymous"), "127.0.0.1", new Date(), new byte[0]) :
+            newEntry(copyOfKey, new byte[0], UTF8.getBytes("anonymous"), Domains.LOCALHOST, new Date(), new byte[0]) :
             new CommentEntry(copyOfKey, record);
     }
 
@@ -326,7 +327,7 @@ public class BlogBoardComments {
         public String getIp() {
             final String ip = this.record.get("ip");
             if (ip == null)
-                return "127.0.0.1";
+                return Domains.LOCALHOST;
             return ip;
         }
         private void setPage(final byte[] page) {

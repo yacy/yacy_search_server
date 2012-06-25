@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
@@ -83,7 +84,7 @@ public class BlogComments {
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
         String strAuthor = post.get("author", "anonymous");
 

@@ -1071,7 +1071,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             // set rewrite values
             final serverObjects tp = new serverObjects();
 
-            String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = "127.0.0.1";
+            String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = Domains.LOCALHOST;
 
             // check if ip is local ip address
             final InetAddress hostAddress = Domains.dnsResolve(clientIP);

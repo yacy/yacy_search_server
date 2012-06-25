@@ -114,7 +114,7 @@ public class SettingsAck_p {
                     final InetSocketAddress theNewAddress = theServerCore.generateSocketAddress(port);
                     final String hostName = Domains.getHostName(theNewAddress.getAddress());
                     prop.put("info_restart", "1");
-                    prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))? "localhost" : hostName);
+                    prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))? Domains.LOCALHOST : hostName);
                     prop.put("info_restart_port", theNewAddress.getPort());
 
                     env.setConfig("port", port);

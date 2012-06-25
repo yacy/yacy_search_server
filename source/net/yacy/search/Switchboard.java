@@ -277,7 +277,7 @@ public final class Switchboard extends serverSwitch
         // check if port is already occupied
         final int port = getConfigInt("port", 8090);
         try {
-            if ( TimeoutRequest.ping("127.0.0.1", port, 500) ) {
+            if ( TimeoutRequest.ping(Domains.LOCALHOST, port, 500) ) {
                 throw new RuntimeException(
                     "a server is already running on the YaCy port "
                         + port

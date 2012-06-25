@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Map;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
@@ -67,7 +68,7 @@ public class ViewImage {
 
         String urlString = post.get("url", "");
         final String urlLicense = post.get("code", "");
-        final boolean auth = (header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header); // handle access rights
+        final boolean auth = Domains.isLocalhost(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")) || sb.verifyAuthentication(header); // handle access rights
 
         DigestURI url = null;
         if ((urlString.length() > 0) && (auth)) try {

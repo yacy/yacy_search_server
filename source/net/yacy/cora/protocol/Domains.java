@@ -63,6 +63,8 @@ import com.google.common.util.concurrent.TimeLimiter;
 
 public class Domains {
 
+    public  static final String LOCALHOST = "127.0.0.1"; // replace with IPv6 0:0:0:0:0:0:0:1 ?
+    private static       String LOCALHOST_NAME = LOCALHOST; // this will be replaced with the actual name of the local host
 
     private static Class<?> InetAddressLocatorClass;
     private static Method InetAddressLocatorGetLocaleInetAddressMethod;
@@ -687,7 +689,7 @@ public class Domains {
 
     public static final InetAddress parseInetAddress(String ip) {
         if (ip == null || ip.length() < 8) return null;
-        if (isLocalhost(ip)) ip = "127.0.0.1";
+        if (isLocalhost(ip)) ip = LOCALHOST;
         final String[] ips = dotPattern.split(ip);
         if (ips.length != 4) return null;
         final byte[] ipb = new byte[4];
@@ -723,7 +725,6 @@ public class Domains {
         return nameCacheNoCachingPatterns.size();
     }
 
-    private static String localHostName = "127.0.0.1";
     private static Set<InetAddress> localHostAddresses = new HashSet<InetAddress>();
     private static Set<String> localHostNames = new HashSet<String>();
     static {
@@ -732,7 +733,7 @@ public class Domains {
             if (localHostAddress != null) localHostAddresses.add(localHostAddress);
         } catch (final UnknownHostException e) {}
         try {
-            final InetAddress[] moreAddresses = InetAddress.getAllByName(localHostName);
+            final InetAddress[] moreAddresses = InetAddress.getAllByName(LOCALHOST_NAME);
             if (moreAddresses != null) localHostAddresses.addAll(Arrays.asList(moreAddresses));
         } catch (final UnknownHostException e) {}
 
@@ -759,13 +760,13 @@ public class Domains {
 
                 // now look up the host name
                 try {
-                    localHostName = getHostName(InetAddress.getLocalHost());
+                    LOCALHOST_NAME = getHostName(InetAddress.getLocalHost());
                 } catch (final UnknownHostException e) {}
 
                 // after the host name was resolved, we try to look up more local addresses
                 // using the host name:
                 try {
-                    final InetAddress[] moreAddresses = InetAddress.getAllByName(localHostName);
+                    final InetAddress[] moreAddresses = InetAddress.getAllByName(LOCALHOST_NAME);
                     if (moreAddresses != null) localHostAddresses.addAll(Arrays.asList(moreAddresses));
                 } catch (final UnknownHostException e) {
                 }

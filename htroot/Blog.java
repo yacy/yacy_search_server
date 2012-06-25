@@ -30,8 +30,8 @@
 // javac -classpath .:../classes Blog.java
 // if the shell's current path is HTROOT
 
-import java.util.Date;
 import java.text.DateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +39,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.NewsPool;
@@ -53,12 +54,12 @@ public class Blog {
     private static final String DEFAULT_PAGE = "blog_default";
 
         private static DateFormat SimpleFormatter = DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT, Locale.getDefault());
-        
+
     /**
      * print localized date/time "yyyy/mm/dd HH:mm:ss"
      * @param date
-     * @return 
-     */    
+     * @return
+     */
     public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
@@ -100,7 +101,7 @@ public class Blog {
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
         String strAuthor = post.get("author", "anonymous");
 

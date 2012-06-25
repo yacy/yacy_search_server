@@ -1075,7 +1075,7 @@ public class yacysearch {
             prop.put("depth", "0");
 
             // adding some additional properties needed for the rss feed
-            String hostName = header.get("Host", "localhost");
+            String hostName = header.get("Host", Domains.LOCALHOST);
             if ( hostName.indexOf(':', 0) == -1 ) {
                 hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
             }
@@ -1136,7 +1136,7 @@ public class yacysearch {
 
         // hostname and port (assume locahost if nothing helps)
         final InetAddress hostIP = Domains.myPublicLocalIP();
-        prop.put("myhost", hostIP != null ? hostIP.getHostAddress() : "localhost");
+        prop.put("myhost", hostIP != null ? hostIP.getHostAddress() : Domains.LOCALHOST);
         prop.put("myport", serverCore.getPortNr(sb.getConfig("port", "8090")));
 
         // return rewrite properties

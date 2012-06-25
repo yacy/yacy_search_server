@@ -169,9 +169,9 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
 
     public static String clientAddress(final Socket s) {
         final InetAddress uAddr = s.getInetAddress();
-        if (uAddr.isAnyLocalAddress()) return "127.0.0.1";
+        if (uAddr.isAnyLocalAddress()) return Domains.LOCALHOST;
         String cIP = uAddr.getHostAddress();
-        if (Domains.isLocal(cIP, null)) cIP = "127.0.0.1";
+        if (Domains.isLocal(cIP, null)) cIP = Domains.LOCALHOST;
         return cIP;
     }
 
@@ -966,6 +966,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         public Restarter(final int delay) {
             this.delay = delay;
         }
+        @Override
         public void run() {
             // waiting for a while
             try {

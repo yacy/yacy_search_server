@@ -157,7 +157,7 @@ public class HTTPClient {
 		// connections per host (2 default)
 		clientConnectionManager.setDefaultMaxPerRoute(2);
 		// Increase max connections for localhost
-		final HttpHost localhost = new HttpHost("127.0.0.1");
+		final HttpHost localhost = new HttpHost(Domains.LOCALHOST);
 		clientConnectionManager.setMaxPerRoute(new HttpRoute(localhost), maxcon);
 		/**
 		 * HTTP protocol settings
@@ -396,7 +396,7 @@ public class HTTPClient {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
         String host = url.getHost();
-        if (host == null) host = "127.0.0.1";
+        if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         final NonClosingInputStreamEntity inputStreamEntity = new NonClosingInputStreamEntity(instream, length);
     	// statistics
@@ -433,7 +433,7 @@ public class HTTPClient {
     	final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
 
         setHost(vhost); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-    	if (vhost == null) setHost("127.0.0.1");
+    	if (vhost == null) setHost(Domains.LOCALHOST);
 
         final MultipartEntity multipartEntity = new MultipartEntity();
         for (final Entry<String,ContentBody> part : post.entrySet())
@@ -463,7 +463,7 @@ public class HTTPClient {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
         String host = url.getHost();
-        if (host == null) host = "127.0.0.1";
+        if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
 
         final InputStreamEntity inputStreamEntity = new InputStreamEntity(instream, length);
