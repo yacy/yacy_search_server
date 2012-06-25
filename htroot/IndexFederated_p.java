@@ -30,17 +30,17 @@ import java.util.Iterator;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.solr.SolrConnector;
-import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.cora.services.federated.solr.ShardSelection;
+import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.cora.services.federated.solr.SingleSolrConnector;
+import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segments;
+import net.yacy.search.index.SolrField;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import net.yacy.search.index.SolrField;
 
 public class IndexFederated_p {
 
@@ -51,11 +51,12 @@ public class IndexFederated_p {
 
         if (post != null && post.containsKey("set")) {
             // yacy
-            env.setConfig("federated.service.yacy.indexing.enabled", post.getBoolean("yacy.indexing.enabled", false));
+            String localindex = post.get("yacy.indexing", "off");
+            env.setConfig("federated.service.yacy.indexing.engine", localindex);
 
             // solr
             final boolean solrWasOn = env.getConfigBool("federated.service.solr.indexing.enabled", true);
-            final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.enabled", false);
+            final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.solrremote", false);
             env.setConfig("federated.service.solr.indexing.enabled", solrIsOnAfterwards);
             String solrurls = post.get("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr"));
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
@@ -81,18 +82,18 @@ public class IndexFederated_p {
 
             if (solrWasOn) {
                 // switch off
-                sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().close();
-                sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
+                sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr().close();
+                sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(null);
             }
 
             if (solrIsOnAfterwards) {
                 // switch on
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
                 try {
-                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr((usesolr) ? new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true) : null);
+                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr((usesolr) ? new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true) : null);
                 } catch (final IOException e) {
                     Log.logException(e);
-                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
+                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(null);
                 }
             }
 
@@ -127,11 +128,11 @@ public class IndexFederated_p {
         }
 
         // show solr host table
-        if (sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() == null) {
+        if (sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr() == null) {
             prop.put("table", 0);
         } else {
             prop.put("table", 1);
-            final SolrConnector solr = sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr();
+            final SolrConnector solr = sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr();
             final long[] size = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getSizeList() : new long[]{((SingleSolrConnector) solr).getSize()};
             final String[] urls = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getAdminInterfaceList() : new String[]{((SingleSolrConnector) solr).getAdminInterface()};
             boolean dark = false;
@@ -171,8 +172,12 @@ public class IndexFederated_p {
         prop.put("scheme", c);
 
         // fill attribute fields
-        prop.put("yacy.indexing.enabled.checked", env.getConfigBool("federated.service.yacy.indexing.enabled", true) ? 1 : 0);
-        prop.put("solr.indexing.enabled.checked", env.getConfigBool("federated.service.solr.indexing.enabled", false) ? 1 : 0);
+        // allowed values are: classic, solr, off
+        // federated.service.yacy.indexing.engine = classic
+        prop.put("yacy.indexing.engine.classic.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("classic") ? 1 : 0);
+        prop.put("yacy.indexing.engine.solr.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("solr") ? 1 : 0);
+        prop.put("yacy.indexing.engine.off.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("off") ? 1 : 0);
+        prop.put("solr.indexing.solrremote.checked", env.getConfigBool("federated.service.solr.indexing.enabled", false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr").replace(",", "\n"));
         prop.put("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5"));
         prop.put("solr.indexing.schemefile", schemename);

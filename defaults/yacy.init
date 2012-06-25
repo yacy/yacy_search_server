@@ -1047,11 +1047,16 @@ color_searchurlhover = #008000
 # - extract the solr (3.1) package, 'cd example' and start solr with 'java -jar start.jar'
 # - start yacy and then start a crawler. The crawler will fill both, YaCy and solr indexes.
 # - to check whats in solr after indexing, open http://localhost:8983/solr/admin/
-federated.service.yacy.indexing.enabled = true
 federated.service.solr.indexing.enabled = false
 federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.schemefile = solr.keys.default.list
+
+# the indexing engine in YaCy can be switched off or on
+# (off may make sense if federated.service.solr.indexing.enabled = true)
+# for experiments the value federated.service.yacy.indexing.engine = solr may be used
+# allowed values are: classic, solr, off
+federated.service.yacy.indexing.engine = classic
 
 # RDF triplestore settings
 triplestore.persistent = true

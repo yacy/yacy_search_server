@@ -408,15 +408,16 @@ public final class Switchboard extends serverSwitch
         final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
 
-        try {
-            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(
-                (usesolr) ? new ShardSolrConnector(
-                    solrurls,
-                    ShardSelection.Method.MODULO_HOST_MD5,
-                    10000, true) : null);
-        } catch ( final IOException e ) {
-            Log.logException(e);
-            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
+        if (usesolr && solrurls != null && solrurls.length() > 0) {
+            try {
+                this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(
+                                new ShardSolrConnector(
+                                                solrurls,
+                                                ShardSelection.Method.MODULO_HOST_MD5,
+                                                10000, true));
+            } catch ( final IOException e ) {
+                Log.logException(e);
+            }
         }
 
         // initialize network database
@@ -2435,8 +2436,18 @@ public final class Switchboard extends serverSwitch
 
     public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
-        if ( this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() != null
-            && getConfigBool("federated.service.solr.indexing.enabled", false)/*in.queueEntry.profile().pushSolr()*/) {
+        if ( !in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia() ) {
+            if ( this.log.isInfo() ) {
+                this.log.logInfo("Not Condensed Resource '"
+                    + in.queueEntry.url().toNormalform(false, true)
+                    + "': indexing not wanted by crawl profile");
+            }
+            return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+        }
+
+        boolean localSolr = this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getLocalSolr() != null && getConfig("federated.service.yacy.indexing.engine", "classic").equals("solr");
+        boolean remoteSolr = this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr() != null && getConfigBool("federated.service.solr.indexing.enabled", false);
+        if (localSolr || remoteSolr) {
             // send the documents to solr
             for ( final Document doc : in.documents ) {
                 try {
@@ -2455,7 +2466,8 @@ public final class Switchboard extends serverSwitch
                     }
                     try {
                         SolrDoc solrDoc = this.solrScheme.yacy2solr(id, in.queueEntry.getResponseHeader(), doc);
-                        this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().add(solrDoc);
+                        if (localSolr) this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getLocalSolr().add(solrDoc);
+                        if (remoteSolr) this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr().add(solrDoc);
                     } catch ( final IOException e ) {
                         Log.logWarning(
                             "SOLR",
@@ -2472,19 +2484,11 @@ public final class Switchboard extends serverSwitch
         }
 
         // check if we should accept the document for our index
-        if ( !getConfigBool("federated.service.yacy.indexing.enabled", false) ) {
+        if (!getConfig("federated.service.yacy.indexing.engine", "classic").equals("classic")) {
             if ( this.log.isInfo() ) {
                 this.log.logInfo("Not Condensed Resource '"
                     + in.queueEntry.url().toNormalform(false, true)
                     + "': indexing not wanted by federated rule for YaCy");
-            }
-            return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
-        }
-        if ( !in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia() ) {
-            if ( this.log.isInfo() ) {
-                this.log.logInfo("Not Condensed Resource '"
-                    + in.queueEntry.url().toNormalform(false, true)
-                    + "': indexing not wanted by crawl profile");
             }
             return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
         }

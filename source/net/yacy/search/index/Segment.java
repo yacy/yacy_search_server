@@ -152,14 +152,23 @@ public class Segment {
 
         // create LURL-db
         this.urlMetadata = new MetadataRepository(segmentPath, "text.urlmd", useTailCache, exceed134217727);
+        //this.connectLocalSolr();
     }
 
-    public void connectSolr(final SolrConnector solr) {
-        this.urlMetadata.connectSolr(solr);
+    public void connectRemoteSolr(final SolrConnector solr) {
+        this.urlMetadata.connectRemoteSolr(solr);
     }
 
-    public SolrConnector getSolr() {
-        return this.urlMetadata.getSolr();
+    public void connectLocalSolr() throws IOException {
+        this.urlMetadata.connectLocalSolr();
+    }
+
+    public SolrConnector getRemoteSolr() {
+        return this.urlMetadata.getRemoteSolr();
+    }
+
+    public SolrConnector getLocalSolr() {
+        return this.urlMetadata.getLocalSolr();
     }
 
     public MetadataRepository urlMetadata() {

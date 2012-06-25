@@ -61,6 +61,8 @@ import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.search.Switchboard;
+import net.yacy.search.solr.EmbeddedSolrConnector;
 import de.anomic.crawler.CrawlStacker;
 
 public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
@@ -71,7 +73,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
     private final File                location;
     private final String              tablename;
     private       ArrayList<HostStat> statsDump;
-    private       SolrConnector       solr;
+    private       SolrConnector       localSolr, remoteSolr;
 
     public MetadataRepository(
             final File path,
@@ -85,15 +87,27 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         this.urlIndexFile = backupIndex; //new Cache(backupIndex, 20000000, 20000000);
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
-        this.solr = null;
+        this.remoteSolr = null;
+        this.localSolr = null;
     }
 
-    public void connectSolr(final SolrConnector solr) {
-        this.solr = solr;
+    public void connectRemoteSolr(final SolrConnector solr) {
+        this.remoteSolr = solr;
     }
 
-    public SolrConnector getSolr() {
-        return this.solr;
+    public void connectLocalSolr() throws IOException {
+        File solrLocation = this.location;
+        if (solrLocation.getName().equals("default")) solrLocation = solrLocation.getParentFile();
+        solrLocation = new File(solrLocation, "solr");
+        this.localSolr = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath,"defaults"), "solr"));
+    }
+
+    public SolrConnector getRemoteSolr() {
+        return this.remoteSolr;
+    }
+
+    public SolrConnector getLocalSolr() {
+        return this.localSolr;
     }
 
     public void clearCache() {
@@ -123,7 +137,8 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
             this.urlIndexFile.close();
             this.urlIndexFile = null;
         }
-        if (this.solr != null) this.solr.close();
+        if (this.remoteSolr != null) this.remoteSolr.close();
+        if (this.localSolr != null) this.localSolr.close();
     }
 
     public int writeCacheSize() {
@@ -207,7 +222,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
     public boolean exists(final byte[] urlHash) {
         if (urlHash == null) return false;
         try {
-            if (this.solr != null && this.solr.exists(ASCII.String(urlHash))) {
+            if (this.remoteSolr != null && this.remoteSolr.exists(ASCII.String(urlHash))) {
                 return true;
             }
         } catch (final Throwable e) {

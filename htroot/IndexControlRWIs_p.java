@@ -92,7 +92,7 @@ public class IndexControlRWIs_p
         prop.put("keyhash", "");
         prop.put("result", "");
         prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
-        prop.put("cleanup_solr", sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() == null
+        prop.put("cleanup_solr", sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr() == null
             || !sb.getConfigBool("federated.service.solr.indexing.enabled", false) ? 0 : 1);
 
         String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
@@ -180,7 +180,7 @@ public class IndexControlRWIs_p
                 if ( post.get("deleteSolr", "").equals("on")
                     && sb.getConfigBool("federated.service.solr.indexing.enabled", false) ) {
                     try {
-                        sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().clear();
+                        sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr().clear();
                     } catch ( final Exception e ) {
                         Log.logException(e);
                     }

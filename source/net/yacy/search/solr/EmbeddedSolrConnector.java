@@ -32,10 +32,7 @@ import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.index.SolrField;
 
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.client.solrj.embedded.JettySolrRunner;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.core.CoreContainer;

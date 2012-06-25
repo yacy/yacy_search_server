@@ -21,22 +21,16 @@
     <form action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
-        <input type="checkbox" name="yacy.indexing.classic" id="yacy.indexing.classic" #(yacy.indexing.classic.checked)#:: checked="checked"#(/yacy.indexing.classic.checked)# />
-        <label for="p2p">Embedded 'Classic YaCy' Search Index</label>
+        The built-in search index can either be 'classic' (as before YaCy 1.03), 'solr' (experimental since 1.03) and 'off' (useful only if a remote solr index is used)
       </legend>
-        You can just switch on or off this index. If you switch it off, you will not be able to search with YaCy any more.
+      <dl>
+      <dt><input type="radio" name="yacy.indexing" value="classic" id="yacy.indexing.engine.classic" #(yacy.indexing.engine.classic.checked)#:: checked="checked"#(/yacy.indexing.engine.classic.checked)# /></dt><dd>embedded 'classic' search index</dd>
+      <dt><input type="radio" name="yacy.indexing" value="solr" id="yacy.indexing.engine.solr" #(yacy.indexing.engine.solr.checked)#:: checked="checked"#(/yacy.indexing.engine.solr.checked)# /></dt><dd>embedded solr search index</dd>
+      <dt><input type="radio" name="yacy.indexing" value="off" id="yacy.indexing.engine.off" #(yacy.indexing.engine.off.checked)#:: checked="checked"#(/yacy.indexing.engine.off.checked)# /></dt><dd>no local index</dd>
+      <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>
+      </dl>
       </fieldset>
-      <input type="submit" name="set" value="Set" />
-      
-      <fieldset>
-      <legend>
-        <input type="checkbox" name="yacy.indexing.solrembedded" id=""yacy.indexing.solrembedded" #("yacy.indexing.solrembedded.checked)#:: checked="checked"#(/"yacy.indexing.solrembedded.checked)# />
-        <label for="p2p">Embedded Solr Search Index</label>
-      </legend>
-        Experimental embedded solr index.
-      </fieldset>
-      <input type="submit" name="set" value="Set" />
-      
+
       <fieldset>
       <legend>
         <input type="checkbox" name="solr.indexing.solrremote" id="solr.indexing.solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# />
