@@ -327,7 +327,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
                 throw new MalformedURLException("relative path malformed: " + relPath);
             }
-            this.path = baseURL.path + relPath;
+            if (relPath.startsWith("/")) this.path = baseURL.path + relPath.substring(1); else this.path = baseURL.path + relPath;
         } else {
             if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
                 this.path = baseURL.path + relPath;
@@ -574,6 +574,10 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     private void identPort(final String inputURL, final int dflt) throws MalformedURLException {
         // identify ref in file
+        if (this.host == null) {
+            this.port = dflt;
+            return;
+        }
         int pss = 0;
         int ip6 = this.host.indexOf('[');
         if (ip6 >= 0 && ((ip6 = this.host.indexOf("]", ip6)) > 0)) {
@@ -710,10 +714,17 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public String getHost() {
-        return (this.host.charAt(0) == '[' && this.host.charAt(this.host.length() - 1) == ']') ? this.host.substring(1, this.host.length() - 1) : this.host;
+        if (this.host == null) return null;
+        if (this.host.charAt(0) == '[') {
+            int p = this.host.indexOf(']');
+            if (p < 0) return this.host;
+            return this.host.substring(1, p);
+        }
+        return this.host;
     }
 
     public String getTLD() {
+        if (this.host == null) return "";
         int p = this.host.lastIndexOf('.');
         if (p < 0) return "";
         return this.host.substring(p + 1);

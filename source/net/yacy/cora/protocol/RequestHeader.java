@@ -50,7 +50,7 @@ public class RequestHeader extends HeaderFramework {
 
     public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
     public static final String IF_RANGE = "If-Range";
-    public static final String REFERER = "Referer";
+    public static final String REFERER = "Referer"; // a misspelling of referrer that occurs as an HTTP header field. Its defined so in the http protocol, so please don't 'fix' it!
 
     private static final long serialVersionUID = 0L;
 

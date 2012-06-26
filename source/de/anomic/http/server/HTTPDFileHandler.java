@@ -1216,6 +1216,9 @@ public final class HTTPDFileHandler {
         } catch (final Exception e) {
             try {
                 // error handling
+                if (e instanceof NullPointerException) {
+                    Log.logException(e);
+                }
                 int httpStatusCode = 400;
                 final String httpStatusText = null;
                 final StringBuilder errorMessage = new StringBuilder(2000);

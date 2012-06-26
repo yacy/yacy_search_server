@@ -911,10 +911,10 @@ public class Domains {
         return (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
                 "127.0.0.1".equals(host) ||
                 "localhost".equals(host) ||
-                host.startsWith("0:0:0:0:0:0:0:1") ||
-                host.startsWith("fe80:0:0:0:0:0:0:1") || // used by my mac as localhost
-                host.startsWith("::1/") ||
-                "::1".equals(host)
+                host.startsWith("0:0:0:0:0:0:0:1") || host.startsWith("[0:0:0:0:0:0:0:1]") ||
+                host.startsWith("fe80:0:0:0:0:0:0:1") || host.startsWith("[fe80:0:0:0:0:0:0:1]") || // used by my mac as localhost
+                host.startsWith("::1/") || host.startsWith("[::1/") ||
+                "::1".equals(host) || "[::1]".equals(host)
                 );
     }
 
