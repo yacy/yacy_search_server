@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 
 import net.yacy.yacy;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.document.Document;
@@ -155,7 +156,7 @@ public class AugmentHtmlStream {
     private static String loadInternal(String path, RequestHeader requestHeader) {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         String realmProp = requestHeader.get(RequestHeader.AUTHORIZATION);
-        ServerSideIncludes.writeContent(path, buffer, realmProp, "127.0.0.1", requestHeader); // TODO: ip
+        ServerSideIncludes.writeContent(path, buffer, realmProp, Domains.LOCALHOST, requestHeader); // TODO: ip
         return buffer.toString();
     }
 
@@ -210,12 +211,12 @@ public class AugmentHtmlStream {
     }
 
     public static StringBuffer process (StringBuffer data, Charset charset, DigestURI url, RequestHeader requestHeader) {
-              
+
         String action =  requestHeader.get("YACYACTION");
         requestHeader.remove("YACYACTION");
 
         globalrequestHeader = requestHeader;
-        
+
         Switchboard sb = Switchboard.getSwitchboard();
 
         boolean augmented = false;
@@ -381,7 +382,7 @@ public class AugmentHtmlStream {
                     NodeList bodychildren = bt.getChildren();
 
                     bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction_elements/OverlayInteraction.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader)));
-                    
+
                     bodychildren.add(new org.htmlparser.nodes.TextNode(loadInternal("interaction_elements/Footer.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader)));
 
                     bt.setChildren(bodychildren);

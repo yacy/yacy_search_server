@@ -93,9 +93,10 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
+import net.yacy.cora.services.federated.solr.ShardSelection;
+import net.yacy.cora.services.federated.solr.ShardSolrConnector;
+import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
-import net.yacy.cora.services.federated.solr.SolrShardingConnector;
-import net.yacy.cora.services.federated.solr.SolrShardingSelection;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -151,6 +152,9 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
 import net.yacy.search.ranking.RankingProfile;
+
+import com.google.common.io.Files;
+
 import de.anomic.crawler.Cache;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
@@ -273,7 +277,7 @@ public final class Switchboard extends serverSwitch
         // check if port is already occupied
         final int port = getConfigInt("port", 8090);
         try {
-            if ( TimeoutRequest.ping("127.0.0.1", port, 500) ) {
+            if ( TimeoutRequest.ping(Domains.LOCALHOST, port, 500) ) {
                 throw new RuntimeException(
                     "a server is already running on the YaCy port "
                         + port
@@ -392,7 +396,7 @@ public final class Switchboard extends serverSwitch
             getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
         final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/" + schemename);
         if ( !solrWorkProfile.exists() ) {
-            FileUtils.copy(solrBackupProfile, solrWorkProfile);
+            Files.copy(solrBackupProfile, solrWorkProfile);
         }
         final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile);
         this.solrScheme = new SolrConfiguration(solrWorkProfile);
@@ -404,16 +408,19 @@ public final class Switchboard extends serverSwitch
         // set up the solr interface
         final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
+        int commitWithinMs = getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000);
 
-        try {
-            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(
-                (usesolr) ? new SolrShardingConnector(
-                    solrurls,
-                    SolrShardingSelection.Method.MODULO_HOST_MD5,
-                    10000, true) : null);
-        } catch ( final IOException e ) {
-            Log.logException(e);
-            this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectSolr(null);
+        if (usesolr && solrurls != null && solrurls.length() > 0) {
+            try {
+                SolrConnector solr = new ShardSolrConnector(
+                                solrurls,
+                                ShardSelection.Method.MODULO_HOST_MD5,
+                                10000, true);
+                solr.setCommitWithinMs(commitWithinMs);
+                this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(solr);
+            } catch ( final IOException e ) {
+                Log.logException(e);
+            }
         }
 
         // initialize network database
@@ -731,7 +738,7 @@ public final class Switchboard extends serverSwitch
                 getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT),
                 "notifier.gif");
         try {
-            FileUtils.copy(notifierSource, notifierDest);
+            Files.copy(notifierSource, notifierDest);
         } catch ( final IOException e ) {
         }
 
@@ -1800,7 +1807,7 @@ public final class Switchboard extends serverSwitch
                     0,
                     0,
                     0);
-            response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile, false);
+            response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false);
             final indexingQueueEntry queueEntry =
                 new indexingQueueEntry(Segments.Process.SURROGATES, response, new Document[] {
                     document
@@ -2432,8 +2439,18 @@ public final class Switchboard extends serverSwitch
 
     public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
-        if ( this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr() != null
-            && getConfigBool("federated.service.solr.indexing.enabled", false)/*in.queueEntry.profile().pushSolr()*/) {
+        if ( !in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia() ) {
+            if ( this.log.isInfo() ) {
+                this.log.logInfo("Not Condensed Resource '"
+                    + in.queueEntry.url().toNormalform(false, true)
+                    + "': indexing not wanted by crawl profile");
+            }
+            return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+        }
+
+        boolean localSolr = this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getLocalSolr() != null && getConfig("federated.service.yacy.indexing.engine", "classic").equals("solr");
+        boolean remoteSolr = this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr() != null && getConfigBool("federated.service.solr.indexing.enabled", false);
+        if (localSolr || remoteSolr) {
             // send the documents to solr
             for ( final Document doc : in.documents ) {
                 try {
@@ -2452,7 +2469,8 @@ public final class Switchboard extends serverSwitch
                     }
                     try {
                         SolrDoc solrDoc = this.solrScheme.yacy2solr(id, in.queueEntry.getResponseHeader(), doc);
-                        this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getSolr().add(solrDoc);
+                        if (localSolr) this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getLocalSolr().add(solrDoc);
+                        if (remoteSolr) this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr().add(solrDoc);
                     } catch ( final IOException e ) {
                         Log.logWarning(
                             "SOLR",
@@ -2469,19 +2487,11 @@ public final class Switchboard extends serverSwitch
         }
 
         // check if we should accept the document for our index
-        if ( !getConfigBool("federated.service.yacy.indexing.enabled", false) ) {
+        if (!getConfig("federated.service.yacy.indexing.engine", "classic").equals("classic")) {
             if ( this.log.isInfo() ) {
                 this.log.logInfo("Not Condensed Resource '"
                     + in.queueEntry.url().toNormalform(false, true)
                     + "': indexing not wanted by federated rule for YaCy");
-            }
-            return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
-        }
-        if ( !in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia() ) {
-            if ( this.log.isInfo() ) {
-                this.log.logInfo("Not Condensed Resource '"
-                    + in.queueEntry.url().toNormalform(false, true)
-                    + "': indexing not wanted by crawl profile");
             }
             return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
         }
@@ -3347,7 +3357,8 @@ public final class Switchboard extends serverSwitch
                     url = new DigestURI(seedListFileURL);
                     //final long start = System.currentTimeMillis();
                     client.HEADResponse(url.toString());
-                    header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+                    int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+                    header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
                     //final long loadtime = System.currentTimeMillis() - start;
                     /*if (header == null) {
                         if (loadtime > getConfigLong("bootstrapLoadTimeout", 6000)) {

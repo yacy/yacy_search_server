@@ -781,6 +781,7 @@ dc_rights
 
         for (final Document doc: docs) {
 
+        	if (doc == null) continue;
             final String author = doc.dc_creator();
             if (author.length() > 0) {
                 if (authors.length() > 0) authors.append(",");

@@ -448,7 +448,7 @@ public class SnippetProcess {
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
             this.shallrun = true;
-            this.solr = SnippetProcess.this.rankingProcess.getQuery().getSegment().getSolr();
+            this.solr = SnippetProcess.this.rankingProcess.getQuery().getSegment().getRemoteSolr();
         }
 
         @Override

@@ -32,6 +32,8 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
+import com.google.common.io.Files;
+
 public class migration {
     //SVN constants
     public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
@@ -96,7 +98,7 @@ public class migration {
                     final File from = new File(defaultSkinsPath, skinFile);
                     final File to = new File(skinsPath, skinFile);
                     if (from.lastModified() > to.lastModified()) try {
-                        FileUtils.copy(from, to);
+                        Files.copy(from, to);
                     } catch (final IOException e) {}
                 }
             }
@@ -118,7 +120,7 @@ public class migration {
         }else{
             try {
                 mkdirs(styleFile.getParentFile());
-                FileUtils.copy(skinFile, styleFile);
+                Files.copy(skinFile, styleFile);
                 Log.logInfo("MIGRATION", "copied new Skinfile");
             } catch (final IOException e) {
                 Log.logSevere("MIGRATION", "Cannot copy skinfile.");
@@ -164,7 +166,7 @@ public class migration {
             sb.wikiDB.close();
             file2 = new File(sb.workPath, "wiki.db");
             try {
-                FileUtils.copy(file, file2);
+                Files.copy(file, file2);
                 file.delete();
             } catch (final IOException e) {
             }
@@ -174,7 +176,7 @@ public class migration {
                 Log.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
                 file2 = new File(sb.workPath, "wiki-bkp.db");
                 try {
-                    FileUtils.copy(file, file2);
+                    Files.copy(file, file2);
                     file.delete();
                 } catch (final IOException e) {}
             }
@@ -192,7 +194,7 @@ public class migration {
             sb.messageDB.close();
             file2=new File(sb.workPath, "message.db");
             try {
-                FileUtils.copy(file, file2);
+                Files.copy(file, file2);
                 file.delete();
             } catch (final IOException e) {}
             try {

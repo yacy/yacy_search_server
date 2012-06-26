@@ -124,7 +124,7 @@ public class FTPLoader {
                 if (dirList == null) {
                     response = null;
                 } else {
-                    final ResponseHeader responseHeader = new ResponseHeader();
+                    final ResponseHeader responseHeader = new ResponseHeader(200);
                     responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
                     responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
                     final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
@@ -132,7 +132,6 @@ public class FTPLoader {
                             request,
                             requestHeader,
                             responseHeader,
-                            "200",
                             profile,
                             false,
                             dirList.toString().getBytes());
@@ -226,7 +225,7 @@ public class FTPLoader {
             final DigestURI refurl = this.sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
             if (refurl != null) requestHeader.put(RequestHeader.REFERER, refurl.toNormalform(true, false));
         }
-        final ResponseHeader responseHeader = new ResponseHeader();
+        final ResponseHeader responseHeader = new ResponseHeader(200);
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(fileDate));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
 
@@ -252,7 +251,6 @@ public class FTPLoader {
                     request,
                     requestHeader,
                     responseHeader,
-                    "200",
                     profile,
                     false,
                     null);
@@ -268,7 +266,6 @@ public class FTPLoader {
                 request,
                 requestHeader,
                 responseHeader,
-                "200",
                 profile,
                 false,
                 b);

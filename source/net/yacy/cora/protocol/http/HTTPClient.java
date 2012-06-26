@@ -47,6 +47,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 
 import org.apache.http.Header;
@@ -156,7 +157,7 @@ public class HTTPClient {
 		// connections per host (2 default)
 		clientConnectionManager.setDefaultMaxPerRoute(2);
 		// Increase max connections for localhost
-		final HttpHost localhost = new HttpHost("localhost");
+		final HttpHost localhost = new HttpHost(Domains.LOCALHOST);
 		clientConnectionManager.setMaxPerRoute(new HttpRoute(localhost), maxcon);
 		/**
 		 * HTTP protocol settings
@@ -339,7 +340,7 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] GETbytes(final MultiProtocolURI url, final int maxBytes) throws IOException {
-        final boolean localhost = url.getHost().equals("localhost");
+        final boolean localhost = Domains.isLocalhost(url.getHost());
         final String urix = url.toNormalform(true, false);
         final HttpGet httpGet = new HttpGet(urix);
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -395,7 +396,7 @@ public class HTTPClient {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
         String host = url.getHost();
-        if (host == null) host = "127.0.0.1";
+        if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         final NonClosingInputStreamEntity inputStreamEntity = new NonClosingInputStreamEntity(instream, length);
     	// statistics
@@ -432,7 +433,7 @@ public class HTTPClient {
     	final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
 
         setHost(vhost); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-    	if (vhost == null) setHost("127.0.0.1");
+    	if (vhost == null) setHost(Domains.LOCALHOST);
 
         final MultipartEntity multipartEntity = new MultipartEntity();
         for (final Entry<String,ContentBody> part : post.entrySet())
@@ -462,7 +463,7 @@ public class HTTPClient {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
         String host = url.getHost();
-        if (host == null) host = "127.0.0.1";
+        if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
 
         final InputStreamEntity inputStreamEntity = new InputStreamEntity(instream, length);
@@ -708,17 +709,18 @@ public class HTTPClient {
         final SSLSocketFactory sslSF = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
     	return sslSF;
     }
-    
+
     /**
      * If the Keep-Alive header is not present in the response,
      * HttpClient assumes the connection can be kept alive indefinitely.
-     * Here we limit this to 5 seconds. 
-     * 
+     * Here we limit this to 5 seconds.
+     *
      * @param defaultHttpClient
      */
     private static void addCustomKeepAliveStrategy(final DefaultHttpClient defaultHttpClient) {
     	defaultHttpClient.setKeepAliveStrategy(new ConnectionKeepAliveStrategy() {
-			public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
+			@Override
+            public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
 		        // Honor 'keep-alive' header
 				String param, value;
 				HeaderElement element;
@@ -726,7 +728,7 @@ public class HTTPClient {
 		                response.headerIterator(HTTP.CONN_KEEP_ALIVE));
 		        while (it.hasNext()) {
 		            element = it.nextElement();
-		            param = element.getName(); 
+		            param = element.getName();
 		            value = element.getValue();
 		            if (value != null && param.equalsIgnoreCase("timeout")) {
 		                try {

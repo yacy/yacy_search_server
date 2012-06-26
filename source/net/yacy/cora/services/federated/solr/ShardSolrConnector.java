@@ -37,22 +37,36 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
 
-public class SolrShardingConnector implements SolrConnector {
+public class ShardSolrConnector implements SolrConnector {
 
     private final List<SolrConnector> connectors;
-    private final SolrShardingSelection sharding;
+    private final ShardSelection sharding;
     private final String[] urls;
 
-    public SolrShardingConnector(final String urlList, final SolrShardingSelection.Method method, final long timeout, boolean multipleConnections) throws IOException {
+    public ShardSolrConnector(final String urlList, final ShardSelection.Method method, final long timeout, boolean multipleConnections) throws IOException {
         urlList.replace(' ', ',');
         this.urls = urlList.split(",");
         this.connectors = new ArrayList<SolrConnector>();
         SolrConnector s;
         for (final String u: this.urls) {
-            s = multipleConnections ? new SolrMultipleConnector(u.trim(), 2) : new SolrSingleConnector(u.trim());
-            this.connectors.add(new SolrRetryConnector(s, timeout));
+            s = multipleConnections ? new MultipleSolrConnector(u.trim(), 2) : new SingleSolrConnector(u.trim());
+            this.connectors.add(new RetrySolrConnector(s, timeout));
         }
-        this.sharding = new SolrShardingSelection(method, this.urls.length);
+        this.sharding = new ShardSelection(method, this.urls.length);
+    }
+
+    @Override
+    public int getCommitWithinMs() {
+        return this.connectors.get(0).getCommitWithinMs();
+    }
+
+    /**
+     * set the solr autocommit delay
+     * @param c the maximum waiting time after a solr command until it is transported to the server
+     */
+    @Override
+    public void setCommitWithinMs(int c) {
+        for (final SolrConnector connector: this.connectors) connector.setCommitWithinMs(c);
     }
 
     @Override
@@ -175,9 +189,11 @@ public class SolrShardingConnector implements SolrConnector {
         final String[] urlAdmin = new String[this.connectors.size()];
         int i = 0;
         final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
-        final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();
+        final String localhostExtern = localhostExternAddress == null ? Domains.LOCALHOST : localhostExternAddress.getHostAddress();
         for (String u: this.urls) {
-            int p = u.indexOf("localhost",0); if (p < 0) p = u.indexOf("127.0.0.1",0);
+            int p = u.indexOf("localhost",0);
+            if (p < 0) p = u.indexOf("127.0.0.1",0);
+            if (p < 0) p = u.indexOf("0:0:0:0:0:0:0:1",0);
             if (p >= 0) u = u.substring(0, p) + localhostExtern + u.substring(p + 9);
             urlAdmin[i++] = u + (u.endsWith("/") ? "admin/" : "/admin/");
         }

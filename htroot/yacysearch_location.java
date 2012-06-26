@@ -24,6 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
@@ -119,7 +120,7 @@ public class yacysearch_location {
             if (post == null) return prop;
             String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
             if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-            String hostName = header.get("Host", "localhost");
+            String hostName = header.get("Host", Domains.LOCALHOST);
             if (hostName.indexOf(':',0) == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
             final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
             final boolean global = post.get("kml_resource", "local").equals("global");

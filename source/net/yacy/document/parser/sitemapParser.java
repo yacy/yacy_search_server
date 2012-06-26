@@ -128,7 +128,8 @@ public class sitemapParser extends AbstractParser implements Parser {
             }
 
             // get some metadata
-            final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+            int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+            final ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
             final String contentMimeType = header.mime();
 
             InputStream contentStream = client.getContentstream();

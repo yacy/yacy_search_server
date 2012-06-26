@@ -625,6 +625,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return this.li.toArray(new String[this.li.size()]);
     }
 
+    public MultiProtocolURI[] getFlash() {
+        String ext;
+        ArrayList<MultiProtocolURI> f = new ArrayList<MultiProtocolURI>();
+        for (final MultiProtocolURI url: this.anchors.keySet()) {
+            ext = url.getFileExtension();
+            if (ext == null) continue;
+            if (ext.equals("swf")) f.add(url);
+        }
+        return f.toArray(new MultiProtocolURI[f.size()]);
+    }
+
     public boolean containsFlash() {
         String ext;
         for (final MultiProtocolURI url: this.anchors.keySet()) {

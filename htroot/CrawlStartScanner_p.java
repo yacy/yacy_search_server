@@ -207,7 +207,7 @@ public class CrawlStartScanner_p
                                 "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99&directDocByURL=off";
                             path += "&crawlingURL=" + url.toNormalform(true, false);
                             WorkTables.execAPICall(
-                                "localhost",
+                                Domains.LOCALHOST,
                                 (int) sb.getConfigLong("port", 8090),
                                 sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""),
                                 path,
@@ -254,7 +254,7 @@ public class CrawlStartScanner_p
                                         "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
                                     path += "&crawlingURL=" + urlString;
                                     WorkTables.execAPICall(
-                                        "localhost",
+                                        Domains.LOCALHOST,
                                         (int) sb.getConfigLong("port", 8090),
                                         sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""),
                                         path,

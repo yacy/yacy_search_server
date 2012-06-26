@@ -403,7 +403,6 @@ public final class HTTPDProxyHandler {
                 		request,
                         requestHeader,
                         cachedResponseHeader,
-                        "200 OK",
                         sb.crawler.defaultProxyProfile,
                         true
                 );
@@ -495,20 +494,20 @@ public final class HTTPDProxyHandler {
                 if (log.isFinest()) log.logFinest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
                 conProp.put(HeaderFramework.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
 
-                final ResponseHeader responseHeader = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+                int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+                final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
                 // determine if it's an internal error of the httpc
                 if (responseHeader.isEmpty()) {
                 	throw new Exception(client.getHttpResponse().getStatusLine().toString());
                 }
 
-                if(AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
+                if (AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
                     // enable chunk encoding, because we don't know the length after annotating
                     responseHeader.remove(HeaderFramework.CONTENT_LENGTH);
                     responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
-
                 }
 
-                ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, client.getHttpResponse().getStatusLine().getStatusCode(), respond);
+                ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, statusCode, respond);
 
                 // the cache does either not exist or is (supposed to be) stale
                 long sizeBeforeDelete = -1;
@@ -558,7 +557,7 @@ public final class HTTPDProxyHandler {
                         conProp,
                         respond,
                         httpVer,
-                        client.getHttpResponse().getStatusLine().getStatusCode(),
+                        statusCode,
                         client.getHttpResponse().getStatusLine().toString(), // status text
                         responseHeader);
 
@@ -569,7 +568,6 @@ public final class HTTPDProxyHandler {
                             request,
                             requestHeader,
                             responseHeader,
-                            Integer.toString(client.getHttpResponse().getStatusLine().getStatusCode()),
                             sb.crawler.defaultProxyProfile,
                             true
                     );
@@ -845,7 +843,8 @@ public final class HTTPDProxyHandler {
 //            if (responseHeader.isEmpty()) {
 //                throw new Exception(res.getStatusLine());
 //            }
-            final ResponseHeader responseHeader = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+            int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+            final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
             if (responseHeader.isEmpty()) {
                 throw new Exception(client.getHttpResponse().getStatusLine().toString());
             }
@@ -860,7 +859,7 @@ public final class HTTPDProxyHandler {
             		conProp,
             		respond,
             		httpVer,
-            		client.getHttpResponse().getStatusLine().getStatusCode(),
+            		statusCode,
             		client.getHttpResponse().getStatusLine().toString(),
             		responseHeader);
             respond.flush();
@@ -951,7 +950,8 @@ public final class HTTPDProxyHandler {
 	            client.POST(getUrl, body, contentLength);
 	            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
 
-	            final ResponseHeader responseHeader = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+                int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+	            final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
 	            // determine if it's an internal error of the httpc
 	            if (responseHeader.isEmpty()) {
 	            	throw new Exception(client.getHttpResponse().getStatusLine().toString());
@@ -971,7 +971,7 @@ public final class HTTPDProxyHandler {
 	            HTTPDemon.sendRespondHeader(conProp,
                         countedRespond,
                         httpVer,
-                        client.getHttpResponse().getStatusLine().getStatusCode(),
+                        statusCode,
                         client.getHttpResponse().getStatusLine().toString(), // status text
                         responseHeader);
 
@@ -1249,11 +1249,12 @@ public final class HTTPDProxyHandler {
 
             try {
             	remoteProxy.HEADResponse("http://" + host + ":" + port);
-            	final ResponseHeader header = new ResponseHeader(remoteProxy.getHttpResponse().getAllHeaders());
+                int statusCode = remoteProxy.getHttpResponse().getStatusLine().getStatusCode();
+            	final ResponseHeader header = new ResponseHeader(statusCode, remoteProxy.getHttpResponse().getAllHeaders());
 
                 // outputs a logline to the serverlog with the current status
             	log.logInfo("CONNECT-RESPONSE: status=" + remoteProxy.getHttpResponse().getStatusLine() + ", header=" + header.toString());
-            	final boolean success = remoteProxy.getHttpResponse().getStatusLine().getStatusCode() >= 200 && remoteProxy.getHttpResponse().getStatusLine().getStatusCode() <= 399;
+            	final boolean success = statusCode >= 200 && statusCode <= 399;
                 if (success) {
                     // replace connection details
                     host = ProxySettings.host;

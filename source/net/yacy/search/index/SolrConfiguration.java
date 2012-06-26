@@ -86,7 +86,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 it.remove();
             }
         }
-            }
+    }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value) {
         if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
@@ -344,7 +344,15 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // flash embedded
-            addSolr(solrdoc, SolrField.flash_b, html.containsFlash());
+            if (isEmpty() || contains(SolrField.flash_b.name())) {
+                MultiProtocolURI[] flashURLs = html.getFlash();
+                for (MultiProtocolURI u: flashURLs) {
+                    // remove all flash links from ibound/outbound links
+                    inboundLinks.remove(u);
+                    ouboundLinks.remove(u);
+                }
+                addSolr(solrdoc, SolrField.flash_b, flashURLs.length > 0);
+            }
 
             // generic evaluation pattern
             for (final String model: html.getEvaluationModelNames()) {
@@ -446,7 +454,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             addSolr(solrdoc, SolrField.lon_coordinate, yacydoc.lon());
             addSolr(solrdoc, SolrField.lat_coordinate, yacydoc.lat());
         }
-        addSolr(solrdoc, SolrField.httpstatus_i, 200);
+        addSolr(solrdoc, SolrField.httpstatus_i, header.getStatusCode());
 
         return solrdoc;
     }

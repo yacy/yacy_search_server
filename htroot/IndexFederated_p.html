@@ -21,17 +21,20 @@
     <form action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
-        <input type="checkbox" name="yacy.indexing.enabled" id="yacy.indexing.enabled" #(yacy.indexing.enabled.checked)#:: checked="checked"#(/yacy.indexing.enabled.checked)# />
-        <label for="p2p">YaCy Embedded Index Engine</label>
+        The built-in search index can either be 'classic' (as before YaCy 1.03), 'solr' (experimental since 1.03) and 'off' (useful only if a remote solr index is used)
       </legend>
-        You can just switch on or off this index. If you switch it off, you will not be able to search with YaCy any more.
+      <dl>
+      <dt><input type="radio" name="yacy.indexing" value="classic" id="yacy.indexing.engine.classic" #(yacy.indexing.engine.classic.checked)#:: checked="checked"#(/yacy.indexing.engine.classic.checked)# /></dt><dd>embedded 'classic' search index</dd>
+      <dt><input type="radio" name="yacy.indexing" value="solr" id="yacy.indexing.engine.solr" #(yacy.indexing.engine.solr.checked)#:: checked="checked"#(/yacy.indexing.engine.solr.checked)# /></dt><dd>embedded solr search index</dd>
+      <dt><input type="radio" name="yacy.indexing" value="off" id="yacy.indexing.engine.off" #(yacy.indexing.engine.off.checked)#:: checked="checked"#(/yacy.indexing.engine.off.checked)# /></dt><dd>no local index</dd>
+      <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>
+      </dl>
       </fieldset>
-      <input type="submit" name="set" value="Set" />
-      
+
       <fieldset>
       <legend>
-        <input type="checkbox" name="solr.indexing.enabled" id="solr.indexing.enabled" #(solr.indexing.enabled.checked)#:: checked="checked"#(/solr.indexing.enabled.checked)# />
-        <label for="p2p">Remote Solr Index</label>
+        <input type="checkbox" name="solr.indexing.solrremote" id="solr.indexing.solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# />
+        <label for="p2p">Remote Solr Search Index</label>
       </legend>
       You can set one or more Solr targets here. If you wish to set several targets, then list them in the 'Solr URL' field using a ',' (comma) as separator.
 
@@ -58,6 +61,8 @@
       #(/table)#
         <dt class="TableCellDark">Solr URL(s)</dt>
         <dd><textarea rows="5" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea></dd>
+        <dt class="TableCellDark">Commit-Within (milliseconds)</dt>
+        <dd><input type="text" size="6" maxlength="6" value="#[solr.indexing.commitWithinMs]#"  name="solr.indexing.commitWithinMs" id="solr.indexing.commitWithinMs"/></dd>
         <dt class="TableCellDark">Sharding Method</dt>
         <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.sharding]#" name="solr.indexing.sharding" id="solr.indexing.sharding" disabled="disabled"/></dd>
         <dt class="TableCellDark">Scheme</dt>

@@ -85,7 +85,7 @@ public class FileLoader {
 
             StringBuilder content = FTPClient.dirhtml(u, null, null, null, list, true);
 
-            ResponseHeader responseHeader = new ResponseHeader();
+            ResponseHeader responseHeader = new ResponseHeader(200);
             responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
             final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
@@ -93,7 +93,6 @@ public class FileLoader {
                     request,
                     requestHeader,
                     responseHeader,
-                    "200",
                     profile,
                     false,
                     content.toString().getBytes());
@@ -103,7 +102,7 @@ public class FileLoader {
 
         // create response header
         String mime = Classification.ext2mime(url.getFileExtension());
-        ResponseHeader responseHeader = new ResponseHeader();
+        ResponseHeader responseHeader = new ResponseHeader(200);
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date(url.lastModified())));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
 
@@ -134,7 +133,6 @@ public class FileLoader {
                     request,
                     requestHeader,
                     responseHeader,
-                    "200",
                     profile,
                     false,
                     url.toTokens().getBytes());
@@ -152,7 +150,6 @@ public class FileLoader {
                 request,
                 requestHeader,
                 responseHeader,
-                "200",
                 profile,
                 false,
                 b);

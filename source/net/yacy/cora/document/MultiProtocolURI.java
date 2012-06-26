@@ -349,8 +349,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         escape();
     }
 
-    public MultiProtocolURI(final String protocol, final String host, final int port, final String path) throws MalformedURLException {
+    public MultiProtocolURI(final String protocol, String host, final int port, final String path) throws MalformedURLException {
         if (protocol == null) throw new MalformedURLException("protocol is null");
+        if (host.indexOf(':') >= 0 && host.charAt(0) != '[') host = '[' + host + ']'; // IPv6 host must be enclosed in square brackets
         this.protocol = protocol;
         this.host = host;
         this.port = port;
@@ -709,7 +710,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public String getHost() {
-        return this.host;
+        return (this.host.charAt(0) == '[' && this.host.charAt(this.host.length() - 1) == ']') ? this.host.substring(1, this.host.length() - 1) : this.host;
     }
 
     public String getTLD() {

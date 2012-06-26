@@ -41,6 +41,7 @@ import java.util.concurrent.ConcurrentMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -59,7 +60,6 @@ public class Balancer {
     private static final String indexSuffix           = "A.db";
     private static final int    EcoFSBufferSize       = 1000;
     private static final int    objectIndexBufferSize = 1000;
-    private static final String localhost             = "localhost";
 
     // class variables filled with external values
     private final File                 cacheStacksPath;
@@ -330,7 +330,7 @@ public class Balancer {
 
     private void pushHashToDomainStacks(String host, final byte[] urlhash) throws RowSpaceExceededException {
         // extend domain stack
-        if (host == null) host = localhost;
+        if (host == null) host = Domains.LOCALHOST;
         HandleSet domainList = this.domainStacks.get(host);
         if (domainList == null) {
             // create new list
@@ -345,7 +345,7 @@ public class Balancer {
 
     private void removeHashFromDomainStacks(String host, final byte[] urlhash) {
         // reduce domain stack
-        if (host == null) host = localhost;
+        if (host == null) host = Domains.LOCALHOST;
         final HandleSet domainList = this.domainStacks.get(host);
         if (domainList == null) {
             this.domainStacks.remove(host);

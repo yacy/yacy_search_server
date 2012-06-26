@@ -1071,7 +1071,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             // set rewrite values
             final serverObjects tp = new serverObjects();
 
-            String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = "127.0.0.1";
+            String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = Domains.LOCALHOST;
 
             // check if ip is local ip address
             final InetAddress hostAddress = Domains.dnsResolve(clientIP);
@@ -1136,9 +1136,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final byte[] result = o.toByteArray();
             o.close(); o = null;
 
-            if(header == null) {
-                header = new ResponseHeader();
-            }
+            if (header == null) header = new ResponseHeader(httpStatusCode);
             header.put(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS, Integer.toString(httpStatusCode));
             header.put(HeaderFramework.DATE, systemDate);
             header.put(HeaderFramework.CONTENT_TYPE, "text/html");
@@ -1189,9 +1187,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             }
         }
 
-        if (headers == null) {
-            headers = new ResponseHeader();
-        }
+        if (headers == null) headers = new ResponseHeader(httpStatusCode);
         final Date now = new Date(System.currentTimeMillis());
 
         headers.put(HeaderFramework.SERVER, "AnomicHTTPD (www.anomic.de)");
@@ -1240,7 +1236,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         if (respond == null) throw new NullPointerException("The outputstream must not be null.");
         if (conProp == null) throw new NullPointerException("The connection property structure must not be null.");
         if (httpVersion == null) httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = HeaderFramework.HTTP_VERSION_1_1;
-        if (responseHeader == null) responseHeader = new ResponseHeader();
+        if (responseHeader == null) responseHeader = new ResponseHeader(httpStatusCode);
 
         try {
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {

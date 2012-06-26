@@ -261,7 +261,7 @@ public final class TextParser {
         if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
         try {
             final Document[] docs = parser.parse(location, mimeType, documentCharset, sourceStream);
-            for (final Document d: docs) { assert d.getText() != null; } // verify docs
+            for (final Document d: docs) { assert d != null && d.getText() != null; } // verify docs
             return docs;
         } catch (final Exception e) {
             throw new Parser.Failure("parser failed: " + parser.getName(), location);

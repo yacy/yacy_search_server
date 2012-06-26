@@ -70,6 +70,7 @@ public class TimeoutRequest<E> {
         try {
             final Future<E> taskFuture = service.submit(this.call);
             final Runnable t = new Runnable() {
+                @Override
                 public void run() { taskFuture.cancel(true); }
             };
             service.execute(t);
@@ -109,6 +110,7 @@ public class TimeoutRequest<E> {
      */
     public static boolean ping(final String host, final int port, final int timeout) throws ExecutionException {
         return new TimeoutRequest<Boolean>(new Callable<Boolean>() {
+            @Override
             public Boolean call() {
                 //long time = System.currentTimeMillis();
                 try {
@@ -134,25 +136,6 @@ public class TimeoutRequest<E> {
     }
 
     /**
-     * do a DNS lookup within a given time
-     * @param host
-     * @param timeout
-     * @return the InetAddress for a given domain name
-     * @throws ExecutionException
-     */
-    public static InetAddress getByName(final String host, final long timeout) throws ExecutionException {
-        return new TimeoutRequest<InetAddress>(new Callable<InetAddress>() {
-            public InetAddress call() {
-                try {
-                    return InetAddress.getByName(host);
-                } catch (final UnknownHostException e) {
-                    return null;
-                }
-            }
-        }).call(timeout);
-    }
-
-    /**
      * perform a reverse domain name lookup for a given InetAddress within a given timeout
      * @param i
      * @param timeout
@@ -161,6 +144,7 @@ public class TimeoutRequest<E> {
      */
     public static String getHostName(final InetAddress i, final long timeout) throws ExecutionException {
         return new TimeoutRequest<String>(new Callable<String>() {
+            @Override
             public String call() { return i.getHostName(); }
         }).call(timeout);
     }
@@ -175,6 +159,7 @@ public class TimeoutRequest<E> {
     public static boolean exists(final SmbFile file, final long timeout) throws IOException {
         try {
             return new TimeoutRequest<Boolean>(new Callable<Boolean>() {
+                @Override
                 public Boolean call() { try {
                     return file.exists();
                 } catch (final SmbException e) {
@@ -196,6 +181,7 @@ public class TimeoutRequest<E> {
     public static boolean canRead(final SmbFile file, final long timeout) throws IOException {
         try {
             return new TimeoutRequest<Boolean>(new Callable<Boolean>() {
+                @Override
                 public Boolean call() { try {
                     return file.canRead();
                 } catch (final SmbException e) {
@@ -217,6 +203,7 @@ public class TimeoutRequest<E> {
     public static boolean canWrite(final SmbFile file, final long timeout) throws IOException {
         try {
             return new TimeoutRequest<Boolean>(new Callable<Boolean>() {
+                @Override
                 public Boolean call() { try {
                     return file.canWrite();
                 } catch (final SmbException e) {
@@ -238,6 +225,7 @@ public class TimeoutRequest<E> {
     public static boolean isHidden(final SmbFile file, final long timeout) throws IOException {
         try {
             return new TimeoutRequest<Boolean>(new Callable<Boolean>() {
+                @Override
                 public Boolean call() { try {
                     return file.isHidden();
                 } catch (final SmbException e) {
@@ -259,6 +247,7 @@ public class TimeoutRequest<E> {
     public static boolean isDirectory(final SmbFile file, final long timeout) throws IOException {
         try {
             return new TimeoutRequest<Boolean>(new Callable<Boolean>() {
+                @Override
                 public Boolean call() { try {
                     return file.isDirectory();
                 } catch (final SmbException e) {
@@ -280,6 +269,7 @@ public class TimeoutRequest<E> {
     public static long length(final SmbFile file, final long timeout) throws IOException {
         try {
             return new TimeoutRequest<Long>(new Callable<Long>() {
+                @Override
                 public Long call() { try {
                     return file.length();
                 } catch (final SmbException e) {
@@ -301,6 +291,7 @@ public class TimeoutRequest<E> {
     public static long lastModified(final SmbFile file, final long timeout) throws IOException {
         try {
             return new TimeoutRequest<Long>(new Callable<Long>() {
+                @Override
                 public Long call() { try {
                     return file.lastModified();
                 } catch (final SmbException e) {
@@ -322,6 +313,7 @@ public class TimeoutRequest<E> {
     public static String[] list(final SmbFile file, final long timeout) throws IOException {
         try {
             return new TimeoutRequest<String[]>(new Callable<String[]>() {
+                @Override
                 public String[] call() { try {
                     return file.list();
                 } catch (final SmbException e) {
@@ -334,11 +326,4 @@ public class TimeoutRequest<E> {
         }
     }
 
-    public static void main(final String[] args) {
-        try {
-            System.out.println(getByName("yacy.net", 100));
-        } catch (final ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
 }

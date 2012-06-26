@@ -29,6 +29,7 @@
 
 import java.io.File;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
@@ -46,7 +47,7 @@ public class Steering {
         final serverObjects prop = new serverObjects();
         prop.put("info", "0"); //no information submitted
 
-        final String requestIP = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String requestIP = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
         // handle access rights
         if (!sb.verifyAuthentication(header)) {

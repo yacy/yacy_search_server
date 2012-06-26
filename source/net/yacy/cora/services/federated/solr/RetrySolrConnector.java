@@ -31,14 +31,28 @@ import java.util.List;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
-public class SolrRetryConnector implements SolrConnector {
+public class RetrySolrConnector implements SolrConnector {
 
     private final SolrConnector solrConnector;
     private final long retryMaxTime;
 
-    public SolrRetryConnector(final SolrConnector solrConnector, final long retryMaxTime) {
+    public RetrySolrConnector(final SolrConnector solrConnector, final long retryMaxTime) {
         this.solrConnector = solrConnector;
         this.retryMaxTime = retryMaxTime;
+    }
+
+    @Override
+    public int getCommitWithinMs() {
+        return this.solrConnector.getCommitWithinMs();
+    }
+
+    /**
+     * set the solr autocommit delay
+     * @param c the maximum waiting time after a solr command until it is transported to the server
+     */
+    @Override
+    public void setCommitWithinMs(int c) {
+        this.solrConnector.setCommitWithinMs(c);
     }
 
     @Override

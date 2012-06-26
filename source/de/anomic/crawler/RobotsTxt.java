@@ -333,7 +333,7 @@ public class RobotsTxt {
             	ByteCount.addAccountCount(ByteCount.CRAWLER, robotsTxt.length);
             }
             final int code = client.getHttpResponse().getStatusLine().getStatusCode();
-            final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+            final ResponseHeader header = new ResponseHeader(code, client.getHttpResponse().getAllHeaders());
 
             // check the response status
             if (code > 199 && code < 300) {

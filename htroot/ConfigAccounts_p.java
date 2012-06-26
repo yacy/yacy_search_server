@@ -1,4 +1,4 @@
-//Config_Accounts_p.java 
+//Config_Accounts_p.java
 //-----------------------
 //part of the AnomicHTTPD caching proxy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -29,25 +29,25 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-
 import de.anomic.data.UserDB;
 import de.anomic.data.UserDB.AccessRight;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import java.util.EnumMap;
-import java.util.Map;
 
 public class ConfigAccounts_p {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
@@ -57,7 +57,7 @@ public class ConfigAccounts_p {
         // admin password
         boolean localhostAccess = sb.getConfigBool("adminAccountForLocalhost", false);
         if (post != null && post.containsKey("setAdmin")) {
-            localhostAccess = "localhost".equals(post.get("access", ""));
+            localhostAccess = Domains.isLocalhost(post.get("access", ""));
             final String user = (post == null) ? "" : post.get("adminuser", "");
             final String pw1  = (post == null) ? "" : post.get("adminpw1", "");
             final String pw2  = (post == null) ? "" : post.get("adminpw2", "");
@@ -68,7 +68,7 @@ public class ConfigAccounts_p {
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig("adminAccount", "");
             }
-            
+
             if (localhostAccess) {
 
             	sb.setConfig("adminAccountForLocalhost", true);
@@ -87,16 +87,16 @@ public class ConfigAccounts_p {
                 }
             }
         }
-        
+
         if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0 && !env.getConfigBool("adminAccountForLocalhost", false)) {
             prop.put("passwordNotSetWarning", 1);
         }
-        
+
         prop.put("localhost.checked", (localhostAccess) ? 1 : 0);
         prop.put("account.checked", (localhostAccess) ? 0 : 1);
         prop.put("statusPassword", localhostAccess ? "0" : "1");
         prop.put("defaultUser", "admin");
-        
+
         //default values
         prop.put("current_user", "newuser");
         prop.put("username", "");
@@ -115,13 +115,13 @@ public class ConfigAccounts_p {
             c++;
         }
         prop.put("rights", c);
-        
+
         prop.put("users", "0");
-        
+
         if (sb.userDB == null) {
             return prop;
         }
-        
+
         if (post == null) {
             //do nothing
 
@@ -130,7 +130,7 @@ public class ConfigAccounts_p {
             //current_user = edited user
         } else if (post.containsKey("user") && !"newuser".equals(post.get("user"))){
             if (post.containsKey("change_user")) {
-                //defaults for newuser are set above                
+                //defaults for newuser are set above
                 entry = sb.userDB.getEntry(post.get("user"));
                 // program crashes if a submit with empty username was made on previous mask and the user clicked on the
                 // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
@@ -176,10 +176,10 @@ public class ConfigAccounts_p {
             for(final AccessRight right : rights) {
                 rightsSet.put(right, post.containsKey(right.toString()) && "on".equals(post.get(right.toString())) ? "true" : "false");
             }
-            
+
             final Map<String, String> mem = new HashMap<String, String>();
             if( "newuser".equals(post.get("current_user"))){ //new user
-                
+
                 if (!"".equals(pw1)) { //change only if set
                     mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username + ":" + pw1));
                 }
@@ -202,7 +202,7 @@ public class ConfigAccounts_p {
                 } catch (final IllegalArgumentException e) {
                     prop.put("error", "3");
                 }
-                
+
             } else { //edit user
 
                 entry = sb.userDB.getEntry(username);
@@ -235,7 +235,7 @@ public class ConfigAccounts_p {
             }//edit user
             prop.putHTML("username", username);
         }
-		
+
         //Generate Userlist
         final Iterator<UserDB.Entry> it = sb.userDB.iterator(true);
         int numUsers=0;

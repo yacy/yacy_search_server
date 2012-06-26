@@ -39,23 +39,36 @@ public class ResponseHeader extends HeaderFramework {
     private static final long serialVersionUID = 0L;
     private static Logger log = Logger.getLogger(ResponseHeader.class);
 
-    public ResponseHeader() {
+    public ResponseHeader(final int statusCode) {
         super();
+        this.put(HeaderFramework.STATUS_CODE, Integer.toString(statusCode));
     }
 
-    public ResponseHeader(final Header[] headers) {
+    public ResponseHeader(final int statusCode, final Header[] headers) {
         super();
+        this.put(HeaderFramework.STATUS_CODE, Integer.toString(statusCode));
         for (final Header h : headers) {
         	add(h.getName(), h.getValue());
         }
     }
 
-    public ResponseHeader(final HashMap<String, String> reverseMappingCache) {
+    public ResponseHeader(final int statusCode, final HashMap<String, String> reverseMappingCache) {
         super(reverseMappingCache);
+        this.put(HeaderFramework.STATUS_CODE, Integer.toString(statusCode));
     }
 
     public ResponseHeader(final HashMap<String, String> reverseMappingCache, final Map<String, String> othermap)  {
         super(reverseMappingCache, othermap);
+    }
+
+    public int getStatusCode() {
+        String statuscode = this.get(HeaderFramework.STATUS_CODE);
+        if (statuscode == null) return 200;
+        try {
+            return Integer.parseInt(statuscode);
+        } catch (NumberFormatException e) {
+            return 200;
+        }
     }
 
     public Date date() {

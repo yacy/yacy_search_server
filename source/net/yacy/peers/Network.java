@@ -351,6 +351,7 @@ public class Network
                     }
                 }
             } catch ( final Exception e ) {
+                Log.logException(e);
                 log.logSevere(
                     "publishThread: error with target seed " + this.seed.toString() + ": " + e.getMessage(),
                     e);

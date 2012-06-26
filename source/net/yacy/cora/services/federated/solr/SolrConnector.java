@@ -33,6 +33,21 @@ import org.apache.solr.common.SolrException;
 
 public interface SolrConnector {
 
+    /**
+     * get the solr autocommit delay
+     * @return the maximum waiting time after a solr command until it is transported to the server
+     */
+    public int getCommitWithinMs();
+
+    /**
+     * set the solr autocommit delay
+     * @param c the maximum waiting time after a solr command until it is transported to the server
+     */
+    public void setCommitWithinMs(int c);
+
+    /**
+     * close the server connection
+     */
     public void close();
 
     /**

@@ -82,7 +82,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String ACCEPT_ENCODING = "Accept-Encoding";
     public static final String ACCEPT_CHARSET = "Accept-Charset";
 
-
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_MD5 = "Content-MD5";
@@ -134,6 +133,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String METHOD_HEAD = "HEAD";
     public static final String METHOD_POST = "POST";
     public static final String METHOD_CONNECT = "CONNECT";
+
+    /*
+     * constanst for metadata which is stored in the ResponseHeader
+     */
+    public static final String STATUS_CODE = "STATUS_CODE";
 
     /* =============================================================
      * defining default http status messages

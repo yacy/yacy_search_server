@@ -36,12 +36,15 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
+
+import com.google.common.io.Files;
+
 import de.anomic.data.BlogBoard;
 import de.anomic.data.BlogBoard.BlogEntry;
 import de.anomic.data.BlogBoardComments;
@@ -53,7 +56,7 @@ import de.anomic.server.serverSwitch;
 public class BlogComments {
 
     private static final String DEFAULT_PAGE = "blog_default";
-    
+
     public static String dateString(final Date date) {
         return Blog.dateString(date);
     }
@@ -81,7 +84,7 @@ public class BlogComments {
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
         String strAuthor = post.get("author", "anonymous");
 
@@ -142,7 +145,7 @@ public class BlogComments {
                 final File notifierSource = new File(sb.getAppPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
                 final File notifierDest   = new File(sb.getDataPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
                 try {
-                    FileUtils.copy(notifierSource, notifierDest);
+                    Files.copy(notifierSource, notifierDest);
                 } catch (final IOException e) {
                     Log.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
 

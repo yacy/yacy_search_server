@@ -80,8 +80,8 @@ public final class HTTPLoader {
     private Response load(final Request request, final int retryCount, final int maxFileSize, final boolean checkBlacklist) throws IOException {
 
         if (retryCount < 0) {
-            this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection counter exceeded", -1);
-            throw new IOException("Redirection counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
+            this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "retry counter exceeded", -1);
+            throw new IOException("retry counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
         }
 
         DigestURI url = request.url();
@@ -131,15 +131,15 @@ public final class HTTPLoader {
 
         // send request
     	final byte[] responseBody = client.GETbytes(url, maxFileSize);
-    	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
-    	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
+        final int code = client.getHttpResponse().getStatusLine().getStatusCode();
+    	final ResponseHeader responseHeader = new ResponseHeader(code, client.getHttpResponse().getAllHeaders());
 
     	if (code > 299 && code < 310) {
     		// redirection (content may be empty)
     	    if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
-                if (header.containsKey(HeaderFramework.LOCATION)) {
+                if (responseHeader.containsKey(HeaderFramework.LOCATION)) {
                     // getting redirection URL
-                	String redirectionUrlString = header.get(HeaderFramework.LOCATION);
+                	String redirectionUrlString = responseHeader.get(HeaderFramework.LOCATION);
                     redirectionUrlString = redirectionUrlString.trim();
 
                     if (redirectionUrlString.length() == 0) {
@@ -202,8 +202,7 @@ public final class HTTPLoader {
             response = new Response(
                     request,
                     requestHeader,
-                    header,
-                    Integer.toString(code),
+                    responseHeader,
                     profile,
                     false,
                     responseBody
@@ -254,8 +253,8 @@ public final class HTTPLoader {
         client.setTimout(20000);
         client.setHeader(requestHeader.entrySet());
         	final byte[] responseBody = client.GETbytes(request.url());
-        	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
-        	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
+            final int code = client.getHttpResponse().getStatusLine().getStatusCode();
+        	final ResponseHeader header = new ResponseHeader(code, client.getHttpResponse().getAllHeaders());
             // FIXME: 30*-handling (bottom) is never reached
             // we always get the final content because httpClient.followRedirects = true
 
@@ -272,7 +271,6 @@ public final class HTTPLoader {
                         request,
                         requestHeader,
                         header,
-                        Integer.toString(code),
                         null,
                         false,
                         responseBody

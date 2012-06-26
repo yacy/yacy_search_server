@@ -1,11 +1,7 @@
 /**
- *  SolrSingleConnector
- *  Copyright 2011 by Michael Peter Christen
- *  First released 14.04.2011 at http://yacy.net
- *
- *  $LastChangedDate: 2011-04-14 22:05:04 +0200 (Do, 14 Apr 2011) $
- *  $LastChangedRevision: 7654 $
- *  $LastChangedBy: orbiter $
+ *  AbstractSolrConnector
+ *  Copyright 2012 by Michael Peter Christen
+ *  First released 21.06.2012 at http://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -26,101 +22,67 @@ package net.yacy.cora.services.federated.solr;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.index.SolrField;
 
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
-import net.yacy.search.index.SolrField;
 
+public class AbstractSolrConnector implements SolrConnector {
 
-public class SolrSingleConnector implements SolrConnector {
+    protected SolrServer server;
+    protected int commitWithinMs; // max time (in ms) before a commit will happen
 
-    private final String solrurl, host, solrpath, solraccount, solrpw;
-    private final int port;
-    private HttpSolrServer server;
+    protected AbstractSolrConnector() {
+        this.server = null;
+        this.commitWithinMs = 180000;
+    }
+
+    protected void init(SolrServer server) {
+        this.server = server;
+    }
+
+    public SolrServer getServer() {
+        return this.server;
+    }
 
     /**
-     * create a new solr connector
-     * @param url the solr url, like http://192.168.1.60:8983/solr/ or http://admin:pw@192.168.1.60:8983/solr/
-     * @param scheme
-     * @throws IOException
+     * get the solr autocommit delay
+     * @return the maximum waiting time after a solr command until it is transported to the server
      */
-    public SolrSingleConnector(final String url) throws IOException {
-        this.solrurl = url;
+    @Override
+    public int getCommitWithinMs() {
+        return this.commitWithinMs;
+    }
 
-        // connect using authentication
-        final MultiProtocolURI u = new MultiProtocolURI(this.solrurl);
-        this.host = u.getHost();
-        this.port = u.getPort();
-        this.solrpath = u.getPath();
-        final String userinfo = u.getUserInfo();
-        if (userinfo == null || userinfo.length() == 0) {
-            this.solraccount = ""; this.solrpw = "";
-        } else {
-            final int p = userinfo.indexOf(':');
-            if (p < 0) {
-                this.solraccount = userinfo; this.solrpw = "";
-            } else {
-                this.solraccount = userinfo.substring(0, p); this.solrpw = userinfo.substring(p + 1);
-            }
-        }
-        if (this.solraccount.length() > 0) {
-            final DefaultHttpClient client = new DefaultHttpClient() {
-                @Override
-                protected HttpContext createHttpContext() {
-                    HttpContext context = super.createHttpContext();
-                    AuthCache authCache = new BasicAuthCache();
-                    BasicScheme basicAuth = new BasicScheme();
-                    HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
-                    authCache.put(targetHost, basicAuth);
-                    context.setAttribute(ClientContext.AUTH_CACHE, authCache);
-                    return context;
-                }
-            };
-            BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(new AuthScope(this.host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(this.solraccount, this.solrpw));
-            client.setCredentialsProvider(credsProvider);
-            this.server = new HttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, client);
-        } else {
-            this.server = new HttpSolrServer(this.solrurl);
-        }
-        this.server.setAllowCompression(true);
-        this.server.setConnectionTimeout(60000);
-        this.server.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
-        this.server.setSoTimeout(60000);
+    /**
+     * set the solr autocommit delay
+     * @param c the maximum waiting time after a solr command until it is transported to the server
+     */
+    @Override
+    public void setCommitWithinMs(int c) {
+        this.commitWithinMs = c;
     }
 
     @Override
     public synchronized void close() {
         try {
             this.server.commit();
+            this.server = null;
         } catch (SolrServerException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 
@@ -196,7 +158,7 @@ public class SolrSingleConnector implements SolrConnector {
     @Override
     public void add(final SolrDoc solrdoc) throws IOException, SolrException {
         try {
-            this.server.add(solrdoc,180000); // commitWithIn 180s
+            this.server.add(solrdoc, this.commitWithinMs);
             //this.server.commit();
         } catch (SolrServerException e) {
             Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdoc.toString());
@@ -209,7 +171,7 @@ public class SolrSingleConnector implements SolrConnector {
         ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
         for (SolrDoc d: solrdocs) l.add(d);
         try {
-            this.server.add(l,180000); // commitWithIn 120s
+            this.server.add(l, this.commitWithinMs);
             //this.server.commit();
         } catch (SolrServerException e) {
             Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdocs.toString());
@@ -251,37 +213,4 @@ public class SolrSingleConnector implements SolrConnector {
         //return result;
     }
 
-
-    public String getAdminInterface() {
-        final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
-        final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();
-        String u = this.solrurl;
-        int p = u.indexOf("localhost",0); if (p < 0) p = u.indexOf("127.0.0.1",0);
-        if (p >= 0) u = u.substring(0, p) + localhostExtern + u.substring(p + 9);
-        return u + (u.endsWith("/") ? "admin/" : "/admin/");
-    }
-
-    public static void main(final String args[]) {
-        SolrSingleConnector solr;
-        try {
-            solr = new SolrSingleConnector("http://127.0.0.1:8983/solr");
-            solr.clear();
-            final File exampleDir = new File("test/parsertest/");
-            long t, t0, a = 0;
-            int c = 0;
-            System.out.println("push files in " + exampleDir.getAbsolutePath() + " to Solr");
-            for (final String s: exampleDir.list()) {
-                if (s.startsWith(".")) continue;
-                t = System.currentTimeMillis();
-                solr.add(new File(exampleDir, s), s);
-                t0 = (System.currentTimeMillis() - t);
-                a += t0;
-                c++;
-                System.out.println("pushed file " + s + " to solr, " + t0 + " milliseconds");
-            }
-            System.out.println("pushed " + c + " files in " + a + " milliseconds, " + (a / c) + " milliseconds average; " + (60000 / a * c) + " PPM");
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
