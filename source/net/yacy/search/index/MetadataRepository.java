@@ -102,12 +102,12 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         this.localSolr = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath,"defaults"), "solr"));
     }
 
-    public SolrConnector getRemoteSolr() {
-        return this.remoteSolr;
-    }
-
     public SolrConnector getLocalSolr() {
         return this.localSolr;
+    }
+
+    public SolrConnector getRemoteSolr() {
+        return this.remoteSolr;
     }
 
     public void clearCache() {
@@ -137,8 +137,8 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
             this.urlIndexFile.close();
             this.urlIndexFile = null;
         }
-        if (this.remoteSolr != null) this.remoteSolr.close();
         if (this.localSolr != null) this.localSolr.close();
+        if (this.remoteSolr != null) this.remoteSolr.close();
     }
 
     public int writeCacheSize() {
@@ -208,10 +208,23 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         if (MemoryControl.shortStatus()) clearCache() ;
     }
 
-    public boolean remove(final byte[] urlHashBytes) {
-        if (urlHashBytes == null) return false;
+    public boolean remove(final byte[] urlHash) {
+        if (urlHash == null) return false;
+        if (this.localSolr != null || this.remoteSolr != null) {
+            String urls = ASCII.String(urlHash);
+            if (this.localSolr != null) try {
+                this.localSolr.delete(urls);
+            } catch (final Throwable e) {
+                Log.logException(e);
+            }
+            if (this.remoteSolr != null) try {
+                this.remoteSolr.delete(urls);
+            } catch (final Throwable e) {
+                Log.logException(e);
+            }
+        }
         try {
-            final Row.Entry r = this.urlIndexFile.remove(urlHashBytes);
+            final Row.Entry r = this.urlIndexFile.remove(urlHash);
             if (r != null) this.statsDump = null;
             return r != null;
         } catch (final IOException e) {
@@ -221,11 +234,22 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
 
     public boolean exists(final byte[] urlHash) {
         if (urlHash == null) return false;
-        try {
-            if (this.remoteSolr != null && this.remoteSolr.exists(ASCII.String(urlHash))) {
-                return true;
+        if (this.localSolr != null || this.remoteSolr != null) {
+            String urls = ASCII.String(urlHash);
+            try {
+                if (this.localSolr != null && this.localSolr.exists(urls)) {
+                    return true;
+                }
+            } catch (final Throwable e) {
+                Log.logException(e);
             }
-        } catch (final Throwable e) {
+            try {
+                if (this.remoteSolr != null && this.remoteSolr.exists(urls)) {
+                    return true;
+                }
+            } catch (final Throwable e) {
+                Log.logException(e);
+            }
         }
         if (this.urlIndexFile == null) return false; // case may happen during shutdown
         return this.urlIndexFile.has(urlHash);
