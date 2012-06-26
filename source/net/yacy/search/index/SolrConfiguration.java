@@ -195,9 +195,6 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
             addSolr(solrdoc, SolrField.htags_i, h);
 
-            // canonical tag
-            if (html.getCanonical() != null) addSolr(solrdoc, SolrField.canonical_s, html.getCanonical().toNormalform(false, false));
-
             // noindex and nofollow attributes
             // from HTML (meta-tag in HTML header: robots)
             // and HTTP header (x-robots property)
@@ -341,6 +338,16 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 }
                 addSolr(solrdoc, SolrField.iframesscount_i, iframes.length);
                 if (iframes.length > 0) addSolr(solrdoc, SolrField.iframes_txt, iframes);
+            }
+
+            // canonical tag
+            if (isEmpty() || contains(SolrField.canonical_s.name())) {
+                final MultiProtocolURI canonical = html.getCanonical();
+                if (canonical != null) {
+                    inboundLinks.remove(canonical);
+                    ouboundLinks.remove(canonical);
+                    addSolr(solrdoc, SolrField.canonical_s, canonical.toNormalform(false, false));
+                }
             }
 
             // flash embedded
