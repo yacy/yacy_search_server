@@ -781,7 +781,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s == null) s = this.metas.get("dc.description");
         if (s == null) s = EMPTY_STRING;
         if (s.length() == 0) {
-            return MultiProtocolURI.splitpattern.split(getTitle().toLowerCase());
+            return new String[0];
         }
         if (s.contains(",")) return commaSepPattern.split(s);
         if (s.contains(";")) return semicSepPattern.split(s);
