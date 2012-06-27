@@ -373,9 +373,9 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         }
     }
 
-    public boolean getBoolean(final String key, final boolean dflt) {
+    public boolean getBoolean(final String key) {
         String s = removeByteOrderMark(super.get(key));
-        if (s == null) return dflt;
+        if (s == null) return false;
         s = s.toLowerCase();
         return s.equals("true") || s.equals("on") || s.equals("1");
     }

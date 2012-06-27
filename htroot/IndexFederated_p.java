@@ -56,10 +56,11 @@ public class IndexFederated_p {
 
             // solr
             final boolean solrWasOn = env.getConfigBool("federated.service.solr.indexing.enabled", true);
-            final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.solrremote", false);
+            final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.solrremote");
             env.setConfig("federated.service.solr.indexing.enabled", solrIsOnAfterwards);
             String solrurls = post.get("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr"));
             int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000));
+            boolean lazy = post.getBoolean("solr.indexing.lazy");
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
             final StringBuilder s = new StringBuilder();
             String s0;
@@ -78,6 +79,7 @@ public class IndexFederated_p {
             solrurls = s.toString().trim();
             env.setConfig("federated.service.solr.indexing.url", solrurls);
             env.setConfig("federated.service.solr.indexing.commitWithinMs", commitWithinMs);
+            env.setConfig("federated.service.solr.indexing.lazy", lazy);
             env.setConfig("federated.service.solr.indexing.sharding", post.get("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5")));
             final String schemename = post.get("solr.indexing.schemefile", env.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list"));
             env.setConfig("federated.service.solr.indexing.schemefile", schemename);
@@ -188,6 +190,7 @@ public class IndexFederated_p {
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool("federated.service.solr.indexing.enabled", false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr").replace(",", "\n"));
         prop.put("solr.indexing.commitWithinMs", env.getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000));
+        prop.put("solr.indexing.lazy.checked", env.getConfigBool("federated.service.solr.indexing.lazy", true) ? 1 : 0);
         prop.put("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5"));
         prop.put("solr.indexing.schemefile", schemename);
 

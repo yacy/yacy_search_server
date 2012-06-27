@@ -398,8 +398,9 @@ public final class Switchboard extends serverSwitch
         if ( !solrWorkProfile.exists() ) {
             Files.copy(solrBackupProfile, solrWorkProfile);
         }
-        final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile);
-        this.solrScheme = new SolrConfiguration(solrWorkProfile);
+        final boolean solrlazy = getConfigBool("federated.service.solr.indexing.lazy", true);
+        final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile, solrlazy);
+        this.solrScheme = new SolrConfiguration(solrWorkProfile, solrlazy);
 
         // update the working scheme with the backup scheme. This is necessary to include new features.
         // new features are always activated by default (if activated in input-backupScheme)

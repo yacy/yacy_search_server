@@ -64,7 +64,7 @@ public class AccessPicture_p {
             color_grid    = post.get("colorgrid",   color_grid);
             color_dot     = post.get("colordot",    color_dot);
             color_line    = post.get("colorline",   color_line);
-            corona        = post.getBoolean("corona", true);
+            corona        = !post.containsKey("corona") || post.getBoolean("corona");
             coronaangle   = (corona) ? post.getInt("coronaangle", 0) : -1;
         }
         if (coronaangle < 0) corona = false;

@@ -101,11 +101,11 @@ public class Status
                 ByteCount.resetCount();
                 redirect = true;
             } else if ( post.containsKey("popup") ) {
-                final boolean trigger_enabled = post.getBoolean("popup", false);
+                final boolean trigger_enabled = post.getBoolean("popup");
                 sb.setConfig("browserPopUpTrigger", trigger_enabled);
                 redirect = true;
             } else if ( post.containsKey("tray") ) {
-                final boolean trigger_enabled = post.getBoolean("tray", false);
+                final boolean trigger_enabled = post.getBoolean("tray");
                 sb.setConfig("trayIcon", trigger_enabled);
                 redirect = true;
             }
