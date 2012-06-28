@@ -41,7 +41,6 @@ import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -65,7 +64,7 @@ public class webstructure {
             } else if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
             	urlhash = ASCII.getBytes(about);
             	hosthash = about.substring(6);
-            	url = authenticated ? sb.getURL(Segments.Process.PUBLIC, urlhash) : null;
+            	url = authenticated ? sb.getURL(urlhash) : null;
             } else if (authenticated && about.length() > 0) {
             	// consider "about" as url or hostname
                 try {
@@ -138,7 +137,7 @@ public class webstructure {
 
                 // citations
                 prop.put("citations", 1);
-            	IndexCell<CitationReference> citationReferences = sb.indexSegments.segment(Segments.Process.PUBLIC).urlCitation();
+            	IndexCell<CitationReference> citationReferences = sb.index.urlCitation();
             	ReferenceContainer<CitationReference> citations = null;
             	// citationReferences.count(urlhash) would give to the number of references good for ranking
             	try {
@@ -158,7 +157,7 @@ public class webstructure {
             		while (i.hasNext()) {
                     	CitationReference cr = i.next();
                     	byte[] refhash = cr.urlhash();
-                    	DigestURI refurl = authenticated ? sb.getURL(Segments.Process.PUBLIC, refhash) : null;
+                    	DigestURI refurl = authenticated ? sb.getURL(refhash) : null;
                     	prop.put("citations_documents_0_anchors_" + d + "_urle", refurl == null ? 0 : 1);
                     	if (refurl != null) prop.putXML("citations_documents_0_anchors_" + d + "_urle_url", refurl.toNormalform(true, false));
                     	prop.put("citations_documents_0_anchors_" + d + "_urle_hash", refhash);

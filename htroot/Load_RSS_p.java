@@ -42,7 +42,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.RSSLoader;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.WorkTables;
@@ -191,7 +190,7 @@ public class Load_RSS_p {
                     messageurl = row.get("url", "");
                     if (messageurl.length() == 0) continue;
                     // get referrer
-                    final DigestURI referrer = sb.getURL(Segments.Process.LOCALCRAWLING, row.get("referrer", "").getBytes());
+                    final DigestURI referrer = sb.getURL(row.get("referrer", "").getBytes());
                     // check if feed is registered in scheduler
                     final byte[] api_pk = row.get("api_pk");
                     final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
@@ -271,7 +270,7 @@ public class Load_RSS_p {
                     final RSSMessage message = feed.getMessage(entry.getValue().substring(5));
                     final DigestURI messageurl = new DigestURI(message.getLink());
                     if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
-                    if (sb.urlExists(Segments.Process.LOCALCRAWLING, messageurl.hash()) != null) continue loop;
+                    if (sb.urlExists(messageurl.hash()) != null) continue loop;
                     sb.addToIndex(messageurl, null, null);
                     RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 } catch (final IOException e) {
@@ -316,7 +315,7 @@ public class Load_RSS_p {
                     author = item.getAuthor();
                     if (author == null) author = item.getCopyright();
                     pubDate = item.getPubDate();
-                    prop.put("showitems_item_" + i + "_state", sb.urlExists(Segments.Process.LOCALCRAWLING, messageurl.hash()) != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
+                    prop.put("showitems_item_" + i + "_state", sb.urlExists(messageurl.hash()) != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
                     prop.put("showitems_item_" + i + "_state_count", i);
                     prop.putHTML("showitems_item_" + i + "_state_guid", item.getGuid());
                     prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);

@@ -215,7 +215,7 @@ public class get_treeview {
 				}
 	        } else if (isAutoTagger || isMetadata || isURLdb || isCrawlStart) {
 	        	try {
-	                final YMarkMetadata meta = new YMarkMetadata(new DigestURI(post.get(ROOT).substring(2)), sb.indexSegments);
+	                final YMarkMetadata meta = new YMarkMetadata(new DigestURI(post.get(ROOT).substring(2)), sb.index);
         			final Document document = meta.loadDocument(sb.loader);
         			final TreeMap<String, YMarkTag> tags = sb.tables.bookmarks.getTags(bmk_user);
         			if(isAutoTagger)  {

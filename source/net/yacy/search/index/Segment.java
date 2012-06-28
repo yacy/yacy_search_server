@@ -137,22 +137,21 @@ public class Segment {
                 maxFileSize,
                 writeBufferSize);
 
-        /*
-        this.authorNavIndex = new IndexCell<NavigationReference>(
-                new File(new File(segmentPath, "nav_author"), "idx"),
-                navigationReferenceFactory,
-                wordOrder,
-                NavigationReferenceRow.navEntryRow,
-                entityCacheMaxSize,
-                targetFileSize,
-                maxFileSize,
-                this.merger,
-                writeBufferSize);
-        */
-
         // create LURL-db
         this.urlMetadata = new MetadataRepository(segmentPath, "text.urlmd", useTailCache, exceed134217727);
         //this.connectLocalSolr();
+    }
+
+    public long URLCount() {
+        return this.urlMetadata.size();
+    }
+
+    public long RWICount() {
+        return this.termIndex.sizesMax();
+    }
+
+    public int RWIBufferCount() {
+        return this.termIndex.getBufferSize();
     }
 
     public void connectRemoteSolr(final SolrConnector solr) {

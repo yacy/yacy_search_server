@@ -67,14 +67,6 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" id="searchform" method="post" enctype="multipart/form-data" accept-charset="UTF-8" onkeyup="xmlhttpPost(); return false;">
     <fieldset><legend>URL Retrieval</legend>
       <dl>
-        <dt class="TableCellDark">Select Segment:</dt>
-        <dd>
-          <select name="selectSegment" size="1">
-            #{segments}#
-            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
-            #{/segments}#
-          </select>
-        </dd>
         
         <dt class="TableCellDark">Retrieve by URL:</dt>
         <dd><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250" />

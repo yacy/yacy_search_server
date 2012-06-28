@@ -40,7 +40,6 @@ import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -63,16 +62,7 @@ public class PerformanceQueues_p {
         File defaultSettingsFile = new File(sb.getAppPath(), "defaults/yacy.init");
 
         // get segment
-        Segment indexSegment = null;
-        if (post != null && post.containsKey("segment")) {
-            String segmentName = post.get("segment");
-            if (sb.indexSegments.segmentExist(segmentName)) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            }
-        } else {
-            // take default segment
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
+        Segment indexSegment = sb.index;
 
         if(post != null) {
         	if(post.containsKey("defaultFile")){

@@ -38,7 +38,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -70,8 +69,7 @@ public class Vocabulary_p {
                         boolean discoverFromTitleSplitted = post.get("discovermethod", "").equals("titlesplitted");
                         boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
                         if (discoveruri != null) {
-                            String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
-                            Segment segment = sb.indexSegments.segment(segmentName);
+                            Segment segment = sb.index;
                             Iterator<DigestURI> ui = segment.urlSelector(discoveruri);
                             String t;
                             while (ui.hasNext()) {

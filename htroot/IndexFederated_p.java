@@ -37,7 +37,6 @@ import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import net.yacy.search.index.SolrField;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -86,8 +85,8 @@ public class IndexFederated_p {
 
             if (solrWasOn) {
                 // switch off
-                sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr().close();
-                sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(null);
+                sb.index.getRemoteSolr().close();
+                sb.index.connectRemoteSolr(null);
             }
 
             if (solrIsOnAfterwards) {
@@ -97,13 +96,13 @@ public class IndexFederated_p {
                     if (usesolr) {
                         SolrConnector solr = new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true);
                         solr.setCommitWithinMs(commitWithinMs);
-                        sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(solr);
+                        sb.index.connectRemoteSolr(solr);
                     } else {
-                        sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(null);
+                        sb.index.connectRemoteSolr(null);
                     }
                 } catch (final IOException e) {
                     Log.logException(e);
-                    sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(null);
+                    sb.index.connectRemoteSolr(null);
                 }
             }
 
@@ -138,11 +137,11 @@ public class IndexFederated_p {
         }
 
         // show solr host table
-        if (sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr() == null) {
+        if (sb.index.getRemoteSolr() == null) {
             prop.put("table", 0);
         } else {
             prop.put("table", 1);
-            final SolrConnector solr = sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr();
+            final SolrConnector solr = sb.index.getRemoteSolr();
             final long[] size = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getSizeList() : new long[]{((SingleSolrConnector) solr).getSize()};
             final String[] urls = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getAdminInterfaceList() : new String[]{((SingleSolrConnector) solr).getAdminInterface()};
             boolean dark = false;

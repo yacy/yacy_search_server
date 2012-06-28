@@ -33,10 +33,9 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.Protocol;
 import net.yacy.peers.Network;
+import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -91,7 +90,7 @@ public final class query {
         if (obj.equals("rwiurlcount")) try {
             // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
-            prop.put("response", sb.indexSegments.termIndex(Segments.Process.PUBLIC).get(env.getBytes(), null).size());
+            prop.put("response", sb.index.termIndex().get(env.getBytes(), null).size());
             return prop;
         } catch (final IOException e) {
             Log.logException(e);
@@ -99,13 +98,13 @@ public final class query {
 
         if (obj.equals("rwicount")) {
             // return the total number of available word indexes
-            prop.put("response", sb.indexSegments.termIndex(Segments.Process.PUBLIC).sizesMax());
+            prop.put("response", sb.index.termIndex().sizesMax());
             return prop;
         }
 
         if (obj.equals("lurlcount")) {
             // return the number of all available l-url's
-            prop.put("response", sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).size());
+            prop.put("response", sb.index.urlMetadata().size());
             return prop;
         }
 

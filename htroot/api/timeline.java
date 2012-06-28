@@ -41,7 +41,6 @@ import net.yacy.kelondro.util.ISO639;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import net.yacy.search.query.QueryParams;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -56,12 +55,7 @@ public final class timeline {
         if ((post == null) || (env == null)) return prop;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
 
-        Segment segment = null;
-        if (post.containsKey("segment") && authenticated) {
-            segment = sb.indexSegments.segment(post.get("segment"));
-        } else {
-            segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
+        Segment segment = sb.index;
 
         final String  querystring = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final int     count  = Math.min((authenticated) ? 1000 : 10, post.getInt("maximumRecords", 1000)); // SRU syntax

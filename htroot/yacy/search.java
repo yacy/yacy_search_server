@@ -66,7 +66,6 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
@@ -223,7 +222,7 @@ public final class search {
         ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> accu = null;
         if (query.length() == 0 && abstractSet != null) {
             // this is _not_ a normal search, only a request for index abstracts
-            final Segment indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+            final Segment indexSegment = sb.index;
             theQuery = new QueryParams(
                     null,
                     abstractSet,
@@ -315,7 +314,7 @@ public final class search {
                     DigestURI.TLD_any_zone_filter,
                     client,
                     false,
-                    sb.indexSegments.segment(Segments.Process.PUBLIC),
+                    sb.index,
                     rankingProfile,
                     header.get(RequestHeader.USER_AGENT, ""),
                     false, 0.0d, 0.0d, 0.0d
