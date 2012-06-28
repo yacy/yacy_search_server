@@ -354,6 +354,24 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 }
             }
 
+            // meta refresh tag
+            if (isEmpty() || contains(SolrField.refresh_s.name())) {
+                String refresh = html.getRefreshPath();
+                if (refresh != null && refresh.length() > 0) {
+                    MultiProtocolURI refreshURL;
+                    try {
+                        refreshURL = refresh.startsWith("http") ? new MultiProtocolURI(html.getRefreshPath()) : new MultiProtocolURI(digestURI, html.getRefreshPath());
+                        if (refreshURL != null) {
+                            inboundLinks.remove(refreshURL);
+                            ouboundLinks.remove(refreshURL);
+                            addSolr(solrdoc, SolrField.refresh_s, refreshURL.toNormalform(false, false));
+                        }
+                    } catch (MalformedURLException e) {
+                        addSolr(solrdoc, SolrField.refresh_s, refresh);
+                    }
+                }
+            }
+
             // flash embedded
             if (isEmpty() || contains(SolrField.flash_b.name())) {
                 MultiProtocolURI[] flashURLs = html.getFlash();

@@ -807,7 +807,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
         final int pos = s.indexOf(';');
         if (pos < 0) return EMPTY_STRING;
-        s = s.substring(pos + 1);
+        s = s.substring(pos + 1).trim();
         if (s.toLowerCase().startsWith("url=")) return s.substring(4).trim();
         return EMPTY_STRING;
     }
