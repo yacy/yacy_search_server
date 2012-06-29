@@ -1,0 +1,10 @@
+{
+"version":"#[version]#",
+"uptime":"#[uptime]#",
+"name":"#[name]#",
+"rowdef":"#[rowdef]#",
+"idx":{
+#{list}#"#[term]#":[#[references]#]#(comma)#::,#(/comma)#
+#{/list}#
+}
+}

@@ -1,4 +1,4 @@
-//httpChunkedOutputStream.java 
+//httpChunkedOutputStream.java
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -29,23 +29,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
-
 import de.anomic.server.serverCore;
 
 public final class ChunkedOutputStream extends FilterOutputStream {
-    private boolean finished = false; 
-    
+    private boolean finished = false;
+
     public ChunkedOutputStream(final OutputStream out) {
         super(out);
     }
-    
-    public void close() throws IOException {
+
+    @Override
+    public synchronized void close() throws IOException {
         if (!this.finished) this.finish();
         this.out.close();
     }
-    
+
     public void finish() throws IOException {
         if (!this.finished) {
             this.out.write((byte) 48);
@@ -55,56 +57,59 @@ public final class ChunkedOutputStream extends FilterOutputStream {
             this.finished = true;
         }
     }
-    
+
+    @Override
     public void write(final byte[] b) throws IOException {
-        if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");        
+        if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         if (b.length == 0) return;
-            
-        this.out.write(Integer.toHexString(b.length).getBytes());
+
+        this.out.write(ASCII.getBytes(Integer.toHexString(b.length)));
         this.out.write(serverCore.CRLF);
         this.out.write(b);
         this.out.write(serverCore.CRLF);
         this.out.flush();
     }
-    
+
+    @Override
     public void write(final byte[] b, final int off, final int len) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         if (len == 0) return;
-        
-        this.out.write(Integer.toHexString(len).getBytes());
+
+        this.out.write(ASCII.getBytes(Integer.toHexString(len)));
         this.out.write(serverCore.CRLF);
         this.out.write(b, off, len);
         this.out.write(serverCore.CRLF);
         this.out.flush();
     }
-    
+
     public void write(final ByteBuffer b, final int off, final int len) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         if (len == 0) return;
-        
-        this.out.write(Integer.toHexString(len).getBytes());
+
+        this.out.write(ASCII.getBytes(Integer.toHexString(len)));
         this.out.write(serverCore.CRLF);
         this.out.write(b.getBytes(off, len));
         this.out.write(serverCore.CRLF);
         this.out.flush();
     }
-    
+
     public void write(final InputStream b) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         final int len = b.available();
         if (len == 0) return;
-        
-        this.out.write(Integer.toHexString(len).getBytes());
+
+        this.out.write(ASCII.getBytes(Integer.toHexString(len)));
         this.out.write(serverCore.CRLF);
-        FileUtils.copy(b, out, len);
+        FileUtils.copy(b, this.out, len);
         this.out.write(serverCore.CRLF);
         this.out.flush();
     }
-    
+
+    @Override
     public void write(final int b) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
-        
-        this.out.write("1".getBytes());
+
+        this.out.write(UTF8.getBytes("1"));
         this.out.write(serverCore.CRLF);
         this.out.write(b);
         this.out.write(serverCore.CRLF);

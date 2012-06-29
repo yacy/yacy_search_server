@@ -7,8 +7,8 @@ import java.util.List;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Digest;
+import net.yacy.search.Switchboard;
 import de.anomic.data.BookmarksDB;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -16,12 +16,12 @@ public class get {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard switchboard = (Switchboard) env;
-        final boolean isAdmin=switchboard.verifyAuthentication(header, true);
+        final boolean isAdmin=switchboard.verifyAuthentication(header);
         final serverObjects prop = new serverObjects();
         String tag = null;
         final String date;
         //String url=""; //urlfilter not yet implemented
-        
+
         if (post != null && post.containsKey("tag")) {
             tag = post.get("tag");
         }
@@ -30,19 +30,19 @@ public class get {
         } else {
             date = ISO8601Formatter.FORMATTER.format();
         }
-        
+
         // if an extended xml should be used
         final boolean extendedXML = (post != null && post.containsKey("extendedXML"));
-        
+
         int count=0;
-        
-        Date parsedDate = null; 
+
+        Date parsedDate = null;
         try {
             parsedDate = ISO8601Formatter.FORMATTER.parse(date);
         } catch (final ParseException e) {
             parsedDate = new Date();
         }
-        
+
         final List<String> bookmark_hashes = switchboard.bookmarksDB.getDate(Long.toString(parsedDate.getTime())).getBookmarkList();
         BookmarksDB.Bookmark bookmark = null;
         for (final String bookmark_hash : bookmark_hashes){
@@ -56,7 +56,7 @@ public class get {
                 prop.put("posts_"+count+"_md5", Digest.encodeMD5Hex(bookmark.getUrl()));
                 prop.put("posts_"+count+"_time", date);
                 prop.putHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
-                
+
                 // additional XML tags
                 prop.put("posts_"+count+"_isExtended",extendedXML ? "1" : "0");
                 if (extendedXML) {
@@ -70,5 +70,5 @@ public class get {
         // return rewrite properties
         return prop;
     }
-    
+
 }

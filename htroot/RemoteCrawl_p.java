@@ -10,7 +10,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,63 +31,62 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
-
+import net.yacy.peers.PeerActions;
+import net.yacy.peers.Seed;
+import net.yacy.peers.operation.yacyVersion;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.data.WorkTables;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyPeerActions;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyVersion;
 
 public class RemoteCrawl_p {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
+
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         if (post != null) {
-            
+
             // store this call as api call
             sb.tables.recordAPICall(post, "RemoteCrawl_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "remote crawler configuration");
-            
+
             if (post.containsKey("crawlResponse")) {
                 boolean crawlResponse = post.get("crawlResponse", "off").equals("on");
-                
+
                 // read remote crawl request settings
-                sb.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
+                sb.setConfig("crawlResponse", crawlResponse);
             }
 
             if (post.containsKey("acceptCrawlLimit")) {
                 // read remote crawl request settings
                 int newppm = 1;
                 try {
-                    newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
+                    newppm = Math.max(1, post.getInt("acceptCrawlLimit", 1));
                 } catch (final NumberFormatException e) {}
                 sb.setRemotecrawlPPM(newppm);
             }
         }
-        
+
         // write remote crawl request settings
         prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? "1" : "0");
         long RTCbusySleep = Math.max(1, env.getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 100));
         final int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
-        
+
         // set seed information directly
         sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
-        
+
         // -------------------------------------------------------------------------------------
         // write network list
         final String STR_TABLE_LIST = "list_";
         int conCount = 0;
 
         boolean dark = true;
-        yacySeed seed;
-        Iterator<yacySeed> e = null;
-        e = sb.peers.seedsSortedConnected(false, yacySeed.RCOUNT);
+        Seed seed;
+        Iterator<Seed> e = null;
+        e = sb.peers.seedsSortedConnected(false, Seed.RCOUNT);
         //e = sb.peers.seedsSortedConnected(false, yacySeed.LCOUNT);
         Pattern peerSearchPattern = null;
         while (e.hasNext() && conCount < 300) {
@@ -96,7 +95,7 @@ public class RemoteCrawl_p {
             if (seed != null) {
                 final long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                 if (lastseen > 720) continue;
-                long rcount = seed.getLong(yacySeed.RCOUNT, 0);
+                long rcount = seed.getLong(Seed.RCOUNT, 0);
                 if (rcount == 0) continue;
                 if ((post != null && post.containsKey("search"))  && peerSearchPattern != null /*(wrongregex == null)*/) {
                     boolean abort = true;
@@ -111,15 +110,16 @@ public class RemoteCrawl_p {
                     if (abort) continue;
                 }
                 prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                String shortname = seed.get(yacySeed.NAME, "deadlink");
-                if (shortname.length() > 20) shortname = shortname.substring(0, 20) + "..."; 
+                String shortname = seed.get(Seed.NAME, "deadlink");
+                if (shortname.length() > 20) shortname = shortname.substring(0, 20) + "...";
                 prop.putHTML(STR_TABLE_LIST + conCount + "_shortname", shortname);
-                prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
+                prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(Seed.NAME, "deadlink"));
                 prop.put(STR_TABLE_LIST + conCount + "_age", seed.getAge());
-                prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
+                String[] yv = yacyVersion.combined2prettyVersion(seed.get(Seed.VERSION, "0.1"), shortname);
+                prop.putHTML(STR_TABLE_LIST + conCount + "_version", yv[0] + "/" + yv[1]);
                 prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
-                prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
-                prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", yacyPeerActions.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
+                prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(Seed.UTC, "-"));
+                prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", PeerActions.formatInterval(60000 * seed.getLong(Seed.UPTIME, 0L)));
                 prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLinkCount());
                 prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getWordCount());
                 prop.putNum(STR_TABLE_LIST + conCount + "_RCount", rcount);
@@ -129,7 +129,7 @@ public class RemoteCrawl_p {
             } // seed != null
         } // while
         prop.putNum("list", conCount);
-        
+
         return prop;
     }
 }

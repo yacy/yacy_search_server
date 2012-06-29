@@ -40,18 +40,22 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.peers.Seed;
+import net.yacy.peers.graphics.EncodedImage;
+import net.yacy.peers.operation.yacyBuildProperties;
+import net.yacy.search.Switchboard;
 import net.yacy.visualization.RasterPlotter;
 
 import org.eclipse.jetty.server.Handler;
@@ -59,17 +63,12 @@ import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import de.anomic.data.MimeTable;
 import de.anomic.http.server.TemplateEngine;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.graphics.EncodedImage;
 
 /**
  * jetty http handler:
@@ -84,22 +83,17 @@ public class TemplateHandler extends AbstractHandler implements Handler {
 
 	private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
 
-    boolean useTemplateCache = false;
-    private ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>> templateCache = null;
     private ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
     
 	@Override
 	protected void doStart() throws Exception {
 		super.doStart();
-		// TODO create template cache
-        templateCache = (useTemplateCache)? new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>() : new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>(0);
-        templateMethodCache = (useTemplateCache) ? new ConcurrentHashMap<File, SoftReference<Method>>() : new ConcurrentHashMap<File, SoftReference<Method>>(0);
+        templateMethodCache =  new ConcurrentHashMap<File, SoftReference<Method>>();
 	}
 
 	@Override
 	protected void doStop() throws Exception {
 		super.doStop();
-		// TODO destroy template cache?
 	}
 
     /** Returns a path to the localized or default file according to the parameter localeSelection
@@ -135,16 +129,14 @@ public class TemplateHandler extends AbstractHandler implements Handler {
         Method m = null;
         // now make a class out of the stream
         try {
-            if (useTemplateCache) {                
-                final SoftReference<Method> ref = templateMethodCache.get(classFile);
-                if (ref != null) {
-                    m = ref.get();
-                    if (m == null) {
-                        templateMethodCache.remove(classFile);
-                    } else {
-                        return m;
-                    }
-                }          
+            final SoftReference<Method> ref = templateMethodCache.get(classFile);
+            if (ref != null) {
+                m = ref.get();
+                if (m == null) {
+                    templateMethodCache.remove(classFile);
+                } else {
+                    return m;
+                }
             }
             
             final Class<?> c = provider.loadClass(classFile);
@@ -154,11 +146,8 @@ public class TemplateHandler extends AbstractHandler implements Handler {
                     serverSwitch.class };
             m = c.getMethod("respond", params);
             
-            if (useTemplateCache) {
-                // storing the method into the cache
-                final SoftReference<Method> ref = new SoftReference<Method>(m);
-                templateMethodCache.put(classFile, ref);
-            }
+            // store the method into the cache
+            templateMethodCache.put(classFile, new SoftReference<Method>(m));
             
         } catch (final ClassNotFoundException e) {
             Log.logSevere("TemplateHandler", "class " + classFile + " is missing:" + e.getMessage());
@@ -258,7 +247,7 @@ public class TemplateHandler extends AbstractHandler implements Handler {
 	                result = RasterPlotter.exportImage(bi, targetExt);
 	            }
                 
-                final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+                final String mimeType = Classification.ext2mime(targetExt, "text/html");
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -288,12 +277,12 @@ public class TemplateHandler extends AbstractHandler implements Handler {
             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, sb.peers.myID());
             templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
-            yacySeed myPeer = sb.peers.mySeed();
+            Seed myPeer = sb.peers.mySeed();
             templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1); 
             templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
             
             if(targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
-            	String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+            	String mimeType = Classification.ext2mime(targetExt, "text/html");
             	
                 InputStream fis = null;
                 long fileSize = targetFile.length();

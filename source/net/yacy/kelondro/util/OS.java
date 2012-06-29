@@ -1,4 +1,4 @@
-// OS.java 
+// OS.java
 // -------------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -25,15 +25,18 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
-import de.anomic.server.serverCore;
-
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.logging.Log;
+import de.anomic.server.serverCore;
 
 
 public final class OS {
@@ -46,7 +49,7 @@ public final class OS {
         Windows, // all Windows 95/98/NT/2K/XP
         Unknown; // any other system
     }
-    
+
 	// constants for file type identification (Mac only)
 	public static final String blankTypeString = "____";
 
@@ -62,8 +65,8 @@ public final class OS {
 	public static int maxPathLength = 65535;
 
 	// Macintosh-specific statics
-	public  static final Hashtable<String, String> macFSTypeCache = new Hashtable<String, String>();
-	public  static final Hashtable<String, String> macFSCreatorCache = new Hashtable<String, String>();
+	public  static final Map<String, String> macFSTypeCache = new HashMap<String, String>();
+	public  static final Map<String, String> macFSCreatorCache = new HashMap<String, String>();
 
 	// static initialization
 	static {
@@ -86,7 +89,7 @@ public final class OS {
 		if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
 	}
 
-	
+
 	/**
 	 * finds the maximum possible heap (may cause high system load)
 	 * @return heap in -Xmx<i>[heap]</i>m
@@ -98,14 +101,14 @@ public final class OS {
 		while(!checkWin32Heap(maxmem)) maxmem -= 10;
 		return maxmem;
 	}
-	
+
 	/**
 	 * checks heap (may cause high system load)
 	 * @param mem heap to check in -Xmx<i>[heap]</i>m
 	 * @return true if possible
 	 * @author [DW], 07.02.2009
 	 */
-	public static boolean checkWin32Heap(int mem){
+	public static boolean checkWin32Heap(final int mem){
 		String line = "";
         final List<String> processArgs = new ArrayList<String>();
         processArgs.add("java");
@@ -116,7 +119,7 @@ public final class OS {
 		} catch (final IOException e) {
 			return false;
 		}
-		return (line.indexOf("space for object heap") > -1) ? false : true;
+		return (line.indexOf("space for object heap",0) > -1) ? false : true;
 	}
 
 	public static String infoString() {
@@ -149,7 +152,7 @@ public final class OS {
 	}
 
 	public static void deployScript(final File scriptFile, final String theScript) throws IOException {
-		FileUtils.copy(theScript.getBytes(), scriptFile);
+		FileUtils.copy(UTF8.getBytes(theScript), scriptFile);
 		if(!isWindows){ // set executable
 			try {
 				Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
@@ -158,6 +161,16 @@ public final class OS {
 				throw new IOException(e.getMessage());
 			}
 		}
+	}
+
+	/**
+	 * use a hack to get the current process PID
+	 * @return the PID of the current java process or -1 if the PID cannot be obtained
+	 */
+	public static int getPID() {
+        final String pids = ManagementFactory.getRuntimeMXBean().getName();
+        final int p = pids.indexOf('@');
+        return p >= 0 ? NumberTools.parseIntDecSubstring(pids, 0, p) : -1;
 	}
 
 	public static void execAsynchronous(final File scriptFile) throws IOException {

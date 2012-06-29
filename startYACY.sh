@@ -6,7 +6,7 @@ PIDFILE="yacy.pid"
 OS="`uname`"
 
 #get javastart args
-JAVA_ARGS="-server -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8";
+JAVA_ARGS="-server -Xss256k -XX:MaxPermSize=256m -XX:ReservedCodeCacheSize=1024m -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8";
 #JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
 
 #check if OS is Sun Solaris or one of the OpenSolaris distributions and use different version of id if necessary
@@ -73,8 +73,6 @@ for option in $options;do
 				;;
 			-l|--logging) 
 				LOGGING=1
-                # enable asserts
-                JAVA_ARGS="$JAVA_ARGS -ea"
 				if [ $DEBUG -eq 1 ];then
 					echo "can not combine -l and -d"
 					exit 1;
@@ -124,6 +122,8 @@ then
     then 
         ENABLEHUGEPAGES=1
     fi
+    # the G1 GC is on by default in Java7, so we try that here as well
+    # JAVA_ARGS="$JAVA_ARGS -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
 elif [ $OS = "SunOS" ]
 then
 	# the UseConcMarkSweepGC option caused a full CPU usage - bug on Darwin.

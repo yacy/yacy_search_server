@@ -43,7 +43,7 @@ public interface WordReference extends Reference {
 
     public int phrasesintext();
 
-    public String getLanguage();
+    public byte[] getLanguage();
 
     public char getType();
 

@@ -34,14 +34,14 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.ListManager;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
 import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
 
 public class BlacklistImpExp_p {
     private final static String DISABLED = "disabled_";
@@ -70,10 +70,10 @@ public class BlacklistImpExp_p {
             int peerCount = 0;
             try {
                 final TreeMap<String, String> hostList = new TreeMap<String, String>();
-                final Iterator<yacySeed> e = sb.peers.seedsConnected(true, false, null, (float) 0.0);
+                final Iterator<Seed> e = sb.peers.seedsConnected(true, false, null, (float) 0.0);
                 while (e.hasNext()) {
-                    final yacySeed seed = e.next();
-                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
+                    final Seed seed = e.next();
+                    if (seed != null) hostList.put(seed.get(Seed.NAME, "nameless"),seed.hash);
                 }
 
                 String peername;

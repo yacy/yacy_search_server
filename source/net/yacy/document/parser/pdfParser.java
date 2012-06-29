@@ -1,4 +1,4 @@
-//pdfParser.java 
+//pdfParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -32,7 +32,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+
+import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.document.AbstractParser;
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.io.CharBuffer;
+import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.exceptions.CryptographyException;
@@ -44,32 +53,29 @@ import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.util.PDFTextStripper;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.document.AbstractParser;
-import net.yacy.document.Document;
-import net.yacy.document.Parser;
-import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.FileUtils;
-
 
 public class pdfParser extends AbstractParser implements Parser {
-    
-    public pdfParser() {        
+
+    public pdfParser() {
         super("Acrobat Portable Document Parser");
-        SUPPORTED_EXTENSIONS.add("pdf");
-        SUPPORTED_MIME_TYPES.add("application/pdf");
-        SUPPORTED_MIME_TYPES.add("application/x-pdf");
-        SUPPORTED_MIME_TYPES.add("application/acrobat");
-        SUPPORTED_MIME_TYPES.add("applications/vnd.pdf");
-        SUPPORTED_MIME_TYPES.add("text/pdf");
-        SUPPORTED_MIME_TYPES.add("text/x-pdf");
+        this.SUPPORTED_EXTENSIONS.add("pdf");
+        this.SUPPORTED_MIME_TYPES.add("application/pdf");
+        this.SUPPORTED_MIME_TYPES.add("application/x-pdf");
+        this.SUPPORTED_MIME_TYPES.add("application/acrobat");
+        this.SUPPORTED_MIME_TYPES.add("applications/vnd.pdf");
+        this.SUPPORTED_MIME_TYPES.add("text/pdf");
+        this.SUPPORTED_MIME_TYPES.add("text/x-pdf");
     }
-    
-    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
-        
+
+    @Override
+    public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+
+        // check memory for parser
+        if (!MemoryControl.request(200 * 1024 * 1024, true))
+            throw new Parser.Failure("Not enough Memory available for pdf parser: " + MemoryControl.available(), location);
+
         // create a pdf parser
-        PDDocument pdfDoc = null;
+        final PDDocument pdfDoc;
         //final PDFParser pdfParser;
         try {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
@@ -77,33 +83,32 @@ public class pdfParser extends AbstractParser implements Parser {
             //pdfParser = new PDFParser(source);
             //pdfParser.parse();
             //pdfDoc = pdfParser.getPDDocument();
-        } catch (IOException e) {
-            if (pdfDoc != null) try {pdfDoc.close();} catch (IOException ee) {}
+        } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         } finally {
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
         }
-        
+
         if (pdfDoc.isEncrypted()) {
             try {
                 pdfDoc.openProtection(new StandardDecryptionMaterial(""));
-            } catch (BadSecurityHandlerException e) {
-                try {pdfDoc.close();} catch (IOException ee) {}
+            } catch (final BadSecurityHandlerException e) {
+                try {pdfDoc.close();} catch (final IOException ee) {}
                 throw new Parser.Failure("Document is encrypted (1): " + e.getMessage(), location);
-            } catch (IOException e) {
-                try {pdfDoc.close();} catch (IOException ee) {}
+            } catch (final IOException e) {
+                try {pdfDoc.close();} catch (final IOException ee) {}
                 throw new Parser.Failure("Document is encrypted (2): " + e.getMessage(), location);
-            } catch (CryptographyException e) {
-                try {pdfDoc.close();} catch (IOException ee) {}
+            } catch (final CryptographyException e) {
+                try {pdfDoc.close();} catch (final IOException ee) {}
                 throw new Parser.Failure("Document is encrypted (3): " + e.getMessage(), location);
             }
             final AccessPermission perm = pdfDoc.getCurrentAccessPermission();
             if (perm == null || !perm.canExtractContent())
-                throw new Parser.Failure("Document is encrypted and cannot decrypted", location);
+                throw new Parser.Failure("Document is encrypted and cannot be decrypted", location);
         }
-        
+
         // extracting some metadata
-        final PDDocumentInformation info = pdfDoc.getDocumentInformation();            
+        final PDDocumentInformation info = pdfDoc.getDocumentInformation();
         String docTitle = null, docSubject = null, docAuthor = null, docPublisher = null, docKeywordStr = null;
         if (info != null) {
             docTitle = info.getTitle();
@@ -117,28 +122,52 @@ public class pdfParser extends AbstractParser implements Parser {
             // info.getCreationDate());
             // info.getModificationDate();
         }
-        
+
         if (docTitle == null || docTitle.length() == 0) {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
         }
-        CharBuffer writer = null;
+        final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
+        byte[] contentBytes = new byte[0];
         try {
             // create a writer for output
-            PDFTextStripper stripper = null;
-            writer = new CharBuffer();
-            stripper = new PDFTextStripper();
-            stripper.writeText(pdfDoc, writer); // may throw a NPE
+            final PDFTextStripper  stripper = new PDFTextStripper();
+
+            stripper.setEndPage(3); // get first 3 pages (always)
+            writer.append(stripper.getText(pdfDoc));
+            contentBytes = writer.getBytes(); // remember text in case of interrupting thread
+
+            stripper.setStartPage(4); // continue with page 4 (terminated, resulting in no text)
+            stripper.setEndPage(Integer.MAX_VALUE); // set to default
+            // we start the pdf parsing in a separate thread to ensure that it can be terminated
+            final Thread t = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        writer.append(stripper.getText(pdfDoc));
+                    } catch (final Throwable e) {}
+                }
+            };
+            t.start();
+            t.join(3000);
+            if (t.isAlive()) t.interrupt();
             pdfDoc.close();
-            writer.close();
-        } catch (IOException e) {
+            contentBytes = writer.getBytes(); // get final text before closing writer
+        } catch (final IOException e) {
             // close the writer
             if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-            try {pdfDoc.close();} catch (IOException ee) {}
-            throw new Parser.Failure(e.getMessage(), location);
+            try {pdfDoc.close();} catch (final IOException ee) {}
+            //throw new Parser.Failure(e.getMessage(), location);
+        } catch (final NullPointerException e) {
+            // this exception appeared after the insertion of the jempbox-1.5.0.jar library
+            Log.logException(e);
+            // close the writer
+            if (writer != null) try { writer.close(); } catch (final Exception ex) {}
+            try {pdfDoc.close();} catch (final IOException ee) {}
+            //throw new Parser.Failure(e.getMessage(), location);
         } finally {
-            try {pdfDoc.close();} catch (IOException e) {}
+            try {pdfDoc.close();} catch (final IOException e) {}
+            writer.close();
         }
-        pdfDoc = null;
 
         String[] docKeywords = null;
         if (docKeywordStr != null) {
@@ -146,14 +175,6 @@ public class pdfParser extends AbstractParser implements Parser {
         }
         if (docTitle == null) {
             docTitle = docSubject;
-        }
-    
-        byte[] contentBytes;
-        try {
-            contentBytes = writer.toString().getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            Log.logException(e);
-            throw new Parser.Failure(e.getMessage(), location);
         }
 
         // clear resources in pdfbox. they say that is resolved but it's not. see:
@@ -172,6 +193,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 location,
                 mimeType,
                 "UTF-8",
+                this,
                 null,
                 docKeywords,
                 docTitle,
@@ -179,6 +201,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 docPublisher,
                 null,
                 null,
+                0.0f, 0.0f,
                 contentBytes,
                 null,
                 null,
@@ -195,10 +218,10 @@ public class pdfParser extends AbstractParser implements Parser {
             // file
             final File pdfFile = new File(args[0]);
             if(pdfFile.canRead()) {
-                
+
                 System.out.println(pdfFile.getAbsolutePath());
                 final long startTime = System.currentTimeMillis();
-                
+
                 // parse
                 final AbstractParser parser = new pdfParser();
                 Document document = null;
@@ -212,13 +235,13 @@ public class pdfParser extends AbstractParser implements Parser {
                     Log.logException(e);
                 } catch (final NoClassDefFoundError e) {
                     System.err.println("class not found: " + e.getMessage());
-                } catch (FileNotFoundException e) {
+                } catch (final FileNotFoundException e) {
                     Log.logException(e);
                 }
-                
+
                 // statistics
                 System.out.println("\ttime elapsed: " + (System.currentTimeMillis() - startTime) + " ms");
-                
+
                 // output
                 if (document == null) {
                     System.out.println("\t!!!Parsing without result!!!");

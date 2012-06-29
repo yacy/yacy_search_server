@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Augmented Browsing - Filters and Modules</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Settings">
+    #%env/templates/header.template%#
+    #%env/templates/submenuSemantic.template%#
+    <h2>Augmented Browsing - Filters and Modules</h2>
+    
+    <form id="augmentationFilters" action="AugmentedBrowsingFilters_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend id="urlproxy">Augmented Browsing Filters</legend>
+<p>
+  Select the desired functionality.
+</p>
+
+            <dl>
+            
+            <dt><label for="content">External REFLECT:</label></dt>
+              <dd>
+                <input type="checkbox" name="augmentedReflect" id="augmentedReflect" #(augmentedReflect_checked)#:: checked="checked"#(/augmentedReflect_checked)# />Enabled<br/>
+                <p class="help">
+                   Send webpages to REFLECT (<a href="http://reflect.ws/" target="_blank">http://reflect.ws/</a>)
+                </p>
+              </dd>
+                            
+              
+              
+            </dl>
+            
+            <p>
+  Select the desired inbuilt functionality
+</p>
+
+            <dl>
+            
+            <dt><label for="content">Add DOCTYPE:</label></dt>
+              <dd>
+                <input type="checkbox" name="augmentedAddDoctype" id="augmentedAddDoctype" #(augmentedAddDoctype_checked)#:: checked="checked"#(/augmentedAddDoctype_checked)# />Enabled<br/>
+                <p class="help">
+                   Add DOCTYPE information if not given. This is required for IE to render position:absolute correctly.
+                </p>
+              </dd>
+              
+              <dt><label for="content">Reparse webpage:</label></dt>
+              <dd>
+                <input type="checkbox" name="augmentedReparse" id="augmentedReparse" #(augmentedReparse_checked)#:: checked="checked"#(/augmentedReparse_checked)# />Enabled<br/>
+                <p class="help">
+                   Put webpage back into schema (htmlparser document) to allow node by node manipulation.
+                </p>
+              </dd>
+              
+              <dt><label for="content">Show overlay interaction buttons:</label></dt>
+              <dd>
+                <input type="checkbox" name="overlayInteraction" id="overlayInteraction" #(overlayInteraction_checked)#:: checked="checked"#(/overlayInteraction_checked)# />Enabled<br/>
+                <p class="help">
+                   Show overlay interaction buttons.
+                </p>
+              </dd>
+ 
+            </dl>
+
+	
+            <input type="submit" name="augmentationFiltersSettings" value="Submit"/>
+</fieldset>
+</form>
+
+
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

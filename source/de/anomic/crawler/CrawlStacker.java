@@ -33,120 +33,71 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
-import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
-import net.yacy.repository.Blacklist;
+import net.yacy.peers.SeedDB;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
-
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
+import de.anomic.crawler.CrawlProfile.DomProfile;
 import de.anomic.crawler.ResultURLs.EventOrigin;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.FTPLoader;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.SMBLoader;
-import de.anomic.search.Segment;
-import de.anomic.search.Switchboard;
-import de.anomic.yacy.yacySeedDB;
 
 public final class CrawlStacker {
 
     private final Log log = new Log("STACKCRAWL");
 
     private final WorkflowProcessor<Request>  fastQueue, slowQueue;
-    //private long                   dnsHit;
-    private long                    dnsMiss;
     private final CrawlQueues       nextQueue;
     private final CrawlSwitchboard  crawler;
     private final Segment           indexSegment;
-    private final yacySeedDB        peers;
+    private final SeedDB            peers;
     private final boolean           acceptLocalURLs, acceptGlobalURLs;
     private final FilterEngine      domainList;
 
-    public final static class DomProfile {
-        
-        public String referrer;
-        public int depth, count;
-        
-        public DomProfile(final String ref, final int d) {
-            this.referrer = ref;
-            this.depth = d;
-            this.count = 1;
-        }
-        
-        public void inc() {
-            this.count++;
-        }
-        
-    }
-    
-    private Map<String, DomProfile> doms;
-    
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
 
     public CrawlStacker(
-            CrawlQueues cq,
-            CrawlSwitchboard cs,
-            Segment indexSegment,
-            yacySeedDB peers,
-            boolean acceptLocalURLs,
-            boolean acceptGlobalURLs,
-            FilterEngine domainList) {
+            final CrawlQueues cq,
+            final CrawlSwitchboard cs,
+            final Segment indexSegment,
+            final SeedDB peers,
+            final boolean acceptLocalURLs,
+            final boolean acceptGlobalURLs,
+            final FilterEngine domainList) {
         this.nextQueue = cq;
         this.crawler = cs;
         this.indexSegment = indexSegment;
         this.peers = peers;
-        //this.dnsHit = 0;
-        this.dnsMiss = 0;
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
         this.domainList = domainList;
 
         this.fastQueue = new WorkflowProcessor<Request>("CrawlStackerFast", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, 2);
         this.slowQueue = new WorkflowProcessor<Request>("CrawlStackerSlow", "This is like CrawlStackerFast, but does additionaly a DNS lookup. The CrawlStackerFast does not need this because it can use the DNS cache.", new String[]{"Balancer"}, this, "job",  1000, null, 5);
-        this.doms = new ConcurrentHashMap<String, DomProfile>();
         this.log.logInfo("STACKCRAWL thread initialized.");
     }
 
-    private void domInc(final String domain, final String referrer, final int depth) {
-        final DomProfile dp = doms.get(domain);
-        if (dp == null) {
-            // new domain
-            doms.put(domain, new DomProfile(referrer, depth));
-        } else {
-            // increase counter
-            dp.inc();
-        }
-    }
-    public String domName(final boolean attr, final int index){
-        final Iterator<Map.Entry<String, DomProfile>> domnamesi = doms.entrySet().iterator();
-        String domname="";
-        Map.Entry<String, DomProfile> ey;
-        DomProfile dp;
-        int i = 0;
-        while ((domnamesi.hasNext()) && (i < index)) {
-            ey = domnamesi.next();
-            i++;
-        }
-        if (domnamesi.hasNext()) {
-            ey = domnamesi.next();
-            dp = ey.getValue();
-            domname = ey.getKey() + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
-        }
-        return domname;
-    }
-    
+
     public int size() {
         return this.fastQueue.queueSize() + this.slowQueue.queueSize();
     }
@@ -159,7 +110,6 @@ public final class CrawlStacker {
     public void clear() {
         this.fastQueue.clear();
         this.slowQueue.clear();
-        this.doms.clear();
     }
 
     public void announceClose() {
@@ -168,7 +118,7 @@ public final class CrawlStacker {
         this.slowQueue.announceShutdown();
     }
 
-    public void close() {
+    public synchronized void close() {
         this.log.logInfo("Shutdown. waiting for remaining " + size() + " crawl stacker job entries. please wait.");
         this.fastQueue.announceShutdown();
         this.slowQueue.announceShutdown();
@@ -192,8 +142,8 @@ public final class CrawlStacker {
         // we just don't know anything about that host
         return false;
     }
-    
-    public Request job(Request entry) {
+
+    public Request job(final Request entry) {
         // this is the method that is called by the busy thread from outside
         if (entry == null) return null;
 
@@ -202,7 +152,7 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                nextQueue.errorURL.push(entry, peers.mySeed().hash.getBytes(), new Date(), 1, rejectReason);
+                this.nextQueue.errorURL.push(entry, ASCII.getBytes(this.peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
@@ -214,48 +164,66 @@ public final class CrawlStacker {
     public void enqueueEntry(final Request entry) {
 
         // DEBUG
-        if (log.isFinest()) log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : UTF8.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
+        if (this.log.isFinest()) this.log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
 
         if (prefetchHost(entry.url().getHost())) {
             try {
                 this.fastQueue.enQueue(entry);
                 //this.dnsHit++;
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
         } else {
             try {
                 this.slowQueue.enQueue(entry);
-                this.dnsMiss++;
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
         }
     }
+    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks, final boolean replace) {
+        new Thread() {
+            @Override
+            public void run() {
+                enqueueEntries(initiator, profileHandle, hyperlinks, true);
+            }
+        }.start();
+    }
 
-    public void enqueueEntries(byte[] initiator, String profileHandle, Map<MultiProtocolURI, String> hyperlinks, boolean replace) {
-        for (Map.Entry<MultiProtocolURI, String> e: hyperlinks.entrySet()) {
+    private void enqueueEntries(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks, final boolean replace) {
+        for (final Map.Entry<MultiProtocolURI, Properties> e: hyperlinks.entrySet()) {
             if (e.getKey() == null) continue;
-            
+
             // delete old entry, if exists to force a re-load of the url (thats wanted here)
             final DigestURI url = new DigestURI(e.getKey());
             final byte[] urlhash = url.hash();
             if (replace) {
-                indexSegment.urlMetadata().remove(urlhash);
-                this.nextQueue.noticeURL.removeByURLHash(urlhash);
-                this.nextQueue.errorURL.remove(urlhash);
+                this.indexSegment.urlMetadata().remove(urlhash);
+                this.nextQueue.urlRemove(urlhash);
+                String u = url.toNormalform(true, true);
+                if (u.endsWith("/")) {
+                    u = u + "index.html";
+                } else if (!u.contains(".")) {
+                    u = u + "/index.html";
+                }
+                try {
+                    final byte[] uh = new DigestURI(u).hash();
+                    this.indexSegment.urlMetadata().remove(uh);
+                    this.nextQueue.noticeURL.removeByURLHash(uh);
+                    this.nextQueue.errorURL.remove(uh);
+                } catch (final MalformedURLException e1) {}
             }
-            
+
             if (url.getProtocol().equals("ftp")) {
                 // put the whole ftp site on the crawl stack
-                enqueueEntries(initiator, profileHandle, "ftp", url.getHost(), url.getPort(), replace);
+                enqueueEntriesFTP(initiator, profileHandle, url.getHost(), url.getPort(), replace);
             } else {
                 // put entry on crawl stack
                 enqueueEntry(new Request(
-                        initiator, 
-                        url, 
-                        null, 
-                        e.getValue(), 
+                        initiator,
+                        url,
+                        null,
+                        e.getValue().getProperty("name", ""),
                         new Date(),
                         profileHandle,
                         0,
@@ -266,40 +234,38 @@ public final class CrawlStacker {
             }
         }
     }
-    
-    public void enqueueEntries(final byte[] initiator, final String profileHandle, final String protocol, final String host, final int port, final boolean replace) {
+
+    public void enqueueEntriesFTP(final byte[] initiator, final String profileHandle, final String host, final int port, final boolean replace) {
         final CrawlQueues cq = this.nextQueue;
         new Thread() {
+            @Override
             public void run() {
                 BlockingQueue<FTPClient.entryInfo> queue;
                 try {
                     queue = FTPClient.sitelist(host, port);
                     FTPClient.entryInfo entry;
                     while ((entry = queue.take()) != FTPClient.POISON_entryInfo) {
-                        
+
                         // delete old entry, if exists to force a re-load of the url (thats wanted here)
                         DigestURI url = null;
                         try {
-                            if (protocol.equals("ftp")) url = new DigestURI("ftp://" + host + (port == 21 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
-                            else if (protocol.equals("smb")) url = new DigestURI("smb://" + host + MultiProtocolURI.escape(entry.name));
-                            else if (protocol.equals("http")) url = new DigestURI("http://" + host + (port == 80 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
-                            else if (protocol.equals("https")) url = new DigestURI("https://" + host + (port == 443 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
-                        } catch (MalformedURLException e) {
+                            url = new DigestURI("ftp://" + host + (port == 21 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
+                        } catch (final MalformedURLException e) {
                             continue;
                         }
                         final byte[] urlhash = url.hash();
                         if (replace) {
-                            indexSegment.urlMetadata().remove(urlhash);
+                            CrawlStacker.this.indexSegment.urlMetadata().remove(urlhash);
                             cq.noticeURL.removeByURLHash(urlhash);
                             cq.errorURL.remove(urlhash);
                         }
-                        
+
                         // put entry on crawl stack
                         enqueueEntry(new Request(
-                                initiator, 
-                                url, 
-                                null, 
-                                MultiProtocolURI.unescape(entry.name), 
+                                initiator,
+                                url,
+                                null,
+                                MultiProtocolURI.unescape(entry.name),
                                 entry.date,
                                 profileHandle,
                                 0,
@@ -308,108 +274,126 @@ public final class CrawlStacker {
                                 entry.size
                                 ));
                     }
-                } catch (IOException e1) {
-                } catch (InterruptedException e) {
+                } catch (final IOException e1) {
+                } catch (final InterruptedException e) {
                 }
             }
         }.start();
     }
-    
+
+    /**
+     * simple method to add one url as crawljob
+     * @param url
+     * @return null if successfull, a reason string if not successful
+     */
+    public String stackSimpleCrawl(final DigestURI url) {
+    	final CrawlProfile pe = this.crawler.defaultSurrogateProfile;
+    	return stackCrawl(new Request(
+                this.peers.mySeed().hash.getBytes(),
+                url,
+                null,
+                "CRAWLING-ROOT",
+                new Date(),
+                pe.handle(),
+                0,
+                0,
+                0,
+                0
+                ));
+    }
+
+    /**
+     * stacks a crawl item. The position can also be remote
+     * @param entry
+     * @return null if successful, a reason string if not successful
+     */
     public String stackCrawl(final Request entry) {
-        // stacks a crawl item. The position can also be remote
-        // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
-       
-        final CrawlProfile profile = crawler.getActive(entry.profileHandle().getBytes());
+
+        final CrawlProfile profile = this.crawler.getActive(UTF8.getBytes(entry.profileHandle()));
         String error;
         if (profile == null) {
             error = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
-            log.logWarning(error);
+            this.log.logWarning(error);
             return error;
         }
-        
+
         error = checkAcceptance(entry.url(), profile, entry.depth());
         if (error != null) return error;
-        
+
         // store information
-        final boolean local = Base64Order.enhancedCoder.equal(entry.initiator(), peers.mySeed().hash.getBytes());
-        final boolean proxy = (entry.initiator() == null || entry.initiator().length == 0 || UTF8.String(entry.initiator()).equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
-        final boolean remote = profile.handle().equals(crawler.defaultRemoteProfile.handle());
+        final boolean local = Base64Order.enhancedCoder.equal(entry.initiator(), UTF8.getBytes(this.peers.mySeed().hash));
+        final boolean proxy = (entry.initiator() == null || entry.initiator().length == 0 || ASCII.String(entry.initiator()).equals("------------")) && profile.handle().equals(this.crawler.defaultProxyProfile.handle());
+        final boolean remote = profile.handle().equals(this.crawler.defaultRemoteProfile.handle());
         final boolean global =
             (profile.remoteIndexing()) /* granted */ &&
             (entry.depth() == profile.depth()) /* leaf node */ &&
             //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
             (
-                    (peers.mySeed().isSenior()) ||
-                    (peers.mySeed().isPrincipal())
+                    (this.peers.mySeed().isSenior()) ||
+                    (this.peers.mySeed().isPrincipal())
             ) /* qualified */;
 
         if (!local && !global && !remote && !proxy) {
-            error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + ((entry.initiator() == null) ? "" : UTF8.String(entry.initiator())) + ", profile.handle = " + profile.handle();
+            error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", profile.handle = " + profile.handle();
             this.log.logSevere(error);
             return error;
         }
-        
+
         long maxFileSize = Long.MAX_VALUE;
         if (entry.size() > 0) {
-            String protocol = entry.url().getProtocol();
+            final String protocol = entry.url().getProtocol();
             if (protocol.equals("http") || protocol.equals("https")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
             if (protocol.equals("ftp")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.ftp.maxFileSize", FTPLoader.DEFAULT_MAXFILESIZE);
             if (protocol.equals("smb")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.smb.maxFileSize", SMBLoader.DEFAULT_MAXFILESIZE);
         }
 
         // check availability of parser and maxfilesize
+        String warning = null;
         if (entry.size() > maxFileSize ||
-            (entry.url().getFileExtension().length() > 0 && TextParser.supports(entry.url(), null) != null)
-            ) {
-            nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
+            entry.url().getContentDomain() == ContentDomain.APP  ||
+            entry.url().getContentDomain() == ContentDomain.IMAGE  ||
+            entry.url().getContentDomain() == ContentDomain.AUDIO  ||
+            entry.url().getContentDomain() == ContentDomain.VIDEO ) {
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
+            //if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;
         }
-        
-        final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length == 0) ? null : nextQueue.getURL(entry.referrerhash());
+
+        final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length == 0) ? null : this.nextQueue.getURL(entry.referrerhash());
 
         // add domain to profile domain list
         if (profile.domMaxPages() != Integer.MAX_VALUE) {
-            domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
+            profile.domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
         }
 
         if (global) {
             // it may be possible that global == true and local == true, so do not check an error case against it
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
-            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + UTF8.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
-            nextQueue.noticeURL.push(NoticedURL.StackType.LIMIT, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
-            //this.log.logInfo("stacked/global: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT));
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.GLOBAL, entry);
         } else if (local) {
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
-            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + UTF8.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
-            nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
-            //this.log.logInfo("stacked/local: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE));
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry);
         } else if (proxy) {
-            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + UTF8.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
-            nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
-            //this.log.logInfo("stacked/proxy: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE));
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry);
         } else if (remote) {
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
-            nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
-            //this.log.logInfo("stacked/remote: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry);
         }
+        if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
 
         return null;
     }
 
-    public String checkAcceptance(final DigestURI url, final CrawlProfile profile, int depth) {
-        
+    public String checkAcceptance(final DigestURI url, final CrawlProfile profile, final int depth) {
+
         // check if the protocol is supported
         final String urlProtocol = url.getProtocol();
+        final String urlstring = url.toString();
         if (!Switchboard.getSwitchboard().loader.isSupportedProtocol(urlProtocol)) {
-            this.log.logSevere("Unsupported protocol in URL '" + url.toString() + "'.");
+            this.log.logSevere("Unsupported protocol in URL '" + urlstring + "'.");
             return "unsupported protocol";
         }
 
@@ -421,44 +405,44 @@ public final class CrawlStacker {
         }
 
         // check blacklist
-        if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is in blacklist.");
+        if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, url)) {
+            this.log.logFine("URL '" + urlstring + "' is in blacklist.");
             return "url in blacklist";
         }
 
-        // filter with must-match
-        if ((depth > 0) && !profile.mustMatchPattern().matcher(url.toString()).matches()) {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' does not match must-match crawling filter '" + profile.mustMatchPattern().toString() + "'.");
-            return "url does not match must-match filter";
+        // filter with must-match for URLs
+        if ((depth > 0) && !profile.urlMustMatchPattern().matcher(urlstring).matches()) {
+            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' does not match must-match crawling filter '" + profile.urlMustMatchPattern().toString() + "'.");
+            return "url does not match must-match filter " + profile.urlMustMatchPattern().toString();
         }
 
-        // filter with must-not-match
-        if ((depth > 0) && profile.mustNotMatchPattern().matcher(url.toString()).matches()) {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' does matches do-not-match crawling filter '" + profile.mustNotMatchPattern().toString() + "'.");
-            return "url matches must-not-match filter";
+        // filter with must-not-match for URLs
+        if ((depth > 0) && profile.urlMustNotMatchPattern().matcher(urlstring).matches()) {
+            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.urlMustNotMatchPattern().toString() + "'.");
+            return "url matches must-not-match filter " + profile.urlMustNotMatchPattern().toString();
         }
 
         // deny cgi
-        if (url.isIndividual())  {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is CGI URL.");
-            return "cgi url not allowed";
+        if (url.isIndividual() && !(profile.crawlingQ()))  { // TODO: make special property for crawlingIndividual
+            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is CGI URL.");
+            return "individual url (sessionid etc) not wanted";
         }
 
         // deny post properties
         if (url.isPOST() && !(profile.crawlingQ()))  {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is post URL.");
+            if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is post URL.");
             return "post url not allowed";
         }
 
         // check if the url is double registered
-        final String dbocc = nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
-        URIMetadataRow oldEntry = indexSegment.urlMetadata().load(url.hash(), null, 0);
+        final String dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
+        final URIMetadataRow oldEntry = this.indexSegment.urlMetadata().load(url.hash());
         if (oldEntry == null) {
             if (dbocc != null) {
                 // do double-check
-                if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is double registered in '" + dbocc + "'.");
+                if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is double registered in '" + dbocc + "'.");
                 if (dbocc.equals("errors")) {
-                    ZURL.Entry errorEntry = nextQueue.errorURL.get(url.hash());
+                    final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
                     return "double in: errors (" + errorEntry.anycause() + ")";
                 } else {
                     return "double in: " + dbocc;
@@ -467,16 +451,16 @@ public final class CrawlStacker {
         } else {
             final boolean recrawl = profile.recrawlIfOlder() > oldEntry.loaddate().getTime();
             if (recrawl) {
-                if (this.log.isInfo()) 
-                    this.log.logInfo("RE-CRAWL of URL '" + url.toString() + "': this url was crawled " +
+                if (this.log.isInfo())
+                    this.log.logInfo("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                         ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
             } else {
                 if (dbocc == null) {
                     return "double in: LURL-DB";
                 } else {
-                    if (this.log.isInfo()) this.log.logInfo("URL '" + url.toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
+                    if (this.log.isInfo()) this.log.logInfo("URL '" + urlstring + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
                     if (dbocc.equals("errors")) {
-                        ZURL.Entry errorEntry = nextQueue.errorURL.get(url.hash());
+                        final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
                         return "double in: errors (" + errorEntry.anycause() + ")";
                     } else {
                         return "double in: " + dbocc;
@@ -488,22 +472,57 @@ public final class CrawlStacker {
         // deny urls that exceed allowed number of occurrences
         final int maxAllowedPagesPerDomain = profile.domMaxPages();
         if (maxAllowedPagesPerDomain < Integer.MAX_VALUE) {
-            final DomProfile dp = doms.get(url.getHost());
+            final DomProfile dp = profile.getDom(url.getHost());
             if (dp != null && dp.count >= maxAllowedPagesPerDomain) {
-                if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' appeared too often in crawl stack, a maximum of " + profile.domMaxPages() + " is allowed.");
+                if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + profile.domMaxPages() + " is allowed.");
                 return "crawl stack domain counter exceeded";
             }
-            
+
             if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= profile.domMaxPages()) {
-                if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' appeared too often in result stack, a maximum of " + profile.domMaxPages() + " is allowed.");
+                if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' appeared too often in result stack, a maximum of " + profile.domMaxPages() + " is allowed.");
                 return "result stack domain counter exceeded";
             }
         }
-        
+
+        // the following filters use a DNS lookup to check if the url matches with IP filter
+        // this is expensive and those filters are check at the end of all other tests
+
+        // filter with must-match for IPs
+        if ((depth > 0) && profile.ipMustMatchPattern() != CrawlProfile.MATCH_ALL_PATTERN && url.getHost() != null && !profile.ipMustMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
+            if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' does not match must-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
+            return "ip " + url.getInetAddress().getHostAddress() + " of url does not match must-match filter";
+        }
+
+        // filter with must-not-match for IPs
+        if ((depth > 0) && profile.ipMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && url.getHost() != null && profile.ipMustNotMatchPattern().matcher(url.getInetAddress().getHostAddress()).matches()) {
+            if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' matches must-not-match crawling filter '" + profile.ipMustNotMatchPattern().toString() + "'.");
+            return "ip " + url.getInetAddress().getHostAddress() + " of url matches must-not-match filter";
+        }
+
+        // filter with must-match for IPs
+        final String[] countryMatchList = profile.countryMustMatchList();
+        if (depth > 0 && countryMatchList != null && countryMatchList.length > 0) {
+            final Locale locale = url.getLocale();
+            if (locale != null) {
+                final String c0 = locale.getCountry();
+                boolean granted = false;
+                matchloop: for (final String c: countryMatchList) {
+                    if (c0.equals(c)) {
+                        granted = true;
+                        break matchloop;
+                    }
+                }
+                if (!granted) {
+                    if (this.log.isFine()) this.log.logFine("IP " + url.getInetAddress().getHostAddress() + " of URL '" + urlstring + "' does not match must-match crawling filter '" + profile.ipMustMatchPattern().toString() + "'.");
+                    return "country " + c0 + " of url does not match must-match filter for countries";
+                }
+            }
+        }
+
         return null;
     }
-    
-    
+
+
     /**
      * Test a url if it can be used for crawling/indexing
      * This mainly checks if the url is in the declared domain (local/global)
@@ -527,12 +546,12 @@ public final class CrawlStacker {
         // check if this is a local address and we are allowed to index local pages:
         //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
-        InetAddress ia = Domains.dnsResolve(host);
+        final InetAddress ia = Domains.dnsResolve(host);
         return (local) ?
             ("the host '" + host + "' is local, but local addresses are not accepted: " + ((ia == null) ? "null" : ia.getHostAddress())) :
             ("the host '" + host + "' is global, but global addresses are not accepted: " + ((ia == null) ? "null" : ia.getHostAddress()));
     }
-    
+
     public String urlInAcceptedDomainHash(final byte[] urlhash) {
         // returns true if the url can be accepted according to network.unit.domain
         if (urlhash == null) return "url is null";
@@ -541,8 +560,8 @@ public final class CrawlStacker {
         if (this.acceptLocalURLs && local) return null;
         if (this.acceptGlobalURLs && !local) return null;
         return (local) ?
-            ("the urlhash '" + UTF8.String(urlhash) + "' is local, but local addresses are not accepted") :
-            ("the urlhash '" + UTF8.String(urlhash) + "' is global, but global addresses are not accepted");
+            ("the urlhash '" + ASCII.String(urlhash) + "' is local, but local addresses are not accepted") :
+            ("the urlhash '" + ASCII.String(urlhash) + "' is global, but global addresses are not accepted");
     }
 
     public boolean acceptLocalURLs() {

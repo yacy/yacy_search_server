@@ -41,37 +41,37 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.Formatter;
-
-import de.anomic.http.server.HTTPDemon;
+import net.yacy.peers.Network;
+import net.yacy.peers.PeerActions;
+import net.yacy.peers.Seed;
+import net.yacy.peers.operation.yacySeedUploader;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.http.server.HTTPDProxyHandler;
-import de.anomic.search.Switchboard;
+import de.anomic.http.server.HTTPDemon;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyPeerActions;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacySeedUploader;
 
 public class SettingsAck_p {
-    
+
     private static boolean nothingChanged = false;
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        
+
         // get referer for backlink
         final MultiProtocolURI referer = header.referer();
-        prop.put("referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true, true)); 
+        prop.put("referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true, true));
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
-        
+
         if (post == null) {
             prop.put("info", "1");//no information submitted
             return prop;
         }
-        
+
         // admin password
         if (post.containsKey("adminaccount")) {
             // read and process data
@@ -92,17 +92,17 @@ public class SettingsAck_p {
                 return prop;
             }
             // check passed. set account:
-            env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
+            env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
             prop.put("info", "5");//admin account changed
             prop.putHTML("info_user", user);
             return prop;
         }
-        
-        
+
+
         // proxy password
         if (post.containsKey("proxyaccount")) {
-            /* 
+            /*
              * set new port
              */
             final String port = post.get("port");
@@ -114,12 +114,12 @@ public class SettingsAck_p {
                     final InetSocketAddress theNewAddress = theServerCore.generateSocketAddress(port);
                     final String hostName = Domains.getHostName(theNewAddress.getAddress());
                     prop.put("info_restart", "1");
-                    prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))? "localhost" : hostName);
+                    prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))? Domains.LOCALHOST : hostName);
                     prop.put("info_restart_port", theNewAddress.getPort());
-                    
+
                     env.setConfig("port", port);
-                    
-                    theServerCore.reconnect(5000);                    
+
+                    theServerCore.reconnect(5000);
                 } catch (final SocketException e) {
                     prop.put("info", "26");
                     return prop;
@@ -127,37 +127,23 @@ public class SettingsAck_p {
             } else {
                 prop.put("info_restart", "0");
             }
-            
+
             // read and process data
             String filter = (post.get("proxyfilter")).trim();
-			String use_proxyAccounts="";
-			if(post.containsKey("use_proxyaccounts")){
-				//needed? or set to true by default?
-	            use_proxyAccounts = ((post.get("use_proxyaccounts")).equals("on") ? "true" : "false" );
-			}else{
-				use_proxyAccounts = "false";
-			}
+            final boolean useProxyAccounts = post.containsKey("use_proxyaccounts") && post.get("use_proxyaccounts").equals("on");
             // do checks
-            if ((filter == null) || (use_proxyAccounts == null)) { 
+            if (filter == null) {
                 prop.put("info", "1");//error with submitted information
                 return prop;
             }
-            /*if (user.length() == 0) {
-                prop.put("info", 2);//username must be given
-                return prop;
-            }*/
-            /*if (!(pw1.equals(pw2))) {
-                prop.put("info", 3);//pw check failed
-                return prop;
-            }*/
-                        
+
             if (filter.length() == 0) filter = "*";
             else if (!filter.equals("*")){
-                // testing proxy filter 
+                // testing proxy filter
                 int patternCount = 0;
                 String patternStr = null;
                 try {
-                    final StringTokenizer st = new StringTokenizer(filter,",");                
+                    final StringTokenizer st = new StringTokenizer(filter,",");
                     while (st.hasMoreTokens()) {
                         patternCount++;
                         patternStr = st.nextToken();
@@ -172,11 +158,11 @@ public class SettingsAck_p {
                     return prop;
                 }
             }
-            
+
             // check passed. set account:
             env.setConfig("proxyClient", filter);
-            env.setConfig("use_proxyAccounts", use_proxyAccounts);//"true" or "false"
-			if (use_proxyAccounts.equals("false")){
+            env.setConfig("use_proxyAccounts", useProxyAccounts);
+            if (!useProxyAccounts){
                 prop.put("info", "6");//proxy account has changed(no pw)
                 prop.putHTML("info_filter", filter);
 			} else {
@@ -186,32 +172,32 @@ public class SettingsAck_p {
 			}
             return prop;
         }
-        
+
         // http networking
         if (post.containsKey("httpNetworking")) {
-            
+
             // set transparent proxy flag
             HTTPDProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
-            env.setConfig("isTransparentProxy", HTTPDProxyHandler.isTransparentProxy ? "true" : "false");
+            env.setConfig("isTransparentProxy", HTTPDProxyHandler.isTransparentProxy);
             prop.put("info_isTransparentProxy", HTTPDProxyHandler.isTransparentProxy ? "on" : "off");
-            
+
             // setting the keep alive property
             HTTPDemon.keepAliveSupport = post.containsKey("connectionKeepAliveSupport");
-            env.setConfig("connectionKeepAliveSupport", HTTPDemon.keepAliveSupport ? "true" : "false");
-            prop.put("info_connectionKeepAliveSupport", HTTPDemon.keepAliveSupport ? "on" : "off"); 
-            
+            env.setConfig("connectionKeepAliveSupport", HTTPDemon.keepAliveSupport);
+            prop.put("info_connectionKeepAliveSupport", HTTPDemon.keepAliveSupport ? "on" : "off");
+
             // setting via header property
-            env.setConfig("proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")?"true":"false");
+            env.setConfig("proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader"));
             prop.put("info_proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")? "on" : "off");
-            
+
             // setting X-Forwarded-for header property
-            env.setConfig("proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")?"true":"false");
-            prop.put("info_proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")? "on" : "off");            
-            
+            env.setConfig("proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader"));
+            prop.put("info_proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")? "on" : "off");
+
             prop.put("info", "20");
             return prop;
         }
-        
+
         // server access
         if (post.containsKey("serveraccount")) {
 
@@ -223,15 +209,15 @@ public class SettingsAck_p {
                 if (staticIP.length() > 8) { staticIP = staticIP.substring(8); } else { staticIP = ""; }
             }
             // TODO IPv6 support!
-            if (staticIP.indexOf(":") > 0) {
-                staticIP = staticIP.substring(0, staticIP.indexOf(":"));
+            if (staticIP.indexOf(':',0) > 0) {
+                staticIP = staticIP.substring(0, staticIP.indexOf(':',0));
             }
             if (staticIP.length() == 0) {
                 serverCore.useStaticIP = false;
             } else {
                 serverCore.useStaticIP = true;
             }
-            if (yacySeed.isProperIP(staticIP) == null) sb.peers.mySeed().setIP(staticIP);
+            if (Seed.isProperIP(staticIP) == null) sb.peers.mySeed().setIP(staticIP);
             env.setConfig("staticIP", staticIP);
 
             // server access data
@@ -255,7 +241,7 @@ public class SettingsAck_p {
             }*/
             if (filter.length() == 0) filter = "*";
             else if (!filter.equals("*")){
-                // testing proxy filter 
+                // testing proxy filter
                 int patternCount = 0;
                 String patternStr = null;
                 try {
@@ -273,41 +259,35 @@ public class SettingsAck_p {
                     prop.putHTML("info_pattern", patternStr);
                     return prop;
                 }
-            }            
-            
+            }
+
             // check passed. set account:
             env.setConfig("serverClient", filter);
-            
+
             prop.put("info", "8");//server access filter updated
             //prop.put("info_user", user);
             prop.putHTML("info_filter", filter);
             return prop;
         }
-        
+
         if (post.containsKey("proxysettings")) {
-            
+
             /* ====================================================================
-             * Reading out the remote proxy settings 
+             * Reading out the remote proxy settings
              * ==================================================================== */
             final boolean useRemoteProxy = post.containsKey("remoteProxyUse");
             final boolean useRemoteProxy4Yacy = post.containsKey("remoteProxyUse4Yacy");
             final boolean useRemoteProxy4SSL = post.containsKey("remoteProxyUse4SSL");
-            
+
             final String remoteProxyHost = post.get("remoteProxyHost", "");
-            final String remoteProxyPortStr = post.get("remoteProxyPort", "");
-            int remoteProxyPort = 0;
-            try {
-                remoteProxyPort = Integer.parseInt(remoteProxyPortStr);
-            } catch (final NumberFormatException e) {
-                remoteProxyPort = 3128;
-            }
-            
+            final int remoteProxyPort = post.getInt("remoteProxyPort", 3128);
+
             final String remoteProxyUser = post.get("remoteProxyUser", "");
             final String remoteProxyPwd = post.get("remoteProxyPwd", "");
-            
+
             final String remoteProxyNoProxyStr = post.get("remoteProxyNoProxy", "");
             //String[] remoteProxyNoProxyPatterns = remoteProxyNoProxyStr.split(",");
-            
+
             /* ====================================================================
              * Storing settings into config file
              * ==================================================================== */
@@ -316,23 +296,23 @@ public class SettingsAck_p {
             env.setConfig("remoteProxyUser", remoteProxyUser);
             env.setConfig("remoteProxyPwd", remoteProxyPwd);
             env.setConfig("remoteProxyNoProxy", remoteProxyNoProxyStr);
-            env.setConfig("remoteProxyUse", (useRemoteProxy) ? "true" : "false");
-            env.setConfig("remoteProxyUse4Yacy", (useRemoteProxy4Yacy) ? "true" : "false");
-            env.setConfig("remoteProxyUse4SSL", (useRemoteProxy4SSL) ? "true" : "false");
-            
+            env.setConfig("remoteProxyUse", useRemoteProxy);
+            env.setConfig("remoteProxyUse4Yacy", useRemoteProxy4Yacy);
+            env.setConfig("remoteProxyUse4SSL", useRemoteProxy4SSL);
+
             /* ====================================================================
              * Enabling settings
              * ==================================================================== */
-            sb.initRemoteProxy();            
-            
+            sb.initRemoteProxy();
+
             prop.put("info", "15"); // The remote-proxy setting has been changed
             return prop;
         }
-        
+
         if (post.containsKey("seedUploadRetry")) {
             String error;
-            if ((error = yacyCore.saveSeedList(sb)) == null) {
-                // trying to upload the seed-list file    
+            if ((error = Network.saveSeedList(sb)) == null) {
+                // trying to upload the seed-list file
                 prop.put("info", "13");
                 prop.put("info_success", "1");
             } else {
@@ -342,27 +322,27 @@ public class SettingsAck_p {
             }
             return prop;
         }
-        
+
         if (post.containsKey("seedSettings")) {
             // get the currently used uploading method
             final String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
             final String newSeedUploadMethod = post.get("seedUploadMethod");
-            final String oldSeedURLStr = sb.peers.mySeed().get(yacySeed.SEEDLISTURL, "");
+            final String oldSeedURLStr = sb.peers.mySeed().get(Seed.SEEDLISTURL, "");
             final String newSeedURLStr = post.get("seedURL");
-            
+
             final boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
             boolean uploadMethodChanged = !oldSeedUploadMethod.equals(newSeedUploadMethod);
             if (uploadMethodChanged) {
-                uploadMethodChanged = yacyCore.changeSeedUploadMethod(newSeedUploadMethod);
+                uploadMethodChanged = Network.changeSeedUploadMethod(newSeedUploadMethod);
             }
-            
+
             if (seedUrlChanged || uploadMethodChanged) {
                 env.setConfig("seedUploadMethod", newSeedUploadMethod);
-                sb.peers.mySeed().put(yacySeed.SEEDLISTURL, newSeedURLStr);
-                
+                sb.peers.mySeed().put(Seed.SEEDLISTURL, newSeedURLStr);
+
                 // try an upload
                 String error;
-                if ((error = yacyCore.saveSeedList(sb)) == null) {
+                if ((error = Network.saveSeedList(sb)) == null) {
                     // we have successfully uploaded the seed-list file
                     prop.put("info_seedUploadMethod", newSeedUploadMethod);
                     prop.putHTML("info_seedURL",newSeedURLStr);
@@ -376,41 +356,41 @@ public class SettingsAck_p {
                 return prop;
             }
         }
-        
-        /* 
-         * Loop through the available seed uploaders to see if the 
-         * configuration of one of them has changed 
+
+        /*
+         * Loop through the available seed uploaders to see if the
+         * configuration of one of them has changed
          */
-        final HashMap<String, String> uploaders = yacyCore.getSeedUploadMethods();
+        final HashMap<String, String> uploaders = Network.getSeedUploadMethods();
         final Iterator<String> uploaderKeys = uploaders.keySet().iterator();
         while (uploaderKeys.hasNext()) {
             // get the uploader module name
             final String uploaderName = uploaderKeys.next();
-            
-            
+
+
             // determining if the user has reconfigured the settings of this uploader
             if (post.containsKey("seed" + uploaderName + "Settings")) {
                 nothingChanged = true;
-                final yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
+                final yacySeedUploader theUploader = Network.getSeedUploader(uploaderName);
                 final String[] configOptions = theUploader.getConfigurationOptions();
                 if (configOptions != null) {
-                    for (int i=0; i<configOptions.length; i++) {
-                        final String newSettings = post.get(configOptions[i],"");
-                        final String oldSettings = env.getConfig(configOptions[i],"");
+                    for (final String configOption : configOptions) {
+                        final String newSettings = post.get(configOption,"");
+                        final String oldSettings = env.getConfig(configOption,"");
                         // bitwise AND with boolean is same as logic AND
-                        nothingChanged &= newSettings.equals(oldSettings); 
+                        nothingChanged &= newSettings.equals(oldSettings);
                         if (!nothingChanged) {
-                            env.setConfig(configOptions[i],newSettings);
+                            env.setConfig(configOption,newSettings);
                         }
                     }
-                }   
+                }
                 if (!nothingChanged) {
                     // if the seed upload method is equal to the seed uploader whose settings
                     // were changed, we now try to upload the seed list with the new settings
                     if (env.getConfig("seedUploadMethod","none").equalsIgnoreCase(uploaderName)) {
                         String error;
-                        if ((error = yacyCore.saveSeedList(sb)) == null) {
-                            
+                        if ((error = Network.saveSeedList(sb)) == null) {
+
                             // we have successfully uploaded the seed file
                             prop.put("info", "13");
                             prop.put("info_success", "1");
@@ -418,8 +398,8 @@ public class SettingsAck_p {
                             // if uploading failed we print out an error message
                             prop.put("info", "14");
                             prop.putHTML("info_errormsg",error.replaceAll("\n","<br>"));
-                            env.setConfig("seedUploadMethod","none");                            
-                        }                       
+                            env.setConfig("seedUploadMethod","none");
+                        }
                     } else {
                         prop.put("info", "13");
                         prop.put("info_success", "0");
@@ -429,32 +409,32 @@ public class SettingsAck_p {
                     prop.put("info_success", "0");
                 }
                 return prop;
-            }            
+            }
         }
-        
+
         /*
          * Message forwarding configuration
          */
         if (post.containsKey("msgForwarding")) {
-            env.setConfig("msgForwardingEnabled",post.containsKey("msgForwardingEnabled")?"true":"false");
-            env.setConfig("msgForwardingCmd",post.get("msgForwardingCmd"));
-            env.setConfig("msgForwardingTo",post.get("msgForwardingTo"));
-            
+            env.setConfig("msgForwardingEnabled", post.containsKey("msgForwardingEnabled"));
+            env.setConfig("msgForwardingCmd", post.get("msgForwardingCmd"));
+            env.setConfig("msgForwardingTo", post.get("msgForwardingTo"));
+
             prop.put("info", "21");
             prop.put("info_msgForwardingEnabled", post.containsKey("msgForwardingEnabled") ? "on" : "off");
             prop.putHTML("info_msgForwardingCmd", post.get("msgForwardingCmd"));
             prop.putHTML("info_msgForwardingTo", post.get("msgForwardingTo"));
-            
+
             return prop;
         }
-        
+
         // Crawler settings
         if (post.containsKey("crawlerSettings")) {
-            
+
             // get Crawler Timeout
             String timeoutStr = post.get("crawler.clientTimeout");
             if (timeoutStr==null||timeoutStr.length()==0) timeoutStr = "10000";
-            
+
             int crawlerTimeout;
             try {
                 crawlerTimeout = Integer.parseInt(timeoutStr);
@@ -465,11 +445,11 @@ public class SettingsAck_p {
                 prop.putHTML("info_crawler.clientTimeout",post.get("crawler.clientTimeout"));
                 return prop;
             }
-            
+
             // get maximum http file size
             String maxSizeStr = post.get("crawler.http.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) maxSizeStr = "-1";
-            
+
             long maxHttpSize;
             try {
                 maxHttpSize = Integer.parseInt(maxSizeStr);
@@ -482,11 +462,11 @@ public class SettingsAck_p {
                 prop.putHTML("info_crawler.http.maxFileSize",post.get("crawler.http.maxFileSize"));
                 return prop;
             }
-            
+
             // get maximum ftp file size
             maxSizeStr = post.get("crawler.ftp.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) maxSizeStr = "-1";
-            
+
             long maxFtpSize;
             try {
                 maxFtpSize = Integer.parseInt(maxSizeStr);
@@ -495,11 +475,11 @@ public class SettingsAck_p {
                 prop.put("info", "31");
                 prop.putHTML("info_crawler.ftp.maxFileSize",post.get("crawler.ftp.maxFileSize"));
                 return prop;
-            }                        
-            
+            }
+
             maxSizeStr = post.get("crawler.smb.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) maxSizeStr = "-1";
-            
+
             long maxSmbSize;
             try {
                 maxSmbSize = Integer.parseInt(maxSizeStr);
@@ -508,11 +488,11 @@ public class SettingsAck_p {
                 prop.put("info", "31");
                 prop.putHTML("info_crawler.smb.maxFileSize",post.get("crawler.smb.maxFileSize"));
                 return prop;
-            }                        
-            
+            }
+
             maxSizeStr = post.get("crawler.file.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) maxSizeStr = "-1";
-            
+
             long maxFileSize;
             try {
                 maxFileSize = Integer.parseInt(maxSizeStr);
@@ -521,10 +501,10 @@ public class SettingsAck_p {
                 prop.put("info", "31");
                 prop.putHTML("info_crawler.file.maxFileSize",post.get("crawler.file.maxFileSize"));
                 return prop;
-            }                        
-            
+            }
+
             // everything is ok
-            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :yacyPeerActions.formatInterval(crawlerTimeout));
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :PeerActions.formatInterval(crawlerTimeout));
             prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":Formatter.bytesToString(maxHttpSize));
             prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxFtpSize));
             prop.put("info_crawler.smb.maxFileSize", (maxSmbSize==-1) ? "-1":Formatter.bytesToString(maxSmbSize));
@@ -532,11 +512,11 @@ public class SettingsAck_p {
             prop.put("info", "28");
             return prop;
         }
-        
-        
+
+
         // nothing made
         prop.put("info", "1");//no information submitted
         return prop;
     }
-    
+
 }

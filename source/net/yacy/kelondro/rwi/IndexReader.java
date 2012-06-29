@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,16 +26,16 @@
 
 package net.yacy.kelondro.rwi;
 
+import net.yacy.cora.order.CloneableIterator;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.order.CloneableIterator;
 
 
 public interface IndexReader<ReferenceType extends Reference> {
 
     public int size();
     public boolean has(byte[] wordHash); // should only be used if in case that true is returned the getContainer is NOT called
-    public ReferenceContainer<ReferenceType> get(byte[] wordHash, HandleSet urlselection); 
-    public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] startWordHash, boolean rot);
+    public ReferenceContainer<ReferenceType> get(byte[] wordHash, HandleSet urlselection);
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(byte[] startWordHash, boolean rot, boolean excludePrivate);
     public void close();
-    
+
 }

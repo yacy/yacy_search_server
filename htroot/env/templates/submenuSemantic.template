@@ -1,0 +1,29 @@
+<div class="SubMenu">
+  <h3>Content Semantic</h3>
+</div>
+<div class="SubMenu">
+  <div class="SubMenugroup">
+    <h3>Automated Annotation</h3>
+    <ul class="SubMenu">
+      <li><a href="/Vocabulary_p.html" class="MenuItemLink lock">Auto-Annotation Vocabulary Editor</a></li>
+      <li><a href="/DictionaryLoader_p.html" class="MenuItemLink lock">Knowledge Loader</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Augmented Content</h3>
+    <ul class="SubMenu">
+      <li><a href="/AugmentedBrowsing_p.html" class="MenuItemLink lock">Augmented Browsing</a></li>
+      <li><a href="/AugmentedBrowsingFilters_p.html" class="MenuItemLink lock">Filters and Modules</a></li>
+      <li><a href="/AugmentedParsing_p.html" class="MenuItemLink lock">Augmented Parsing</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Linked Data</h3>
+    <ul class="SubMenu">
+      <li><a href="/Triplestore_p.html" class="MenuItemLink lock">Triplestore</a></li>
+	  <li><a href="/Triple_p.html" class="MenuItemLink lock">Query</a></li>
+    </ul>
+  </div>
+</div>

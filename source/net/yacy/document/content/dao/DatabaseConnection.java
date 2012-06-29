@@ -85,7 +85,7 @@ public class DatabaseConnection {
         }
     }
     
-    public void close() {
+    public synchronized void close() {
         if (connection != null) { 
             try {
             	connection.close();

@@ -1,5 +1,5 @@
 /**
- *  oad_RSS_p
+ *  Load_RSS_p
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 20.08.2010 at http://yacy.net
  *
@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.RSSFeed;
@@ -33,19 +34,18 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-
-import de.anomic.crawler.CrawlProfile;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.RSSLoader;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.WorkTables;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -63,104 +63,104 @@ public class Load_RSS_p {
         prop.put("url", "");
 
         if (post != null && post.containsKey("removeSelectedFeedsNewList")) {
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
                     sb.tables.delete("rss", entry.getValue().substring(5).getBytes());
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.logException(e);
                 }
             }
         }
-        
+
         if (post != null && post.containsKey("removeAllFeedsNewList")) try {
-            Iterator<Row> plainIterator = sb.tables.iterator("rss");
+            final Iterator<Row> plainIterator = sb.tables.iterator("rss");
             Row row;
             String messageurl;
-            List<byte[]> d = new ArrayList<byte[]>();
+            final List<byte[]> d = new ArrayList<byte[]>();
             while (plainIterator.hasNext()) {
                 row = plainIterator.next();
                 if (row == null) continue;
                 messageurl = row.get("url", "");
                 if (messageurl.length() == 0) continue;
-                byte[] api_pk = row.get("api_pk");
-                Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
-                if (r == null || !r.get("comment", "").matches(".*\\Q" + messageurl + "\\E.*")) {
+                final byte[] api_pk = row.get("api_pk");
+                final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
+                if (r == null || !r.get("comment", "").matches(".*" + Pattern.quote(messageurl) + ".*")) {
                     d.add(row.getPK());
                 }
             }
-            for (byte[] pk: d) {
+            for (final byte[] pk: d) {
                 sb.tables.delete("rss", pk);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
         }
-        
+
         if (post != null && post.containsKey("removeSelectedFeedsScheduler")) {
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
-                    byte[] pk = entry.getValue().substring(5).getBytes();
-                    Row rssRow = sb.tables.select("rss", pk);
-                    byte[] schedulerPK = rssRow.get("api_pk", (byte[]) null);
+                    final byte[] pk = entry.getValue().substring(5).getBytes();
+                    final Row rssRow = sb.tables.select("rss", pk);
+                    final byte[] schedulerPK = rssRow.get("api_pk", (byte[]) null);
                     if (schedulerPK != null) sb.tables.delete("api", schedulerPK);
                     rssRow.remove("api_pk");
                     sb.tables.insert("rss", pk, rssRow);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.logException(e);
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                 }
             }
         }
-        
+
         if (post != null && post.containsKey("removeAllFeedsScheduler")) try {
-            Iterator<Row> plainIterator = sb.tables.iterator("rss");
+            final Iterator<Row> plainIterator = sb.tables.iterator("rss");
             Row row;
             String messageurl;
-            List<byte[]> d = new ArrayList<byte[]>();
+            final List<byte[]> d = new ArrayList<byte[]>();
             while (plainIterator.hasNext()) {
                 row = plainIterator.next();
                 if (row == null) continue;
                 messageurl = row.get("url", "");
                 if (messageurl.length() == 0) continue;
-                byte[] api_pk = row.get("api_pk");
-                Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
-                if (r != null && r.get("comment", "").matches(".*\\Q" + messageurl + "\\E.*")) {
+                final byte[] api_pk = row.get("api_pk");
+                final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
+                if (r != null && r.get("comment", "").matches(".*" + Pattern.quote(messageurl) + ".*")) {
                     d.add(row.getPK());
                 }
             }
-            for (byte[] pk: d) {
-                Row rssRow = sb.tables.select("rss", pk);
-                byte[] schedulerPK = rssRow.get("api_pk", (byte[]) null);
+            for (final byte[] pk: d) {
+                final Row rssRow = sb.tables.select("rss", pk);
+                final byte[] schedulerPK = rssRow.get("api_pk", (byte[]) null);
                 if (schedulerPK != null) sb.tables.delete("api", schedulerPK);
                 rssRow.remove("api_pk");
                 sb.tables.insert("rss", pk, rssRow);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
         }
-        
+
         if (post != null && post.containsKey("addSelectedFeedScheduler")) {
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) {
                     Row row;
                     try {
-                        byte [] pk = entry.getValue().substring(5).getBytes();
+                        final byte [] pk = entry.getValue().substring(5).getBytes();
                         row = sb.tables.select("rss", pk);
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         Log.logException(e);
                         continue;
-                    } catch (RowSpaceExceededException e) {
+                    } catch (final RowSpaceExceededException e) {
                         Log.logException(e);
                         continue;
                     }
                     DigestURI url = null;
                     try {
                         url = new DigestURI(row.get("url", ""));
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         Log.logWarning("Load_RSS", "malformed url '" + row.get("url", "") + "': " + e.getMessage());
                         continue;
                     }
@@ -169,7 +169,7 @@ public class Load_RSS_p {
                 }
             }
         }
-        
+
         if (post == null || (post != null && (
                 post.containsKey("addSelectedFeedScheduler") ||
                 post.containsKey("removeSelectedFeedsNewList") ||
@@ -181,23 +181,23 @@ public class Load_RSS_p {
                 // get list of primary keys from the api table with scheduled feed loading requests
                 Tables.Row row;
                 String messageurl;
-                
+
                 // check feeds
                 int newc = 0, apic = 0;
-                Iterator<Row> plainIterator = sb.tables.iterator("rss");
+                final Iterator<Row> plainIterator = sb.tables.iterator("rss");
                 while (plainIterator.hasNext()) {
                     row = plainIterator.next();
                     if (row == null) continue;
                     messageurl = row.get("url", "");
                     if (messageurl.length() == 0) continue;
                     // get referrer
-                    DigestURI referrer = sb.getURL(Segments.Process.LOCALCRAWLING, row.get("referrer", "").getBytes());
+                    final DigestURI referrer = sb.getURL(Segments.Process.LOCALCRAWLING, row.get("referrer", "").getBytes());
                     // check if feed is registered in scheduler
-                    byte[] api_pk = row.get("api_pk");
-                    Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
-                    if (r != null && r.get("comment", "").matches(".*\\Q" + messageurl + "\\E.*")) {
+                    final byte[] api_pk = row.get("api_pk");
+                    final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
+                    if (r != null && r.get("comment", "").matches(".*" + Pattern.quote(messageurl) + ".*")) {
                         // this is a recorded entry
-                        Date date_next_exec = r.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
+                        final Date date_next_exec = r.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
                         prop.put("showscheduledfeeds_list_" + apic + "_pk", UTF8.String(row.getPK()));
                         prop.put("showscheduledfeeds_list_" + apic + "_count", apic);
                         prop.putXML("showscheduledfeeds_list_" + apic + "_rss", messageurl);
@@ -228,76 +228,76 @@ public class Load_RSS_p {
                 prop.put("shownewfeeds_list" , newc);
                 prop.put("shownewfeeds_num", newc);
                 prop.put("shownewfeeds", newc > 0 ? 1 : 0);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }
-            
+
             return prop;
         }
 
         prop.put("url", post.get("url", ""));
-        
-        int repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
+
+        int repeat_time = post.getInt("repeat_time", -1);
         final String repeat_unit = post.get("repeat_unit", "seldays"); // selminutes, selhours, seldays
-        if (!post.get("repeat", "off").equals("on") && repeat_time > 0) repeat_time = -1;
-        
+        if (!"on".equals(post.get("repeat", "off")) && repeat_time > 0) repeat_time = -1;
+
         boolean record_api = false;
-        
+
         DigestURI url = null;
         try {
             url = post.containsKey("url") ? new DigestURI(post.get("url", "")) : null;
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             Log.logWarning("Load_RSS_p", "url not well-formed: '" + post.get("url", "") + "'");
         }
-        
+
         // if we have an url then try to load the rss
         RSSReader rss = null;
         if (url != null) try {
             prop.put("url", url.toNormalform(true, false));
-            Response response = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
-            byte[] resource = response == null ? null : response.getContent();
+            final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, true);
+            final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
 
         // index all selected items: description only
         if (rss != null && post.containsKey("indexSelectedItemContent")) {
-            RSSFeed feed = rss.getFeed();
-            loop: for (Map.Entry<String, String> entry: post.entrySet()) {
+            final RSSFeed feed = rss.getFeed();
+            loop: for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
-                    RSSMessage message = feed.getMessage(entry.getValue().substring(5));
-                    DigestURI messageurl = new DigestURI(message.getLink());
+                    final RSSMessage message = feed.getMessage(entry.getValue().substring(5));
+                    final DigestURI messageurl = new DigestURI(message.getLink());
                     if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
                     if (sb.urlExists(Segments.Process.LOCALCRAWLING, messageurl.hash()) != null) continue loop;
                     sb.addToIndex(messageurl, null, null);
-                    RSSLoader.indexTriggered.put(messageurl.hash(), new Date());
-                } catch (IOException e) {
+                    RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
+                } catch (final IOException e) {
                     Log.logException(e);
-                } catch (Failure e) {
+                } catch (final Failure e) {
                     Log.logException(e);
                 }
             }
         }
-        
+
         if (rss != null && post.containsKey("indexAllItemContent")) {
             record_api = true;
-            RSSFeed feed = rss.getFeed();
+            final RSSFeed feed = rss.getFeed();
             RSSLoader.indexAllRssFeed(sb, url, feed);
         }
-        
+
         if (record_api && rss != null && rss.getFeed() != null && rss.getFeed().getChannel() != null) {
             // record API action
             RSSLoader.recordAPI(sb, post.get(WorkTables.TABLE_API_COL_APICALL_PK, null), url, rss.getFeed(), repeat_time, repeat_unit);
         }
-        
+
         // show items from rss
         if (rss != null) {
             prop.put("showitems", 1);
-            RSSFeed feed = rss.getFeed();
-            RSSMessage channel = feed.getChannel();
+            final RSSFeed feed = rss.getFeed();
+            final RSSMessage channel = feed.getChannel();
             prop.putHTML("showitems_title", channel == null ? "" : channel.getTitle());
             String author = channel == null ? "" : channel.getAuthor();
             if (author == null || author.length() == 0) author = channel == null ? "" : channel.getCopyright();
@@ -308,11 +308,11 @@ public class Load_RSS_p {
             prop.putHTML("showitems_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
             prop.putHTML("showitems_ttl", channel == null ? "" : channel.getTTL());
             prop.putHTML("showitems_docs", channel == null ? "" : channel.getDocs());
-            
+
             int i = 0;
             for (final Hit item: feed) {
                 try {
-                    DigestURI messageurl = new DigestURI(item.getLink());
+                    final DigestURI messageurl = new DigestURI(item.getLink());
                     author = item.getAuthor();
                     if (author == null) author = item.getCopyright();
                     pubDate = item.getPubDate();
@@ -326,7 +326,7 @@ public class Load_RSS_p {
                     prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
                     prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
                     i++;
-                } catch (MalformedURLException e) {
+                } catch (final MalformedURLException e) {
                     Log.logException(e);
                     continue;
                 }
@@ -339,8 +339,8 @@ public class Load_RSS_p {
                 prop.put("showload_rss", url.toNormalform(true, false));
             }
         }
-        
+
         return prop;
     }
-    
+
 }

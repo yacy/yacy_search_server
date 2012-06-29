@@ -28,7 +28,7 @@
 
 package de.anomic.http.server;
 
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverSwitch;
 
 public final class RobotsTxtConfig {

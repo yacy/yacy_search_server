@@ -67,7 +67,7 @@ public class MessageBoard {
         return database.size();
     }
     
-    public void close() {
+    public synchronized void close() {
         database.close();
     }
     
@@ -184,7 +184,7 @@ public class MessageBoard {
     public String write(final entry message) {
         // writes a message and returns key
         try {
-            database.insert(message.key.getBytes(), message.record);
+            database.insert(UTF8.getBytes(message.key), message.record);
             return message.key;
         } catch (final Exception e) {
             Log.logException(e);
@@ -195,7 +195,7 @@ public class MessageBoard {
     public entry read(final String key) {
         Map<String, String> record;
         try {
-            record = database.get(key.getBytes());
+            record = database.get(UTF8.getBytes(key));
         } catch (final IOException e) {
             Log.logException(e);
             return null;
@@ -208,7 +208,7 @@ public class MessageBoard {
     
     public void remove(final String key) {
         try {
-            database.delete(key.getBytes());
+            database.delete(UTF8.getBytes(key));
         } catch (final IOException e) {
         }
     }

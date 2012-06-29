@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -30,33 +30,30 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.TreeMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.order.Order;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
-import net.yacy.kelondro.order.Order;
 import net.yacy.kelondro.order.StackIterator;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
 public class SplitTable implements Index, Iterable<Row.Entry> {
@@ -68,36 +65,36 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     private static final int EcoFSBufferSize = 20;
 
     // the thread pool for the keeperOf executor service
-    private ExecutorService executor;
-    
+    //private ExecutorService executor;
+
     private Map<String, Index> tables; // a map from a date string to a kelondroIndex object
     private final Row rowdef;
     private final File path;
     private final String prefix;
     private final Order<Row.Entry> entryOrder;
     private       String current;
-    private long  fileAgeLimit;
-    private long  fileSizeLimit;
-    private boolean useTailCache;
-    private boolean exceed134217727;
+    private final long  fileAgeLimit;
+    private final long  fileSizeLimit;
+    private final boolean useTailCache;
+    private final boolean exceed134217727;
 
     public SplitTable(
-            final File path, 
-            final String tablename, 
+            final File path,
+            final String tablename,
             final Row rowdef,
             final boolean useTailCache,
-            final boolean exceed134217727) throws RowSpaceExceededException {
-        this(path, tablename, rowdef, ArrayStack.oneMonth, (long) Integer.MAX_VALUE, useTailCache, exceed134217727);
+            final boolean exceed134217727) {
+        this(path, tablename, rowdef, ArrayStack.oneMonth, Integer.MAX_VALUE, useTailCache, exceed134217727);
     }
 
     private SplitTable(
-            final File path, 
-            final String tablename, 
-            final Row rowdef, 
+            final File path,
+            final String tablename,
+            final Row rowdef,
             final long fileAgeLimit,
             final long fileSizeLimit,
             final boolean useTailCache,
-            final boolean exceed134217727) throws RowSpaceExceededException {
+            final boolean exceed134217727) {
         this.path = path;
         this.prefix = tablename;
         this.rowdef = rowdef;
@@ -108,93 +105,96 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         this.entryOrder = new Row.EntryComparator(rowdef.objectOrder);
         init();
     }
-    
+
+    @Override
     public long mem() {
         long m = 0;
-        for (Index i: tables.values()) m += i.mem();
+        for (final Index i: this.tables.values()) m += i.mem();
         return m;
     }
-    
+
+    @Override
     public final byte[] smallestKey() {
-        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
-        for (Index oi: this.tables.values()) try {
+        final HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
+        for (final Index oi: this.tables.values()) try {
             keysort.put(oi.smallestKey());
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
         }
         return keysort.smallestKey();
     }
-    
+
+    @Override
     public final byte[] largestKey() {
-        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
-        for (Index oi: this.tables.values()) try {
+        final HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
+        for (final Index oi: this.tables.values()) try {
             keysort.put(oi.largestKey());
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
         }
         return keysort.largestKey();
     }
 
     private String newFilename() {
-        return prefix + "." + GenericFormatter.SHORT_MILSEC_FORMATTER.format() + ".table";
+        return this.prefix + "." + GenericFormatter.SHORT_MILSEC_FORMATTER.format() + ".table";
     }
-    
-    private void init() throws RowSpaceExceededException {
-        current = null;
+
+    private void init() {
+        this.current = null;
 
         // initialized tables map
         this.tables = new HashMap<String, Index>();
-        if (!(path.exists())) path.mkdirs();
-        String[] tablefile = path.list();
-        
+        if (!(this.path.exists())) this.path.mkdirs();
+        String[] tablefile = this.path.list();
+
         // zero pass: migrate old table names
         File f;
-        Random r = new Random(System.currentTimeMillis());
-        for (int i = 0; i < tablefile.length; i++) {
-            if ((tablefile[i].startsWith(prefix)) &&
-                (tablefile[i].charAt(prefix.length()) == '.') &&
-                (tablefile[i].length() == prefix.length() + 7)) {
-                f = new File(path, tablefile[i]);
-                String newname = tablefile[i] + "0100000" + (Long.toString(r.nextLong())+"00000").substring(1,5) + ".table";
-                f.renameTo(new File(path, newname));
+        final Random r = new Random(System.currentTimeMillis());
+        for (final String element : tablefile) {
+            if ((element.startsWith(this.prefix)) &&
+                (element.charAt(this.prefix.length()) == '.') &&
+                (element.length() == this.prefix.length() + 7)) {
+                f = new File(this.path, element);
+                final String newname = element + "0100000" + (Long.toString(r.nextLong())+"00000").substring(1,5) + ".table";
+                f.renameTo(new File(this.path, newname));
             }
         }
         // read new list again
-        tablefile = path.list();
-        
+        tablefile = this.path.list();
+
         // first pass: find tables
         final HashMap<String, Long> t = new HashMap<String, Long>();
         long ram, time, maxtime = 0;
         Date d;
-        for (int i = 0; i < tablefile.length; i++) {
-            if ((tablefile[i].startsWith(prefix)) &&
-                (tablefile[i].charAt(prefix.length()) == '.') &&
-                (tablefile[i].length() == prefix.length() + 24)) {
-                f = new File(path, tablefile[i]);
+        for (final String element : tablefile) {
+            if ((element.startsWith(this.prefix)) &&
+                (element.charAt(this.prefix.length()) == '.') &&
+                (element.length() == this.prefix.length() + 24)) {
+                f = new File(this.path, element);
                 try {
-                    d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(tablefile[i].substring(prefix.length() + 1, prefix.length() + 18));
-                } catch (ParseException e) {
+                    d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(element.substring(this.prefix.length() + 1, this.prefix.length() + 18));
+                } catch (final ParseException e) {
                     Log.logSevere("SplitTable", "", e);
                     continue;
                 }
                 time = d.getTime();
                 if (time > maxtime) {
-                    current = tablefile[i];
+                    this.current = element;
                     assert this.current != null;
                     maxtime = time;
                 }
-                
-                t.put(tablefile[i], Table.staticRAMIndexNeed(f, rowdef));
+
+                t.put(element, Table.staticRAMIndexNeed(f, this.rowdef));
             }
         }
-        
+
         // second pass: open tables
         Iterator<Map.Entry<String, Long>> i;
         Map.Entry<String, Long> entry;
         String maxf;
         long maxram;
-        Index table;
-        while (!t.isEmpty()) {
+        final List<Thread> warmingUp = new ArrayList<Thread>(); // for concurrent warming up
+        maxfind: while (!t.isEmpty()) {
             // find maximum table
             maxram = 0;
             maxf = null;
@@ -207,50 +207,61 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
                     maxram = ram;
                 }
             }
-            
+
             // open next biggest table
             t.remove(maxf);
-            f = new File(path, maxf);
+            f = new File(this.path, maxf);
             Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
+            Table table;
             try {
-                table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
-            } catch (RowSpaceExceededException e) {
-                table = new Table(f, rowdef, 0, 0, false, this.exceed134217727);
+                table = new Table(f, this.rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727, false);
+            } catch (final RowSpaceExceededException e) {
+                try {
+                    table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727, false);
+                } catch (final RowSpaceExceededException ee) {
+                    Log.logSevere("SplitTable", "Table " + f.toString() + " cannot be initialized: " + ee.getMessage(), ee);
+                    continue maxfind;
+                }
             }
-            tables.put(maxf, table);
+            final Table a = table;
+            final Thread p = new Thread() {
+                @Override
+                public void run() {
+                    a.warmUp();
+                }
+            };
+            p.start();
+            warmingUp.add(p);
+            this.tables.put(maxf, table);
         }
+        // collect warming up threads
+        for (final Thread p: warmingUp) try {p.join();} catch (final InterruptedException e) {}
         assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
-        
+
         // init the thread pool for the keeperOf executor service
+        /*
         this.executor = new ThreadPoolExecutor(
-                Math.max(tables.size(), Runtime.getRuntime().availableProcessors()) + 1, 
-                Math.max(tables.size(), Runtime.getRuntime().availableProcessors()) + 1, 10, 
-                TimeUnit.SECONDS, 
-                new LinkedBlockingQueue<Runnable>(), 
-                new NamePrefixThreadFactory(prefix));
+                Math.max(this.tables.size(), Runtime.getRuntime().availableProcessors()) + 1,
+                Math.max(this.tables.size(), Runtime.getRuntime().availableProcessors()) + 1, 10,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new NamePrefixThreadFactory(this.prefix));
+        */
     }
-    
+
+    @Override
     public void clear() throws IOException {
-    	this.close();
-    	final String[] l = path.list();
-    	for (int i = 0; i < l.length; i++) {
-    		if (l[i].startsWith(prefix)) {
-    		    final File f = new File(path, l[i]);
-    		    if (f.isDirectory()) delete(path, l[i]); else FileUtils.deletedelete(f);
+    	close();
+    	final String[] l = this.path.list();
+    	for (final String element : l) {
+    		if (element.startsWith(this.prefix)) {
+    		    final File f = new File(this.path, element);
+    		    if (f.isDirectory()) delete(this.path, element); else FileUtils.deletedelete(f);
     		}
     	}
-    	try {
-            init();
-        } catch (RowSpaceExceededException e) {
-            useTailCache = false;
-            try {
-                init();
-            } catch (RowSpaceExceededException e1) {
-                throw new IOException(e1.getMessage());
-            }
-        }
+    	init();
     }
-    
+
     public static void delete(final File path, final String tablename) {
         final File tabledir = new File(path, tablename);
         if (!(tabledir.exists())) return;
@@ -260,165 +271,202 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         }
 
         final String[] files = tabledir.list();
-        for (int i = 0; i < files.length; i++) {
-            FileUtils.deletedelete(new File(tabledir, files[i]));
+        for (final String file : files) {
+            FileUtils.deletedelete(new File(tabledir, file));
         }
 
         FileUtils.deletedelete(tabledir);
     }
-    
+
+    @Override
     public String filename() {
-        return new File(path, prefix).toString();
+        return new File(this.path, this.prefix).toString();
     }
-    
+
+    @Override
     public int size() {
-        final Iterator<Index> i = tables.values().iterator();
+        final Iterator<Index> i = this.tables.values().iterator();
         int s = 0;
         while (i.hasNext()) s += i.next().size();
         return s;
     }
-    
+
+    @Override
     public boolean isEmpty() {
-        final Iterator<Index> i = tables.values().iterator();
+        final Iterator<Index> i = this.tables.values().iterator();
         while (i.hasNext()) if (!i.next().isEmpty()) return false;
         return true;
     }
-    
+
     public int writeBufferSize() {
         int s = 0;
-        for (final Index index : tables.values()) {
+        for (final Index index : this.tables.values()) {
             if (index instanceof Cache) s += ((Cache) index).writeBufferSize();
         }
         return s;
     }
-    
+
+    @Override
     public Row row() {
         return this.rowdef;
     }
-    
+
+    @Override
     public boolean has(final byte[] key) {
         return keeperOf(key) != null;
     }
-    
-    public Row.Entry get(final byte[] key) throws IOException {
+
+    @Override
+    public Row.Entry get(final byte[] key, final boolean forcecopy) throws IOException {
         final Index keeper = keeperOf(key);
         if (keeper == null) return null;
-        return keeper.get(key);
+        synchronized (this) { // avoid concurrent IO from different methods
+            return keeper.get(key, forcecopy);
+        }
     }
-    
+
+    @Override
+    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
+        Row.Entry entry;
+        for (final byte[] key: keys) {
+            entry = get(key, forcecopy);
+            if (entry != null) map.put(key, entry);
+        }
+        return map;
+    }
+
     private Index newTable() {
         this.current = newFilename();
-        final File f = new File(path, this.current);
+        final File f = new File(this.path, this.current);
         Table table = null;
         try {
-            table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
-        } catch (RowSpaceExceededException e) {
+            table = new Table(f, this.rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727, true);
+        } catch (final RowSpaceExceededException e) {
             try {
-                table = new Table(f, rowdef, 0, 0, false, this.exceed134217727);
-            } catch (RowSpaceExceededException e1) {
+                table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727, true);
+            } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }
         }
-        tables.put(this.current, table);
+        this.tables.put(this.current, table);
         assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
         return table;
     }
-    
-    private Index checkTable(Index table) {
+
+    private Index checkTable(final Index table) {
         // check size and age of given table; in case it is too large or too old
         // create a new table
         assert table != null;
-        String name = new File(table.filename()).getName();
+        long t = System.currentTimeMillis();
+        if (((t / 1000) % 10) != 0) return table; // we check only every 10 seconds because all these file and parser operations are very expensive
+        final String name = new File(table.filename()).getName();
         long d;
         try {
-            d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(name.substring(prefix.length() + 1, prefix.length() + 18)).getTime();
-        } catch (ParseException e) {
+            d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(name.substring(this.prefix.length() + 1, this.prefix.length() + 18)).getTime();
+        } catch (final ParseException e) {
             Log.logSevere("SplitTable", "", e);
             d = 0;
         }
-        if (d + this.fileAgeLimit < System.currentTimeMillis() || new File(this.path, name).length() >= this.fileSizeLimit) {
+        if (d + this.fileAgeLimit < t || new File(this.path, name).length() >= this.fileSizeLimit) {
             return newTable();
         }
         return table;
     }
-    
+
+    @Override
     public Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         Index keeper = keeperOf(row.getPrimaryKeyBytes());
-        if (keeper != null) return keeper.replace(row);
-        synchronized (this.tables) {
+        if (keeper != null) synchronized (this) { // avoid concurrent IO from different methods
+            return keeper.replace(row);
+        }
+        synchronized (this) {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
             keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
         }
         keeper.put(row);
         return null;
     }
-    
+
     /**
      * Adds the row to the index. The row is identified by the primary key of the row.
      * @param row a index row
-     * @return true if this set did _not_ already contain the given row. 
+     * @return true if this set did _not_ already contain the given row.
      * @throws IOException
      * @throws RowSpaceExceededException
      */
+    @Override
     public boolean put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        byte[] key = row.getPrimaryKeyBytes();
-        if (tables == null) return true;
-        synchronized (this.tables) {
-            Index keeper = keeperOf(key);
+        final byte[] key = row.getPrimaryKeyBytes();
+        if (this.tables == null) return true;
+        Index keeper = keeperOf(key);
+        if (keeper != null) synchronized (this) { // avoid concurrent IO from different methods
+            return keeper.put(row);
+        }
+        synchronized (this) {
+            keeper = keeperOf(key); // we must check that again because it could have changed in between
             if (keeper != null) return keeper.put(row);
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
             keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
-            boolean b = keeper.put(row);
+            final boolean b = keeper.put(row);
             assert b;
             return b;
         }
     }
-    
 
     private Index keeperOf(final byte[] key) {
         if (key == null) return null;
-        if (tables == null) return null;
-        for (Index oi: tables.values()) {
+        if (this.tables == null) return null;
+        for (final Index oi: this.tables.values()) {
             if (oi.has(key)) return oi;
         }
         return null;
     }
-    
+
+    @Override
     public void addUnique(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        Index table = (this.current == null) ? null : tables.get(this.current);
-        synchronized (this.tables) {
+        Index keeper = (this.current == null) ? null : this.tables.get(this.current);
+        synchronized (this) {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
-            if (table == null) table = newTable(); else table = checkTable(table);
+            if (keeper == null) keeper = newTable(); else keeper = checkTable(keeper);
         }
-        table.addUnique(row);
+        keeper.addUnique(row);
     }
-    
+
+    @Override
     public List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
-        final Iterator<Index> i = tables.values().iterator();
+        final Iterator<Index> i = this.tables.values().iterator();
         final List<RowCollection> report = new ArrayList<RowCollection>();
         while (i.hasNext()) {
             report.addAll(i.next().removeDoubles());
         }
         return report;
     }
-    
+
+    @Override
     public boolean delete(final byte[] key) throws IOException {
         final Index table = keeperOf(key);
         if (table == null) return false;
-        return table.delete(key);
+        synchronized (this) { // avoid concurrent IO from different methods
+            return table.delete(key);
+        }
     }
-    
+
+    @Override
     public Row.Entry remove(final byte[] key) throws IOException {
         final Index table = keeperOf(key);
         if (table == null) return null;
-        return table.remove(key);
+        synchronized (this) { // avoid concurrent IO from different methods
+            return table.remove(key);
+        }
     }
-    
+
+    @Override
     public Row.Entry removeOne() throws IOException {
-        final Iterator<Index> i = tables.values().iterator();
+        final Iterator<Index> i = this.tables.values().iterator();
         Index table, maxtable = null;
         int maxcount = -1;
         while (i.hasNext()) {
@@ -431,11 +479,14 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         if (maxtable == null) {
             return null;
         }
-        return maxtable.removeOne();
+        synchronized (this) { // avoid concurrent IO from different methods
+            return maxtable.removeOne();
+        }
     }
-    
-    public List<Row.Entry> top(int count) throws IOException {
-        final Iterator<Index> i = tables.values().iterator();
+
+    @Override
+    public List<Row.Entry> top(final int count) throws IOException {
+        final Iterator<Index> i = this.tables.values().iterator();
         Index table, maxtable = null;
         int maxcount = -1;
         while (i.hasNext()) {
@@ -448,65 +499,75 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         if (maxtable == null) {
             return null;
         }
-        return maxtable.top(count);
+        synchronized (this) { // avoid concurrent IO from different methods
+            return maxtable.top(count);
+        }
     }
-    
+
+    @Override
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(tables.size());
-        final Iterator<Index> i = tables.values().iterator();
+        final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(this.tables.size());
+        final Iterator<Index> i = this.tables.values().iterator();
         CloneableIterator<byte[]> k;
         while (i.hasNext()) {
             k = i.next().keys(up, firstKey);
             if (k != null) c.add(k);
         }
-        return MergeIterator.cascade(c, rowdef.objectOrder, MergeIterator.simpleMerge, up);
+        return MergeIterator.cascade(c, this.rowdef.objectOrder, MergeIterator.simpleMerge, up);
     }
-    
+
+    @Override
     public CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
-        final List<CloneableIterator<Row.Entry>> c = new ArrayList<CloneableIterator<Row.Entry>>(tables.size());
-        final Iterator<Index> i = tables.values().iterator();
+        final List<CloneableIterator<Row.Entry>> c = new ArrayList<CloneableIterator<Row.Entry>>(this.tables.size());
+        final Iterator<Index> i = this.tables.values().iterator();
         while (i.hasNext()) {
             c.add(i.next().rows(up, firstKey));
         }
-        return MergeIterator.cascade(c, entryOrder, MergeIterator.simpleMerge, up);
+        return MergeIterator.cascade(c, this.entryOrder, MergeIterator.simpleMerge, up);
     }
-    
+
+    @Override
     public Iterator<Entry> iterator() {
         try {
             return rows();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
-    
+
+    @Override
     @SuppressWarnings("unchecked")
     public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
-        final CloneableIterator<Row.Entry>[] c = new CloneableIterator[tables.size()];
-        final Iterator<Index> i = tables.values().iterator();
+        final CloneableIterator<Row.Entry>[] c = new CloneableIterator[this.tables.size()];
+        final Iterator<Index> i = this.tables.values().iterator();
         int d = 0;
         while (i.hasNext()) {
             c[d++] = i.next().rows();
         }
         return StackIterator.stack(c);
     }
-    
+
+    @Override
     public synchronized void close() {
-        if (tables == null) return;
+        if (this.tables == null) return;
+        /*
         this.executor.shutdown();
         try {
             this.executor.awaitTermination(3, TimeUnit.SECONDS);
         } catch (final InterruptedException e) {
         }
         this.executor = null;
-        final Iterator<Index> i = tables.values().iterator();
+        */
+        final Iterator<Index> i = this.tables.values().iterator();
         while (i.hasNext()) {
             i.next().close();
         }
         this.tables = null;
     }
 
+    @Override
     public void deleteOnExit() {
-        for (Index i: this.tables.values()) i.deleteOnExit();
+        for (final Index i: this.tables.values()) i.deleteOnExit();
     }
-    
+
 }

@@ -148,64 +148,7 @@ Cookies==Cookies
 #---------------------------
 YaCy: Help==YaCy: Aiuto
 Help==Aiuto
-This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy &egrave; un web crawler distributio e anche un proxy HTTP. Tu stai usando <i>l'intefaccia on-line<i> dell'applicazione. Puoi usare questa interfaccia per configurare le tue preferenze personali e del proxy, controllare l'accesso e  le propriet&agrave; del crawler. Ancora pi&ugrave; importante, puoi usare la pagina del search per cercare tu stesso sul'indice <i>globale</i>.
-For more detailed information, visit the <a href="http://www.yacy.net/">YaCy homepage</a>==Per informazioni pi&ugrave; dettagliate , visita <a href="http://www.yacy.net/">YaCy Homepage</a>
-Local and Global Search: Options and Functions==Search locale e globale: Opzioni e Funzioni
-The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Il proxy fornisce una interfaccia di ricerca che accede al tuo indice locale, creato dalle pagine che passano attraverso il proxy.
-The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Il search pu&ograve; funzionare globalmente, ricercando attraverso gli altri 'pari'. Puoi usare le seguenti opzioni per migliorare i risultati delle tue ricerche.
-Search Word List==Lista delle parole da ricercare.
-You can search for several words simultanous. Words must be separated by a single space.==Puoi cercare per pi&ugrave; parole simultaneamente. Le parole devono essere separate da uno spazio singolo.
-The words are treated conjunctive, that means every must occur in the result, not any.== Le parole sono trattate in congiunzione, cio&egrave; ognuna deve essere presente nel risultato, non almeno una.
-If you do a global search \(see below\) you may get different results each time you do a search.==Se fai una ricerca globale \(vedi sotto\) puoi ottenre risultati deiversi ongi volta che fai una ricerca.
-Maximum Number of Results==Massimo Numero di Risultati
-You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Puoi selezionare il numero massimo di link desiderati. Noi non supportiamo ancora la paginazione dei risultati per ogni possibile link.
-Instead we encourage you to enhance the search result by submitting more search words.==Invece incoraggiamo il miglioramento dei risultati della ricerca tramite l'inserimento di pi&ugrave; parole.
-Result Order Options==Opzioni di ordinamento del risultato
-The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Il motore di ricerca fornisce un sistema di 'ranking' della qualit&agrave; sperimentale. In contrasto con gli altri motori conosciuti noi forniamo anche
-a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==l'ordine dei risultati per data. Se cambi l'ordine a 'Date-Quality' saranno mostrate per prime le pagine aggiornate pi&ugrave; recentemente.
-For pages that have the same date the second order, 'Quality' is applied.==Le pagine che hanno la stessa data sono ordinate per 'Qualit&agrave;'.
-This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Questo motore di ricerca &egrave; costruito per ricercare le pagine che passano attraverso il proxy. Ma l'indice di ricerca viene distribuito agli altri 'pari',
-so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==in questo modo puoi comunque ricercare globalmente: questa funzione &egrave; ancora rudimentale, ma pu&ograve; essere scelta per i casi di test. I rilasci futuri distribuiranno
-automatically distribute index information <i>before</i> a search happends to form a performant distributed hash table -- a very fast global search.==automaticamente le informazioni dell'indice <i>prima</i> che la ricerca avvenga per costituire una hash table distribuita e performante -- un ricerca globale veramente veloce.
-Maximum Search Time==Massimo Tempo di Ricerca
-Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Le ricerche sull'indice locale sono estremamente veloci, dell'ordine dei millisecondi, perfino per un grande numero di /(milioni/) di pagine. Ma la ricerca
-global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==sull'indice globale richiede pi&ugrave; tempo poich&egrave; deve trovare il 'pari' giusto che contenga i migliori risultati per la ricerca. Questo &egrave; vero specialmente nel caso
-distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==che l'indice distribuito sia in test mode. I risultati delle ricerche saranno pi&ugrave; stabili /(ripetute ricerche globali produrrano risultati più simili/) pi&ugrave; lungo
-the search time is.==sar&agrave; il tempo di ricerca.
-You may want to use accesskeys to navigate through the YaCy webinterface:==Tu puoi voler usare le accesskeys per navigare attraverso l'interfaccia web di YaCy:
-Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows e Internet Explorer: Alt + Accesskey + Enter
-Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows e Mozilla/Firefox/Netscape: Alt + Accesskey
-Windows and Opera: Shift \+ Esc \+ Accesskey==Windows e Opera: Shift + Esc + Accesskey
-Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter=Macintosh e Internet Explorer: Str + Accesskey + Enter
-Macintosh and Safari: Strg \+ Accesskey==Macintosh e Safari: Strg + Accesskey
-Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh e Mozilla/Firefox/Netscape: Strg + Accesskey
-Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh e Opera: Shift + Esc + Accesskey
-Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake e Galeon/Mozilla: Alt + Accesskey
-All OS and Amaya: Strg \+ Accesskey==Tutti gli OS e Amaya: Strg + Accesskey
 
-Search Page==Pagina di ricerca
-Network==Network
-Status==Stato
-
-YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy in alcune funzioni usa le expressioni regolari, per esempio nelle blaklist.
-There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Esistono diversi standard per le regexps, YaCy usa la sintassi del Perl 5.
-Here ist a short overview about the functions, which should fir for most cases\:<==Qui c'&egrave; una breve descrizione di queste funzioni, sufficiente per la maggior parte dei casi:<
-
-arbitrary character==caratteri arbitrari
-character x==carattere x
-not x==non x
-0 or more times x==0 o pi&ugrave; volte x
-0 or 1 time x==0 o 1 volta x
-1 or more times x==1 o pi&ugrave; volte x
-concatenation of x and y==Concatenazione di x e y
-x or y==x o y
-String "foo" or string "bar"==Stringa "foo" o Stringa "bar"
-a or b or c \(same as a\|b\|c\)==a o b o c \(uguale ad a\|b\|c\)
-a or b or c \(same as above\)==a o b o c \(come sopra\)
-exactly n appearances of x==esattamente n ricorrenze di  x
-at least n appearances of x==almeno n ricorrenze di x
-at least n, maximum m appearanches of x==almeno n, massimo m ricorrenze di x
-Modify priority of instructions==Modifica la priorit&agrave; delle istruzioni
 #-----------------------------
 
 # EOF

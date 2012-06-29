@@ -41,6 +41,7 @@ jpe     = image/jpeg
 jpeg    = image/jpeg
 jpg     = image/jpeg
 js      = text/javascript
+json	= application/json
 jsp     = text/html
 kml     = application/vnd.google-earth.kml+xml
 lha     = application/x-lzh

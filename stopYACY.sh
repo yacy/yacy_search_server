@@ -32,3 +32,10 @@ else
 	echo "Neither wget nor java could be found or are not executable."
 	echo "Visit http://localhost:$port/Steering.html?shutdown=true to stop YaCy or (in emergency case) use ./killYACY.sh"
 fi
+
+# wait until the yacy.running file disappears which means that YaCy has terminated
+# If you don't want to wait, just run this concurrently
+while [ -f "DATA/yacy.running" ]
+do
+sleep 1
+done

@@ -1,4 +1,4 @@
-// profile.java 
+// profile.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -37,11 +37,10 @@ import java.util.Properties;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-
-import de.anomic.search.Switchboard;
+import net.yacy.peers.Protocol;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNetwork;
 
 public final class profile {
 
@@ -50,7 +49,7 @@ public final class profile {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        if (!Protocol.authentifyRequest(post, env)) return prop;
 
         if ((sb.isRobinsonMode()) &&
            	(!sb.isPublicRobinson()) &&
@@ -59,7 +58,7 @@ public final class profile {
         	prop.put("list", "0");
             return prop;
         }
-        
+
         final Properties profile = new Properties();
         int count=0;
         String key="";
@@ -68,7 +67,7 @@ public final class profile {
         FileInputStream fileIn = null;
         try {
             fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
-            profile.load(fileIn);        
+            profile.load(fileIn);
         } catch(final IOException e) {
         } finally {
             if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (final Exception e) {}

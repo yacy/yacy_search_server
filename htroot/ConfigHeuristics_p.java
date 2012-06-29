@@ -26,8 +26,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.search.Switchboard;
 import de.anomic.data.WorkTables;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -45,14 +45,11 @@ public class ConfigHeuristics_p {
             
             if (post.containsKey("site_on")) sb.setConfig("heuristic.site", true);
             if (post.containsKey("site_off")) sb.setConfig("heuristic.site", false);
-            if (post.containsKey("scroogle_on")) sb.setConfig("heuristic.scroogle", true);
-            if (post.containsKey("scroogle_off")) sb.setConfig("heuristic.scroogle", false);
             if (post.containsKey("blekko_on")) sb.setConfig("heuristic.blekko", true);
             if (post.containsKey("blekko_off")) sb.setConfig("heuristic.blekko", false);
         }
         
         prop.put("site.checked", sb.getConfigBool("heuristic.site", false) ? 1 : 0);
-        prop.put("scroogle.checked", sb.getConfigBool("heuristic.scroogle", false) ? 1 : 0);
         prop.put("blekko.checked", sb.getConfigBool("heuristic.blekko", false) ? 1 : 0);
         
         return prop;

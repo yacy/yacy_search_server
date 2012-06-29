@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -32,7 +32,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -42,49 +41,60 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.storage.ARC;
+import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 
 public class Digest {
-	
-    private final static int digestThreads = Runtime.getRuntime().availableProcessors() * 2 + 1;
-	public static BlockingQueue<MessageDigest> digestPool = new ArrayBlockingQueue<MessageDigest>(digestThreads);
-	static {
-		for (int i = 0; i < digestThreads; i++)
-			try {
-				MessageDigest digest = MessageDigest.getInstance("MD5");
-				digest.reset();
-				digestPool.add(digest);
-			} catch (NoSuchAlgorithmException e) {
-			    Log.logException(e);
-			}
-	}
-	
+
+	public static BlockingQueue<MessageDigest> digestPool = new LinkedBlockingDeque<MessageDigest>();
+
+    private static final int md5CacheSize = Math.max(200000, Math.min(10000000, (int) (MemoryControl.available() / 20000L)));
+    private static ARC<String, byte[]> md5Cache = null;
+    static {
+        try {
+            md5Cache = new ConcurrentARC<String, byte[]>(md5CacheSize, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
+        } catch (final OutOfMemoryError e) {
+            md5Cache = new ConcurrentARC<String, byte[]>(1000, Math.max(2, Runtime.getRuntime().availableProcessors()));
+        }
+    }
+
+    /**
+     * clean the md5 cache
+     */
+    public static void cleanup() {
+    	md5Cache.clear();
+    }
+    
     public static String encodeHex(final long in, final int length) {
         String s = Long.toHexString(in);
         while (s.length() < length) s = "0" + s;
         return s;
     }
-    
+
     public static String encodeOctal(final byte[] in) {
         if (in == null) return "";
         final StringBuilder result = new StringBuilder(in.length * 8 / 3);
-        for (int i = 0; i < in.length; i++) {
-            if ((0Xff & in[i]) < 8) result.append('0');
-            result.append(Integer.toOctalString(0Xff & in[i]));
+        for (final byte element : in) {
+            if ((0Xff & element) < 8) result.append('0');
+            result.append(Integer.toOctalString(0Xff & element));
         }
         return result.toString();
     }
-    
+
     public static String encodeHex(final byte[] in) {
         if (in == null) return "";
         final StringBuilder result = new StringBuilder(in.length * 2);
-        for (int i = 0; i < in.length; i++) {
-            if ((0Xff & in[i]) < 16) result.append('0');
-            result.append(Integer.toHexString(0Xff & in[i]));
+        for (final byte element : in) {
+            if ((0Xff & element) < 16) result.append('0');
+            result.append(Integer.toHexString(0Xff & element));
         }
         return result.toString();
     }
@@ -96,7 +106,7 @@ public class Digest {
         }
         return result;
     }
-    
+
     public static String encodeMD5Hex(final String key) {
         // generate a hex representation from the md5 of a string
         return encodeHex(encodeMD5Raw(key));
@@ -111,40 +121,44 @@ public class Digest {
         // generate a hex representation from the md5 of a byte-array
         return encodeHex(encodeMD5Raw(b));
     }
-
+    
     public static byte[] encodeMD5Raw(final String key) {
-    	MessageDigest digest = null;
-    	boolean fromPool = true;
-        try {
-            digest = digestPool.take();
-        } catch (InterruptedException e) {
-        	Log.logWarning("Digest", "using generic instead of pooled digest");
-        	try {
-				digest = MessageDigest.getInstance("MD5");
-			} catch (NoSuchAlgorithmException e1) {
-			    Log.logException(e1);
-			}
-			digest.reset();
-			fromPool = false;
-		}
+
+        byte[] h = md5Cache.get(key);
+        if (h != null) return h;
+
+    	MessageDigest digest = digestPool.poll();
+    	if (digest == null) {
+    	    // if there are no digest objects left, create some on the fly
+    	    // this is not the most effective way but if we wouldn't do that the encoder would block
+    	    try {
+                digest = MessageDigest.getInstance("MD5");
+                digest.reset();
+            } catch (final NoSuchAlgorithmException e) {
+            }
+    	} else {
+    	    digest.reset(); // they should all be reseted but anyway; this is safe
+    	}
         byte[] keyBytes;
-        try {
-            keyBytes = key.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            keyBytes = key.getBytes();
-        }
+        keyBytes = UTF8.getBytes(key);
         digest.update(keyBytes);
-        byte[] result = digest.digest();
-        digest.reset();
-        if (fromPool)
-			try {
-				digestPool.put(digest);
-			} catch (InterruptedException e) {
-			    Log.logException(e);
-			}
+        final byte[] result = digest.digest();
+        digest.reset(); // to be prepared for next
+        try {
+            digestPool.put(digest);
+            //System.out.println("Digest Pool size = " + digestPool.size());
+        } catch ( InterruptedException e ) {
+        }
+
+        // update the cache
+        if (MemoryControl.shortStatus()) {
+            md5Cache.clear();
+        } else {
+            md5Cache.insertIfAbsent(key, result); // prevent expensive MD5 computation and encoding
+        }
         return result;
     }
-    
+
     public static byte[] encodeMD5Raw(final File file) throws IOException {
         FileInputStream  in;
         try {
@@ -154,14 +168,14 @@ public class Digest {
             Log.logException(e);
             return null;
         }
-        
+
         // create a concurrent thread that consumes data as it is read
         // and computes the md5 while doing IO
-        md5FilechunkConsumer md5consumer = new md5FilechunkConsumer(1024 * 64, 8);
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        Future<MessageDigest> md5result = service.submit(md5consumer);
+        final md5FilechunkConsumer md5consumer = new md5FilechunkConsumer(1024 * 64, 8);
+        final ExecutorService service = Executors.newSingleThreadExecutor();
+        final Future<MessageDigest> md5result = service.submit(md5consumer);
         service.shutdown();
-        
+
         filechunk c;
         try {
             while (true) {
@@ -179,105 +193,106 @@ public class Digest {
         }
         // put in poison into queue to tell the consumer to stop
         md5consumer.consume(md5FilechunkConsumer.poison);
-        
+
         // return the md5 digest from future task
         try {
             return md5result.get().digest();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             Log.logException(e);
             throw new IOException(e);
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             Log.logException(e);
             throw new IOException(e);
         }
     }
-    
+
     private static class filechunk {
         public byte[] b;
         public int n;
-        public filechunk(int len) {
-            b = new byte[len];
-            n = 0;
+        public filechunk(final int len) {
+            this.b = new byte[len];
+            this.n = 0;
         }
     }
-    
+
     private static class md5FilechunkConsumer implements Callable<MessageDigest> {
 
         private   final BlockingQueue<filechunk> empty;
         private   final BlockingQueue<filechunk> filed;
         protected static filechunk poison = new filechunk(0);
         private   MessageDigest digest;
-        
-        public md5FilechunkConsumer(int bufferSize, int bufferCount) {
-            empty = new ArrayBlockingQueue<filechunk>(bufferCount);
-            filed = new LinkedBlockingQueue<filechunk>();
+
+        public md5FilechunkConsumer(final int bufferSize, final int bufferCount) {
+            this.empty = new ArrayBlockingQueue<filechunk>(bufferCount);
+            this.filed = new LinkedBlockingQueue<filechunk>();
             // fill the empty queue
-            for (int i = 0; i < bufferCount; i++) empty.add(new filechunk(bufferSize));
+            for (int i = 0; i < bufferCount; i++) this.empty.add(new filechunk(bufferSize));
             // init digest
             try {
-                digest = MessageDigest.getInstance("MD5");
-            } catch (NoSuchAlgorithmException e) {
+                this.digest = MessageDigest.getInstance("MD5");
+            } catch (final NoSuchAlgorithmException e) {
                 System.out.println("Internal Error at md5:" + e.getMessage());
             }
-            digest.reset();
+            this.digest.reset();
         }
-        
-        public void consume(filechunk c) {
+
+        public void consume(final filechunk c) {
             try {
-                filed.put(c);
-            } catch (InterruptedException e) {
+                this.filed.put(c);
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
         }
-        
+
         public filechunk nextFree() throws IOException {
             try {
-                return empty.take();
-            } catch (InterruptedException e) {
+                return this.empty.take();
+            } catch (final InterruptedException e) {
                 Log.logException(e);
                 throw new IOException(e);
             }
         }
 
+        @Override
         public MessageDigest call() {
             try {
                 filechunk c;
                 while(true) {
-                    c = filed.take();
+                    c = this.filed.take();
                     if (c == poison) break;
-                    digest.update(c.b, 0, c.n);
-                    empty.put(c);
+                    this.digest.update(c.b, 0, c.n);
+                    this.empty.put(c);
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
             }
-            return digest;
+            return this.digest;
         }
-        
+
     }
-    
-    public static String fastFingerprintHex(final File file, boolean includeDate) {
+
+    public static String fastFingerprintHex(final File file, final boolean includeDate) {
         try {
             return encodeHex(fastFingerprintRaw(file, includeDate));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
 
-    public static String fastFingerprintB64(final File file, boolean includeDate) {
+    public static String fastFingerprintB64(final File file, final boolean includeDate) {
         try {
-            byte[] b = fastFingerprintRaw(file, includeDate);
+            final byte[] b = fastFingerprintRaw(file, includeDate);
             assert b != null : "file = " + file.toString();
             if (b == null || b.length == 0) return null;
             assert b.length != 0 : "file = " + file.toString();
             return Base64Order.enhancedCoder.encode(b);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
             return null;
         }
     }
 
-    
+
     /**
      * the fast fingerprint computes a md5-like hash from a given file,
      * which is different from a md5 because it does not read the complete file
@@ -292,21 +307,21 @@ public class Digest {
      * array[32k + 8 .. 32k + 15] = lastModified of file as long
      * @param file
      * @return fingerprint in md5 raw format
-     * @throws IOException 
+     * @throws IOException
      */
-    public static byte[] fastFingerprintRaw(final File file, boolean includeDate) throws IOException {
+    public static byte[] fastFingerprintRaw(final File file, final boolean includeDate) throws IOException {
         final int mb = 16 * 1024;
         final long fl = file.length();
         if (fl <= 2 * mb) return encodeMD5Raw(file);
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             Log.logException(e);
             return null;
         }
-        RandomAccessFile raf = new RandomAccessFile(file, "r");
-        byte[] a = new byte[mb];
+        final RandomAccessFile raf = new RandomAccessFile(file, "r");
+        final byte[] a = new byte[mb];
         try {
             raf.seek(0);
             raf.readFully(a, 0, mb);
@@ -318,7 +333,7 @@ public class Digest {
             if (includeDate) digest.update(NaturalOrder.encodeLong(file.lastModified(), 8), 0, 8);
         } finally {
             raf.close();
-            try {raf.getChannel().close();} catch (IOException e) {}
+            try {raf.getChannel().close();} catch (final IOException e) {}
         }
         return digest.digest();
     }
@@ -341,39 +356,39 @@ public class Digest {
         }
         return null;
     }
-    
+
     public static void main(final String[] s) {
         // usage example:
         // java -classpath classes de.anomic.kelondro.kelondroDigest -md5 DATA/HTCACHE/mediawiki/wikipedia.de.xml
         // java -classpath classes de.anomic.kelondro.kelondroDigest -md5 readme.txt
-        // java -classpath classes de.anomic.kelondro.kelondroDigest -fb64 DATA/HTCACHE/responseHeader.heap 
+        // java -classpath classes de.anomic.kelondro.kelondroDigest -fb64 DATA/HTCACHE/responseHeader.heap
         // compare with:
         // md5 readme.txt
-        long start = System.currentTimeMillis();
-        
+        final long start = System.currentTimeMillis();
+
         if (s.length == 0) {
             System.out.println("usage: -[md5|fingerprint] <arg>");
             System.exit(0);
         }
-        
+
         if (s[0].equals("-md5")) {
             // generate a md5 from a given file
-            File f = new File(s[1]);
+            final File f = new File(s[1]);
             try {
                 System.out.println("MD5 (" + f.getName() + ") = " + encodeMD5Hex(f));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
-        
+
         if (s[0].equals("-fhex")) {
             // generate a fast fingerprint from a given file
-            File f = new File(s[1]);
+            final File f = new File(s[1]);
             System.out.println("fingerprint hex (" + f.getName() + ") = " + fastFingerprintHex(f, true));
         }
         if (s[0].equals("-fb64")) {
             // generate a fast fingerprint from a given file
-            File f = new File(s[1]);
+            final File f = new File(s[1]);
             System.out.println("fingerprint b64 (" + f.getName() + ") = " + fastFingerprintB64(f, true));
         }
 
@@ -384,5 +399,8 @@ public class Digest {
         }
 
         System.out.println("time: " + (System.currentTimeMillis() - start) + " ms");
+
+        // without this this method would never end
+        Log.shutdown();
     }
 }

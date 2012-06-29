@@ -22,15 +22,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.geolocalization.GeonamesLocalization;
-import net.yacy.document.geolocalization.OpenGeoDBLocalization;
+import net.yacy.document.geolocation.GeonamesLocation;
+import net.yacy.document.geolocation.OpenGeoDBLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
-import de.anomic.crawler.CrawlProfile;
+import net.yacy.search.Switchboard;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -39,15 +39,15 @@ public class DictionaryLoader_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects(); // return variable that accumulates replacements
-       
+
         /*
          * distinguish the following cases:
          * - dictionary file was not loaded -> actions: load the file
          * - dictionary file is loaded and enabled -> actions: disable or remove the file
          * - dictionary file is loaded but disabled -> actions: enable or remove the file
          */
-        
-        for (LibraryProvider.Dictionary dictionary: LibraryProvider.Dictionary.values()) {
+
+        for (final LibraryProvider.Dictionary dictionary: LibraryProvider.Dictionary.values()) {
             prop.put(dictionary.nickname + "URL", dictionary.url);
             prop.put(dictionary.nickname + "Storage", dictionary.file().toString());
             prop.put(dictionary.nickname + "Status", dictionary.file().exists() ? 1 : dictionary.fileDisabled().exists() ? 2 : 0);
@@ -56,95 +56,269 @@ public class DictionaryLoader_p {
             prop.put(dictionary.nickname + "ActionActivated", 0);
             prop.put(dictionary.nickname + "ActionDeactivated", 0);
         }
-        
-        if (post == null) return prop;
-        
+
+        if (post == null) {
+            return prop;
+        }
+
         // GEON0
         if (post.containsKey("geon0Load")) {
             // load from the net
             try {
-                Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, false);
-                byte[] b = response.getContent();
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON0.file());
-                LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocalization(LibraryProvider.Dictionary.GEON0.file()));
+                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null, -1));
+                LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geon0Status", LibraryProvider.Dictionary.GEON0.file().exists() ? 1 : 0);
                 prop.put("geon0ActionLoaded", 1);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 Log.logException(e);
                 prop.put("geon0ActionLoaded", 2);
                 prop.put("geon0ActionLoaded_error", e.getMessage());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
                 prop.put("geon0ActionLoaded", 2);
                 prop.put("geon0ActionLoaded_error", e.getMessage());
             }
         }
-        
+
         if (post.containsKey("geon0Remove")) {
             FileUtils.deletedelete(LibraryProvider.Dictionary.GEON0.file());
             FileUtils.deletedelete(LibraryProvider.Dictionary.GEON0.fileDisabled());
-            LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEON0.nickname);
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON0.nickname);
             prop.put("geon0ActionRemoved", 1);
         }
-        
+
         if (post.containsKey("geon0Deactivate")) {
             LibraryProvider.Dictionary.GEON0.file().renameTo(LibraryProvider.Dictionary.GEON0.fileDisabled());
-            LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEON0.nickname);
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON0.nickname);
             prop.put("geon0ActionDeactivated", 1);
         }
-        
+
         if (post.containsKey("geon0Activate")) {
             LibraryProvider.Dictionary.GEON0.fileDisabled().renameTo(LibraryProvider.Dictionary.GEON0.file());
-            LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocalization(LibraryProvider.Dictionary.GEON0.file()));
+            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null, -1));
+            LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
             prop.put("geon0ActionActivated", 1);
         }
-        
+
+        // GEON1
+        if (post.containsKey("geon1Load")) {
+            // load from the net
+            try {
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final byte[] b = response.getContent();
+                FileUtils.copy(b, LibraryProvider.Dictionary.GEON1.file());
+                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON1.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON1.file(), null, -1));
+                LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
+                prop.put("geon1Status", LibraryProvider.Dictionary.GEON1.file().exists() ? 1 : 0);
+                prop.put("geon1ActionLoaded", 1);
+            } catch (final MalformedURLException e) {
+                Log.logException(e);
+                prop.put("geon1ActionLoaded", 2);
+                prop.put("geon1ActionLoaded_error", e.getMessage());
+            } catch (final IOException e) {
+                Log.logException(e);
+                prop.put("geon1ActionLoaded", 2);
+                prop.put("geon1ActionLoaded_error", e.getMessage());
+            }
+        }
+
+        if (post.containsKey("geon1Remove")) {
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON1.file());
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON1.fileDisabled());
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON1.nickname);
+            prop.put("geon1ActionRemoved", 1);
+        }
+
+        if (post.containsKey("geon1Deactivate")) {
+            LibraryProvider.Dictionary.GEON1.file().renameTo(LibraryProvider.Dictionary.GEON1.fileDisabled());
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON1.nickname);
+            prop.put("geon1ActionDeactivated", 1);
+        }
+
+        if (post.containsKey("geon1Activate")) {
+            LibraryProvider.Dictionary.GEON1.fileDisabled().renameTo(LibraryProvider.Dictionary.GEON1.file());
+            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON1.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON1.file(), null, -1));
+            LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
+            prop.put("geon1ActionActivated", 1);
+        }
+
+        // GEON2
+        if (post.containsKey("geon2Load")) {
+            // load from the net
+            try {
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON2.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final byte[] b = response.getContent();
+                FileUtils.copy(b, LibraryProvider.Dictionary.GEON2.file());
+                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON2.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON2.file(), null, 100000));
+                LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
+                prop.put("geon2Status", LibraryProvider.Dictionary.GEON2.file().exists() ? 1 : 0);
+                prop.put("geon2ActionLoaded", 1);
+            } catch (final MalformedURLException e) {
+                Log.logException(e);
+                prop.put("geon2ActionLoaded", 2);
+                prop.put("geon2ActionLoaded_error", e.getMessage());
+            } catch (final IOException e) {
+                Log.logException(e);
+                prop.put("geon2ActionLoaded", 2);
+                prop.put("geon2ActionLoaded_error", e.getMessage());
+            }
+        }
+
+        if (post.containsKey("geon2Remove")) {
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON2.file());
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON2.fileDisabled());
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON2.nickname);
+            prop.put("geon2ActionRemoved", 1);
+        }
+
+        if (post.containsKey("geon2Deactivate")) {
+            LibraryProvider.Dictionary.GEON2.file().renameTo(LibraryProvider.Dictionary.GEON2.fileDisabled());
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEON2.nickname);
+            prop.put("geon2ActionDeactivated", 1);
+        }
+
+        if (post.containsKey("geon2Activate")) {
+            LibraryProvider.Dictionary.GEON2.fileDisabled().renameTo(LibraryProvider.Dictionary.GEON2.file());
+            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON2.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON2.file(), null, 100000));
+            LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
+            prop.put("geon2ActionActivated", 1);
+        }
+
         // GEO1
         if (post.containsKey("geo1Load")) {
             // load from the net
             try {
-                Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, false);
-                byte[] b = response.getContent();
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEODB1.file());
-                LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEODB0.nickname);
-                LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocalization(LibraryProvider.Dictionary.GEODB1.file(), false));
+                LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
+                LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocation(LibraryProvider.Dictionary.GEODB1.file(), null));
+                LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
                 prop.put("geo1Status", LibraryProvider.Dictionary.GEODB1.file().exists() ? 1 : 0);
                 prop.put("geo1ActionLoaded", 1);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 Log.logException(e);
                 prop.put("geo1ActionLoaded", 2);
                 prop.put("geo1ActionLoaded_error", e.getMessage());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
                 prop.put("geo1ActionLoaded", 2);
                 prop.put("geo1ActionLoaded_error", e.getMessage());
             }
         }
-        
+
         if (post.containsKey("geo1Remove")) {
             FileUtils.deletedelete(LibraryProvider.Dictionary.GEODB1.file());
             FileUtils.deletedelete(LibraryProvider.Dictionary.GEODB1.fileDisabled());
-            LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
             prop.put("geo1ActionRemoved", 1);
         }
-        
+
         if (post.containsKey("geo1Deactivate")) {
             LibraryProvider.Dictionary.GEODB1.file().renameTo(LibraryProvider.Dictionary.GEODB1.fileDisabled());
-            LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
+            LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
             prop.put("geo1ActionDeactivated", 1);
         }
-        
+
         if (post.containsKey("geo1Activate")) {
             LibraryProvider.Dictionary.GEODB1.fileDisabled().renameTo(LibraryProvider.Dictionary.GEODB1.file());
-            LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocalization(LibraryProvider.Dictionary.GEODB1.file(), false));
+            LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocation(LibraryProvider.Dictionary.GEODB1.file(), null));
+            LibraryProvider.autotagging.addPlaces(LibraryProvider.geoLoc);
             prop.put("geo1ActionActivated", 1);
         }
-        
+
+        // DRW0
+        if (post.containsKey("drw0Load")) {
+            // load from the net
+            try {
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.DRW0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final byte[] b = response.getContent();
+                FileUtils.copy(b, LibraryProvider.Dictionary.DRW0.file());
+                LibraryProvider.activateDeReWo();
+                LibraryProvider.initDidYouMean();
+                prop.put("drw0Status", LibraryProvider.Dictionary.DRW0.file().exists() ? 1 : 0);
+                prop.put("drw0ActionLoaded", 1);
+            } catch (final MalformedURLException e) {
+                Log.logException(e);
+                prop.put("drw0ActionLoaded", 2);
+                prop.put("drw0ActionLoaded_error", e.getMessage());
+            } catch (final IOException e) {
+                Log.logException(e);
+                prop.put("drw0ActionLoaded", 2);
+                prop.put("drw0ActionLoaded_error", e.getMessage());
+            }
+        }
+
+        if (post.containsKey("drw0Remove")) {
+            LibraryProvider.deactivateDeReWo();
+            LibraryProvider.initDidYouMean();
+            FileUtils.deletedelete(LibraryProvider.Dictionary.DRW0.file());
+            FileUtils.deletedelete(LibraryProvider.Dictionary.DRW0.fileDisabled());
+            prop.put("drw0ActionRemoved", 1);
+        }
+
+        if (post.containsKey("drw0Deactivate")) {
+            LibraryProvider.deactivateDeReWo();
+            LibraryProvider.initDidYouMean();
+            LibraryProvider.Dictionary.DRW0.file().renameTo(LibraryProvider.Dictionary.DRW0.fileDisabled());
+            prop.put("drw0ActionDeactivated", 1);
+        }
+
+        if (post.containsKey("drw0Activate")) {
+            LibraryProvider.Dictionary.DRW0.fileDisabled().renameTo(LibraryProvider.Dictionary.DRW0.file());
+            LibraryProvider.activateDeReWo();
+            LibraryProvider.initDidYouMean();
+            prop.put("drw0ActionActivated", 1);
+        }
+
+        // PND0
+        if (post.containsKey("pnd0Load")) {
+            // load from the net
+            try {
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.PND0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final byte[] b = response.getContent();
+                FileUtils.copy(b, LibraryProvider.Dictionary.PND0.file());
+                LibraryProvider.activatePND();
+                prop.put("pnd0Status", LibraryProvider.Dictionary.PND0.file().exists() ? 1 : 0);
+                prop.put("pnd0ActionLoaded", 1);
+            } catch (final MalformedURLException e) {
+                Log.logException(e);
+                prop.put("pnd0ActionLoaded", 2);
+                prop.put("pnd0ActionLoaded_error", e.getMessage());
+            } catch (final IOException e) {
+                Log.logException(e);
+                prop.put("pnd0ActionLoaded", 2);
+                prop.put("pnd0ActionLoaded_error", e.getMessage());
+            }
+        }
+
+        if (post.containsKey("pnd0Remove")) {
+            LibraryProvider.deactivatePND();
+            FileUtils.deletedelete(LibraryProvider.Dictionary.PND0.file());
+            FileUtils.deletedelete(LibraryProvider.Dictionary.PND0.fileDisabled());
+            prop.put("pnd0ActionRemoved", 1);
+        }
+
+        if (post.containsKey("pnd0Deactivate")) {
+            LibraryProvider.deactivatePND();
+            LibraryProvider.Dictionary.PND0.file().renameTo(LibraryProvider.Dictionary.PND0.fileDisabled());
+            prop.put("pnd0ActionDeactivated", 1);
+        }
+
+        if (post.containsKey("pnd0Activate")) {
+            LibraryProvider.Dictionary.PND0.fileDisabled().renameTo(LibraryProvider.Dictionary.PND0.file());
+            LibraryProvider.activatePND();
+            prop.put("pnd0ActionActivated", 1);
+        }
+
         // check status again
-        for (LibraryProvider.Dictionary dictionary: LibraryProvider.Dictionary.values()) {
+        for (final LibraryProvider.Dictionary dictionary: LibraryProvider.Dictionary.values()) {
             prop.put(dictionary.nickname + "Status", dictionary.file().exists() ? 1 : dictionary.fileDisabled().exists() ? 2 : 0);
         }
-                
+
         return prop; // return rewrite values for templates
     }
 }

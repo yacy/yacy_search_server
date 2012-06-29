@@ -1,4 +1,4 @@
-// translator.java 
+// translator.java
 // -------------------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -40,17 +40,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
-
 import de.anomic.server.serverSwitch;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Wordlist based translator
@@ -58,6 +57,9 @@ import java.util.Set;
  * Uses a Property like file with phrases or single words to translate a string or a file
  * */
 public class Translator {
+
+    public final static String LANG_FILENAME_FILTER = "^.*\\.lng$";
+
     public static String translate(final String source, final Map<String, String> translationTable){
         final Set<String> keys = translationTable.keySet();
         String result = source;
@@ -74,11 +76,11 @@ public class Translator {
         }
         return result;
     }
-    
+
     /**
      * Load multiple translationLists from one File. Each List starts with #File: relative/path/to/file
      * @param translationFile the File, which contains the Lists
-     * @return a Hashtable, which contains for each File a Hashtable with translations.
+     * @return a HashMap, which contains for each File a HashMap with translations.
      */
     public static Map<String, Map<String, String>> loadTranslationsLists(final File translationFile){
         final Map<String, Map<String, String>> lists = new HashMap<String, Map<String, String>>(); //list of translationLists for different files.
@@ -117,7 +119,7 @@ public class Translator {
     public static boolean translateFile(final File sourceFile, final File destFile, final File translationFile){
         return translateFile(sourceFile, destFile, loadTranslationsLists(translationFile).get(sourceFile.getName()));
     }
-	
+
     public static boolean translateFile(final File sourceFile, final File destFile, final Map<String, String> translationList){
 
         StringBuilder content = new StringBuilder();
@@ -138,7 +140,7 @@ public class Translator {
                 } catch (final Exception e) {}
             }
         }
-        
+
         content = new StringBuilder(translate(content.toString(), translationList));
         BufferedWriter bw = null;
         try{
@@ -154,7 +156,7 @@ public class Translator {
                 } catch (final Exception e) {}
             }
         }
-		
+
 	return true;
     }
 
@@ -183,7 +185,7 @@ public class Translator {
                 } catch (final IndexOutOfBoundsException e) {
                     Log.logSevere("TRANSLATOR", "Error creating relative Path for "+sourceFile.getAbsolutePath());
                     relativePath = "wrong path"; //not in translationLists
-                } 
+                }
                 if (translationLists.containsKey(relativePath)) {
                     Log.logInfo("TRANSLATOR", "Translating file: "+ relativePath);
                     if(!translateFile(
@@ -215,7 +217,11 @@ public class Translator {
     }
 
     public static Map<String, String> langMap(final serverSwitch env) {
-        final String[] ms = env.getConfig("locale.lang", "").split(",");
+        final String[] ms = (
+            "default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk," +
+            "gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky,cn/&#27721;&#35821;/&#28450;&#35486;," +
+            "ru/&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;,uk/&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;"
+            ).split(",");
         final Map<String, String> map = new HashMap<String, String>();
         for (final String element : ms) {
             int p = element.indexOf('/');
@@ -224,8 +230,8 @@ public class Translator {
         }
         return map;
     }
-        
-    public static boolean changeLang(final serverSwitch env, final String langPath, final String lang) {
+
+    public static boolean changeLang(final serverSwitch env, final File langPath, final String lang) {
         boolean ret = false;
 
         if ("default".equals(lang) || "default.lng".equals(lang)) {
@@ -255,5 +261,9 @@ public class Translator {
             }
         }
         return ret;
+    }
+
+    public static List<String> langFiles(File langPath) {
+        return FileUtils.getDirListing(langPath, Translator.LANG_FILENAME_FILTER);
     }
 }

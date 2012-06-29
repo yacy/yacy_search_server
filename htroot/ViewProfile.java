@@ -43,15 +43,15 @@ import java.util.Properties;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Network;
+import net.yacy.peers.NewsDB;
+import net.yacy.peers.NewsPool;
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNewsDB;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacySeed;
 
 public class ViewProfile {
 
@@ -91,28 +91,28 @@ public class ViewProfile {
             prop.put("success_peerhash", sb.peers.mySeed().hash);
         } else {
             // read the profile from remote peer
-            yacySeed seed = sb.peers.getConnected(hash);
+            Seed seed = sb.peers.getConnected(hash);
             if (seed == null) seed = sb.peers.getDisconnected(hash);
             if (seed == null) {
                 prop.put("success", "1"); // peer unknown
             } else {
                 // process news if existent
                 try {
-                    final yacyNewsDB.Record record = sb.peers.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
-                    if (record != null) sb.peers.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
+                    final NewsDB.Record record = sb.peers.newsPool.getByOriginator(NewsPool.INCOMING_DB, NewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
+                    if (record != null) sb.peers.newsPool.moveOff(NewsPool.INCOMING_DB, record.id());
                 } catch (final Exception e) {
                     Log.logException(e);
                 }
                 
                 // try to get the profile from remote peer
                 if (sb.clusterhashes != null) seed.setAlternativeAddress(sb.clusterhashes.get(seed.hash.getBytes()));
-                profile = yacyClient.getProfile(seed);
+                profile = Protocol.getProfile(seed);
                 
                 // if profile did not arrive, say that peer is disconnected
                 if (profile == null) {
                     prop.put("success", "2"); // peer known, but disconnected
                 } else {
-                    yacyCore.log.logInfo("fetched profile:" + profile);
+                    Network.log.logInfo("fetched profile:" + profile);
                     prop.put("success", "3"); // everything ok
                 }
                 prop.putHTML("success_peername", seed.getName());
@@ -162,7 +162,7 @@ public class ViewProfile {
                     prop.put("success_" + key, "1");
                     // only comments get "wikified"
                     if(key.equals("comment")){
-                        prop.putWiki(
+                        prop.putWiki(sb.peers.mySeed().getClusterAddress(), 
                                 "success_" + key + "_value",
                                 entry.getValue().replaceAll("\r", "").replaceAll("\\\\n", "\n"));
                         prop.put("success_" + key + "_b64value", Base64Order.standardCoder.encodeString(entry.getValue()));

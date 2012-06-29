@@ -1,4 +1,4 @@
-// Bookmarks_p.java 
+// Bookmarks_p.java
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -35,30 +35,30 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-
-import de.anomic.crawler.CrawlProfile;
+import net.yacy.peers.NewsPool;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.BookmarksDB.Bookmark;
 import de.anomic.data.BookmarksDB.Tag;
 import de.anomic.data.ListManager;
 import de.anomic.data.UserDB;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsPool;
-import java.util.Map;
 
 
 public class Bookmarks {
@@ -66,14 +66,14 @@ public class Bookmarks {
 	private static final serverObjects prop = new serverObjects();
 	private static Switchboard sb = null;
 	private static UserDB.Entry user = null;
-	private static boolean isAdmin = false;	
+	private static boolean isAdmin = false;
 
 	final static int SORT_ALPHA = 1;
 	final static int SORT_SIZE = 2;
 	final static int SHOW_ALL = -1;
 	final static boolean TAGS = false;
 	final static boolean FOLDERS = true;
-	
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
     	int max_count = 10;
@@ -81,12 +81,12 @@ public class Bookmarks {
     	int display = 0;
     	String tagName = "";
     	String username="";
-    	
+
     	prop.clear();
     	sb = (Switchboard) env;
-    	user = sb.userDB.getUser(header);   
-    	isAdmin = (sb.verifyAuthentication(header, true) || user!= null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT));
-    
+    	user = sb.userDB.getUser(header);
+    	isAdmin = (sb.verifyAuthentication(header) || user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
+
     	// set user name
     	if (user != null) {
             username=user.getUserName();
@@ -94,16 +94,16 @@ public class Bookmarks {
             username="admin";
         }
     	prop.putHTML("user", username);
-    	
+
     	//redirect to userpage
     	/*
     	if(username!="" &&(post == null || !post.containsKey("user") && !post.containsKey("mode")))
         prop.put("LOCATION", "/Bookmarks.html?user="+username);
     	*/
-    
+
     	// set peer address
     	prop.put("address", sb.peers.mySeed().getPublicAddress());
-    
+
     	//defaultvalues
     	if(isAdmin) {
             prop.put("mode", "1");
@@ -122,11 +122,11 @@ public class Bookmarks {
     	prop.put("mode_path", "");
     	prop.put("mode_public", "1"); //1=is public
     	prop.put("mode_feed", "0"); //no newsfeed
-    	
+
     	if (post != null) {
             if (!isAdmin) {
                 if(post.containsKey("login")){
-                    prop.put("AUTHENTICATE","admin log-in");
+                	prop.authenticationRequired();
                 }
             } else if (post.containsKey("mode")) {
                 final String mode=post.get("mode");
@@ -167,12 +167,12 @@ public class Bookmarks {
                         bookmark.setPublic(false);
                     }
 
-                    if(post.containsKey("feed") && ("feed".equals(post.get("feed")))){
+                    if(post.containsKey("feed") && ("true".equals(post.get("feed")))){
                         bookmark.setFeed(true);
                     } else {
                         bookmark.setFeed(false);
                     }
-                    
+
                     bookmark.setTags(tags, true);
                     sb.bookmarksDB.saveBookmark(bookmark);
                 }
@@ -195,20 +195,19 @@ public class Bookmarks {
                     final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash.getBytes(), null, 0);
+                        final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(ASCII.getBytes(urlHash));
                         if (urlentry != null) try {
-                            final URIMetadataRow.Components metadata = urlentry.metadata();
-                            final Document document = Document.mergeDocuments(metadata.url(), null, sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CrawlProfile.CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE));
+                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE));
                             prop.put("mode_edit", "0"); // create mode
-                            prop.put("mode_url", metadata.url().toNormalform(false, true));
-                            prop.putHTML("mode_title", metadata.dc_title());
-                            prop.putHTML("mode_description", (document == null) ? metadata.dc_title(): document.dc_title());
-                            prop.putHTML("mode_author", metadata.dc_creator());
-                            prop.putHTML("mode_tags", (document == null) ? metadata.dc_subject() : document.dc_subject(','));
+                            prop.put("mode_url", urlentry.url().toNormalform(false, true));
+                            prop.putHTML("mode_title", urlentry.dc_title());
+                            prop.putHTML("mode_description", (document == null) ? urlentry.dc_title(): document.dc_title());
+                            prop.putHTML("mode_author", urlentry.dc_creator());
+                            prop.putHTML("mode_tags", (document == null) ? urlentry.dc_subject() : document.dc_subject(','));
                             prop.putHTML("mode_path","");
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed
-                        } catch (IOException e) {Log.logException(e);} catch (Parser.Failure e) {Log.logException(e);}
+                        } catch (final IOException e) {Log.logException(e);} catch (final Parser.Failure e) {Log.logException(e);}
                     } else {
                         // get from the bookmark database
                         prop.put("mode_edit", "1"); // edit mode
@@ -223,7 +222,7 @@ public class Bookmarks {
                         } else {
                             prop.put("mode_public", "0");
                         }
-                        
+
                         if (bookmark.getFeed()) {
                             prop.put("mode_feed", "1");
                         } else {
@@ -238,7 +237,7 @@ public class Bookmarks {
                 if("".equals(tags)){
                     tags="unsorted";
                 }
-    			
+
                 Log.logInfo("BOOKMARKS", "Trying to import bookmarks from HTML-file");
 
                 try {
@@ -265,30 +264,30 @@ public class Bookmarks {
             }
 
             if (post.containsKey("start")) {
-                start = Integer.parseInt(post.get("start"));
+                start = post.getInt("start", 0);
             }
 
             if (post.containsKey("num")) {
-                max_count = Integer.parseInt(post.get("num"));
+                max_count = post.getInt("num", 10);
             }
     	} // END if(post != null)
-    	
+
     	if (display == 0) {
-    	    	
+
 	    	//-----------------------
 	    	// create tag list
 	    	//-----------------------
 	    	printTagList("taglist", tagName, SORT_SIZE, 25, false);
 	    	printTagList("optlist", tagName, SORT_ALPHA, SHOW_ALL, true);
-	    	       	
+
 	    	//-----------------------
 	    	// create bookmark list
 	    	//-----------------------
 	    	int count = 0;
-	        Iterator<String> it = null;    	
+	        Iterator<String> it = null;
 
                 prop.put("display_num-bookmarks", sb.bookmarksDB.bookmarksSize());
-	       	
+
 	       	if(!"".equals(tagName)){
                     prop.put("display_selected", "");
                     it = sb.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
@@ -296,18 +295,18 @@ public class Bookmarks {
                     prop.put("display_selected", " selected=\"selected\"");
                     it = sb.bookmarksDB.getBookmarksIterator(isAdmin);
 	       	}
-	       	
+
 	       	//skip the first entries (display next page)
 	       	count = 0;
 	       	while(count < start && it.hasNext()){
                     it.next();
                     count++;
 	       	}
-	       	
+
 	       	count = 0;
 	       	while(count < max_count && it.hasNext()) {
                     final Bookmark bookmark = sb.bookmarksDB.getBookmark(it.next());
-	       		
+
                     if (bookmark != null){
                         if (bookmark.getFeed() && isAdmin) {
                             prop.put("display_bookmarks_"+count+"_link", "/FeedReader_p.html?url="+bookmark.getUrl());
@@ -319,7 +318,7 @@ public class Bookmarks {
                         prop.put("display_bookmarks_"+count+"_date", ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())));
                         prop.put("display_bookmarks_"+count+"_rfc822date", HeaderFramework.formatRFC1123(new Date(bookmark.getTimeStamp())));
                         prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
-	            
+
                         //List Tags.
                         final Set<String> tags = bookmark.getTags();
                         int tagCount=0;
@@ -355,24 +354,29 @@ public class Bookmarks {
                     prop.put("display_prev-page_num", max_count);
 	       	}
 	       	prop.put("display_bookmarks", count);
-	    
-	    
+
+
 	    	//-----------------------
 	    	// create folder list
 	    	//-----------------------
-	       	
+
 	       	count = 0;
 	       	count = recurseFolders(BookmarkHelper.getFolderList("/", sb.bookmarksDB.getTagIterator(isAdmin)), "/", 0, true, "");
 	       	prop.put("display_folderlist", count);
     	}
        	return prop;    // return from serverObjects respond()
-    }    
-    
-    private static void printTagList(final String id, final String tagName, final int comp, final int max, final boolean opt){    	
-    	int count=0;
+    }
 
-    	final Iterator<BookmarksDB.Tag> it;
-    	
+    private static void printTagList(final String id, final String tagName, final int comp, final int max, final boolean opt){
+
+    	if (sb.bookmarksDB == null) {
+    	    prop.put("display_"+id, 0);
+    	    return;
+    	}
+
+    	int count=0;
+        final Iterator<BookmarksDB.Tag> it;
+
         if ("".equals(tagName)) {
             it = sb.bookmarksDB.getTagIterator(isAdmin, comp, max);
         } else {
@@ -398,11 +402,11 @@ public class Bookmarks {
                 count++;
             }
        	}
-       	prop.put("display_"+id, count);    	
+       	prop.put("display_"+id, count);
     }
-    
+
     private static int recurseFolders(final Iterator<String> it, String root, int count, final boolean next, final String prev) {
-    	
+
         final String fn = (next) ? it.next() : prev;
 
     	if("\uffff".equals(fn)) {
@@ -414,14 +418,14 @@ public class Bookmarks {
             }
             return count;
     	}
-   
+
     	if (fn.startsWith(("/".equals(root) ? root : root + "/"))) {
             prop.put("display_folderlist_"+count+"_folder", "<li>"+fn.replaceFirst(root+"/*","")+"<ul class=\"folder\">");
             count++;
             final Iterator<String> bit = sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
 
             while (bit.hasNext()) {
-                Bookmark bookmark=sb.bookmarksDB.getBookmark(bit.next());
+                final Bookmark bookmark=sb.bookmarksDB.getBookmark(bit.next());
     		if(bookmark == null) {
                     break;
                 }
@@ -433,7 +437,7 @@ public class Bookmarks {
                 count = recurseFolders(it, fn, count, true, fn);
             }
 
-    	} else {		
+    	} else {
             prop.put("display_folderlist_"+count+"_folder", "</ul></li>");
             count++;
             root = root.replaceAll("(/.[^/]*$)", "");
@@ -441,7 +445,7 @@ public class Bookmarks {
                 root = "/";
             }
             count = recurseFolders(it, root, count, false, fn);
-    	} 
+    	}
     	return count;
     }
 
@@ -453,7 +457,7 @@ public class Bookmarks {
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));
     	map.put("tags", tagsString.replace(',', ' '));
-    	sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map);
+    	sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_BOOKMARK_ADD, map);
     }
 
 }

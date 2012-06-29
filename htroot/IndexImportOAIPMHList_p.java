@@ -30,8 +30,8 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.importer.OAIPMHImporter;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

@@ -9,19 +9,58 @@
 				<legend>Import Bookmarks</legend>
 				<dl>
 					<dt>
-						<label for="importer">Importer:</label>
+						<label for="importer">Bookmark File Format:</label>
 					</dt>
 					<dd>
-						<select name="importer" id="importer">
-							<option value="xbel">XBEL Importer</option>
-							<option value="html">Netscape HTML Importer</option>
-						</select>
+					    <input type="radio" name="importer" value="html" /> Netscape HTML,
+					    <small>
+					    bookmark.htm (Firefox, IE, Safari, Opera) 
+					    </small>
+					    <br />
+					    <input type="radio" name="importer" value="json" /> Firefox JSON
+					    <br />
+					    <input type="radio" name="importer" value="xbel" /> XBEL, 
+					    <small>
+					    <a href="http://pyxml.sourceforge.net/topics/xbel/">
+					    XML Bookmark Exchange Language
+					    </a>
+					    </small>
+					    <br />
+					    <input type="radio" name="importer" value="surro" /> Surrogate Reader
 					</dd>
+					<br />
 					<dt>
 						<label for="file">File:</label>
 					</dt>
 					<dd>
 						<input type="file" name="bmkfile" id="bmkfile" />
+					</dd>
+					<br />
+					<dt>
+						<label for="root">Source Folder:</label>
+					</dt>
+					<dd>
+						<input type="text" name="source" id="source" value="" disabled="disabled" />
+					</dd>
+					<br />
+					<dt>
+						<label for="root">Target Folder:</label>
+					</dt>
+					<dd>
+						<input type="text" name="root" id="root" value="/Imported Bookmarks" />
+					</dd>
+					<br />
+					<dt>
+						<label for="autotag">Settings for automatic tagging:</label>
+					</dt>
+					<dd>
+					    <input type="radio" name="autotag" value="off" /> Off
+					    <br />
+					    <input type="radio" name="autotag" value="empty" /> Only for empty tags
+					    <br />
+					    <input type="radio" name="autotag" value="overwrite" /> Overwriting existing tags
+					    <br />
+					    <input type="radio" name="autotag" value="merge" /> Merging with existing tags
 					</dd>
 				</dl>
 				<input type="submit" name="importbookmarks" value="import" />

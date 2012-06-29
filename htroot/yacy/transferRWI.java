@@ -1,4 +1,4 @@
-// transferRWI.java 
+// transferRWI.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -30,32 +30,34 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.repository.Blacklist;
-
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.peers.EventChannel;
+import net.yacy.peers.Network;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
+import net.yacy.peers.dht.FlatWordPartitionScheme;
+import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segments;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyChannel;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
 public final class transferRWI {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
-        
+
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -64,7 +66,7 @@ public final class transferRWI {
             logWarning(contentType, "post or env is null!");
             return prop;
         }
-        if (!yacyNetwork.authentifyRequest(post, env)) {
+        if (!Protocol.authentifyRequest(post, env)) {
             logWarning(contentType, "not authentified");
             return prop;
         }
@@ -76,7 +78,7 @@ public final class transferRWI {
             logWarning(contentType, "missing entryc");
             return prop;
         }
-        
+
         // request values
         final String iam      = post.get("iam", "");                      // seed hash of requester
         final String youare   = post.get("youare", "");                   // seed hash of the target peer, needed for network stability
@@ -84,17 +86,17 @@ public final class transferRWI {
         final int wordc       = post.getInt("wordc", 0);                  // number of different words
         final int entryc      = post.getInt("entryc", 0);                 // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
-        boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
-        final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
+        boolean granted       = sb.getConfigBool("allowReceiveIndex", false);
+        final boolean blockBlacklist = sb.getConfigBool("indexReceiveBlockBlacklist", false);
         final long cachelimit = sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
-        final yacySeed otherPeer = sb.peers.get(iam);
-        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
-        
+        final Seed otherPeer = sb.peers.get(iam);
+        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
+
         // response values
         int pause = 0;
         String result = "ok";
         final StringBuilder unknownURLs = new StringBuilder(6000);
-        
+
         if ((youare == null) || (!youare.equals(sb.peers.mySeed().hash))) {
         	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.peers.mySeed().hash);
             result = "wrong_target";
@@ -132,8 +134,8 @@ public final class transferRWI {
             final long startProcess = System.currentTimeMillis();
 
             // decode request
-            System.out.println("STRINGS " + UTF8.String(indexes));
-            Iterator<String> it = FileUtils.strings(indexes);
+            //System.out.println("STRINGS " + UTF8.String(indexes));
+            final Iterator<String> it = FileUtils.strings(indexes);
 
             // free memory
             indexes = null;
@@ -150,41 +152,45 @@ public final class transferRWI {
             int received = 0;
             int blocked = 0;
             int receivedURL = 0;
+            final IndexCell<WordReference> cell = sb.indexSegments.termIndex(Segments.Process.DHTIN);
+            int count = 0;
             while (it.hasNext()) {
                 serverCore.checkInterruption();
                 estring = it.next();
-                
+                count++;
+                if (count > 1000) break; // protection against flooding
+
                 // check if RWI entry is well-formed
-                p = estring.indexOf('{');
-                if ((p < 0) || (estring.indexOf("x=") < 0) || !(estring.indexOf("[B@") < 0)) {
+                p = estring.indexOf('{',0);
+                if (p < 0 || estring.indexOf("x=",0) < 0 || !(estring.indexOf("[B@",0) < 0)) {
                     blocked++;
                     continue;
                 }
                 wordHash = estring.substring(0, p);
                 wordhashes.add(wordHash);
                 iEntry = new WordReferenceRow(estring.substring(p));
-                urlHash = iEntry.metadataHash();
-                
+                urlHash = iEntry.urlhash();
+
                 // block blacklisted entries
-                if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + UTF8.String(urlHash) + "' from peer " + otherPeerName);
+                if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(BlacklistType.DHT, urlHash))) {
+                    Network.log.logFine("transferRWI: blocked blacklisted URLHash '" + ASCII.String(urlHash) + "' from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }
-                
+
                 // check if the entry is in our network domain
                 final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomainHash(urlHash);
                 if (urlRejectReason != null) {
-                    yacyCore.log.logWarning("transferRWI: blocked URL hash '" + UTF8.String(urlHash) + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
+                    Network.log.logWarning("transferRWI: blocked URL hash '" + ASCII.String(urlHash) + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
                     //if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked URL hash '" + urlHash + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }
-                
+
                 // learn entry
                 try {
-                    sb.indexSegments.termIndex(Segments.Process.DHTIN).add(wordHash.getBytes(), iEntry);
-                } catch (Exception e) {
+                    cell.add(wordHash.getBytes(), iEntry);
+                } catch (final Exception e) {
                     Log.logException(e);
                 }
                 serverCore.checkInterruption();
@@ -200,14 +206,14 @@ public final class transferRWI {
                 } catch (final Exception ex) {
                     sb.getLog().logWarning(
                                 "transferRWI: DB-Error while trying to determine if URL with hash '" +
-                                UTF8.String(urlHash) + "' is known.", ex);
+                                ASCII.String(urlHash) + "' is known.", ex);
                 }
                 received++;
             }
             sb.peers.mySeed().incRI(received);
 
             // finally compose the unknownURL hash list
-            Iterator<byte[]> bit = unknownURL.iterator();  
+            final Iterator<byte[]> bit = unknownURL.iterator();
             unknownURLs.ensureCapacity(unknownURL.size() * 25);
             while (bit.hasNext()) {
                 unknownURLs.append(",").append(UTF8.String(bit.next()));
@@ -216,14 +222,14 @@ public final class transferRWI {
             if (wordhashes.isEmpty() || received == 0) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
-                String firstHash = wordhashes.get(0);
-                String lastHash = wordhashes.get(wordhashes.size() - 1);
+                final String firstHash = wordhashes.get(0);
+                final String lastHash = wordhashes.get(wordhashes.size() - 1);
                 final long avdist = (FlatWordPartitionScheme.std.dhtDistance(firstHash.getBytes(), null, sb.peers.mySeed()) + FlatWordPartitionScheme.std.dhtDistance(lastHash.getBytes(), null, sb.peers.mySeed())) / 2;
-                sb.getLog().logInfo("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "]/" + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName);
-                yacyChannel.channels(yacyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "]/" + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName, "", otherPeer.hash));
+                sb.getLog().logInfo("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName);
+                EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName, "", otherPeer.hash));
             }
             result = "ok";
-            
+
             pause = (int) (sb.indexSegments.termIndex(Segments.Process.DHTIN).getBufferSize() * 20000 / sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
         }
 

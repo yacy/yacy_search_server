@@ -750,6 +750,8 @@ Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Mein
 Manual System Update==Manuelle Systemaktualisierung
 Current installed Release==Aktuell installierte Version
 Available Releases==Verfügbare Versionen
+\(unsigned\)==(unsigniert)
+\(signed\)==(signiert)
 "Download Release"=="Version Herunterladen"
 "Check for new Release"=="Nach neuer Version suchen"
 Downloaded Releases==Heruntergeladene Versionen
@@ -936,7 +938,7 @@ Statistics about \#\[domains\]\# domains in this stack:==Statistiken über #[dom
 \(7\) Results from surrogates import==\(7\) Ergebnisse aus dem Surrogat Import
 These records had been imported from surrogate files in DATA/SURROGATES/in==Diese Datensätze wurden aus Surrogat Dateien in DATA/SURROGATES/in importiert
 <em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>Anwendungsfall:</em> Dateien mit Dublin Core Metadaten Inhalt in das DATA/SURROGATES/in kopieren oder eine der Index Import Funktionen nutzen
-\(i.e. <a href="/IndexImportWikimedia_p.html">wikimedia import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportWikimedia_p.html">WikiMedia Dump Import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
+\(i.e. <a href="/IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportMediawiki_p.html">MediaWiki Dump Import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
 #Domain==Domain
 #URLs=URLs
 "delete all"=="Alle Löschen"
@@ -1168,78 +1170,11 @@ The scheduler on crawls can be changed or removed using the <a href=\"Table_API_
 #File: Help.html
 #---------------------------
 YaCy: Help==YaCy: Hilfe
->Help==>Hilfe
-This is a distributed web crawler and also a caching HTTP proxy. You are using the <em>online-interface</em> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <em>global</em> index.==YaCy ist eine Suchmaschine,  die ähnlich dem Prinzip des verteilten Rechnens (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und Indexieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <em>Online-Interface</em> von YaCy. Sie können dieses Interface auch zum Konfigurieren Ihrer persönlichen Einstellungen, Proxy-Einstellungen, der Zugriffs-Kontrolle und den Crawl-Einstellungen benutzen. Sie können das Interface auch zum Starten von Crawls, Nachrichtenversand an andere YaCy-Nutzer und zur Überwachung Ihres Index, Cache-Status und des Crawl-Prozesses benutzen. Besonders wichtig ist, dass Sie die Suchseite benutzen können, um entweder den eigenen oder den <em>globalen</em> Index zu durchsuchen.
-For more detailed information, visit the==Für weitergehende Informationen besuchen Sie bitte die
-YaCy homepage==YaCy-Homepage
-Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
-The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die auf Ihren lokalen Index zugreift. Dieser setzt sich aus den Webseiten zusammen, die Sie mit dem Proxy besuchen.
-The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie können allerdings auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
-Search Word List==Suchwort Liste
-You can search for several words simultanous. Words must be separated by a single space.==Sie können eine Suche mit mehreren Wörtern gleichzeitig starten. Die Wörter müssen durch ein Leerzeichen getrennt sein.
-The words are treated conjunctive, that means every must occur in the result, not any.==
-If you do a global search \(see below\) you may get different results each time you do a search.==Wenn Sie eine globale Suche (siehe unten) durchführen, kann es sein, dass Sie bei wiederholten Suchanfragen jedesmal andere Ergebnisse erhalten.
-Maximum Number of Results==Maximale Anzahl an Ergebnissen
+Tutorial==Anleitung
+You are using the administration interface of your own search engine==Sie benutzen gerade das Administrationsinterface ihrer eigenen Suchmaschine
+You can create your own search index with YaCy==Sie können mit YaCy Ihren eigenen Suchindex erstellen
+To learn how to do that, watch one of the demonstration videos below==Bitte sehen Sie als Anleitung eine Demonstration (2. Video unten in deutscher Sprache)
 
-You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Sie können auswählen, wieviele Links Ihnen angezeigt werden sollen. Wir unterstützen im Moment keine mehrfachen Ergebnisseiten für jeden möglichen Link.
-Instead we encourage you to enhance the search result by submitting more search words.==Stattdessen möchten wir Sie dazu auffordern, Ihre Suchergebnisse durch das Eingeben von mehreren Suchwörtern, zu vergrößern.
-Result Order Options==Reihenfolge der Ergebnisse
-The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Die Suchmaschine bietet ein experimentelles 'Qualitäts' Ranking an. Im Gegensatz zu anderen üblichen Suchmaschinen bieten wir
-a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==auch die Sortierung nach Datum an. Wenn Sie die Reihenfolge in 'Datum-Qualität' ändern, werden die als letztes überarbeiteten Webseiten aus den Suchergebnissen ganz oben aufgelistet.
-For pages that have the same date the second order, 'Quality' is applied.==Für Seiten die das gleiche Datum haben, wird dann nach der 'Qualität' geordnet.
-Resource Domain==Quelle der Suche
-This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Diese Suchmaschine ist so aufgebaut, dass sie die Seiten durchsucht, die mit dem Proxy besucht wurden. Aber der Suchindex ist auch auf andere Peers verteilt,
-so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==so dass Sie auch global suchen können: diese Funktion ist veraltet, aber Sie können sie zum testen benutzen. Neue Versionen werden
-automatically distribute index information <em>before</em> a search happends to form a performant distributed hash table -- a very fast global search.==automatisch einen verteilten Index erstellen <em>bevor</em> es geschieht, dass eine Suche, eine verteilte Hash-Tabelle erstellt --  eine sehr schnelle globale Suche.
-Maximum Search Time==Maximale Zeit zum Suchen
-Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Den lokalen Index zu durchsuchen, geht extrem schnell. Es geschieht innerhalb von Millisekunden auch bei einer großen Anzahl (ein paar Millionen) von Seiten.
-global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==Im Gegensatz dazu braucht es mehr Zeit den globalen Index zu durchsuchen, da erst der richtige Peer, der die besten Ergbnisse liefern kann, gefunden werden muss. Dies ist vermutlich auch der Grund warum
-distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==diese Art von Suchmaschine noch in der Testphase ist. Die Suchergebnisse werden immer besser (eine wiederholte globale Suche bringt mehr gleiche Ergebnisse), je länger
-the search time is.==die Zeit zum Suchen ist.
-Accesskeys<==Schnell-Zugriffstasten<
-You may want to use accesskeys to navigate through the YaCy webinterface:==Sie können durch das YaCy Web Interface auch mit Hilfe von Tastenkombinationen navigieren. Drücken Sie dazu eine der folgenden Kombinationen ('Taste' steht für einen der drei unten genannten Buchstaben):
-Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows und Internet Explorer: Alt + Taste + Enter
-Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows und Mozilla/Firefox/Netscape: Alt + Taste
-Windows and Opera: Shift \+ Esc \+ Accesskey==Windows und Opera: Shift + Esc + Taste
-Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter==Macintosh und Internet Explorer: Str + Taste + Enter
-Macintosh and Safari: Strg \+ Accesskey==Macintosh und Safari: Strg + Taste
-Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh und Mozilla/Firefox/Netscape: Strg + Taste
-Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh und Opera: Shift + Esc + Taste
-Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake und Galeon/Mozilla: Alt + Taste
-All OS and Amaya: Strg \+ Accesskey==Alle OS Versionen und Amaya: Strg + Taste
-
-Search Page==Suchseite
-Network==Netzwerk
-Status==Status
-
-Regular Expressions<==Reguläre Ausdrücke<
-YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy benutzt reguläre Ausdrücke für einige Funktionen, z.B. die Blacklist.
-There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Es gibt einige Standards für diese Ausdrücke, YaCy orientiert sich an der Syntax von Perl 5.
-Here ist a short overview about the functions, which should fir for most cases\:<==Hier finden Sie einen kurzen Überblick über die Funktionen, die die meisten Anwendungsfälle abdecken sollten:<
-
-
-arbitrary character==beliebiges Zeichen
-character x==Zeichen x
-not x==nicht x
-0 or more times x==0 oder mehr Vorkommen von x
-0 or 1 time x==0 oder 1 Vorkommen von x
-1 or more times x==1 oder mehr Vorkommen von x
-concatenation of x and y==Verkettung von x und y
-x or y==x oder y
-String "foo" or string "bar"==String "foo" oder String "bar"
-a or b or c \(same as a\|b\|c\)==a oder b oder c (dasselbe wie a|b|c)
-a or b or c \(same as above\)==a oder b oder c (dasselbe wie oben)
-exactly n appearances of x==genau n Vorkommen von x
-at least n appearances of x==mindestens n Vorkommen von x
-at least n, maximum m appearanches of x==mindestens n, maximal m Vorkommen von m
-Modify priority of instructions==Priorität der Befehle ändern
-Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Escape-Zeichen, das benutzt wird, um Zeichen mit Sonderbedeutung (z.B. "[" oder "*"),  zu "escapen", d.h. ihre Sonderbedeutung verlieren.
-Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==Regex folgen Prioritäten (absteigend): Verkettung, unäre Operatore (*,+,^,{}), binäre Operatoren (|). Die Reihenfolge kann durch das Setzen von Klammern geändert werden.
-Example:==Beispiel:
-This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Dies erfüllt heise.de/ mit einem String davor, z.B. "http://www.". Es folgt ein beliebiger String, dann ein Slash und eine Zahl. Der Punkt in "heise.de" ist nicht escaped, weil der Punkt für ein beliebiges Zeichen steht, folglich auch für "." selbst.
-A possible URL which would match this regexp is\:==Eine URL, die den regulären Ausdruck erfüllen würde, ist:
-An URL which would not match is:==Eine URL die diese Regex nicht erfüllen würde ist:
-There is ".html" at the end, which is not included with the Regular Expression.==Hier ist ".html" am Ende angehängt, das nicht in der Regex enthalten ist.
 #-----------------------------
 
 #File: index.html
@@ -1255,6 +1190,7 @@ Applications==Anwendungen
 more options...==mehr Optionen...
 advanced parameters==erweiterte Parameter
 Max. number of results==Max. Anzahl der Ergebnisse
+Results per page==Ergebnisse pro Seite
 Resource==Quelle
 global==global
 >local==>lokal
@@ -1269,10 +1205,50 @@ show all==alle zeigen
 #überarbeiten!!!
 Prefer mask==Vorzugsmaske
 Constraints==Einschränkungen
-only index pages==Nur Index Seiten
+only index pages==Nur Index-Seiten
 "authentication required"=="Autorisierung erforderlich"
 Disable search function for users without authorization==Suchfunktion für Benutzer ohne Autorisierung sperren
 Enable web search to everyone==Suchfunktion für alle Nutzer erlauben
+the peer-to-peer network==Peer-to-Peer-Netzwerk
+only the local index==Nur lokaler Index
+Query Operators==Such-Operatoren
+restrictions==Restriktionen
+only urls with the &lt;phrase&gt; in the url==Nur URLs, welche &lt;phrase&gt; enthalten
+only urls with extension==Nur URLs mit der Dateinamenserweiterung
+only urls from host==Nur URLs vom Server
+only pages with as-author-anotated==Nur Seiten mit dem angegebenen Autor
+only pages from top-level-domains==Nur Seiten aus der Top-Level-Domain
+only resources from http or https servers==Nur Ressources auf HTTP- oder HTTPS-Servern
+only resources from ftp servers==Nur Ressourcen auf FTP-Servern
+they are rare==eher selten
+crawl them yourself==crawlen Sie sie selbst
+only resources from smb servers==Nur Ressourcen von SMB-Servern
+Intranet Indexing</a> must be selected==Intranet-Indexierung</a> muss ausgewählt sein
+only files from a local file system==Nur Dateien aus dem lokalen Dateisystem
+ranking modifier==Ranking-Modifizierung
+sort by date==Sortierung nach Datum
+latest first==Neuste zuerst
+multiple words shall appear near==Mehrere Wörter sollen nah zusammen stehen
+doublequotes==Anführungszeichen
+prefer given language==Angegebene Sprache bevorzugen
+an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
+heuristics==Heuristiken
+add search results from scroogle==Benutze zusätzliche Ergebnisse von Scroogle
+add search results from blekko==Benutze zusätzliche Ergebnisse von Blekko
+Search Navigation==Such-Navigation
+keyboard shotcuts==Tastatur-Kürzel
+tab or page-up==Tab oder Bild hoch
+next result page==Nächste Ergebnisseite
+page-down==Bild nach unten
+previous result page==Vorherige Ergebnisseite
+automatic result retrieval==Automatische Ergebnis-Abfrage
+browser integration==Browserintegration
+after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==Nach der Suche clicken Sie auf das Suchfeld Ihres Browsers und wählen Sie '"YaCy" hinzufügen'
+search as rss feed==Suche als RSS-Feed
+click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==Klicken Sie nach der Suche auf das rote Icon in der rechten oberen Ecke. Dies funktioniert gut mit dem '/date' Ranking-Modifizierer. Hier ein
+>example==>Beispiel
+json search results==JSON-Suchergebnisse
+for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Für AJAX-Entwickler: Rufen Sie den RSS-Feed auf und ersetzen Sie '.rss' durch '.json'
 #-----------------------------
 
 #File: IndexCleaner_p.html
@@ -1661,15 +1637,15 @@ The crawling queue==Der Crawler-Puffer
 Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zum Crawler-Puffer gehören
 #-----------------------------
 
-#File: IndexImportWikimedia_p.html
+#File: IndexImportMediawiki_p.html
 #---------------------------
-#Wikimedia Dump Import==Wikimedia Dump Import
+#MediaWiki Dump Import==MediaWiki Dump Import
 No import thread is running, you can start a new thread here==Sie können hier einen neuen Thread starten, da aktuell kein Import Thread läuft
 Bad input data:==Ungültige Eingabedaten:
-Wikimedia Dump File Selection: select a \'bz2\' file==Wikimedia Dump Datei Auswahl: Wähle eine 'bz2' Datei aus
-You can import Wikipedia dumps here. An example is the file==Hier können Sie Wikimedia Dumps importieren. Als Beispiel dient die Datei
-Dumps must be in XML format and must be encoded in bz2. Do not decompress the file after downloading!==Dumps müssen im XML Format vorliegen und bz2 komprimiert sein. Entpacken Sie die Datei nicht nach dem Herunterladen!
-"Import Wikimedia Dump"=="Importiere Wikimedia Dump"
+MediaWiki Dump File Selection: select a \'bz2\' file==MediaWiki Dump Datei Auswahl: Wähle eine 'bz2' Datei aus
+You can import MediaWiki dumps here. An example is the file==Hier können Sie MediaWiki Dumps importieren. Als Beispiel dient die Datei
+Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==Dumps müssen im XML Format vorliegen und bz2 komprimiert sein. Legen Sie die Datei im YaCy-Verzeichnis oder einem Unterordner ab.
+"Import MediaWiki Dump"=="Importiere MediaWiki Dump"
 When the import is started, the following happens:==Wenn der Import gestartet wird passiert Folgendes:
 The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Der Dump wird zur Laufzeit extrahiert und die Wiki Einträge werden in das Dublin Core Datenformat übersetzt. Die Ausgabe schaut wie folgt aus:
 Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Je 10000 Wiki Einträge werden zusammen in eine Ausgabedatei geschrieben und in /DATA/SURROGATES/in temporär gespeichert.
@@ -2054,6 +2030,8 @@ free space==freiem Speicher
 disable DHT-in below==Deaktivere eingehende DHT Transfers unter
 RAM==Arbeitsspeicher
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Änderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
+restart now</a>==jetzt neustarten</a>
+Confirm Restart==Bestätige Neustart
 refresh graph==aktualisiere Diagramm
 #show memory tables==Zeige Speicher-Tabellen
 Use Default Profile:==Standard Profil benutzen:
@@ -3199,6 +3177,8 @@ This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.
 The query format is similar to <a href=\"http://www.loc.gov/standards/sru/\">SRU</a>.==Das Abfrageformat ist ähnlich dem <a href="http://www.loc.gov/standards/sru/">SRU</a>.
 Click the API icon to see an example call to the search rss API.==Klicken Sie auf das API Symbol, um einen Beispielaufruf der RSS Such API zu sehen.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+loading from local index...==lädt aus lokalem Index...
+e="Search"==e="Suchen"
 #-----------------------------
 
 #File: yacysearch.html
@@ -3275,6 +3255,9 @@ Table Viewer==Tabellen Betrachter
 #---------------------------
 YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
 ### SEARCH & BROWSE ###
+>Search==>Suche
+Web Search==Web-Suche
+File Search==Datei-Suche
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
 Search Page==Suchseite
 Rich Client Search==Rich Client Suche
@@ -3282,10 +3265,11 @@ Interactive local Search==Interaktive lokale Suche
 Compare Search==Vergleichs-Suche
 Ranking Config==Ranking Einstellungen
 >Surftips==>Surftipps
-Publication==Veröffentlichung
+Local Peer Wiki==Lokales Wiki
 >Bookmarks==>Lesezeichen
 >Help==>Hilfe
 ### INDEX CONTROL ###
+Index&nbsp;Production==Indexerzeugung
 Index&nbsp;Control==Index&nbsp;Kontrolle
 Index Creation==Indexerzeugung
 Crawler Monitor==Crawler Überwachung
@@ -3379,7 +3363,7 @@ Advanced Properties==Erweiterte Konfiguration
 #---------------------------
 External Content Integration==Integration von externen Inhalten
 Import phpBB3 forum==Importiere phpBB3 Forum
-Import Wikimedia dumps==Importiere Wikimedia Dumps
+Import Mediawiki dumps==Importiere Mediawiki Dumps
 Import OAI-PMH Sources==Importiere OAI-PMH Quellen
 #-----------------------------
 
@@ -3395,7 +3379,7 @@ Outgoing&nbsp;Cookies==Ausgehende Cookies
 Processing Monitor==Prozess Monitor
 Crawler Queues==Crawler Puffer
 Loader<==Lade Puffer<
-Parser Errors==Parser Fehler
+Rejected URLs==Abgelehnte URLs
 >Queues<==>Warteschlangen<
 Local<==Lokal<
 #Global==Global
@@ -3449,7 +3433,7 @@ Crawl Start<br/>\(Expert\)==Crawl Start<br/>(Experte)
 Network<br/>Scanner==Netzwerk<br/>Scanner
 #>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
 Crawling of==Crawlen von
-#Media Wikis==Media Wikis
+#MediaWikis==MediaWikis
 >phpBB3 Forums<==>phpBB3 Foren<
 Content Import<==Content Importer<
 Network Harvesting<==Netzwerk Harvesting<
@@ -3458,7 +3442,7 @@ Network Harvesting<==Netzwerk Harvesting<
 Database Reader<==Datenbank Leser<
 for phpBB3 Forums==für phpBB3 Foren
 Dump Reader for==Dump Leser für
-#Wikimedia dumps==Wikimedia dumps
+#MediaWiki dumps==MediaWiki dumps
 #-----------------------------
 
 #File: env/templates/submenuPortalIntegration.template

@@ -1,4 +1,4 @@
-// serverFileUtils.java 
+// serverFileUtils.java
 // -------------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -32,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -46,6 +47,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -55,165 +57,210 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.storage.Files;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
 
-
-public final class FileUtils {
+public final class FileUtils
+{
 
     private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
-    
+
     public static long copy(final InputStream source, final OutputStream dest) throws IOException {
         return copy(source, dest, -1);
     }
-    
+
     /**
      * Copies an InputStream to an OutputStream.
-     * 
+     *
      * @param source InputStream
      * @param dest OutputStream
      * @param count the total amount of bytes to copy (-1 for all, else must be greater than zero)
      * @return Total number of bytes copied.
-     * @throws IOException 
-     * 
+     * @throws IOException
      * @see #copy(InputStream source, File dest)
      * @see #copyRange(File source, OutputStream dest, int start)
      * @see #copy(File source, OutputStream dest)
      * @see #copy(File source, File dest)
      */
-    public static long copy(final InputStream source, final OutputStream dest, final long count) throws IOException {
+    public static long copy(final InputStream source, final OutputStream dest, final long count)
+        throws IOException {
         assert count < 0 || count > 0 : "precondition violated: count == " + count + " (nothing to copy)";
-        if (count == 0) {
+        if ( count == 0 ) {
             // no bytes to copy
             return 0;
         }
-        
-        final byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];                
+
+        final byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         int chunkSize = (int) ((count > 0) ? Math.min(count, DEFAULT_BUFFER_SIZE) : DEFAULT_BUFFER_SIZE);
-        
-        int c; long total = 0;
-        while ((c = source.read(buffer, 0, chunkSize)) > 0) {
+
+        int c;
+        long total = 0;
+        while ( (c = source.read(buffer, 0, chunkSize)) > 0 ) {
             dest.write(buffer, 0, c);
             dest.flush();
             total += c;
-            
-            if (count > 0) {
-                chunkSize = (int) Math.min(count - total, DEFAULT_BUFFER_SIZE);
-                if (chunkSize == 0) break;
+
+            if ( count > 0 && count == total) {
+                break;
             }
-            
+
         }
         dest.flush();
-        
+
         return total;
     }
-    
-    public static int copy(final File source, final Charset inputCharset, final Writer dest) throws IOException {
+
+    public static int copy(final File source, final Charset inputCharset, final Writer dest)
+        throws IOException {
         InputStream fis = null;
         try {
             fis = new FileInputStream(source);
             return copy(fis, dest, inputCharset);
         } finally {
-            if (fis != null) try { fis.close(); } catch (final Exception e) {}
+            if ( fis != null ) {
+                try {
+                    fis.close();
+                } catch (Exception e ) {
+                }
+            }
         }
-    }    
-    
+    }
+
     public static int copy(final InputStream source, final Writer dest) throws IOException {
         final InputStreamReader reader = new InputStreamReader(source);
-        return copy(reader,dest);
+        return copy(reader, dest);
     }
-    
-    public static int copy(final InputStream source, final Writer dest, final Charset inputCharset) throws IOException {
-        final InputStreamReader reader = new InputStreamReader(source,inputCharset);
-        return copy(reader,dest);
+
+    public static int copy(final InputStream source, final Writer dest, final Charset inputCharset)
+        throws IOException {
+        final InputStreamReader reader = new InputStreamReader(source, inputCharset);
+        return copy(reader, dest);
     }
-    
+
     public static int copy(final String source, final Writer dest) throws IOException {
         dest.write(source);
         dest.flush();
         return source.length();
     }
-    
-    public static int copy(final Reader source, final Writer dest) throws IOException {        
+
+    public static int copy(final Reader source, final Writer dest) throws IOException {
+        assert source != null;
+        assert dest != null;
+        if ( source == null ) {
+            throw new IOException("source is null");
+        }
+        if ( dest == null ) {
+            throw new IOException("dest is null");
+        }
         final char[] buffer = new char[DEFAULT_BUFFER_SIZE];
         int count = 0;
         int n = 0;
         try {
-            while (-1 != (n = source.read(buffer))) {
+            while ( -1 != (n = source.read(buffer)) ) {
                 dest.write(buffer, 0, n);
                 count += n;
             }
             dest.flush();
-        } catch (final Exception e) {
+        } catch ( final Exception e ) {
+            assert e != null;
             // an "sun.io.MalformedInputException: Missing byte-order mark" - exception may occur here
-            throw new IOException(e.getMessage());
+            //Log.logException(e);
+            throw new IOException(
+                e == null ? "null" : e.getMessage() == null ? e.toString() : e.getMessage(),
+                e);
         }
         return count;
     }
-    
+
     public static void copy(final InputStream source, final File dest) throws IOException {
-        copy(source,dest,-1);
+        copy(source, dest, -1);
     }
-    
+
     /**
      * Copies an InputStream to a File.
-     * 
-     * @param source    InputStream
-     * @param dest    File
+     *
+     * @param source InputStream
+     * @param dest File
      * @param count the amount of bytes to copy
-     * @throws IOException 
+     * @throws IOException
      * @see #copy(InputStream source, OutputStream dest)
      * @see #copyRange(File source, OutputStream dest, int start)
      * @see #copy(File source, OutputStream dest)
      * @see #copy(File source, File dest)
      */
     public static void copy(final InputStream source, final File dest, final long count) throws IOException {
-        String path = dest.getParent();
-        if (path != null && path.length() > 0) new File(path).mkdirs();
+        final String path = dest.getParent();
+        if ( path != null && path.length() > 0 ) {
+            new File(path).mkdirs();
+        }
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(dest);
             copy(source, fos, count);
         } finally {
-            if (fos != null) try {fos.close();} catch (final Exception e) { Log.logWarning("FileUtils", "cannot close FileOutputStream for "+ dest +"! "+ e.getMessage()); }
+            if ( fos != null ) {
+                try {
+                    fos.close();
+                } catch ( final Exception e ) {
+                    Log.logWarning(
+                        "FileUtils",
+                        "cannot close FileOutputStream for " + dest + "! " + e.getMessage());
+                }
+            }
         }
     }
 
     /**
      * Copies a part of a File to an OutputStream.
-     * @param source    File
-     * @param dest    OutputStream
+     *
+     * @param source File
+     * @param dest OutputStream
      * @param start Number of bytes to skip from the beginning of the File
-     * @throws IOException 
+     * @throws IOException
      * @see #copy(InputStream source, OutputStream dest)
      * @see #copy(InputStream source, File dest)
      * @see #copy(File source, OutputStream dest)
      * @see #copy(File source, File dest)
      */
-    public static void copyRange(final File source, final OutputStream dest, final int start) throws IOException {
+    public static void copyRange(final File source, final OutputStream dest, final int start)
+        throws IOException {
         InputStream fis = null;
         try {
             fis = new FileInputStream(source);
             final long skipped = fis.skip(start);
-            if (skipped != start) throw new IllegalStateException("Unable to skip '" + start + "' bytes. Only '" + skipped + "' bytes skipped.");
+            if ( skipped != start ) {
+                throw new IllegalStateException("Unable to skip '"
+                    + start
+                    + "' bytes. Only '"
+                    + skipped
+                    + "' bytes skipped.");
+            }
             copy(fis, dest, -1);
         } finally {
-            if (fis != null) try { fis.close(); } catch (final Exception e) {}
+            if ( fis != null ) {
+                try {
+                    fis.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
     }
 
     /**
      * Copies a File to an OutputStream.
-     * @param source    File
-     * @param dest    OutputStream
-     * @throws IOException 
+     *
+     * @param source File
+     * @param dest OutputStream
+     * @throws IOException
      * @see #copy(InputStream source, OutputStream dest)
      * @see #copy(InputStream source, File dest)
      * @see #copyRange(File source, OutputStream dest, int start)
@@ -225,31 +272,12 @@ public final class FileUtils {
             fis = new FileInputStream(source);
             copy(fis, dest, -1);
         } finally {
-            if (fis != null) try { fis.close(); } catch (final Exception e) {}
-        }
-    }
-
-    /**
-     * Copies a File to a File.
-     * @param source    File
-     * @param dest    File
-     * @param count the amount of bytes to copy
-     * @throws IOException 
-     * @see #copy(InputStream source, OutputStream dest)
-     * @see #copy(InputStream source, File dest)
-     * @see #copyRange(File source, OutputStream dest, int start)
-     * @see #copy(File source, OutputStream dest)
-     */
-    public static void copy(final File source, final File dest) throws IOException {
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-        try {
-            fis = new FileInputStream(source);
-            fos = new FileOutputStream(dest);
-            copy(fis, fos, -1);
-        } finally {
-            if (fis != null) try {fis.close();} catch (final Exception e) {}
-            if (fos != null) try {fos.close();} catch (final Exception e) {}
+            if ( fis != null ) {
+                try {
+                    fis.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
     }
 
@@ -257,24 +285,24 @@ public final class FileUtils {
         dest.write(source, 0, source.length);
         dest.flush();
     }
-    
+
     public static void copy(final byte[] source, final File dest) throws IOException {
         copy(new ByteArrayInputStream(source), dest);
     }
 
     public static byte[] read(final InputStream source) throws IOException {
-        return read(source,-1);
+        return read(source, -1);
     }
-    
+
     public static byte[] read(final InputStream source, final int count) throws IOException {
-        if (count > 0) {
-            byte[] b = new byte[count];
-            int c = source.read(b, 0, count);
-            assert c == count: "count = " + count + ", c = " + c;
-            if (c != count) {
-            	byte[] bb = new byte[c];
-            	System.arraycopy(b, 0, bb, 0, c);
-            	return bb;
+        if ( count > 0 ) {
+            final byte[] b = new byte[count];
+            final int c = source.read(b, 0, count);
+            assert c == count : "count = " + count + ", c = " + c;
+            if ( c != count ) {
+                final byte[] bb = new byte[c];
+                System.arraycopy(b, 0, bb, 0, c);
+                return bb;
             }
             return b;
         }
@@ -290,9 +318,16 @@ public final class FileUtils {
         try {
             fis = new FileInputStream(source);
             int p = 0, c;
-            while ((c = fis.read(buffer, p, buffer.length - p)) > 0) p += c;
+            while ( (c = fis.read(buffer, p, buffer.length - p)) > 0 ) {
+                p += c;
+            }
         } finally {
-            if (fis != null) try { fis.close(); } catch (final Exception e) {}
+            if ( fis != null ) {
+                try {
+                    fis.close();
+                } catch ( final Exception e ) {
+                }
+            }
             fis = null;
         }
         return buffer;
@@ -302,14 +337,24 @@ public final class FileUtils {
         ByteArrayOutputStream byteOut = null;
         GZIPOutputStream zipOut = null;
         try {
-            byteOut = new ByteArrayOutputStream((int)(source.length()/2));
+            byteOut = new ByteArrayOutputStream((int) (source.length() / 2));
             zipOut = new GZIPOutputStream(byteOut);
             copy(source, zipOut);
             zipOut.close();
             return byteOut.toByteArray();
         } finally {
-            if (zipOut != null) try { zipOut.close(); } catch (final Exception e) {}
-            if (byteOut != null) try { byteOut.close(); } catch (final Exception e) {}
+            if ( zipOut != null ) {
+                try {
+                    zipOut.close();
+                } catch ( final Exception e ) {
+                }
+            }
+            if ( byteOut != null ) {
+                try {
+                    byteOut.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
     }
 
@@ -319,7 +364,12 @@ public final class FileUtils {
             fos = new FileOutputStream(dest);
             writeAndGZip(source, fos);
         } finally {
-            if (fos != null) try {fos.close();} catch (final Exception e) {}
+            if ( fos != null ) {
+                try {
+                    fos.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
     }
 
@@ -330,29 +380,37 @@ public final class FileUtils {
             copy(source, zipOut);
             zipOut.close();
         } finally {
-            if (zipOut != null) try { zipOut.close(); } catch (final Exception e) {}
+            if ( zipOut != null ) {
+                try {
+                    zipOut.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
     }
-    
+
     /**
      * This function determines if a byte array is gzip compressed and uncompress it
+     *
      * @param source properly gzip compressed byte array
      * @return uncompressed byte array
      * @throws IOException
      */
     public static byte[] uncompressGZipArray(byte[] source) throws IOException {
-    	if (source == null) return null;
-    	
+        if ( source == null ) {
+            return null;
+        }
+
         // support of gzipped data (requested by roland)
-		/* "Bitwise OR of signed byte value
-		 * 
-		 * [...] Values loaded from a byte array are sign extended to 32 bits before
-		 * any any bitwise operations are performed on the value. Thus, if b[0]
-		 * contains the value 0xff, and x is initially 0, then the code ((x <<
-		 * 8) | b[0]) will sign extend 0xff to get 0xffffffff, and thus give the
-		 * value 0xffffffff as the result. [...]" findbugs description of BIT_IOR_OF_SIGNED_BYTE
-		 */
-        if ((source.length > 1) && (((source[1] << 8) | (source[0] & 0xff)) == GZIPInputStream.GZIP_MAGIC)) {
+        /* "Bitwise OR of signed byte value
+         *
+         * [...] Values loaded from a byte array are sign extended to 32 bits before
+         * any any bitwise operations are performed on the value. Thus, if b[0]
+         * contains the value 0xff, and x is initially 0, then the code ((x <<
+         * 8) | b[0]) will sign extend 0xff to get 0xffffffff, and thus give the
+         * value 0xffffffff as the result. [...]" findbugs description of BIT_IOR_OF_SIGNED_BYTE
+         */
+        if ( (source.length > 1) && (((source[1] << 8) | (source[0] & 0xff)) == GZIPInputStream.GZIP_MAGIC) ) {
             System.out.println("DEBUG: uncompressGZipArray - uncompressing source");
             try {
                 final ByteArrayInputStream byteInput = new ByteArrayInputStream(source);
@@ -360,22 +418,22 @@ public final class FileUtils {
                 final GZIPInputStream zippedContent = new GZIPInputStream(byteInput);
                 final byte[] data = new byte[1024];
                 int read = 0;
-                
+
                 // reading gzip file and store it uncompressed
-                while((read = zippedContent.read(data, 0, 1024)) != -1) {
+                while ( (read = zippedContent.read(data, 0, 1024)) != -1 ) {
                     byteOutput.write(data, 0, read);
                 }
                 zippedContent.close();
-                byteOutput.close();   
-                
+                byteOutput.close();
+
                 source = byteOutput.toByteArray();
-            } catch (final Exception e) {
-                if (!e.getMessage().equals("Not in GZIP format")) {
+            } catch ( final Exception e ) {
+                if ( !e.getMessage().equals("Not in GZIP format") ) {
                     throw new IOException(e.getMessage());
                 }
             }
-        }    
-        
+        }
+
         return source;
     }
 
@@ -385,14 +443,21 @@ public final class FileUtils {
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String line;
-            while ((line = br.readLine()) != null) {
+            while ( (line = br.readLine()) != null ) {
                 line = line.trim();
-                if (line.length() > 0 && line.charAt(0) != '#') set.add(line.trim().toLowerCase());
+                if ( line.length() > 0 && line.charAt(0) != '#' ) {
+                    set.add(line.trim().toLowerCase());
+                }
             }
             br.close();
-        } catch (final IOException e) {
+        } catch ( final IOException e ) {
         } finally {
-            if (br != null) try { br.close(); } catch (final Exception e) {}
+            if ( br != null ) {
+                try {
+                    br.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
         return set;
     }
@@ -402,177 +467,235 @@ public final class FileUtils {
         try {
             final byte[] b = read(f);
             return table(strings(b));
-        } catch (final IOException e2) {
+        } catch ( final IOException e2 ) {
             Log.logSevere("FileUtils", f.toString() + " not found", e2);
             return null;
         }
     }
-    
-    public static void saveMap(final File file, final Map<String, String> props, final String comment) throws IOException {
-        PrintWriter pw = null;
-        final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
-        pw = new PrintWriter(tf, "UTF-8");
-        pw.println("# " + comment);
-        String key, value;
-        for (final Map.Entry<String, String> entry: props.entrySet()) {
-            key = entry.getKey();
-            if (key != null)
-            	key = key.replace("\\", "\\\\").replace("\n", "\\n").replace("=", "\\=");
-            if (entry.getValue() == null) {
-                value = "";
-            } else {
-                value = entry.getValue().replace("\\", "\\\\").replace("\n", "\\n");
-            }
-            pw.println(key + "=" + value);
-        }
-        pw.println("# EOF");
-        pw.close();
-        forceMove(tf, file);
+
+    public static ConcurrentHashMap<String, byte[]> loadMapB(final File f) {
+        ConcurrentHashMap<String, String> m = loadMap(f);
+        if (m == null) return null;
+        ConcurrentHashMap<String, byte[]> mb = new ConcurrentHashMap<String, byte[]>();
+        for (Map.Entry<String, String> e: m.entrySet()) mb.put(e.getKey(), UTF8.getBytes(e.getValue()));
+        return mb;
     }
 
-    public static Set<String> loadSet(final File file, final int chunksize, final boolean tree) throws IOException {
-        final Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
+    public static void saveMap(final File file, final Map<String, String> props, final String comment) {
+        PrintWriter pw = null;
+        final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
+        try {
+            pw = new PrintWriter(tf, "UTF-8");
+            pw.println("# " + comment);
+            String key, value;
+            for ( final Map.Entry<String, String> entry : props.entrySet() ) {
+                key = entry.getKey();
+                if ( key != null ) {
+                    key = key.replace("\\", "\\\\").replace("\n", "\\n").replace("=", "\\=");
+                }
+                if ( entry.getValue() == null ) {
+                    value = "";
+                } else {
+                    value = entry.getValue().replace("\\", "\\\\").replace("\n", "\\n");
+                }
+                pw.println(key + "=" + value);
+            }
+            pw.println("# EOF");
+        } catch ( FileNotFoundException e ) {
+            Log.logWarning("FileUtils", e.getMessage(), e);
+        } catch ( UnsupportedEncodingException e ) {
+            Log.logWarning("FileUtils", e.getMessage(), e);
+        } finally {
+            if ( pw != null ) {
+                pw.close();
+            }
+            pw = null;
+        }
+        try {
+            forceMove(tf, file);
+        } catch ( IOException e ) {
+            // ignore
+        }
+    }
+
+    public static void saveMapB(final File file, final Map<String, byte[]> props, final String comment) {
+        HashMap<String, String> m = new HashMap<String, String>();
+        for (Map.Entry<String, byte[]> e: props.entrySet()) m.put(e.getKey(), UTF8.String(e.getValue()));
+        saveMap(file, m, comment);
+    }
+
+    public static Set<String> loadSet(final File file, final int chunksize, final boolean tree)
+        throws IOException {
+        final Set<String> set =
+            (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
         final byte[] b = read(file);
-        for (int i = 0; (i + chunksize) <= b.length; i++) {
+        for ( int i = 0; (i + chunksize) <= b.length; i++ ) {
             set.add(UTF8.String(b, i, chunksize));
         }
         return set;
     }
 
-    public static Set<String> loadSet(final File file, final String sep, final boolean tree) throws IOException {
-        final Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
+    public static Set<String> loadSet(final File file, final String sep, final boolean tree)
+        throws IOException {
+        final Set<String> set =
+            (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
         final byte[] b = read(file);
         final StringTokenizer st = new StringTokenizer(UTF8.String(b), sep);
-        while (st.hasMoreTokens()) {
+        while ( st.hasMoreTokens() ) {
             set.add(st.nextToken());
         }
         return set;
     }
 
-    public static void saveSet(final File file, final String format, final Set<byte[]> set, final String sep) throws IOException {
+    public static void saveSet(final File file, final String format, final Set<byte[]> set, final String sep)
+        throws IOException {
         final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
-        if ((format == null) || (format.equals("plain"))) {
+        if ( (format == null) || (format.equals("plain")) ) {
             os = new BufferedOutputStream(new FileOutputStream(tf));
-        } else if (format.equals("gzip")) {
+        } else if ( format.equals("gzip") ) {
             os = new GZIPOutputStream(new FileOutputStream(tf));
-        } else if (format.equals("zip")) {
+        } else if ( format.equals("zip") ) {
             final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
             String name = file.getName();
-            if (name.endsWith(".zip")) name = name.substring(0, name.length() - 4);
+            if ( name.endsWith(".zip") ) {
+                name = name.substring(0, name.length() - 4);
+            }
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        if(os != null) {
-            for (final Iterator<byte[]> i = set.iterator(); i.hasNext(); ) {
-                os.write(i.next());
-                if (sep != null) os.write(sep.getBytes("UTF-8"));
+        if ( os != null ) {
+            for ( final byte[] b : set ) {
+                os.write(b);
+                if ( sep != null ) {
+                    os.write(UTF8.getBytes(sep));
+                }
             }
             os.close();
         }
         forceMove(tf, file);
     }
 
-    public static void saveSet(final File file, final String format, final RowSet set, final String sep) throws IOException {
+    public static void saveSet(final File file, final String format, final RowSet set, final String sep)
+        throws IOException {
         final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
-        if ((format == null) || (format.equals("plain"))) {
+        if ( (format == null) || (format.equals("plain")) ) {
             os = new BufferedOutputStream(new FileOutputStream(tf));
-        } else if (format.equals("gzip")) {
+        } else if ( format.equals("gzip") ) {
             os = new GZIPOutputStream(new FileOutputStream(tf));
-        } else if (format.equals("zip")) {
+        } else if ( format.equals("zip") ) {
             final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
             String name = file.getName();
-            if (name.endsWith(".zip")) name = name.substring(0, name.length() - 4);
+            if ( name.endsWith(".zip") ) {
+                name = name.substring(0, name.length() - 4);
+            }
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        if (os != null) {
+        if ( os != null ) {
             final Iterator<Row.Entry> i = set.iterator();
-            String key;
-            if (i.hasNext()) {
-                key = UTF8.String(i.next().getPrimaryKeyBytes());
-                os.write(key.getBytes("UTF-8"));
+            if ( i.hasNext() ) {
+                os.write(i.next().getPrimaryKeyBytes());
             }
-            while (i.hasNext()) {
-                key = UTF8.String(i.next().getPrimaryKeyBytes());
-                if (sep != null) os.write(sep.getBytes("UTF-8"));
-                os.write(key.getBytes("UTF-8"));
+            while ( i.hasNext() ) {
+                if ( sep != null ) {
+                    os.write(UTF8.getBytes(sep));
+                }
+                os.write(i.next().getPrimaryKeyBytes());
             }
             os.close();
         }
         forceMove(tf, file);
     }
 
-    public static ConcurrentHashMap<String, String> table(Reader r) {
-    	BufferedReader br = new BufferedReader(r);
-    	return table(new StringsIterator(br));
-	}
-    
-    public static ConcurrentHashMap<String, String> table(Iterator<String> li) {
-    	String line;
-    	final ConcurrentHashMap<String, String> props = new ConcurrentHashMap<String, String>();
-    	while (li.hasNext()) {
-        	int pos = 0;
-    		line = li.next().trim();
-    		if (line.length() > 0 && line.charAt(0) == '#') continue; // exclude comments
-    		do {
-    			// search for unescaped =
-    			pos = line.indexOf('=', pos+1);
-    		} while ( pos > 0 && line.charAt(pos-1) == '\\');
-    		if (pos > 0) {
-    			String key = line.substring(0, pos).trim().replace("\\=", "=").replace("\\n", "\n").replace("\\", "\\");
-    			String value = line.substring(pos + 1).trim().replace("\\n", "\n").replace("\\\\", "\\");
-        		props.put(key, value);
-    		}
-    	}
-    	return props;
-	}
-    
+    public static ConcurrentHashMap<String, String> table(final Reader r) {
+        final BufferedReader br = new BufferedReader(r);
+        return table(new StringsIterator(br));
+    }
+
+    private final static Pattern escaped_equal = Pattern.compile("\\=", Pattern.LITERAL);
+    private final static Pattern escaped_newline = Pattern.compile("\\n", Pattern.LITERAL);
+    private final static Pattern escaped_backslash = Pattern.compile("\\", Pattern.LITERAL);
+
+    //private final static Pattern escaped_backslashbackslash = Pattern.compile("\\\\", Pattern.LITERAL);
+
+    public static ConcurrentHashMap<String, String> table(final Iterator<String> li) {
+        String line;
+        final ConcurrentHashMap<String, String> props = new ConcurrentHashMap<String, String>();
+        while ( li.hasNext() ) {
+            int pos = 0;
+            line = li.next().trim();
+            if ( line.length() > 0 && line.charAt(0) == '#' ) {
+                continue; // exclude comments
+            }
+            do {
+                // search for unescaped =
+                pos = line.indexOf('=', pos + 1);
+            } while ( pos > 0 && line.charAt(pos - 1) == '\\' );
+            if ( pos > 0 ) {
+                String key = escaped_equal.matcher(line.substring(0, pos).trim()).replaceAll("=");
+                key = escaped_newline.matcher(key).replaceAll("\n");
+                key = escaped_backslash.matcher(key).replaceAll("\\");
+                String value = escaped_newline.matcher(line.substring(pos + 1).trim()).replaceAll("\n");
+                value = value.replace("\\\\", "\\"); // does not work: escaped_backslashbackslash.matcher(value).replaceAll("\\");
+                //System.out.println("key = " + key + ", value = " + value);
+                props.put(key, value);
+            }
+        }
+        return props;
+    }
+
     public static Map<String, String> table(final byte[] a) {
+        if (a == null) return new ConcurrentHashMap<String, String>();
+        //System.out.println("***TABLE: a.size = " + a.length);
         return table(strings(a));
     }
 
-    public static Iterator<String> strings(byte[] a) {
-        if (a == null) return new ArrayList<String>().iterator();
+    public static Iterator<String> strings(final byte[] a) {
+        if ( a == null ) {
+            return new ArrayList<String>().iterator();
+        }
         try {
             return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), "UTF-8")));
-        } catch (UnsupportedEncodingException e) {
+        } catch ( final UnsupportedEncodingException e ) {
             return null;
         }
     }
-    
 
     /**
      * Read lines of a file into an ArrayList.
-     * 
+     *
      * @param listFile the file
      * @return the resulting array as an ArrayList
      */
-    public static ArrayList<String> getListArray(final File listFile){
+    public static ArrayList<String> getListArray(final File listFile) {
         String line;
         final ArrayList<String> list = new ArrayList<String>();
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile),"UTF-8"));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile), "UTF-8"));
 
-            while((line = br.readLine()) != null){
+            while ( (line = br.readLine()) != null ) {
                 list.add(line);
             }
             br.close();
-        } catch(final IOException e) {
+        } catch ( final IOException e ) {
             // list is empty
         } finally {
-            if (br!=null) try { br.close(); } catch (final Exception e) {}
+            if ( br != null ) {
+                try {
+                    br.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
         return list;
     }
-    
-
 
     /**
      * Write a String to a file (used for string representation of lists).
-     * 
+     *
      * @param listFile the file to write to
      * @param out the String to write
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
@@ -584,10 +707,15 @@ public final class FileUtils {
             bw.write(out);
             bw.close();
             return true;
-        } catch(final IOException e) {
+        } catch ( final IOException e ) {
             return false;
         } finally {
-            if (bw!=null) try { bw.close(); } catch (final Exception e) {}
+            if ( bw != null ) {
+                try {
+                    bw.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
     }
 
@@ -596,32 +724,39 @@ public final class FileUtils {
 
     /**
      * Read lines of a text file into a String, optionally ignoring comments.
-     * 
+     *
      * @param listFile the File to read from.
      * @param withcomments If <code>false</code> ignore lines starting with '#'.
      * @return String representation of the file content.
      */
-    public static String getListString(final File listFile, final boolean withcomments){
+    public static String getListString(final File listFile, final boolean withcomments) {
         final StringBuilder temp = new StringBuilder(300);
-        
-        BufferedReader br = null;        
-        try{
+
+        BufferedReader br = null;
+        try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile)));
             temp.ensureCapacity((int) listFile.length());
-            
+
             // Read the List
             String line = "";
-            while ((line = br.readLine()) != null) {
-                if (line.length() == 0) continue;
-                if (line.charAt(0) != '#' || withcomments) {
+            while ( (line = br.readLine()) != null ) {
+                if ( line.length() == 0 ) {
+                    continue;
+                }
+                if ( line.charAt(0) != '#' || withcomments ) {
                     //temp += line + serverCore.CRLF_STRING;
                     temp.append(line).append(CR).append(LF);
                 }
             }
             br.close();
-        } catch (final IOException e) {
+        } catch ( final IOException e ) {
         } finally {
-            if (br!=null) try { br.close(); } catch (final Exception e) {}
+            if ( br != null ) {
+                try {
+                    br.close();
+                } catch ( final Exception e ) {
+                }
+            }
         }
 
         return new String(temp);
@@ -629,21 +764,20 @@ public final class FileUtils {
 
     /**
      * Read content of a directory into a String array of file names.
-     * @param dirname The directory to get the file listing from. If it doesn't exist yet,
-     * it will be created.
+     *
+     * @param dirname The directory to get the file listing from. If it doesn't exist yet, it will be created.
      * @return array of file names
      */
-    public static List<String> getDirListing(final String dirname){
+    public static List<String> getDirListing(final String dirname) {
         return getDirListing(dirname, null);
     }
-    
+
     /**
      * Read content of a directory into a String array of file names.
-     * @param dirname The directory to get the file listing from. If it doesn't exist yet,
-     * it will be created.
-     * @param filter String which contains a regular expression which has to be matched by
-     * file names in order to appear in returned array. All file names will be returned if
-     * filter is null.
+     *
+     * @param dirname The directory to get the file listing from. If it doesn't exist yet, it will be created.
+     * @param filter String which contains a regular expression which has to be matched by file names in order
+     *        to appear in returned array. All file names will be returned if filter is null.
      * @return array of file names
      */
     public static List<String> getDirListing(final String dirname, final String filter) {
@@ -652,63 +786,64 @@ public final class FileUtils {
 
     /**
      * Read content of a directory into a String array of file names.
-     * 
-     * @param dir The directory to get the file listing from. If it doesn't exist yet,
-     * it will be created.
+     *
+     * @param dir The directory to get the file listing from. If it doesn't exist yet, it will be created.
      * @return array of file names
      */
-    public static List<String> getDirListing(final File dir){
+    public static List<String> getDirListing(final File dir) {
         return getDirListing(dir, null);
     }
-    
+
     /**
      * Read content of a directory into a String array of file names.
-     * @param dir The directory to get the file listing from. If it doesn't exist yet,
-     * it will be created.
-     * @param filter String which contains a regular expression which has to be matched by
-     * file names in order to appear in returned array. All file names will be returned if
-     * filter is null.
+     *
+     * @param dir The directory to get the file listing from. If it doesn't exist yet, it will be created.
+     * @param filter String which contains a regular expression which has to be matched by file names in order
+     *        to appear in returned array. All file names will be returned if filter is null.
      * @return array of file names
      */
-    public static List<String> getDirListing(final File dir, final String filter){
-        List<String> ret = new LinkedList<String>();
+    public static List<String> getDirListing(final File dir, final String filter) {
+        final List<String> ret = new LinkedList<String>();
         File[] fileList;
-        if (dir != null ) {
-            if (!dir.exists()) {
+        if ( dir != null ) {
+            if ( !dir.exists() ) {
                 dir.mkdir();
             }
             fileList = dir.listFiles();
-            for (int i=0; i<= fileList.length-1; i++) {
-                if (filter == null || fileList[i].getName().matches(filter)) {
+            for ( int i = 0; i <= fileList.length - 1; i++ ) {
+                if ( filter == null || fileList[i].getName().matches(filter) ) {
                     ret.add(fileList[i].getName());
                 }
             }
             return ret;
         }
         return null;
-    }    
+    }
 
     // same as below
-    public static ArrayList<File> getDirsRecursive(final File dir, final String notdir){
+    public static ArrayList<File> getDirsRecursive(final File dir, final String notdir) {
         return getDirsRecursive(dir, notdir, true);
     }
-    
+
     /**
-     * Returns a List of all dirs and subdirs as File Objects
-     *
-     * Warning: untested
+     * Returns a List of all dirs and subdirs as File Objects Warning: untested
      */
-    public static ArrayList<File> getDirsRecursive(final File dir, final String notdir, final boolean excludeDotfiles){
+    public static ArrayList<File> getDirsRecursive(
+        final File dir,
+        final String notdir,
+        final boolean excludeDotfiles) {
         final File[] dirList = dir.listFiles();
         final ArrayList<File> resultList = new ArrayList<File>();
         ArrayList<File> recursive;
         Iterator<File> iter;
-        for (int i=0;i<dirList.length;i++) {
-            if (dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith(".")) && !dirList[i].getName().equals(notdir)) {
+        for ( int i = 0; i < dirList.length; i++ ) {
+            if ( dirList[i].isDirectory()
+                && (!excludeDotfiles || !dirList[i].getName().startsWith("."))
+                && !dirList[i].getName().equals(notdir) ) {
                 resultList.add(dirList[i]);
                 recursive = getDirsRecursive(dirList[i], notdir, excludeDotfiles);
-                iter=recursive.iterator();
-                while (iter.hasNext()) {
+                iter = recursive.iterator();
+                while ( iter.hasNext() ) {
                     resultList.add(iter.next());
                 }
             }
@@ -716,158 +851,192 @@ public final class FileUtils {
         return resultList;
     }
 
-    
-
     /**
      * Write elements of an Array of Strings to a file (one element per line).
-     *  
+     *
      * @param listFile the file to write to
      * @param list the Array to write
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
      */
-    public static boolean writeList(final File listFile, final String[] list){
+    public static boolean writeList(final File listFile, final String[] list) {
         final StringBuilder out = new StringBuilder(list.length * 40 + 1);
-        for(int i=0;i < list.length; i++){
-            out.append(list[i]).append(CR).append(LF);
+        for ( final String element : list ) {
+            out.append(element).append(CR).append(LF);
         }
         return FileUtils.writeList(listFile, new String(out)); //(File, String)
     }
-    
-    public static class StringsIterator implements Iterator<String> {
-        private final BufferedReader reader;
+
+    public static class StringsIterator implements Iterator<String>
+    {
+        private BufferedReader reader;
         private String nextLine;
+
         public StringsIterator(final BufferedReader reader) {
             this.reader = reader;
             this.nextLine = null;
             next();
         }
+
+        @Override
         public boolean hasNext() {
-            return nextLine != null;
+            return this.nextLine != null;
         }
 
+        @Override
         public String next() {
-            String line = nextLine;
-            try {
-                while ((nextLine = reader.readLine()) != null) {
-                    nextLine = nextLine.trim();
-                    if (nextLine.length() > 0) break;
+            final String line = this.nextLine;
+            if (this.reader != null) try {
+                while ( (this.nextLine = this.reader.readLine()) != null ) {
+                    this.nextLine = this.nextLine.trim();
+                    if ( this.nextLine.length() > 0 ) {
+                        break;
+                    }
                 }
-            } catch (IOException e) {
-                nextLine = null;
-            } catch (OutOfMemoryError e) {
+            } catch ( final IOException e ) {
+                this.nextLine = null;
+            } catch ( final OutOfMemoryError e ) {
                 Log.logException(e);
-                nextLine = null;
+                this.nextLine = null;
+            }
+            if (this.nextLine == null && this.reader != null) {
+                try {
+                    this.reader.close();
+                } catch (IOException e) {} finally {
+                    this.reader = null;
+                }
             }
             return line;
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
-        
+
     }
-    
+
     /**
      * @param from
      * @param to
      * @throws IOException
      */
     private static void forceMove(final File from, final File to) throws IOException {
-        if(!(to.delete() && from.renameTo(to))) {
+        if ( !(to.delete() && from.renameTo(to)) ) {
             // do it manually
-            copy(from, to);
+            Files.copy(from, to);
             FileUtils.deletedelete(from);
         }
     }
-    
+
     /**
-    * Moves all files from a directory to another.
-    * @param from_dir    Directory which contents will be moved.
-    * @param to_dir    Directory to move into. It must exist already.
-    */
+     * Moves all files from a directory to another.
+     *
+     * @param from_dir Directory which contents will be moved.
+     * @param to_dir Directory to move into. It must exist already.
+     */
     public static void moveAll(final File from_dir, final File to_dir) {
-        if (!(from_dir.isDirectory())) return;
-        if (!(to_dir.isDirectory())) return;
+        if ( !(from_dir.isDirectory()) ) {
+            return;
+        }
+        if ( !(to_dir.isDirectory()) ) {
+            return;
+        }
         final String[] list = from_dir.list();
-        for (int i = 0; i < list.length; i++) {
-        	if(!new File(from_dir, list[i]).renameTo(new File(to_dir, list[i])))
-        		Log.logWarning("serverFileUtils", "moveAll(): could not move from "+ from_dir + list[i] +" to "+ to_dir + list[i]);
+        for ( int i = 0; i < list.length; i++ ) {
+            if ( !new File(from_dir, list[i]).renameTo(new File(to_dir, list[i])) ) {
+                Log.logWarning("serverFileUtils", "moveAll(): could not move from "
+                    + from_dir
+                    + list[i]
+                    + " to "
+                    + to_dir
+                    + list[i]);
+            }
         }
     }
-    
 
-    public static class dirlistComparator implements Comparator<File>, Serializable {
-        
+    public static class dirlistComparator implements Comparator<File>, Serializable
+    {
+
         /**
-		 * generated serial
-		 */
-		private static final long serialVersionUID = -5196490300039230135L;
+         * generated serial
+         */
+        private static final long serialVersionUID = -5196490300039230135L;
 
-		public int compare(final File file1, final File file2) {
-            if (file1.isDirectory() && !file2.isDirectory()) {
+        @Override
+        public int compare(final File file1, final File file2) {
+            if ( file1.isDirectory() && !file2.isDirectory() ) {
                 return -1;
-            } else if (!file1.isDirectory() && file2.isDirectory()) {
+            } else if ( !file1.isDirectory() && file2.isDirectory() ) {
                 return 1;
             } else {
                 return file1.getName().compareToIgnoreCase(file2.getName());
             }
         }
-    }    
+    }
 
-    public static final File createTempFile(@SuppressWarnings("rawtypes") Class classObj, final String name) throws IOException {
+    public static final File createTempFile(final Class<?> classObj, final String name) throws IOException {
         String parserClassName = classObj.getName();
         int idx = parserClassName.lastIndexOf('.');
-        if (idx != -1) {
-            parserClassName = parserClassName.substring(idx+1);
-        } 
-                    
+        if ( idx != -1 ) {
+            parserClassName = parserClassName.substring(idx + 1);
+        }
+
         // get the file extension
         idx = name.lastIndexOf('/');
-        final String fileName = (idx != -1) ? name.substring(idx+1) : name;        
-        
+        final String fileName = (idx != -1) ? name.substring(idx + 1) : name;
+
         idx = fileName.lastIndexOf('.');
-        final String fileExt = (idx > -1) ? fileName.substring(idx+1) : "";
-        
+        final String fileExt = (idx > -1) ? fileName.substring(idx + 1) : "";
+
         // create the temp file
-        final File tempFile = File.createTempFile(parserClassName + "_" + ((idx>-1)?fileName.substring(0,idx):fileName), (fileExt.length()>0)?"."+fileExt:fileExt);
+        final File tempFile =
+            File.createTempFile(
+                parserClassName + "_" + ((idx > -1) ? fileName.substring(0, idx) : fileName),
+                (fileExt.length() > 0) ? "." + fileExt : fileExt);
         return tempFile;
     }
-    
+
     /**
      * copies the input stream to one output stream (byte per byte)
+     *
      * @param in
      * @param out
      * @return number of copies bytes
      * @throws IOException
      */
-    public static int copyToStream(final BufferedInputStream in, final BufferedOutputStream out) throws IOException {
+    public static int copyToStream(final BufferedInputStream in, final BufferedOutputStream out)
+        throws IOException {
         int count = 0;
         // copy bytes
         int b;
-        while ((b = in.read()) != -1) {
+        while ( (b = in.read()) != -1 ) {
             count++;
             out.write(b);
         }
         out.flush();
         return count;
     }
-    
+
     /**
      * copies the input stream to both output streams (byte per byte)
+     *
      * @param in
      * @param out0
      * @param out1
      * @return number of copies bytes
      * @throws IOException
      */
-    public static int copyToStreams(final BufferedInputStream in, final BufferedOutputStream out0, final BufferedOutputStream out1) throws IOException {
+    public static int copyToStreams(
+        final BufferedInputStream in,
+        final BufferedOutputStream out0,
+        final BufferedOutputStream out1) throws IOException {
         assert out0 != null;
         assert out1 != null;
-        
+
         int count = 0;
         // copy bytes
         int b;
-        while((b = in.read()) != -1) {
+        while ( (b = in.read()) != -1 ) {
             count++;
             out0.write(b);
             out1.write(b);
@@ -879,37 +1048,45 @@ public final class FileUtils {
 
     /**
      * copies the input stream to all writers (byte per byte)
+     *
      * @param data
      * @param writer
      * @param charSet
      * @return
      * @throws IOException
      */
-    public static int copyToWriter(final BufferedInputStream data, final BufferedWriter writer, final Charset charSet) throws IOException {
+    public static int copyToWriter(
+        final BufferedInputStream data,
+        final BufferedWriter writer,
+        final Charset charSet) throws IOException {
         // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
         final Reader sourceReader = new InputStreamReader(data, charSet);
-        
+
         int count = 0;
         // copy bytes
         int b;
-        while((b = sourceReader.read()) != -1) {
+        while ( (b = sourceReader.read()) != -1 ) {
             count++;
             writer.write(b);
         }
         writer.flush();
         return count;
     }
-    
-    public static int copyToWriters(final BufferedInputStream data, final BufferedWriter writer0, final BufferedWriter writer1, final Charset charSet) throws IOException {
+
+    public static int copyToWriters(
+        final BufferedInputStream data,
+        final BufferedWriter writer0,
+        final BufferedWriter writer1,
+        final Charset charSet) throws IOException {
         // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
         assert writer0 != null;
         assert writer1 != null;
         final Reader sourceReader = new InputStreamReader(data, charSet);
-        
+
         int count = 0;
         // copy bytes
         int b;
-        while((b = sourceReader.read()) != -1) {
+        while ( (b = sourceReader.read()) != -1 ) {
             count++;
             writer0.write(b);
             writer1.write(b);
@@ -918,64 +1095,78 @@ public final class FileUtils {
         writer1.flush();
         return count;
     }
-    
+
     /**
-     * delete files and directories
-     * if a directory is not empty, delete also everything inside
-     * because deletion sometimes fails on windows, there is also a windows exec included
+     * delete files and directories if a directory is not empty, delete also everything inside because
+     * deletion sometimes fails on windows, there is also a windows exec included
+     *
      * @param path
      */
     public static void deletedelete(final File path) {
-        if (path == null || !path.exists()) return;
+        if ( path == null || !path.exists() ) {
+            return;
+        }
 
         // empty the directory first
-        if (path.isDirectory()) {
+        if ( path.isDirectory() ) {
             final String[] list = path.list();
-            if (list != null) {
-                for (String s: list) deletedelete(new File(path, s));
+            if ( list != null ) {
+                for ( final String s : list ) {
+                    deletedelete(new File(path, s));
+                }
             }
         }
-        
+
         int c = 0;
-        while (c++ < 20) {
-            if (!path.exists()) break;
-            if (path.delete()) break;
+        while ( c++ < 20 ) {
+            if ( !path.exists() ) {
+                break;
+            }
+            if ( path.delete() ) {
+                break;
+            }
             // some OS may be slow when giving up file pointer
             //System.runFinalization();
             //System.gc();
-            try { Thread.sleep(200); } catch (InterruptedException e) { break; }
+            try {
+                Thread.sleep(200);
+            } catch ( final InterruptedException e ) {
+                break;
+            }
         }
-        if (path.exists()) {
+        if ( path.exists() ) {
             path.deleteOnExit();
             String p = "";
             try {
                 p = path.getCanonicalPath();
-            } catch (IOException e1) {
+            } catch ( final IOException e1 ) {
                 Log.logException(e1);
             }
-            if (System.getProperties().getProperty("os.name","").toLowerCase().startsWith("windows")) {
+            if ( System.getProperties().getProperty("os.name", "").toLowerCase().startsWith("windows") ) {
                 // deleting files on windows sometimes does not work with java
                 try {
-                    String command = "cmd /C del /F /Q \"" + p + "\"";
-                    Process r = Runtime.getRuntime().exec(command);
-                    if (r == null) {
+                    final String command = "cmd /C del /F /Q \"" + p + "\"";
+                    final Process r = Runtime.getRuntime().exec(command);
+                    if ( r == null ) {
                         Log.logSevere("FileUtils", "cannot execute command: " + command);
                     } else {
-                        byte[] response = read(r.getInputStream());
+                        final byte[] response = read(r.getInputStream());
                         Log.logInfo("FileUtils", "deletedelete: " + UTF8.String(response));
                     }
-                } catch (IOException e) {
+                } catch ( final IOException e ) {
                     Log.logException(e);
-                }                
+                }
             }
-            if (path.exists()) Log.logSevere("FileUtils", "cannot delete file " + p);
+            if ( path.exists() ) {
+                Log.logSevere("FileUtils", "cannot delete file " + p);
+            }
         }
     }
-    
+
     public static void main(final String[] args) {
         try {
             writeAndGZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
-        } catch (final IOException e) {
+        } catch ( final IOException e ) {
             Log.logException(e);
         }
     }

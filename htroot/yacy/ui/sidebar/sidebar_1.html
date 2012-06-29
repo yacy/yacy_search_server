@@ -15,7 +15,7 @@
 			unique: false,
 			toggle: function() {
 				var $this = $(this);
-				if (!$this.attr("id") == "bmk_tags_folder") {
+
 					if ($this.hasClass("expandable")) {					
 						var select = "li:has(ul li[id="+$this.attr("id")+"])";
 						qtag = $(select).attr("id");
@@ -31,7 +31,7 @@
 							reloadBM();
 						} 		
 					}
-				}
+
 			}				
 		});
 						
@@ -78,7 +78,7 @@
 				<option value="/yacysearch.json?resource=global&verify=true" selected="selected">freeworld</option>
 				<option value="/yacysearch.json?resource=local&verify=true" >local peer</option>
 				<option value="ymarks" >bookmarks</option>
-				<option value="/api/util/ynetSearch.json?login=&url=http://sciencenet.fzk.de:8080/yacysearch.json?resource=global&verify=true" >sciencenet-ynetSearch</option>
+				<option value="/api/ynetSearch.json?login=&url=http://sciencenet.fzk.de:8080/yacysearch.json?resource=global&verify=true" >sciencenet-ynetSearch</option>
 				<option value="http://sciencenet.fzk.de:8080/yacysearch.json?callback=?&resource=global&verify=true" >sciencenet-JsonP</option>
 				<option value="http://yacy.kicks-ass.net:8080/yacysearch.json?callback=?&resource=global&verify=true" >apfelmaennchen-JsonP</option>							
 			</select>

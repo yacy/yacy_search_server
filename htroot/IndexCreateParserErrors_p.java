@@ -25,14 +25,14 @@
 
 import java.util.ArrayList;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
 import de.anomic.crawler.ZURL;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
 
 public class IndexCreateParserErrors_p {
     
@@ -72,7 +72,7 @@ public class IndexCreateParserErrors_p {
             dark = true;
             DigestURI url; 
             byte[] initiatorHash, executorHash;
-            yacySeed initiatorSeed, executorSeed;
+            Seed initiatorSeed, executorSeed;
             int j=0;
             ArrayList<ZURL.Entry> l = sb.crawlQueues.errorURL.list(showRejectedCount);
             ZURL.Entry entry;
@@ -84,8 +84,8 @@ public class IndexCreateParserErrors_p {
                 
                 initiatorHash = entry.initiator();
                 executorHash = entry.executor();
-                initiatorSeed = (initiatorHash == null) ? null : sb.peers.getConnected(UTF8.String(initiatorHash));
-                executorSeed = (executorHash == null) ? null : sb.peers.getConnected(UTF8.String(executorHash));
+                initiatorSeed = (initiatorHash == null) ? null : sb.peers.getConnected(ASCII.String(initiatorHash));
+                executorSeed = (executorHash == null) ? null : sb.peers.getConnected(ASCII.String(executorHash));
                 prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));

@@ -6,7 +6,7 @@
 //Frankfurt, Germany, 2004
 //
 //This file was contributed by Martin Thelian
-//$LastChangedDate$ 
+//$LastChangedDate$
 //$LastChangedBy$
 //$LastChangedRevision$
 //
@@ -29,26 +29,26 @@
 //if the shell's current path is HTROOT
 
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URLDecoder;
 import java.util.Date;
 
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
-
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class QuickCrawlLink_p {
-    
+
     /**
      * Example Javascript to call this servlet:
      * <code>javascript:w = window.open('http://user:pwd@localhost:8090/QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&xdstopw=on&title=' + escape(document.title) + '&url=' + location.href,'_blank','height=150,width=500,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no'); w.focus();</code>
@@ -58,14 +58,14 @@ public class QuickCrawlLink_p {
      * @return the rewrite-properties for the template
      */
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
+
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        
+
         // get segment
         Segment indexSegment = null;
         if (post != null && post.containsKey("segment")) {
-            String segmentName = post.get("segment");
+            final String segmentName = post.get("segment");
             if (sb.indexSegments.segmentExist(segmentName)) {
                 indexSegment = sb.indexSegments.segment(segmentName);
             }
@@ -73,47 +73,43 @@ public class QuickCrawlLink_p {
             // take default segment
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
-        
+
         if (post == null) {
             // send back usage example
             prop.put("mode", "0");
-            
+
             // get the http host header
             final String hostSocket = header.get(HeaderFramework.CONNECTION_PROP_HOST);
-            
+
             //String host = hostSocket;
             int port = 80;
-            final int pos = hostSocket.indexOf(":");
+            final int pos = hostSocket.indexOf(':',0);
             if (pos != -1) {
-                port = Integer.parseInt(hostSocket.substring(pos + 1));
+                port = NumberTools.parseIntDecSubstring(hostSocket, pos + 1);
                 //host = hostSocket.substring(0, pos);
-            }    
-            
-            prop.put("mode_host", "localhost");
+            }
+
+            prop.put("mode_host", Domains.LOCALHOST);
             prop.put("mode_port", port);
-            
+
             return prop;
         }
         prop.put("mode", "1");
-        
+
         // get the URL
         String crawlingStart = post.get("url",null);
-        try {
-            crawlingStart = URLDecoder.decode(crawlingStart, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            Log.logException(e);
-        }
-        
+        crawlingStart = UTF8.decodeURL(crawlingStart);
+
         // get the browser title
         final String title = post.get("title",null);
-        
+
         // get other parameters if set
-        final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL);
-        final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
-        final int CrawlingDepth      = Integer.parseInt(post.get("crawlingDepth", "0"));        
+        final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
+        final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+        final int CrawlingDepth      = post.getInt("crawlingDepth", 0);
         final boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
         final boolean indexText      = post.get("indexText", "on").equals("on");
-        final boolean indexMedia      = post.get("indexMedia", "on").equals("on");
+        final boolean indexMedia     = post.get("indexMedia", "on").equals("on");
         final boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
         final boolean remoteIndexing = post.get("crawlOrder", "").equals("on");
         final boolean xsstopw        = post.get("xsstopw", "").equals("on");
@@ -122,11 +118,11 @@ public class QuickCrawlLink_p {
 
         prop.put("mode_url", (crawlingStart == null) ? "unknown" : crawlingStart);
         prop.putHTML("mode_title", (title == null) ? "unknown" : title);
-        
+
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
             try {crawlingStart = new DigestURI(crawlingStart).toNormalform(true, true);} catch (final MalformedURLException e1) {}
-            
+
             // check if url is proper
             DigestURI crawlingStartURL = null;
             try {
@@ -136,21 +132,25 @@ public class QuickCrawlLink_p {
                 prop.put("mode_code", "1");
                 return prop;
             }
-                    
+
             final byte[] urlhash = crawlingStartURL.hash();
             indexSegment.urlMetadata().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
             sb.crawlQueues.errorURL.remove(urlhash);
-            
+
             // create crawling profile
             CrawlProfile pe = null;
             try {
                 pe = new CrawlProfile(
-                        crawlingStartURL.getHost(), 
+                        crawlingStartURL.getHost(),
                         crawlingStartURL,
                         crawlingMustMatch,
+                        CrawlProfile.MATCH_ALL_STRING,
+                        CrawlProfile.MATCH_NEVER_STRING,
+                        "",
                         crawlingMustNotMatch,
                         CrawlingDepth,
+                        true,
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
                         -1, // domMaxPages, if negative: no count restriction
                         crawlDynamic,
@@ -161,7 +161,7 @@ public class QuickCrawlLink_p {
                         xsstopw,
                         xdstopw,
                         xpstopw,
-                        CrawlProfile.CacheStrategy.IFFRESH);
+                        CacheStrategy.IFFRESH);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);
             } catch (final Exception e) {
                 // mist
@@ -170,22 +170,22 @@ public class QuickCrawlLink_p {
                 prop.putHTML("mode_status_error", e.getMessage());
                 return prop;
             }
-            
+
             // stack URL
             String reasonString = null;
             reasonString = sb.crawlStacker.stackCrawl(new Request(
-                    sb.peers.mySeed().hash.getBytes(), 
+                    sb.peers.mySeed().hash.getBytes(),
                     crawlingStartURL,
-                    null, 
-                    (title==null)?"CRAWLING-ROOT":title, 
+                    null,
+                    (title==null)?"CRAWLING-ROOT":title,
                     new Date(),
                     pe.handle(),
-                    0, 
+                    0,
                     0,
                     0,
                     0
                 ));
-            
+
             // validate rejection reason
             if (reasonString == null) {
                 prop.put("mode_status", "0");//start msg
@@ -196,7 +196,7 @@ public class QuickCrawlLink_p {
                 prop.putHTML("mode_status_error", reasonString);
             }
         }
-        
+
         return prop;
     }
 }

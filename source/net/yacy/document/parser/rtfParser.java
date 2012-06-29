@@ -1,4 +1,4 @@
-//rtfParser.java 
+//rtfParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -32,40 +32,42 @@ import java.io.InputStream;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 
 public class rtfParser extends AbstractParser implements Parser {
 
     public rtfParser() {
         super("Rich Text Format Parser");
-        SUPPORTED_EXTENSIONS.add("rtf");
-        SUPPORTED_MIME_TYPES.add("text/rtf");
-        SUPPORTED_MIME_TYPES.add("text/richtext");
-        SUPPORTED_MIME_TYPES.add("application/rtf");
-        SUPPORTED_MIME_TYPES.add("application/x-rtf");
-        SUPPORTED_MIME_TYPES.add("application/x-soffice");
+        this.SUPPORTED_EXTENSIONS.add("rtf");
+        this.SUPPORTED_MIME_TYPES.add("text/rtf");
+        this.SUPPORTED_MIME_TYPES.add("text/richtext");
+        this.SUPPORTED_MIME_TYPES.add("application/rtf");
+        this.SUPPORTED_MIME_TYPES.add("application/x-rtf");
+        this.SUPPORTED_MIME_TYPES.add("application/x-soffice");
     }
 
-    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+    public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
-        try {	
+        try {
             final DefaultStyledDocument doc = new DefaultStyledDocument();
-            
-            final RTFEditorKit theRtfEditorKit = new RTFEditorKit();               
-            theRtfEditorKit.read(source, doc, 0);            
-            
+
+            final RTFEditorKit theRtfEditorKit = new RTFEditorKit();
+            theRtfEditorKit.read(source, doc, 0);
+
             final String bodyText = doc.getText(0, doc.getLength());
-            
+
             return new Document[]{new Document(
                     location,
                     mimeType,
                     "UTF-8",
+                    this,
                     null,
                     null,
                     ((bodyText.length() > 80)? bodyText.substring(0, 80):bodyText.trim()).
@@ -77,16 +79,17 @@ public class rtfParser extends AbstractParser implements Parser {
                     "", // TODO: publisher
                     null,
                     null,
-                    bodyText.getBytes("UTF-8"),
+                    0.0f, 0.0f,
+                    UTF8.getBytes(bodyText),
                     null,
                     null,
                     null,
-                    false)};        
+                    false)};
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
-            
-            throw new Parser.Failure("Unexpected error while parsing rtf resource." + e.getMessage(),location); 
+
+            throw new Parser.Failure("Unexpected error while parsing rtf resource." + e.getMessage(),location);
         }
     }
 

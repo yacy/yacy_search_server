@@ -1,4 +1,4 @@
-//autoconfig.pac 
+//autoconfig.pac
 //-----------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -29,43 +29,44 @@
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.cora.util.NumberTools;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class autoconfig {
-    
+
 	// http://web.archive.org/web/20071011034022/http://wp.netscape.com/eng/mozilla/2.0/relnotes/demo/proxy-live.html
     /**
-     * Generates a proxy-autoconfig-file (application/x-ns-proxy-autoconfig) 
-     * See: <a href="http://wp.netscape.com/eng/mozilla/2.0/relnotes/demo/proxy-live.html">Proxy Auto-Config File Format</a> 
+     * Generates a proxy-autoconfig-file (application/x-ns-proxy-autoconfig)
+     * See: <a href="http://wp.netscape.com/eng/mozilla/2.0/relnotes/demo/proxy-live.html">Proxy Auto-Config File Format</a>
      * @param header the complete HTTP header of the request
      * @param post any arguments for this servlet, the request carried with (GET as well as POST)
      * @param env the serverSwitch object holding all runtime-data
      * @return the rewrite-properties for the template
      */
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
+
         final serverObjects prop = new serverObjects();
-        
+
         final boolean yacyonly = env.getConfigBool(SwitchboardConstants.PROXY_YACY_ONLY, false);
-        
+
         // get the http host header
         final String hostSocket = header.get(HeaderFramework.CONNECTION_PROP_HOST);
-        
+
         String host = hostSocket;
         int port = 80;
-        final int pos = hostSocket.indexOf(":");        
+        final int pos = hostSocket.indexOf(':',0);
         if (pos != -1) {
-            port = Integer.parseInt(hostSocket.substring(pos + 1));
+            port = NumberTools.parseIntDecSubstring(hostSocket, pos + 1);
             host = hostSocket.substring(0, pos);
-        }    
-        
+        }
+
         prop.put("yacy", yacyonly ? "0" : "1");
         prop.put("yacy_host", host);
         prop.put("yacy_port", port);
-        
+
         return prop;
     }
-    
+
 }

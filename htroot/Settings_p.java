@@ -27,13 +27,13 @@ import java.util.Iterator;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.Network;
+import net.yacy.peers.Seed;
+import net.yacy.peers.operation.yacySeedUploader;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacySeedUploader;
 
 public final class Settings_p {
     
@@ -85,33 +85,18 @@ public final class Settings_p {
         prop.putHTML("peerLang", peerLang);
         
         // http networking settings
-        prop.put("isTransparentProxy", env.getConfig("isTransparentProxy", "false").equals("true") ? "1" : "0"); 
-        prop.put("connectionKeepAliveSupport", env.getConfig("connectionKeepAliveSupport", "false").equals("true") ? "1" : "0");
-        prop.put("proxy.sendViaHeader", env.getConfig("proxy.sendViaHeader", "false").equals("true") ? "1" : "0");
-        prop.put("proxy.sendXForwardedForHeader", env.getConfig("proxy.sendXForwardedForHeader", "true").equals("true") ? "1" : "0");
+        prop.put("isTransparentProxy", env.getConfigBool("isTransparentProxy", false) ? "1" : "0");
+        prop.put("connectionKeepAliveSupport", env.getConfigBool("connectionKeepAliveSupport", false) ? "1" : "0");
+        prop.put("proxy.sendViaHeader", env.getConfigBool("proxy.sendViaHeader", false) ? "1" : "0");
+        prop.put("proxy.sendXForwardedForHeader", env.getConfigBool("proxy.sendXForwardedForHeader", true) ? "1" : "0");
 
-        // set values
-        String s;
-        int pos;
-        
         // admin password
-        if (env.getConfig("adminAccountBase64", "").length() == 0) {
-            // no password has been specified
-            prop.put("adminuser","admin");
-        } else {
-            s = env.getConfig("adminAccount", "admin:void");
-            pos = s.indexOf(":");
-            if (pos < 0) {
-                prop.put("adminuser","admin");
-            } else {
-                prop.put("adminuser",s.substring(0, pos));
-            }
-        }
+        prop.put("adminuser","admin");
         
         // remote proxy
-        prop.put("remoteProxyUseChecked", env.getConfig("remoteProxyUse", "false").equals("true") ? 1 : 0);
-        prop.put("remoteProxyUse4Yacy", env.getConfig("remoteProxyUse4Yacy", "true").equals("true") ? 1 : 0);
-        prop.put("remoteProxyUse4SSL", env.getConfig("remoteProxyUse4SSL", "true").equals("true") ? 1 : 0);
+        prop.put("remoteProxyUseChecked", env.getConfigBool("remoteProxyUse", false) ? 1 : 0);
+        prop.put("remoteProxyUse4Yacy", env.getConfigBool("remoteProxyUse4Yacy", true) ? 1 : 0);
+        prop.put("remoteProxyUse4SSL", env.getConfigBool("remoteProxyUse4SSL", true) ? 1 : 0);
         
         prop.putHTML("remoteProxyHost", env.getConfig("remoteProxyHost", ""));
         prop.putHTML("remoteProxyPort", env.getConfig("remoteProxyPort", ""));
@@ -125,7 +110,7 @@ public final class Settings_p {
         prop.putHTML("proxyfilter", env.getConfig("proxyClient", "*"));
         
         // proxy password
-        if ( env.getConfig("use_proxyAccounts", "false").equals("false") ) {
+        if (!env.getConfigBool("use_proxyAccounts", false)) {
             // no password has been specified
             prop.put("use_proxyAccounts", "0"); //unchecked
         } else {
@@ -163,7 +148,7 @@ public final class Settings_p {
             env.setConfig("seedUploadMethod",enabledUploader);
         }                  
         
-        final HashMap<String, String> uploaders = yacyCore.getSeedUploadMethods();
+        final HashMap<String, String> uploaders = Network.getSeedUploadMethods();
         prop.put("seedUploadMethods", uploaders.size() + 1);
         prop.put("seedUploadMethods_0_name", "none");
         prop.put("seedUploadMethods_0_selected", enabledUploader.equals("none") ? "1" : "0");
@@ -178,7 +163,7 @@ public final class Settings_p {
             prop.put("seedUploadMethods_" +count+ "_selected", uploaderName.equals(enabledUploader) ? "1" : "0");            
             prop.put("seedUploadMethods_" +count+ "_file", "Settings_Seed_Upload" + uploaderName + ".inc");
             
-            final yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
+            final yacySeedUploader theUploader = Network.getSeedUploader(uploaderName);
             final String[] configOptions = theUploader.getConfigurationOptions();
             if (configOptions != null) {
                 for (int i=0; i<configOptions.length; i++) {
@@ -189,12 +174,12 @@ public final class Settings_p {
         }
         
         // general settings
-        prop.put("seedURL", sb.peers.mySeed().get(yacySeed.SEEDLISTURL, ""));
+        prop.put("seedURL", sb.peers.mySeed().get(Seed.SEEDLISTURL, ""));
         
         /*
          * Message forwarding configuration
          */
-        prop.put("msgForwardingEnabled",env.getConfig("msgForwardingEnabled","false").equals("true") ? "1" : "0");
+        prop.put("msgForwardingEnabled",env.getConfigBool("msgForwardingEnabled",false) ? "1" : "0");
         prop.putHTML("msgForwardingCmd",env.getConfig("msgForwardingCmd", ""));
         prop.putHTML("msgForwardingTo",env.getConfig("msgForwardingTo", ""));
 

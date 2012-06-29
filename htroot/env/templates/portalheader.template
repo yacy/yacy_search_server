@@ -1,0 +1,26 @@
+<!-- YaCy Portalseach by apfelmaennchen <sof@gmx.de> -->
+  <!-- /env/portalheader.template -->
+	<link media="screen" type="text/css" href="/portalsearch/yacy-portalsearch.css" rel="stylesheet" />
+	<script src="/jquery/js/jquery.query-2.1.7.js" type="text/javascript"></script>
+	<script src="/jquery/js/jquery.form-2.73.js" type="text/javascript"></script>
+	<script src="/jquery/js/jquery.field-0.9.2.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		//<![CDATA[
+		$(document).ready(function() {
+			if ($("#yacylivesearch").length ) {
+				yconf = {
+					url      : ' ',
+					global   : false,
+					width    : 500,	
+					height   : 600,			
+					theme    : 'start',
+					title    : 'YaCy Search Widget',
+					load_js  : false,
+					load_css : false
+				};
+				$.getScript(yconf.url+'/portalsearch/yacy-portalsearch.js', function(){});
+			}
+		});
+		//]]>
+	</script>
+  <!-- END YaCy Portalsearch -->

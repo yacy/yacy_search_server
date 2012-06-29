@@ -302,79 +302,7 @@ Cookie==Cookie
 #---------------------------
 YaCy: Help==YaCy: Pomoc
 >Help==>Pomoc
-# NOT USED
-#This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==Toto je distribuovany vyhladavac a HTTP proxy server fungujuci na podobnom prince ako vykonavanie distribuovanych vypoctov (ako napr. SETI@home). V pripade YaCy ide o "distribuovane vyhladavanie a indexovanie" obsahu Internetu. Momentalne pouzivate <i>YaCy online interface</i>. Tento interface mozete pouzit aj na konfiguraciu osobnych nastaveni, proxy nastaveni, kontrolu pristupu a prehladavania/preliezania webu tzv. web crawling. YaCy online interface moze byt pouzity aj na start preliezania webu (web crawling), posielanie sprav inym YaCy uzivatelom a na kontrolu a sledovanie Vaseho indexu, stavu cache a beziacich procesov web crawling. To najdolezitejsie: Vyhladavacia stranka moze byt pouzita bud na vyhladavanie vo Vasom vlastnom, alebo v <i>globalnom</i> indexe.
-For more detailed information, visit the==Viac informacii najdete na
-YaCy homepage==domovskej stranke YaCy
-Local and Global Search: Options and Functions==Lokalne a globalne vyhladavanie: Nastavenia a funkcie
-The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Proxy poskytuje vyhladavaci interface, ktory pristupuje k lokalnemu indexu vytvorenemu z web stranok ktore ste navstivili cez proxy server.
-The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Vyhladavat mozete takisto globalne, prehladavanim ostatnych peerov. Na spresnenie vyhladavania mozete pouzit nasledujuce volby
-Search Word List==Zoznam vyhladavanych slov
-You can search for several words simultanous. Words must be separated by a single space.==Vyhladavat mozete podla viacerych slov sucasne. Slova musia byt oddelene medzerou.
-The words are treated conjunctive, that means every must occur in the result, not any.==Vysledok vyhladavania obsahuje odkazy zahrnujuce vsetky hladane slova sucasne ("Slovo_1" a sucasne "Slovo_2")
-If you do a global search \(see below\) you may get different results each time you do a search.==Pri globalnom vyhladavani (pozri nizsie) mozete obdrzat rozdielne vysledky pre rovnake vyhladavacie kriteria. 
-Maximum Number of Results==Maximalny pocet vysledkov vyhladavania
-#DAS ist eine Murksübersetzung... bitte ggf. verbessern.
-# NOT USED
-#Prefer mask\:==Maska preferencii:
-You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Mozete zvolit maximalny zobrazovany pocet odkazov. Mnohonasobne stranky vysledkov pre virtualne lubovolny odkaz zatial nie su podporovane.
-Instead we encourage you to enhance the search result by submitting more search words.==Na zlepsenie vysledkov vyhladavania doporucujeme zadat viacero klucovych slov.
-Result Order Options==Poradie vysledkov vyhladavania
-The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==YaCy vyhladavac poskytuje experimentalne hodnotenie kvality, tzv. "Quality ranking". Oproti inych vyhladavacom ponukame
-a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==vysledoky vyhladavania zotriedene podla datumu. Pri zmene poradie vysledkov podla "Datum-Kvalita" bude najcerstvejsie aktualizovana stranka v zozname vysledkov ako prva.
-For pages that have the same date the second order, 'Quality' is applied.==Stranky s rovnakym datumom su zoradene podla kvality.
-Resource Domain==Zdroj hladania
-This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==YaCy vyhladavac je konstruovany na prehladavanie tych stranok ktore prejdu cez proxy, avsak vyhladavaci index je distribuovany aj inym peerom,
-so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==takze mozete vyhladavat tiez globalne: tato funkcia je v sucasnosti zastarala. Moze byt vsak pouzita na testovacie ucely. Buduce verzie budu
-# NOT USED 
-#automatically distribute index information <i>before</i> a search happends to form a performant distributed hash table -- a very fast global search.==automaticky distribuovat index vyhladavania <i>pred tym</i> ako sa udeje prve vyhladavanie, vytvori distribuovanu hash tabulku --- velmi rychle globalbe vyhladavanie.
-Maximum Search Time==Maximalna doba vyhladavania
-Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Prehladavanie lokalneho indexu je velmi rychle. Uskutocni sa radovo za milisekundy aj pre velke mnozstvo (miliony) stranok. Naproti tomu prehladavanie 
-global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==globalneho indexu vyzaduje viacej casu na najdenie spravneho vzdialeneho peera, ktory obsahuje najlepsie vysledky vyhladavania. Toto sa deje zvlast v pripade 
-distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==ked je distribuovany index v testovacom mode. Vysledky vyhladavania budu v tomto pripade lepsie a stabilnejsie 
-the search time is.==pri dlhsom case vyhladavania. (Opakovane globalne vyhladavanie prinesie podobnejsie vysledky.) 
-You may want to use accesskeys to navigate through the YaCy webinterface:==Na navigaciu v YaCy web interface mozete pouzivat klavesove skratky:
-Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows a Internet Explorer: Alt + Klavesa + Enter
-Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows a Mozilla/Firefox/Netscape: Alt + Klavesa
-Windows and Opera: Shift \+ Esc \+ Accesskey==Windows a Opera: Shift + Esc + Klavesa
-Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter==Macintosh a Internet Explorer: Ctrl + Klavesa + Enter
-Macintosh and Safari: Strg \+ Accesskey==Macintosh a Safari: Ctrl + Klavesa
-Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh a Mozilla/Firefox/Netscape: Ctrl + Klavesa
-Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh a Opera: Shift + Esc + Klavesa
-Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake a Galeon/Mozilla: Alt + Klavesa
-All OS and Amaya: Strg \+ Accesskey==Vsetky verzie operacnych systemov a Amaya: Ctrl + Klavesa
 
-Search Page==Vyhladavacia stranka
-Network==Siet
-Status==Stav
-
-YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy pouziva regularne vyrazy pre niektore funkcie, napr. Blacklist.
-There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Existuje niekolko standartov pre tieto vyrazy. YaCy pouziva syntax Perlu 5.
-Here ist a short overview about the functions, which should fir for most cases\:<==Tu najdete strucny prehlad funkcii, ktore by mali pokryvat najcastejsie pripady pouzitia:<
-
-
-arbitrary character==lubovolny znak
-character x==znak x
-not x==nie x
-0 or more times x==0 alebo viac krat x
-0 or 1 time x==0 alebo 1 krat x
-1 or more times x==1 alebo viac krat x
-concatenation of x and y==zretazenie x a y
-x or y==x alebo y
-String "foo" or string "bar"==Retazec "foo" alebo retazec "bar"
-a or b or c \(same as a\|b\|c\)==a alebo b alebo c (to iste ako a|b|c)
-a or b or c \(same as above\)==a alebo b alebo c (to iste ako vyzsie)
-exactly n appearances of x==presne n vyskytov x
-at least n appearances of x==najmenej n vyskytov x
-at least n, maximum m appearanches of x==minimalne n, maximalne m vyskytov m
-Modify priority of instructions==Zmen prioritu prikazov
-Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Escape-znak je pouzity na "unik" specialnych znakov (napr. "\[" alebo "\*"\), ktore potom stracaju svoj specialny vyznam
-Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==Operatory regularnych vyrazov maju nasledovnu prioritu (zostupne): operator zretazenia, unarne operatory (*,+,^,{}), binarne operatory (|). Poradie vykonavania operatorov moze byt zmenene pomocou zatvoriek.
-Example:==Priklad:
-This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Toto oznacuje heise.de/ s retazcom vpredu, napr. "http://www.", nasledovany lubovolnym retazcom, a po nom lomitkom a cislom. Bodka v "heise.de" nie je escapovana, pretoze predstavuje lubovolny znak, t.j. aj bodku "." samu.
-A possible URL which would match this regexp is\:==URL adresa ktoru oznacuje tento regularny vyraz je:
-An URL which would not match is:==URL adresa ktoru neoznacuje tento regularny vyraz je:
-There is ".html" at the end, which is not included with the Regular Expression.==Tu je na konci retazec ".html" ktory nie je obsiahnutny regularnym vyrazom. 
 #-----------------------------
 
 #File: index.html

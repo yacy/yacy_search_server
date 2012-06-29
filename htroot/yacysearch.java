@@ -28,96 +28,133 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
-import net.yacy.document.geolocalization.Location;
+import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
-import net.yacy.kelondro.util.ISO639;
-
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.CrawlProfile.CacheStrategy;
+import net.yacy.peers.EventChannel;
+import net.yacy.peers.NewsPool;
+import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.search.EventTracker;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
+import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.SearchEvent;
+import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.ranking.RankingProfile;
 import de.anomic.data.DidYouMean;
-import de.anomic.search.AccessTracker;
-import de.anomic.search.ContentDomain;
-import de.anomic.search.QueryParams;
-import de.anomic.search.RankingProfile;
-import de.anomic.search.SearchEvent;
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkTables;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.graphics.ProfilingGraph;
-import de.anomic.yacy.yacyChannel;
 
 public class yacysearch {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(
+        final RequestHeader header,
+        final serverObjects post,
+        final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
-        
-        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
-        
-        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+
+        final boolean searchAllowed =
+            sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
+
+        boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        if ( !authenticated ) {
+            final UserDB.Entry user = sb.userDB.getUser(header);
+            authenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
+        }
         final boolean localhostAccess = sb.accessFromLocalhost(header);
         final String promoteSearchPageGreeting =
-                (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ?
-                    env.getConfig("network.unit.description", "") :
-                    env.getConfig(SwitchboardConstants.GREETING, "");
+            (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
+                "network.unit.description",
+                "") : env.getConfig(SwitchboardConstants.GREETING, "");
         final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
-        
+
         // get query
-        final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
-        String querystring =  originalquerystring.replace('+', ' ').replace('*', ' ').trim();
-        CrawlProfile.CacheStrategy snippetFetchStrategy = (post == null) ? null : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
+        final String originalquerystring =
+            (post == null) ? "" : post.get("query", post.get("search", "")).trim();
+        String querystring = originalquerystring.replace('+', ' ').replace('*', ' ').trim();
+        CacheStrategy snippetFetchStrategy =
+            (post == null) ? null : CacheStrategy.parse(post.get("verify", "cacheonly"));
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
-        
+
+        //get focus option
+        prop.put("focus", ((post == null) ? true : post.get("focus", "1").equals("1")) ? 1 : 0);
+
+        // produce vocabulary navigation sidebars
+        Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
+        int j = 0;
+        for (Tagging v: vocabularies) {
+            prop.put("sidebarVocabulary_" + j + "_vocabulary", v.getName());
+            j++;
+        }
+        prop.put("sidebarVocabulary", j);
+
         // get segment
         Segment indexSegment = null;
-        if (post != null && post.containsKey("segment")) {
+        if ( post != null && post.containsKey("segment") ) {
             final String segmentName = post.get("segment");
-            if (sb.indexSegments.segmentExist(segmentName)) {
+            if ( sb.indexSegments.segmentExist(segmentName) ) {
                 indexSegment = sb.indexSegments.segment(segmentName);
             }
         } else {
             // take default segment
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
-        
-        final boolean rss = header.get("EXT", "").equals("rss");
+
+        final String EXT = header.get("EXT", "");
+        final boolean rss = EXT.equals("rss");
+        final boolean json = EXT.equals("json");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-        if (post == null || indexSegment == null || env == null || !searchAllowed) {
+        prop.put(
+            "promoteSearchPageGreeting.homepage",
+            sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put(
+            "promoteSearchPageGreeting.smallImage",
+            sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        if ( post == null || indexSegment == null || env == null || !searchAllowed ) {
             // we create empty entries for template strings
             prop.put("searchagain", "0");
             prop.put("former", "");
@@ -131,7 +168,12 @@ public class yacysearch {
             prop.put("constraint", "");
             prop.put("cat", "href");
             prop.put("depth", "0");
-            prop.put("verify", (post == null) ? "true" : post.get("verify", "true"));
+            prop.put(
+                "search.verify",
+                (post == null) ? sb.getConfig("search.verify", "iffresh") : post.get("verify", "iffresh"));
+            prop.put(
+                "search.navigation",
+                (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
             prop.put("contentdom", "text");
             prop.put("contentdomCheckText", "1");
             prop.put("contentdomCheckAudio", "0");
@@ -150,71 +192,74 @@ public class yacysearch {
             prop.put("meanCount", 5);
             return prop;
         }
-        
+
         // check for JSONP
-        if (post.containsKey("callback")) {
-        	final String jsonp = post.get("callback")+ "([";
-        	prop.put("jsonp-start", jsonp);
-        	prop.put("jsonp-end", "])");
+        if ( post.containsKey("callback") ) {
+            final String jsonp = post.get("callback") + "([";
+            prop.put("jsonp-start", jsonp);
+            prop.put("jsonp-end", "])");
         } else {
-        	prop.put("jsonp-start", "");
-        	prop.put("jsonp-end", "");
+            prop.put("jsonp-start", "");
+            prop.put("jsonp-end", "");
         }
-        
+
         // Adding CORS Access header for yacysearch.rss output
-        if (rss) {
-            final ResponseHeader outgoingHeader = new ResponseHeader();
+        if ( rss ) {
+            final ResponseHeader outgoingHeader = new ResponseHeader(200);
             outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
             prop.setOutgoingHeader(outgoingHeader);
         }
-        
+
         // collect search attributes
-        final boolean newsearch =post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former","")); //new search term
-        
-        int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 1000) : (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 500), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
-        int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
-        
-        final int newcount;
-        if ( authenticated && (newcount = post.getInt("count", 0)) > 0 ) sb.setConfig(SwitchboardConstants.SEARCH_ITEMS, newcount); // set new default maximumRecords if search with "more options"
-        
+
+        int itemsPerPage =
+            Math.min(
+                (authenticated)
+                    ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline()
+                        ? 100
+                        : 5000) : (snippetFetchStrategy != null
+                        && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 1000),
+                post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
+        int startRecord = post.getInt("startRecord", post.getInt("offset", 0));
+
         boolean global = post.get("resource", "local").equals("global") && sb.peers.sizeConnected() > 0;
-        final boolean indexof = (post != null && post.get("indexof","").equals("on")); 
-        
+        final boolean indexof = (post != null && post.get("indexof", "").equals("on"));
+
         final String originalUrlMask;
-        if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) { // option search all
-            originalUrlMask = ".*";
-        } else if (!newsearch && post.containsKey("urlmaskfilter")) {
+        if ( post.containsKey("urlmaskfilter") ) {
             originalUrlMask = post.get("urlmaskfilter", ".*");
         } else {
             originalUrlMask = ".*";
         }
 
         String prefermask = (post == null) ? "" : post.get("prefermaskfilter", "");
-        if (prefermask.length() > 0 && prefermask.indexOf(".*") < 0) {
+        if ( !prefermask.isEmpty() && prefermask.indexOf(".*", 0) < 0 ) {
             prefermask = ".*" + prefermask + ".*";
         }
 
-        Bitfield constraint = (post != null && post.containsKey("constraint") && post.get("constraint", "").length() > 0) ? new Bitfield(4, post.get("constraint", "______")) : null;
-        if (indexof) {
+        Bitfield constraint =
+            (post != null && post.containsKey("constraint") && !post.get("constraint", "").isEmpty())
+                ? new Bitfield(4, post.get("constraint", "______"))
+                : null;
+        if ( indexof ) {
             constraint = new Bitfield(4);
             constraint.set(Condenser.flag_cat_indexof, true);
         }
-        
+
         // SEARCH
-        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true) ||
-                sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
-        global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global search
-        
-        final boolean clustersearch = sb.isRobinsonMode() &&
-                (sb.getConfig("cluster.mode", "").equals("privatecluster") ||
-    		sb.getConfig("cluster.mode", "").equals("publiccluster"));
-        if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
-        
+        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
+        final boolean indexReceiveGranted =
+            sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true)
+                || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
+                || clustersearch;
+        global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global searchnn
+        final boolean intranetMode = sb.isIntranetMode() || sb.isAllIPMode();
+
         // increase search statistic counter
-        if (!global) {
+        if ( !global ) {
             // we count only searches on the local peer here, because global searches
             // are counted on the target peer to preserve privacy of the searcher
-            if (authenticated) {
+            if ( authenticated ) {
                 // local or authenticated search requests are counted separately
                 // because they are not part of a public available peer statistic
                 sb.searchQueriesRobinsonFromLocal++;
@@ -224,277 +269,507 @@ public class yacysearch {
                 sb.searchQueriesRobinsonFromRemote++;
             }
         }
-        
+
         // find search domain
-        final ContentDomain contentdom = ContentDomain.contentdomParser(post == null ? "text" : post.get("contentdom", "text"));
-        
+        final Classification.ContentDomain contentdom =
+            ContentDomain.contentdomParser(post == null ? "all" : post.get("contentdom", "all"));
+
         // patch until better search profiles are available
-        if ((contentdom != ContentDomain.TEXT) && (itemsPerPage <= 32)) itemsPerPage = 64;
-        
+        if (contentdom == ContentDomain.IMAGE && (itemsPerPage == 10 || itemsPerPage == 100)) {
+            itemsPerPage = 64;
+        } else if ( contentdom != ContentDomain.IMAGE && itemsPerPage > 50 && itemsPerPage < 100 ) {
+            itemsPerPage = 10;
+        }
+
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
-        if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
+        if ( trackerHandles == null ) {
+            trackerHandles = new TreeSet<Long>();
+        }
         boolean block = false;
-        if (Domains.matchesList(client, sb.networkBlacklist)) {
+        if ( Domains.matchesList(client, sb.networkBlacklist) ) {
             global = false;
-            if (snippetFetchStrategy != null) snippetFetchStrategy = null;
+            if ( snippetFetchStrategy != null ) {
+                snippetFetchStrategy = null;
+            }
             block = true;
-            Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
-        } else if (Domains.matchesList(client, sb.networkWhitelist)) {
-            Log.logInfo("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
-        } else if (!authenticated && !localhostAccess) {
+            Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM "
+                + client
+                + " gets no permission to search");
+        } else if ( Domains.matchesList(client, sb.networkWhitelist) ) {
+            Log.logInfo("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM "
+                + client
+                + " gets no search restrictions");
+        } else if ( !authenticated && !localhostAccess && !intranetMode ) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
-            synchronized (trackerHandles) {
-                int accInThreeSeconds = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size();
-                int accInOneMinute = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size();
-                int accInTenMinutes = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size();
+            synchronized ( trackerHandles ) {
+                final int accInThreeSeconds =
+                    trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size();
+                final int accInOneMinute =
+                    trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size();
+                final int accInTenMinutes =
+                    trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size();
                 // protections against too strong YaCy network load, reduces remote search
-                if (global) {
-                    if (accInTenMinutes >= 60 || accInOneMinute >= 6 || accInThreeSeconds >= 1) {
+                if ( global ) {
+                    if ( accInTenMinutes >= 60 || accInOneMinute >= 6 || accInThreeSeconds >= 1 ) {
                         global = false;
-                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed global search");
+                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                            + client
+                            + ": "
+                            + accInThreeSeconds
+                            + "/3s, "
+                            + accInOneMinute
+                            + "/60s, "
+                            + accInTenMinutes
+                            + "/600s, "
+                            + " requests, disallowed global search");
                     }
                 }
                 // protection against too many remote server snippet loads (protects traffic on server)
-                if (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline()) {
-                    if (accInTenMinutes >= 20 || accInOneMinute >= 4 || accInThreeSeconds >= 1) {
+                if ( snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ) {
+                    if ( accInTenMinutes >= 20 || accInOneMinute >= 4 || accInThreeSeconds >= 1 ) {
                         snippetFetchStrategy = CacheStrategy.CACHEONLY;
-                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed remote snippet loading");
+                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                            + client
+                            + ": "
+                            + accInThreeSeconds
+                            + "/3s, "
+                            + accInOneMinute
+                            + "/60s, "
+                            + accInTenMinutes
+                            + "/600s, "
+                            + " requests, disallowed remote snippet loading");
                     }
                 }
                 // general load protection
-                if (accInTenMinutes >= 3000 || accInOneMinute >= 600 || accInThreeSeconds >= 60) {
+                if ( accInTenMinutes >= 3000 || accInOneMinute >= 600 || accInThreeSeconds >= 60 ) {
                     block = true;
-                    Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed search");
+                    Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                        + client
+                        + ": "
+                        + accInThreeSeconds
+                        + "/3s, "
+                        + accInOneMinute
+                        + "/60s, "
+                        + accInTenMinutes
+                        + "/600s, "
+                        + " requests, disallowed search");
                 }
             }
         }
-        
-        if ((!block) && (post == null || post.get("cat", "href").equals("href"))) {
+
+        if ( !block && (post == null || post.get("cat", "href").equals("href")) ) {
             String urlmask = null;
-            
+
             // check available memory and clean up if necessary
-            if (!MemoryControl.request(8000000L, false)) {
+            if ( !MemoryControl.request(8000000L, false) ) {
                 indexSegment.urlMetadata().clearCache();
-                SearchEventCache.cleanupEvents(true);
+                SearchEventCache.cleanupEvents(false);
             }
-            
+
             final RankingProfile ranking = sb.getRanking();
+            final StringBuilder modifier = new StringBuilder(20);
 
-            if (querystring.indexOf("/near") >= 0) {
-            	querystring = querystring.replace("/near", "");
-            	ranking.coeff_worddistance = RankingProfile.COEFF_MAX;
+            if ( querystring.indexOf("/near", 0) >= 0 ) {
+                querystring = querystring.replace("/near", "");
+                ranking.coeff_worddistance = RankingProfile.COEFF_MAX;
+                modifier.append("/near ");
             }
-            if (querystring.indexOf("/date") >= 0) {
-            	querystring = querystring.replace("/date", "");
+            if ( querystring.indexOf("/date", 0) >= 0 ) {
+                querystring = querystring.replace("/date", "");
                 ranking.coeff_date = RankingProfile.COEFF_MAX;
+                modifier.append("/date ");
             }
-            int lrp = querystring.indexOf("/language/");
-            String lr = "";
-            if (lrp >= 0) {
-                if (querystring.length() >= (lrp + 11)) {
-                    lr = querystring.substring(lrp + 9, lrp + 11);
-                }
+            if ( querystring.indexOf("/http", 0) >= 0 ) {
+                querystring = querystring.replace("/http", "");
+                urlmask = "https?://.*";
+                modifier.append("/http ");
+            }
+            if ( querystring.indexOf("/https", 0) >= 0 ) {
+                querystring = querystring.replace("/https", "");
+                urlmask = "https?://.*";
+                modifier.append("/https ");
+            }
+            if ( querystring.indexOf("/ftp", 0) >= 0 ) {
+                querystring = querystring.replace("/ftp", "");
+                urlmask = "ftp://.*";
+                modifier.append("/ftp ");
+            }
+            if ( querystring.indexOf("/smb", 0) >= 0 ) {
+                querystring = querystring.replace("/smb", "");
+                urlmask = "smb://.*";
+                modifier.append("/smb ");
+            }
 
-                querystring = querystring.replace("/language/" + lr, "");
-                lr = lr.toLowerCase();
+            if ( querystring.indexOf("/file", 0) >= 0 ) {
+                querystring = querystring.replace("/file", "");
+                urlmask = "file://.*";
+                modifier.append("/file ");
             }
-            final int inurl = querystring.indexOf("inurl:");
-            if (inurl >= 0) {
+
+            if ( querystring.indexOf("/location", 0) >= 0 ) {
+                querystring = querystring.replace("/location", "");
+                if ( constraint == null ) {
+                    constraint = new Bitfield(4);
+                }
+                constraint.set(Condenser.flag_cat_haslocation, true);
+                modifier.append("/location ");
+            }
+
+            final int lrp = querystring.indexOf("/language/", 0);
+            String language = "";
+            if ( lrp >= 0 ) {
+                if ( querystring.length() >= (lrp + 12) ) {
+                    language = querystring.substring(lrp + 10, lrp + 12);
+                }
+                querystring = querystring.replace("/language/" + language, "");
+                language = language.toLowerCase();
+                modifier.append("/language/").append(language).append(' ');
+            }
+
+            final int inurl = querystring.indexOf("inurl:", 0);
+            if ( inurl >= 0 ) {
                 int ftb = querystring.indexOf(' ', inurl);
-                if (ftb == -1) ftb = querystring.length();
-                String urlstr = querystring.substring(inurl + 6, ftb);
+                if ( ftb == -1 ) {
+                    ftb = querystring.length();
+                }
+                final String urlstr = querystring.substring(inurl + 6, ftb);
                 querystring = querystring.replace("inurl:" + urlstr, "");
-                if(urlstr.length() > 0) urlmask = ".*" + urlstr + ".*";
+                if ( !urlstr.isEmpty() ) {
+                    urlmask = urlmask == null ? ".*" + urlstr + ".*" : urlmask + urlstr + ".*";
+                }
+                modifier.append("inurl:").append(urlstr).append(' ');
             }
-            final int filetype = querystring.indexOf("filetype:");
-            if (filetype >= 0) {
+
+            final int filetype = querystring.indexOf("filetype:", 0);
+            if ( filetype >= 0 ) {
                 int ftb = querystring.indexOf(' ', filetype);
-                if (ftb == -1) ftb = querystring.length();
+                if ( ftb == -1 ) {
+                    ftb = querystring.length();
+                }
                 String ft = querystring.substring(filetype + 9, ftb);
                 querystring = querystring.replace("filetype:" + ft, "");
-                while (ft.length() > 0 && ft.charAt(0) == '.') ft = ft.substring(1);
-                if (ft.length() > 0) {
-                    if (urlmask == null) {
+                while ( !ft.isEmpty() && ft.charAt(0) == '.' ) {
+                    ft = ft.substring(1);
+                }
+                if ( !ft.isEmpty() ) {
+                    if ( urlmask == null ) {
                         urlmask = ".*\\." + ft;
                     } else {
                         urlmask = urlmask + ".*\\." + ft;
                     }
                 }
+                modifier.append("filetype:").append(ft).append(' ');
             }
-            String tenant = null;
-            if (post.containsKey("tenant")) {
-                tenant = post.get("tenant");
-                if (tenant != null && tenant.length() == 0) tenant = null;
-                if (tenant != null) {
-                	if (urlmask == null) urlmask = ".*" + tenant + ".*"; else urlmask = ".*" + tenant + urlmask;
+
+            int voc = 0;
+            Collection<Tagging.Metatag> metatags = new ArrayList<Tagging.Metatag>(1);
+            while ((voc = querystring.indexOf("/vocabulary/", 0)) >= 0) {
+                String vocabulary = "";
+                int ve = querystring.indexOf(' ', voc + 12);
+                if (ve < 0) {
+                    vocabulary = querystring.substring(voc);
+                    querystring = querystring.substring(0, voc).trim();
+                } else {
+                    vocabulary = querystring.substring(voc, ve);
+                    querystring = querystring.substring(0, voc) + querystring.substring(ve);
+                }
+                modifier.append(vocabulary).append(' ');
+                vocabulary = vocabulary.substring(12);
+                int p = vocabulary.indexOf('/');
+                if (p > 0) {
+                    String k = vocabulary.substring(0, p);
+                    String v = vocabulary.substring(p + 1);
+                    metatags.add(LibraryProvider.autotagging.metatag(k, v));
                 }
             }
-            int site = querystring.indexOf("site:");
-            String sitehash = null;
-            String sitehost = null;
-            if (site >= 0) {
-                int ftb = querystring.indexOf(' ', site);
-                if (ftb == -1) ftb = querystring.length();
-                sitehost = querystring.substring(site + 5, ftb);
-                querystring = querystring.replace("site:" + sitehost, "");
-                while (sitehost.length() > 0 && sitehost.charAt(0) == '.') sitehost = sitehost.substring(1);
-                while (sitehost.endsWith(".")) sitehost = sitehost.substring(0, sitehost.length() - 1);
-                sitehash = DigestURI.domhash(sitehost);
+
+            int radius = 0;
+            double lon = 0.0d, lat = 0.0d, rad = 0.0d;
+            if ((radius = querystring.indexOf("/radius/")) >= 0) {
+                int ve = querystring.indexOf(' ', radius + 8);
+                String geo = "";
+                if (ve < 0) {
+                    geo = querystring.substring(radius);
+                    querystring = querystring.substring(0, radius).trim();
+                } else {
+                    geo = querystring.substring(radius, ve);
+                    querystring = querystring.substring(0, radius) + querystring.substring(ve);
+                }
+                geo = geo.substring(8);
+                String[] sp = geo.split("/");
+                if (sp.length == 3) try {
+                    lat = Double.parseDouble(sp[0]);
+                    lon = Double.parseDouble(sp[1]);
+                    rad = Double.parseDouble(sp[2]);
+                } catch (NumberFormatException e) {
+                    lon = 0.0d; lat = 0.0d; rad = 0.0d;
+                }
             }
-            
-            final int heuristicScroogle = querystring.indexOf("heuristic:scroogle");
-            if (heuristicScroogle >= 0) {
-                querystring = querystring.replace("heuristic:scroogle", "");
-            }
-            
-            final int heuristicBlekko = querystring.indexOf("heuristic:blekko");
-            if (heuristicBlekko >= 0) {
-                querystring = querystring.replace("heuristic:blekko", "");
-            }
-            
-            final int authori = querystring.indexOf("author:");
-        	String authorhash = null;
-            if (authori >= 0) {
-            	// check if the author was given with single quotes or without
-            	final boolean quotes = (querystring.charAt(authori + 7) == (char) 39);
-            	String author;
-            	if (quotes) {
-                    int ftb = querystring.indexOf((char) 39, authori + 8);
-                    if (ftb == -1) ftb = querystring.length() + 1;
-                    author = querystring.substring(authori + 8, ftb);
-                    querystring = querystring.replace("author:'" + author + "'", "");
-            	} else {
-                    int ftb = querystring.indexOf(' ', authori);
-                    if (ftb == -1) ftb = querystring.length();
-                    author = querystring.substring(authori + 7, ftb);
-                    querystring = querystring.replace("author:" + author, "");
-            	}
-            	authorhash = UTF8.String(Word.word2hash(author));
-            }
-            final int tld = querystring.indexOf("tld:");
-            if (tld >= 0) {
-                int ftb = querystring.indexOf(' ', tld);
-                if (ftb == -1) ftb = querystring.length();
-                String domain = querystring.substring(tld + 4, ftb);
-                querystring = querystring.replace("tld:" + domain, "");
-                while (domain.length() > 0 && domain.charAt(0) == '.') domain = domain.substring(1);
-                if (domain.indexOf('.') < 0) domain = "\\." + domain; // is tld
-                if (domain.length() > 0) {
-                    if (urlmask == null) {
-                        urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*";
+
+            String tenant = null;
+            if ( post.containsKey("tenant") ) {
+                tenant = post.get("tenant");
+                if ( tenant != null && tenant.isEmpty() ) {
+                    tenant = null;
+                }
+                if ( tenant != null ) {
+                    if ( urlmask == null ) {
+                        urlmask = ".*" + tenant + ".*";
                     } else {
-                        urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + urlmask;
+                        urlmask = ".*" + tenant + urlmask;
                     }
                 }
             }
-            if (urlmask == null || urlmask.length() == 0) urlmask = originalUrlMask; //if no urlmask was given
-           
+
+            final int site = querystring.indexOf("site:", 0);
+            String sitehash = null;
+            String sitehost = null;
+            if ( site >= 0 ) {
+                int ftb = querystring.indexOf(' ', site);
+                if ( ftb == -1 ) {
+                    ftb = querystring.length();
+                }
+                sitehost = querystring.substring(site + 5, ftb);
+                querystring = querystring.replace("site:" + sitehost, "");
+                while ( sitehost.length() > 0 && sitehost.charAt(0) == '.' ) {
+                    sitehost = sitehost.substring(1);
+                }
+                while ( sitehost.endsWith(".") ) {
+                    sitehost = sitehost.substring(0, sitehost.length() - 1);
+                }
+                sitehash = DigestURI.hosthash(sitehost);
+                modifier.append("site:").append(sitehost).append(' ');
+            }
+
+            final int heuristicBlekko = querystring.indexOf("/heuristic/blekko", 0);
+            if ( heuristicBlekko >= 0 ) {
+                querystring = querystring.replace("/heuristic/blekko", "");
+                modifier.append("/heuristic/blekko ");
+            }
+
+            final int authori = querystring.indexOf("author:", 0);
+            String authorhash = null;
+            if ( authori >= 0 ) {
+                // check if the author was given with single quotes or without
+                final boolean quotes = (querystring.charAt(authori + 7) == '(');
+                String author;
+                if ( quotes ) {
+                    int ftb = querystring.indexOf(')', authori + 8);
+                    if ( ftb == -1 ) {
+                        ftb = querystring.length() + 1;
+                    }
+                    author = querystring.substring(authori + 8, ftb);
+                    querystring = querystring.replace("author:(" + author + ")", "");
+                    modifier.append("author:(").append(author).append(") ");
+                } else {
+                    int ftb = querystring.indexOf(' ', authori);
+                    if ( ftb == -1 ) {
+                        ftb = querystring.length();
+                    }
+                    author = querystring.substring(authori + 7, ftb);
+                    querystring = querystring.replace("author:" + author, "");
+                    modifier.append("author:").append(author).append(' ');
+                }
+                authorhash = ASCII.String(Word.word2hash(author));
+            }
+
+            final int tld = querystring.indexOf("tld:", 0);
+            if ( tld >= 0 ) {
+                int ftb = querystring.indexOf(' ', tld);
+                if ( ftb == -1 ) {
+                    ftb = querystring.length();
+                }
+                String domain = querystring.substring(tld + 4, ftb);
+                querystring = querystring.replace("tld:" + domain, "");
+                modifier.append("tld:").append(domain).append(' ');
+                while ( domain.length() > 0 && domain.charAt(0) == '.' ) {
+                    domain = domain.substring(1);
+                }
+                if ( domain.indexOf('.', 0) < 0 ) {
+                    domain = "\\." + domain;
+                } // is tld
+                if ( domain.length() > 0 ) {
+                    urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + ((urlmask != null) ? urlmask : "");
+                }
+            }
+            if ( urlmask == null || urlmask.isEmpty() ) {
+                urlmask = originalUrlMask;
+            } //if no urlmask was given
+
             // read the language from the language-restrict option 'lr'
             // if no one is given, use the user agent or the system language as default
-            String language = (post == null) ? lr : post.get("lr", lr);
-            if (language.startsWith("lang_")) language = language.substring(5);
-            if (!ISO639.exists(language)) {
+            language = (post == null) ? language : post.get("lr", language);
+            if ( language.startsWith("lang_") ) {
+                language = language.substring(5);
+            }
+            if ( !ISO639.exists(language) ) {
                 // find out language of the user by reading of the user-agent string
                 String agent = header.get(HeaderFramework.ACCEPT_LANGUAGE);
-                if (agent == null) agent = System.getProperty("user.language");
+                if ( agent == null ) {
+                    agent = System.getProperty("user.language");
+                }
                 language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
-                if (language == null) language = "en";
+                if ( language == null ) {
+                    language = "en";
+                }
             }
-            
+
             // navigation
-            final String navigation = (post == null) ? "" : post.get("nav", "");
-            
+            final String navigation =
+                (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "");
+
             // the query
-            final TreeSet<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
-            
-            int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
+            final Collection<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
+
+            final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? query.length - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
-            final SortedSet<String> filtered = SetTools.joinConstructive(query[0], Switchboard.stopwords);
-            if (!filtered.isEmpty()) {
-                SetTools.excludeDestructive(query[0], Switchboard.stopwords);
+            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(query[0], Switchboard.stopwords);
+            if ( !filtered.isEmpty() ) {
+                SetTools.excludeDestructiveByTestSmallInLarge(query[0], Switchboard.stopwords);
             }
 
             // if a minus-button was hit, remove a special reference first
-            if (post != null && post.containsKey("deleteref")) try {
-                if (!sb.verifyAuthentication(header, true)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                    return prop;
-                }
-                
-                // delete the index entry locally
-                final String delHash = post.get("deleteref", ""); // urlhash
-                indexSegment.termIndex().remove(Word.words2hashesHandles(query[0]), delHash.getBytes());
+            if ( post != null && post.containsKey("deleteref") ) {
+                try {
+                    if ( !sb.verifyAuthentication(header) ) {
+                    	prop.authenticationRequired();
+                        return prop;
+                    }
 
-                // make new news message with negative voting
-                if (!sb.isRobinsonMode()) {
-                    final Map<String, String> map = new HashMap<String, String>();
-                    map.put("urlhash", delHash);
-                    map.put("vote", "negative");
-                    map.put("refid", "");
-                    sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                    // delete the index entry locally
+                    final String delHash = post.get("deleteref", ""); // urlhash
+                    indexSegment.termIndex().remove(Word.words2hashesHandles(query[0]), delHash.getBytes());
+
+                    // make new news message with negative voting
+                    if ( !sb.isRobinsonMode() ) {
+                        final Map<String, String> map = new HashMap<String, String>();
+                        map.put("urlhash", delHash);
+                        map.put("vote", "negative");
+                        map.put("refid", "");
+                        sb.peers.newsPool.publishMyNews(
+                            sb.peers.mySeed(),
+                            NewsPool.CATEGORY_SURFTIPP_VOTE_ADD,
+                            map);
+                    }
+
+                    // delete the search history since this still shows the entry
+                    SearchEventCache.delete(delHash);
+                } catch ( final IOException e ) {
+                    Log.logException(e);
                 }
-            } catch (IOException e) {
-                Log.logException(e);
             }
 
             // if a plus-button was hit, create new voting message
-            if (post != null && post.containsKey("recommendref")) {
-                if (!sb.verifyAuthentication(header, true)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            if ( post != null && post.containsKey("recommendref") ) {
+                if ( !sb.verifyAuthentication(header) ) {
+                	prop.authenticationRequired();
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(recommendHash.getBytes(), null, 0);
-                if (urlentry != null) {
-                    final URIMetadataRow.Components metadata = urlentry.metadata();
+                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(recommendHash));
+                if ( urlentry != null ) {
                     Document[] documents = null;
                     try {
-                        documents = sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CrawlProfile.CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE);
-                    } catch (IOException e) {
-                    } catch (Parser.Failure e) {
+                        documents =
+                            sb.loader.loadDocuments(
+                                sb.loader.request(urlentry.url(), true, false),
+                                CacheStrategy.IFEXIST,
+                                5000,
+                                Integer.MAX_VALUE);
+                    } catch ( final IOException e ) {
+                    } catch ( final Parser.Failure e ) {
                     }
-                    if (documents != null) {
+                    if ( documents != null ) {
                         // create a news message
                         final Map<String, String> map = new HashMap<String, String>();
-                        map.put("url", metadata.url().toNormalform(false, true).replace(',', '|'));
-                        map.put("title", metadata.dc_title().replace(',', ' '));
+                        map.put("url", urlentry.url().toNormalform(false, true).replace(',', '|'));
+                        map.put("title", urlentry.dc_title().replace(',', ' '));
                         map.put("description", documents[0].dc_title().replace(',', ' '));
                         map.put("author", documents[0].dc_creator());
                         map.put("tags", documents[0].dc_subject(' '));
-                        sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map);
+                        sb.peers.newsPool.publishMyNews(
+                            sb.peers.mySeed(),
+                            NewsPool.CATEGORY_SURFTIPP_ADD,
+                            map);
                         documents[0].close();
                     }
                 }
             }
 
-            // prepare search properties
-            final boolean globalsearch = (global) && indexReceiveGranted; /* && (yacyonline)*/ 
-        
+            // if a bookmarks-button was hit, create new bookmark entry
+            if ( post != null && post.containsKey("bookmarkref") ) {
+                if ( !sb.verifyAuthentication(header) ) {
+                	prop.authenticationRequired();
+                    return prop;
+                }
+                final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
+                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(bookmarkHash));
+                if ( urlentry != null ) {
+                    try {
+                        sb.tables.bookmarks.createBookmark(
+                            sb.loader,
+                            urlentry.url(),
+                            YMarkTables.USER_ADMIN,
+                            true,
+                            "searchresult",
+                            "/search");
+                    } catch ( final Throwable e ) {
+                    }
+                }
+            }
+
             // do the search
             final HandleSet queryHashes = Word.words2hashesHandles(query[0]);
-            final QueryParams theQuery = new QueryParams(
+            final Pattern snippetPattern = QueryParams.stringSearchPattern(originalquerystring);
+
+            // check filters
+            try {
+                Pattern.compile(urlmask);
+            } catch ( final PatternSyntaxException ex ) {
+                Log.logWarning("SEARCH", "Illegal URL mask, not a valid regex: " + urlmask);
+                prop.put("urlmaskerror", 1);
+                prop.putHTML("urlmaskerror_urlmask", urlmask);
+                urlmask = ".*";
+            }
+
+            try {
+                Pattern.compile(prefermask);
+            } catch ( final PatternSyntaxException ex ) {
+                Log.logWarning("SEARCH", "Illegal prefer mask, not a valid regex: " + prefermask);
+                prop.put("prefermaskerror", 1);
+                prop.putHTML("prefermaskerror_prefermask", prefermask);
+                prefermask = "";
+            }
+
+            final QueryParams theQuery =
+                new QueryParams(
                     originalquerystring,
                     queryHashes,
                     Word.words2hashesHandles(query[1]),
                     Word.words2hashesHandles(query[2]),
+                    snippetPattern,
                     tenant,
+                    modifier.toString().trim(),
                     maxDistance,
                     prefermask,
                     contentdom,
                     language,
+                    metatags,
                     navigation,
                     snippetFetchStrategy,
                     itemsPerPage,
-                    offset,
+                    startRecord,
                     urlmask,
-                    (clustersearch && globalsearch) ? QueryParams.SEARCHDOM_CLUSTERALL :
-                    ((globalsearch) ? QueryParams.SEARCHDOM_GLOBALDHT : QueryParams.SEARCHDOM_LOCAL),
+                    clustersearch && global ? QueryParams.Searchdom.CLUSTER : (global && indexReceiveGranted
+                        ? QueryParams.Searchdom.GLOBAL
+                        : QueryParams.Searchdom.LOCAL),
                     20,
                     constraint,
                     true,
                     sitehash,
+                    DigestURI.hosthashess(sb.getConfig("search.excludehosth", "")),
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,
@@ -502,142 +777,231 @@ public class yacysearch {
                     indexSegment,
                     ranking,
                     header.get(RequestHeader.USER_AGENT, ""),
-                    sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false) && sb.peers.mySeed().getFlagAcceptRemoteIndex());
+                    sb.getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, false)
+                        && sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
+                        && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
+                    lat, lon, rad);
             EventTracker.delete(EventTracker.EClass.SEARCH);
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.INITIALIZATION, "", 0, 0), false);
-            
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
+                theQuery.id(true),
+                SearchEvent.Type.INITIALIZATION,
+                "",
+                0,
+                0), false);
+
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(3000);
-        
+
             // filter out words that appear in bluelist
             theQuery.filterOut(Switchboard.blueList);
-            
+
             // log
-            Log.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + QueryParams.hashSet2hashString(theQuery.queryHashes) + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
-            yacyChannel.channels(yacyChannel.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
+            Log.logInfo(
+                "LOCAL_SEARCH",
+                "INIT WORD SEARCH: "
+                    + theQuery.queryString
+                    + ":"
+                    + QueryParams.hashSet2hashString(theQuery.queryHashes)
+                    + " - "
+                    + theQuery.neededResults()
+                    + " links to be computed, "
+                    + theQuery.itemsPerPage()
+                    + " lines to be displayed");
+            EventChannel.channels(EventChannel.LOCALSEARCH).addMessage(
+                new RSSMessage("Local Search Request", theQuery.queryString, ""));
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
-            if (SearchEventCache.getEvent(theQuery.id(false)) == null) {
-                theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
-                offset = 0;
+            if ( SearchEventCache.getEvent(theQuery.id(false)) == null ) {
+                theQuery.setOffset(0); // in case that this is a new search, always start without a offset
+                startRecord = 0;
             }
-            final SearchEvent theSearch = SearchEventCache.getEvent(
-                theQuery, sb.peers, sb.tables, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader,
-                (int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_USER, sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 10)),
-                      sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_USER, sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)),
-                (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0),
-                (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
-            try {
-                Thread.sleep(global ? 100 : 10);
-            } catch (InterruptedException e1) {} // wait a little time to get first results in the search
-            
-            if (offset == 0) {
-                if (sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated) sb.heuristicSite(theSearch, sitehost);
-                if ((heuristicScroogle >= 0  || sb.getConfigBool("heuristic.scroogle", false)) && authenticated) sb.heuristicScroogle(theSearch);
-                if ((heuristicBlekko >= 0  || sb.getConfigBool("heuristic.blekko", false)) && authenticated) sb.heuristicRSS("http://blekko.com/ws/$+/rss", theSearch, "blekko");
+            final SearchEvent theSearch =
+                SearchEventCache.getEvent(
+                    theQuery,
+                    sb.peers,
+                    sb.tables,
+                    (sb.isRobinsonMode()) ? sb.clusterhashes : null,
+                    false,
+                    sb.loader,
+                    (int) sb.getConfigLong(
+                        SwitchboardConstants.REMOTESEARCH_MAXCOUNT_USER,
+                        sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 10)),
+                    sb.getConfigLong(
+                        SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
+                        sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)),
+                    (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0),
+                    (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
+
+            if ( startRecord == 0 ) {
+                if ( sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated ) {
+                    sb.heuristicSite(theSearch, sitehost);
+                }
+                if ( (heuristicBlekko >= 0 || sb.getConfigBool("heuristic.blekko", false)) && authenticated ) {
+                    sb.heuristicRSS("http://blekko.com/ws/$+/rss", theSearch, "blekko");
+                }
             }
 
             // log
-            Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
-                    "local-unfiltered(" + theSearch.getRankingResult().getLocalIndexCount() + "), " +
-                    "-local_miss(" + theSearch.getRankingResult().getMissCount() + "), " +
-                    "remote(" + theSearch.getRankingResult().getRemoteResourceSize() + ") links found, " +
-                    (System.currentTimeMillis() - timestamp) + " ms");
+            Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: "
+                + theQuery.queryString
+                + " - "
+                + "local-unfiltered("
+                + theSearch.getRankingResult().getLocalIndexCount()
+                + "), "
+                + "local_miss("
+                + theSearch.getRankingResult().getMissCount()
+                + "), "
+                + "local_sortout("
+                + theSearch.getRankingResult().getSortOutCount()
+                + "), "
+                + "remote("
+                + theSearch.getRankingResult().getRemoteResourceSize()
+                + ") links found, "
+                + (System.currentTimeMillis() - timestamp)
+                + " ms");
 
             // prepare search statistics
-            theQuery.resultcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteIndexCount();
+            theQuery.resultcount =
+                theSearch.getRankingResult().getLocalIndexCount()
+                    - theSearch.getRankingResult().getMissCount()
+                    - theSearch.getRankingResult().getSortOutCount()
+                    + theSearch.getRankingResult().getRemoteIndexCount();
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
             theQuery.urlretrievaltime = theSearch.result().getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.result().getSnippetComputationTime();
             AccessTracker.add(AccessTracker.Location.local, theQuery);
-                        
+
             // check suggestions
-            int meanMax = 0;
-            if (post != null && post.containsKey("meanCount")) {
-            	try {
-            	    meanMax = Integer.parseInt(post.get("meanCount"));            	
-            	} catch (NumberFormatException e) {}
-            }
+            final int meanMax = (post != null) ? post.getInt("meanCount", 0) : 0;
+
             prop.put("meanCount", meanMax);
-            if (meanMax > 0) {
-                final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
-            	final Iterator<String> meanIt = didYouMean.getSuggestions(100, 5).iterator();
+            if ( meanMax > 0 && !json && !rss ) {
+                final DidYouMean didYouMean =
+                    new DidYouMean(indexSegment.termIndex(), new StringBuilder(querystring));
+                final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(100, 5).iterator();
                 int meanCount = 0;
                 String suggestion;
-                while(meanCount<meanMax && meanIt.hasNext()) {
-                    suggestion = meanIt.next();
-                    prop.put("didYouMean_suggestions_"+meanCount+"_word", suggestion);
-                    prop.put("didYouMean_suggestions_"+meanCount+"_url",
-                            QueryParams.navurl("html", 0, theQuery, suggestion, originalUrlMask.toString(), theQuery.navigators)
-    	             );
-                    prop.put("didYouMean_suggestions_"+meanCount+"_sep","|");
-                    meanCount++;
-                }
-                prop.put("didYouMean_suggestions_"+(meanCount-1)+"_sep","");
-                prop.put("didYouMean", meanCount>0 ? 1:0);
+                try {
+                    meanCollect: while ( meanCount < meanMax && meanIt.hasNext() ) {
+                        try {
+                            suggestion = meanIt.next().toString();
+                            prop.put("didYouMean_suggestions_" + meanCount + "_word", suggestion);
+                            prop.put(
+                                "didYouMean_suggestions_" + meanCount + "_url",
+                                QueryParams.navurl(
+                                    "html",
+                                    0,
+                                    theQuery,
+                                    suggestion,
+                                    originalUrlMask.toString(),
+                                    theQuery.navigators).toString());
+                            prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
+                            meanCount++;
+                        } catch (ConcurrentModificationException e) {break meanCollect;}
+                    }
+                } catch (ConcurrentModificationException e) {}
+                prop.put("didYouMean_suggestions_" + (meanCount - 1) + "_sep", "");
+                prop.put("didYouMean", meanCount > 0 ? 1 : 0);
                 prop.put("didYouMean_suggestions", meanCount);
             } else {
                 prop.put("didYouMean", 0);
             }
-            
+
             // find geographic info
-            SortedSet<Location> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
-            if (coordinates == null || coordinates.isEmpty() || offset > 0) {
+            final SortedSet<GeoLocation> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
+            if ( coordinates == null || coordinates.isEmpty() || startRecord > 0 ) {
                 prop.put("geoinfo", "0");
             } else {
                 int i = 0;
-                for (Location c: coordinates) {
+                for ( final GeoLocation c : coordinates ) {
                     prop.put("geoinfo_loc_" + i + "_lon", Math.round(c.lon() * 10000.0f) / 10000.0f);
                     prop.put("geoinfo_loc_" + i + "_lat", Math.round(c.lat() * 10000.0f) / 10000.0f);
                     prop.put("geoinfo_loc_" + i + "_name", c.getName());
                     i++;
-                    if (i >= 10) break;
+                    if ( i >= 10 ) {
+                        break;
+                    }
                 }
                 prop.put("geoinfo_loc", i);
                 prop.put("geoinfo", "1");
             }
-            
+
             // update the search tracker
             try {
-                synchronized (trackerHandles) {
-                    trackerHandles.add(theQuery.time);
-                    while (trackerHandles.size() > 600) {
-                        if (!trackerHandles.remove(trackerHandles.first())) break;
+                synchronized ( trackerHandles ) {
+                    trackerHandles.add(theQuery.starttime);
+                    while ( trackerHandles.size() > 600 ) {
+                        if ( !trackerHandles.remove(trackerHandles.first()) ) {
+                            break;
+                        }
                     }
                 }
                 sb.localSearchTracker.put(client, trackerHandles);
-            	if (sb.localSearchTracker.size() > 1000) sb.localSearchTracker.remove(sb.localSearchTracker.keys().nextElement());
-            } catch (Exception e) {
+                if ( sb.localSearchTracker.size() > 100 ) {
+                    sb.localSearchTracker.remove(sb.localSearchTracker.keys().nextElement());
+                }
+                if ( MemoryControl.shortStatus() ) {
+                    sb.localSearchTracker.clear();
+                }
+            } catch ( final Exception e ) {
                 Log.logException(e);
             }
-            
-            final int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteIndexCount();
-            prop.put("num-results_offset", offset);
-            prop.put("num-results_itemscount", Formatter.number(0, true));
+
+            final int indexcount =
+                theSearch.getRankingResult().getLocalIndexCount()
+                    - theSearch.getRankingResult().getMissCount()
+                    - theSearch.getRankingResult().getSortOutCount()
+                    + theSearch.getRankingResult().getRemoteIndexCount();
+            prop.put("num-results_offset", startRecord == 0 ? 0 : startRecord + 1);
+            prop.put("num-results_itemscount", Formatter.number(
+                startRecord + theSearch.getQuery().itemsPerPage > indexcount ? startRecord
+                    + indexcount
+                    % theSearch.getQuery().itemsPerPage : startRecord + theSearch.getQuery().itemsPerPage,
+                true));
             prop.put("num-results_itemsPerPage", itemsPerPage);
             prop.put("num-results_totalcount", Formatter.number(indexcount, true));
-            prop.put("num-results_globalresults", (globalsearch) ? "1" : "0");
-            prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.getRankingResult().getLocalIndexCount(), true));
-            prop.put("num-results_globalresults_localMissCount", Formatter.number(theSearch.getRankingResult().getMissCount(), true));
-            prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
-            prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
-            prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
-            
+            prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch)
+                ? "1"
+                : "0");
+            prop.put(
+                "num-results_globalresults_localResourceSize",
+                Formatter.number(theSearch.getRankingResult().getLocalIndexCount(), true));
+            prop.put(
+                "num-results_globalresults_localMissCount",
+                Formatter.number(theSearch.getRankingResult().getMissCount(), true));
+            prop.put(
+                "num-results_globalresults_remoteResourceSize",
+                Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
+            prop.put(
+                "num-results_globalresults_remoteIndexCount",
+                Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
+            prop.put(
+                "num-results_globalresults_remotePeerCount",
+                Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
+
             // compose page navigation
-            final StringBuilder resnav = new StringBuilder();
-            final int thispage = offset / theQuery.displayResults();
-            if (thispage == 0) {
-            	resnav.append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
+            final StringBuilder resnav = new StringBuilder(200);
+            final int thispage = startRecord / theQuery.itemsPerPage();
+            if ( thispage == 0 ) {
+                resnav
+                    .append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
             } else {
-            	resnav.append("<a id=\"prevpage\" href=\"");
-                resnav.append(QueryParams.navurl("html", thispage - 1, theQuery, null, originalUrlMask, navigation));
-            	resnav.append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
+                resnav.append("<a id=\"prevpage\" href=\"");
+                resnav.append(QueryParams.navurl(
+                    "html",
+                    thispage - 1,
+                    theQuery,
+                    null,
+                    originalUrlMask,
+                    navigation).toString());
+                resnav
+                    .append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
-            final int numberofpages = Math.min(10, 1 + ((indexcount - 1) / theQuery.displayResults()));
-            
-            for (int i = 0; i < numberofpages; i++) {
-                if (i == thispage) {
+            final int numberofpages = Math.min(10, 1 + ((indexcount - 1) / theQuery.itemsPerPage()));
+
+            for ( int i = 0; i < numberofpages; i++ ) {
+                if ( i == thispage ) {
                     resnav.append("<img src=\"env/grafics/navs");
                     resnav.append(i + 1);
                     resnav.append(".gif\" alt=\"page");
@@ -645,7 +1009,9 @@ public class yacysearch {
                     resnav.append("\" width=\"16\" height=\"16\" />&nbsp;");
                 } else {
                     resnav.append("<a href=\"");
-                    resnav.append(QueryParams.navurl("html", i, theQuery, null, originalUrlMask, navigation));
+                    resnav.append(QueryParams
+                        .navurl("html", i, theQuery, null, originalUrlMask, navigation)
+                        .toString());
                     resnav.append("\"><img src=\"env/grafics/navd");
                     resnav.append(i + 1);
                     resnav.append(".gif\" alt=\"page");
@@ -653,38 +1019,51 @@ public class yacysearch {
                     resnav.append("\" width=\"16\" height=\"16\" /></a>&nbsp;");
                 }
             }
-            if (thispage >= numberofpages) {
-            	resnav.append("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
+            if ( thispage >= numberofpages ) {
+                resnav
+                    .append("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
             } else {
                 resnav.append("<a id=\"nextpage\" href=\"");
-                resnav.append(QueryParams.navurl("html", thispage + 1, theQuery, null, originalUrlMask, navigation));
-                resnav.append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
+                resnav.append(QueryParams.navurl(
+                    "html",
+                    thispage + 1,
+                    theQuery,
+                    null,
+                    originalUrlMask,
+                    navigation).toString());
+                resnav
+                    .append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
             }
             final String resnavs = resnav.toString();
             prop.put("num-results_resnav", resnavs);
-            prop.put("pageNavBottom", (indexcount - offset > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
+            prop.put("pageNavBottom", (indexcount - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
             prop.put("pageNavBottom_resnav", resnavs);
-        
+
             // generate the search result lines; the content will be produced by another servlet
-            for (int i = 0; i < theQuery.displayResults(); i++) {
-                prop.put("results_" + i + "_item", offset + i);
+            for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {
+                prop.put("results_" + i + "_item", startRecord + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
             }
-            prop.put("results", theQuery.displayResults());
-            prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO) ? 1 : 0);
+            prop.put("results", theQuery.itemsPerPage());
+            prop
+                .put(
+                    "resultTable",
+                    (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO)
+                        ? 1
+                        : 0);
             prop.put("eventID", theQuery.id(false)); // for bottomline
-            
+
             // process result of search
-            if (!filtered.isEmpty()) {
+            if ( !filtered.isEmpty() ) {
                 prop.put("excluded", "1");
                 prop.putHTML("excluded_stopwords", filtered.toString());
             } else {
                 prop.put("excluded", "0");
             }
 
-            if (prop == null || prop.isEmpty()) {
-                if (post.get("query", post.get("search", "")).length() < 3) {
-                    prop.put("num-results", "2"); // no results - at least 3 chars
+            if ( prop == null || prop.isEmpty() ) {
+                if ( post.get("query", post.get("search", "")).length() < 2 ) {
+                    prop.put("num-results", "2"); // no results - at least 2 chars
                 } else {
                     prop.put("num-results", "1"); // no results
                 }
@@ -696,30 +1075,44 @@ public class yacysearch {
             prop.put("depth", "0");
 
             // adding some additional properties needed for the rss feed
-            String hostName = header.get("Host", "localhost");
-            if (hostName.indexOf(':') == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
+            String hostName = header.get("Host", Domains.LOCALHOST);
+            if ( hostName.indexOf(':', 0) == -1 ) {
+                hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
+            }
             prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
             prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+            prop.put("thisaddress", hostName);
         }
-        
+
         prop.put("searchagain", global ? "1" : "0");
         prop.putHTML("former", originalquerystring);
         prop.put("count", itemsPerPage);
-        prop.put("offset", offset);
+        prop.put("offset", startRecord);
         prop.put("resource", global ? "global" : "local");
         prop.putHTML("urlmaskfilter", originalUrlMask);
         prop.putHTML("prefermaskfilter", prefermask);
         prop.put("indexof", (indexof) ? "on" : "off");
         prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());
-        prop.put("verify", snippetFetchStrategy == null ? "false" : snippetFetchStrategy.toName());
+        prop.put("search.verify", snippetFetchStrategy == null
+            ? sb.getConfig("search.verify", "iffresh")
+            : snippetFetchStrategy.toName());
+        prop.put(
+            "search.navigation",
+            (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
         prop.put("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
-        prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
+        prop.put(
+            "searchdomswitches",
+            sb.getConfigBool("search.text", true)
+                || sb.getConfigBool("search.audio", true)
+                || sb.getConfigBool("search.video", true)
+                || sb.getConfigBool("search.image", true)
+                || sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
         prop.put("searchdomswitches_searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
         prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
         prop.put("searchdomswitches_searchimage", sb.getConfigBool("search.image", true) ? 1 : 0);
         prop.put("searchdomswitches_searchapp", sb.getConfigBool("search.app", true) ? 1 : 0);
-        prop.put("searchdomswitches_searchtext_check", (contentdom == ContentDomain.TEXT) ? "1" : "0");
+        prop.put("searchdomswitches_searchtext_check", (contentdom == ContentDomain.TEXT || contentdom == ContentDomain.ALL) ? "1" : "0");
         prop.put("searchdomswitches_searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
         prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
         prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
@@ -738,9 +1131,14 @@ public class yacysearch {
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);
         prop.putXML("rss_queryenc", originalquerystring.replace(' ', '+'));
-                
+
         sb.localSearchLastAccess = System.currentTimeMillis();
-        
+
+        // hostname and port (assume locahost if nothing helps)
+        final InetAddress hostIP = Domains.myPublicLocalIP();
+        prop.put("myhost", hostIP != null ? hostIP.getHostAddress() : Domains.LOCALHOST);
+        prop.put("myport", serverCore.getPortNr(sb.getConfig("port", "8090")));
+
         // return rewrite properties
         return prop;
     }

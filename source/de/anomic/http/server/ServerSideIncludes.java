@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -29,8 +29,9 @@ package de.anomic.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Properties;
+import java.util.HashMap;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -38,23 +39,23 @@ import net.yacy.kelondro.util.ByteBuffer;
 
 public class ServerSideIncludes {
 
-    public static void writeSSI(final ByteBuffer in, final OutputStream out, final String authorization, final String requesthost) throws IOException {
-        writeSSI(in, 0, out, authorization, requesthost);
+    public static void writeSSI(final ByteBuffer in, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) throws IOException {
+        writeSSI(in, 0, out, authorization, requesthost, requestHeader);
     }
-    
-    public static void writeSSI(final ByteBuffer in, int off, final OutputStream out, final String authorization, final String requesthost) throws IOException {
-        int p = in.indexOf("<!--#".getBytes(), off);
+
+    private static void writeSSI(final ByteBuffer in, int off, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) throws IOException {
+        int p = in.indexOf(ASCII.getBytes("<!--#"), off);
         int q;
         while (p >= 0) {
-            q = in.indexOf("-->".getBytes(), p + 10);
+            q = in.indexOf(ASCII.getBytes("-->"), p + 10);
             if (out instanceof ChunkedOutputStream) {
                 ((ChunkedOutputStream) out).write(in, off, p - off);
             } else {
                 out.write(in.getBytes(off, p - off));
             }
-            parseSSI(in, p, out, authorization, requesthost);
+            parseSSI(in, p, out, authorization, requesthost, requestHeader);
             off = q + 3;
-            p = in.indexOf("<!--#".getBytes(), off);
+            p = in.indexOf(ASCII.getBytes("<!--#"), off);
         }
         if (out instanceof ChunkedOutputStream) {
             ((ChunkedOutputStream) out).write(in, off, in.length() - off);
@@ -62,18 +63,18 @@ public class ServerSideIncludes {
             out.write(in.getBytes(off, in.length() - off));
         }
     }
-    
-    private static void parseSSI(final ByteBuffer in, final int off, final OutputStream out, final String authorization, final String requesthost) {
-        if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
-            final int q = in.indexOf("\"".getBytes(), off + 22);
+
+    private static void parseSSI(final ByteBuffer in, final int off, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) {
+        if (in.startsWith(ASCII.getBytes("<!--#include virtual=\""), off)) {
+            final int q = in.indexOf(ASCII.getBytes("\""), off + 22);
             if (q > 0) {
                 final String path = in.toString(off + 22, q - off - 22);
-                writeContent(path, out, authorization, requesthost);
+                writeContent(path, out, authorization, requesthost, requestHeader);
             }
         }
     }
-    
-    private static void writeContent(String path, final OutputStream out, final String authorization, final String requesthost) {
+
+    public static void writeContent(String path, final OutputStream out, final String authorization, final String requesthost, final RequestHeader requestHeader) {
         // check if there are arguments in path string
         String args = "";
         final int argpos = path.indexOf('?');
@@ -81,16 +82,18 @@ public class ServerSideIncludes {
             args = path.substring(argpos + 1);
             path = path.substring(0, argpos);
         }
-        
+
         // set up virtual connection properties to call httpdFileHander.doGet()
-        final Properties conProp = new Properties();
+        final HashMap<String, Object> conProp = new HashMap<String, Object>();
         final RequestHeader header = new RequestHeader(HTTPDemon.reverseMappingCache);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_METHOD, HeaderFramework.METHOD_GET);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_PATH, path);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_ARGS, args);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, requesthost);
+        conProp.put(HeaderFramework.CONNECTION_PROP_METHOD, HeaderFramework.METHOD_GET);
+        conProp.put(HeaderFramework.CONNECTION_PROP_PATH, path);
+        conProp.put(HeaderFramework.CONNECTION_PROP_ARGS, args);
+        conProp.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+        conProp.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, requesthost);
         header.put(RequestHeader.AUTHORIZATION, authorization);
+        if (requestHeader.containsKey(RequestHeader.COOKIE)) header.put(RequestHeader.COOKIE, requestHeader.get(RequestHeader.COOKIE));
+        header.put(RequestHeader.REFERER, requestHeader.get(RequestHeader.REFERER));
         HTTPDFileHandler.doGet(conProp, header, out);
     }
 }

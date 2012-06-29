@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -24,45 +24,44 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.text.SimpleDateFormat;
+import java.util.TreeSet;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-
-import de.anomic.search.AccessTracker;
-import de.anomic.search.QueryParams;
-import de.anomic.search.Switchboard;
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryParams;
+import de.anomic.server.serverAccessTracker.Track;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverAccessTracker.Track;
-import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
-	
+
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
 
     private static Collection<Track> listclone (final Collection<Track> m) {
-        final Collection<Track> accessClone = new ConcurrentLinkedQueue<Track>();
+        final Collection<Track> accessClone = new LinkedBlockingQueue<Track>();
         try {
             accessClone.addAll(m);
         } catch (final ConcurrentModificationException e) {}
         return accessClone;
     }
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-     
+
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         prop.setLocalized(!(header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml"));
@@ -71,7 +70,7 @@ public class AccessTracker_p {
             page = post.getInt("page", 0);
         }
         prop.put("page", page);
-     
+
         final int maxCount = 1000;
         boolean dark = true;
         if (page == 0) {
@@ -91,7 +90,7 @@ public class AccessTracker_p {
             } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
-            
+
             entCount = 0;
             try {
                 for (final Map.Entry<String, Integer> bfe: serverCore.bfHost.entrySet()) {
@@ -153,7 +152,7 @@ public class AccessTracker_p {
             long stimeSum1 = 0;
             long rtimeSum1 = 0;
             int m = 0;
-            
+
             while (ai.hasNext()) {
                 try {
                     query = ai.next();
@@ -164,8 +163,8 @@ public class AccessTracker_p {
                 prop.put("page_list_" + m + "_dark", ((dark) ? 1 : 0) );
                 dark =! dark;
                 prop.putHTML("page_list_" + m + "_host", query.host);
-                prop.put("page_list_" + m + "_date", SimpleFormatter.format(new Date(query.time.longValue())));
-                prop.put("page_list_" + m + "_timestamp", query.time.longValue());
+                prop.put("page_list_" + m + "_date", SimpleFormatter.format(new Date(query.starttime)));
+                prop.put("page_list_" + m + "_timestamp", query.starttime);
                 if (page == 2) {
                     // local search
                     prop.putNum("page_list_" + m + "_offset", query.offset);
@@ -199,7 +198,7 @@ public class AccessTracker_p {
             prop.put("page_list", m);
             prop.put("page_num", m);
             prop.put("page_resultcount", rcount);
-            
+
             // Put -1 instead of NaN as result for empty search list and return the safe HTML blank char for table output
             if (m == 0) {
                 m = -1;
@@ -250,7 +249,7 @@ public class AccessTracker_p {
                 entry = i.next();
                 host = entry.getKey();
                 handles = entry.getValue();
-                
+
                 int dateCount = 0;
                 final Iterator<Long> ii = handles.iterator();
                 while (ii.hasNext()) {
@@ -263,11 +262,11 @@ public class AccessTracker_p {
                 final int qph = handles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size();
                 qphSum += qph;
                 prop.put("page_list_" + m + "_qph", qph);
-                
+
                 prop.put("page_list_" + m + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.putHTML("page_list_" + m + "_host", host);
                 if (page == 5) {
-                    final yacySeed remotepeer = sb.peers.lookupByIP(Domains.dnsResolve(host), true, true, true);
+                    final Seed remotepeer = sb.peers.lookupByIP(Domains.dnsResolve(host), -1, true, true, true);
                     prop.putHTML("page_list_" + m + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
                 prop.putNum("page_list_" + m + "_count", handles.size());
@@ -277,7 +276,7 @@ public class AccessTracker_p {
             }
             } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
             // return empty values to not break the table view if no results can be listed
-            if (m==0) {                
+            if (m==0) {
                 prop.put("page_list", 1);
                 prop.put("page_list_0_dates_0_date", "");
                 prop.put("page_list_0_dates", 1);
@@ -296,5 +295,5 @@ public class AccessTracker_p {
         // return rewrite properties
         return prop;
     }
- 
+
 }

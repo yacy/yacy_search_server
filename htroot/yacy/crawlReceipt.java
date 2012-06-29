@@ -1,4 +1,4 @@
-// crawlReceipt.java 
+// crawlReceipt.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -29,24 +29,25 @@
 
 import java.io.IOException;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
-import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.yacySeed;
 
 public final class crawlReceipt {
 
-    
+
     /*
      * this is used to respond on a remote crawling request
      */
@@ -55,10 +56,10 @@ public final class crawlReceipt {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        if ((post == null) || (env == null) || !yacyNetwork.authentifyRequest(post, env)) {
+        if ((post == null) || (env == null) || !Protocol.authentifyRequest(post, env)) {
             return prop;
         }
-        
+
         final Log log = sb.getLog();
 
         //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
@@ -74,7 +75,7 @@ public final class crawlReceipt {
         final String reason     = post.get("reason", "");   // the reason for that result
         //String words      = post.get("wordh", "");    // priority word hashes
         final String propStr    = crypt.simpleDecode(post.get("lurlEntry", ""), key);
-        
+
         /*
          the result can have one of the following values:
          negative cases, no retry
@@ -85,38 +86,38 @@ public final class crawlReceipt {
          negative cases, retry possible
            rejected    - the peer has rejected to load the resource
            dequeue     - peer too busy - rejected to crawl
-         
+
          positive cases with crawling
            fill        - the resource was loaded and processed
            update      - the resource was already in database but re-loaded and processed
-	 
-         positive cases without crawling	 
+
+         positive cases without crawling
            known       - the resource is already in database, believed to be fresh and not reloaded
            stale       - the resource was reloaded but not processed because source had no changes
 
         */
-        
-        final yacySeed otherPeer = sb.peers.get(iam);
-        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
+
+        final Seed otherPeer = sb.peers.get(iam);
+        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
 
         if ((sb.peers.mySeed() == null) || (!(sb.peers.mySeed().hash.equals(youare)))) {
             // no yacy connection / unknown peers
             prop.put("delay", "3600");
             return prop;
         }
-        
+
         if (propStr == null) {
             // error with url / wrong key
             prop.put("delay", "3600");
             return prop;
         }
-        
+
         if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(otherPeer))) {
         	// we reject urls that are from outside our cluster
         	prop.put("delay", "9999");
         	return prop;
     	}
-        
+
         // generating a new loaded URL entry
         final URIMetadataRow entry = URIMetadataRow.importEntry(propStr);
         if (entry == null) {
@@ -124,28 +125,35 @@ public final class crawlReceipt {
             prop.put("delay", "3600");
             return prop;
         }
-        
-        final URIMetadataRow.Components metadata = entry.metadata();
-        if (metadata.url() == null) {
-            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + UTF8.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
+
+        if (entry.url() == null) {
+            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
-        
+
         // check if the entry is in our network domain
-        final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(metadata.url());
+        final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(entry.url());
         if (urlRejectReason != null) {
-            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + UTF8.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
             return prop;
         }
-        
+
+        // Check URL against DHT blacklist
+        if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, entry)) {
+            // URL is blacklisted
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (URL is blacklisted) for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true) + " from peer " + iam);
+            prop.put("delay", "9999");
+            return prop;
+        }
+
         if ("fill".equals(result)) try {
             // put new entry into database
             sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
             ResultURLs.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
-            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + UTF8.String(entry.hash()) + ":" + metadata.url().toNormalform(false, true));
+            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true));
 
             // ready for more
             prop.put("delay", "10");
@@ -162,13 +170,14 @@ public final class crawlReceipt {
                 youare.getBytes(),
                 null,
                 0,
-                result + ":" + reason);
+                FailCategory.FINAL_LOAD_CONTEXT,
+                result + ":" + reason, -1);
         //switchboard.noticeURL.remove(receivedUrlhash);
         prop.put("delay", "3600");
         return prop;
-	
+
          // return rewrite properties
-	
+
     }
 
 }

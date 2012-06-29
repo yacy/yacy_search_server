@@ -5,14 +5,13 @@ import java.util.Date;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
-
-import de.anomic.search.Switchboard;
+import net.yacy.peers.EventChannel;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyChannel;
 
 public class feed {
- 
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
@@ -24,7 +23,7 @@ public class feed {
         prop.put("item", "0");
 
         if ((post == null) || (env == null)) return prop;
-        final boolean authorized = sb.verifyAuthentication(header, false);
+        final boolean authorized = sb.verifyAuthentication(header);
 
         final String channelNames = post.get("set");
         if (channelNames == null) return prop;
@@ -32,17 +31,21 @@ public class feed {
 
         int messageCount = 0;
         int messageMaxCount = Math.min(post.getInt("count", 100), 1000);
- 
-        channelIteration: for (final String channel: channels) {
-            // prevent that unauthorized access to this servlet get results from private data
-            if ((!authorized) && (yacyChannel.privateChannels.contains(channel))) continue channelIteration; // allow only public channels if not authorized
 
-            if ("TEST".equals(channel)) {
+        channelIteration: for (final String channelName: channels) {
+            // prevent that unauthorized access to this servlet get results from private data
+
+            final EventChannel channel = EventChannel.valueOf(channelName);
+            if (channel == null) continue channelIteration;
+
+            if (!authorized && EventChannel.privateChannels.contains(channel)) continue channelIteration; // allow only public channels if not authorized
+
+            if ("TEST".equals(channelName)) {
                 // for interface testing return at least one single result
                 prop.putXML("channel_title", "YaCy News Testchannel");
                 prop.putXML("channel_description", "");
                 prop.put("channel_pubDate", (new Date()).toString());
-                prop.putXML("item_" + messageCount + "_title", channel + ": " + "YaCy Test Entry " + (new Date()).toString());
+                prop.putXML("item_" + messageCount + "_title", channelName + ": " + "YaCy Test Entry " + (new Date()).toString());
                 prop.putXML("item_" + messageCount + "_description", "abcdefg");
                 prop.putXML("item_" + messageCount + "_link", "http://yacy.net");
                 prop.put("item_" + messageCount + "_pubDate", (new Date()).toString());
@@ -51,9 +54,9 @@ public class feed {
                 messageMaxCount--;
                 continue channelIteration;
             }
-            
+
             // read the channel
-            final RSSFeed feed = yacyChannel.channels(channel);
+            final RSSFeed feed = EventChannel.channels(channel);
             if (feed == null || feed.isEmpty()) continue channelIteration;
 
             RSSMessage message = feed.getChannel();
@@ -67,11 +70,11 @@ public class feed {
                 if (message == null) continue;
 
                 // create RSS entry
-                prop.putXML("item_" + messageCount + "_title", channel + ": " + message.getTitle());
+                prop.putXML("item_" + messageCount + "_title", channelName + ": " + message.getTitle());
                 prop.putXML("item_" + messageCount + "_description", message.getDescription());
                 prop.putXML("item_" + messageCount + "_link", message.getLink());
                 prop.put("item_" + messageCount + "_pubDate", message.getPubDate());
-                prop.put("item_" + messageCount + "_guid", message.getGuid());
+                prop.putXML("item_" + messageCount + "_guid", message.getGuid());
                 messageCount++;
                 messageMaxCount--;
             }
@@ -82,5 +85,5 @@ public class feed {
         // return rewrite properties
         return prop;
     }
- 
+
 }

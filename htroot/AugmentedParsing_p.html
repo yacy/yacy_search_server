@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Augmented Parsing</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Settings">
+    #%env/templates/header.template%#
+    #%env/templates/submenuSemantic.template%#
+    <h2>Augmented Parsing</h2>
+    
+    <form id="parsersettings" action="AugmentedParsing_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend id="urlproxy">Global Status</legend>
+<p>
+  With this settings you can activate or deactivate augmented parsing which combines the documents with information from external sources (tags etc.).
+</p>
+
+            <dl>
+            
+            <dt><label for="content">Augmented Parser:</label></dt>
+              <dd>
+                <input type="checkbox" name="augmentedparserenabled" id="augmentedparserenabled" #(augmentedparserenabled_checked)#:: checked="checked"#(/augmentedparserenabled_checked)# />Enabled<br/>
+                <p class="help">
+                  Globally enables or disables the augmented parser. This setting requires a restart.
+                </p>
+              </dd>
+              
+              <dt><label for="content">Augmented Parser - RDFa:</label></dt>
+              <dd>
+                <input type="checkbox" name="augmentedparserRDFenabled" id="augmentedparserRDFenabled" #(augmentedparserRDFenabled_checked)#:: checked="checked"#(/augmentedparserRDFenabled_checked)# />Enabled<br/>
+                <p class="help">
+                  Globally enables or disables the RDFa parser. This setting requires a restart.
+                </p>
+              </dd>
+              
+              
+            </dl>
+
+	
+            <input type="submit" name="augmentedparserSettings" value="Submit"/>
+</fieldset>
+</form>
+
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

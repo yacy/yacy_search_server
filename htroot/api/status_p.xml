@@ -1,32 +1,52 @@
 <?xml version="1.0"?>
 <status>
   <ppm>#[ppm]#</ppm>
+  
   <wordCacheSize>#[wordCacheSize]#</wordCacheSize>
   <wordCacheMaxSize>#[wordCacheMaxSize]#</wordCacheMaxSize>
-  
-  <loaderqueue>
-    <size>#[loaderSize]#</size>
-    <max>#[loaderMax]#</max>
-  </loaderqueue>
-  <localcrawlerqueue>
-    <size>#[localCrawlSize]#</size>
-  </localcrawlerqueue>
-  <limitcrawlerqueue>
-    <size>#[limitCrawlSize]#</size>
-  </limitcrawlerqueue>
-  <remotecrawlerqueue>
-    <size>#[remoteCrawlSize]#</size>
-  </remotecrawlerqueue>
 
   <memory>
     <free>#[freeMemory]#</free>
     <total>#[totalMemory]#</total>
     <max>#[maxMemory]#</max>
   </memory>
+  
   <processors>#[processors]#</processors>
+  
   <traffic>
 	<in>#[trafficIn]#</in>
 	<proxy>#[trafficProxy]#</proxy>
 	<crawler>#[trafficCrawler]#</crawler>
   </traffic>
+  
+  <dbsize>
+    <urlpublictext>#[urlpublictextSize]#</urlpublictext>
+    <rwipublictext>#[rwipublictextSize]#</rwipublictext>
+  </dbsize>
+  
+  <loaderqueue>
+    <size>#[loaderSize]#</size>
+    <max>#[loaderMax]#</max>
+  </loaderqueue>
+  
+  <localcrawlerqueue>
+    <size>#[localCrawlSize]#</size>
+    <state>#[localCrawlState]#</state>
+  </localcrawlerqueue>
+  
+  <limitcrawlerqueue>
+    <size>#[limitCrawlSize]#</size>
+    <state>#[limitCrawlState]#</state>
+  </limitcrawlerqueue>
+  
+  <remotecrawlerqueue>
+    <size>#[remoteCrawlSize]#</size>
+    <state>#[remoteCrawlState]#</state>
+  </remotecrawlerqueue>
+  
+  <noloadcrawlerqueue>
+    <size>#[noloadCrawlSize]#</size>
+    <state>#[noloadCrawlState]#</state>
+  </noloadcrawlerqueue>
+  
 </status>

@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Federated Index</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexFederated_p">
+<div id="api">
+<a href="/api/schema_p.xml">
+<img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
+<span>The solr schema can also be retrieved as xml here. Click the API icon to see the xml. Just copy this xml to solr/conf/schema.xml to configure solr.</span>
+</div>	
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>Federated Index</h2>
+    <p>
+      YaCy supports multiple index storage locations. At this time only the YaCy-internal search index can be used for the YaCy search interface
+      A Solr index storage location is optional. The local index storage location can be disabled.
+    </p>
+    
+    <form action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+      <legend>
+        The built-in search index can either be 'classic' (as before YaCy 1.03), 'solr' (experimental since 1.03) and 'off' (useful only if a remote solr index is used)
+      </legend>
+      <dl>
+      <dt><input type="radio" name="yacy.indexing" value="classic" id="yacy.indexing.engine.classic" #(yacy.indexing.engine.classic.checked)#:: checked="checked"#(/yacy.indexing.engine.classic.checked)# /></dt><dd>embedded 'classic' search index</dd>
+      <dt><input type="radio" name="yacy.indexing" value="solr" id="yacy.indexing.engine.solr" #(yacy.indexing.engine.solr.checked)#:: checked="checked"#(/yacy.indexing.engine.solr.checked)# /></dt><dd>embedded solr search index</dd>
+      <dt><input type="radio" name="yacy.indexing" value="off" id="yacy.indexing.engine.off" #(yacy.indexing.engine.off.checked)#:: checked="checked"#(/yacy.indexing.engine.off.checked)# /></dt><dd>no local index</dd>
+      <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>
+      </dl>
+      </fieldset>
+
+      <fieldset>
+      <legend>
+        <input type="checkbox" name="solr.indexing.solrremote" id="solr.indexing.solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# />
+        <label for="p2p">Remote Solr Search Index</label>
+      </legend>
+      You can set one or more Solr targets here. If you wish to set several targets, then list them in the 'Solr URL' field using a ',' (comma) as separator.
+
+      <div align="left">
+      <dl>
+      #(table)#::
+        <dt class="TableCellDark">Solr Hosts</dt>
+        <dd>
+      <div>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td><strong>Solr Host Administration Interface</strong><br/></td>
+        <td><strong>Index Size</strong></td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td><a href="#[url]#">#[url]#</a></td>
+        <td align="right">#[size]#</td>
+      </tr>
+      #{/list}#
+      </table>
+      </div>
+        </dd>
+      #(/table)#
+        <dt class="TableCellDark">Solr URL(s)</dt>
+        <dd><textarea rows="5" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea></dd>
+        <dt class="TableCellDark">Commit-Within (milliseconds)</dt>
+        <dd><input type="text" size="6" maxlength="6" value="#[solr.indexing.commitWithinMs]#"  name="solr.indexing.commitWithinMs" id="solr.indexing.commitWithinMs"/></dd>
+        <dt class="TableCellDark">Sharding Method</dt>
+        <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.sharding]#" name="solr.indexing.sharding" id="solr.indexing.sharding" disabled="disabled"/></dd>
+        <dt class="TableCellDark">Scheme</dt>
+        <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.schemefile]#" name="solr.indexing.schemefile" id="solr.indexing.schemefile" disabled="disabled"/></dd>
+      </dl>
+      </div>
+      <div>
+          <h3>Index Scheme</h3><p>If you use a custom Solr schema you may enter a different field name in the column 'Custom Solr Field Name' of the YaCy default attribute name</p>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Active</td>
+        <td>Attribute</td>
+        <td>Custom Solr Field Name</td>
+        <td>Comment</td>
+      </tr>
+      #{scheme}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td align="center"><input type="checkbox" name="scheme_#[key]#" value="checked" #(checked)#::checked="checked"#(/checked)#/></td>
+        <td align="left">#[key]#</td>
+        <td align="left"><input type="text" name="scheme_solrfieldname_#[key]#" value="#[solrfieldname]#"/></td>
+        <td align="left">#[comment]#</td>
+      </tr>
+      #{/scheme}#
+      </table>
+      </div>
+    </fieldset>
+      <input type="submit" name="set" value="Set" />
+    </form>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -26,10 +26,7 @@ import net.yacy.cora.protocol.ResponseHeader;
 public class servletProperties extends serverObjects {
 
     private static final long serialVersionUID = 1L;
-    
-    public static final String ACTION_AUTHENTICATE = "AUTHENTICATE";
-    public static final String ACTION_LOCATION = "LOCATION";
-    
+
     public static final String PEER_STAT_VERSION = "version";
     public static final String PEER_STAT_UPTIME = "uptime";
     public static final String PEER_STAT_MYTIME = "mytime";
@@ -37,56 +34,62 @@ public class servletProperties extends serverObjects {
     public static final String PEER_STAT_CLIENTID = "clientid";
 
     private String prefix="";
-    
+
     private  ResponseHeader outgoingHeader;
-    
+
     public servletProperties(){
         super();
     }
-    
+
     public servletProperties(final serverObjects so) {
         super(so);
     }
-    
+
     public void setOutgoingHeader(final ResponseHeader outgoingHeader) {
         this.outgoingHeader = outgoingHeader;
     }
-    
+
     public ResponseHeader getOutgoingHeader() {
-        if(outgoingHeader == null)
-            return new ResponseHeader();
-        return outgoingHeader;
+        if (this.outgoingHeader == null) return new ResponseHeader(200);
+        return this.outgoingHeader;
     }
-    
+
     public void setPrefix(final String myprefix) {
-        prefix=myprefix;
+        this.prefix=myprefix;
     }
-    
+
+    @Override
     public String put(final String key, final byte[] value) {
-        return super.put(prefix + key, value);
+        return super.put(this.prefix + key, value);
     }
-    
+
+    @Override
     public long put(final String key, final long value) {
-        return super.put(prefix + key, value);
+        return super.put(this.prefix + key, value);
     }
-    
+
+    @Override
     public long inc(final String key) {
-        return super.inc(prefix+key);
+        return super.inc(this.prefix+key);
     }
-    
+
+    @Override
     public Object get(final String key, final Object dflt) {
-        return super.get(prefix+key, dflt);
+        return super.get(this.prefix+key, dflt);
     }
-    
+
+    @Override
     public String get(final String key, final String dflt) {
-        return super.get(prefix+key, dflt);
+        return super.get(this.prefix+key, dflt);
     }
-    
+
+    @Override
     public int getInt(final String key, final int dflt) {
-        return super.getInt(prefix+key, dflt);
+        return super.getInt(this.prefix+key, dflt);
     }
-    
+
+    @Override
     public long getLong(final String key, final long dflt) {
-        return super.getLong(prefix+key, dflt);
+        return super.getLong(this.prefix+key, dflt);
     }
 }

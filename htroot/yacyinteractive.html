@@ -9,7 +9,7 @@
 <link media="screen" type="text/css" href="/yacy/ui/css/autocomplete.css" rel="stylesheet" />  
 </head>
 <body>
-<script type="text/javascript" src="/yacy/ui/js/jquery.autocomplete.js"></script>
+<script type="text/javascript" src="/yacy/ui/js/jquery.autocomplete.yacy.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
         $('#search').autocomplete('/suggest.json', {parse: opensearch, delay: 0, selectFirst: false, scroll: false, max: 30});  
@@ -30,12 +30,6 @@
         };
       });
     </script>
-<script type="text/javascript">
-//<![CDATA[
-var q = "#[query]#";
-if (q != "") search(q);
-//]]>
-</script>
 #(topmenu)#
 #%env/templates/embeddedheader.template%#
 ::
@@ -54,13 +48,21 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 #%env/templates/simpleheader.template%#
 #(/topmenu)#
 <div>
-<form class="search small" id="searchform" action="yacyinteractive.html" method="get" onkeyup="xmlhttpPost(); return false;">
+<form class="search small" id="searchform" action="yacyinteractive.html" method="get" #(allowrealtime)#onsubmit="document.getElementById('searchnavigation').innerHTML = '<div>loading from local index...</div>'"::onkeyup="xmlhttpPost(); return false;"#(/allowrealtime)#>
   <h2>#[promoteSearchPageGreeting]#</h2>
   <div class="yacylogo">
     <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch"/></a>
   </div>
   <fieldset class="yacys">
-  <input id="search" name="query" type="text" value="#[query]#" size="50" maxlength="80" />
+  <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
+  <input type="hidden" name="startRecord" value="#[startRecord]#" />
+  <input type="hidden" name="verify", value="false" />
+  <input type="hidden" name="resource", value="local" />
+  <input type="hidden" name="contentdom", value="all" />
+  <input id="search" class="searchinput" name="query" type="text" value="#[query]#" size="40" maxlength="80" onFocus="this.select()" />
+  #(allowrealtime)#
+  <input id="Enter" type="submit" name="Enter" value="Search" />::
+  #(/allowrealtime)#
   </fieldset>
   <!--<pre>Raw JSON String: <div id="raw"></div></pre>-->
 </form>
@@ -70,9 +72,20 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 <div id="searchresults" style="clear:both;">
 <!-- <div><img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph" width="660" height="240"/></div> -->
 </div>
+<div id="serverlist" style="clear:both;">
+#(serverlist)#::
+<!--#include virtual="ServerScannerList.html?embedded=" -->
+#(/serverlist)#
+</div>
 <script type="text/javascript">
 //<![CDATA[
-document.getElementById("query").focus();
+var q = "#[query]#";
+var s = "#[startRecord]#";
+var m = "#[maximumRecords]#";
+if (q != "") search(q, m, s);
+#(focus)#::
+document.getElementById("search").focus();
+#(/focus)#
 //]]>
 </script>
 #%env/templates/footer.template%#

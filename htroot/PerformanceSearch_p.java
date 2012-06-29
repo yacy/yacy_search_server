@@ -28,11 +28,11 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.EventTracker;
+import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.search.EventTracker;
 
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class PerformanceSearch_p {
     
@@ -44,11 +44,11 @@ public class PerformanceSearch_p {
         int c = 0;
         if (events != null) {
             EventTracker.Event event;
-            ProfilingGraph.searchEvent search;
+            ProfilingGraph.EventSearch search;
             long lastt = 0;
             while (events.hasNext()) {
                 event = events.next();
-                search = (ProfilingGraph.searchEvent) event.payload;
+                search = (ProfilingGraph.EventSearch) event.payload;
                 prop.put("table_" + c + "_query", search.queryID);
                 prop.put("table_" + c + "_event", search.processName.name());
                 prop.put("table_" + c + "_comment", search.comment);

@@ -2,7 +2,7 @@
  *  Index
  *  Copyright 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 26.10.2005 at http://yacy.net
- *  
+ *
  *  $LastChangedDate$
  *  $LastChangedRevision$
  *  $LastChangedBy$
@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -25,10 +25,12 @@
 package net.yacy.kelondro.index;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.cora.order.CloneableIterator;
 
 
 public interface Index extends Iterable<Row.Entry> {
@@ -41,13 +43,14 @@ public interface Index extends Iterable<Row.Entry> {
     public byte[] smallestKey();
     public byte[] largestKey();
     public boolean has(byte[] key); // use this only if there is no get in case that has returns true
-    public Row.Entry get(byte[] key) throws IOException;
+    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, boolean forcecopy) throws IOException, InterruptedException;
+    public Row.Entry get(byte[] key, boolean forcecopy) throws IOException;
     public Row.Entry replace(Row.Entry row) throws RowSpaceExceededException, IOException;
-    
+
     /**
      * Adds the row to the index. The row is identified by the primary key of the row.
      * @param row a index row
-     * @return true if this set did _not_ already contain the given row. 
+     * @return true if this set did _not_ already contain the given row.
      * @throws IOException
      * @throws RowSpaceExceededException
      */

@@ -9,7 +9,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -24,9 +24,9 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.TreeSet;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
@@ -38,32 +38,31 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.ISO639;
-
-import de.anomic.search.QueryParams;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
+import net.yacy.peers.Network;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
+import net.yacy.search.query.QueryParams;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 
 public final class timeline {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
-        
+
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        
+
         Segment segment = null;
         if (post.containsKey("segment") && authenticated) {
             segment = sb.indexSegments.segment(post.get("segment"));
         } else {
             segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
-        
+
         final String  querystring = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final int     count  = Math.min((authenticated) ? 1000 : 10, post.getInt("maximumRecords", 1000)); // SRU syntax
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
@@ -75,22 +74,22 @@ public final class timeline {
             language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
-        final TreeSet<String>[] query = QueryParams.cleanQuery(querystring); // converts also umlaute
+        final Collection<String>[] query = QueryParams.cleanQuery(querystring); // converts also umlaute
         HandleSet q = Word.words2hashesHandles(query[0]);
-        
+
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
 
         // prepare search
         final long timestamp = System.currentTimeMillis();
-        
+
         // prepare an abstract result
         int indexabstractContainercount = 0;
         int joincount = 0;
 
         // retrieve index containers
         //yacyCore.log.logInfo("INIT TIMELINE SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + count + " links");
-        
+
         // get the index container with the result vector
         TermSearch<WordReference> search = null;
         try {
@@ -99,7 +98,7 @@ public final class timeline {
             Log.logException(e);
         }
         ReferenceContainer<WordReference> index = search.joined();
-        
+
         Iterator<WordReference> i = index.entries();
         WordReference entry;
         int c = 0;
@@ -117,14 +116,14 @@ public final class timeline {
             c++;
         }
         prop.put("event", c);
-        
+
         // log
-        yacyCore.log.logInfo("EXIT TIMELINE SEARCH: " +
+        Network.log.logInfo("EXIT TIMELINE SEARCH: " +
                 QueryParams.anonymizedQueryHashes(q) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");
- 
+
         return prop;
     }
 

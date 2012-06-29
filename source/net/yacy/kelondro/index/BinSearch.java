@@ -26,7 +26,13 @@
 
 package net.yacy.kelondro.index;
 
-import net.yacy.kelondro.order.ByteOrder;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import net.yacy.cora.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
 
 
@@ -35,7 +41,7 @@ public final class BinSearch {
     private final byte[] chunks;
     private final int    chunksize;
     private final int    count;
-    private static final ByteOrder objectOrder = new NaturalOrder(true);
+    private static final ByteOrder objectOrder = new NaturalOrder(true); // the natural order is much faster than the b64Order
     
     public BinSearch(final byte[] chunks, final int chunksize) {
         this.chunks = chunks;
@@ -43,23 +49,36 @@ public final class BinSearch {
         this.count = chunks.length / chunksize;
     }
     
+    public BinSearch(final List<byte[]> chunkList, final int chunksize) {
+        byte[][] chunksa = new byte[chunkList.size()][];
+        chunksa = chunkList.toArray(chunksa);
+        Arrays.sort(chunksa, objectOrder);
+        this.chunks = new byte[chunkList.size() * chunksize];
+        for (int i = 0; i < chunksa.length; i++) System.arraycopy(chunksa[i], 0, this.chunks, i * chunksize, chunksize);
+        this.chunksize = chunksize;
+        this.count = chunks.length / chunksize;
+        assert this.count == chunkList.size();
+    }
+    
     public final boolean contains(final byte[] t) {
         return contains(t, 0, this.count);
     }
 
-    private final synchronized boolean contains(final byte[] t, final int beginPos, final int endPos) {
+    private final boolean contains(final byte[] t, int beginPos, int endPos) {
         // the endPos is exclusive, beginPos is inclusive
         // this method is synchronized to make the use of the buffer possible
         assert t.length == this.chunksize;
-        if (beginPos >= endPos) return false;
-        final int pivot = (beginPos + endPos) / 2;
-        if ((pivot < 0) || (pivot >= this.count)) return false;
-        assert this.chunksize == t.length;
-        final int c = objectOrder.compare(this.chunks, pivot * this.chunksize, t, 0, this.chunksize);
-        if (c == 0) return true;
-        if (c < 0) /* buffer < t */ return contains(t, pivot + 1, endPos);
-        if (c > 0) /* buffer > t */ return contains(t, beginPos, pivot);
-        return false;
+        while (true) {
+            if (beginPos >= endPos) return false;
+            final int pivot = (beginPos + endPos) / 2;
+            if ((pivot < 0) || (pivot >= this.count)) return false;
+            assert this.chunksize == t.length;
+            final int c = objectOrder.compare(this.chunks, pivot * this.chunksize, t, 0, this.chunksize);
+            if (c == 0) return true;
+            if (c < 0) /* buffer < t */ {beginPos = pivot + 1; continue;}
+            if (c > 0) /* buffer > t */ {endPos = pivot; continue;}
+            return false;
+        }
     }
     
     public final int size() {
@@ -70,6 +89,19 @@ public final class BinSearch {
         final byte[] a = new byte[chunksize];
         System.arraycopy(this.chunks, element * this.chunksize, a, 0, chunksize);
         return a;
+    }
+    
+    public final byte[] get(final int element, byte[] a) {
+        assert a.length == chunksize;
+        System.arraycopy(this.chunks, element * this.chunksize, a, 0, chunksize);
+        return a;
+    }
+    
+    public final void write(File f) throws IOException {
+        FileOutputStream os = new FileOutputStream(f);
+        os.write(this.chunks);
+        os.flush();
+        os.close();
     }
     
     public static void main(final String[] args) {

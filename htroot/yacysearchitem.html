@@ -9,7 +9,9 @@
     <img width="16" height="9" src="/env/grafics/heuristic_new.gif" title="heuristic:#[name]# (new link)" style="width:16px; height:9px;" alt="heuristic:#[name]# (new link)"/>
     #(/heuristic)#
     #(authorized)#::
-    <a href="/Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img width="11" height="11" src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" class="recommendIcon" /></a>
+    #(bookmark)#::
+      <a href="#[bookmarklink]#" class="bookmarklink" title="recommend"><img width="11" height="11" src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" class="recommendIcon" /></a>
+    #(/bookmark)#
     #(recommend)#
       <img width="11" height="11" src="/env/grafics/empty.gif" title="" alt="recommend" class="recommendIcon" />
       <img width="11" height="11" src="/env/grafics/empty.gif" title="" alt="delete" class="deleteIcon" />
@@ -24,36 +26,35 @@
   <p class="urlinfo">
   #(showDate)#::#[date]##(/showDate)#
   #(showSize)#::&nbsp;|&nbsp;#[sizename]##(/showSize)#
-  #(showMetadata)#::&nbsp;|&nbsp;<a href="api/yacydoc.html?urlhash=#[urlhash]#" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a>#(/showMetadata)#
-  #(showParser)#::&nbsp;|&nbsp;<a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#&amp">Parser</a>#(/showParser)#
-  #(showPictures)#::&nbsp;|&nbsp;<a href="yacysearch.html?cat=image&amp;url=#[link]#&amp;query=#[former]#">Pictures</a></p>#(/showPictures)#
+  #(showMetadata)#::&nbsp;|&nbsp;<a href="api/yacydoc.html?urlhash=#[urlhash]#" target="_blank" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a>#(/showMetadata)#
+  #(showParser)#::&nbsp;|&nbsp;<a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#&amp" target="_blank">Parser</a>#(/showParser)#
+  #(showPictures)#::&nbsp;|&nbsp;<a href="yacysearch.html?cat=image&amp;url=#[link]#&amp;query=#[former]#">Pictures</a>#(/showPictures)#
+  #(showCache)#::&nbsp;|&nbsp;<a href="CacheResource_p.html?url=#[link]#" target="_blank">Cache</a>#(/showCache)#
+  #(showProxy)#::&nbsp;|&nbsp;<a href="proxy.html?url=#[link]#" target="_blank">Augmented Browsing</a>#(/showProxy)#
+  #(showTags)#::<br/><!--#include virtual="/currentyacypeer/interaction_elements/Tag_part.html?hash=#[urlhash]#&amp;url=#[url]#" -->#(/showTags)#
+  </p>
   </div>
   ::
   #(item)#::<div class="thumbcontainer">
-    <a href="#[hrefCache]#" class="thumblink" onclick="return hs.expand(this)">
-      <img src="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#" alt="#[name]#" />
+    <a href="#[hrefCache]#" target="#[target]#" class="thumblink" onclick="return hs.expand(this)">
+      <!-- <img src="/ViewImage.png?maxwidth=128&amp;maxheight=128&amp;code=#[code]#" alt="#[name]#" /> -->
+      <img src="#[href]#" width="128" height="128" alt="#[name]#" />
     </a>
-    <div class="highslide-caption"><a href="#[href]#">#[name]#</a><br /><a href="#[source]#">#[sourcedom]#</a></div>
+    <div class="highslide-caption"><a href="#[href]#" target="#[target]#">#[name]#</a><br /><a href="#[source]#" target="#[target]#">#[sourcedom]#</a></div>
     <!--
     <div class="TableCellDark"><a href="#[href]#">#[name]#</a><br />#[attr]#</div>
     -->
   </div>#(/item)#
   ::
-  #{items}#
-  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>
-  #{/items}#
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#
   ::
-  #{items}#
-  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>
-  #{/items}#
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#
   ::
-  #{items}#
-  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>
-  #{/items}#
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#
 #(/content)#
 
 <script type="text/javascript">
-statistics("#[offset]#", "#[itemscount]#", "#[totalcount]#", "#[localResourceSize]#", "#[remoteResourceSize]#", "#[remoteIndexCount]#", "#[remotePeerCount]#");
+statistics("#[offset]#", "#[itemscount]#", "#[itemsperpage]#", "#[totalcount]#", "#[localResourceSize]#", "#[remoteResourceSize]#", "#[remoteIndexCount]#", "#[remotePeerCount]#", "#[navurlBase]#");
 progressbar.step(1);
 </script>
 

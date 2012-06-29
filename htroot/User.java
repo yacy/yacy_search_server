@@ -1,4 +1,4 @@
-//User.java 
+//User.java
 //-----------------------
 //part of the AnomicHTTPD caching proxy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -33,16 +33,15 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
-
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.data.UserDB;
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
 public class User{
-    
+
     public static servletProperties respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final Switchboard sb = Switchboard.getSwitchboard();
@@ -52,6 +51,8 @@ public class User{
         prop.put("logged_in", "0");
         prop.put("logged-in_limit", "0");
         prop.put("status", "0");
+        prop.put("logged-in_username", "");
+        prop.put("logged-in_returnto", "");
         //identified via HTTPPassword
         entry=sb.userDB.proxyAuth((requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
@@ -68,7 +69,7 @@ public class User{
                 }
             }
         }
-        
+
         //identified via userDB
         if(entry != null){
             prop.put("logged-in", "1");
@@ -86,16 +87,19 @@ public class User{
                 prop.put("logged-in_limit_percent2", (100-percent)/3);
             }
         //logged in via static Password
-        }else if(sb.verifyAuthentication(requestHeader, true)){
+        }else if(sb.verifyAuthentication(requestHeader)){
             prop.put("logged-in", "2");
         //identified via form-login
         //TODO: this does not work for a static admin, yet.
         }else if(post != null && post.containsKey("username") && post.containsKey("password")){
+        	if (post.containsKey("returnto"))
+        		prop.putHTML("logged-in_returnto", post.get("returnto"));
             final String username=post.get("username");
             final String password=post.get("password");
-            
+            prop.put("logged-in_username", username);
+
             entry=sb.userDB.passwordAuth(username, password);
-            final boolean staticAdmin = sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").equals(
+            final boolean staticAdmin = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").equals(
                     Digest.encodeMD5Hex(
                             Base64Order.standardCoder.encodeString(username + ":" + password)
                     )
@@ -106,12 +110,12 @@ public class User{
                 cookie=sb.userDB.getCookie(entry);
             else if(staticAdmin)
                 cookie=sb.userDB.getAdminCookie();
-                
+
             if(entry != null || staticAdmin){
-                final ResponseHeader outgoingHeader=new ResponseHeader();
+                final ResponseHeader outgoingHeader=new ResponseHeader(200);
                 outgoingHeader.setCookie("login", cookie);
                 prop.setOutgoingHeader(outgoingHeader);
-                
+
                 prop.put("logged-in", "1");
                 prop.put("logged-in_identified-by", "1");
                 prop.putHTML("logged-in_username", username);
@@ -120,7 +124,7 @@ public class User{
                 }
             }
         }
-        
+
         if(post!= null && entry != null){
         		if(post.containsKey("changepass")){
         			prop.put("status", "1"); //password
@@ -153,7 +157,10 @@ public class User{
             }
             //XXX: This should not be needed anymore, because of isLoggedout
             if(! (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
-                prop.put("AUTHENTICATE","admin log-in");
+            	prop.authenticationRequired();
+            }
+            if(post.containsKey("returnto")){
+                prop.put("LOCATION", post.get("returnto"));
             }
         }
         // return rewrite properties

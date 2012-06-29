@@ -141,4 +141,12 @@ public class SentenceReader implements Iterator<StringBuilder> {
     public void remove() {
         throw new UnsupportedOperationException();
     }
+    
+    public synchronized void close() {
+    	try {
+    		raf.close();
+    	} catch(IOException ioe) {
+    		// Ignore IO Exceptions
+    	}
+    }
 }

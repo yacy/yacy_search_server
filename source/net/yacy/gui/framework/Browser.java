@@ -2,7 +2,7 @@
  *  Browser
  *  Copyright 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 05.08.2010 at http://yacy.net
- *  
+ *
  *  $LastChangedDate$
  *  $LastChangedRevision$
  *  $LastChangedBy$
@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -61,11 +61,17 @@ public class Browser {
         // check operation system type
         final Properties sysprop = System.getProperties();
         final String sysname = sysprop.getProperty("os.name","").toLowerCase();
-        if (sysname.startsWith("mac os x")) systemOS = systemMacOSX;
-        else if (sysname.startsWith("mac os")) systemOS = systemMacOSC;
-        else if (sysname.startsWith("windows")) systemOS = systemWindows;
-        else if ((sysname.startsWith("linux")) || (sysname.startsWith("unix"))) systemOS = systemUnix;
-        else systemOS = systemUnknown;
+        if (sysname.startsWith("mac os x")) {
+            systemOS = systemMacOSX;
+        } else if (sysname.startsWith("mac os")) {
+            systemOS = systemMacOSC;
+        } else if (sysname.startsWith("windows")) {
+            systemOS = systemWindows;
+        } else if ((sysname.startsWith("linux")) || (sysname.startsWith("unix"))) {
+            systemOS = systemUnix;
+        } else {
+            systemOS = systemUnknown;
+        }
 
         isMacArchitecture = ((systemOS == systemMacOSC) || (systemOS == systemMacOSX));
         isUnixFS = ((systemOS == systemMacOSX) || (systemOS == systemUnix));
@@ -74,9 +80,13 @@ public class Browser {
         isWin32 = (isWindows && System.getProperty("os.arch", "").contains("x86"));
 
         // set up maximum path length according to system
-        if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
+        if (isWindows) {
+            maxPathLength = 255;
+        } else {
+            maxPathLength = 65535;
+        }
     }
-    
+
     public static void openBrowser(final String url) {
         boolean head = System.getProperty("java.awt.headless", "").equals("false");
         try {
@@ -93,11 +103,13 @@ public class Browser {
             } else {
                 throw new RuntimeException("System unknown");
             }
-        } catch (Exception e) {
-            if (head) try {
-                openBrowserJava(url);
-            } catch (Exception ee) {
-                logBrowserFail(url, ee);
+        } catch (Throwable e) {
+            if (head) {
+                try {
+                    openBrowserJava(url);
+                } catch (Exception ee) {
+                    logBrowserFail(url, ee);
+                }
             } else {
                 logBrowserFail(url, e);
             }
@@ -107,18 +119,22 @@ public class Browser {
     private static void openBrowserJava(final String url) throws Exception {
         Desktop.getDesktop().browse(new URI(url));
     }
-    
+
     private static void openBrowserMac(final String url) throws Exception {
         Process p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open location \"" + url + "\""});
         p.waitFor();
-        if (p.exitValue() != 0) throw new RuntimeException("Mac Exec Error: " + errorResponse(p));
+        if (p.exitValue() != 0) {
+            throw new RuntimeException("Mac Exec Error: " + errorResponse(p));
+        }
     }
-    
+
     private static void openBrowserUnixFirefox(final String url) throws Exception {
         String cmd = "firefox -remote openURL(" + url + ")";
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
-        if (p.exitValue() != 0) throw new RuntimeException("Unix Exec Error/Firefox: " + errorResponse(p));
+        if (p.exitValue() != 0) {
+            throw new RuntimeException("Unix Exec Error/Firefox: " + errorResponse(p));
+        }
     }
     /*
     private static void openBrowserUnixGeneric(final String url) throws Exception {
@@ -131,19 +147,24 @@ public class Browser {
     private static void openBrowserWin(final String url) throws Exception {
         // see forum at http://forum.java.sun.com/thread.jsp?forum=57&thread=233364&message=838441
         String cmd;
-        if (System.getProperty("os.name").contains("2000")) cmd = "rundll32 url.dll,FileProtocolHandler " + url;
-        else cmd = "rundll32 url.dll,FileProtocolHandler \"" + url + "\"";
+        if (System.getProperty("os.name").contains("2000")) {
+            cmd = "rundll32 url.dll,FileProtocolHandler " + url;
+        } else {
+            cmd = "rundll32 url.dll,FileProtocolHandler \"" + url + "\"";
+        }
         //cmd = "cmd.exe /c start javascript:document.location='" + url + "'";
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
-        if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
+        if (p.exitValue() != 0) {
+            throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
+        }
     }
 
-    private static void logBrowserFail(final String url, Exception e) {
-        if (e != null) Log.logException(e);
+    private static void logBrowserFail(final String url, Throwable e) {
+        //if (e != null) Log.logException(e);
         Log.logInfo("Browser", "please start your browser and open the following location: " + url);
     }
-    
+
     private static String errorResponse(final Process p) {
         final BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
         String line, error = "";
@@ -162,7 +183,7 @@ public class Browser {
             }
         }
     }
-    
+
     public static void main(final String[] args) {
         if ("-u".equals(args[0])) {
             openBrowser(args[1]);

@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Triplestore</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Settings">
+  
+<div id="api">
+<a href="/interaction/GetRDF.xml?global=" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>The information that is presented on this page can also be retrieved as XML
+Click the API icon to see the Triplestore.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
+</div>
+
+    #%env/templates/header.template%#
+    #%env/templates/submenuSemantic.template%#
+    <h2>Triplestore</h2>
+    
+    <form id="parsersettings" action="Triplestore_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend id="urlproxy">Triplestore</legend>
+<p>
+  With this settings you change the behavior of the jena-based Triplestore.
+</p>
+
+            <dl>
+            
+            <dt>Triplestore size:</dt>
+              <dd>
+                #[size]#
+              </dd>
+            
+            <dt><label for="content">Persistent store:</label></dt>
+              <dd>
+                <input type="checkbox" name="tspersistentenabled" id="tspersistentenabled" #(tspersistentenabled_checked)#:: checked="checked"#(/tspersistentenabled_checked)# />Enabled<br/>
+                <p class="help">
+                  If enabled, the Triplestore will save its content on shutdown on the filesystem and load it again on startup.
+                </p>
+              </dd>
+              
+       <!--       <dt><label for="author">Forward feedback to peer:</label></dt>
+              <dd>
+                <input type="text" name="feedbackforward" value="#[feedbackforward]#" size="60" /><br/><br/>
+                <p class="help">
+                  Feedback is forwarded to this peer.
+                </p>
+              </dd>
+              
+              <dt><label for="content">Store Feedback on this peer:</label></dt>
+              <dd>
+                <input type="checkbox" name="acceptfeedbackenabled" id="acceptfeedbackenabled" #(acceptfeedbackenabled_checked)#:: checked="checked"#(/acceptfeedbackenabled_checked)# />Enabled<br/>
+                <p class="help">
+                  If enabled, this peer will accept Feedback items and will NOT forward them.
+                </p>
+              </dd> -->
+                            
+              
+            </dl>
+
+	
+            <input type="submit" name="tsSettings" value="Submit"/>
+</fieldset>
+</form>
+
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

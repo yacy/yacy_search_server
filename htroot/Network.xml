@@ -19,8 +19,9 @@
     <receivedURLs>#[rU]#</receivedURLs>
     <type>#(type)#junior::senior::principal#(/type)#</type> 
     <direct>#(type_direct)#direct::passive#(/type_direct)#</direct> 
-    <acceptcrawl>#[acceptcrawl]#</acceptcrawl> 
+    <acceptcrawl>#[acceptcrawl]#</acceptcrawl>
     <dhtreceive>#[dhtreceive]#</dhtreceive>
+    <nodestate>#[nodestate]#</nodestate>
     <location>#[location]#</location>
     <seedurl>#[type_url]#</seedurl>
     #(complete)#
@@ -73,6 +74,7 @@
     <rurls>#[my-RCount]#</rurls> 
     <acceptcrawl>#[my-acceptcrawl]#</acceptcrawl>
     <acceptindex>#[my-dhtreceive]#</acceptindex>
+    <nodestate>#[my-nodestate]#</nodestate>
     <sentwords>#[my-sI]#</sentwords>
     <senturls>#[my-sU]#</senturls>
     <receivedwords>#[my-rI]#</receivedwords>

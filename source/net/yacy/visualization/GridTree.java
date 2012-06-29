@@ -5,12 +5,9 @@ import java.util.List;
 
 public class GridTree {
 
-    private String name, description;
     private List<GridTree> children;
     
-    public GridTree(String name, String description) {
-        this.name = name;
-        this.description = description;
+    public GridTree() {
         this.children = null;
     }
     

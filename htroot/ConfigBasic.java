@@ -1,4 +1,4 @@
-// ConfigBasic.java 
+// ConfigBasic.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -6,9 +6,9 @@
 // Frankfurt, Germany, 2006
 // Created 28.02.2006
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2011-11-25 12:23:52 +0100 (Fr, 25 Nov 2011) $
+// $LastChangedRevision: 8101 $
+// $LastChangedBy: orbiter $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,118 +37,116 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.workflow.InstantBusyThread;
-
-import de.anomic.data.WorkTables;
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.data.Translator;
-import de.anomic.http.server.HTTPDemon;
+import de.anomic.data.WorkTables;
 import de.anomic.http.server.HTTPDFileHandler;
-import de.anomic.net.UPnP;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
+import de.anomic.tools.UPnP;
 
 public class ConfigBasic {
-    
+
     private static final int NEXTSTEP_FINISHED  = 0;
     private static final int NEXTSTEP_PWD       = 1;
     private static final int NEXTSTEP_PEERNAME  = 2;
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws FileNotFoundException, IOException {
-        
+
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        final String langPath = env.getDataPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
+        final File langPath = new File(sb.getAppPath("locale.source", "locales").getAbsolutePath());
         String lang = env.getConfig("locale.language", "default");
-        
+
         final int authentication = sb.adminAuthenticated(header);
         if (authentication < 2) {
             // must authenticate
-            prop.put("AUTHENTICATE", "admin log-in"); 
+        	prop.authenticationRequired();
             return prop;
         }
-        
+
         // store this call as api call
         if (post != null && post.containsKey("set")) {
             sb.tables.recordAPICall(post, "ConfigBasic.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "basic settings");
         }
-        
+
         //boolean doPeerPing = false;
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
             InstantBusyThread.oneTimeJob(sb.yc, "peerPing", null, 0);
             //doPeerPing = true;
         }
-        
+
         // language settings
         if (post != null && post.containsKey("language")  && !lang.equals(post.get("language", "default")) &&
                 (Translator.changeLang(env, langPath, post.get("language", "default") + ".lng"))) {
             prop.put("changedLanguage", "1");
         }
-        
+
         // peer name settings
         final String peerName = (post == null) ? sb.peers.mySeed().getName() : post.get("peername", "");
-        
+
         // port settings
         final long port;
-        if (post != null && post.containsKey("port") && Integer.parseInt(post.get("port")) > 1023) {
+        if (post != null && post.getInt("port", 0) > 1023) {
             port = post.getLong("port", 8090);
         } else {
             port = env.getConfigLong("port", 8090); //this allows a low port, but it will only get one, if the user edits the config himself.
         }
 
         // check if peer name already exists
-        final yacySeed oldSeed = sb.peers.lookupByName(peerName);
-        if (oldSeed == null && !sb.peers.mySeed().getName().equals(peerName)) {
-            // the name is new
-            if (Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches()) {
-                sb.peers.mySeed().setName(peerName);
-            }
+        final Seed oldSeed = sb.peers.lookupByName(peerName);
+        if (oldSeed == null &&
+            !peerName.equals(sb.peers.mySeed().getName()) &&
+            Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches()) {
+            sb.peers.setMyName(peerName);
+            sb.peers.saveMySeed();
         }
-        
+
         // UPnP config
         final boolean upnp;
-        if(post != null && post.containsKey("port")) { // hack to allow checkbox
-        	upnp = post.containsKey("enableUpnp");
-        	if (upnp && !sb.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) {
-                    UPnP.addPortMapping();
-                }
-        	sb.setConfig(SwitchboardConstants.UPNP_ENABLED, upnp);
-        	if (!upnp) {
-                    UPnP.deletePortMapping();
-                }
+        if (post != null && post.containsKey("port")) { // hack to allow checkbox
+            upnp = post.containsKey("enableUpnp");
+            if (upnp && !sb.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) {
+                UPnP.addPortMapping();
+            }
+            sb.setConfig(SwitchboardConstants.UPNP_ENABLED, upnp);
+            if (!upnp) {
+                UPnP.deletePortMapping();
+            }
         } else {
             upnp = false;
         }
-        
+
         // check port
         final boolean reconnect;
         if (!(env.getConfigLong("port", port) == port)) {
             // validate port
             final serverCore theServerCore = (serverCore) env.getThread("10_httpd");
             env.setConfig("port", port);
-            
+
             // redirect the browser to the new port
             reconnect = true;
-            
+
             // renew upnp port mapping
             if (upnp) {
                 UPnP.addPortMapping();
             }
-            
+
             String host = null;
             if (header.containsKey(HeaderFramework.HOST)) {
                 host = header.get(HeaderFramework.HOST);
-                final int idx = host.indexOf(':');
+                final int idx = host.indexOf(':',0);
                 if (idx != -1) host = host.substring(0,idx);
             } else {
                 host = Domains.myPublicLocalIP().getHostAddress();
             }
-            
+
             prop.put("reconnect", "1");
             prop.put("reconnect_host", host);
             prop.put("nextStep_host", host);
@@ -156,11 +154,11 @@ public class ConfigBasic {
             prop.put("nextStep_port", port);
             prop.put("reconnect_sslSupport", theServerCore.withSSL() ? "1" : "0");
             prop.put("nextStep_sslSupport", theServerCore.withSSL() ? "1" : "0");
-            
+
             // generate new shortcut (used for Windows)
             //yacyAccessible.setNewPortBat(Integer.parseInt(port));
             //yacyAccessible.setNewPortLink(Integer.parseInt(port));
-            
+
             // force reconnection in 7 seconds
             theServerCore.reconnect(7000);
         } else {
@@ -177,13 +175,19 @@ public class ConfigBasic {
                 // switch to p2p mode
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+                // set default behavior for search verification
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh"); // nocache,iffresh,ifexist,cacheonly,false
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
             }
-            if ("portal".equals(post.get("usecase", "")) && !"webprotal".equals(networkName)) {
+            if ("portal".equals(post.get("usecase", "")) && !"webportal".equals(networkName)) {
                 // switch to webportal network
                 sb.switchNetwork("defaults/yacy.network.webportal.unit");
                 // switch to robinson mode
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                // set default behavior for search verification
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "ifexist"); // nocache,iffresh,ifexist,cacheonly,false
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
             }
             if ("intranet".equals(post.get("usecase", "")) && !"intranet".equals(networkName)) {
                 // switch to intranet network
@@ -191,6 +195,9 @@ public class ConfigBasic {
                 // switch to p2p mode: enable ad-hoc networks between intranet users
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                // set default behavior for search verification
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "cacheonly"); // nocache,iffresh,ifexist,cacheonly,false
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
             }
             if ("intranet".equals(post.get("usecase", ""))) {
                 final String repositoryPath = post.get("repositoryPath", "/DATA/HTROOT/repository");
@@ -200,7 +207,7 @@ public class ConfigBasic {
                 }
             }
         }
-        
+
         networkName = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "");
         if ("freeworld".equals(networkName)) {
             prop.put("setUseCase", 1);
@@ -216,18 +223,18 @@ public class ConfigBasic {
         }
         prop.put("setUseCase_port", port);
         prop.put("setUseCase_repositoryPath", sb.getConfig("repositoryPath", "/DATA/HTROOT/repository"));
-        
+
         // check if values are proper
-        final boolean properPassword = (sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
-        final boolean properName = (sb.peers.mySeed().getName().length() >= 3) && (!(yacySeed.isDefaultPeerName(sb.peers.mySeed().getName())));
+        final boolean properPassword = (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
+        final boolean properName = (sb.peers.mySeed().getName().length() >= 3) && (!(Seed.isDefaultPeerName(sb.peers.mySeed().getName())));
         final boolean properPort = (sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal());
-        
-        if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
-        	env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
-        	env.setConfig("browserPopUpPage", "Status.html");
-        	HTTPDFileHandler.initDefaultPath();
+
+        if ((env.getConfig(SwitchboardConstants.BROWSER_DEFAULT, "").startsWith("ConfigBasic.html,"))) {
+            env.setConfig(SwitchboardConstants.BROWSER_DEFAULT, env.getConfig(SwitchboardConstants.BROWSER_DEFAULT, "").substring(17));
+            env.setConfig("browserPopUpPage", "Status.html");
+            HTTPDFileHandler.initDefaultPath();
         }
-        
+
         prop.put("statusName", properName ? "1" : "0");
         prop.put("statusPort", properPort ? "1" : "0");
         if (reconnect) {
@@ -241,7 +248,7 @@ public class ConfigBasic {
         } else {
             prop.put("nextStep", NEXTSTEP_FINISHED);
         }
-                
+
         final boolean upnp_enabled = env.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false);
         prop.put("upnp", "1");
         prop.put("upnp_enabled", upnp_enabled ? "1" : "0");
@@ -251,27 +258,21 @@ public class ConfigBasic {
         else {
             prop.put("upnp_success", "0");
         }
-        
-        // set default values       
+
+        // set default values
         prop.putHTML("defaultName", sb.peers.mySeed().getName());
         prop.putHTML("defaultPort", env.getConfig("port", "8090"));
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
+        prop.put("lang_de", "0");
+        prop.put("lang_fr", "0");
+        prop.put("lang_cn", "0");
+        prop.put("lang_ru", "0");
+        prop.put("lang_uk", "0");
+        prop.put("lang_en", "0");
         if ("default".equals(lang)) {
-            prop.put("langDeutsch", "0");
-            prop.put("langFrancais", "0");
-            prop.put("langEnglish", "1");
-        } else if ("fr".equals(lang)) {
-            prop.put("langDeutsch", "0");
-            prop.put("langFrancais", "1");
-            prop.put("langEnglish", "0");
-        } else if ("de".equals(lang)) {
-            prop.put("langDeutsch", "1");
-            prop.put("langFrancais", "0");
-            prop.put("langEnglish", "0");
+            prop.put("lang_en", "1");
         } else {
-            prop.put("langDeutsch", "0");
-            prop.put("langFrancais", "0");
-            prop.put("langEnglish", "0");
+            prop.put("lang_" + lang, "1");
         }
         return prop;
     }

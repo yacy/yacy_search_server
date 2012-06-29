@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding="UTF-8" standalone='yes'?>
+<info status="#[status]#">
+	<title>#[title]#</title>
+	<desc>#[desc]#</desc>
+	<keywords>
+		#{keywords}#<tag name="#[tag]#" />
+		#{/keywords}#
+	</keywords>
+	<autotags>	
+		#{autotags}#<tag name="#[tag]#" />
+		#{/autotags}#
+	</autotags>
+	<crawlstart 
+		#{crawlstart}##[key]#="#[value]#"
+		#{/crawlstart}#
+	>
+	</crawlstart>
+</info>
+

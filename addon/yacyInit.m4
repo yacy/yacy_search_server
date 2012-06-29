@@ -57,7 +57,7 @@ SHUTDOWN_TIMEOUT=50
 # Default niceness if not set in config file
 NICE_VAL=0
 
-JAVA_ARGS="-server -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8"
+JAVA_ARGS="-server -Xss256k -XX:MaxPermSize=256m -XX:ReservedCodeCacheSize=1024m -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8"
 #check if system supports large memory pages and enable it if possible
 HUGEPAGESTOTAL="$(cat /proc/meminfo | grep HugePages_Total | sed s/[^0-9]//g)"
 if [ -n "$HUGEPAGESTOTAL" ] && [ $HUGEPAGESTOTAL -ne 0 ]
@@ -100,7 +100,7 @@ fi
 cd $YACY_HOME
 
 #get javastart args
-if [ -f DATA/SETTINGS/yacy.conf ]
+if [ -s DATA/SETTINGS/yacy.conf ]
 then
 	# startup memory
 	for i in Xmx Xms; do
@@ -270,7 +270,7 @@ ifdef(`ArchLinux', `
 		# dont forget to kill shutdown process if necessary
 		shutdown_pid=$( ps ax | grep $shutdown_pid | awk '{ print $1 }' | grep $shutdown_pid )
 		if [ -n "$shutdown_pid" ] ; then
-			kill -9 $shutdown_pid
+			kill -9 $shutdown_pid &>/dev/null
 		fi
 
 		if [ "$2" != "--leave-pidfile" ]; then

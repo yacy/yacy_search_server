@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,7 +27,7 @@ package net.yacy.kelondro.util;
 import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.cora.order.ByteOrder;
 
 
 /**
@@ -37,31 +37,31 @@ import net.yacy.kelondro.order.ByteOrder;
  * a byte[] in a Hashtable does not work because the hash computation does not
  * work for byte[]. This class extends byte[] with a cached hashing function,
  * so it can be used in hashtables.
+ * //FIXME: so does storing byte[] in HashMap help? as I'm moving use of Hashtable to
+ * //FIXME: HashMap, if so, please remove this class- or notify me
  */
 
 public class ByteArray {
-    
-    private final byte[] buffer;
-    private int hash;
 
-    
+    private final byte[] buffer;
+
+
     public ByteArray(final byte[] bb) {
         this.buffer = bb;
-        this.hash = 0;
     }
 
     public int length() {
-        return buffer.length;
+        return this.buffer.length;
     }
-    
+
     public byte[] asBytes() {
         return this.buffer;
     }
-    
+
     public byte readByte(final int pos) {
-        return buffer[pos];
+        return this.buffer[pos];
     }
-    
+
     public static boolean startsWith(final byte[] buffer, final byte[] pattern) {
         // compares two byte arrays: true, if pattern appears completely at offset position
         if (buffer == null && pattern == null) return true;
@@ -70,22 +70,25 @@ public class ByteArray {
         for (int i = 0; i < pattern.length; i++) if (buffer[i] != pattern[i]) return false;
         return true;
     }
-    
+
     public int compareTo(final ByteArray b, final ByteOrder order) {
         assert this.buffer.length == b.buffer.length;
         return order.compare(this.buffer, b.buffer);
     }
-    
+
     public int compareTo(final int aoffset, final int alength, final ByteArray b, final int boffset, final int blength, final ByteOrder order) {
         assert alength == blength;
         return order.compare(this.buffer, aoffset, b.buffer, boffset, blength);
     }
-    
+
+    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
+
     @Override
     public int hashCode() {
-        if (this.hash != 0) return this.hash;        
-        this.hash = hashCode(this.buffer);
-        return this.hash;
+        if (this.hashCache == Integer.MIN_VALUE) {
+            this.hashCache = ByteArray.hashCode(this.buffer);
+        }
+        return this.hashCache;
     }
 
     /**
@@ -98,18 +101,18 @@ public class ByteArray {
         for (byte c: b) h = 31 * h + (c & 0xFF);
         return h;
     }
-    
+
     @Override
     public boolean equals(Object other) {
         ByteArray b = (ByteArray) other;
-        if (buffer == null && b == null) return true;
-        if (buffer == null || b == null) return false;
+        if (this.buffer == null && b == null) return true;
+        if (this.buffer == null || b == null) return false;
         if (this.buffer.length != b.buffer.length) return false;
         int l = this.buffer.length;
         while (--l >= 0) if (this.buffer[l] != b.buffer[l]) return false;
         return true;
     }
-    
+
     public static long parseDecimal(final byte[] s) throws NumberFormatException {
         if (s == null) throw new NumberFormatException("null");
 
@@ -119,7 +122,7 @@ public class ByteArray {
         long limit;
         long multmin;
         long digit;
-        
+
         if (max <= 0) throw new NumberFormatException(UTF8.String(s));
         if (s[0] == '-') {
             negative = true;

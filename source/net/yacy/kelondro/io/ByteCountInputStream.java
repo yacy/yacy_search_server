@@ -1,4 +1,4 @@
-//httpByteCountinputStream.java 
+//httpByteCountinputStream.java
 //-----------------------
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
@@ -29,24 +29,23 @@ package net.yacy.kelondro.io;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-//import java.util.HashMap;
 
 import net.yacy.kelondro.logging.Log;
 
 public final class ByteCountInputStream extends FilterInputStream {
-    
+
 //    private final static Object syncObject = new Object();
 //    private final static HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
 //    private static long globalByteCount = 0;
-    
+
     private boolean finished = false;
     protected long byteCount;
-    private String byteCountAccountName = null; 
+    private String byteCountAccountName = null;
 
     protected ByteCountInputStream(final InputStream inputStream) {
         this(inputStream, null);
     }
-    
+
     /**
      * Constructor of this class
      * @param inputStream the {@link InputStream} to read from
@@ -54,7 +53,7 @@ public final class ByteCountInputStream extends FilterInputStream {
     public ByteCountInputStream(final InputStream inputStream, final String accountName) {
         this(inputStream,0,accountName);
     }
-    
+
     /**
      * Constructor of this class
      * @param inputStream the {@link InputStream} to read from
@@ -64,14 +63,16 @@ public final class ByteCountInputStream extends FilterInputStream {
         super(inputStream);
         this.byteCount = initByteCount;
         this.byteCountAccountName = accountName;
-    }  
-    
+    }
+
+    @Override
     public final int read(final byte[] b) throws IOException {
         final int readCount = super.read(b);
         if (readCount > 0) this.byteCount += readCount;
         return readCount;
     }
 
+    @Override
     public final int read(final byte[] b, final int off, final int len) throws IOException {
         try {
         final int readCount = super.read(b, off, len);
@@ -82,31 +83,33 @@ public final class ByteCountInputStream extends FilterInputStream {
         }
     }
 
+    @Override
     public final int read() throws IOException {
         this.byteCount++;
         return super.read();
     }
-    
+
+    @Override
     public final long skip(final long len) throws IOException {
         final long skipCount = super.skip(len);
-        if (skipCount > 0) this.byteCount += skipCount; 
+        if (skipCount > 0) this.byteCount += skipCount;
         return skipCount;
     }
 
     public final long getCount() {
         return this.byteCount;
     }
-    
+
     public final String getAccountName() {
         return this.byteCountAccountName;
     }
-    
+
 //    public final static long getGlobalCount() {
 //        synchronized (syncObject) {
 //            return globalByteCount;
 //        }
 //    }
-    
+
 //    public final static long getAccountCount(final String accountName) {
 //        synchronized (syncObject) {
 //            if (byteCountInfo.containsKey(accountName)) {
@@ -115,8 +118,9 @@ public final class ByteCountInputStream extends FilterInputStream {
 //            return 0;
 //        }
 //    }
-    
-    public final void close() throws IOException {
+
+    @Override
+    public final synchronized void close() throws IOException {
         try {
             super.close();
         } catch (OutOfMemoryError e) {
@@ -124,10 +128,10 @@ public final class ByteCountInputStream extends FilterInputStream {
         }
         this.finish();
     }
-    
+
     public final void finish() {
         if (this.finished) return;
-        
+
         this.finished = true;
         ByteCount.addAccountCount(this.byteCountAccountName, this.byteCount);
 //        synchronized (syncObject) {
@@ -140,10 +144,10 @@ public final class ByteCountInputStream extends FilterInputStream {
 //                lastByteCount += this.byteCount;
 //                byteCountInfo.put(this.byteCountAccountName, Long.valueOf(lastByteCount));
 //            }
-//            
-//        }        
+//
+//        }
     }
-    
+
 //    public final static void resetCount() {
 //        synchronized (syncObject) {
 //            globalByteCount = 0;

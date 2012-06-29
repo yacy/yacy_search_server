@@ -1,0 +1,266 @@
+## this is a list of all solr keys
+## solr can be used as alternative index target, solr is NOT the primary indexing system of YaCy
+## this complete list of keys can be reduced:
+## reduced list of keys can be placed in DATA/SETTINGS/solr.keys.<profile>.list
+## where they can be used as profiles for solr index transport
+
+## the syntax of this file:
+## - all lines beginning with '##' are comments
+## - all non-empty lines not beginning with '#' are keyword lines
+## - all lines beginning with '#' and where the second character is not '#' are commented-out keyword lines
+
+##url of document, string
+sku
+
+## primary key of document, the URL hash, string
+id
+
+## longitude of location as declared in WSG84, tdouble
+lon_coordinate
+
+## longitude of location as declared in WSG84, tdouble
+lat_coordinate
+
+## last-modified from http header, date
+last_modified
+
+## ip of host of url (after DNS lookup), string
+ip_s
+
+## mime-type of document, string
+content_type
+
+## content of title tag, text
+title
+
+## content of author-tag, texgen
+author
+
+## content of description-tag, text
+description
+
+## content of keywords tag; words are separated by space, textgen
+keywords
+
+## character encoding, string
+charset_s
+
+## tags of css entries, normalized with absolute URL, textgen
+css_tag_txt
+
+## urls of css entries, normalized with absolute URL, textgen
+css_url_txt
+
+## number of css entries, int
+csscount_i
+
+## urls of script entries, normalized with absolute URL, textgen
+scripts_txt
+
+## number of script entries, int
+scriptscount_i
+
+## encoded as binary value into an integer:
+## bit  0: "all" contained in html header meta
+## bit  1: "index" contained in html header meta
+## bit  2: "noindex" contained in html header meta
+## bit  3: "nofollow" contained in html header meta
+## bit  8: "noarchive" contained in http header properties
+## bit  9: "nosnippet" contained in http header properties
+## bit 10: "noindex" contained in http header properties
+## bit 11: "nofollow" contained in http header properties
+## bit 12: "unavailable_after" contained in http header properties
+## content of <meta name="robots" content=#content#> tag and the "X-Robots-Tag" HTTP property
+robots_i
+
+## html status return code (i.e. "200" for ok), -1 if not loaded (see content of failreason_t for this case), int
+httpstatus_i
+
+## content of <meta name="generator" content=#content#> tag, text
+metagenerator_t
+
+## all visible text, text
+text_t
+
+## number of words in visible area, int
+wordcount_i
+
+## internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
+inboundlinks_tag_txt
+
+## internal links, only the protocol
+#inboundlinks_protocol_txt
+
+## internal links, the url only without the protocol
+#inboundlinks_urlstub_txt
+
+## internal links, the name property of the a-tag
+#inboundlinks_name_txt
+
+## internal links, the rel property of the a-tag
+#inboundlinks_rel_txt
+
+## internal links, the rel property of the a-tag, coded binary
+#inboundlinks_relflags_txt
+
+## internal links, the text content of the a-tag
+#inboundlinks_text_txt
+
+## total number of inbound links, int
+inboundlinkscount_i
+
+## number of inbound links with nofollow tag, int
+inboundlinksnofollowcount_i
+
+## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
+outboundlinks_tag_txt
+
+## external links, only the protocol
+#outboundlinks_protocol_txt
+
+## external links, the url only without the protocol
+#outboundlinks_urlstub_txt
+
+## external links, the name property of the a-tag
+#outboundlinks_name_txt
+
+## external links, the rel property of the a-tag
+#outboundlinks_rel_txt
+
+## external links, the rel property of the a-tag, coded binary
+#outboundlinks_relflags_txt
+
+## external links, the text content of the a-tag
+#outboundlinks_text_txt
+
+## external number of inbound links, int
+outboundlinkscount_i
+
+## number of external links with nofollow tag, int
+outboundlinksnofollowcount_i
+
+## all image tags, encoded as <img> tag inclusive alt- and title property, textgen
+images_tag_txt
+
+## all image links without the protocol and '://'
+#images_urlstub_txt
+
+## all image link protocols
+#images_protocol_txt
+
+## all image link alt tag
+#images_alt_txt
+
+## number of images, int
+imagescount_i
+
+## h1 header, textgen
+h1_txt
+
+## h2 header, textgen
+h2_txt
+
+## h3 header, textgen
+h3_txt
+
+## h4 header, textgen
+h4_txt
+
+## h5 header, textgen
+h5_txt
+
+## h6 header, textgen
+h6_txt
+
+## binary pattern for the existance of h1..h6 headlines, int
+htags_i
+
+## all path elements in the url, textgen
+paths_txt
+
+## host of the url, string
+host_s
+
+## url inside the canonical link element, string
+canonical_s
+
+## all texts in <li> tags, textgen
+li_txt
+
+## number of <li> tags, int
+licount_i
+
+## all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order, textgen
+bold_txt
+
+## number of occurrences of texts in bold_txt, textgen
+#bold_val
+
+## total number of occurrences of <b> or <strong>, int
+boldcount_i
+
+## all texts inside of <i> tags. no doubles. listed in the order of number of occurrences in decreasing order, textgen
+italic_txt
+
+## number of occurrences of texts in italic_txt, textgen
+#italic_val
+
+## total number of occurrences of <i>, int
+italiccount_i
+
+## flag that shows if a swf file is linked, boolean
+flash_b
+
+## list of all links to frames, textgen
+frames_txt
+
+## number of attr_frames, int
+framesscount_i
+
+## list of all links to iframes, textgen
+iframes_txt
+
+## number of attr_iframes, int
+iframesscount_i
+
+## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias, textgen
+#ext_cms_txt
+
+##number of attributes that count for a specific cms in attr_cms, textgen
+#ext_cms_val
+
+## names of ad-servers/ad-services, textgen
+#ext_ads_txt
+
+## number of attributes counts in attr_ads, textgen
+#ext_ads_val
+
+## names of recognized community functions, textgen
+#ext_community_txt
+
+## number of attribute counts in attr_community, textgen
+#ext_community_val
+
+## names of map services, textgen
+#ext_maps_txt
+
+## number of attribute counts in attr_maps, textgen
+#ext_maps_val
+
+## names of tracker server, textgen
+#ext_tracker_txt
+
+## number of attribute counts in attr_tracker, textgen
+#ext_tracker_val
+
+## names matching title expressions, textgen
+#ext_title_txt
+
+## number of matching title expressions, textgen
+#ext_title_val
+
+## fail reason if a page was not loaded. if the page was loaded then this field is empty, text
+failreason_t
+
+## response time of target server in milliseconds, int
+responsetime_i

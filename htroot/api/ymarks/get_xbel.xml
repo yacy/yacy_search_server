@@ -4,7 +4,7 @@
 	<!ENTITY % local.url.att "yacy:public CDATA #IMPLIED yacy:tags CDATA #IMPLIED yacy:visits CDATA #IMPLIED">
 ]>
 <xbel version="1.0" xmlns:yacy="http://www.yacy.net">
-<title>#[user]# YaCy Bookmarks</title>
+<title>#[user]# YaCy Bookmarks: #[root]#</title>
 <info>
 <metadata owner="http://www.yacy.net" />
 </info>

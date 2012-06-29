@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -32,10 +32,10 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 public class SnippetExtractor {
-    
+
     String snippetString;
     HandleSet remainingHashes;
-    
+
     public SnippetExtractor(final Collection<StringBuilder> sentences, final HandleSet queryhashes, int maxLength) throws UnsupportedOperationException {
         if (sentences == null) throw new UnsupportedOperationException("sentence == null");
         if (queryhashes == null || queryhashes.isEmpty()) throw new UnsupportedOperationException("queryhashes == null");
@@ -46,10 +46,10 @@ public class SnippetExtractor {
         TreeSet<Integer> positions;
         int linenumber = 0;
         int fullmatchcounter = 0;
-        lookup: for (StringBuilder sentence: sentences) {
-            hs = WordTokenizer.hashSentence(sentence.toString(), null);
+        lookup: for (final StringBuilder sentence: sentences) {
+            hs = WordTokenizer.hashSentence(sentence.toString(), null, 100);
             positions = new TreeSet<Integer>();
-            for (byte[] word: queryhashes) {
+            for (final byte[] word: queryhashes) {
                 pos = hs.get(word);
                 if (pos != null) {
                     positions.add(pos);
@@ -69,7 +69,7 @@ public class SnippetExtractor {
             }
             linenumber++;
         }
-        
+
         StringBuilder sentence;
         SnippetExtractor tsr;
         while (!order.isEmpty()) {
@@ -79,27 +79,27 @@ public class SnippetExtractor {
             } catch (UnsupportedOperationException e) {
                 continue;
             }
-            snippetString = tsr.snippetString;
-            if (snippetString != null && snippetString.length() > 0) {
-                remainingHashes = tsr.remainingHashes;
-                if (remainingHashes.isEmpty()) {
+            this.snippetString = tsr.snippetString;
+            if (this.snippetString != null && this.snippetString.length() > 0) {
+                this.remainingHashes = tsr.remainingHashes;
+                if (this.remainingHashes.isEmpty()) {
                     // we have found the snippet
                     return; // finished!
-                } else if (remainingHashes.size() < queryhashes.size()) {
+                } else if (this.remainingHashes.size() < queryhashes.size()) {
                     // the result has not all words in it.
                     // find another sentence that represents the missing other words
                     // and find recursively more sentences
-                    maxLength = maxLength - snippetString.length();
+                    maxLength = maxLength - this.snippetString.length();
                     if (maxLength < 20) maxLength = 20;
                     try {
-                        tsr = new SnippetExtractor(order.values(), remainingHashes, maxLength);
+                        tsr = new SnippetExtractor(order.values(), this.remainingHashes, maxLength);
                     } catch (UnsupportedOperationException e) {
                         throw e;
                     }
                     final String nextSnippet = tsr.snippetString;
                     if (nextSnippet == null) return;
-                    snippetString = snippetString + (" / " + nextSnippet);
-                    remainingHashes = tsr.remainingHashes;
+                    this.snippetString = this.snippetString + (" / " + nextSnippet);
+                    this.remainingHashes = tsr.remainingHashes;
                     return;
                 } else {
                     // error
@@ -110,7 +110,7 @@ public class SnippetExtractor {
         }
         throw new UnsupportedOperationException("no snippet computed");
     }
-    
+
     private static int linelengthKey(int givenlength, int maxlength) {
         if (givenlength > maxlength) return 1;
         if (givenlength >= maxlength / 2 && givenlength < maxlength) return 7;
@@ -118,15 +118,15 @@ public class SnippetExtractor {
         if (givenlength >= maxlength / 8 && givenlength < maxlength / 4) return 3;
         return 0;
     }
-    
+
     private SnippetExtractor(String sentence, final HandleSet queryhashes, final int maxLength) throws UnsupportedOperationException {
         try {
             if (sentence == null) throw new UnsupportedOperationException("no sentence given");
             if (queryhashes == null || queryhashes.isEmpty()) throw new UnsupportedOperationException("queryhashes == null");
             byte[] hash;
-            
+
             // find all hashes that appear in the sentence
-            final Map<byte[], Integer> hs = WordTokenizer.hashSentence(sentence, null);
+            final Map<byte[], Integer> hs = WordTokenizer.hashSentence(sentence, null, 100);
             final Iterator<byte[]> j = queryhashes.iterator();
             Integer pos;
             int p, minpos = sentence.length(), maxpos = -1;
@@ -159,8 +159,7 @@ public class SnippetExtractor {
                 " [..] " +
                 sentence.substring((maxpos + 26 > sentence.length()) ? sentence.length() : maxpos + 26).trim();
                 maxpos = maxpos + lenb - sentence.length() + 6;
-            }
-            if (maxpos > maxLength) {
+            } else if (maxpos > maxLength) {
                 // the string is too long, even if we cut it at the end
                 // so cut it here at both ends at once
                 assert maxpos >= minpos;
@@ -174,11 +173,11 @@ public class SnippetExtractor {
             }
             if (sentence.length() > maxLength) {
                 // trim sentence, 1st step (cut at right side)
-                sentence = sentence.substring(0, maxpos).trim() + " [..]";
+                sentence = sentence.substring(0, Math.min(maxpos + 20, sentence.length())).trim() + " [..]";
             }
             if (sentence.length() > maxLength) {
                 // trim sentence, 2nd step (cut at left side)
-                sentence = "[..] " + sentence.substring(minpos).trim();
+                sentence = "[..] " + sentence.substring(Math.max(minpos - 20, 0)).trim();
             }
             if (sentence.length() > maxLength) {
                 // trim sentence, 3rd step (cut in the middle)
@@ -190,11 +189,11 @@ public class SnippetExtractor {
             throw new UnsupportedOperationException(e.getMessage());
         }
     }
-    
+
     public String getSnippet() {
         return this.snippetString;
     }
-    
+
     public HandleSet getRemainingWords() {
         return this.remainingHashes;
     }

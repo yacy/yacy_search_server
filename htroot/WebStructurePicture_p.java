@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -32,40 +32,40 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.peers.graphics.WebStructureGraph;
+import net.yacy.search.Switchboard;
+import net.yacy.visualization.GraphPlotter;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
-import net.yacy.visualization.GraphPlotter;
-
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.graphics.WebStructureGraph;
 
 public class WebStructurePicture_p {
-    
+
     private static final double maxlongd = Long.MAX_VALUE;
-    
+
     public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-        
+
         String color_text    = "888888";
         String color_back    = "FFFFFF";
         String color_dot     = "11BB11";
         String color_line    = "222222";
         String color_lineend = "333333";
-        
+
         int width = 1024;
         int height = 576;
         int depth = 3;
         int nodes = 100; // maximum number of host nodes that are painted
         int time = -1;
         String host = null;
-        
+        int cyc = 0;
+
         if (post != null) {
             width         = post.getInt("width", 1024);
             height        = post.getInt("height", 576);
@@ -78,8 +78,9 @@ public class WebStructurePicture_p {
             color_dot     = post.get("colordot",     color_dot);
             color_line    = post.get("colorline",    color_line);
             color_lineend = post.get("colorlineend", color_lineend);
+            cyc   = post.getInt("cyc", 0);
         }
-        
+
         // too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
         if (width < 32 ) width = 32;
         if (width > 10000) width = 10000;
@@ -87,10 +88,10 @@ public class WebStructurePicture_p {
         if (height > 10000) height = 10000;
         if (depth > 8) depth = 8;
         if (depth < 0) depth = 0;
-        
+
         // calculate target time
         final long timeout = (time < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + (time * 8 / 10);
-        
+
         // find start point
         if ((host == null) || (host.length() == 0) || (host.equals("auto"))) {
             // find domain with most references
@@ -99,22 +100,32 @@ public class WebStructurePicture_p {
         final RasterPlotter graphPicture;
         if (host == null) {
             // probably no information available
-            graphPicture = new RasterPlotter(width, height, RasterPlotter.DrawMode.MODE_SUB, color_back);
+            final RasterPlotter.DrawMode drawMode = (RasterPlotter.darkColor(color_back)) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB;
+            graphPicture = new RasterPlotter(width, height, drawMode, color_back);
             PrintTool.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0);
             PrintTool.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0);
         } else {
             // find start hash
             String hash = null;
-            try {
-                hash = UTF8.String((new DigestURI("http://" + host)).hash(), 6, 6);
+            if (host != null && host.length() > 0) try {
+                hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);
             } catch (final MalformedURLException e) {Log.logException(e);}
             //assert (sb.webStructure.outgoingReferences(hash) != null);
-            
+
             // recursively find domains, up to a specific depth
-            final GraphPlotter graph = new GraphPlotter();
-            if (host != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
+            GraphPlotter graph = new GraphPlotter();
+            if (host != null && hash != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth, cyc);
             //graph.print();
-            
+
+            // apply physics to it to get a better shape
+            if (post != null && post.containsKey("pa")) {
+                // test with: http://localhost:8090/WebStructurePicture_p.png?pa=1&ral=0.7&raa=0.5&rar=2&rel=0.5&rea=1&rer=2
+                GraphPlotter.Ribbon rAll = new GraphPlotter.Ribbon(post.getFloat("ral", 0.1f), post.getFloat("raa", 0.1f), post.getFloat("rar", 0.1f));
+                GraphPlotter.Ribbon rEdge = new GraphPlotter.Ribbon(post.getFloat("rel", 0.05f), post.getFloat("rea", 0.1f), post.getFloat("rer", 0.1f));
+                for (int i = 0; i < post.getInt("pa", 1); i++) graph = graph.physics(rAll, rEdge);
+            }
+
+            // draw the graph
             graphPicture = graph.draw(width, height, 40, 40, 16, 16, color_back, color_dot, color_line, color_lineend, color_text);
         }
         // print headline
@@ -124,23 +135,26 @@ public class WebStructurePicture_p {
         PrintTool.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
 
         return graphPicture;
-        
+
     }
-    
-    private static final int place(final GraphPlotter graph, final WebStructureGraph structure, final String centerhash, final String centerhost, int maxnodes, final long timeout, final double x, final double y, int nextlayer, final int maxlayer) {
+
+    private static final int place(
+                    final GraphPlotter graph, final WebStructureGraph structure, final String centerhash, final String centerhost,
+                    int maxnodes, final long timeout, final double x, final double y, int nextlayer, final int maxlayer,
+                    final int cyc) {
         // returns the number of nodes that had been placed
         assert centerhost != null;
-        GraphPlotter.coordinate center = graph.getPoint(centerhost);
+        final GraphPlotter.Point center = graph.getNode(centerhost);
         int mynodes = 0;
         if (center == null) {
-            graph.addPoint(centerhost, x, y, nextlayer);
+            graph.addNode(centerhost, x, y, nextlayer);
             maxnodes--;
             mynodes++;
         }
         if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
         final double radius = 1.0 / (1 << nextlayer);
-        WebStructureGraph.structureEntry sr = structure.outgoingReferences(centerhash);
+        final WebStructureGraph.StructureEntry sr = structure.outgoingReferences(centerhash);
         final Map<String, Integer> next = (sr == null) ? new HashMap<String, Integer>() : sr.references;
         Map.Entry<String, Integer> entry;
         String targethash, targethost;
@@ -150,23 +164,23 @@ public class WebStructurePicture_p {
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;
-        while ((i.hasNext()) && (maxnodes > 0) && (System.currentTimeMillis() < timeout)) {
+        while (i.hasNext() && maxnodes > 0 && System.currentTimeMillis() < timeout) {
             entry = i.next();
             targethash = entry.getKey();
-            targethost = structure.resolveDomHash2DomString(targethash);
+            targethost = structure.hostHash2hostName(targethash);
             if (targethost == null) continue;
             thisrefs = entry.getValue().intValue();
             targetrefs = structure.referencesCount(targethash); // can be cpu/time-critical
             maxtargetrefs = Math.max(targetrefs, maxtargetrefs);
             maxthisrefs = Math.max(thisrefs, maxthisrefs);
             targets.add(new String[] {targethash, targethost});
-            if (graph.getPoint(targethost) != null) continue;
+            if (graph.getNode(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
-            final double angle = Base64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd * 2 * Math.PI;
+            final double angle = ((Base64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd) + (cyc / 360.0d)) * 2.0d * Math.PI;
             //System.out.println("ANGLE = " + angle);
             rr = radius * 0.25 * (1 - targetrefs / (double) maxtargetrefs);
             re = radius * 0.5 * (thisrefs / (double) maxthisrefs);
-            graph.addPoint(targethost, x + (radius - rr - re) * Math.cos(angle), y + (radius - rr - re) * Math.sin(angle), nextlayer);
+            graph.addNode(targethost, x + (radius - rr - re) * Math.cos(angle), y + (radius - rr - re) * Math.sin(angle), nextlayer);
             maxnodes--;
             mynodes++;
         }
@@ -178,14 +192,14 @@ public class WebStructurePicture_p {
             target = j.next();
             targethash = target[0];
             targethost = target[1];
-            final GraphPlotter.coordinate c = graph.getPoint(targethost);
+            final GraphPlotter.Point c = graph.getNode(targethost);
             assert c != null;
-            nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targethash, targethost, maxnodes, timeout, c.x, c.y, nextlayer, maxlayer);
+            nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targethash, targethost, maxnodes, timeout, c.x, c.y, nextlayer, maxlayer, cyc);
             mynodes += nextnodes;
             maxnodes -= nextnodes;
-            graph.setBorder(centerhost, targethost);
+            graph.setEdge(centerhost, targethost);
         }
         return mynodes;
     }
-    
+
 }

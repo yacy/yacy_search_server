@@ -8,7 +8,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -25,26 +25,46 @@
 
 package net.yacy.kelondro.util;
 
-import net.yacy.kelondro.logging.Log;
-
 /**
  * Use this to get information about memory usage or try to free some memory
  */
 public class MemoryControl {
 
-	
-    private static final Runtime runtime = Runtime.getRuntime();
-    public static long maxMemory = runtime.maxMemory(); // this value does never change during runtime
-	private static final Log log = new Log("MEMORY");
-    
-    private static final long[] gcs = new long[5];
-    private static int gcs_pos = 0;
-    private static long lastGC = 0l;
-    private static long DHTMbyte = 0L;
-    private static long prevDHTtreshold = 0L;
-    private static int DHTtresholdCount = 0;
-    private static boolean allowDHT = true;
-    private static boolean shortStatus = false;
+    private static boolean shortStatus = false, simulatedShortStatus = false, usingStandardStrategy = true;
+    private static MemoryStrategy strategy;
+
+    private static MemoryStrategy getStrategy() {
+    	if (strategy == null || strategy.hasError()) {
+    		if (!usingStandardStrategy) {
+    			strategy = new GenerationMemoryStrategy();
+//    			if (strategy.hasError()) { // perhaps we do have a G1
+//    				strategy = new G1MemoryStrategy();
+//    			}
+    	    	// fall back if error detected
+    	    	if (strategy.hasError()) {
+    	    		usingStandardStrategy = true;
+    	    		strategy = new StandardMemoryStrategy();
+    	    	}
+    		} else {
+    			strategy = new StandardMemoryStrategy();
+    		}
+    	}
+    	return strategy;
+    }
+
+    public final static void setStandardStrategy(final boolean std) {
+        if (usingStandardStrategy != std) {
+    		usingStandardStrategy = std;
+    		strategy = null;
+    	}
+    }
+
+    /**
+     * @return the name of the used strategy
+     */
+    public final static String getStrategyName() {
+    	return getStrategy().getName();
+    }
 
     /**
      * Runs the garbage collector if last garbage collection is more than last millis ago
@@ -52,42 +72,7 @@ public class MemoryControl {
      * @param info additional info for log
      */
     public final synchronized static boolean gc(final int last, final String info) { // thq
-    	assert last >= 10000; // too many forced GCs will cause bad execution performance
-        final long elapsed = System.currentTimeMillis() - lastGC;
-        if (elapsed > last) {
-            final long before = free();
-            final long start = System.currentTimeMillis();
-            System.gc();
-            lastGC = System.currentTimeMillis();
-            final long after = free();
-            gcs[gcs_pos++] = after - before;
-            if (gcs_pos >= gcs.length) gcs_pos = 0;
-            
-            if (log.isFine()) log.logInfo("[gc] before: " + Formatter.bytesToString(before) +
-                                              ", after: " + Formatter.bytesToString(after) +
-                                              ", freed: " + Formatter.bytesToString(after - before) +
-                                              ", rt: " + (lastGC - start) + " ms, call: " + info);
-            return true;
-        }
-        
-        if (log.isFinest()) log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
-        return false;
-    }
-    
-    /**
-     * This method calculates the average amount of bytes freed by the last GCs forced by this class
-     * @return the average amount of freed bytes of the last forced GCs or <code>0</code> if no
-     * GC has been run yet
-     */
-    public static long getAverageGCFree() {
-        long x = 0;
-        int y = 0;
-        for (int i=0; i<gcs.length; i++)
-            if (gcs[i] != 0) {
-                x += gcs[i];
-                y++;
-            }
-        return (y == 0) ? 0 : x / y;
+    	return getStrategy().gc(last, info);
     }
 
     /**
@@ -95,15 +80,24 @@ public class MemoryControl {
      * @return bytes
      */
     public static final long free() {
-        return runtime.freeMemory();
+        return getStrategy().free();
     }
-    
+
     /**
      * memory that is available including increasing total memory up to maximum
      * @return bytes
      */
     public static final long available() {
-        return maxMemory - total() + free();
+        return getStrategy().available();
+    }
+
+    /**
+	 * maximum memory the Java virtual will allocate machine; may vary over time in some cases
+	 * @return bytes
+	 */
+	public static final long maxMemory()
+    {
+    	return getStrategy().maxMemory();
     }
 
 	/**
@@ -112,130 +106,105 @@ public class MemoryControl {
 	 */
 	public static final long total()
 	{
-		return runtime.totalMemory();
+		return getStrategy().total();
 	}
 
 	/**
-     * <p>Tries to free a specified amount of bytes.</p>
-     * <p>
-     *   If the currently available memory is enough, the method returns <code>true</code> without
-     *   performing additional steps. If not, the behaviour depends on the parameter <code>force</code>.
-     *   If <code>false</code>, a Full GC is only performed if former GCs indicated that a GC should
-     *   provide enough free memory. If former GCs didn't but <code>force</code> is set to <code>true</code>
-     *   a Full GC is performed nevertheless.
-     * </p>
-     * <p>
-     *   Setting the <code>force</code> parameter to false doesn't necessarily mean, that no GC may be
-     *   performed by this method, if the currently available memory doesn't suffice!
-     * </p>
-     * <p><em>Be careful with this method as GCs should always be the last measure to take</em></p>
-     * 
+     * check for a specified amount of bytes
+     *
      * @param size the requested amount of free memory in bytes
-     * @param force specifies whether a GC should be run even in case former GCs didn't provide enough memory
+     * @param force specifies whether risk an expensive GC
      * @return whether enough memory could be freed (or is free) or not
      */
     public static boolean request(final long size, final boolean force) {
-        boolean r = request0(size, force);
-        shortStatus = !r;
-        return r;
+        if (size < 1024) return true; // to speed up things. If this would fail, it would be much too late to check this.
+        return getStrategy().request(size, force, shortStatus);
     }
-    private static boolean request0(final long size, final boolean force) {
-    	final long avg = getAverageGCFree();
-    	if (avg >= size) return true;
-        long avail = available();
-        if (avail >= size) return true;
-        if (log.isFine()) {
-            final String t = new Throwable("Stack trace").getStackTrace()[1].toString();
-            log.logFine(t + " requested " + (size >> 10) + " KB, got " + (avail >> 10) + " KB");
-        } 
-        if (force || avg == 0 || avg + avail >= size) {
-            // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
-            
-            final long memBefore = avail;
-            boolean performedGC = gc(10000, "serverMemory.runGC(...)");
-            avail = available();
-            if (performedGC) {
-                final long freed = avail - memBefore;
-                log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >> 10)
-                    + " KB (requested/available/average: "
-                    + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
-            }
-            checkDHTrule(avail);
-            return avail >= size;
-        } else {
-            if (log.isFine()) log.logFine("former GCs indicate to not be able to free enough memory (requested/available/average: "
-                    + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
-            return false;
-        }
+
+    /**
+     * the simulated short status can be set to find out if the short status has effects to the system
+     * @param status
+     */
+    public static void setSimulatedShortStatus(final boolean status) {
+        simulatedShortStatus = status;
     }
-    
+
+    /**
+     * the simulated short status can be retrieved to show that option in online interfaces
+     * @return
+     */
+    public static boolean getSimulatedShortStatus() {
+        return simulatedShortStatus;
+    }
+
+    /**
+     * @return if last request failed
+     */
     public static boolean shortStatus() {
-        return shortStatus;
+        //if (shortStatus) System.out.println("**** SHORT MEMORY ****");
+        return simulatedShortStatus || shortStatus;
     }
-    
+
     /**
      * memory that is currently bound in objects
      * @return used bytes
      */
     public static long used() {
-        return total() - free();
+        return getStrategy().used();
     }
-        
-    public static boolean getDHTallowed() {
-    	return allowDHT;
-    }
-    
-    public static void setDHTallowed() {
-    	allowDHT = true;
-    	DHTtresholdCount = 0;
-    }
-    
+
     /**
-     * set the memory to be available
+     * @return if Memory seams to be in a proper state
      */
-    public static void setDHTMbyte(final long mbyte) {
-    	DHTMbyte = mbyte;
-    	DHTtresholdCount = 0;
+    public static boolean properState() {
+    	return getStrategy().properState();
     }
-    
-    private static void checkDHTrule(final long available) {
-    	// disable dht if memory is less than treshold - 4 times, maximum 11 minutes between each detection
-    	if ((available >> 20) < DHTMbyte) {
-    		final long t = System.currentTimeMillis();
-    		if(prevDHTtreshold + 11L /* minutes */ * 60000L > t) {
-    			DHTtresholdCount++;
-    			if(DHTtresholdCount > 3 /* occurencies - 1 */) allowDHT = false;
-    		}
-    		else DHTtresholdCount = 1;
-    		
-    		prevDHTtreshold = t;
-    		
-			log.logInfo("checkDHTrule: below treshold; tresholdCount: " + DHTtresholdCount + "; allowDHT: " + allowDHT);
-    	}
-    	else if (!allowDHT && (available >> 20) > (DHTMbyte * 2L)) // we were wrong!
-    		setDHTallowed();
+
+    /**
+     * forced enable properState - StandardMemoryStrategy only
+     */
+    public static void resetProperState() {
+    	getStrategy().resetProperState();
+    }
+
+    /**
+     * set the memory to be available for properState - StandardMemoryStrategy only
+     */
+    public static void setProperMbyte(final long mbyte) {
+    	getStrategy().setProperMbyte(mbyte);
     }
 
     /**
      * main
-     * @param args
+     * @param args use 'force' to request by force, use 'std' / 'gen' to specify strategy
      */
     public static void main(final String[] args) {
-        // try this with a jvm 1.4.2 and with a jvm 1.5 and compare results
+        // try this with different strategy and compare results
         final int mb = 1024 * 1024;
+        boolean force = false;
+        for (final String arg : args) {
+        	if (arg.equals("force")) force = true;
+        	if (arg.equalsIgnoreCase("gen")) usingStandardStrategy = false;
+        	if (arg.equalsIgnoreCase("std")) usingStandardStrategy = true;
+        }
         System.out.println("vm: " + System.getProperty("java.vm.version"));
-        System.out.println("computed max = " + (maxMemory / mb) + " mb");
-        final int alloc = 10000;
+        System.out.println("computed max = " + (maxMemory() / mb) + " mb");
+        System.out.println("using " + getStrategyName());
         final byte[][] x = new byte[100000][];
+
         for (int i = 0; i < 100000; i++) {
-            x[i] = new byte[alloc];
-            if (i % 100 == 0) System.out.println("used = " + (i * alloc / mb) +
-                    ", total = " + (total() / mb) +
-                    ", free = " + (free() / mb) +
-                    ", max = " + (maxMemory / mb) +
-                    ", avail = " + (available() / mb));
+        	if (request(mb, force))
+        	{
+	            x[i] = new byte[mb];
+	            System.out.println("used = " + i + " / " + (used() /mb) +
+	                    ", total = " + (total() / mb) +
+	                    ", free = " + (free() / mb) +
+	                    ", max = " + (maxMemory() / mb) +
+	                    ", avail = " + (available() / mb) +
+	                    (usingStandardStrategy? ", averageGC = " + ((StandardMemoryStrategy)getStrategy()).getAverageGCFree() : ""));
+        	} else System.exit(0);
         }
 
     }
-    
+
 }

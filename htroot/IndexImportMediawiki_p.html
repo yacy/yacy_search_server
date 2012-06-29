@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': MediaWiki Dump Import</title>
+    #%env/templates/metas.template%#
+    #(import)#::<meta http-equiv="REFRESH" content="10" />#(/import)#
+  </head>
+  <body id="IndexImportMediawiki">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>MediaWiki Dump Import</h2>
+    
+    #(import)#
+    <p>#(status)#No import thread is running, you can start a new thread here::Bad input data: #[message]# #(/status)#</p>
+    <form action="IndexImportMediawiki_p.html" method="get" accept-charset="UTF-8">
+        <!-- no post method here, we don't want to transmit the whole file, only the path-->
+        <fieldset>
+          <legend>MediaWiki Dump File Selection: select a xml file (which may be bz2- or gz-encoded)</legend>
+          You can import MediaWiki dumps here. An example is the file
+          <a href="http://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2">
+          http://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2</a>.
+          <br />
+          Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.
+          <br />
+          <input name="file" type="text" value="" size="80" />
+          <input name="submit" type="submit" value="Import MediaWiki Dump" />
+        </fieldset>
+    </form>
+    <p>
+    When the import is started, the following happens:
+    </p><ul>
+    <li>The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:
+    <pre>
+    &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;surrogates xmlns:dc="http://purl.org/dc/elements/1.1/"&gt;
+  &lt;record&gt;
+    &lt;dc:Title&gt;&lt;![CDATA[Alan Smithee]]&gt;&lt;/dc:Title&gt;
+    &lt;dc:Identifier&gt;http://de.wikipedia.org/wiki/Alan%20Smithee&lt;/dc:Identifier&gt;
+    &lt;dc:Description&gt;&lt;![CDATA[Der als Filmregisseur oft genannte Alan Smithee ist ein Anagramm]]&gt;&lt;/dc:Description&gt;
+    &lt;dc:Language&gt;de&lt;/dc:Language&gt;
+    &lt;dc:Date&gt;2009-05-07T06:03:48Z&lt;/dc:Date&gt;
+  &lt;/record&gt;
+  &lt;record&gt;
+    ...
+  &lt;/record&gt; 
+&lt;/surrogates&gt;
+    </pre>
+    </li>
+    <li>Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.</li>
+    <li>When each of the generated output file is finished, it is renamed to a .xml file</li>
+    <li>Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.</li>
+    <li>When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out</li>
+    <li>You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in</li>
+    </ul>
+    <br />
+    ::
+    <form><fieldset><legend>Import Process</legend>
+      <dl>
+        <dt>Thread:</dt><dd>#[thread]#</dd>
+        <dt>Dump:</dt><dd>#[dump]#</dd>
+        <dt>Processed:</dt><dd>#[count]# Wiki Entries</dd>
+        <dt>Speed:</dt><dd>#[speed]# articles per second</dd>
+        <dt>Running Time:</dt><dd>#[runningHours]# hours, #[runningMinutes]# minutes</dd>
+        <dt>Remaining Time:</dt><dd>#[remainingHours]# hours, #[remainingMinutes]# minutes</dd>
+      </dl>    
+    </fieldset></form>
+    #(/import)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

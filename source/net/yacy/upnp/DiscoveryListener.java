@@ -47,11 +47,19 @@
  */
 package net.yacy.upnp;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.logging.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class can be used to listen for UPNP devices responses when a search message is sent by a control point
@@ -73,7 +81,7 @@ public class DiscoveryListener implements Runnable {
   
   private static final int DEFAULT_TIMEOUT = 250;
  
-  private Map<String, Set<DiscoveryResultsHandler>> registeredHandlers = new HashMap<String, Set<DiscoveryResultsHandler>>();
+  private final Map<String, Set<DiscoveryResultsHandler>> registeredHandlers = new HashMap<String, Set<DiscoveryResultsHandler>>();
   
   private final Object REGISTRATION_PROCESS = new Object();
   
@@ -107,12 +115,12 @@ public class DiscoveryListener implements Runnable {
    * @throws IOException if some errors occurs during SSDP search response messages listener thread startup
    */
   public void registerResultsHandler( DiscoveryResultsHandler resultsHandler, String searchTarget ) throws IOException {
-    synchronized( REGISTRATION_PROCESS ) {
-      if ( !inService ) startDevicesListenerThread();
-      Set<DiscoveryResultsHandler> handlers = registeredHandlers.get( searchTarget );
+    synchronized( this.REGISTRATION_PROCESS ) {
+      if ( !this.inService ) startDevicesListenerThread();
+      Set<DiscoveryResultsHandler> handlers = this.registeredHandlers.get( searchTarget );
       if ( handlers == null ) {
         handlers = new HashSet<DiscoveryResultsHandler>();
-        registeredHandlers.put( searchTarget, handlers );
+        this.registeredHandlers.put( searchTarget, handlers );
       }
       handlers.add( resultsHandler );
     }
@@ -124,15 +132,15 @@ public class DiscoveryListener implements Runnable {
    * @param searchTarget the search target
    */
   public void unRegisterResultsHandler( DiscoveryResultsHandler resultsHandler, String searchTarget ) {
-    synchronized( REGISTRATION_PROCESS ) {
-      Set<DiscoveryResultsHandler> handlers = registeredHandlers.get( searchTarget );
+    synchronized( this.REGISTRATION_PROCESS ) {
+      Set<DiscoveryResultsHandler> handlers = this.registeredHandlers.get( searchTarget );
       if ( handlers != null ) {
         handlers.remove( resultsHandler );
         if (handlers.isEmpty()) {
-          registeredHandlers.remove( searchTarget );
+          this.registeredHandlers.remove( searchTarget );
         }
       }
-      if (registeredHandlers.isEmpty()) {
+      if (this.registeredHandlers.isEmpty()) {
         stopDevicesListenerThread();
       }
     }
@@ -140,13 +148,13 @@ public class DiscoveryListener implements Runnable {
   
   private void startDevicesListenerThread() throws IOException {
     synchronized( singleton ) {
-      if ( !inService ) {
+      if ( !this.inService ) {
         
         this.startMultiCastSocket();
         Thread deamon = new Thread( this, "DiscoveryListener daemon" );
-        deamon.setDaemon( daemon );
+        deamon.setDaemon( this.daemon );
         deamon.start();
-        while ( !inService ) {
+        while ( !this.inService ) {
           // wait for the thread to be started let's wait a few ms
           try {
             Thread.sleep( 2 );
@@ -160,7 +168,7 @@ public class DiscoveryListener implements Runnable {
   
   private void stopDevicesListenerThread() {
     synchronized( singleton ) {
-      inService = false;
+      this.inService = false;
     }
   }
   
@@ -171,38 +179,39 @@ public class DiscoveryListener implements Runnable {
       bindPort = Integer.parseInt( port );
     }
 
-    skt = new java.net.MulticastSocket( null );
-    skt.bind( new InetSocketAddress( InetAddress.getByName( "0.0.0.0" ), bindPort ) );
-    skt.setTimeToLive( Discovery.DEFAULT_TTL );
-    skt.setSoTimeout( DEFAULT_TIMEOUT );
-    skt.joinGroup( InetAddress.getByName( Discovery.SSDP_IP ) );
+    this.skt = new java.net.MulticastSocket( null );
+    this.skt.bind( new InetSocketAddress( InetAddress.getByName( "0.0.0.0" ), bindPort ) );
+    this.skt.setTimeToLive( Discovery.DEFAULT_TTL );
+    this.skt.setSoTimeout( DEFAULT_TIMEOUT );
+    this.skt.joinGroup( InetAddress.getByName( Discovery.SSDP_IP ) );
 
     byte[] buf = new byte[2048];
-    input = new DatagramPacket( buf, buf.length );
+    this.input = new DatagramPacket( buf, buf.length );
 
   }
 
-  public void run() {
+  @Override
+public void run() {
     if ( !Thread.currentThread().getName().equals( "DiscoveryListener daemon" ) ) {
       throw new RuntimeException( "No right to call this method" );
     }
-    inService = true;
-    while ( inService ) {
+    this.inService = true;
+    while ( this.inService ) {
       try {
         listenBroadCast();
       } catch ( SocketTimeoutException ex ) {
         // ignoring
       } catch ( IOException ioEx ) {
-        log.error( "IO Exception during UPNP DiscoveryListener messages listening thread", ioEx );
+        log.error( "IO Exception during UPNP DiscoveryListener messages listening thread" );
       } catch( Exception ex ) {
-        log.error( "Fatal Error during UPNP DiscoveryListener messages listening thread, thread will exit", ex );
-        inService = false;
+        log.error( "Fatal Error during UPNP DiscoveryListener messages listening thread, thread will exit" );
+        this.inService = false;
       }
     }
     
     try {
-      skt.leaveGroup( InetAddress.getByName( Discovery.SSDP_IP ) );
-      skt.close();
+      this.skt.leaveGroup( InetAddress.getByName( Discovery.SSDP_IP ) );
+      this.skt.close();
     } catch ( Exception ex ) {
       // ignoring
     }
@@ -210,9 +219,9 @@ public class DiscoveryListener implements Runnable {
 
   private void listenBroadCast() throws IOException {
     
-    skt.receive( input );
-    InetAddress from = input.getAddress();
-    String received = new String( input.getData(), input.getOffset(), input.getLength() );
+    this.skt.receive( this.input );
+    InetAddress from = this.input.getAddress();
+    String received = new String( this.input.getData(), this.input.getOffset(), this.input.getLength() );
     HttpResponse msg = null;
     try {
       msg = new HttpResponse( received );
@@ -265,11 +274,10 @@ public class DiscoveryListener implements Runnable {
       String udn = usn;
       int index = udn.indexOf( "::" );
       if ( index != -1 ) udn = udn.substring( 0, index );
-      synchronized( REGISTRATION_PROCESS ) {
-        Set<DiscoveryResultsHandler> handlers = registeredHandlers.get( st );
+      synchronized( this.REGISTRATION_PROCESS ) {
+        Set<DiscoveryResultsHandler> handlers = this.registeredHandlers.get( st );
         if ( handlers != null ) {
-          for ( Iterator<DiscoveryResultsHandler> i = handlers.iterator(); i.hasNext(); ) {
-            DiscoveryResultsHandler handler = i.next();
+          for ( DiscoveryResultsHandler handler : handlers ) {
             handler.discoveredDevice( usn, udn, st, maxAge, loc, server );
           }
         }

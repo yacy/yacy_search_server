@@ -29,19 +29,17 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import com.google.common.io.Files;
 
 public class migration {
     //SVN constants
     public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
     public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
     public static final int NEW_OVERLAYS=4422;
-    public static void main(final String[] args) {
-
-    }
+    public static final int IDX_HOST=7724; // api for index retrieval: host index
 
     public static void migrate(final Switchboard sb, final int fromRev, final int toRev){
         if(fromRev < toRev){
@@ -57,6 +55,10 @@ public class migration {
             migrateWorkFiles(sb);
         }
         installSkins(sb); // FIXME: yes, bad fix for quick release 0.47
+        // add new navigation
+        if (sb.getConfig("search.navigation", "").equals("hosts,authors,namespace,topics")) {
+            sb.setConfig("search.navigation", "hosts,authors,namespace,topics,filetype,protocol");
+        }
     }
     /*
      * remove the static defaultfiles. We use them through a overlay now.
@@ -81,7 +83,7 @@ public class migration {
         if(file.exists())
             delete(file);
     }
-    
+
     /*
      * copy skins from the release to DATA/SKINS.
      */
@@ -91,12 +93,12 @@ public class migration {
         if (defaultSkinsPath.exists()) {
             final List<String> skinFiles = FileUtils.getDirListing(defaultSkinsPath.getAbsolutePath());
             mkdirs(skinsPath);
-            for (String skinFile : skinFiles){
+            for (final String skinFile : skinFiles){
                 if (skinFile.endsWith(".css")){
-                    File from = new File(defaultSkinsPath, skinFile);
-                    File to = new File(skinsPath, skinFile);
+                    final File from = new File(defaultSkinsPath, skinFile);
+                    final File to = new File(skinsPath, skinFile);
                     if (from.lastModified() > to.lastModified()) try {
-                        FileUtils.copy(from, to);
+                        Files.copy(from, to);
                     } catch (final IOException e) {}
                 }
             }
@@ -118,7 +120,7 @@ public class migration {
         }else{
             try {
                 mkdirs(styleFile.getParentFile());
-                FileUtils.copy(skinFile, styleFile);
+                Files.copy(skinFile, styleFile);
                 Log.logInfo("MIGRATION", "copied new Skinfile");
             } catch (final IOException e) {
                 Log.logSevere("MIGRATION", "Cannot copy skinfile.");
@@ -144,7 +146,7 @@ public class migration {
         }
         try {
             sb.initBookmarks();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
     }
@@ -164,40 +166,40 @@ public class migration {
             sb.wikiDB.close();
             file2 = new File(sb.workPath, "wiki.db");
             try {
-                FileUtils.copy(file, file2);
+                Files.copy(file, file2);
                 file.delete();
             } catch (final IOException e) {
             }
-            
+
             file = new File(sb.getDataPath(), "DATA/SETTINGS/wiki-bkp.db");
             if (file.exists()) {
                 Log.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
                 file2 = new File(sb.workPath, "wiki-bkp.db");
                 try {
-                    FileUtils.copy(file, file2);
+                    Files.copy(file, file2);
                     file.delete();
-                } catch (final IOException e) {}        
+                } catch (final IOException e) {}
             }
             try {
                 sb.initWiki();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
         }
-        
-        
+
+
         file=new File(sb.getDataPath(), "DATA/SETTINGS/message.db");
         if(file.exists()){
             Log.logInfo("MIGRATION", "Migrating message.db to "+ sb.workPath);
             sb.messageDB.close();
             file2=new File(sb.workPath, "message.db");
             try {
-                FileUtils.copy(file, file2);
+                Files.copy(file, file2);
                 file.delete();
             } catch (final IOException e) {}
             try {
                 sb.initMessages();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
         }
@@ -207,18 +209,14 @@ public class migration {
         // set preset accounts/passwords
         String acc;
         if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
-            sb.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
+            sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
             sb.setConfig("adminAccount", "");
         }
-    
+
         // fix unsafe old passwords
         if ((acc = sb.getConfig("proxyAccountBase64", "")).length() > 0) {
             sb.setConfig("proxyAccountBase64MD5", Digest.encodeMD5Hex(acc));
             sb.setConfig("proxyAccountBase64", "");
-        }
-        if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
-            sb.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(acc));
-            sb.setConfig("adminAccountBase64", "");
         }
         if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {
             sb.setConfig("uploadAccountBase64MD5", Digest.encodeMD5Hex(acc));
@@ -231,14 +229,14 @@ public class migration {
     }
 
     public static void migrateSwitchConfigSettings(final Switchboard sb) {
-        
+
         // migration for additional parser settings
         String value = "";
         //Locales in DATA, because DATA must be writable, htroot not.
         if(sb.getConfig("locale.translated_html", "DATA/LOCALE/htroot").equals("htroot/locale")){
         	sb.setConfig("locale.translated_html", "DATA/LOCALE/htroot");
         }
-        
+
         // migration for blacklists
         if ((value = sb.getConfig("proxyBlackListsActive","")).length() > 0) {
             sb.setConfig("proxy.BlackLists", value);
@@ -246,16 +244,16 @@ public class migration {
             sb.setConfig("dht.BlackLists", value);
             sb.setConfig("search.BlackLists", value);
             sb.setConfig("surftips.BlackLists", value);
-            
+
             sb.setConfig("BlackLists.Shared",sb.getConfig("proxyBlackListsShared",""));
             sb.setConfig("proxyBlackListsActive", "");
         }
-        
+
         // migration of http specific crawler settings
         if ((value = sb.getConfig("crawler.acceptLanguage","")).length() > 0) {
             sb.setConfig("crawler.http.acceptEncoding", sb.getConfig("crawler.acceptEncoding","gzip,deflate"));
             sb.setConfig("crawler.http.acceptLanguage", sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5"));
-            sb.setConfig("crawler.http.acceptCharset",  sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));            
-        }        
+            sb.setConfig("crawler.http.acceptCharset",  sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));
+        }
     }
 }

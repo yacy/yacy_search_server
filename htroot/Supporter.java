@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -25,55 +25,54 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.storage.DynamicScore;
-import net.yacy.cora.storage.ScoreCluster;
+import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.repository.Blacklist;
-
-import de.anomic.search.Switchboard;
+import net.yacy.peers.NewsDB;
+import net.yacy.peers.NewsPool;
+import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
-import de.anomic.yacy.yacyNewsDB;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacySeed;
 
 public class Supporter {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
-        
+
         final boolean showScore = ((post != null) && (post.containsKey("score")));
-        
+
         // access control
         final boolean publicPage = sb.getConfigBool("publicSurftips", true);
-        final boolean authorizedAccess = sb.verifyAuthentication(header, false);
-        
+        final boolean authorizedAccess = sb.verifyAuthentication(header);
+
         if ((publicPage) || (authorizedAccess)) {
-        
+
             // read voting
             String hash;
             if ((post != null) && ((hash = post.get("voteNegative", null)) != null)) {
-                if (!sb.verifyAuthentication(header, false)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                if (!sb.verifyAuthentication(header)) {
+                	prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting
@@ -82,12 +81,12 @@ public class Supporter {
                     map.put("urlhash", hash);
                     map.put("vote", "negative");
                     map.put("refid", post.get("refid", ""));
-                    sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                    sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
                 }
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
-                if (!sb.verifyAuthentication(header, false)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                if (!sb.verifyAuthentication(header)) {
+                	prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting
@@ -99,22 +98,22 @@ public class Supporter {
                 map.put("vote", "positive");
                 map.put("refid", post.get("refid", ""));
                 map.put("comment", post.get("comment", ""));
-                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
             }
-        
+
             // create Supporter
             final HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
             final HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
-            accumulateVotes(sb, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            accumulateVotes(sb, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-            final DynamicScore<String> ranking = new ScoreCluster<String>(); // score cluster for url hashes
+            final ScoreMap<String> ranking = new ConcurrentScoreMap<String>(); // score cluster for url hashes
             final Row rowdef = new Row("String url-255, String title-120, String description-120, String refid-" + (GenericFormatter.PATTERN_SHORT_SECOND.length() + 12), NaturalOrder.naturalOrder);
             final HashMap<String, Entry> Supporter = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
-            accumulateSupporter(sb, Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            accumulateSupporter(sb, Supporter, ranking, rowdef, negativeHashes, positiveHashes, NewsPool.INCOMING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-        
+
             // read out surftipp array and create property entries
             final Iterator<String> k = ranking.keys(false);
             int i = 0;
@@ -124,20 +123,22 @@ public class Supporter {
             while (k.hasNext()) {
                 urlhash = k.next();
                 if (urlhash == null) continue;
-                
+
                 row = Supporter.get(urlhash);
                 if (row == null) continue;
-                
-                url = row.getColString(0, null);
+
+                url = row.getPrimaryKeyUTF8().trim();
                 try {
-                    if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, new DigestURI(url, urlhash.getBytes()))) continue;
-                } catch(final MalformedURLException e) {continue;}
-                title = row.getColString(1,"UTF-8");
-                description = row.getColString(2,"UTF-8");
+                    if (Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS, new DigestURI(url, urlhash.getBytes()))) continue;
+                } catch (final MalformedURLException e) {
+                    continue;
+                }
+                title = row.getColUTF8(1);
+                description = row.getColUTF8(2);
                 if ((url == null) || (title == null) || (description == null)) continue;
-                refid = row.getColString(3, null);
-                voted = (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
-                        (sb.peers.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
+                refid = row.getColUTF8(3);
+                voted = (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) ||
+                        (sb.peers.newsPool.getSpecific(NewsPool.PUBLISHED_DB, NewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 prop.put("supporter_results_" + i + "_authorized", authenticated ? "1" : "0");
                 prop.put("supporter_results_" + i + "_authorized_recommend", voted ? "0" : "1");
 
@@ -156,7 +157,7 @@ public class Supporter {
                 prop.putHTML("supporter_results_" + i + "_title", (showScore) ? ("(" + ranking.get(urlhash) + ") " + title) : title);
                 prop.putHTML("supporter_results_" + i + "_description", description);
                 i++;
-                
+
                 if (i >= 50) break;
             }
             prop.put("supporter_results", i);
@@ -164,27 +165,27 @@ public class Supporter {
         } else {
             prop.put("supporter", "0");
         }
-        
+
         return prop;
     }
 
     private static int timeFactor(final Date created) {
         return (int) Math.max(0, 10 - ((System.currentTimeMillis() - created.getTime()) / 24 / 60 / 60 / 1000));
     }
-    
+
     private static void accumulateVotes(final Switchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
-        yacyNewsDB.Record record;
-        final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        NewsDB.Record record;
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
         int j = 0;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
             if (record == null) continue;
-            
-            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
+
+            if (record.category().equals(NewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                 final String urlhash = record.attribute("urlhash", "");
                 final String vote    = record.attribute("vote", "");
-                final int factor = ((dbtype == yacyNewsPool.OUTGOING_DB) || (dbtype == yacyNewsPool.PUBLISHED_DB)) ? 2 : 1;
+                final int factor = ((dbtype == NewsPool.OUTGOING_DB) || (dbtype == NewsPool.PUBLISHED_DB)) ? 2 : 1;
                 if (vote.equals("negative")) {
                     final Integer i = negativeHashes.get(urlhash);
                     if (i == null) negativeHashes.put(urlhash, Integer.valueOf(factor));
@@ -198,61 +199,61 @@ public class Supporter {
             }
         }
     }
-    
+
     private static void accumulateSupporter(
             final Switchboard sb,
-            final HashMap<String, Entry> Supporter, final DynamicScore<String> ranking, final Row rowdef,
+            final HashMap<String, Entry> Supporter, final ScoreMap<String> ranking, final Row rowdef,
             final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
-        yacyNewsDB.Record record;
-        final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        NewsDB.Record record;
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
         int j = 0;
         String url = "", urlhash;
         Row.Entry entry;
         int score = 0;
         Integer vote;
-        yacySeed seed;
+        Seed seed;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
             if (record == null) continue;
-            
-            entry = null;
-            if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) &&
-                ((seed = sb.peers.getConnected(record.originator())) != null)) try {
-                url = record.attribute("homepage", "");
-                if (url.length() < 12) continue;
-                entry = rowdef.newEntry(new byte[][]{
-                                url.getBytes(),
-                                url.getBytes(),
-                                ("Home Page of " + seed.getName()).getBytes("UTF-8"),
-                                record.id().getBytes()
-                        });
-                score = 1 + timeFactor(record.created());
-            } catch (final IOException e) {}
 
-            if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_BROADCAST)) &&
-                ((seed = sb.peers.getConnected(record.originator())) != null)) try {
+            entry = null;
+            if ((record.category().equals(NewsPool.CATEGORY_PROFILE_UPDATE)) &&
+                ((seed = sb.peers.getConnected(record.originator())) != null)) {
                 url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 url.getBytes(),
-                                ("Home Page of " + seed.getName()).getBytes("UTF-8"),
+                                UTF8.getBytes(("Home Page of " + seed.getName())),
                                 record.id().getBytes()
                         });
                 score = 1 + timeFactor(record.created());
-            } catch (final IOException e) {}
+            }
+
+            if ((record.category().equals(NewsPool.CATEGORY_PROFILE_BROADCAST)) &&
+                ((seed = sb.peers.getConnected(record.originator())) != null)) {
+                url = record.attribute("homepage", "");
+                if (url.length() < 12) continue;
+                entry = rowdef.newEntry(new byte[][]{
+                                url.getBytes(),
+                                url.getBytes(),
+                                UTF8.getBytes(("Home Page of " + seed.getName())),
+                                record.id().getBytes()
+                        });
+                score = 1 + timeFactor(record.created());
+            }
 
             // add/subtract votes and write record
             if (entry != null) {
                 try {
-                    urlhash = UTF8.String((new DigestURI(url)).hash());
+                    urlhash = ASCII.String((new DigestURI(url)).hash());
                 } catch (final MalformedURLException e) {
                     urlhash = null;
                 }
                 if (urlhash == null)
                     try {
-                        urlhash = UTF8.String((new DigestURI("http://" + url)).hash());
+                        urlhash = ASCII.String((new DigestURI("http://" + url)).hash());
                     } catch (final MalformedURLException e) {
                         urlhash = null;
                     }

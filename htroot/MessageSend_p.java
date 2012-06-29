@@ -25,19 +25,19 @@
 //javac -classpath .:../Classes MessageSend_p.java
 //if the shell's current path is HTROOT
 
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacySeed;
 
 public class MessageSend_p {
 
@@ -51,12 +51,12 @@ public class MessageSend_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        if ((post == null) || (post.get("hash","").length() == 0)) {
+        if ((post == null) || (post.get("hash","").isEmpty())) {
             prop.put("mode", "2");
             return prop;
         }
 
-        final String hash    = post.get("hash", "");
+        final String hash = post.get("hash", "");
         String subject = post.get("subject", "");
         String message = post.get("message", "");
 
@@ -69,18 +69,18 @@ public class MessageSend_p {
 
             // open an editor page for the message
             // first ask if the other peer is online, and also what kind of document it accepts
-            final Map<String, String> result = yacyClient.permissionMessage(sb.peers, hash);
+            final Map<String, String> result = Protocol.permissionMessage(sb.peers, hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
             String peerName;
-            yacySeed targetPeer = null;
+            Seed targetPeer = null;
             if (hash.equals(sb.peers.mySeed().hash)) {
-                peerName = sb.peers.mySeed().get(yacySeed.NAME,"nameless");
+                peerName = sb.peers.mySeed().get(Seed.NAME,"nameless");
             } else {
                 targetPeer = sb.peers.getConnected(hash);
                 if (targetPeer == null)
                     peerName = "nameless";
                 else
-                    peerName = targetPeer.get(yacySeed.NAME,"nameless");
+                    peerName = targetPeer.get(Seed.NAME,"nameless");
             }
 
             prop.putXML("mode_permission_peerName", peerName);
@@ -107,7 +107,7 @@ public class MessageSend_p {
                     prop.putXML("mode_permission_message", message);
                     prop.putHTML("mode_permission_hash", hash);
                     if (post.containsKey("preview")) {
-                        prop.putWiki("mode_permission_previewmessage", message);
+                        prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_permission_previewmessage", message);
 
                     }
 
@@ -121,19 +121,14 @@ public class MessageSend_p {
             // send written message to peer
             try {
                 prop.put("mode_status", "0");
-                int messagesize = Integer.parseInt(post.get("messagesize", "0"));
+                int messagesize = post.getInt("messagesize", 0);
                 //int attachmentsize = Integer.parseInt(post.get("attachmentsize", "0"));
 
                 if (messagesize < 1000) messagesize = 1000; // debug
                 if (subject.length() > 100) subject = subject.substring(0, 100);
                 if (message.length() > messagesize) message = message.substring(0, messagesize);
-                byte[] mb;
-                try {
-                    mb = message.getBytes("UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    mb = message.getBytes();
-                }
-                final Map<String, String> result = yacyClient.postMessage(sb.peers, hash, subject, mb);
+                final byte[] mb = UTF8.getBytes(message);
+                final Map<String, String> result = Protocol.postMessage(sb.peers, hash, subject, mb);
 
                 //message has been sent
                 prop.put("mode_status_response", result.get("response"));

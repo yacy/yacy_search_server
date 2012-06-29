@@ -61,142 +61,151 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.document.Classification;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.peers.Seed;
+import net.yacy.peers.graphics.EncodedImage;
+import net.yacy.peers.operation.yacyBuildProperties;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.visualization.RasterPlotter;
-
-import de.anomic.data.MimeTable;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import de.anomic.data.UserDB;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.graphics.EncodedImage;
 
 public final class HTTPDFileHandler {
-    
+
     // create a class loader
     private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
     private static serverSwitch switchboard = null;
     private static Switchboard sb = Switchboard.getSwitchboard();
-    
+    private final static byte[] UNRESOLVED_PATTERN = ASCII.getBytes("-UNRESOLVED_PATTERN-");
+
+
     private static File     htRootPath     = null;
     private static File     htDocsPath     = null;
     private static String[] defaultFiles   = null;
     private static File     htDefaultPath  = null;
     private static File     htLocalePath   = null;
     public  static String   indexForward   = "";
-    
+
     protected static final class TemplateCacheEntry {
         Date lastModified;
         byte[] content;
     }
-    private static final ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>> templateCache;    
+    private static final ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>> templateCache;
     private static final ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache;
-    
+
     public static final boolean useTemplateCache;
-    
+
     //private Properties connectionProperties = null;
     // creating a logger
     private static final Log theLogger = new Log("FILEHANDLER");
-    
+
     static {
         final serverSwitch theSwitchboard = Switchboard.getSwitchboard();
         useTemplateCache = theSwitchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
         templateCache = (useTemplateCache)? new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>() : new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>(0);
-        templateMethodCache = (useTemplateCache) ? new ConcurrentHashMap<File, SoftReference<Method>>() : new ConcurrentHashMap<File, SoftReference<Method>>(0);
-        
+        templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
+
         if (switchboard == null) {
             switchboard = theSwitchboard;
 
-            if (MimeTable.isEmpty()) {
+            if (Classification.countMimes() == 0) {
                 // load the mime table
                 final String mimeTablePath = theSwitchboard.getConfig("mimeTable","");
                 Log.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
-                MimeTable.init(new File(theSwitchboard.getAppPath(), mimeTablePath));
+                Classification.init(new File(theSwitchboard.getAppPath(), mimeTablePath));
             }
-            
+
             // create default files array
             initDefaultPath();
-            
+
             // create a htRootPath: system pages
             if (htRootPath == null) {
                     htRootPath = new File(theSwitchboard.getAppPath(), theSwitchboard.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
                     if (!(htRootPath.exists())) htRootPath.mkdir();
             }
-            
+
             // create a htDocsPath: user defined pages
             if (htDocsPath == null) {
                 htDocsPath = theSwitchboard.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
                 if (!(htDocsPath.exists())) htDocsPath.mkdirs();
             }
-            
+
             // create a repository path
             final File repository = new File(htDocsPath, "repository");
             if (!repository.exists()) repository.mkdirs();
-            
+
             // create htLocaleDefault, htLocalePath
             if (htDefaultPath == null) htDefaultPath = theSwitchboard.getAppPath("htDefaultPath", "htroot");
             if (htLocalePath == null) htLocalePath = theSwitchboard.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
         }
-        
+
     }
-    
+
     public static final void initDefaultPath() {
         // create default files array
-        defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
+        defaultFiles = switchboard.getConfig(SwitchboardConstants.BROWSER_DEFAULT,"index.html").split(",");
         if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
         indexForward = switchboard.getConfig(SwitchboardConstants.INDEX_FORWARD, "");
         if (indexForward.startsWith("/")) indexForward = indexForward.substring(1);
     }
-    
+
     /** Returns a path to the localized or default file according to the locale.language (from he switchboard)
      * @param path relative from htroot */
     public static File getLocalizedFile(final String path){
         return getLocalizedFile(path, switchboard.getConfig("locale.language","default"));
     }
-    
+
     /** Returns a path to the localized or default file according to the parameter localeSelection
      * @param path relative from htroot
      * @param localeSelection language of localized file; locale.language from switchboard is used if localeSelection.equals("") */
@@ -212,13 +221,13 @@ public final class HTTPDFileHandler {
             if (localePath.exists()) return localePath;  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
         }
 
-        File docsPath  = new File(htDocsPath, path);
+        final File docsPath  = new File(htDocsPath, path);
         if (docsPath.exists()) return docsPath;
         return new File(htDefaultPath, path);
     }
-    
+
     private static final ResponseHeader getDefaultHeaders(final String path) {
-        final ResponseHeader headers = new ResponseHeader();
+        final ResponseHeader headers = new ResponseHeader(200);
         String ext;
         int pos;
         if ((pos = path.lastIndexOf('.')) < 0) {
@@ -229,62 +238,56 @@ public final class HTTPDFileHandler {
         headers.put(HeaderFramework.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(HeaderFramework.DATE, HeaderFramework.formatRFC1123(new Date()));
         if(!(Classification.isMediaExtension(ext))){
-            headers.put(HeaderFramework.PRAGMA, "no-cache");         
+            headers.put(HeaderFramework.PRAGMA, "no-cache");
         }
         return headers;
     }
-    
-    public static void doGet(final Properties conProp, final RequestHeader requestHeader, final OutputStream response) {
+
+    public static void doGet(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
-    
-    public static void doHead(final Properties conProp, final RequestHeader requestHeader, final OutputStream response) {
+
+    public static void doHead(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
-    
-    public static void doPost(final Properties conProp, final RequestHeader requestHeader, final OutputStream response, final InputStream body) {
+
+    public static void doPost(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream response, final InputStream body) {
         doResponse(conProp, requestHeader, response, body);
     }
-    
-    public static void doResponse(final Properties conProp, final RequestHeader requestHeader, final OutputStream out, final InputStream body) {
-  
+
+    public static void doResponse(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream out, final InputStream body) {
+
         String path = null;
         try {
-            // getting some connection properties            
-            final String method = conProp.getProperty(HeaderFramework.CONNECTION_PROP_METHOD);
-            path = conProp.getProperty(HeaderFramework.CONNECTION_PROP_PATH);
-            String argsString = conProp.getProperty(HeaderFramework.CONNECTION_PROP_ARGS); // is null if no args were given
-            final String httpVersion = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER);
-            final String clientIP = conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, "unknown-host");
-            
+            // getting some connection properties
+            final String method = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
+            path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);
+            String argsString = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS); // is null if no args were given
+            final String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+            String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = "unknown-host";
+
             // check hack attacks in path
-            if (path.indexOf("..") >= 0) {
+            if (path.indexOf("..",0) >= 0) {
                 HTTPDemon.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
                 return;
             }
-            
-            // url decoding of path
-            try {
-                path = URLDecoder.decode(path, "UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                // This should never occur
-                assert(false) : "UnsupportedEncodingException: " + e.getMessage();
-            }
-            
+
+            path = UTF8.decodeURL(path);
+
             // check against hack attacks in path
-            if (path.indexOf("..") >= 0) {
+            if (path.indexOf("..",0) >= 0) {
                 HTTPDemon.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
                 return;
             }
-            
-            // check permission/granted access
-            String authorization = requestHeader.get(RequestHeader.AUTHORIZATION);
-            if (authorization != null && authorization.length() == 0) authorization = null;
-            final String adminAccountBase64MD5 = switchboard.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");
-            
+
+            // allow proper access to current peer via virtual directory
+            if (path.startsWith("/currentyacypeer/")) {
+            	path = path.substring(16);
+            }
+
             // cache settings
             boolean nocache = path.contains("?") || body != null;
-            
+
             // a bad patch to map the /xml/ path to /api/
             if (path.startsWith("/xml/")) {
                 path = "/api/" + path.substring(5);
@@ -297,54 +300,70 @@ public final class HTTPDFileHandler {
             if (path.startsWith("/bookmarks/")) {
                 path = "/api/bookmarks/" + path.substring(11);
             }
-            
-            final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
-            final String refererHost = requestHeader.refererHost();
-            boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
-            final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
-            final boolean protectedPage = path.indexOf("_p.") > 0;
-            final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
-            final boolean softauth = accessFromLocalhost && authorization != null && authorization.length() > 6 && (adminAccountBase64MD5.equals(authorization.substring(6)));
 
-            if (protectedPage && ((!softauth && !grantedForLocalhost && !accountEmpty) || requestHeader.userAgent().startsWith("yacybot"))) {
-                // authentication required
-                if (authorization == null) {
-                    // no authorization given in response. Ask for that
-                    final ResponseHeader responseHeader = getDefaultHeaders(path);
-                    responseHeader.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
-                    //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
-                    final servletProperties tp=new servletProperties();
-                    tp.put("returnto", path);
-                    //TODO: separate error page Wrong Login / No Login
-                    HTTPDemon.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, responseHeader);
-                    return;
-                } else if (
-                    (HTTPDemon.staticAdminAuthenticated(authorization.trim().substring(6), switchboard) == 4) ||
-                    (sb.userDB.hasAdminRight(authorization, requestHeader.getHeaderCookies()))) {
-                    //Authentication successful. remove brute-force flag
-                    serverCore.bfHost.remove(conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
-                } else {
-                    // a wrong authentication was given or the userDB user does not have admin access. Ask again
-                    Log.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                    final Integer attempts = serverCore.bfHost.get(clientIP);
-                    if (attempts == null)
-                        serverCore.bfHost.put(clientIP, Integer.valueOf(1));
-                    else
-                        serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
-    
-                    final ResponseHeader headers = getDefaultHeaders(path);
-                    headers.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
-                    HTTPDemon.sendRespondHeader(conProp,out,httpVersion,401,headers);
-                    return;
-                }
+            // these are the 5 cases where an access granted:
+            // (the alternative is that we deliver a 401 to request authorization)
+
+            // -1- the page is not protected; or
+            final boolean protectedPage = path.indexOf("_p.",0) > 0;
+            boolean accessGranted = !protectedPage;
+
+            // -2- a password is not configured; or
+            final String adminAccountBase64MD5 = switchboard.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+            if (!accessGranted) {
+                accessGranted = adminAccountBase64MD5.length() == 0;
             }
-        
+
+            // -3- access from localhost is granted and access comes from localhost; or
+            final String refererHost = requestHeader.refererHost();
+            if (!accessGranted) {
+                final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
+                final boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+                accessGranted = adminAccountForLocalhost && accessFromLocalhost;
+            }
+
+            // -4- a password is configured and access comes from localhost
+            //     and the realm-value of a http-authentify String is equal to the stored base64MD5; or
+            String realmProp = requestHeader.get(RequestHeader.AUTHORIZATION);
+            if (realmProp != null && realmProp.length() == 0) realmProp = null;
+            final String realmValue = realmProp == null ? null : realmProp.substring(6);
+            if (!accessGranted) {
+                final boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+                accessGranted = accessFromLocalhost && realmValue != null && realmProp.length() > 6 && (adminAccountBase64MD5.equals(realmValue));
+                Log.logInfo("HTTPDFileHandler", "access from localhost blocked, clientIP=" + clientIP);
+            }
+
+            // -5- a password is configured and access comes with matching http-authentify
+            if (!accessGranted) {
+                accessGranted = realmProp != null && realmValue != null && (sb.userDB.hasAdminRight(realmProp, requestHeader.getHeaderCookies()) || adminAccountBase64MD5.equals(Digest.encodeMD5Hex(realmValue)));
+            }
+
+            // in case that we are still not granted we ask for a password
+            if (!accessGranted) {
+                Log.logInfo("HTTPD", "Wrong log-in for path '" + path + "' from host '" + clientIP + "'");
+                final Integer attempts = serverCore.bfHost.get(clientIP);
+                if (attempts == null)
+                    serverCore.bfHost.put(clientIP, Integer.valueOf(1));
+                else
+                    serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
+
+                final ResponseHeader responseHeader = getDefaultHeaders(path);
+                responseHeader.put(RequestHeader.WWW_AUTHENTICATE, "Basic realm=\"" + serverObjects.ADMIN_AUTHENTICATE_MSG + "\"");
+                final servletProperties tp=new servletProperties();
+                tp.put("returnto", path);
+                HTTPDemon.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, responseHeader);
+                return;
+            }
+
+            // Authentication successful. remove brute-force flag
+            serverCore.bfHost.remove(conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+
             // parse arguments
             serverObjects args = new serverObjects();
             int argc = 0;
             if (argsString == null) {
                 // no args here, maybe a POST with multipart extension
-                int length = requestHeader.getContentLength();
+                final int length = requestHeader.getContentLength();
                 //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
 
                 /* don't parse body in case of a POST CGI call since it has to be
@@ -384,7 +403,7 @@ public final class HTTPDFileHandler {
                 // simple args in URL (stuff after the "?")
                 argc = HTTPDemon.parseArgs(args, argsString);
             }
-        
+
             // check for cross site scripting - attacks in request arguments
             if (args != null && argc > 0) {
                 // check all values for occurrences of script values
@@ -392,42 +411,46 @@ public final class HTTPDFileHandler {
                 String val;
                 while (e.hasNext()) {
                     val = e.next();
-                    if ((val != null) && (val.indexOf("<script") >= 0) && !path.equals("/Crawler_p.html")) {
+                    if ((val != null) && (val.indexOf("<script",0) >= 0) && !path.equals("/Crawler_p.html")) {
                         // deny request
                         HTTPDemon.sendRespondError(conProp,out,4,403,null,"bad post values",null);
                         return;
                     }
                 }
             }
-            
+
             if (args != null) nocache = true;
-        
+
             // we are finished with parsing
             // the result of value hand-over is in args and argc
-            if (path.length() == 0) {
+            if (path.isEmpty()) {
                 HTTPDemon.sendRespondError(conProp,out,4,400,null,"Bad Request",null);
                 out.flush();
                 return;
             }
-            File targetClass=null;
+            File targetClass = null;
 
             // locate the file
-            if (path.length() > 0 && path.charAt(0) != '/' && path.charAt(0) != '\\') path = "/" + path; // attach leading slash
-            if (path.endsWith("index.html")) path = path.substring(0, path.length() - 10);
-            
+            if (!path.isEmpty() && path.charAt(0) != '/' && path.charAt(0) != '\\') {
+                path = "/" + path; // attach leading slash
+            }
+            if (path.endsWith("index.html")) {
+                path = path.substring(0, path.length() - 10);
+            }
+
             // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the locale.language
             String localeSelection = switchboard.getConfig("locale.language","default");
             if (args != null && (args.containsKey("language"))) {
-                // TODO 9.11.06 Bost: a class with information about available languages is needed. 
+                // TODO 9.11.06 Bost: a class with information about available languages is needed.
                 // the indexOf(".") is just a workaround because there from ConfigLanguage.html commes "de.lng" and
                 // from ConfigBasic.html comes just "de" in the "language" parameter
                 localeSelection = args.get("language", localeSelection);
                 if (localeSelection.indexOf('.') != -1)
                     localeSelection = localeSelection.substring(0, localeSelection.indexOf('.'));
             }
-            
+
             File targetFile = getLocalizedFile(path, localeSelection);
-            final String targetExt = conProp.getProperty("EXT","");
+            String targetExt = (String) conProp.get("EXT"); if (targetExt == null) targetExt = "";
             targetClass = rewriteClassFile(new File(htDefaultPath, path));
             if (path.endsWith("/") || path.endsWith("\\")) {
                 String testpath;
@@ -438,8 +461,8 @@ public final class HTTPDFileHandler {
                     path = testpath;
                 } else {
                     // attach default file name(s)
-                    for (int i = 0; i < defaultFiles.length; i++) {
-                        testpath = path + defaultFiles[i];
+                    for (final String defaultFile : defaultFiles) {
+                        testpath = path + defaultFile;
                         targetFile = getOverlayedFile(testpath);
                         targetClass = getOverlayedClass(testpath);
                         if (targetFile.exists()) {
@@ -449,7 +472,7 @@ public final class HTTPDFileHandler {
                     }
                 }
                 targetFile = getLocalizedFile(path, localeSelection);
-                
+
                 //no defaultfile, send a dirlisting
                 if (targetFile == null || !targetFile.exists() || (targetFile.exists() && targetFile.isDirectory())) {
                     final StringBuilder aBuffer = new StringBuilder();
@@ -462,12 +485,12 @@ public final class HTTPDFileHandler {
                     String headline, author, description, publisher;
                     int images, links;
                     ContentScraper scraper;
-                    for (int i = 0; i < list.length; i++) {
-                        f = new File(targetFile, list[i]);
+                    for (final String element : list) {
+                        f = new File(targetFile, element);
                         if (f.isDirectory()) {
-                            aBuffer.append("    <li><a href=\"" + path + list[i] + "/\">" + list[i] + "/</a><br/></li>\n");
+                            aBuffer.append("    <li><a href=\"" + path + element + "/\">" + element + "/</a><br/></li>\n");
                         } else {
-                            if (list[i].endsWith("html") || (list[i].endsWith("htm"))) {
+                            if (element.endsWith("html") || (element.endsWith("htm"))) {
                                 scraper = ContentScraper.parseResource(f);
                                 headline = scraper.getTitle();
                                 author = scraper.getAuthor();
@@ -492,8 +515,8 @@ public final class HTTPDFileHandler {
                                 size = (sz / 1024 / 1024) + " MB";
                             }
                             aBuffer.append("    <li>");
-                            if (headline != null && headline.length() > 0) aBuffer.append("<a href=\"" + list[i] + "\"><b>" + headline + "</b></a><br/>");
-                            aBuffer.append("<a href=\"" + path + list[i] + "\">" + list[i] + "</a><br/>");
+                            if (headline != null && headline.length() > 0) aBuffer.append("<a href=\"" + element + "\"><b>" + headline + "</b></a><br/>");
+                            aBuffer.append("<a href=\"" + path + element + "\">" + element + "</a><br/>");
                             if (author != null && author.length() > 0) aBuffer.append("Author: " + author + "<br/>");
                             if (publisher != null && publisher.length() > 0) aBuffer.append("Publisher: " + publisher + "<br/>");
                             if (description != null && description.length() > 0) aBuffer.append("Description: " + description + "<br/>");
@@ -503,9 +526,9 @@ public final class HTTPDFileHandler {
                     aBuffer.append("  </ul>\n</body>\n</html>\n");
 
                     // write the list to the client
-                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html; charset=UTF-8", aBuffer.length(), new Date(targetFile.lastModified()), null, new ResponseHeader(), null, null, true);
+                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html; charset=UTF-8", aBuffer.length(), new Date(targetFile.lastModified()), null, new ResponseHeader(200), null, null, true);
                     if (!method.equals(HeaderFramework.METHOD_HEAD)) {
-                        out.write(aBuffer.toString().getBytes("UTF-8"));
+                        out.write(UTF8.getBytes(aBuffer.toString()));
                     }
                     return;
                 }
@@ -520,11 +543,13 @@ public final class HTTPDFileHandler {
                         targetClass = rewriteClassFile(new File(htDocsPath, path));
                     }
             }
-            
+
             // implement proxy via url (not in servlet, because we need binary access on ouputStream)
             if (path.equals("/proxy.html")) {
-            	List<Pattern> urlProxyAccess = Domains.makePatterns(sb.getConfig("proxyURL.access", "127.0.0.1"));
-            	if (sb.getConfigBool("proxyURL", false) && Domains.matchesList(clientIP, urlProxyAccess)) {
+            	final List<Pattern> urlProxyAccess = Domains.makePatterns(sb.getConfig("proxyURL.access", Domains.LOCALHOST));
+                final UserDB.Entry user = sb.userDB.getUser(requestHeader);
+                final boolean user_may_see_proxyurl = Domains.matchesList(clientIP, urlProxyAccess) || (user!=null && user.hasRight(UserDB.AccessRight.PROXY_RIGHT));
+            	if (sb.getConfigBool("proxyURL", false) && user_may_see_proxyurl) {
             		doURLProxy(args, conProp, requestHeader, out);
             		return;
             	}
@@ -532,22 +557,22 @@ public final class HTTPDFileHandler {
         			HTTPDemon.sendRespondError(conProp,out,3,403,"Access denied",null,null);
             	}
             }
-            
+
             // track all files that had been accessed so far
             if (targetFile != null && targetFile.exists()) {
                 if (args != null && args.size() > 0) sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), path));
             }
-            
+
             //File targetClass = rewriteClassFile(targetFile);
             //We need tp here
             servletProperties templatePatterns = null;
             Date targetDate;
-            
+
             if ((targetClass != null) && (path.endsWith("png"))) {
                 // call an image-servlet to produce an on-the-fly - generated image
                 Object img = null;
                 try {
-                    requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+                    requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                     requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
                     requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "png");
                     // in case that there are no args given, args = null or empty hashmap
@@ -560,6 +585,7 @@ public final class HTTPDFileHandler {
                     e.getTargetException().getMessage() +
                     "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
                     Log.logException(e);
+                    Log.logException(e.getCause());
                     Log.logException(e.getTargetException());
                     targetClass = null;
                 }
@@ -572,7 +598,7 @@ public final class HTTPDFileHandler {
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
-                        final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+                        final String mimeType = Classification.ext2mime(targetExt, "text/html");
                         final ByteBuffer result = RasterPlotter.exportImage(yp.getImage(), targetExt);
 
                         // write the array to the client
@@ -586,7 +612,7 @@ public final class HTTPDFileHandler {
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
-                        final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+                        final String mimeType = Classification.ext2mime(targetExt, "text/html");
                         final ByteBuffer result = yp.getImage();
 
                         // write the array to the client
@@ -595,18 +621,38 @@ public final class HTTPDFileHandler {
                             result.writeTo(out);
                         }
                     }
-                    if (img instanceof Image) {
-                        final Image i = (Image) img;
+                    /*
+                    if (img instanceof BufferedImage) {
+                        final BufferedImage i = (BufferedImage) img;
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
                         final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
 
                         // generate an byte array from the generated image
+                        int width = i.getWidth(); if (width < 0) width = 96; // bad hack
+                        int height = i.getHeight(); if (height < 0) height = 96; // bad hack
+                        final ByteBuffer result = RasterPlotter.exportImage(i, targetExt);
+
+                        // write the array to the client
+                        HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
+                        if (!method.equals(HeaderFramework.METHOD_HEAD)) {
+                            result.writeTo(out);
+                        }
+                    }
+                    */
+                    if (img instanceof Image) {
+                        final Image i = (Image) img;
+                        // send an image to client
+                        targetDate = new Date(System.currentTimeMillis());
+                        nocache = true;
+                        final String mimeType = Classification.ext2mime(targetExt, "text/html");
+
+                        // generate an byte array from the generated image
                         int width = i.getWidth(null); if (width < 0) width = 96; // bad hack
                         int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
                         final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-                        bi.createGraphics().drawImage(i, 0, 0, width, height, null); 
+                        bi.createGraphics().drawImage(i, 0, 0, width, height, null);
                         final ByteBuffer result = RasterPlotter.exportImage(bi, targetExt);
 
                         // write the array to the client
@@ -616,169 +662,252 @@ public final class HTTPDFileHandler {
                         }
                     }
                 }
-            } else if (((switchboard.getConfigBool("cgi.allow", false)) &&                                  // check if CGI execution is allowed in config
-                    (matchesSuffix(path, switchboard.getConfig("cgi.suffixes", null))) &&  // "right" file extension?
-                    (path.substring(0, path.indexOf(targetFile.getName())).contains("/CGI-BIN/") ||
-                    path.substring(0, path.indexOf(targetFile.getName())).contains("/cgi-bin/")) &&         // file in right directory?
-                    targetFile.exists())
+            // old-school CGI execution
+            } else if ((switchboard.getConfigBool("cgi.allow", false) // check if CGI execution is allowed in config
+                    && matchesSuffix(path, switchboard.getConfig("cgi.suffixes", null)) // "right" file extension?
+                    && path.substring(0, path.indexOf(targetFile.getName())).toUpperCase().contains("/CGI-BIN/") // file in right directory?
+                    && targetFile.exists())
                     ) {
 
-                String mimeType = "text/html";
-                int statusCode = 200;
+                if (!targetFile.canExecute()) {
+                    HTTPDemon.sendRespondError(
+                            conProp,
+                            out,
+                            -1,
+                            403,
+                            null,
+                            HeaderFramework.http1_1.get(
+                                    Integer.toString(403)),
+                            null);
+                    Log.logWarning(
+                            "HTTPD",
+                            "CGI script " + targetFile.getPath()
+                            + " could not be executed due to "
+                            + "insufficient access rights.");
+                } else {
+                    String mimeType = "text/html";
+                    int statusCode = 200;
 
-                ProcessBuilder pb;
+                    final ProcessBuilder pb =
+                            new ProcessBuilder(assembleCommandFromShebang(targetFile));
+                    pb.directory(targetFile.getParentFile());
 
-                pb = new ProcessBuilder(targetFile.getAbsolutePath());
+                    final String fileSeparator =
+                            System.getProperty("file.separator", "/");
 
-                String fileSeparator = System.getProperty("file.separator", "/");
-
-                // set environment variables
-                Map<String, String> env = pb.environment();
-                env.put("SERVER_SOFTWARE", getDefaultHeaders(path).get(HeaderFramework.SERVER));
-                env.put("SERVER_NAME", sb.peers.mySeed().getName());
-                env.put("GATEWAY_INTERFACE", "CGI/1.1");
-                if (httpVersion != null) {
-                    env.put("SERVER_PROTOCOL", httpVersion);
-                }
-                env.put("SERVER_PORT", switchboard.getConfig("port", "8090"));
-                env.put("REQUEST_METHOD", method);
-//                env.put("PATH_INFO", "");         // TODO: implement
-//                env.put("PATH_TRANSLATED", "");   // TODO: implement
-                env.put("SCRIPT_NAME", path);
-                if (argsString != null) {
-                    env.put("QUERY_STRING", argsString);
-                }
-                env.put("REMOTE_ADDR", clientIP);
-//                env.put("AUTH_TYPE", "");         // TODO: implement
-//                env.put("REMOTE_USER", "");       // TODO: implement
-//                env.put("REMOTE_IDENT", "");      // I don't think we need this
-                env.put("DOCUMENT_ROOT", switchboard.getAppPath().getAbsolutePath() + fileSeparator + switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
-                if (requestHeader.getContentType() != null) {
-                    env.put("CONTENT_TYPE", requestHeader.getContentType());
-                }
-                if (method.equalsIgnoreCase(HeaderFramework.METHOD_POST) && body != null) {
-                    env.put("CONTENT_LENGTH", Integer.toString(requestHeader.getContentLength()));
-                }
-
-                // add values from request header to environment (see: http://hoohoo.ncsa.uiuc.edu/cgi/env.html#headers)
-                for (Map.Entry<String, String> requestHeaderEntry : requestHeader.entrySet()) {
-                    env.put("HTTP_" + requestHeaderEntry.getKey().toUpperCase().replace("-", "_"), requestHeaderEntry.getValue());
-                }
-
-                int exitValue = 0;
-                String cgiBody = null;
-
-                try {
-                    // start execution of script
-                    Process p = pb.start();
-
-                    OutputStream os = new BufferedOutputStream(p.getOutputStream());
-
-                    if (method.equalsIgnoreCase(HeaderFramework.METHOD_POST) && body != null) {
-                        byte[] buffer = new byte[1024];
-                        int len = requestHeader.getContentLength();
-                        while (len > 0) {
-                            body.read(buffer);
-                            len = len - buffer.length;
-                            os.write(buffer);
-                        }
+                    // set environment variables
+                    final Map<String, String> env = pb.environment();
+                    env.put(
+                            "SERVER_SOFTWARE",
+                            getDefaultHeaders(path).get(HeaderFramework.SERVER));
+                    env.put("SERVER_NAME", sb.peers.mySeed().getName());
+                    env.put("GATEWAY_INTERFACE", "CGI/1.1");
+                    if (httpVersion != null) {
+                        env.put("SERVER_PROTOCOL", httpVersion);
+                    }
+                    env.put("SERVER_PORT", switchboard.getConfig("port", "8090"));
+                    env.put("REQUEST_METHOD", method);
+    //                env.put("PATH_INFO", "");         // TODO: implement
+    //                env.put("PATH_TRANSLATED", "");   // TODO: implement
+                    env.put("SCRIPT_NAME", path);
+                    if (argsString != null) {
+                        env.put("QUERY_STRING", argsString);
+                    }
+                    env.put("REMOTE_ADDR", clientIP);
+    //                env.put("AUTH_TYPE", "");         // TODO: implement
+    //                env.put("REMOTE_USER", "");       // TODO: implement
+    //                env.put("REMOTE_IDENT", "");      // I don't think we need this
+                    env.put(
+                            "DOCUMENT_ROOT",
+                            switchboard.getAppPath().getAbsolutePath()
+                            + fileSeparator + switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
+                    if (requestHeader.getContentType() != null) {
+                        env.put("CONTENT_TYPE", requestHeader.getContentType());
+                    }
+                    if (method.equalsIgnoreCase(HeaderFramework.METHOD_POST)
+                            && body != null) {
+                        env.put(
+                                "CONTENT_LENGTH",
+                                Integer.toString(requestHeader.getContentLength()));
                     }
 
-                    os.close();
+                    /* add values from request header to environment
+                     * (see: http://hoohoo.ncsa.uiuc.edu/cgi/env.html#headers) */
+                    for (final Map.Entry<String, String> requestHeaderEntry
+                            : requestHeader.entrySet()) {
+                        env.put("HTTP_"
+                            + requestHeaderEntry.getKey().toUpperCase().replace("-", "_"),
+                            requestHeaderEntry.getValue());
+                    }
+
+                    int exitValue = 0;
+                    String cgiBody = null;
+                    final StringBuilder error = new StringBuilder(256);
 
                     try {
-                        p.waitFor();
-                    } catch (InterruptedException ex) {
+                        // start execution of script
+                        final Process p = pb.start();
 
-                    }
+                        final OutputStream os =
+                                new BufferedOutputStream(p.getOutputStream());
 
-                    exitValue = p.exitValue();
+                        if (method.equalsIgnoreCase(
+                                HeaderFramework.METHOD_POST) && body != null) {
+                            final byte[] buffer = new byte[1024];
+                            int len = requestHeader.getContentLength();
+                            while (len > 0) {
+                                body.read(buffer);
+                                len = len - buffer.length;
+                                os.write(buffer);
+                            }
+                        }
 
-                    InputStream is = new BufferedInputStream(p.getInputStream());
+                        os.close();
 
-                    StringBuilder StringBuilder = new StringBuilder(1024);
+                        try {
+                            p.waitFor();
+                        } catch (final InterruptedException ex) {
 
-                    while (is.available() > 0) {
-                        StringBuilder.append((char) is.read());
-                    }
+                        }
 
-                    String cgiReturn = StringBuilder.toString();
-                    int indexOfDelimiter = cgiReturn.indexOf("\n\n");
-                    String[] cgiHeader = new String[0];
-                    if (indexOfDelimiter > -1) {
-                        cgiHeader = cgiReturn.substring(0, indexOfDelimiter).split("\n");
-                    }
-                    cgiBody = cgiReturn.substring(indexOfDelimiter + 1);
+                        exitValue = p.exitValue();
 
-                    String key;
-                    String value;
-                    for (int i = 0; i < cgiHeader.length; i++) {
-                        indexOfDelimiter = cgiHeader[i].indexOf(':');
-                        key = cgiHeader[i].substring(0, indexOfDelimiter).trim();
-                        value = cgiHeader[i].substring(indexOfDelimiter + 1).trim();
-                        conProp.setProperty(key, value);
-                        if (key.equals("Cache-Control") && value.equals("no-cache")) {
-                            nocache = true;
-                        } else if (key.equals("Content-type")) {
-                            mimeType = value;
-                        } else if (key.equals("Status")) {
-                            if (key.length() > 2) {
-                                try {
-                                    statusCode = Integer.parseInt(value.substring(0, 3));
-                                } catch (NumberFormatException ex) {
-                                    /* tough luck, we will just have to use 200 as default value */
+                        final InputStream is =
+                                new BufferedInputStream(p.getInputStream());
+
+                        final InputStream es =
+                                new BufferedInputStream(p.getErrorStream());
+
+                        final StringBuilder processOutput =
+                                new StringBuilder(1024);
+
+                        while (is.available() > 0) {
+                            processOutput.append((char) is.read());
+                        }
+
+                        while (es.available() > 0) {
+                            error.append((char) es.read());
+                        }
+
+                        int indexOfDelimiter = processOutput.indexOf("\n\n", 0);
+                        final String[] cgiHeader;
+                        if (indexOfDelimiter > -1) {
+                            cgiHeader =
+                                    processOutput.substring(
+                                            0, indexOfDelimiter).split("\n");
+                        } else {
+                            cgiHeader = new String[0];
+                        }
+                        cgiBody = processOutput.substring(indexOfDelimiter + 1);
+
+                        String key;
+                        String value;
+                        for (final String element : cgiHeader) {
+                            indexOfDelimiter = element.indexOf(':');
+                            key = element.substring(0, indexOfDelimiter).trim();
+                            value = element.substring(indexOfDelimiter + 1).trim();
+                            conProp.put(key, value);
+                            if ("Cache-Control".equals(key)
+                                    && "no-cache".equals(value)) {
+                                nocache = true;
+                            } else if ("Content-type".equals(key)) {
+                                mimeType = value;
+                            } else if ("Status".equals(key)) {
+                                if (key.length() > 2) {
+                                    try {
+                                        statusCode =
+                                                Integer.parseInt(
+                                                        value.substring(0, 3));
+                                    } catch (final NumberFormatException ex) {
+                                        Log.logWarning(
+                                                "HTTPD",
+                                                "CGI script " + targetFile.getPath()
+                                                + " returned illegal status code \""
+                                                + value + "\".");
+                                    }
                                 }
                             }
                         }
+                    } catch (final IOException ex) {
+                        exitValue = -1;
                     }
-                } catch (IOException ex) {
-                    exitValue = -1;
+
+                    /* did the script return an exit value != 0
+                     * and still there is supposed to be
+                     * everything right with the HTTP status?
+                     * -> change status to 500 since 200 would
+                     * be a lie
+                     */
+                    if (exitValue != 0 && statusCode == 200) {
+                        statusCode = 500;
+                    }
+
+                    targetDate = new Date(System.currentTimeMillis());
+
+                    if (cgiBody != null && !cgiBody.isEmpty()) {
+                        HTTPDemon.sendRespondHeader(
+                                conProp,
+                                out,
+                                httpVersion,
+                                statusCode,
+                                null,
+                                mimeType,
+                                cgiBody.length(),
+                                targetDate,
+                                null,
+                                null,
+                                null,
+                                null,
+                                nocache);
+                        out.write(UTF8.getBytes(cgiBody));
+                    } else {
+                        HTTPDemon.sendRespondError(
+                                conProp,
+                                out,
+                                exitValue,
+                                statusCode,
+                                null,
+                                HeaderFramework.http1_1.get(
+                                        Integer.toString(statusCode)),
+                                null);
+                        Log.logWarning(
+                                "HTTPD",
+                                "CGI script " + targetFile.getPath()
+                                + " returned exit value " + exitValue
+                                + ", body empty: "
+                                + (cgiBody == null || cgiBody.isEmpty()));
+                        if (error.length() > 0) {
+                            Log.logWarning("HTTPD", "Reported error: " + error);
+                        }
+                    }
                 }
-
-                /* did the script return an exit value != 0 and still there is supposed to be
-                 * everything right with the HTTP status? -> change status to 500 since 200 would
-                 * be a lie
-                 */
-                if (exitValue != 0 && statusCode == 200) {
-                    statusCode = 500;
-                }
-
-                targetDate = new Date(System.currentTimeMillis());
-
-                if (exitValue == 0 || (cgiBody != null && !cgiBody.equals(""))) {
-                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, cgiBody.length(), targetDate, null, null, null, null, nocache);
-                    out.write(cgiBody.getBytes());
-                } else {
-                    HTTPDemon.sendRespondError(conProp, out, exitValue, statusCode, null, HeaderFramework.http1_1.get(Integer.toString(statusCode)), null);
-                }
-                
-
             } else if ((targetClass != null) && (path.endsWith(".stream"))) {
                 // call rewrite-class
-                requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+                requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "stream");
                 //requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
                 //requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
-             
-                HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null);                
-                
+
+                HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null);
+
                 // in case that there are no args given, args = null or empty hashmap
                 /* servletProperties tp = (servlerObjects) */ invokeServlet(targetClass, requestHeader, args);
                 forceConnectionClose(conProp);
-                return;                
+                return;
             } else if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
                 // we have found a file that can be written to the client
                 // if this file uses templates, then we use the template
                 // re-write - method to create an result
-                String mimeType = MimeTable.ext2mime(targetExt, "text/html");
-                final boolean zipContent = requestHeader.acceptGzip() && HTTPDemon.shallTransportZipped("." + conProp.getProperty("EXT",""));
-                if (path.endsWith("html") || 
-                        path.endsWith("htm") || 
-                        path.endsWith("xml") || 
-                        path.endsWith("json") || 
-                        path.endsWith("rdf") || 
-                        path.endsWith("rss") || 
+                String mimeType = Classification.ext2mime(targetExt, "text/html");
+                String ext = (String) conProp.get("EXT"); if (ext == null) ext = "";
+                final boolean zipContent = requestHeader.acceptGzip() && HTTPDemon.shallTransportZipped("." + ext);
+                if (path.endsWith("html") ||
+                        path.endsWith("htm") ||
+                        path.endsWith("xml") ||
+                        path.endsWith("json") ||
+                        path.endsWith("rdf") ||
+                        path.endsWith("rss") ||
                         path.endsWith("csv") ||
                         path.endsWith("pac") ||
                         path.endsWith("src") ||
@@ -788,23 +917,23 @@ public final class HTTPDFileHandler {
                         path.endsWith("css") ||
                         path.endsWith("/") ||
                         path.equals("/robots.txt")) {
-                            
+
                     /*targetFile = getLocalizedFile(path);
                     if (!(targetFile.exists())) {
                         // try to find that file in the htDocsPath
                         File trialFile = new File(htDocsPath, path);
                         if (trialFile.exists()) targetFile = trialFile;
                     }*/
-            
-                    
+
+
                     // call rewrite-class
-                   
+
                     if (targetClass != null) {
                         // CGI-class: call the class to create a property for rewriting
                         try {
-                            requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+                            requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                             requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
-                            int ep = path.lastIndexOf(".");
+                            final int ep = path.lastIndexOf(".");
                             requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, path.substring(ep + 1));
                             // in case that there are no args given, args = null or empty hashmap
                             final Object tmp = invokeServlet(targetClass, requestHeader, args);
@@ -819,7 +948,7 @@ public final class HTTPDFileHandler {
                             // check if the servlets requests authentication
                             if (templatePatterns.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
                                 // handle brute-force protection
-                                if (authorization != null) {
+                                if (realmProp != null) {
                                     Log.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                                     final Integer attempts = serverCore.bfHost.get(clientIP);
                                     if (attempts == null)
@@ -835,7 +964,7 @@ public final class HTTPDFileHandler {
                             } else if (templatePatterns.containsKey(servletProperties.ACTION_LOCATION)) {
                                 String location = templatePatterns.get(servletProperties.ACTION_LOCATION, "");
                                 if (location.length() == 0) location = path;
-                                
+
                                 final ResponseHeader headers = getDefaultHeaders(path);
                                 headers.setAdditionalHeaderProperties(templatePatterns.getOutgoingHeader().getAdditionalHeaderProperties()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
                                 headers.put(HeaderFramework.LOCATION,location);
@@ -848,20 +977,17 @@ public final class HTTPDFileHandler {
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((Switchboard) switchboard).peers.myID());
                             templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
-                            yacySeed myPeer = sb.peers.mySeed();
-                            templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1); 
+                            final Seed myPeer = sb.peers.mySeed();
+                            templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                             templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (final InvocationTargetException e) {
                             if (e.getCause() instanceof InterruptedException) {
                                 throw new InterruptedException(e.getCause().getMessage());
-                            }                            
-                            
-                            theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
-                                    e.getMessage() +
-                                    " target exception at " + targetClass + ": " +
-                                    e.getTargetException().toString() + ":" +
-                                    e.getTargetException().getMessage(),e);
+                            }
+                            Log.logException(e);
+                            Log.logException(e.getCause());
+                            Log.logException(e.getTargetException());
                             targetClass = null;
                             throw e;
                         }
@@ -869,13 +995,19 @@ public final class HTTPDFileHandler {
                     }
 
                     targetDate = new Date(targetFile.lastModified());
-                    
+                    Date expireDate = null;
+                    if (templatePatterns == null) {
+                    	// if the file will not be changed, cache it in the browser
+                    	expireDate = new Date(new Date().getTime() + (31l * 24 * 60 * 60 * 1000));
+                    }
+
+
                     // rewrite the file
                     InputStream fis = null;
-                    
+
                     // read the file/template
                     TemplateCacheEntry templateCacheEntry = null;
-                    long fileSize = targetFile.length();
+                    final long fileSize = targetFile.length();
                     if (useTemplateCache && fileSize <= 512 * 1024) {
                         // read from cache
                         SoftReference<TemplateCacheEntry> ref = templateCache.get(targetFile);
@@ -884,16 +1016,17 @@ public final class HTTPDFileHandler {
                             if (templateCacheEntry == null) templateCache.remove(targetFile);
                         }
 
-                        Date targetFileDate = new Date(targetFile.lastModified());
+                        final Date targetFileDate = new Date(targetFile.lastModified());
                         if (templateCacheEntry == null || targetFileDate.after(templateCacheEntry.lastModified)) {
                             // loading the content of the template file into
                             // a byte array
-                        templateCacheEntry = new TemplateCacheEntry();
+                            templateCacheEntry = new TemplateCacheEntry();
                             templateCacheEntry.lastModified = targetFileDate;
                             templateCacheEntry.content = FileUtils.read(targetFile);
 
                             // storing the content into the cache
                             ref = new SoftReference<TemplateCacheEntry>(templateCacheEntry);
+                            if (MemoryControl.shortStatus()) templateCache.clear();
                             templateCache.put(targetFile, ref);
                             if (theLogger.isFinest()) theLogger.logFinest("Cache MISS for file " + targetFile);
                         } else {
@@ -910,21 +1043,21 @@ public final class HTTPDFileHandler {
                     } else {
                         fis = new BufferedInputStream(new FileInputStream(targetFile));
                     }
-                    
+
                     if (mimeType.startsWith("text")) {
                         // every text-file distributed by yacy is UTF-8
-                        if(!path.startsWith("/repository")) {
+                        if (!path.startsWith("/repository")) {
                             mimeType = mimeType + "; charset=UTF-8";
                         } else {
                             // detect charset of html-files
-                            if((path.endsWith("html") || path.endsWith("htm"))) {
+                            if ((path.endsWith("html") || path.endsWith("htm"))) {
                                 // save position
                                 fis.mark(1000);
                                 // scrape document to look up charset
-                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis,"UTF-8",new DigestURI("http://localhost"),null,false);
+                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis, "UTF-8", new DigestURI("http://localhost"), null, false);
                                 final String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
-                                if(charset != null)
-                                    mimeType = mimeType + "; charset="+charset;
+                                htmlFilter.close();
+                                if (charset != null) mimeType = mimeType + "; charset="+charset;
                                 // reset position
                                 fis.reset();
                             }
@@ -940,15 +1073,18 @@ public final class HTTPDFileHandler {
                         // send page in chunks and parse SSIs
                         final ByteBuffer o = new ByteBuffer();
                         // apply templates
-                        TemplateEngine.writeTemplate(fis, o, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                        TemplateEngine.writeTemplate(fis, o, templatePatterns, UNRESOLVED_PATTERN);
                         fis.close();
+                        ResponseHeader rh = (templatePatterns == null) ? new ResponseHeader(200) : templatePatterns.getOutgoingHeader();
                         HTTPDemon.sendRespondHeader(conProp, out,
-                                httpVersion, 200, null, mimeType, -1,
-                                targetDate, null, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                httpVersion, rh.getStatusCode(), null, mimeType, -1,
+                                targetDate, expireDate, rh,
                                 null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
                         final ChunkedOutputStream chos = new ChunkedOutputStream(out);
-                        ServerSideIncludes.writeSSI(o, chos, authorization, clientIP);
+                        // GZIPOutputStream does not implement flush (this is a bug IMHO)
+                        // so we can't compress this stuff, without loosing the cool SSI trickle feature
+                        ServerSideIncludes.writeSSI(o, chos, realmProp, clientIP, requestHeader);
                         //chos.write(result);
                         chos.finish();
                     } else {
@@ -956,45 +1092,46 @@ public final class HTTPDFileHandler {
                         final String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
                         final ByteBuffer o1 = new ByteBuffer();
-                        TemplateEngine.writeTemplate(fis, o1, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                        TemplateEngine.writeTemplate(fis, o1, templatePatterns, ASCII.getBytes("-UNRESOLVED_PATTERN-"));
                         fis.close();
                         final ByteBuffer o = new ByteBuffer();
-                        
+
                         if (zipContent) {
                             GZIPOutputStream zippedOut = new GZIPOutputStream(o);
-                            ServerSideIncludes.writeSSI(o1, zippedOut, authorization, clientIP);
+                            ServerSideIncludes.writeSSI(o1, zippedOut, realmProp, clientIP, requestHeader);
                             //httpTemplate.writeTemplate(fis, zippedOut, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                             zippedOut.finish();
                             zippedOut.flush();
                             zippedOut.close();
                             zippedOut = null;
                         } else {
-                            ServerSideIncludes.writeSSI(o1, o, authorization, clientIP);
+                            ServerSideIncludes.writeSSI(o1, o, realmProp, clientIP, requestHeader);
                             //httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         }
+                        ResponseHeader rh = (templatePatterns == null) ? new ResponseHeader(200) : templatePatterns.getOutgoingHeader();
                         if (method.equals(HeaderFramework.METHOD_HEAD)) {
                             HTTPDemon.sendRespondHeader(conProp, out,
-                                    httpVersion, 200, null, mimeType, o.length(),
-                                    targetDate, null, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                    httpVersion, rh.getStatusCode(), null, mimeType, o.length(),
+                                    targetDate, expireDate, rh,
                                     contentEncoding, null, nocache);
                         } else {
                             final byte[] result = o.getBytes(); // this interrupts streaming (bad idea!)
                             HTTPDemon.sendRespondHeader(conProp, out,
-                                    httpVersion, 200, null, mimeType, result.length,
-                                    targetDate, null, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                    httpVersion, rh.getStatusCode(), null, mimeType, result.length,
+                                    targetDate, expireDate, rh,
                                     contentEncoding, null, nocache);
                             FileUtils.copy(result, out);
-                        }  
+                        }
                     }
                 } else { // no html
-                    
+
                     int statusCode = 200;
                     int rangeStartOffset = 0;
-                    ResponseHeader header = new ResponseHeader();
-                    
+                    final ResponseHeader header = new ResponseHeader(statusCode);
+
                     // adding the accept ranges header
                     header.put(HeaderFramework.ACCEPT_RANGES, "bytes");
-                    
+
                     // reading the files md5 hash if availabe and use it as ETAG of the resource
                     String targetMD5 = null;
                     final File targetMd5File = new File(targetFile + ".md5");
@@ -1002,7 +1139,7 @@ public final class HTTPDFileHandler {
                         if (targetMd5File.exists()) {
                             //String description = null;
                             targetMD5 = UTF8.String(FileUtils.read(targetMd5File));
-                            int pos = targetMD5.indexOf('\n');
+                            final int pos = targetMD5.indexOf('\n');
                             if (pos >= 0) {
                                 //description = targetMD5.substring(pos + 1);
                                 targetMD5 = targetMD5.substring(0, pos);
@@ -1013,8 +1150,8 @@ public final class HTTPDFileHandler {
                         }
                     } catch (final IOException e) {
                         Log.logException(e);
-                    }                        
-                    
+                    }
+
                     if (requestHeader.containsKey(HeaderFramework.RANGE)) {
                         final Object ifRange = requestHeader.ifRange();
                         if ((ifRange == null)||
@@ -1025,28 +1162,30 @@ public final class HTTPDFileHandler {
                                 final String rangesVal = rangeHeaderVal.substring("bytes=".length());
                                 final String[] ranges = rangesVal.split(",");
                                 if ((ranges.length == 1)&&(ranges[0].endsWith("-"))) {
-                                    rangeStartOffset = Integer.parseInt(ranges[0].substring(0,ranges[0].length()-1));
+                                    rangeStartOffset = NumberTools.parseIntDecSubstring(ranges[0], 0, ranges[0].length() - 1);
                                     statusCode = 206;
                                     header.put(HeaderFramework.CONTENT_RANGE, "bytes " + rangeStartOffset + "-" + (targetFile.length()-1) + "/" + targetFile.length());
                                 }
                             }
                         }
                     }
-                    
+
                     // write the file to the client
                     targetDate = new Date(targetFile.lastModified());
+                    // cache file for one month in browser (but most browsers won't cache for that long)
+                    final Date expireDate = new Date(new Date().getTime() + (31l * 24 * 60 * 60 * 1000));
                     final long   contentLength    = (zipContent)?-1:targetFile.length()-rangeStartOffset;
                     final String contentEncoding  = (zipContent) ? "gzip" : null;
                     final String transferEncoding = (httpVersion.equals(HeaderFramework.HTTP_VERSION_1_1) && zipContent) ? "chunked" : null;
                     if (!httpVersion.equals(HeaderFramework.HTTP_VERSION_1_1) && zipContent) forceConnectionClose(conProp);
-                    
-                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, contentLength, targetDate, null, header, contentEncoding, transferEncoding, nocache);
-                
-                    if (!method.equals(HeaderFramework.METHOD_HEAD)) {                        
+
+                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, contentLength, targetDate, expireDate, header, contentEncoding, transferEncoding, nocache);
+
+                    if (!method.equals(HeaderFramework.METHOD_HEAD)) {
                         ChunkedOutputStream chunkedOut = null;
                         GZIPOutputStream zipped = null;
                         OutputStream newOut = out;
-                        
+
                         if (transferEncoding != null) {
                             chunkedOut = new ChunkedOutputStream(newOut);
                             newOut = chunkedOut;
@@ -1055,9 +1194,9 @@ public final class HTTPDFileHandler {
                             zipped = new GZIPOutputStream(newOut);
                             newOut = zipped;
                         }
-                        
+
                         FileUtils.copyRange(targetFile, newOut, rangeStartOffset);
-                        
+
                         if (zipped != null) {
                             zipped.flush();
                             zipped.finish();
@@ -1074,14 +1213,17 @@ public final class HTTPDFileHandler {
                 HTTPDemon.sendRespondError(conProp,out,3,404,"File not Found",null,null);
                 return;
             }
-        } catch (final Exception e) {     
+        } catch (final Exception e) {
             try {
                 // error handling
-                int httpStatusCode = 400; 
-                final String httpStatusText = null; 
-                final StringBuilder errorMessage = new StringBuilder(2000); 
-                Exception errorExc = null;            
-                
+                if (e instanceof NullPointerException) {
+                    Log.logException(e);
+                }
+                int httpStatusCode = 400;
+                final String httpStatusText = null;
+                final StringBuilder errorMessage = new StringBuilder(2000);
+                Exception errorExc = null;
+
                 final String errorMsg = e.getMessage();
                 if (
                         (e instanceof InterruptedException) ||
@@ -1090,13 +1232,13 @@ public final class HTTPDFileHandler {
                     errorMessage.append("Interruption detected while processing query.");
                     httpStatusCode = 503;
                 } else {
-                    if ((errorMsg != null) && 
+                    if ((errorMsg != null) &&
                         (
                            errorMsg.contains("Broken pipe") ||
                            errorMsg.contains("Connection reset") ||
                            errorMsg.contains("Read timed out") ||
                            errorMsg.contains("Connection timed out") ||
-                           errorMsg.contains("Software caused connection abort")                           
+                           errorMsg.contains("Software caused connection abort")
                        )) {
                         // client closed the connection, so we just end silently
                         errorMessage.append("Client unexpectedly closed connection while processing query.");
@@ -1106,41 +1248,64 @@ public final class HTTPDFileHandler {
                         errorExc = e;
                     }
                 }
-                
+
                 errorMessage.append("\nSession: ").append(Thread.currentThread().getName())
                             .append("\nQuery:   ").append(path)
-                            .append("\nClient:  ").append(conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP,"unknown")) 
-                            .append("\nReason:  ").append(e.getMessage());    
-                
+                            .append("\nClient:  ").append(conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP))
+                            .append("\nReason:  ").append(e.getMessage());
+
                 if (!conProp.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                    // sending back an error message to the client 
+                    // sending back an error message to the client
                     // if we have not already send an http header
                     HTTPDemon.sendRespondError(conProp,out, 4, httpStatusCode, httpStatusText, errorMessage.toString(), errorExc);
                 } else {
                     // otherwise we close the connection
                     forceConnectionClose(conProp);
-                }    
-                
-                // if it is an unexpected error we log it 
+                }
+
+                // if it is an unexpected error we log it
                 if (httpStatusCode == 500) {
                     theLogger.logWarning(errorMessage.toString(), e);
                 }
-                
+
             } catch (final Exception ee) {
                 forceConnectionClose(conProp);
-            }            
-            
+            }
+
         } finally {
             try {out.flush();}catch (final Exception e) {}
         }
     }
-    
-    private static final String appendPath(String proplist, String path) {
+
+    /**
+     * Returns a list which contains parts of command
+     * which is used to start external process for
+     * CGI scripts.
+     * @param targetFile file to run
+     * @return list of parts of command
+     * @throws IOException if file can not be accessed
+     */
+    private static List<String> assembleCommandFromShebang(
+            final File targetFile)
+            throws IOException {
+        final List<String > ret = new ArrayList<String>();
+        final BufferedReader br =
+                new BufferedReader(new FileReader(targetFile), 512);
+        final String line = br.readLine();
+        if (line.startsWith("#!")) {
+            ret.addAll(Arrays.asList(line.substring(2).split(" ")));
+        }
+        ret.add(targetFile.getAbsolutePath());
+
+        return ret;
+    }
+
+    private static final String appendPath(final String proplist, final String path) {
         if (proplist.length() == 0) return path;
         if (proplist.indexOf(path) >= 0) return proplist;
         return proplist + "," + path;
     }
-    
+
     public static final File getOverlayedClass(final String path) {
         File targetClass;
         targetClass = rewriteClassFile(new File(htDefaultPath, path)); //works for default and localized files
@@ -1159,10 +1324,10 @@ public final class HTTPDFileHandler {
         }
         return targetFile;
     }
-    
-    private static final void forceConnectionClose(final Properties conprop) {
+
+    private static final void forceConnectionClose(final HashMap<String, Object> conprop) {
         if (conprop != null) {
-            conprop.setProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");            
+            conprop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
         }
     }
 
@@ -1180,12 +1345,12 @@ public final class HTTPDFileHandler {
             return null;
         }
     }
-    
-    private static final Method rewriteMethod(final File classFile) throws InvocationTargetException {                
+
+    private static final Method rewriteMethod(final File classFile) throws InvocationTargetException {
         Method m = null;
         // now make a class out of the stream
         try {
-            if (useTemplateCache) {                
+            if (templateMethodCache != null) {
                 final SoftReference<Method> ref = templateMethodCache.get(classFile);
                 if (ref != null) {
                     m = ref.get();
@@ -1194,22 +1359,24 @@ public final class HTTPDFileHandler {
                     } else {
                         return m;
                     }
-                }          
+                }
             }
-            
+
             final Class<?> c = provider.loadClass(classFile);
             final Class<?>[] params = new Class[] {
                     RequestHeader.class,
                     serverObjects.class,
                     serverSwitch.class };
             m = c.getMethod("respond", params);
-            
-            if (useTemplateCache) {
+
+            if (MemoryControl.shortStatus()) {
+                templateMethodCache.clear();
+            } else {
                 // storing the method into the cache
                 final SoftReference<Method> ref = new SoftReference<Method>(m);
                 templateMethodCache.put(classFile, ref);
             }
-            
+
         } catch (final ClassNotFoundException e) {
             Log.logSevere("HTTPDFileHandler", "class " + classFile + " is missing:" + e.getMessage());
             throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
@@ -1219,11 +1386,11 @@ public final class HTTPDFileHandler {
         }
         return m;
     }
-    
+
     private static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         try {
             return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             Log.logException(e);
             return null;
         }
@@ -1235,11 +1402,11 @@ public final class HTTPDFileHandler {
      * @param suffixList the list of suffixes which is a string of suffixes separated by commas
      * @return true if the filename ends with a suffix from the list, else false
      */
-    private static boolean matchesSuffix(String name, String suffixList) {
+    private static boolean matchesSuffix(final String name, final String suffixList) {
         boolean ret = false;
 
         if (suffixList != null && name != null) {
-            String[] suffixes = suffixList.split(",");
+            final String[] suffixes = suffixList.split(",");
             find:
             for (int i = 0; i < suffixes.length; i++) {
                 if (name.endsWith("." + suffixes[i].trim())) {
@@ -1251,28 +1418,52 @@ public final class HTTPDFileHandler {
 
         return ret;
     }
-    
+
     /**
      * do a proxy request for document
      * extracts url from GET-parameter url
      * not in separete servlet, because we need access to binary outstream
-     * @throws IOException 
+     * @throws IOException
      */
-    private static void doURLProxy(final serverObjects args, final Properties conProp, final RequestHeader requestHeader, OutputStream out) throws IOException {
-        final String httpVersion = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+    private static void doURLProxy(final serverObjects args, final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream out) throws IOException {
+        final String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
 		URL proxyurl = null;
+		String action = "";
 
-		if (args != null && args.containsKey("url")) {
-			String strUrl = args.get("url");
-			proxyurl = new URL(strUrl);
+		if(conProp != null && conProp.containsKey("ARGS")) {
+			String strARGS = (String) conProp.get("ARGS");
+			if(strARGS.startsWith("action=")) {
+				int detectnextargument = strARGS.indexOf("&");
+				action = strARGS.substring (7, detectnextargument);
+				strARGS = strARGS.substring(detectnextargument+1);
+			}
+			if(strARGS.startsWith("url=")) {
+				final String strUrl = strARGS.substring(4); // strip url=
+
+				try {
+				proxyurl = new URL(strUrl);
+				} catch (MalformedURLException e) {
+					proxyurl = new URL (URLDecoder.decode(strUrl, UTF8.charset.name()));
+
+				}
+			}
 		}
+
+		if (proxyurl==null) {
+			throw new IOException("no url as argument supplied");
+		}
+		String host = proxyurl.getHost();
+		if (proxyurl.getPort() != -1) {
+			host += ":" + proxyurl.getPort();
+		}
+
 		// set properties for proxy connection
-   		final Properties prop = new Properties();
-		prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
-		prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, proxyurl.getHost());
-		prop.setProperty(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
-		prop.setProperty(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
-		prop.setProperty("CLIENTIP", "0:0:0:0:0:0:0:1");
+   		final HashMap<String, Object> prop = new HashMap<String, Object>();
+		prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
+		prop.put(HeaderFramework.CONNECTION_PROP_HOST, host);
+		prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getFile().replaceAll(" ", "%20"));
+		prop.put(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
+		prop.put("CLIENTIP", "0:0:0:0:0:0:0:1");
 
 		// remove some stuff from request header, so it isn't send to the server
 		requestHeader.remove("CLIENTIP");
@@ -1282,18 +1473,15 @@ public final class HTTPDFileHandler {
 		requestHeader.remove("Connection");
 		requestHeader.put(HeaderFramework.HOST, proxyurl.getHost());
 
-		ByteArrayOutputStream o = new ByteArrayOutputStream();
+		// temporarily add argument to header to pass it on to augmented browsing
+		requestHeader.put("YACYACTION", action);
 
+		final ByteArrayOutputStream o = new ByteArrayOutputStream();
 		HTTPDProxyHandler.doGet(prop, requestHeader, o);
-		//System.err.println(prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS));
-		if (o == null) {
-			HTTPDemon.sendRespondError(conProp,out,3,404,"File not Found",null,null);
-			return;
-		}
 
 		// reparse header to extract content-length and mimetype
-		final ResponseHeader outgoingHeader = new ResponseHeader();
-		InputStream in = new ByteArrayInputStream(o.toByteArray());
+		final ResponseHeader outgoingHeader = new ResponseHeader(200);
+		final InputStream in = new ByteArrayInputStream(o.toByteArray());
 		String line = readLine(in);
 		while(line != null && !line.equals("")) {
 			int p;
@@ -1307,51 +1495,133 @@ public final class HTTPDFileHandler {
 			HTTPDemon.sendRespondError(conProp,out,3,500,"null",null,null);
 			return;
 		}
-		
-		final int httpStatus = Integer.parseInt(prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS)); 
-		
-		if (outgoingHeader.getContentType().startsWith("text/html")) {
-			StringWriter buffer = new StringWriter();
+
+		final int httpStatus = Integer.parseInt((String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS));
+
+		String directory = "";
+		if (proxyurl.getPath().lastIndexOf('/') > 0)
+			directory = proxyurl.getPath().substring(0, proxyurl.getPath().lastIndexOf('/'));
+
+		String location = "";
+
+		if (outgoingHeader.containsKey("Location")) {
+			// rewrite location header
+			location = outgoingHeader.get("Location");
+			if (location.startsWith("http")) {
+				location = "/proxy.html?action="+action+"&url=" + location;
+			} else {
+				location = "/proxy.html?action="+action+"&url=http://" + proxyurl.getHost() + "/" + location;
+			}
+			outgoingHeader.put("Location", location);
+		}
+
+		final String mimeType = outgoingHeader.getContentType();
+		if ((mimeType.startsWith("text/html") || mimeType.startsWith("text"))) {
+			final StringWriter buffer = new StringWriter();
 
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
-				FileUtils.copy(new ChunkedInputStream(in), buffer, Charset.forName("UTF-8"));
+				FileUtils.copy(new ChunkedInputStream(in), buffer, UTF8.charset);
 			} else {
-				FileUtils.copy(in, buffer, Charset.forName("UTF-8"));
+				FileUtils.copy(in, buffer, UTF8.charset);
 			}
 
-			String sbuffer = buffer.toString();
+			final String sbuffer = buffer.toString();
 
-			String directory = "";
-			if (proxyurl.getPath().lastIndexOf('/') > 0)
-				directory = proxyurl.getPath().substring(0, proxyurl.getPath().lastIndexOf('/'));
-			sbuffer = sbuffer.replaceAll("(href|src)=\"/([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+"/$2\"");
-			sbuffer = sbuffer.replaceAll("(href|src)='/([^:\"]+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+"/$2'");
-			sbuffer = sbuffer.replaceAll("(href|src)=\"([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2\"");
-			sbuffer = sbuffer.replaceAll("(href|src)='([^:\"]+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2'");
-			sbuffer = sbuffer.replaceAll("url\\(", "url(/proxy.html?url=http://"+proxyurl.getHost()+proxyurl.getPath());
-			
+			final Pattern p = Pattern.compile("(href=\"|src=\")([^\"]+)|(href='|src=')([^']+)|(url\\(')([^']+)|(url\\(\")([^\"]+)|(url\\()([^\\)]+)");
+			final Matcher m = p.matcher(sbuffer);
+			final StringBuffer result = new StringBuffer(80);
+			String init, url;
+			MultiProtocolURI target;
+			while (m.find()) {
+				init = null;
+				if(m.group(1) != null) init = m.group(1);
+				if(m.group(3) != null) init = m.group(3);
+				if(m.group(5) != null) init = m.group(5);
+				if(m.group(7) != null) init = m.group(7);
+				if(m.group(9) != null) init = m.group(9);
+				url = null;
+				if(m.group(2) != null) url = m.group(2);
+				if(m.group(4) != null) url = m.group(4);
+				if(m.group(6) != null) url = m.group(6);
+				if(m.group(8) != null) url = m.group(8);
+				if(m.group(10) != null) url = m.group(10);
+				if (url.startsWith("data:") || url.startsWith("#") || url.startsWith("mailto:") || url.startsWith("javascript:")) {
+					String newurl = init + url;
+					newurl = newurl.replaceAll("\\$","\\\\\\$");
+				    m.appendReplacement(result, newurl);
+
+				} else if (url.startsWith("http")) {
+					// absoulte url of form href="http://domain.com/path"
+					if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
+						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI(url)) != null) {
+							continue;
+						}
+					}
+
+					String newurl = init + "/proxy.html?url=" + url;
+					newurl = newurl.replaceAll("\\$","\\\\\\$");
+				    m.appendReplacement(result, newurl);
+
+				} else if (url.startsWith("//")) {
+					// absoulte url but same protocol of form href="//domain.com/path"
+					final String complete_url = proxyurl.getProtocol() + ":" +  url;
+					if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
+						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI(complete_url)) != null) {
+							continue;
+						}
+					}
+
+					String newurl = init + "/proxy.html?url=" + complete_url;
+					newurl = newurl.replaceAll("\\$","\\\\\\$");
+				    m.appendReplacement(result, newurl);
+
+				} else if (url.startsWith("/")) {
+					// absolute path of form href="/absolute/path/to/linked/page"
+					String newurl = init + "/proxy.html?url=http://" + host + url;
+					newurl = newurl.replaceAll("\\$","\\\\\\$");
+				    m.appendReplacement(result, newurl);
+
+				} else {
+					// relative path of form href="relative/path"
+					try {
+						target = new MultiProtocolURI("http://" + host + directory + "/" + url);
+						String newurl = init + "/proxy.html?url=" + target.toString();
+						newurl = newurl.replaceAll("\\$","\\\\\\$");
+						m.appendReplacement(result, newurl);
+					}
+					catch (final MalformedURLException e) {}
+
+				}
+			}
+			m.appendTail(result);
+
+			final byte[] sbb = UTF8.getBytes(result.toString());
+
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
-				
-				out = new ChunkedOutputStream(out);
-			} else {
-				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(sbuffer.getBytes().length));
-				
-				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
-			}
 
-			out.write(sbuffer.getBytes("UTF-8"));
+				final ChunkedOutputStream cos = new ChunkedOutputStream(out);
+
+				cos.write(sbb);
+				cos.finish();
+			} else {
+				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(sbb.length));
+
+				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
+
+				out.write(sbb);
+			}
 		} else {
 			if (!outgoingHeader.containsKey(HeaderFramework.CONTENT_LENGTH))
-				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));
+				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, (String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));
     		HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
 			FileUtils.copy(in, out);
 		}
 		return;
     }
-	
-	private static String readLine(InputStream in) throws IOException {
-		ByteArrayOutputStream buf = new ByteArrayOutputStream();
+
+	private static String readLine(final InputStream in) throws IOException {
+		final ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		int b;
 		while ((b=in.read()) != '\r' && b != -1) {
 			buf.write(b);
@@ -1361,5 +1631,5 @@ public final class HTTPDFileHandler {
 		if (b == -1) return null;
 		return buf.toString("UTF-8");
 	}
-    
+
 }

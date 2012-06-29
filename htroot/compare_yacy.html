@@ -16,7 +16,8 @@
     <fieldset>
         <legend>Websearch Comparison</legend>
         <form action="" method="get" accept-charset="UTF-8">
-            <p>Left Search Engine
+            <p><input type="text" class="searchinput" name="query" value="#[search_query]#" size="20" /><input type="submit" value="Compare" />
+               Left Search Engine
                    <select name="left">
                    #{searchengines}#
                    <option #(leftengine)#::selected="selected"#(/leftengine)#>#[searchengine]#</option>
@@ -28,8 +29,6 @@
                    <option #(rightengine)#::selected="selected"#(/rightengine)#>#[searchengine]#</option>
                    #{/searchengines}#
                    </select>
-               &nbsp;&nbsp;Query
-               <input type="text" name="query" value="#[search_query]#" size="60" /><input type="submit" value="Compare" />
                <input type="hidden" name="display" value="#[display]#" />
            </p>
         </form>

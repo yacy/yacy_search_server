@@ -21,7 +21,7 @@
       <dl>
       <dt>Current installed Release</dt>
       <dd>#[versionpp]#</dd>
-      <dt><br />Available Releases (<a href="http://svn.berlios.de/wsvn/yacy/?op=log">changelog</a>)</dt>
+      <dt><br />Available Releases (<a href="https://gitorious.org/yacy/rc1/commits/master">changelog</a>)</dt>
       <dd><form action="ConfigUpdate_p.html" method="get" accept-charset="UTF-8"><p>
         &nbsp;<select name="releasedownload">
         #{availreleases}#
@@ -114,8 +114,9 @@
       </dl>
       </fieldset>
       ::
-      You installed YaCy with a package manager. To update YaCy, use the package manager:<p>
-      Debian: apt-get update &amp;&amp; apt-get install yacy</p>
+      <p>You installed YaCy with a package manager. To update YaCy, use the package manager:</p>
+      <p>manual update:<br/>apt-get update &amp;&amp; apt-get install yacy</p>
+      <p>automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy</p>
       ::
     #(/candeploy)#
     

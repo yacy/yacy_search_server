@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,21 +27,22 @@
 package net.yacy.kelondro.rwi;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.ByteOrder;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.util.ByteBuffer;
 
 
 /**
@@ -53,16 +54,19 @@ import net.yacy.kelondro.util.ByteBuffer;
  */
 public class ReferenceContainer<ReferenceType extends Reference> extends RowSet {
 
+    private static final long serialVersionUID=-540567425172727979L;
+
     private   byte[] termHash;
     protected ReferenceFactory<ReferenceType> factory;
-    
+    public static int maxReferences = 0; // overwrite this to enable automatic index shrinking. 0 means no shrinking
+
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final RowSet collection) {
         super(collection);
         assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
         this.factory = factory;
         this.termHash = termHash;
     }
-    
+
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash) {
         super(factory.getRow());
         assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
@@ -70,7 +74,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         this.factory = factory;
         this.lastTimeWrote = 0;
     }
-    
+
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int objectCount) throws RowSpaceExceededException {
         super(factory.getRow(), objectCount);
         assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
@@ -78,13 +82,13 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         this.factory = factory;
         this.lastTimeWrote = 0;
     }
-    
+
     public ReferenceContainer<ReferenceType> topLevelClone() throws RowSpaceExceededException {
-        final ReferenceContainer<ReferenceType> newContainer = new ReferenceContainer<ReferenceType>(this.factory, this.termHash, this.size());
+        final ReferenceContainer<ReferenceType> newContainer = new ReferenceContainer<ReferenceType>(this.factory, this.termHash, size());
         newContainer.addAllUnique(this);
         return newContainer;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> emptyContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash) {
         assert termHash == null || (termHash[2] != '@' && termHash.length == factory.getRow().primaryKeyLength);
         return new ReferenceContainer<ReferenceType>(factory, termHash);
@@ -96,7 +100,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public void setWordHash(final byte[] newTermHash) {
-    	assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
+    	assert this.termHash == null || (this.termHash[2] != '@' && this.termHash.length == this.rowdef.primaryKeyLength);
         this.termHash = newTermHash;
     }
 
@@ -105,31 +109,31 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public byte[] getTermHash() {
-        return termHash;
+        return this.termHash;
     }
-    
+
     public void add(final Reference entry) throws RowSpaceExceededException {
         // add without double-occurrence test
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         this.addUnique(entry.toKelondroEntry());
     }
-    
+
     public ReferenceContainer<ReferenceType> merge(final ReferenceContainer<ReferenceType> c) throws RowSpaceExceededException {
         return new ReferenceContainer<ReferenceType>(this.factory, this.termHash, super.merge(c));
     }
-    
+
     public Reference replace(final Reference entry) throws RowSpaceExceededException {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         final Row.Entry r = super.replace(entry.toKelondroEntry());
         if (r == null) return null;
-        return factory.produceSlow(r);
+        return this.factory.produceSlow(r);
     }
-    
+
     public void put(final Reference entry) throws RowSpaceExceededException {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         super.put(entry.toKelondroEntry());
     }
-    
+
     public boolean putRecent(final Reference entry) throws RowSpaceExceededException {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         // returns true if the new entry was added, false if it already existed
@@ -137,7 +141,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         if (oldEntryRow == null) {
             return true;
         }
-        final Reference oldEntry = factory.produceSlow(oldEntryRow);
+        final Reference oldEntry = this.factory.produceSlow(oldEntryRow);
         if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
             this.replace(oldEntry.toKelondroEntry()); // put it back
             return false;
@@ -163,9 +167,9 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         this.lastTimeWrote = java.lang.Math.max(this.lastTimeWrote, c.updated());
         return x;
     }
-    
+
     public ReferenceType getReference(final byte[] urlHash) {
-        final Row.Entry entry = super.get(urlHash);
+        final Row.Entry entry = super.get(urlHash, false);
         if (entry == null) return null;
         return this.factory.produceSlow(entry);
     }
@@ -188,6 +192,58 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return count;
     }
 
+    /**
+     * Shrink the reference size in such a way that it does not exceed maxReferences
+     * In case that the index is too large, old entries are deleted
+     * @return the number of deleted entries
+     */
+    public int shrinkReferences() {
+        final int oldsize = size();
+    	final int diff = oldsize - maxReferences;
+    	if (maxReferences <= 0 || diff <= 0) return 0;
+    	synchronized (this) {
+        	final int[] indexes = oldPostions(diff);
+        	Arrays.sort(indexes);
+        	for (int i = indexes.length - 1; i >= 0; i--) {
+        		if (indexes[i] < 0) break;
+        		removeRow(indexes[i], false);
+        	}
+        	sort();
+    	}
+    	return oldsize - size();
+    }
+
+    private int[] oldPostions(final int count) {
+    	final int[] indexes = new int[count];
+    	int i = 0;
+    	for (final List<Integer> positions : positionsByLastMod()) {
+    		for (final Integer pos : positions) {
+    			indexes[i++] = pos;
+    			if (i >= count) return indexes;
+    		}
+    	}
+    	return indexes;
+    }
+
+    private Collection<List<Integer>> positionsByLastMod() {
+    	long mod;
+    	List<Integer> positions;
+    	ReferenceType r;
+		final TreeMap<Long, List<Integer>> tm = new TreeMap<Long, List<Integer>>();
+    	final Iterator<ReferenceType> i = this.entries();
+    	int pos = 0;
+    	while (i.hasNext()) {
+    		r = i.next();
+    		if (r == null) continue;
+    		mod = r.lastModified();
+    		positions = tm.get(mod);
+    		if (positions == null) positions = new ArrayList<Integer>();
+    		positions.add(pos++);
+    		tm.put(mod, positions);
+    	}
+    	return tm.values();
+    }
+
     public Iterator<ReferenceType> entries() {
         // returns an iterator of indexRWIEntry objects
         return new entryIterator();
@@ -196,33 +252,39 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     public class entryIterator implements Iterator<ReferenceType> {
 
         Iterator<Row.Entry> rowEntryIterator;
-        
+
         public entryIterator() {
-            rowEntryIterator = iterator();
+            this.rowEntryIterator = iterator();
         }
-        
+
+        @Override
         public boolean hasNext() {
-            return rowEntryIterator.hasNext();
+            return this.rowEntryIterator.hasNext();
         }
 
+        @Override
         public ReferenceType next() {
-            final Row.Entry rentry = rowEntryIterator.next();
+            final Row.Entry rentry = this.rowEntryIterator.next();
             if (rentry == null) return null;
-            return factory.produceSlow(rentry);
+            return ReferenceContainer.this.factory.produceSlow(rentry);
         }
 
+        @Override
         public void remove() {
-            rowEntryIterator.remove();
+            this.rowEntryIterator.remove();
         }
-        
+
     }
-    
+
     public static Object mergeUnique(final Object a, final Object b) throws RowSpaceExceededException {
-        final ReferenceContainer<?> c = (ReferenceContainer<?>) a;
-        c.addAllUnique((ReferenceContainer<?>) b);
-        return c;
+        if (a instanceof ReferenceContainer<?>) {
+            final ReferenceContainer<?> c = (ReferenceContainer<?>) a;
+            c.addAllUnique((ReferenceContainer<?>) b);
+            return c;
+        }
+        throw new UnsupportedOperationException("Objects have wrong type: " + a.getClass().getName());
     }
-    
+
     public static final Method containerMergeMethod;
     static {
         Method meth = null;
@@ -254,15 +316,15 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         final ReferenceContainer<ReferenceType> rcLocal = ReferenceContainer.joinContainers(factory, includeContainers, maxDistance);
         if (rcLocal == null) return ReferenceContainer.emptyContainer(factory, null, 0);
         excludeContainers(factory, rcLocal, excludeContainers);
-        
+
         return rcLocal;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinContainers(
             final ReferenceFactory<ReferenceType> factory,
             final Collection<ReferenceContainer<ReferenceType>> containers,
             final int maxDistance) throws RowSpaceExceededException {
-        
+
         // order entities by their size
         final TreeMap<Long, ReferenceContainer<ReferenceType>> map = new TreeMap<Long, ReferenceContainer<ReferenceType>>();
         ReferenceContainer<ReferenceType> singleContainer;
@@ -271,18 +333,18 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         while (i.hasNext()) {
             // get next entity:
             singleContainer = i.next();
-            
+
             // check result
             if (singleContainer == null || singleContainer.isEmpty()) return null; // as this is a cunjunction of searches, we have no result if any word is not known
-            
+
             // store result in order of result size
             map.put(Long.valueOf(singleContainer.size() * 1000 + count), singleContainer);
             count++;
         }
-        
+
         // check if there is any result
         if (map.isEmpty()) return null; // no result, nothing found
-        
+
         // the map now holds the search results in order of number of hits per word
         // we now must pairwise build up a conjunction of these sets
         Long k = map.firstKey(); // the smallest, which means, the one with the least entries
@@ -302,31 +364,31 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         if (searchResult.isEmpty()) return null;
         return searchResult;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeContainers(
                             final ReferenceFactory<ReferenceType> factory,
                             ReferenceContainer<ReferenceType> pivot,
                             final Collection<ReferenceContainer<ReferenceType>> containers) {
-        
+
         // check if there is any result
         if (containers == null || containers.isEmpty()) return pivot; // no result, nothing found
-        
+
         final Iterator<ReferenceContainer<ReferenceType>> i = containers.iterator();
         while (i.hasNext()) {
         	pivot = excludeDestructive(factory, pivot, i.next());
         	if (pivot == null || pivot.isEmpty()) return null;
         }
-        
+
         return pivot;
     }
-    
+
     // join methods
     private static int log2(int x) {
         int l = 0;
         while (x > 0) {x = x >> 1; l++;}
         return l;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinConstructive(
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> i1,
@@ -334,13 +396,13 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final int maxDistance) throws RowSpaceExceededException {
         if ((i1 == null) || (i2 == null)) return null;
         if (i1.isEmpty() || i2.isEmpty()) return null;
-        
+
         // decide which method to use
         final int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
         final int low  = ((i1.size() > i2.size()) ? i2.size() : i1.size());
         final int stepsEnum = 10 * (high + low - 1);
         final int stepsTest = 12 * log2(high) * low;
-        
+
         // start most efficient method
         if (stepsEnum > stepsTest) {
             if (i1.size() < i2.size())
@@ -350,7 +412,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         }
         return joinConstructiveByEnumeration(factory, i1, i2, maxDistance);
     }
-    
+
     private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinConstructiveByTest(
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> small,
@@ -366,12 +428,12 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         ReferenceType ie2;
         while (se.hasNext()) {
             ie1 = se.next();
-            ie2 = large.getReference(ie1.metadataHash());
+            ie2 = large.getReference(ie1.urlhash());
             if ((ie1 != null) && (ie2 != null)) {
-                assert (ie1.metadataHash().length == keylength) : "ie0.urlHash() = " + UTF8.String(ie1.metadataHash());
-                assert (ie2.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie2.metadataHash());
+                assert (ie1.urlhash().length == keylength) : "ie0.urlHash() = " + ASCII.String(ie1.urlhash());
+                assert (ie2.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie2.urlhash());
                 // this is a hit. Calculate word distance:
-                
+
                 ie1 = factory.produceFast(ie2);
                 ie1.join(ie2);
                 if (ie1.distance() <= maxDistance) conj.add(ie1);
@@ -379,7 +441,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         }
         return conj;
     }
-    
+
     private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinConstructiveByEnumeration(
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> i1,
@@ -391,7 +453,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         assert (keylength == i2.rowdef.width(0));
         final ReferenceContainer<ReferenceType> conj = new ReferenceContainer<ReferenceType>(factory, null, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())))) return conj; // ordering must be equal
-        ByteOrder ordering = i1.rowdef.getOrdering();
+        final ByteOrder ordering = i1.rowdef.getOrdering();
         final Iterator<ReferenceType> e1 = i1.entries();
         final Iterator<ReferenceType> e2 = i2.entries();
         int c;
@@ -402,9 +464,9 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.metadataHash());
-                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + UTF8.String(ie2.metadataHash());
-                c = ordering.compare(ie1.metadataHash(), ie2.metadataHash());
+                assert (ie1.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie1.urlhash());
+                assert (ie2.urlhash().length == keylength) : "ie2.urlHash() = " + ASCII.String(ie2.urlhash());
+                c = ordering.compare(ie1.urlhash(), ie2.urlhash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = e1.next(); else break;
@@ -422,7 +484,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         }
         return conj;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeDestructive(
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> pivot,
@@ -431,20 +493,20 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         if (excl == null) return pivot;
         if (pivot.isEmpty()) return null;
         if (excl.isEmpty()) return pivot;
-        
+
         // decide which method to use
         final int high = ((pivot.size() > excl.size()) ? pivot.size() : excl.size());
         final int low  = ((pivot.size() > excl.size()) ? excl.size() : pivot.size());
         final int stepsEnum = 10 * (high + low - 1);
         final int stepsTest = 12 * log2(high) * low;
-        
+
         // start most efficient method
         if (stepsEnum > stepsTest) {
             return excludeDestructiveByTest(pivot, excl);
         }
         return excludeDestructiveByEnumeration(factory, pivot, excl);
     }
-    
+
     private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeDestructiveByTest(
             final ReferenceContainer<ReferenceType> pivot,
             final ReferenceContainer<ReferenceType> excl) {
@@ -456,16 +518,16 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         Reference ie0, ie1;
             while (se.hasNext()) {
                 ie0 = se.next();
-                ie1 = excl.getReference(ie0.metadataHash());
+                ie1 = excl.getReference(ie0.urlhash());
                 if ((ie0 != null) && (ie1 != null)) {
-                    assert (ie0.metadataHash().length == keylength) : "ie0.urlHash() = " + UTF8.String(ie0.metadataHash());
-                    assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.metadataHash());
-                    if (iterate_pivot) se.remove(); pivot.delete(ie0.metadataHash());
+                    assert (ie0.urlhash().length == keylength) : "ie0.urlHash() = " + ASCII.String(ie0.urlhash());
+                    assert (ie1.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie1.urlhash());
+                    if (iterate_pivot) se.remove(); pivot.delete(ie0.urlhash());
                 }
             }
         return pivot;
     }
-    
+
     private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeDestructiveByEnumeration(
                             final ReferenceFactory<ReferenceType> factory,
                             final ReferenceContainer<ReferenceType> pivot,
@@ -484,9 +546,9 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.metadataHash());
-                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + UTF8.String(ie2.metadataHash());
-                c = pivot.rowdef.getOrdering().compare(ie1.metadataHash(), ie2.metadataHash());
+                assert (ie1.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie1.urlhash());
+                assert (ie2.urlhash().length == keylength) : "ie2.urlHash() = " + ASCII.String(ie2.urlhash());
+                c = pivot.rowdef.getOrdering().compare(ie1.urlhash(), ie2.urlhash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = e1.next(); else break;
@@ -505,90 +567,14 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return pivot;
     }
 
+    @Override
     public synchronized String toString() {
-        return "C[" + UTF8.String(termHash) + "] has " + this.size() + " entries";
+        return "C[" + ASCII.String(this.termHash) + "] has " + size() + " entries";
     }
-    
+
+    @Override
     public int hashCode() {
-        return (int) Base64Order.enhancedCoder.decodeLong(UTF8.String(this.termHash).substring(0, 4));
-    }
-    
-
-    public static final <ReferenceType extends Reference> ByteBuffer compressIndex(final ReferenceContainer<ReferenceType> inputContainer, final ReferenceContainer<ReferenceType> excludeContainer, final long maxtime) {
-        // collect references according to domains
-        final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
-        final TreeMap<String, StringBuilder> doms = new TreeMap<String, StringBuilder>();
-        synchronized (inputContainer) {
-            final Iterator<ReferenceType> i = inputContainer.entries();
-            Reference iEntry;
-            String dom, mod;
-            StringBuilder paths;
-            while (i.hasNext()) {
-                iEntry = i.next();
-                if ((excludeContainer != null) && (excludeContainer.getReference(iEntry.metadataHash()) != null)) continue; // do not include urls that are in excludeContainer
-                dom = UTF8.String(iEntry.metadataHash(), 6, 6);
-                mod = UTF8.String(iEntry.metadataHash(), 0, 6);
-                if ((paths = doms.get(dom)) == null) {
-                    doms.put(dom, new StringBuilder(30).append(mod));
-                } else {
-                    doms.put(dom, paths.append(mod));
-                }
-                if (System.currentTimeMillis() > timeout)
-                    break;
-            }
-        }
-        // construct a result string
-        final ByteBuffer bb = new ByteBuffer(inputContainer.size() * 6);
-        bb.append('{');
-        final Iterator<Map.Entry<String, StringBuilder>> i = doms.entrySet().iterator();
-        Map.Entry<String, StringBuilder> entry;
-        while (i.hasNext()) {
-            entry = i.next();
-            bb.append(entry.getKey());
-            bb.append(':');
-            bb.append(entry.getValue().toString());
-            if (System.currentTimeMillis() > timeout)
-                break;
-            if (i.hasNext())
-                bb.append(',');
-        }
-        bb.append('}');
-        return bb;
+        return (int) Base64Order.enhancedCoder.decodeLong(this.termHash, 0, 4);
     }
 
-    public static final TreeMap<String, StringBuilder> decompressIndex(ByteBuffer ci, final String peerhash) {
-        TreeMap<String, StringBuilder> target = new TreeMap<String, StringBuilder>();
-        // target is a mapping from url-hashes to a string of peer-hashes
-        if (ci.byteAt(0) != '{' || ci.byteAt(ci.length() - 1) != '}') return target;
-        //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
-        ci = ci.trim(1, ci.length() - 2);
-        String dom, url;
-        StringBuilder peers;
-        StringBuilder urlsb;
-        while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
-            assert ci.length() >= 6 : "ci.length() = " + ci.length();
-            dom = ci.toStringBuilder(0, 6, 6).toString();
-            ci.trim(7);
-            while ((ci.length() > 0) && (ci.byteAt(0) != ',')) {
-                assert ci.length() >= 6 : "ci.length() = " + ci.length();
-                urlsb = ci.toStringBuilder(0, 6, 12);
-                urlsb.append(dom);
-                url = urlsb.toString();
-                ci.trim(6);
-                
-                peers = target.get(url);
-                if (peers == null) {
-                    peers = new StringBuilder(24);
-                    peers.append(peerhash);
-                    target.put(url, peers);
-                } else {
-                    peers.append(peerhash);
-                }
-                //System.out.println("DEBUG-DECOMPRESS: " + url + ":" + target.get(url));
-            }
-            if (ci.byteAt(0) == ',') ci.trim(1);
-        }
-        return target;
-    }
-    
 }

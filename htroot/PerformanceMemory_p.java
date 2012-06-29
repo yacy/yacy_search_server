@@ -38,90 +38,97 @@ import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
-
-import de.anomic.search.SearchEventCache;
-import de.anomic.search.Switchboard;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.SearchEventCache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class PerformanceMemory_p {
-    
+
     private static final long KB = 1024;
     private static final long MB = 1024 * KB;
     private static Map<String, String> defaultSettings = null;
-        
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if (defaultSettings == null) {
             defaultSettings = FileUtils.loadMap(new File(env.getAppPath(), "defaults/yacy.init"));
         }
-        
+
         prop.put("gc", "0");
         if (post != null) {
             if (post.containsKey("gc")) {
                 System.gc();
                 prop.put("gc", "1");
+            } else {
+                MemoryControl.setSimulatedShortStatus(post.containsKey("simulatedshortmemory"));
+                final boolean std = post.containsKey("useStandardmemoryStrategy");
+                env.setConfig("memory.standardStrategy", std);
+                MemoryControl.setStandardStrategy(std);
             }
         }
-        
-        final long memoryFreeNow = MemoryControl.free();
-        final long memoryFreeAfterInitBGC = Long.parseLong(env.getConfig("memoryFreeAfterInitBGC", "0"));
-        final long memoryFreeAfterInitAGC = Long.parseLong(env.getConfig("memoryFreeAfterInitAGC", "0"));
-        final long memoryFreeAfterStartup = Long.parseLong(env.getConfig("memoryFreeAfterStartup", "0"));
-        final long memoryTotalNow = MemoryControl.total();
-        final long memoryTotalAfterInitBGC = Long.parseLong(env.getConfig("memoryTotalAfterInitBGC", "0"));
-        final long memoryTotalAfterInitAGC = Long.parseLong(env.getConfig("memoryTotalAfterInitAGC", "0"));
-        final long memoryTotalAfterStartup = Long.parseLong(env.getConfig("memoryTotalAfterStartup", "0"));
-        
-        prop.putNum("memoryMax", MemoryControl.maxMemory / MB);
-        prop.putNum("memoryAvailAfterStartup", (MemoryControl.maxMemory - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
-        prop.putNum("memoryAvailAfterInitBGC", (MemoryControl.maxMemory - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / MB);
-        prop.putNum("memoryAvailAfterInitAGC", (MemoryControl.maxMemory - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / MB);
-        prop.putNum("memoryAvailNow", (MemoryControl.maxMemory - memoryTotalNow + memoryFreeNow) / MB);
+
+        prop.put("simulatedshortmemory.checked", MemoryControl.getSimulatedShortStatus() ? 1 : 0);
+        prop.put("useStandardmemoryStrategy.checked", env.getConfigBool("memory.standardStrategy", true) ? 1 : 0);
+        prop.put("memoryStrategy", MemoryControl.getStrategyName());
+
+        final long memoryFreeAfterInitBGC = env.getConfigLong("memoryFreeAfterInitBGC", 0L);
+        final long memoryFreeAfterInitAGC = env.getConfigLong("memoryFreeAfterInitAGC", 0L);
+        final long memoryFreeAfterStartup = env.getConfigLong("memoryFreeAfterStartup", 0L);
+        final long memoryTotalAfterInitBGC = env.getConfigLong("memoryTotalAfterInitBGC", 0L);
+        final long memoryTotalAfterInitAGC = env.getConfigLong("memoryTotalAfterInitAGC", 0L);
+        final long memoryTotalAfterStartup = env.getConfigLong("memoryTotalAfterStartup", 0L);
+
+        prop.putNum("memoryMax", MemoryControl.maxMemory() / MB);
+        prop.putNum("memoryAvailAfterStartup", (MemoryControl.maxMemory() - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
+        prop.putNum("memoryAvailAfterInitBGC", (MemoryControl.maxMemory() - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / MB);
+        prop.putNum("memoryAvailAfterInitAGC", (MemoryControl.maxMemory() - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / MB);
+        prop.putNum("memoryAvailNow", MemoryControl.available() / MB);
         prop.putNum("memoryTotalAfterStartup", memoryTotalAfterStartup / KB);
         prop.putNum("memoryTotalAfterInitBGC", memoryTotalAfterInitBGC / KB);
         prop.putNum("memoryTotalAfterInitAGC", memoryTotalAfterInitAGC / KB);
-        prop.putNum("memoryTotalNow", memoryTotalNow / MB);
+        prop.putNum("memoryTotalNow", MemoryControl.total() / MB);
         prop.putNum("memoryFreeAfterStartup", memoryFreeAfterStartup / KB);
         prop.putNum("memoryFreeAfterInitBGC", memoryFreeAfterInitBGC / KB);
         prop.putNum("memoryFreeAfterInitAGC", memoryFreeAfterInitAGC / KB);
-        prop.putNum("memoryFreeNow", memoryFreeNow / MB);
+        prop.putNum("memoryFreeNow", MemoryControl.free() / MB);
         prop.putNum("memoryUsedAfterStartup", (memoryTotalAfterStartup - memoryFreeAfterStartup) / KB);
         prop.putNum("memoryUsedAfterInitBGC", (memoryTotalAfterInitBGC - memoryFreeAfterInitBGC) / KB);
         prop.putNum("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / KB);
-        prop.putNum("memoryUsedNow", (memoryTotalNow - memoryFreeNow) / MB);
-        
+        prop.putNum("memoryUsedNow", MemoryControl.used() / MB);
+
         // write table for Table index sizes
         Iterator<String> i = Table.filenames();
         String filename;
-        Map<String, String> map;
+        Map<Table.StatKeys, String> mapx;
         int p, c = 0;
         long mem, totalmem = 0;
         while (i.hasNext()) {
             filename = i.next();
-            map = Table.memoryStats(filename);
-            prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
-            prop.putNum("EcoList_" + c + "_tableSize", map.get("tableSize"));
+            mapx = Table.memoryStats(filename);
+            prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
+            prop.putNum("EcoList_" + c + "_tableSize", mapx.get(Table.StatKeys.tableSize));
 
-            assert map.get("tableKeyMem") != null : map;
-            mem = Long.parseLong(map.get("tableKeyMem"));
+            String v = mapx.get(Table.StatKeys.tableKeyMem);
+            mem = v == null ? 0 : Long.parseLong(v);
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableKeyMem", Formatter.bytesToString(mem));
-            prop.put("EcoList_" + c + "_tableKeyChunkSize", map.get("tableKeyChunkSize"));
-            
-            mem = Long.parseLong(map.get("tableValueMem"));
+            prop.put("EcoList_" + c + "_tableKeyChunkSize", mapx.get(Table.StatKeys.tableKeyChunkSize));
+
+            v = mapx.get(Table.StatKeys.tableValueMem);
+            mem = v == null ? 0 : Long.parseLong(v);
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableValueMem", Formatter.bytesToString(mem));
-            prop.put("EcoList_" + c + "_tableValueChunkSize", map.get("tableValueChunkSize"));
-            
+            prop.put("EcoList_" + c + "_tableValueChunkSize", mapx.get(Table.StatKeys.tableValueChunkSize));
+
             c++;
         }
         prop.put("EcoList", c);
-        prop.putNum("EcoIndexTotalMem", totalmem / (1024 * 1024d));
-        
+        prop.putNum("EcoIndexTotalMem", totalmem / (1024d * 1024d));
+
         // write object cache table
-        Iterator<Map.Entry<String, RAMIndex>> oi = RAMIndex.objects();
+        final Iterator<Map.Entry<String, RAMIndex>> oi = RAMIndex.objects();
         c = 0;
         mem = 0;
         Map.Entry<String, RAMIndex> oie;
@@ -130,73 +137,80 @@ public class PerformanceMemory_p {
         while (oi.hasNext()) {
             try {
                 oie = oi.next();
-            } catch (ConcurrentModificationException e) {
+            } catch (final ConcurrentModificationException e) {
                 break;
             }
             filename = oie.getKey();
             cache = oie.getValue();
-            prop.put("indexcache_" + c + "_Name", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
-            
+            prop.put("indexcache_" + c + "_Name", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
+
             hitmem = cache.mem();
             totalhitmem += hitmem;
             prop.put("indexcache_" + c + "_ChunkSize", cache.row().objectsize);
             prop.putNum("indexcache_" + c + "_Count", cache.size());
             prop.put("indexcache_" + c + "_NeededMem", cache.size() * cache.row().objectsize);
             prop.put("indexcache_" + c + "_UsedMem", hitmem);
-            
+
             c++;
         }
         prop.put("indexcache", c);
-        prop.putNum("indexcacheTotalMem", totalhitmem / (1024 * 1024d));
-        
+        prop.putNum("indexcacheTotalMem", totalhitmem / (1024d * 1024d));
+
         // write object cache table
         i = Cache.filenames();
         c = 0;
         long missmem, totalmissmem = 0;
         totalhitmem = 0;
+        Map<Cache.StatKeys, String> mapy;
         while (i.hasNext()) {
             filename = i.next();
-            map = Cache.memoryStats(filename);
-            prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
-            
+            mapy = Cache.memoryStats(filename);
+            prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
+
             // hit cache
-            hitmem = Long.parseLong(map.get("objectHitMem"));
+            hitmem = Long.parseLong(mapy.get(Cache.StatKeys.objectHitMem));
             totalhitmem += hitmem;
-            prop.put("ObjectList_" + c + "_objectHitChunkSize", map.get("objectHitChunkSize"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheCount", map.get("objectHitCacheCount"));
+            prop.put("ObjectList_" + c + "_objectHitChunkSize", mapy.get(Cache.StatKeys.objectHitChunkSize));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheCount", mapy.get(Cache.StatKeys.objectHitCacheCount));
             prop.put("ObjectList_" + c + "_objectHitCacheMem", Formatter.bytesToString(hitmem));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheReadHit", map.get("objectHitCacheReadHit"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheReadMiss", map.get("objectHitCacheReadMiss"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteUnique", map.get("objectHitCacheWriteUnique"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteDouble", map.get("objectHitCacheWriteDouble"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheDeletes", map.get("objectHitCacheDeletes"));
-            prop.putNum("ObjectList_" + c + "_objectHitCacheFlushes", map.get("objectHitCacheFlushes"));
-            
+            prop.putNum("ObjectList_" + c + "_objectHitCacheReadHit", mapy.get(Cache.StatKeys.objectHitCacheReadHit));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheReadMiss", mapy.get(Cache.StatKeys.objectHitCacheReadMiss));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteUnique", mapy.get(Cache.StatKeys.objectHitCacheWriteUnique));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheWriteDouble", mapy.get(Cache.StatKeys.objectHitCacheWriteDouble));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheDeletes", mapy.get(Cache.StatKeys.objectHitCacheDeletes));
+            prop.putNum("ObjectList_" + c + "_objectHitCacheFlushes", mapy.get(Cache.StatKeys.objectHitCacheFlushes));
+
             // miss cache
-            missmem = Long.parseLong(map.get("objectMissMem"));
+            missmem = Long.parseLong(mapy.get(Cache.StatKeys.objectMissMem));
             totalmissmem += missmem;
-            prop.put("ObjectList_" + c + "_objectMissChunkSize", map.get("objectMissChunkSize"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheCount", map.get("objectMissCacheCount"));
+            prop.put("ObjectList_" + c + "_objectMissChunkSize", mapy.get(Cache.StatKeys.objectMissChunkSize));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheCount", mapy.get(Cache.StatKeys.objectMissCacheCount));
             prop.putHTML("ObjectList_" + c + "_objectMissCacheMem", Formatter.bytesToString(missmem));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheReadHit", map.get("objectMissCacheReadHit"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheReadMiss", map.get("objectMissCacheReadMiss"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteUnique", map.get("objectMissCacheWriteUnique"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteDouble", map.get("objectMissCacheWriteDouble"));
-            prop.putNum("ObjectList_" + c + "_objectMissCacheDeletes", map.get("objectMissCacheDeletes"));
-            //prop.put("ObjectList_" + c + "_objectMissCacheFlushes", map.get("objectMissCacheFlushes"));
-            
+            prop.putNum("ObjectList_" + c + "_objectMissCacheReadHit", mapy.get(Cache.StatKeys.objectMissCacheReadHit));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheReadMiss", mapy.get(Cache.StatKeys.objectMissCacheReadMiss));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteUnique", mapy.get(Cache.StatKeys.objectMissCacheWriteUnique));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheWriteDouble", mapy.get(Cache.StatKeys.objectMissCacheWriteDouble));
+            prop.putNum("ObjectList_" + c + "_objectMissCacheDeletes", mapy.get(Cache.StatKeys.objectMissCacheDeletes));
+            //prop.put("ObjectList_" + c + "_objectMissCacheFlushes", mapy.get(Cache.StatKeys.objectMissCacheFlushes));
+
             c++;
         }
         prop.put("ObjectList", c);
-        prop.putNum("objectCacheStopGrow", Cache.getMemStopGrow() / (1024 * 1024d));
-        prop.putNum("objectCacheStartShrink", Cache.getMemStartShrink() / (1024 * 1024d));
-        prop.putNum("objectHitCacheTotalMem", totalhitmem / (1024 * 1024d));
-        prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024 * 1024d));
-        
+        prop.putNum("objectCacheStopGrow", Cache.getMemStopGrow() / (1024d * 1024d));
+        prop.putNum("objectCacheStartShrink", Cache.getMemStartShrink() / (1024d * 1024d));
+        prop.putNum("objectHitCacheTotalMem", totalhitmem / (1024d * 1024d));
+        prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024d * 1024d));
+
         // other caching structures
         prop.putNum("namecacheHit.size", Domains.nameCacheHitSize());
+        prop.putNum("namecacheHit.Hit", Domains.cacheHit_Hit);
+        prop.putNum("namecacheHit.Miss", Domains.cacheHit_Miss);
+        prop.putNum("namecacheHit.Insert", Domains.cacheHit_Insert);
         prop.putNum("namecacheMiss.size", Domains.nameCacheMissSize());
-        prop.putNum("namecache.noCache", Domains.nameCacheNoCachingListSize());
+        prop.putNum("namecacheMiss.Hit", Domains.cacheMiss_Hit);
+        prop.putNum("namecacheMiss.Miss", Domains.cacheMiss_Miss);
+        prop.putNum("namecacheMiss.Insert", Domains.cacheMiss_Insert);
+        prop.putNum("namecache.noCache", Domains.nameCacheNoCachingPatternsSize());
         prop.putNum("blacklistcache.size", Switchboard.urlBlacklist.blacklistCacheSize());
         prop.putNum("searchevent.size", SearchEventCache.size());
         prop.putNum("searchevent.hit", SearchEventCache.cacheHit);

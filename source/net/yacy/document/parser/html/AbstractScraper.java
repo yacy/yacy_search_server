@@ -1,4 +1,4 @@
-// AbstractScraper.java 
+// AbstractScraper.java
 // ---------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -32,12 +32,14 @@ package net.yacy.document.parser.html;
 import java.util.Properties;
 import java.util.Set;
 
+import net.yacy.kelondro.util.MemoryControl;
+
 public abstract class AbstractScraper implements Scraper {
 
     public static final char lb = '<';
     public static final char rb = '>';
     public static final char sl = '/';
- 
+
     private Set<String> tags0;
     private Set<String> tags1;
 
@@ -52,11 +54,11 @@ public abstract class AbstractScraper implements Scraper {
     }
 
     public boolean isTag0(final String tag) {
-        return (tags0 != null) && (tags0.contains(tag.toLowerCase()));
+        return (this.tags0 != null) && (this.tags0.contains(tag.toLowerCase()));
     }
 
     public boolean isTag1(final String tag) {
-        return (tags1 != null) && (tags1.contains(tag.toLowerCase()));
+        return (this.tags1 != null) && (this.tags1.contains(tag.toLowerCase()));
     }
 
     //the 'missing' method that shall be implemented:
@@ -68,6 +70,7 @@ public abstract class AbstractScraper implements Scraper {
     public abstract void scrapeTag1(String tagname, Properties tagopts, char[] text);
 
     protected static String stripAllTags(final char[] s) {
+        if (!MemoryControl.request(s.length * 2, false)) return "";
         final StringBuilder r = new StringBuilder(s.length);
         int bc = 0;
         for (final char c : s) {
@@ -89,10 +92,10 @@ public abstract class AbstractScraper implements Scraper {
 
     public void close() {
         // free resources
-        tags0 = null;
-        tags1 = null;
+        this.tags0 = null;
+        this.tags1 = null;
     }
-    
+
 }
 
 

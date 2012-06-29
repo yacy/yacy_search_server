@@ -36,16 +36,16 @@ import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.WorkflowThread;
-
-//import de.anomic.http.client.ConnectionInfo;
-//import de.anomic.http.client.Client;
-import de.anomic.search.Switchboard;
+import net.yacy.peers.PeerActions;
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverCore.Session;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverCore.Session;
-import de.anomic.yacy.yacyPeerActions;
-import de.anomic.yacy.yacySeed;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public final class Connections_p {    
     
@@ -61,7 +61,7 @@ public final class Connections_p {
         // determines if name lookup should be done or not 
         final boolean doNameLookup;
         if (post != null) {  
-            doNameLookup = (post.containsKey("nameLookup") && "true".equals(post.get("nameLookup","true")));
+            doNameLookup = (post.containsKey("nameLookup") && post.getBoolean("nameLookup", true));
             if (post.containsKey("closeServerSession")) {
                 final String sessionName = post.get("closeServerSession", null);
                 sb.closeSessions("10_httpd", sessionName);
@@ -83,7 +83,7 @@ public final class Connections_p {
             
             // get the request command line
             String commandLine = s.getCommandLine();
-            final boolean blockingRequest = (commandLine == null);;
+            final boolean blockingRequest = (commandLine == null);
             final int commandCount = s.getCommandCount();
             
             // get the source ip address and port
@@ -96,11 +96,11 @@ public final class Connections_p {
             String prot = "http"; // only httpd sessions listed
             
             // determining if the source is a yacy host
-            yacySeed seed = null;
+            Seed seed = null;
             if (doNameLookup) {
-                seed = sb.peers.lookupByIP(userAddress,true,false,false);
+                seed = sb.peers.lookupByIP(userAddress, -1, true, false, false);
                 if (seed != null && (seed.hash.equals(sb.peers.mySeed().hash)) &&
-                        (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
+                        (!seed.get(Seed.PORT,"").equals(Integer.toString(userPort)))) {
                     seed = null;
                 }
             }
@@ -117,7 +117,7 @@ public final class Connections_p {
             prop.put("list_" + idx + "_proto", prot);
             if (sessionTime > 1000*60) {
                 prop.put("list_" + idx + "_ms", "0");
-                prop.put("list_" + idx + "_ms_duration",yacyPeerActions.formatInterval(sessionTime));
+                prop.put("list_" + idx + "_ms_duration",PeerActions.formatInterval(sessionTime));
             } else {
                 prop.put("list_" + idx + "_ms", "1");
                 prop.putNum("list_" + idx + "_ms_duration", sessionTime);
@@ -144,11 +144,14 @@ public final class Connections_p {
         
         // client sessions
         final Set<ConnectionInfo> allConnections = ConnectionInfo.getAllConnections();
-        // TODO sorting
-//        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
+        // sorting: sort by initTime, decending
+        List<ConnectionInfo> allConnectionsSorted = new LinkedList<ConnectionInfo>(allConnections);
+        Collections.sort(allConnectionsSorted);
+        Collections.reverse(allConnectionsSorted); // toggle ascending/descending
+        
         int c = 0;
-        synchronized (allConnections) {
-        for (final ConnectionInfo conInfo: allConnections) {
+        synchronized (allConnectionsSorted) {
+        for (final ConnectionInfo conInfo: allConnectionsSorted) {
             prop.put("clientList_" + c + "_clientProtocol", conInfo.getProtocol());
             prop.putNum("clientList_" + c + "_clientLifetime", conInfo.getLifetime());
             prop.putNum("clientList_" + c + "_clientUpbytes", conInfo.getUpbytes());

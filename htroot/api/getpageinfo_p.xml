@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding="UTF-8" standalone='yes'?>
+<pageinfo>
+  <title>#[title]#</title>
+  <desc>#[desc]#</desc>
+  <lang>#[lang]#</lang>
+  <robots>#(robots-allowed)#0::1::#(/robots-allowed)#</robots>
+  <robotsInfo>#[robotsInfo]#</robotsInfo>
+  <sitemap>#[sitemap]#</sitemap>
+  <favicon>#[favicon]#</favicon>
+  <sitelist>#[sitelist]#</sitelist>
+  <filter>#[filter]#</filter>
+  <tags>
+    #{tags}#
+    <tag name="#[tag]#" />
+    #{/tags}#
+  </tags>
+  <links>
+    #{links}#
+    <link name="#[link]#" />
+    #{/links}#
+  </links>
+  <oai>#[oai]#</oai>
+</pageinfo>

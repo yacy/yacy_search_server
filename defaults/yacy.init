@@ -98,6 +98,18 @@ filesize.max.other = 8589934591
 network.unit.definition = defaults/yacy.network.freeworld.unit
 #network.unit.definition = defaults/yacy.network.intranet.unit
 
+# distinguish intranet/internet IPs:
+# if this setting is set to true, then only URL-Hashes with 'intranet'-Flag is created, even if the
+# url is in the internet. This can be done to enhance the crawling speed dramatically since a DNS-lookup
+# to check if a host is in the internet oder an intranet can be omited.
+# This option is only valid if the network.unit.domain property is set to 'any'
+network.unit.domain.nocheck = false
+
+# in addition to non-dht networks a client may have its own agent name
+# this option is only used if the value is non-empty and network.unit.dht = false
+# that means it is not usable in YaCy p2p-configurations, only in private portal configurations
+network.unit.tenant.agent =
+
 # Update process properties
 # The update server location is given in the network.unit.definition,
 # but the settings for update processing and cycles are individual.
@@ -113,7 +125,7 @@ update.cycle = 168
 # It is recommended to set this list to low developer version numbers
 update.blacklist = ...[123]
 # a update can also restricted with a concept property, which can decide if an
-# update is only valid if it either is a main release or any svn release including new development releases
+# update is only valid if it either is a main release or any release including new development releases
 # Valid keywords are 'main' and 'any'
 update.concept = any
 # the following values are set automatically:
@@ -211,9 +223,7 @@ defaultFiles = index.html,index.htm,default.html,search.html,console.html,contro
 # the <dir> must exist as sub-path to htLocalePath
 # the htLocaleSelection selects from the given locales, value=one-of-<dir>
 locale.source=locales
-locale.work=DATA/LOCALE/locales
 locale.translated_html=DATA/LOCALE/htroot
-locale.lang=default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk,gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky
 locale.language=default
 
 # virtual host for httpdFileServlet access
@@ -235,8 +245,8 @@ sessionidNamesFile = defaults/sessionid.names
 proxyCache = DATA/HTCACHE
 
 # the maximum disc cache size for files in Cache in megabytes
-# default: 32 Gigabyte
-proxyCacheSize = 32768
+# default: 4 Gigabyte
+proxyCacheSize = 4096
 
 # a path to the surrogate input directory
 surrogates.in = DATA/SURROGATES/in
@@ -350,7 +360,7 @@ proxyBlueList=yacy.blue
 # if several ip's are allowed then they must be separated by a ','
 # regular expressions may be used
 #proxyClient=192.168.0.4
-proxyClient=localhost,127\.0\.0\.1,192\.168\..*,10\..*,0:0:0:0:0:0:0:1
+proxyClient=localhost,127\.0\.0\.1,192\.168\..*,10\..*,0:0:0:0:0:0:0:1.*
 
 # YaCyHop: allow public usage of proxy for yacy-protocol
 # this enables usage of the internal http proxy for everyone,
@@ -369,7 +379,7 @@ serverClient=*
 
 # use_proxyAccounts: set to true to restrict proxy-access to some identified users.
 #use User_p.html to create some Users.
-use_proxyAccounts=false
+use_proxyAccounts=true
 
 # adminAccount: a user:password - pair for administration of
 # settings through the web interface
@@ -454,9 +464,10 @@ browserPopUpPage=index.html
 indexForward =
 
 # defines if the YaCy icon appears in the system tray on supported platforms
-trayIcon=true
-trayIcon.force=false
-tray.label=YaCy
+tray.icon.enabled=true
+tray.icon.force=false
+tray.icon.label=YaCy
+tray.menu.enabled=true
 
 # index sharing attributes: by default, sharing is on.
 # If you want to use YaCy only for local indexing (robinson mode),
@@ -495,6 +506,8 @@ proxyYacyOnly=false
 # enable proxy via url (/proxy.html?url=http://yacy.net)
 proxyURL=false
 proxyURL.access=127.0.0.1,0:0:0:0:0:0:0:1
+# which urls to rewrite to /proxy.html?url=x (values: all, domainlist)
+proxyURL.rewriteURLs=domainlist
 
 # From the 'IndexCreate' menu point you can also define a crawling start point.
 # The crawling works the same way as the prefetch, but it is possible to
@@ -502,6 +515,7 @@ proxyURL.access=127.0.0.1,0:0:0:0:0:0:0:1
 # Be careful with this number. Consider a branching factor of average 20;
 # A prefetch-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
 crawlingDepth=3
+crawlingDirectDocByURL=true
 crawlingIfOlder=-1
 crawlingDomFilterDepth=-1
 crawlingDomMaxPages=-1
@@ -543,6 +557,12 @@ xpstopw=true
 # Change to false if requesting hits from peers with modified stopwords-file and using the unchanged client-version
 filterOutStopwordsFromTopwords=true
 
+# crawling steering: must-match/must-not-match
+crawlingIPMustMatch=.*
+crawlingIPMustNotMatch=
+# the default country codes are all codes for countries in Europe
+crawlingCountryMustMatch=AD,AL,AT,BA,BE,BG,BY,CH,CY,CZ,DE,DK,EE,ES,FI,FO,FR,GG,GI,GR,HR,HU,IE,IM,IS,IT,JE,LI,LT,LU,LV,MC,MD,MK,MT,NL,NO,PL,PT,RO,RU,SE,SI,SJ,SK,SM,TR,UA,UK,VA,YU
+
 # performance-settings
 # delay-times for permanent loops (milliseconds)
 # the idlesleep is the pause that an proces sleeps if the last call to the
@@ -551,11 +571,11 @@ filterOutStopwordsFromTopwords=true
 # the prereq-value is a memory pre-requisite: that much bytes must
 # be available/free in the heap; othervise the loop is not executed
 # and another idlesleep is performed
-20_dhtdistribution_idlesleep=15000
-20_dhtdistribution_busysleep=10000
+20_dhtdistribution_idlesleep=30000
+20_dhtdistribution_busysleep=15000
 20_dhtdistribution_memprereq=12582912
-30_peerping_idlesleep=60000
-30_peerping_busysleep=60000
+30_peerping_idlesleep=30000
+30_peerping_busysleep=30000
 30_peerping_memprereq=2097152
 40_peerseedcycle_idlesleep=1800000
 40_peerseedcycle_busysleep=1200000
@@ -601,12 +621,13 @@ cleanup.failedSearchURLtimeout = 86400000
 # if a high performance for large search indexes is wanted, then setting the values to equal number is recommended
 # if YaCy shall be nice in not-only-yacy environments, then the Xms value may be lower
 javastart_Xmx=Xmx600m
-javastart_Xms=Xms180m
+javastart_Xms=Xms90m
 
-# YaCy is able to use RAM copies of database tables. This needs a lot of RAM
-# To switch copying of file tables int RAM on, use this property
-# this value is automatically set to true, if more than one gigabyte RAM is available
-ramcopy=false
+# YaCy is able to use RAM copies of database tables. This needs a lot of RAM.
+# To switch on copying of file tables int RAM, there must be enough memory
+# The memory that is available at startup time is used to switch the feature on
+# The tableCachingLimit is the amount of free RAM at startup time to switch on the feature
+tableCachingLimit=419430400
 
 # some java versions may be limited to a specific array size
 # of 134217727 entries. To prevent that tables of that size are generated,
@@ -627,7 +648,7 @@ javastart_priority=10
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
 # ram cache during indexing. If you want to increase indexing speed, increase this
 # value i.e. up to one million, but increase also the memory limit to a minimum of 2GB
-wordCacheMaxCount = 100000
+wordCacheMaxCount = 50000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
@@ -670,13 +691,16 @@ crawlPause.localsearch=50
 crawlPause.remotesearch=10
 
 # Some configuration values for the crawler
-crawler.clientTimeout=9000
+crawler.clientTimeout=30000
 
 # http crawler specific settings; size in bytes
+crawler.http.accept=text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 crawler.http.acceptEncoding=gzip
 crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
 crawler.http.maxFileSize=10485760
+crawler.http.FollowRedirects=true
+crawler.http.RecordRedirects=false
 
 # ftp crawler specific settings; size in bytes
 crawler.ftp.maxFileSize=10485760
@@ -702,9 +726,9 @@ search.options = true
 # search domains. If set to false then that search is not available
 search.text = true
 search.image = true
-search.audio = true
-search.video = true
-search.app = true
+search.audio = false
+search.video = false
+search.app = false
 
 # number of search results displayed by default
 search.items = 10
@@ -713,15 +737,48 @@ search.items = 10
 # possible values:
 # "_blank" (new window), "_self" (same window), "_parent" (the parent frame of a frameset),
 # "_top" (top of all frames), "searchresult" (a default custom page name for search results)
+# a special pattern can be given for exceptions to the default target according to urls
 search.target = _self
+search.target.special = _self
+search.target.special.pattern =
 
 # search result lines may show additional information for each search hit
 # these information pieces may be switched on or off
 search.result.show.date = true
-search.result.show.size = true
-search.result.show.metadata = true
-search.result.show.parser = true
-search.result.show.pictures = true
+search.result.show.size = false
+search.result.show.metadata = false
+search.result.show.parser = false
+search.result.show.pictures = false
+search.result.show.cache = true
+search.result.show.proxy = false
+search.result.show.tags = false
+
+# search navigators: comma-separated list of default values for search navigation.
+# can be temporary different if search string is given with differen navigation values
+# assigning no value(s) means that no navigation is shown
+search.navigation=hosts,authors,namespace,topics,filetype,protocol
+
+# search result verification and snippet fetch caching rules
+# each search result can be verified byloading the link from the web
+# this can be enhanced using a cache. In some cases it may be appropriate
+# to not verify the link at all and do not compute a snippet
+# the possible cases are:
+# nocache:   no use of web cache, load all snippets online
+# iffresh:   use the cache if the cache exists and is fresh otherwise load online
+# ifexist:   use the cache if the cache exist or load online
+# cacheonly: never go online, use all content from cache. If no cache entry exist,
+#            consider content nevertheless as available and show result without snippet
+# false:     no link verification and not snippet generation:
+             all search results are valid without verification
+search.verify = ifexist
+
+search.excludehosts=
+search.excludehosth=
+
+# in case that a link verification fails then the corresponding index reference can be
+# deleted to clean up the index. If this property is set then failed index verification in
+# the cases of nocache, iffresh and ifexist causes an index deletion
+search.verify.delete = true
 
 # remote search details
 remotesearch.maxcount = 20
@@ -765,6 +822,11 @@ indexDistribution.minChunkSize = 10
 indexDistribution.maxChunkSize = 1000
 indexDistribution.startChunkSize = 200
 indexDistribution.maxChunkFails = 1
+
+# limit of references per term & blob to the younges of this value
+# a value of <= 0 disables this feature (no limit)
+# a value of e.g. 100000 can improve stability and reduce load while searching very popular words
+index.maxReferences = 0
 
 # Search sequence settings
 # collection:
@@ -855,6 +917,11 @@ publicSearchpage = true
 # to /Status.html to get the main memu bar back
 publicTopmenu = true
 
+# flag if a small link to the administration sites on the right bottom of the index
+# page should be shown to all users.
+# you might want to enabled this, if publicTopmenu is disabled
+publicAdministratorPi = false
+
 # Wiki access rights
 # the built-in wiki system allows by default only that the administrator is allowed to make changes
 # this can be changed. There are three options:
@@ -899,7 +966,7 @@ routing.deleteOldSeeds.time = 30
 
 # options to remember the default search engines when using the search compare features
 compare_yacy.left = YaCy
-compare_yacy.right = YaCy
+compare_yacy.right = metager.de
 
 # minimum free disk space for crawling (MiB)
 disk.free = 3000
@@ -910,12 +977,12 @@ disk.free.hardlimit = 1000
 memory.acceptDHTabove = 50
 memory.disabledDHT = false
 
+# wether using standard memory strategy - or try generation memory strategy
+memory.standardStrategy = true
+
 # setting if execution of CGI files is allowed or not
 cgi.allow = false
 cgi.suffixes = cgi,pl
-
-# whether this is a version for a web browser
-browserintegration = false
 
 # content integration settings
 content.phpbb3.urlstub = http://<mydomain>/
@@ -947,7 +1014,6 @@ about.body =
 
 # search heuristics
 heuristic.site = false
-heuristic.scroogle = false
 heuristic.blekko = false
 
 # colours for generic design
@@ -965,3 +1031,66 @@ color_signother = #000099
 color_searchheadline = #2200CC
 color_searchurl = #008000
 color_searchurlhover = #008000
+
+
+# federated index storage and federated search functionality
+# federated search means that other search engines may be used together with the built-in indexing.
+# each federated search may be able to be used as remote indexing service and/or as remote search service.
+# a typical use case for a federated search is a concurrent search from opensearch sources.
+# a typical use case for a remote indexing service is a remote solr index. YaCy supports remote solr indexes.
+
+# solr indexes can be filled if enabled is set to true
+# the remote index scheme is the same as produced by the SolrCell; see http://wiki.apache.org/solr/ExtractingRequestHandler
+# because this default scheme is used the default example scheme can be used as solr configuration
+# to use this, do the following:
+# - set federated.service.solr.indexing.enabled = true
+# - download solr from http://www.apache.org/dyn/closer.cgi/lucene/solr/
+# - extract the solr (3.1) package, 'cd example' and start solr with 'java -jar start.jar'
+# - start yacy and then start a crawler. The crawler will fill both, YaCy and solr indexes.
+# - to check whats in solr after indexing, open http://localhost:8983/solr/admin/
+federated.service.solr.indexing.enabled = false
+federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
+federated.service.solr.indexing.commitWithinMs = 1000
+federated.service.solr.indexing.sharding = MODULO_HOST_MD5
+federated.service.solr.indexing.schemefile = solr.keys.default.list
+
+# the indexing engine in YaCy can be switched off or on
+# (off may make sense if federated.service.solr.indexing.enabled = true)
+# for experiments the value federated.service.yacy.indexing.engine = solr may be used
+# allowed values are: classic, solr, off
+federated.service.yacy.indexing.engine = classic
+
+# RDF triplestore settings
+triplestore.persistent = true
+
+# Augmentation settings
+parserAugmentation = false
+parserAugmentation.RDFa = false
+proxyAugmentation = false
+augmentation.reflect = false
+augmentation.addDoctype = false
+augmentation.reparse = false
+
+# Interaction settings
+interaction.feedback.enabled = true
+interaction.feedback.url = 
+interaction.feedback.accept = false
+interaction.usertracking.enabled = true
+interaction.addcontent.enabled = false
+interaction.userlogon.enabled = false
+interaction.approvelist.enabled = false
+interaction.suggestrejected.enabled = false
+interaction.overlayinteraction.enabled = false
+
+interaction.globalmenu.enabled = true
+interaction.portalconfigbutton.enabled = true
+interaction.crawltraces.enabled = false
+interaction.userselfregistration.enabled = false
+interaction.forcebookmarkimport = 
+interaction.visiblecategories = all
+
+interaction.dontimportbookmarks = 
+
+interaction.autocrawler.enabled = false
+interaction.autocrawler.domainfilter = .*
+interaction.autocrawler.categoryfilter = .*

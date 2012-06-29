@@ -1,3 +1,0 @@
-cd `dirname $0`/..
-java -Xms1500m -Xmx2000m -classpath source:classes de.anomic.plasma.plasmaRankingCRProcess -accumulate .
-java -Xms1500m -Xmx2000m -classpath source:classes de.anomic.plasma.plasmaRankingCRProcess -recycle . 168

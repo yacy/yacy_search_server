@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -39,44 +39,44 @@ public abstract class LookAheadIterator<A> implements Iterator<A>, Iterable<A> {
 
     private boolean fresh = true;
     private A next = null;
-    
+
     public LookAheadIterator() {
     }
 
-    public Iterator<A> iterator() {
+    public final Iterator<A> iterator() {
         return this;
     }
-    
+
     /**
      * the internal next-method
      * @return a value of type A if available or null if no more value are available
      */
     protected abstract A next0() ;
-    
+
     private final void checkInit() {
-        if (fresh) {
-            next = next0();
-            fresh = false;
+        if (this.fresh) {
+            this.next = next0();
+            this.fresh = false;
         }
     }
-    
+
     public final boolean hasNext() {
         checkInit();
-        return next != null;
+        return this.next != null;
     }
 
     public final A next() {
         checkInit();
-        A n = next;
-        next = next0();
+        final A n = this.next;
+        this.next = next0();
         return n;
     }
-    
+
     /**
      * a remove is not possible with this implementation
      */
     public final void remove() {
         throw new UnsupportedOperationException();
     }
-    
+
 }

@@ -41,13 +41,31 @@
       <dl>
         <dt class="TableCellDark">Index Deletion</dt>
         <dd><input type="checkbox" name="deleteIndex" id="deleteIndex"
-             onclick="x=document.getElementById('deleteIndex').checked;document.getElementById('deleteCache').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';document.getElementById('deleteSearchFl').checked=x;if(x){c='';}document.getElementById('deleteCache').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;document.getElementById('deleteSearchFl').disabled=c;"
+             onclick="x=document.getElementById('deleteIndex').checked;document.getElementById('deleteTriplestore').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';document.getElementById('deleteSearchFl').checked=x;if(x){c='';}document.getElementById('deleteTriplestore').disabled=c;document.getElementById('deletecomplete').disabled=c;document.getElementById('deleteCache').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;document.getElementById('deleteSearchFl').disabled=c;"
             /><label for="deleteIndex">Delete Search Index</label><br/>
-            <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /><label for="deleteCrawlQueues">Stop Crawler and delete Crawl Queues</label><br/>
+            #(solr)#::<input type="checkbox" name="deleteSolr" id="deleteSolr"
+             onclick="x=document.getElementById('deleteSolr').checked;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';document.getElementById('deleteSearchFl').checked=x;if(x){c='';}document.getElementById('deletecomplete').disabled=c;document.getElementById('deleteCache').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;document.getElementById('deleteSearchFl').disabled=c;"
+            /><label for="deleteSolr">Delete Solr Index</label><br/>#(/solr)#
+            <input type="checkbox" name="deleteTriplestore" id="deleteTriplestore" disabled="disabled" /><label for="deleteTriplestore">Delete RDF Triplestore</label><br/>
             <input type="checkbox" name="deleteCache" id="deleteCache" disabled="disabled" /><label for="deleteCache">Delete HTTP &amp; FTP Cache</label><br/>
+            <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /><label for="deleteCrawlQueues">Stop Crawler and delete Crawl Queues</label><br/>
             <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" /><label for="deleteRobots">Delete robots.txt Cache</label><br/>
-            <input type="checkbox" name="deleteSearchFl" id="deleteSearchFl" disabled="disabled" /><label for="deleteSearchFl">Delete cached snippet-fetching failures during search</label><br/><br/><br/>
-            <input type="submit" name="deletecomplete" value="Delete"/>
+            <input type="checkbox" name="deleteSearchFl" id="deleteSearchFl" disabled="disabled" /><label for="deleteSearchFl">Delete cached snippet-fetching failures during search</label><br/><br/>
+            <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    </form>
+    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Limitations</legend>
+      <dl>
+        <dt class="TableCellDark">Index Reference Size</dt>
+        <dd><input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOff" value="off" #(maxReferencesRadioChecked)#checked="checked"::#(/maxReferencesRadioChecked)# onclick="window.location.href='IndexControlRWIs_p.html?maxReferencesRadio=off&maxReferencesLimit='"/>
+            No reference size limitation (this may cause strong CPU load when words are searched that appear very often)<br/>
+            <input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOn" value="on" #(maxReferencesRadioChecked)#::checked="checked"#(/maxReferencesRadioChecked)# onclick="window.location.href='IndexControlRWIs_p.html?maxReferencesRadio=on&maxReferencesLimit=&maxReferences=#[maxReferences]#'"/>
+            Limitation of number of references per word: <input type="text" name="maxReferences" value="#[maxReferences]#" size="9" maxlength="12" onfocus="document.getElementById('maxReferencesRadioOff').checked = false;document.getElementById('maxReferencesRadioOn').checked = true"/> (this causes that old references als deleted if that limit is reached)<br/><br/>
+            <input type="submit" name="maxReferencesLimit" id="maxReferencesLimit" value="Set References Limit"/>
         </dd>
       </dl>
     </fieldset>
@@ -149,10 +167,11 @@
         </dd>
         <dt class="TableCellDark">to Peer:</dt>
         <dd>select <select name="hostHash">
-              #{hosts}#
-              <option value="#[hosthash]#">#[hostname]#</option>
-              #{/hosts}#
-            </select> or enter a hash:<input type="text" name="host" value="" size="21" maxlength="21" />
+                #{hosts}#
+                <option value="#[hosthash]#">#[hostname]#</option>
+                #{/hosts}#
+            </select> <br>
+                or enter a hash or peer name:<input type="text" name="host" value="" size="21" maxlength="21" />
         </dd>
       </dl>
     </fieldset>
@@ -177,7 +196,7 @@
       <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td colspan="3">Resource</td>
-        <td colspan="8">Negative Ranking Factors</td>
+        <td colspan="9">Negative Ranking Factors</td>
         <td colspan="8">Positive Ranking Factors</td>
         <td rowspan="2">props</td>
         <td rowspan="2">Reverse Normalized Weighted Ranking Sum</td>
@@ -194,6 +213,7 @@
         <td>pos of phrase</td>
         <td>pos in phrase</td>
         <td>word distance</td>
+        <td>YBR</td>
         <td>term frequency</td>
         <td>authority</td>
         <td>date</td>
@@ -223,6 +243,7 @@
         <td class="TableCellDark">#[phrase]#</td>
         <td class="TableCellDark">#[posinphrase]#</td>
         <td class="TableCellDark">#[worddistance]#</td>
+        <td class="TableCellDark">#[ybr]#</td>
         <td>#[tf]#</td>
         <td>#[authority]#</td>
         <td>#[date]#</td>

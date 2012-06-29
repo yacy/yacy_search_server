@@ -1,0 +1,232 @@
+/* Body */
+#ymarks_body {
+
+}
+
+/* Main */
+#ymarks_body div.main {   
+  margin-top: 7px;
+}
+
+/* Sidebar */ 
+#ymarks_body div.sidebar {     
+  width:250px;
+  float:right; 
+  margin-right: 10px;
+  margin-left:10px; 
+  margin-top:5px; 
+  padding-top:2px;
+}
+
+#ymarks_folders_tab {
+  margin-left: -5px;
+  margin-right: -5px;
+}
+
+/* YaCy Bookmarks ---------------------------*/
+#ymarks_flexigrid .url {
+	padding-top: 1px;
+	font-size: 0.9em;
+  	line-height: 1.2em;
+  	margin-bottom:0.6em;
+}
+#ymarks_flexigrid h3.linktitle {
+	margin-top:2px;	
+	margin-bottom: -0.5em;
+    font-size: 1.0em;
+    line-height: 1.2em;
+	color:#239AFF;
+}
+#ymarks_flexigrid h3.linktitle a {
+	color:#239AFF;
+	text-decoration:none;
+}
+#ymarks_flexigrid p.url a {
+  	color:#20A020;
+  	text-decoration:none;
+}
+#ymarks_flexigrid .tag {
+	font-size: 1.1em;
+  	line-height: 1.3em;
+  	color:#20A020;
+}
+#ymarks_flexigrid .desc {
+  	font-style:italic;
+	font-size: 0.9em;
+  	color: #808080;
+  	line-height: 1.2em;
+  	margin-bottom:-1em; 	
+}
+
+#ymarks_treeview {
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+#ymarks_tagcloud {
+	margin: 10px 5px 10px 5px; /* top right bottom left */
+	text-align: justify;
+	line-height: 1.2em;
+}
+#ymarks_tagcloud a {
+	cursor:pointer;		
+}
+#ymarks_tagcloud a:hover {
+	background-color:#e6EEEE;		
+}
+#ymarks_body .input {
+  width: 190px;  
+  margin-bottom: .5em;
+  padding: 2px 0px 2px 0px; /* top right bottom left */
+  border: 1px solid #CCCCCC;
+  font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* color: #999999; */
+}
+img.help {
+  vertical-align: middle;
+  padding-bottom:5px;
+  padding-left: 8px;
+}
+
+/* Bookmark Dialogs */
+.bm_input, .bm_select { 
+  padding: 2px 0px 2px 0px; /* top right bottom left */
+  border: 1px solid #CCCCCC;
+  margin: 0px 0px 2px 5px;
+}
+.bm_input { 
+	width: 280px; 
+}
+.bm_select { 
+	width: 60px; 
+}
+.bm_dialog label { 
+	margin: 6px 0px 2px 5px;
+	font-size: 0.8em;
+}
+.bm_dialog {
+	margin: 5px 5px 5px 5px;
+}
+
+#bm_tags_tagsinput {
+	margin: 0px 0px 2px 5px;
+}
+
+
+/* YaCy Flexigrid ---------------------------*/
+.flexigrid div.fbutton .burst {
+	background: url(../../yacy/ui/img-2/burst.png) no-repeat center left;
+}
+.flexigrid div.fbutton .pictures {
+	background: url(../../yacy/ui/img-2/pictures.png) no-repeat center left;
+}
+.flexigrid div.fbutton .help {
+	background: url(../../yacy/ui/img-2/question_blue.png) no-repeat center left;
+}
+.flexigrid div.fbutton .delete {
+	background: url(../../yacy/ui/img-2/cancel.png) no-repeat center left;
+}
+.flexigrid div.fbutton .edit {
+	background: url(../../yacy/ui/img-2/pencil.png) no-repeat center left;
+}
+.flexigrid div.fbutton .import {
+	background: url(../../yacy/ui/img-2/download.png) no-repeat center left;
+}
+.flexigrid div.fbutton .rss {
+	background: url(../../yacy/ui/img-2/rss_round.png) no-repeat center left;
+}
+.flexigrid div.fbutton .xml {
+	background: url(../../yacy/ui/img-2/code.png) no-repeat center left;
+}
+.flexigrid div.fbutton .bookmark {
+	border-bottom: 0px;
+	background: url(../../yacy/ui/img/bookmark.png) no-repeat center left;
+}
+.flexigrid div.fbutton .blacklist {
+	background: url(../../yacy/ui/img/blacklist.png) no-repeat center left;
+}
+.flexigrid div.fbutton .crawl {
+	background: url(../../yacy/ui/img/crawl.png) no-repeat center left;
+}
+.flexigrid div.fbutton .next {
+	background: url(../../yacy/ui/img/next.png) no-repeat center left;
+}
+.flexigrid div.fbutton .prev {
+	background: url(../../yacy/ui/img/prev.png) no-repeat center left;
+}
+.flexigrid div.fbutton .load {
+	background: url(../../yacy/ui/img/flexigrid/load.png) no-repeat center left;
+}
+.flexigrid div.fbutton .addTag {
+	background: url(../../yacy/ui/img/tags/tag_blue_add.png) no-repeat center left;
+}
+.flexigrid div.fbutton .editTag {
+	background: url(../../yacy/ui/img/tags/tag_blue_edit.png) no-repeat center left;
+}
+.flexigrid div.fbutton .deleteTag {
+	background: url(../../yacy/ui/img/tags/tag_blue_delete.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-debug {
+	background: url(../../yacy/ui/img-2/magnify.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-info {
+	background: url(../../yacy/ui/img-2/info.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-system {
+	background: url(../../yacy/ui/img-2/accept_green.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-warning {
+	background: url(../../yacy/ui/img/blacklist.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-error {
+	background: url(../../yacy/ui/img-2/stop.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-new {
+	background: url(../../yacy/ui/img-2/new.png) no-repeat center left;
+}
+.flexigrid div.fbutton .clock {
+	background: url(../../yacy/ui/img-2/clock.png) no-repeat center left;
+}
+.flexigrid div.fbutton .calendar {
+	background: url(../../yacy/ui/img-2/calendar.png) no-repeat center left;
+}
+.flexigrid div.fbutton .refresh {
+	background: url(../../yacy/ui/img/flexigrid/load.png) no-repeat center left;
+}
+.flexigrid div.fbutton .accept {
+	background: url(../../yacy/ui/img-2/accept.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-more {
+	/* background: url(../img/flexigrid/uup.png) no-repeat center left; */
+	margin-left: -20px;
+}
+/* overrides for ui-tab styles
+-------------------------------------*/
+#ymarks_sidebar .ui-tabs-nav li a:link,
+#ymarks_sidebar .ui-tabs-nav li a:visited,
+#ymarks_sidebar .ui-tabs-nav li a:hover,
+#ymarks_sidebar .ui-tabs-nav li a:active, 
+#ymarks_sidebar .ui-tabs-nav li.ui-tabs-selected a:link,
+#ymarks_sidebar .ui-tabs-nav li.ui-tabs-selected a:visited,
+#ymarks_sidebar .ui-tabs-nav li.ui-tabs-selected a:hover,
+#ymarks_sidebar .ui-tabs-nav li.ui-tabs-selected a:active { font-size: 12px; padding-left: 5px;}
+
+
+/* overrides for treeview styles
+-------------------------------------*/
+
+.filetree span.err { 
+	background: url(/yacy/ui/img-2/stop.png) 0 0 no-repeat;
+	padding: 1px 0px 0px 18px; 
+	display: block;
+}
+.filetree span.question { 
+	background: url(/yacy/ui/img-2/question_blue.png) 0 0 no-repeat;
+	padding: 1px 0px 0px 18px; 
+	display: block;
+}
+.filetree span.crawl { 
+	background: url(/yacy/ui/img/crawl.png) 0 0 no-repeat;
+	padding: 1px 0px 0px 18px; 
+	display: block;
+}

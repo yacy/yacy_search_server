@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -28,8 +28,10 @@ package net.yacy.kelondro.data.word;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
@@ -46,7 +48,7 @@ import net.yacy.kelondro.util.ByteArray;
  */
 public final class WordReferenceRow extends AbstractReference implements WordReference, Cloneable {
 
-	
+
     public static final Row urlEntryRow = new Row(new Column[]{
             new Column("h", Column.celltype_string,    Column.encoder_bytes, Word.commonHashLength, "urlhash"),
             new Column("a", Column.celltype_cardinal,  Column.encoder_b256,  2, "lastModified"),
@@ -72,14 +74,13 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         Base64Order.enhancedCoder
     );
     // available chars: b,e,j,q
-    
+
     /**
 	 * object for termination of concurrent blocking queue processing
 	 */
     public static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
 	public static final WordReferenceRow poison = new WordReferenceRow(poisonRowEntry);
-    
-    
+
     // static properties
     private static final int col_urlhash       =  0; // h 12 the url hash b64-encoded
     private static final int col_lastModified  =  1; // a  2 last-modified time of the document where word appears
@@ -94,7 +95,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     private static final int col_urlLength     = 10; // m  1 byte-length of complete URL
     private static final int col_urlComps      = 11; // n  1 number of path components
 
-    // dynamic properties    
+    // dynamic properties
     private static final int col_typeofword    = 12; // g  1 grammatical classification
     private static final int col_flags         = 13; // z  4 b64-encoded appearance flags (24 bit, see definition below)
     private static final int col_hitcount      = 14; // c  1 number of occurrences of this word in text
@@ -115,7 +116,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     public  static final int flag_app_emphasized    = 29; // word is emphasized in text (i.e. bold, italics, special size)
 
     private final Row.Entry entry;
-    
+
     public WordReferenceRow(
             final byte[]   urlHash,
             final int      urlLength,     // byte-length of complete URL
@@ -129,14 +130,14 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
             final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-            final String   language,      // (guessed) language of document
+            final byte[]   language,      // (guessed) language of document
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
             final int      outlinksOther, // outlinks to other domain
             final Bitfield flags  // attributes to the url and to the word according the url
     ) {
 
-        assert (urlHash.length == 12) : "urlhash = " + UTF8.String(urlHash);
+        assert (urlHash.length == 12) : "urlhash = " + ASCII.String(urlHash);
         this.entry = urlEntryRow.newEntry();
         final int mddlm = MicroDate.microDateDays(lastmodified);
         final int mddct = MicroDate.microDateDays(updatetime);
@@ -147,7 +148,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry.setCol(col_wordsInText, wordcount);
         this.entry.setCol(col_phrasesInText, phrasecount);
         this.entry.setCol(col_doctype, new byte[]{(byte) doctype});
-        this.entry.setCol(col_language, ((language == null) || (language.length() != urlEntryRow.width(col_language))) ? "uk" : language, null);
+        this.entry.setCol(col_language, (language == null || language.length != urlEntryRow.width(col_language)) ? WordReferenceVars.default_language : language);
         this.entry.setCol(col_llocal, outlinksSame);
         this.entry.setCol(col_lother, outlinksOther);
         this.entry.setCol(col_urlLength, urlLength);
@@ -161,8 +162,8 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry.setCol(col_reserve1, 0);
         this.entry.setCol(col_reserve2, 0);
     }
-    
-    public WordReferenceRow(final String  urlHash,
+
+    public WordReferenceRow(final byte[]   urlHash,
                             final int      urlLength,     // byte-length of complete URL
                             final int      urlComps,      // number of path components
                             final int      titleLength,   // length of description/length (longer are better?)
@@ -170,23 +171,23 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                             final int      phrasecount,   // total number of phrases
                             final long     lastmodified,  // last-modified time of the document where word appears
                             final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-                            final String   language,      // (guessed) language of document
+                            final byte[]   language,      // (guessed) language of document
                             final char     doctype,       // type of document
                             final int      outlinksSame,  // outlinks to same domain
                             final int      outlinksOther  // outlinks to other domain
                     ) {
-                        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
+                        assert (urlHash.length == 12) : "urlhash = " + ASCII.String(urlHash);
                         this.entry = urlEntryRow.newEntry();
                         final int mddlm = MicroDate.microDateDays(lastmodified);
                         final int mddct = MicroDate.microDateDays(updatetime);
-                        this.entry.setCol(col_urlhash, urlHash, null);
+                        this.entry.setCol(col_urlhash, urlHash);
                         this.entry.setCol(col_lastModified, mddlm);
                         this.entry.setCol(col_freshUntil, Math.max(0, mddlm + (mddct - mddlm) * 2)); // TTL computation
                         this.entry.setCol(col_wordsInTitle, titleLength / 6); // word count estimation; TODO: change value handover to number of words
                         this.entry.setCol(col_wordsInText, wordcount);
                         this.entry.setCol(col_phrasesInText, phrasecount);
                         this.entry.setCol(col_doctype, new byte[]{(byte) doctype});
-                        this.entry.setCol(col_language, ((language == null) || (language.length() != urlEntryRow.width(col_language))) ? "uk" : language, null);
+                        this.entry.setCol(col_language, ((language == null) || (language.length != urlEntryRow.width(col_language))) ? WordReferenceVars.default_language : language);
                         this.entry.setCol(col_llocal, outlinksSame);
                         this.entry.setCol(col_lother, outlinksOther);
                         this.entry.setCol(col_urlLength, urlLength);
@@ -194,7 +195,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_reserve1, 0);
                         this.entry.setCol(col_reserve2, 0);
                     }
-    
+
     public void setWord(final Word word) {
                         this.entry.setCol(col_typeofword, new byte[]{(byte) 0});
                         this.entry.setCol(col_flags, word.flags.bytes());
@@ -203,64 +204,128 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_posinphrase, word.posInPhrase);
                         this.entry.setCol(col_posofphrase, word.numOfPhrase);
     }
-    
-    public WordReferenceRow(final String urlHash, final String code) {
-        // the code is the external form of the row minus the leading urlHash entry
-        this.entry = urlEntryRow.newEntry((urlHash + code).getBytes());
+
+    public static class ExternalParser {
+        private static final String PIN = "_";
+        private final BlockingQueue<String> in;
+        private final BlockingQueue<WordReferenceRow> out;
+        Thread[] worker;
+        public ExternalParser(final int concurrency) {
+            this.in = new LinkedBlockingQueue<String>();
+            this.out = new LinkedBlockingQueue<WordReferenceRow>();
+            for (int i = 0; i < concurrency; i++) {
+                this.worker[i] = new Thread() {
+                    @Override
+                    public void run() {
+                        String s;
+                        try {
+                            while ((s = ExternalParser.this.in.take()) != PIN) {
+                                ExternalParser.this.out.put(new WordReferenceRow(s));
+                            }
+                        } catch (final InterruptedException e) {
+                        }
+                    }
+                };
+                this.worker[i].start();
+            }
+        }
+        public ExternalParser() {
+            this(Runtime.getRuntime().availableProcessors());
+        }
+        public void put(final String s) {
+            try {
+                this.in.put(s);
+            } catch (final InterruptedException e) {
+            }
+        }
+        public void terminate() {
+            for (@SuppressWarnings("unused") final Thread w : this.worker) {
+                try {
+                    this.in.put(PIN);
+                } catch (final InterruptedException e) {
+                }
+            }
+            for (final Thread w : this.worker) {
+                try {
+                    if (w.isAlive()) w.join();
+                } catch (final InterruptedException e) {
+                }
+            }
+            try {
+                this.out.put(poison);
+            } catch (final InterruptedException e) {
+            }
+        }
+        public WordReferenceRow take() {
+            WordReferenceRow row;
+            try {
+                row = this.out.take();
+            } catch (final InterruptedException e) {
+                return poison;
+            }
+            return row;
+        }
     }
-    
+
     public WordReferenceRow(final String external) {
         this.entry = urlEntryRow.newEntry(external, true);
     }
-    
+
     public WordReferenceRow(final byte[] row) {
         this.entry = urlEntryRow.newEntry(row);
     }
-    
+
     public WordReferenceRow(final byte[] row, final int offset, final boolean clone) {
         this.entry = urlEntryRow.newEntry(row, offset, clone);
     }
-    
+
     public WordReferenceRow(final Row.Entry rentry) {
-        // FIXME: see if cloning is necessary
+        // no cloning is necessary since there is no further manipulation after this initial instantiation
         this.entry = rentry;
     }
-    
+
     @Override
     public WordReferenceRow clone() {
         final byte[] b = new byte[urlEntryRow.objectsize];
-        System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
+        System.arraycopy(this.entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
         return new WordReferenceRow(b);
     }
 
+    @Override
     public String toPropertyForm() {
-        return entry.toPropertyForm(true, true, false);
+        return this.entry.toPropertyForm('=', true, true, false, false);
     }
-    
+
+    @Override
     public Entry toKelondroEntry() {
         return this.entry;
     }
 
-    public byte[] metadataHash() {
+    @Override
+    public byte[] urlhash() {
         return this.entry.getColBytes(col_urlhash, true);
     }
 
+    @Override
     public int virtualAge() {
         return (int) this.entry.getColLong(col_lastModified);  // this is the time in MicoDateDays format
     }
 
+    @Override
     public long lastModified() {
         return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
     }
-    
+
     public long freshUntil() {
         return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_freshUntil));
     }
 
+    @Override
     public int hitcount() {
-        return (int) this.entry.getColLong(col_hitcount);
+        return (0xff & this.entry.getColByte(col_hitcount));
     }
 
+    @Override
     public Collection<Integer> positions() {
         return new ArrayList<Integer>(0);
     }
@@ -270,86 +335,99 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return (int) this.entry.getColLong(col_posintext);
     }
 
+    @Override
     public int posinphrase() {
-        return (int) this.entry.getColLong(col_posinphrase);
+        return (0xff & this.entry.getColByte(col_posinphrase));
     }
 
+    @Override
     public int posofphrase() {
-        return (int) this.entry.getColLong(col_posofphrase);
+        return (0xff & this.entry.getColByte(col_posofphrase));
     }
 
+    @Override
     public int wordsintext() {
         return (int) this.entry.getColLong(col_wordsInText);
     }
 
+    @Override
     public int phrasesintext() {
         return (int) this.entry.getColLong(col_phrasesInText);
     }
 
-    public String getLanguage() {
-        return this.entry.getColString(col_language, null);
+    @Override
+    public byte[] getLanguage() {
+        return this.entry.getColBytes(col_language, true);
     }
 
+    @Override
     public char getType() {
         return (char) this.entry.getColByte(col_doctype);
     }
 
+    @Override
     public int wordsintitle() {
-        return (int) this.entry.getColLong(col_wordsInTitle);
+        return (0xff & this.entry.getColByte(col_wordsInTitle));
     }
-    
+
+    @Override
     public int llocal() {
-        return (int) this.entry.getColLong(col_llocal);
+        return (0xff & this.entry.getColByte(col_llocal));
     }
-    
+
+    @Override
     public int lother() {
-        return (int) this.entry.getColLong(col_lother);
+        return (0xff & this.entry.getColByte(col_lother));
     }
-    
+
+    @Override
     public int urllength() {
-        return (int) this.entry.getColLong(col_urlLength);
+        return (0xff & this.entry.getColByte(col_urlLength));
     }
-    
+
+    @Override
     public int urlcomps() {
-        return (int) this.entry.getColLong(col_urlComps);
+        return (0xff & this.entry.getColByte(col_urlComps));
     }
-    
+
+    @Override
     public Bitfield flags() {
         return new Bitfield(this.entry.getColBytes(col_flags, false));
     }
-    
+
+    @Override
     public double termFrequency() {
-        return (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
+        return (((double) hitcount()) / ((double) (wordsintext() + wordsintitle() + 1)));
     }
-    
+
     @Override
     public String toString() {
         return toPropertyForm();
     }
 
-    public boolean isOlder(final Reference other) {
-        if (other == null) return false;
-        if (this.lastModified() < other.lastModified()) return true;
-        return false;
-    }
-    
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof WordReferenceRow)) return false;
-        WordReferenceRow other = (WordReferenceRow) obj;
-        return Base64Order.enhancedCoder.equal(this.metadataHash(), other.metadataHash());
-    }
-    
-    @Override
-    public int hashCode() {
-        return ByteArray.hashCode(this.metadataHash());
+        final WordReferenceRow other = (WordReferenceRow) obj;
+        return Base64Order.enhancedCoder.equal(urlhash(), other.urlhash());
     }
 
+    private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
+
+    @Override
+    public int hashCode() {
+        if (this.hashCache == Integer.MIN_VALUE) {
+            this.hashCache = ByteArray.hashCode(urlhash());
+        }
+        return this.hashCache;
+    }
+
+    @Override
     public void join(final Reference oe) {
         throw new UnsupportedOperationException("");
-        
+
     }
-    
+
 }

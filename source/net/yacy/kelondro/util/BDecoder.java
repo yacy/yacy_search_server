@@ -116,19 +116,19 @@ public class BDecoder {
             return UTF8.String(this.b);
         }
         public void toStream(OutputStream os) throws IOException {
-            os.write(Integer.toString(this.b.length).getBytes());
+            os.write(UTF8.getBytes(Integer.toString(this.b.length)));
             os.write(_p);
             os.write(this.b);
         }
         public static void toStream(OutputStream os, byte[] b) throws IOException {
-            os.write(Integer.toString(b.length).getBytes());
+            os.write(UTF8.getBytes(Integer.toString(b.length)));
             os.write(_p);
             os.write(b);
         }
         public static void toStream(OutputStream os, String s) throws IOException {
-            os.write(Integer.toString(s.length()).getBytes());
+            os.write(UTF8.getBytes(Integer.toString(s.length())));
             os.write(_p);
-            os.write(s.getBytes());
+            os.write(UTF8.getBytes(s));
         }
     }
     
@@ -149,14 +149,14 @@ public class BDecoder {
         public String toString() {
             StringBuilder s = new StringBuilder(l.size() * 40 + 1);
             s.append("[");
-            for (BObject o: l) s.append(o.toString()).append(",");
+            for (final BObject o: l) s.append(o.toString()).append(",");
             s.setLength(s.length() - 1);
             s.append("]");
             return s.toString();
         }
         public void toStream(OutputStream os) throws IOException {
             os.write(_l);
-            for (BObject bo: this.l) bo.toStream(os);
+            for (final BObject bo: this.l) bo.toStream(os);
             os.write(_e);
         }
     }
@@ -178,14 +178,14 @@ public class BDecoder {
         public String toString() {
             StringBuilder s = new StringBuilder(m.size() * 40 + 1);
             s.append('{');
-            for (Map.Entry<String, BObject> e: m.entrySet()) s.append(e.getKey()).append(':').append(e.getValue().toString()).append(','); 
+            for (final Map.Entry<String, BObject> e: m.entrySet()) s.append(e.getKey()).append(':').append(e.getValue().toString()).append(','); 
             s.setLength(s.length() - 1);
             s.append('}');
             return s.toString();
         }
         public void toStream(OutputStream os) throws IOException {
             os.write(_d);
-            for (Map.Entry<String, BObject> e: this.m.entrySet()) {
+            for (final Map.Entry<String, BObject> e: this.m.entrySet()) {
                 BStringObject.toStream(os, e.getKey());
                 e.getValue().toStream(os);
             }
@@ -218,7 +218,7 @@ public class BDecoder {
         }
         public void toStream(OutputStream os) throws IOException {
             os.write(_i);
-            os.write(Long.toString(this.i).getBytes());
+            os.write(UTF8.getBytes(Long.toString(this.i)));
             os.write(_e);
         }
     }
@@ -226,9 +226,11 @@ public class BDecoder {
     private Map<String, BObject> convertToMap(final List<BObject> list) {
         final Map<String, BObject> m = new LinkedHashMap<String, BObject>();
         final int length = list.size();
+        byte[] key;
+        BObject value;
         for (int i = 0; i < length; i += 2) {
-            final byte[] key = list.get(i).getString();
-            BObject value = null;
+            key = list.get(i).getString();
+            value = null;
             if (i + 1 < length) {
                 value = list.get(i + 1);
             }
@@ -240,8 +242,9 @@ public class BDecoder {
     private List<BObject> readList() {
         final List<BObject> list = new ArrayList<BObject>();
         char ch = (char) b[pos];
+        BObject bo;
         while (ch != 'e') {
-            BObject bo = parse();
+            bo = parse();
             if (bo == null) {pos++; break;}
             list.add(bo);
             ch = (char) b[pos];
@@ -287,13 +290,13 @@ public class BDecoder {
         if (bo.getType() == BType.list) {
             System.out.println("[");
             //for (int i = 0; i < t + 1; i++) System.out.print(" ");
-            for (BObject o: bo.getList()) print(o, t + 1);
+            for (final BObject o: bo.getList()) print(o, t + 1);
             for (int i = 0; i < t; i++) System.out.print(" ");
             System.out.println("]");
         }
         if (bo.getType() == BType.dictionary) {
             System.out.println("{");
-            for (Map.Entry<String, BObject> e: bo.getMap().entrySet()) {
+            for (final Map.Entry<String, BObject> e: bo.getMap().entrySet()) {
                 for (int i = 0; i < t + 1; i++) System.out.print(" ");
                 System.out.print(e.getKey());
                 System.out.println(":");

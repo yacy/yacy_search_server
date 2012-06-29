@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -79,7 +79,7 @@ public class IndexCreateDomainCrawl_p {
         prop.put("indexingMediaChecked", env.getConfigBool("indexMedia", false) ? "1" : "0");
         prop.put("crawlOrderChecked", env.getConfigBool("crawlOrder", false) ? "1" : "0");
         
-        long LCbusySleep = Integer.parseInt(env.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        long LCbusySleep = env.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 100L);
         int LCppm = (LCbusySleep == 0) ? 1000 : (int) (60000L / LCbusySleep);
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");

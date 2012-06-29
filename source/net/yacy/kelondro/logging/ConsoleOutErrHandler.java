@@ -1,4 +1,4 @@
-//ConsoleOutErrHandler.java 
+//ConsoleOutErrHandler.java
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -42,37 +42,37 @@ public final class ConsoleOutErrHandler extends Handler {
     private boolean ignoreCtrlChr = false;
     private Level splitLevel = Level.WARNING;
     private final Handler stdOutHandler;
-    private final Handler stdErrHandler;    
-    
+    private final Handler stdErrHandler;
+
     public ConsoleOutErrHandler() {
         this.stdOutHandler = new ConsoleOutHandler();
-        this.stdErrHandler = new ConsoleHandler(); 
+        this.stdErrHandler = new ConsoleHandler();
         this.stdOutHandler.setLevel(Level.FINEST);
         this.stdErrHandler.setLevel(Level.WARNING);
         configure();
     }
-    
+
     /**
      * Get any configuration properties set
      */
     private void configure() {
         final LogManager manager = LogManager.getLogManager();
         final String className = getClass().getName();
-        
+
         final String level = manager.getProperty(className + ".level");
         setLevel((level == null) ? Level.INFO : Level.parse(level));
-        
+
         final Level levelStdOut = parseLevel(manager.getProperty(className + ".levelStdOut"));
         final Level levelSplit = parseLevel(manager.getProperty(className + ".levelSplit"));
         final Level levelStdErr = parseLevel(manager.getProperty(className + ".levelStdErr"));
         setLevels(levelStdOut,levelSplit,levelStdErr);
-        
+
         final String filter = manager.getProperty(className + ".filter");
         setFilter(makeFilter(filter));
-        
+
         final String formatter = manager.getProperty(className + ".formatter");
         setFormatter(makeFormatter(formatter));
-        
+
         final String encoding = manager.getProperty(className + ".encoding");
         try {
             this.stdOutHandler.setEncoding(encoding);
@@ -80,12 +80,12 @@ public final class ConsoleOutErrHandler extends Handler {
         } catch (final UnsupportedEncodingException e) {
             Log.logException(e);
         }
-        
+
         final String ignoreCtrlChrStr = manager.getProperty(className + ".ignoreCtrlChr");
         this.ignoreCtrlChr = (ignoreCtrlChrStr==null) ? false : "true".equalsIgnoreCase(ignoreCtrlChrStr);
-        
-    }    
-    
+
+    }
+
     private Level parseLevel(final String levelName) {
         try {
             return (levelName == null) ? Level.INFO : Level.parse(levelName);
@@ -93,10 +93,10 @@ public final class ConsoleOutErrHandler extends Handler {
             return Level.ALL;
         }
     }
-    
+
     private Filter makeFilter(final String name) {
         if (name == null) return null;
-        
+
         Filter f = null;
         try {
             final Class<?> c = Class.forName(name);
@@ -107,11 +107,11 @@ public final class ConsoleOutErrHandler extends Handler {
             }
         }
         return f;
-    }    
-    
+    }
+
     private Formatter makeFormatter(final String name) {
         if (name == null) return null;
-        
+
         Formatter f = null;
         try {
             final Class<?> c = Class.forName(name);
@@ -120,12 +120,13 @@ public final class ConsoleOutErrHandler extends Handler {
             f = new SimpleFormatter();
         }
         return f;
-    }    
-    
-    
+    }
+
+
+    @Override
     public final void publish(final LogRecord record) {
         if (!isLoggable(record)) return;
-        
+
         if (this.ignoreCtrlChr) {
             String msg = record.getMessage();
             if (msg != null) {
@@ -133,36 +134,39 @@ public final class ConsoleOutErrHandler extends Handler {
             }
             record.setMessage(msg);
         }
-        
-        if (record.getLevel().intValue() >= splitLevel.intValue()) {
+
+        if (record.getLevel().intValue() >= this.splitLevel.intValue()) {
             this.stdErrHandler.publish(record);
+            this.stdErrHandler.flush();
         } else {
             this.stdOutHandler.publish(record);
+            this.stdOutHandler.flush();
         }
-        flush();
     }
 
+    @Override
     public void flush() {
         this.stdOutHandler.flush();
         this.stdErrHandler.flush();
     }
 
-    public void close() throws SecurityException {
-        this.stdOutHandler.close();  
+    @Override
+    public synchronized void close() throws SecurityException {
+        this.stdOutHandler.close();
         this.stdErrHandler.close();
     }
-    
+
     @Override
     public synchronized void setLevel(final Level newLevel) throws SecurityException {
         super.setLevel(newLevel);
     }
-    
+
     public void setLevels(final Level stdOutLevel, final Level splitLevel, final Level stdErrLevel) throws SecurityException {
         this.stdOutHandler.setLevel(stdOutLevel);
         this.splitLevel = splitLevel;
         this.stdErrHandler.setLevel(stdErrLevel);
     }
-    
+
     @Override
     public void setFormatter(final Formatter newFormatter) throws SecurityException {
         super.setFormatter(newFormatter);

@@ -161,7 +161,7 @@ public class XMLTables {
         return null;
     }
 
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         commit(true);
     }
 

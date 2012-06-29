@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -26,29 +26,31 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.parser.bzipParser;
 import net.yacy.document.parser.csvParser;
 import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.genericParser;
 import net.yacy.document.parser.gzipParser;
 import net.yacy.document.parser.htmlParser;
+import net.yacy.document.parser.mmParser;
 import net.yacy.document.parser.odtParser;
 import net.yacy.document.parser.ooxmlParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.pptParser;
 import net.yacy.document.parser.psParser;
+import net.yacy.document.parser.rdfParser;
 import net.yacy.document.parser.rssParser;
 import net.yacy.document.parser.rtfParser;
 import net.yacy.document.parser.sevenzipParser;
+import net.yacy.document.parser.sidAudioParser;
 import net.yacy.document.parser.swfParser;
 import net.yacy.document.parser.tarParser;
 import net.yacy.document.parser.torrentParser;
@@ -56,11 +58,14 @@ import net.yacy.document.parser.vcfParser;
 import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
+import net.yacy.document.parser.augment.AugmentParser;
 import net.yacy.document.parser.images.genericImageParser;
-import net.yacy.document.parser.mmParser;
-import net.yacy.document.parser.sidAudioParser;
+import net.yacy.document.parser.rdfa.impl.RDFaParser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.Switchboard;
 
 public final class TextParser {
 
@@ -68,12 +73,12 @@ public final class TextParser {
     private static final Object v = new Object();
 
     private static final Parser genericIdiom = new genericParser();
-    private static final Map<String, Parser> mime2parser = new ConcurrentHashMap<String, Parser>();
-    private static final Map<String, Parser> ext2parser = new ConcurrentHashMap<String, Parser>();
+    private static final Map<String, Set<Parser>> mime2parser = new ConcurrentHashMap<String, Set<Parser>>();
+    private static final Map<String, Set<Parser>> ext2parser = new ConcurrentHashMap<String, Set<Parser>>();
     private static final Map<String, String> ext2mime = new ConcurrentHashMap<String, String>();
     private static final Map<String, Object> denyMime = new ConcurrentHashMap<String, Object>();
     private static final Map<String, Object> denyExtensionx = new ConcurrentHashMap<String, Object>();
-    
+
     static {
         initParser(new bzipParser());
         initParser(new csvParser());
@@ -98,46 +103,57 @@ public final class TextParser {
         initParser(new vsdParser());
         initParser(new xlsParser());
         initParser(new zipParser());
+        initParser(new RDFaParser());
+        initParser(new rdfParser());
+
+        if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation.RDFa", true)) initParser(new RDFaParser());
+        if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation", true)) initParser(new AugmentParser());
     }
-    
+
     public static Set<Parser> parsers() {
-        Set<Parser> c = new HashSet<Parser>();
-        c.addAll(ext2parser.values());
-        c.addAll(mime2parser.values());
+        final Set<Parser> c = new HashSet<Parser>();
+        for (Set<Parser> pl: ext2parser.values()) c.addAll(pl);
+        for (Set<Parser> pl: mime2parser.values()) c.addAll(pl);
         return c;
     }
 
-    private static void initParser(Parser parser) {
+    private static void initParser(final Parser parser) {
         String prototypeMime = null;
-        for (String mime: parser.supportedMimeTypes()) {
+        for (final String mime: parser.supportedMimeTypes()) {
             // process the mime types
             final String mimeType = normalizeMimeType(mime);
             if (prototypeMime == null) prototypeMime = mimeType;
-            Parser p0 = mime2parser.get(mimeType);
-            if (p0 != null) log.logSevere("parser for mime '" + mimeType + "' was set to '" + p0.getName() + "', overwriting with new parser '" + parser.getName() + "'.");
-            mime2parser.put(mimeType, parser);
+            Set<Parser> p0 = mime2parser.get(mimeType);
+            if (p0 == null) {
+                p0 = new HashSet<Parser>();
+                mime2parser.put(mimeType, p0);
+            }
+            p0.add(parser);
             Log.logInfo("PARSER", "Parser for mime type '" + mimeType + "': " + parser.getName());
         }
-        
+
         if (prototypeMime != null) for (String ext: parser.supportedExtensions()) {
             ext = ext.toLowerCase();
-            String s = ext2mime.get(ext);
-            if (s != null) log.logSevere("parser for extension '" + ext + "' was set to mime '" + s + "', overwriting with new mime '" + prototypeMime + "'.");
+            final String s = ext2mime.get(ext);
+            if (s != null && !s.equals(prototypeMime)) Log.logInfo("PARSER", "Parser for extension '" + ext + "' was set to mime '" + s + "', overwriting with new mime '" + prototypeMime + "'.");
             ext2mime.put(ext, prototypeMime);
         }
-        
+
         for (String ext: parser.supportedExtensions()) {
             // process the extensions
             ext = ext.toLowerCase();
-            Parser p0 = ext2parser.get(ext);
-            if (p0 != null) log.logSevere("parser for extension '" + ext + "' was set to '" + p0.getName() + "', overwriting with new parser '" + parser.getName() + "'.");
-            ext2parser.put(ext, parser);
+            Set<Parser> p0 = ext2parser.get(ext);
+            if (p0 == null) {
+                p0 = new HashSet<Parser>();
+                ext2parser.put(ext, p0);
+            }
+            p0.add(parser);
             Log.logInfo("PARSER", "Parser for extension '" + ext + "': " + parser.getName());
         }
     }
-    
+
     public static Document[] parseSource(
-            final MultiProtocolURI location,
+            final DigestURI location,
             final String mimeType,
             final String charset,
             final File sourceFile
@@ -162,21 +178,36 @@ public final class TextParser {
         } finally {
             if (sourceStream != null) try { sourceStream.close(); } catch (final Exception ex) {}
         }
-        for (Document d: docs) { assert d.getText() != null; } // verify docs
+        for (final Document d: docs) { assert d.getText() != null; } // verify docs
+
         return docs;
     }
-    
+
     public static Document[] parseSource(
-            final MultiProtocolURI location,
+            final DigestURI location,
             String mimeType,
             final String charset,
             final byte[] content
         ) throws Parser.Failure {
-        return parseSource(location, mimeType, charset, content.length, new ByteArrayInputStream(content));
+        if (log.isFine()) log.logFine("Parsing '" + location + "' from byte-array");
+        mimeType = normalizeMimeType(mimeType);
+        Set<Parser> idioms = null;
+        try {
+            idioms = parsers(location, mimeType);
+        } catch (final Parser.Failure e) {
+            final String errorMsg = "Parser Failure for extension '" + location.getFileExtension() + "' or mimetype '" + mimeType + "': " + e.getMessage();
+            log.logWarning(errorMsg);
+            throw new Parser.Failure(errorMsg, location);
+        }
+        assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true, false);
+
+        Document[] docs = parseSource(location, mimeType, idioms, charset, content);
+
+        return docs;
     }
-    
+
     public static Document[] parseSource(
-            final MultiProtocolURI location,
+            final DigestURI location,
             String mimeType,
             final String charset,
             final long contentLength,
@@ -184,42 +215,40 @@ public final class TextParser {
         ) throws Parser.Failure {
         if (log.isFine()) log.logFine("Parsing '" + location + "' from stream");
         mimeType = normalizeMimeType(mimeType);
-        List<Parser> idioms = null;
+        Set<Parser> idioms = null;
         try {
             idioms = parsers(location, mimeType);
-        } catch (Parser.Failure e) {
+        } catch (final Parser.Failure e) {
             final String errorMsg = "Parser Failure for extension '" + location.getFileExtension() + "' or mimetype '" + mimeType + "': " + e.getMessage();
             log.logWarning(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true, false);
-        
+
         // if we do not have more than one parser or the content size is over MaxInt
         // then we use only one stream-oriented parser.
         if (idioms.size() == 1 || contentLength > Integer.MAX_VALUE) {
             // use a specific stream-oriented parser
-            Document[] docs = parseSource(location, mimeType, idioms.get(0), charset, contentLength, sourceStream);
-            for (Document d: docs) { assert d.getText() != null; } // verify docs
-            return docs;
+            return parseSource(location, mimeType, idioms.iterator().next(), charset, contentLength, sourceStream);
         }
-        
+
         // in case that we know more parsers we first transform the content into a byte[] and use that as base
         // for a number of different parse attempts.
         byte[] b = null;
         try {
             b = FileUtils.read(sourceStream, (int) contentLength);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
         Document[] docs = parseSource(location, mimeType, idioms, charset, b);
-        for (Document d: docs) { assert d.getText() != null; } // verify docs
+
         return docs;
     }
 
     private static Document[] parseSource(
-            final MultiProtocolURI location,
-            String mimeType,
-            Parser parser,
+            final DigestURI location,
+            final String mimeType,
+            final Parser parser,
             final String charset,
             final long contentLength,
             final InputStream sourceStream
@@ -231,18 +260,18 @@ public final class TextParser {
 
         if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
         try {
-            Document[] docs = parser.parse(location, mimeType, documentCharset, sourceStream);
-            for (Document d: docs) { assert d.getText() != null; } // verify docs
+            final Document[] docs = parser.parse(location, mimeType, documentCharset, sourceStream);
+            for (final Document d: docs) { assert d != null && d.getText() != null; } // verify docs
             return docs;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Parser.Failure("parser failed: " + parser.getName(), location);
         }
     }
 
     private static Document[] parseSource(
-            final MultiProtocolURI location,
+            final DigestURI location,
             final String mimeType,
-            final List<Parser> parsers,
+            final Set<Parser> parsers,
             final String charset,
             final byte[] sourceArray
         ) throws Parser.Failure {
@@ -252,20 +281,35 @@ public final class TextParser {
         assert !parsers.isEmpty();
 
         Document[] docs = null;
-        HashMap<Parser, Parser.Failure> failedParser = new HashMap<Parser, Parser.Failure>();
-        for (Parser parser: parsers) {
-            try {
-                docs = parser.parse(location, mimeType, documentCharset, new ByteArrayInputStream(sourceArray));
-            } catch (Parser.Failure e) {
-                failedParser.put(parser, e);
-                //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
-            } catch (Exception e) {
-                failedParser.put(parser, new Parser.Failure(e.getMessage(), location));
-                //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
+        final HashMap<Parser, Parser.Failure> failedParser = new HashMap<Parser, Parser.Failure>();
+        if (MemoryControl.request(sourceArray.length * 6, false)) {
+            for (final Parser parser: parsers) {
+            	ByteArrayInputStream bis;
+            	if (mimeType.equals("text/plain") && parser.getName().equals("HTML Parser")) {
+            	    // a hack to simulate html files .. is needed for NOLOAD queues. This throws their data into virtual text/plain messages.
+            	    bis = new ByteArrayInputStream(UTF8.getBytes("<html><head></head><body><h1>" + UTF8.String(sourceArray) + "</h1></body><html>"));
+            	} else {
+            	    bis = new ByteArrayInputStream(sourceArray);
+            	}
+                try {
+                    docs = parser.parse(location, mimeType, documentCharset, bis);
+                } catch (final Parser.Failure e) {
+                    failedParser.put(parser, e);
+                    //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
+                } catch (final Exception e) {
+                    failedParser.put(parser, new Parser.Failure(e.getMessage(), location));
+                    //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
+                } finally {
+                	try {
+                		bis.close();
+                	} catch(IOException ioe) {
+                		// Ignore.
+                	}
+                }
+                if (docs != null) break;
             }
-            if (docs != null) break;
         }
-        
+
         if (docs == null) {
             if (failedParser.isEmpty()) {
                 final String errorMsg = "Parsing content with file extension '" + location.getFileExtension() + "' and mimetype '" + mimeType + "' failed.";
@@ -273,34 +317,35 @@ public final class TextParser {
                 throw new Parser.Failure(errorMsg, location);
             } else {
                 String failedParsers = "";
-                for (Map.Entry<Parser, Parser.Failure> error: failedParser.entrySet()) {
+                for (final Map.Entry<Parser, Parser.Failure> error: failedParser.entrySet()) {
                     log.logWarning("tried parser '" + error.getKey().getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + error.getValue().getMessage(), error.getValue());
                     failedParsers += error.getKey().getName() + " ";
                 }
                 throw new Parser.Failure("All parser failed: " + failedParsers, location);
             }
         }
-        for (Document d: docs) { assert d.getText() != null : "mimeType = " + mimeType; } // verify docs
+        for (final Document d: docs) { assert d.getText() != null : "mimeType = " + mimeType; } // verify docs
+
         return docs;
     }
-    
+
     /**
      * check if the parser supports the given content.
      * @param url
      * @param mimeType
      * @return returns null if the content is supported. If the content is not supported, return a error string.
      */
-    public static String supports(final MultiProtocolURI url, String mimeType) {
+    public static String supports(final MultiProtocolURI url, final String mimeType) {
         try {
             // try to get a parser. If this works, we don't need the parser itself, we just return null to show that everything is ok.
-            List<Parser> idioms = parsers(url, mimeType);
-            return (idioms == null || idioms.isEmpty() || (idioms.size() == 1 && idioms.get(0).getName().equals(genericIdiom.getName()))) ? "no parser found" : null;
-        } catch (Parser.Failure e) {
+            final Set<Parser> idioms = parsers(url, mimeType);
+            return (idioms == null || idioms.isEmpty() || (idioms.size() == 1 && idioms.iterator().next().getName().equals(genericIdiom.getName()))) ? "no parser found" : null;
+        } catch (final Parser.Failure e) {
             // in case that a parser is not available, return a error string describing the problem.
             return e.getMessage();
         }
     }
-    
+
     /**
      * find a parser for a given url and mime type
      * because mime types returned by web severs are sometimes wrong, we also compute the mime type again
@@ -314,37 +359,44 @@ public final class TextParser {
      * @return a list of Idiom parsers that may be appropriate for the given criteria
      * @throws Parser.Failure
      */
-    private static List<Parser> parsers(final MultiProtocolURI url, String mimeType1) throws Parser.Failure {
-        List<Parser> idioms = new ArrayList<Parser>(2);
-        
+    private static Set<Parser> parsers(final MultiProtocolURI url, String mimeType1) throws Parser.Failure {
+        final Set<Parser> idioms = new HashSet<Parser>(2);
+
         // check extension
         String ext = url.getFileExtension();
-        Parser idiom;
+        Set<Parser> idiom;
         if (ext != null && ext.length() > 0) {
             ext = ext.toLowerCase();
             if (denyExtensionx.containsKey(ext)) throw new Parser.Failure("file extension '" + ext + "' is denied (1)", url);
             idiom = ext2parser.get(ext);
-            if (idiom != null) idioms.add(idiom);
+            if (idiom != null) idioms.addAll(idiom);
         }
-        
+
         // check given mime type
         if (mimeType1 != null) {
             mimeType1 = normalizeMimeType(mimeType1);
             if (denyMime.containsKey(mimeType1)) throw new Parser.Failure("mime type '" + mimeType1 + "' is denied (1)", url);
             idiom = mime2parser.get(mimeType1);
-            if (idiom != null && !idioms.contains(idiom)) idioms.add(idiom);
+            if (idiom != null && !idioms.contains(idiom)) idioms.addAll(idiom);
         }
-        
+
         // check mime type computed from extension
-        String mimeType2 = ext2mime.get(ext);
-        if (mimeType2 != null && (idiom = mime2parser.get(mimeType2)) != null && !idioms.contains(idiom)) idioms.add(idiom);
-        
+        final String mimeType2 = ext2mime.get(ext);
+        if (mimeType2 != null && (idiom = mime2parser.get(mimeType2)) != null && !idioms.contains(idiom)) idioms.addAll(idiom);
+
         // always add the generic parser
         idioms.add(genericIdiom);
         //if (idioms.isEmpty()) throw new Parser.Failure("no parser found for extension '" + ext + "' and mime type '" + mimeType1 + "'", url);
-        
+
         return idioms;
     }
+
+    /**
+     * checks if the parser supports the given mime type. It is not only checked if the parser can parse such types,
+     * it is also checked if the mime type is not included in the mimetype-deny list.
+     * @param mimeType
+     * @return an error if the mime type is not supported, null otherwise
+     */
     public static String supportsMime(String mimeType) {
         if (mimeType == null) return null;
         mimeType = normalizeMimeType(mimeType);
@@ -353,68 +405,84 @@ public final class TextParser {
         return null;
     }
 
-    public static String supportsExtension(final MultiProtocolURI url) {
-        String ext = url.getFileExtension().toLowerCase();
+    /**
+     * checks if the parser supports the given extension. It is not only checked if the parser can parse such files,
+     * it is also checked if the extension is not included in the extension-deny list.
+     * @param extention
+     * @return an error if the extension is not supported, null otherwise
+     */
+    public static String supportsExtension(final String ext) {
         if (ext == null || ext.length() == 0) return null;
         if (denyExtensionx.containsKey(ext)) return "file extension '" + ext + "' is denied (2)";
-        String mimeType = ext2mime.get(ext);
+        final String mimeType = ext2mime.get(ext);
         if (mimeType == null) return "no parser available";
-        Parser idiom = mime2parser.get(mimeType);
+        final Set<Parser> idiom = mime2parser.get(mimeType);
         assert idiom != null;
-        if (idiom == null) return "no parser available (internal error!)";
+        if (idiom == null || idiom.size() == 0) return "no parser available (internal error!)";
         return null;
     }
-    
-    public static String mimeOf(MultiProtocolURI url) {
+
+    /**
+     * checks if the parser supports the given extension. It is not only checked if the parser can parse such files,
+     * it is also checked if the extension is not included in the extension-deny list.
+     * @param extention
+     * @return an error if the extension is not supported, null otherwise
+     */
+    public static String supportsExtension(final MultiProtocolURI url) {
+        return supportsExtension(url.getFileExtension().toLowerCase());
+    }
+
+    public static String mimeOf(final MultiProtocolURI url) {
         return mimeOf(url.getFileExtension());
     }
-    
-    public static String mimeOf(String ext) {
+
+    public static String mimeOf(final String ext) {
         return ext2mime.get(ext.toLowerCase());
     }
-    
+
     private static String normalizeMimeType(String mimeType) {
         if (mimeType == null) return "application/octet-stream";
         mimeType = mimeType.toLowerCase();
         final int pos = mimeType.indexOf(';');
         return ((pos < 0) ? mimeType.trim() : mimeType.substring(0, pos).trim());
     }
-    
-    public static void setDenyMime(String denyList) {
+
+    public static void setDenyMime(final String denyList) {
         denyMime.clear();
         String n;
-        for (String s: denyList.split(",")) {
+        for (final String s: denyList.split(",")) {
             n = normalizeMimeType(s);
             if (n != null && n.length() > 0) denyMime.put(n, v);
         }
     }
-    
+
     public static String getDenyMime() {
         String s = "";
-        for (String d: denyMime.keySet()) s += d + ",";
+        for (final String d: denyMime.keySet()) s += d + ",";
         if (s.length() > 0) s = s.substring(0, s.length() - 1);
         return s;
     }
-    
-    public static void grantMime(String mime, boolean grant) {
-        String n = normalizeMimeType(mime);
+
+    public static void grantMime(final String mime, final boolean grant) {
+        final String n = normalizeMimeType(mime);
         if (n == null || n.length() == 0) return;
         if (grant) denyMime.remove(n); else denyMime.put(n, v);
     }
-    
-    public static void setDenyExtension(String denyList) {
+
+    public static void setDenyExtension(final String denyList) {
         denyExtensionx.clear();
-        for (String s: denyList.split(",")) denyExtensionx.put(s, v);
+        for (final String s: denyList.split(",")) denyExtensionx.put(s, v);
     }
-    
+
     public static String getDenyExtension() {
         String s = "";
-        for (String d: denyExtensionx.keySet()) s += d + ",";
+        for (final String d: denyExtensionx.keySet()) s += d + ",";
         s = s.substring(0, s.length() - 1);
         return s;
     }
-    
-    public static void grantExtension(String ext, boolean grant) {
+
+    public static void grantExtension(final String ext, final boolean grant) {
+        if (ext == null || ext.length() == 0) return;
         if (grant) denyExtensionx.remove(ext); else denyExtensionx.put(ext, v);
     }
 

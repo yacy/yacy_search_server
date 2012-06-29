@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,9 +27,14 @@
 
 package net.yacy.kelondro.index;
 
+import java.io.Serializable;
+
+import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.util.kelondroException;
 
-public final class Column {
+public final class Column implements Cloneable, Serializable {
+
+    private static final long serialVersionUID=6558500565023465301L;
 
     public static final int celltype_undefined  = 0;
     public static final int celltype_boolean    = 1;
@@ -37,12 +42,12 @@ public final class Column {
     public static final int celltype_string     = 3;
     public static final int celltype_cardinal   = 4;
     public static final int celltype_bitfield   = 5;
-    
+
     public static final int encoder_none   = 0;
     public static final int encoder_b64e   = 1;
     public static final int encoder_b256   = 2;
     public static final int encoder_bytes  = 3;
-    
+
     public          int    cellwidth;
     public    final String nickname;
     protected final int    celltype;
@@ -65,7 +70,7 @@ public final class Column {
         celldef = celldef.trim();
         if (celldef.length() > 0 && celldef.charAt(0) == '<') celldef = celldef.substring(1);
         if (celldef.endsWith(">")) celldef = celldef.substring(0, celldef.length() - 1);
-        
+
         // parse type definition
         int p = celldef.indexOf(' ');
         String typename = "";
@@ -76,7 +81,7 @@ public final class Column {
         } else {
             typename = celldef.substring(0, p);
             celldef = celldef.substring(p + 1).trim();
-            
+
             if (typename.equals("boolean")) {
                 this.celltype = celltype_boolean;
                 this.cellwidth = 1;
@@ -109,9 +114,9 @@ public final class Column {
                 this.cellwidth = -1; // yet undefined
             } else {
                 throw new kelondroException("kelondroColumn - undefined type def '" + typename + "'");
-            }           
+            }
         }
-        
+
         // parse length
         p = celldef.indexOf('-');
         if (p < 0) {
@@ -130,21 +135,21 @@ public final class Column {
             final int q = celldef.indexOf(' ');
             if (q < 0) {
                 try {
-                    this.cellwidth = Integer.parseInt(celldef.substring(p + 1));
+                    this.cellwidth = NumberTools.parseIntDecSubstring(celldef, p + 1);
                 } catch (final NumberFormatException e) {
                     throw new kelondroException("kelondroColumn - cellwidth description wrong:" + celldef.substring(p + 1));
                 }
                 celldef = "";
             } else {
                 try {
-                    this.cellwidth = Integer.parseInt(celldef.substring(p + 1, q));
+                    this.cellwidth = NumberTools.parseIntDecSubstring(celldef, p + 1, q);
                 } catch (final NumberFormatException e) {
                     throw new kelondroException("kelondroColumn - cellwidth description wrong:" + celldef.substring(p + 1, q));
                 }
                 celldef = celldef.substring(q + 1);
             }
         }
-        
+
         // check length constraints
         if (this.cellwidth < 0) throw new kelondroException("kelondroColumn - no cell width given for " + this.nickname);
         if (((typename.equals("boolean")) && (this.cellwidth > 1)) ||
@@ -179,9 +184,9 @@ public final class Column {
             if (this.celltype == celltype_cardinal) throw new kelondroException("kelondroColumn - encoder missing for cell " + this.nickname);
             this.encoder = encoder_bytes;
         }
-        
+
         assert (this.celltype != celltype_cardinal) || (this.encoder == encoder_b64e) || (this.encoder == encoder_b256);
-        
+
         // parse/check description
         if (celldef.length() > 0 && celldef.charAt(0) == '"') {
             p = celldef.indexOf('"', 1);
@@ -192,46 +197,65 @@ public final class Column {
         }
     }
 
+    /**
+     * th clone method is useful to produce a similiar column with a different cell width
+     * @return the cloned Column
+     */
+    @Override
+    public Object clone() {
+    	return new Column(this.nickname, this.celltype, this.encoder, this.cellwidth, this.description);
+    }
+
+    /**
+     * a column width may change when the object was not yet used.
+     * this applies to clones of Column objects which are used as Column producers
+     * @param cellwidth
+     */
+    public void setCellwidth(int cellwidth) {
+    	assert this.celltype == celltype_string || this.celltype == celltype_binary;
+    	this.cellwidth = cellwidth;
+    }
+
     @Override
     public final String toString() {
         final StringBuilder s = new StringBuilder(20);
-        switch (celltype) {
+        switch (this.celltype) {
         case celltype_undefined:
-            s.append(nickname);
+            s.append(this.nickname);
             s.append('-');
-            s.append(cellwidth);
+            s.append(this.cellwidth);
             break;
         case celltype_boolean:
             s.append("boolean ");
-            s.append(nickname);
+            s.append(this.nickname);
             break;
         case celltype_binary:
             s.append("byte[] ");
-            s.append(nickname);
+            s.append(this.nickname);
             s.append('-');
-            s.append(cellwidth);
+            s.append(this.cellwidth);
             break;
         case celltype_string:
             s.append("String ");
-            s.append(nickname);
+            s.append(this.nickname);
             s.append('-');
-            s.append(cellwidth);
+            s.append(this.cellwidth);
             break;
         case celltype_cardinal:
             s.append("Cardinal ");
-            s.append(nickname);
+            s.append(this.nickname);
             s.append('-');
-            s.append(cellwidth);
+            s.append(this.cellwidth);
             break;
         case celltype_bitfield:
             s.append("Bitfield ");
-            s.append(nickname);
+            s.append(this.nickname);
             s.append('-');
-            s.append(cellwidth);
+            s.append(this.cellwidth);
             break;
         }
-        
-        switch (encoder) {
+
+        switch (this.encoder) {
         case encoder_b64e:
             s.append(" {b64e}");
             break;
@@ -249,11 +273,11 @@ public final class Column {
 	public final int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + celltype;
-		result = prime * result + cellwidth;
-		result = prime * result + encoder;
+		result = prime * result + this.celltype;
+		result = prime * result + this.cellwidth;
+		result = prime * result + this.encoder;
 		result = prime * result
-				+ ((nickname == null) ? 0 : nickname.hashCode());
+				+ ((this.nickname == null) ? 0 : this.nickname.hashCode());
 		return result;
 	}
 
@@ -266,12 +290,12 @@ public final class Column {
 		if (obj == null) return false;
 		if (!(obj instanceof Column)) return false;
 		final Column other = (Column) obj;
-		if (celltype != other.celltype) return false;
-		if (cellwidth != other.cellwidth) return false;
-		if (encoder != other.encoder) return false;
-		if (nickname == null) {
+		if (this.celltype != other.celltype) return false;
+		if (this.cellwidth != other.cellwidth) return false;
+		if (this.encoder != other.encoder) return false;
+		if (this.nickname == null) {
 			if (other.nickname != null) return false;
-		} else if (!nickname.equals(other.nickname)) return false;
+		} else if (!this.nickname.equals(other.nickname)) return false;
 		return true;
 	}
 

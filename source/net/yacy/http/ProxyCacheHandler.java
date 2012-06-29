@@ -40,8 +40,8 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 
+import de.anomic.crawler.Cache;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.client.Cache;
 
 /**
  * jetty http handler
@@ -70,7 +70,7 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
 		if(request.getMethod().equals("GET")) {
 			String queryString = request.getQueryString()!=null ? "?" + request.getQueryString() : "";
 			DigestURI url = new DigestURI(request.getRequestURL().toString() + queryString);
-			ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url);
+			ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url.hash());
 			
 			if(cachedResponseHeader != null) {
 				RequestHeader proxyHeaders = ProxyHandler.convertHeaderFromJetty(request);
@@ -91,10 +91,10 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
                 		yacyRequest,
                 		proxyHeaders,
                         cachedResponseHeader,
-                        "200 OK",
-                        sb.crawler.defaultProxyProfile
+                        sb.crawler.defaultProxyProfile,
+                        false
                 );
-                byte[] cacheContent = Cache.getContent(url);
+                byte[] cacheContent = Cache.getContent(url.hash());
                 if (cacheContent != null && cachedResponse.isFreshForProxy()) {
                 	handleRequestFromCache(request, response, cachedResponseHeader, cacheContent);
                 }

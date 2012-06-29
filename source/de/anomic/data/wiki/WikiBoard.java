@@ -1,4 +1,4 @@
-//wikiBoard.java 
+//wikiBoard.java
 //-------------------------------------
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
@@ -35,7 +35,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -43,7 +45,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
 
 /**
- * 
+ *
  */
 public class WikiBoard {
 
@@ -69,14 +71,14 @@ public class WikiBoard {
      */
     public WikiBoard(final File actpath, final File bkppath) throws IOException {
         new File(actpath.getParent()).mkdirs();
-        if (datbase == null) {
+        if (this.datbase == null) {
             //datbase = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, actpathNew), 500, '_');
-            datbase = new MapHeap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+            this.datbase = new MapHeap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         }
         new File(bkppath.getParent()).mkdirs();
-        if (bkpbase == null) {
+        if (this.bkpbase == null) {
             //bkpbase = new MapView(BLOBTree.toHeap(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, bkppathNew), 500, '_');
-            bkpbase = new MapHeap(bkppath, keyLength + DATE_FORMAT.length(), NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+            this.bkpbase = new MapHeap(bkppath, keyLength + DATE_FORMAT.length(), NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         }
     }
 
@@ -85,7 +87,7 @@ public class WikiBoard {
      * @return number of entries in wiki plus number of old entries.
      */
     public int sizeOfTwo() {
-        return datbase.size() + bkpbase.size();
+        return this.datbase.size() + this.bkpbase.size();
     }
 
     /**
@@ -93,15 +95,15 @@ public class WikiBoard {
      * @return number of entries in wiki.
      */
     public int size() {
-        return datbase.size();
+        return this.datbase.size();
     }
 
     /**
      * Closes database files.
      */
-    public void close() {
-        datbase.close();
-        bkpbase.close();
+    public synchronized void close() {
+        this.datbase.close();
+        this.bkpbase.close();
     }
 
     /**
@@ -181,7 +183,7 @@ public class WikiBoard {
     public class Entry {
         private static final String ANONYMOUS = "anonymous";
 
-        private String key;
+        private final String key;
         private final Map<String, String> record;
 
         /**
@@ -219,7 +221,7 @@ public class WikiBoard {
          * @return subject of entry.
          */
         public String subject() {
-            return key;
+            return this.key;
         }
 
         /**
@@ -229,7 +231,7 @@ public class WikiBoard {
         public Date date() {
             Date ret;
             try {
-                final String c = record.get("date");
+                final String c = this.record.get("date");
                 if (c == null) {
                     System.out.println("DEBUG - ERROR: date field missing in wikiBoard");
                     ret = new Date();
@@ -249,7 +251,7 @@ public class WikiBoard {
          * @return author of Entry.
          */
         public String author() {
-            final String a = record.get("author");
+            final String a = this.record.get("author");
             final byte[] b;
             return (a != null && (b = Base64Order.enhancedCoder.decode(a)) != null) ? UTF8.String(b) : ANONYMOUS;
         }
@@ -260,7 +262,7 @@ public class WikiBoard {
          */
         public String reason() {
             final String ret;
-            final String r = record.get("reason");
+            final String r = this.record.get("reason");
             if (r != null) {
                 final byte[] b;
                 ret = ((b = Base64Order.enhancedCoder.decode(r)) != null) ? UTF8.String(b) : "unknown";
@@ -275,7 +277,7 @@ public class WikiBoard {
          * @return content of Entry.
          */
         public byte[] page() {
-            final String m = record.get("page");
+            final String m = this.record.get("page");
             final byte[] b;
             return (m != null && (b = Base64Order.enhancedCoder.decode(m)) != null) ? b : new byte[0];
         }
@@ -285,7 +287,7 @@ public class WikiBoard {
          * @param date date of previous version of Entry.
          */
         void setAncestorDate(final Date date) {
-            record.put("bkp", dateString(date));
+            this.record.put("bkp", dateString(date));
         }
 
         /**
@@ -295,7 +297,7 @@ public class WikiBoard {
         private Date getAncestorDate() {
             Date ret = null;
             try {
-                final String c = record.get("date");
+                final String c = this.record.get("date");
                 if (c != null) {
                     synchronized (SimpleFormatter) {
                         ret = SimpleFormatter.parse(c);
@@ -313,7 +315,7 @@ public class WikiBoard {
          */
         public Entry getAncestor() {
             final Date ancDate = getAncestorDate();
-            return (ancDate == null) ? null : read(key + dateString(ancDate), bkpbase);
+            return (ancDate == null) ? null : read(this.key + dateString(ancDate), WikiBoard.this.bkpbase);
         }
 
         /**
@@ -321,7 +323,7 @@ public class WikiBoard {
          * @param subject subject of child of current Entry.
          */
         void setChild(final String subject) {
-            record.put("child", Base64Order.enhancedCoder.encode(subject.getBytes()));
+            this.record.put("child", Base64Order.enhancedCoder.encode(UTF8.getBytes(subject)));
         }
 
         /**
@@ -329,9 +331,9 @@ public class WikiBoard {
          * @return name of child of this Entry.
          */
         private String getChildName() {
-            final String c = record.get("child");
+            final String c = this.record.get("child");
             final byte[] subject;
-            return (c != null && (subject = Base64Order.enhancedCoder.decode(c)) != null) ? UTF8.String(subject) : null;
+            return (c != null && (subject = Base64Order.enhancedCoder.decode(c)) != null) ? ASCII.String(subject) : null;
         }
 
         /**
@@ -339,7 +341,7 @@ public class WikiBoard {
          * @return true if has child, else false.
          */
         public boolean hasChild() {
-            final String c = record.get("child");
+            final String c = this.record.get("child");
             return (c != null && Base64Order.enhancedCoder.decode(c) != null) ? true : false;
         }
 
@@ -349,7 +351,7 @@ public class WikiBoard {
          */
         public Entry getChild() {
             final String childName = getChildName();
-            return (childName == null) ? null : read(childName, datbase);
+            return (childName == null) ? null : read(childName, WikiBoard.this.datbase);
         }
     }
 
@@ -369,9 +371,9 @@ public class WikiBoard {
             entry.setAncestorDate(oldDate);
             oldEntry.setChild(entry.subject());
             // write the backup
-            bkpbase.insert((entry.key + dateString(oldDate)).getBytes(), oldEntry.record);
+            this.bkpbase.insert(UTF8.getBytes(entry.key + dateString(oldDate)), oldEntry.record);
             // write the new page
-            datbase.insert(entry.key.getBytes(), entry.record);
+            this.datbase.insert(UTF8.getBytes(entry.key), entry.record);
             key = entry.key;
         } catch (final Exception e) {
             Log.logException(e);
@@ -385,7 +387,7 @@ public class WikiBoard {
      * @return Entry which contains data.
      */
     public Entry read(final String key) {
-        return read(key, datbase);
+        return read(key, this.datbase);
     }
 
     /**
@@ -401,8 +403,8 @@ public class WikiBoard {
             if (copyOfKey.length() > keyLength) {
                 copyOfKey = copyOfKey.substring(0, keyLength);
             }
-            final Map<String, String> record = base.get(copyOfKey.getBytes());
-            ret = (record == null) ? newEntry(copyOfKey, ANONYMOUS, "127.0.0.1", "New Page", "".getBytes()) : new Entry(copyOfKey, record);
+            final Map<String, String> record = base.get(UTF8.getBytes(copyOfKey));
+            ret = (record == null) ? newEntry(copyOfKey, ANONYMOUS, Domains.LOCALHOST, "New Page", UTF8.getBytes("")) : new Entry(copyOfKey, record);
         } catch (final IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {
@@ -417,7 +419,7 @@ public class WikiBoard {
      * @return the Entry.
      */
     public Entry readBkp(final String key) {
-        return read(key, bkpbase);
+        return read(key, this.bkpbase);
     }
 
     /**
@@ -427,7 +429,7 @@ public class WikiBoard {
      * @throws IOException
      */
     public Iterator<byte[]> keys(final boolean up) throws IOException {
-        return datbase.keys(up, false);
+        return this.datbase.keys(up, false);
     }
 
     /**
@@ -437,6 +439,6 @@ public class WikiBoard {
      * @throws IOException
      */
     public Iterator<byte[]> keysBkp(final boolean up) throws IOException {
-        return bkpbase.keys(up, false);
+        return this.bkpbase.keys(up, false);
     }
 }

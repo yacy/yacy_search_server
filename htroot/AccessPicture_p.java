@@ -2,7 +2,7 @@
  *  AccessPicture_p
  *  Copyright 2011 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 18.02.2010 at http://yacy.net
- *  
+ *
  *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
  *  $LastChangedRevision: 6922 $
  *  $LastChangedBy: orbiter $
@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -29,33 +29,32 @@ import java.util.Set;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.search.Switchboard;
 import net.yacy.visualization.HexGridPlotter;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
-import net.yacy.visualization.RasterPlotter.DrawMode;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class AccessPicture_p {
 
     private static int[] times = new int[]{60000, 50000, 40000, 30000, 20000, 10000, 1000};
-    
+
     public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-        
+
         String color_text    = "AAAAAA";
         String color_back    = "FFFFFF";
         String color_grid    = "333333";
         String color_dot     = "33CC33";
         String color_line    = "555555";
-        
+
         int width = 1024;
         int height = 576;
         int cellsize = 18;
         boolean corona = false;
         int coronaangle = 0;
-        
+
         if (post != null) {
             width         = post.getInt("width", 1024);
             height        = post.getInt("height", 576);
@@ -65,28 +64,29 @@ public class AccessPicture_p {
             color_grid    = post.get("colorgrid",   color_grid);
             color_dot     = post.get("colordot",    color_dot);
             color_line    = post.get("colorline",   color_line);
-            corona        = post.get("corona", "true").equals("true");
+            corona        = post.getBoolean("corona", true);
             coronaangle   = (corona) ? post.getInt("coronaangle", 0) : -1;
         }
         if (coronaangle < 0) corona = false;
-        
+
         // too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
         if (width < 32 ) width = 32;
         if (width > 10000) width = 10000;
         if (height < 24) height = 24;
         if (height > 10000) height = 10000;
-        
-        final HexGridPlotter picture = new HexGridPlotter(width, height, DrawMode.MODE_SUB, color_back, cellsize);
+
+        final RasterPlotter.DrawMode drawMode = (RasterPlotter.darkColor(color_back)) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB;
+        final HexGridPlotter picture = new HexGridPlotter(width, height, drawMode, color_back, cellsize);
         picture.drawGrid(color_grid);
 
         // calculate dimensions for left and right column
-        int gridLeft = 0;
+        final int gridLeft = 0;
         int gridRight = picture.gridWidth() - 2;
         if ((gridRight & 1) == 0) gridRight--;
 
         // draw home peer
-        int centerx = (picture.gridWidth() >> 1) - 1;
-        int centery = picture.gridHeight() >> 1;
+        final int centerx = (picture.gridWidth() >> 1) - 1;
+        final int centery = picture.gridHeight() >> 1;
         picture.setColor(color_dot);
         picture.gridDot(centerx, centery, 5, true, 100);
         if (corona) {
@@ -99,32 +99,32 @@ public class AccessPicture_p {
         //picture.gridDot(centerx, centery, 31, false);
         picture.setColor(color_text);
         picture.gridPrint(centerx, centery, 5, "THIS YACY PEER", "\"" + sb.peers.myName().toUpperCase() + "\"", 0);
-        
+
         // left column: collect data for access from outside
-        int verticalSlots = (picture.gridHeight() >> 1) - 1;
-        String[] hosts = new String[verticalSlots];
-        int[] time = new int[verticalSlots];
-        int[] count = new int[verticalSlots];
+        final int verticalSlots = (picture.gridHeight() >> 1) - 1;
+        final String[] hosts = new String[verticalSlots];
+        final int[] time = new int[verticalSlots];
+        final int[] count = new int[verticalSlots];
         for (int i = 0; i < verticalSlots; i++) {hosts[i] = null; time[i] = 0; count[i] = 0;}
-        
+
         String host;
         int c, h;
-        for (int j = 0; j < times.length; j++) {
-            Iterator<String> i = sb.accessHosts();
+        for (final int time2 : times) {
+            final Iterator<String> i = sb.accessHosts();
             try {
                 while (i.hasNext()) {
                     host = i.next();
-                    c = sb.latestAccessCount(host, times[j]);
+                    c = sb.latestAccessCount(host, time2);
                     if (c > 0) {
                         h = (Math.abs(host.hashCode())) % hosts.length;
                         hosts[h] = host;
                         count[h] = c;
-                        time[h] = times[j];
+                        time[h] = time2;
                     }
                 }
             } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
         }
-        
+
         // draw left column: access from outside
         for (int i = 0; i < hosts.length; i++) {
             if (hosts[i] != null) {
@@ -145,7 +145,7 @@ public class AccessPicture_p {
                 }
             }
         }
-        
+
         // right column: collect data for access to outside
         for (int i = 0; i < verticalSlots; i++) {hosts[i] = null; time[i] = 0; count[i] = 0;}
         final Set<ConnectionInfo> allConnections = ConnectionInfo.getAllConnections();
@@ -159,7 +159,7 @@ public class AccessPicture_p {
                 time[h] = (int) conInfo.getLifetime();
             }
         }
-     
+
         // draw right column: access to outside
         for (int i = 0; i < hosts.length; i++) {
             if (hosts[i] != null) {
@@ -180,7 +180,7 @@ public class AccessPicture_p {
                 }
             }
         }
-        
+
         // print headline
         picture.setColor(color_text);
         PrintTool.print(picture, 2, 6, 0, "YACY NODE ACCESS GRID", -1);
@@ -202,8 +202,8 @@ public class AccessPicture_p {
         picture.setColor(color_dot);
         picture.gridLine(centerx + 3, picture.gridHeight() - 1, gridRight, picture.gridHeight() - 1);
         picture.gridPrint(gridRight, picture.gridHeight() - 1, 8, "", "OUTGOING CONNECTIONS", 1);
-        
+
         return picture;
-        
+
     }
 }

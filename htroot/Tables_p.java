@@ -30,13 +30,12 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-
-import de.anomic.search.Switchboard;
+import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class Tables_p {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -44,13 +43,13 @@ public class Tables_p {
         prop.put("showtable", 0);
         prop.put("showedit", 0);
         prop.put("showselection", 0);
-        
+
         String table = (post == null) ? null : post.get("table", null);
         if (table != null && !sb.tables.hasHeap(table)) table = null;
-        
+
         // show table selection
         int count = 0;
-        Iterator<String> ti = sb.tables.tables();
+        final Iterator<String> ti = sb.tables.iterator();
         String tablename;
         prop.put("showselection", 1);
         while (ti.hasNext()) {
@@ -63,65 +62,63 @@ public class Tables_p {
         prop.put("showselection_pattern", "");
 
         if (post == null) return prop; // return rewrite properties
-        
-        String counts = post.get("count", null);
-        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : Integer.parseInt(counts);
-        String pattern = post.get("search", "");
-        Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
+
+        final String counts = post.get("count", null);
+        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
+        final String pattern = post.get("search", "");
+        final Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
         prop.put("pattern", pattern);
-        
-        List<String> columns = null;
-        if (table != null) try {
-            columns = sb.tables.columns(table);
-        } catch (IOException e) {
-            Log.logException(e);
-            columns = new ArrayList<String>();
-        }
-        
+
         // apply deletion requests
-        if (post.get("deletetable", "").length() > 0) try {
+        if (post.get("deletetable", "").length() > 0)
             sb.tables.clear(table);
-        } catch (IOException e) {
-            Log.logException(e);
-        }
-        
+
         if (post.get("deleterows", "").length() > 0) {
-            for (Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getValue().startsWith("mark_")) try {
-                    sb.tables.delete(table, entry.getValue().substring(5).getBytes());
-                } catch (IOException e) {
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
+                if (entry.getValue().startsWith("pk_")) try {
+                    sb.tables.delete(table, entry.getValue().substring(3).getBytes());
+                } catch (final IOException e) {
                     Log.logException(e);
                 }
             }
         }
-        
+
         if (post.get("commitrow", "").length() > 0) {
-            String pk = post.get("pk");
-            Map<String, byte[]> map = new HashMap<String, byte[]>();
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+            final String pk = post.get("pk");
+            final Map<String, byte[]> map = new HashMap<String, byte[]>();
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("col_")) {
                     map.put(entry.getKey().substring(4), entry.getValue().getBytes());
                 }
             }
             try {
                 sb.tables.update(table, pk.getBytes(), map);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
         }
-        
+
         // generate table
         prop.put("showtable", 0);
         prop.put("showedit", 0);
-        
+
+
         if (table != null) {
-            
+
+            List<String> columns = null;
+            try {
+                columns = sb.tables.columns(table);
+            } catch (final IOException e) {
+                Log.logException(e);
+                columns = new ArrayList<String>();
+            }
+
             if (post.containsKey("editrow")) {
                 // check if we can find a key
                 String pk = null;
-                for (Map.Entry<String, String> entry: post.entrySet()) {
-                    if (entry.getValue().startsWith("mark_")) {
-                        pk = entry.getValue().substring(5);
+                for (final Map.Entry<String, String> entry: post.entrySet()) {
+                    if (entry.getValue().startsWith("pk_")) {
+                        pk = entry.getValue().substring(3);
                         break;
                     }
                 }
@@ -129,34 +126,34 @@ public class Tables_p {
                     if (pk != null && sb.tables.has(table, pk.getBytes())) {
                         setEdit(sb, prop, table, pk, columns);
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.logException(e);
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                 }
             } else if (post.containsKey("addrow")) try {
                 // get a new key
-                String pk = UTF8.String(sb.tables.createRow(table));
+                final String pk = UTF8.String(sb.tables.createRow(table));
                 setEdit(sb, prop, table, pk, columns);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             } else {
                 prop.put("showtable", 1);
                 prop.put("showtable_table", table);
-                
+
                 // insert the columns
-                
+
                 for (int i = 0; i < columns.size(); i++) {
                     prop.putHTML("showtable_columns_" + i + "_header", columns.get(i));
                 }
                 prop.put("showtable_columns", columns.size());
-                
+
                 // insert all rows
                 try {
                     maxcount = Math.min(maxcount, sb.tables.size(table));
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.logException(e);
                     maxcount = 0;
                 }
@@ -170,7 +167,7 @@ public class Tables_p {
                     while (mapIterator.hasNext() && count < maxcount) {
                         row = mapIterator.next();
                         if (row == null) continue;
-                        
+
                         // write table content
                         prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
                         prop.put("showtable_list_" + count + "_pk", UTF8.String(row.getPK()));
@@ -182,31 +179,31 @@ public class Tables_p {
                         prop.put("showtable_list_" + count + "_columns", columns.size());
                         count++;
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.logException(e);
                 }
                 prop.put("showtable_list", count);
                 prop.put("showtable_num", count);
             }
-            
+
         }
-        
+
         // adding the peer address
         prop.put("address", sb.peers.mySeed().getPublicAddress());
-        
+
         // return rewrite properties
         return prop;
     }
-    
-    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, List<String> columns) throws IOException, RowSpaceExceededException {
+
+    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, final List<String> columns) throws IOException, RowSpaceExceededException {
         prop.put("showedit", 1);
         prop.put("showedit_table", table);
         prop.put("showedit_pk", pk);
-        Tables.Row row = sb.tables.select(table, pk.getBytes());
+        final Tables.Row row = sb.tables.select(table, pk.getBytes());
         if (row == null) return;
         int count = 0;
         byte[] cell;
-        for (String col: columns) {
+        for (final String col: columns) {
             cell = row.get(col);
             prop.put("showedit_list_" + count + "_key", col);
             prop.put("showedit_list_" + count + "_value", cell == null ? "" : UTF8.String(cell));

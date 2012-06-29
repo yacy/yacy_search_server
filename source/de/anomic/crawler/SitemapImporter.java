@@ -28,13 +28,14 @@ package de.anomic.crawler;
 import java.net.MalformedURLException;
 import java.util.Date;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.document.parser.sitemapParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 
 public class SitemapImporter extends Thread {
 
@@ -78,7 +79,7 @@ public class SitemapImporter extends Thread {
             final String dbocc = this.sb.urlExists(Segments.Process.LOCALCRAWLING, nexturlhash);
             if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                 // the url was already loaded. we need to check the date
-                final URIMetadataRow oldEntry = this.sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(nexturlhash, null, 0);
+                final URIMetadataRow oldEntry = this.sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(nexturlhash);
                 if (oldEntry != null) {
                     final Date modDate = oldEntry.moddate();
                     // check if modDate is null
@@ -89,7 +90,7 @@ public class SitemapImporter extends Thread {
 
         // URL needs to crawled
         this.sb.crawlStacker.enqueueEntry(new Request(
-                this.sb.peers.mySeed().hash.getBytes(),
+                ASCII.getBytes(this.sb.peers.mySeed().hash),
                 url,
                 null, // this.siteMapURL.toString(),
                 entry.url(),

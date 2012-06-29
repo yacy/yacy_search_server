@@ -1,4 +1,4 @@
-//Config_Accounts_p.java 
+//Config_Accounts_p.java
 //-----------------------
 //part of the AnomicHTTPD caching proxy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -29,23 +29,25 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
-
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.data.UserDB;
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.search.Switchboard;
+import de.anomic.data.UserDB.AccessRight;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import java.util.Map;
 
 public class ConfigAccounts_p {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
@@ -55,7 +57,7 @@ public class ConfigAccounts_p {
         // admin password
         boolean localhostAccess = sb.getConfigBool("adminAccountForLocalhost", false);
         if (post != null && post.containsKey("setAdmin")) {
-            localhostAccess = "localhost".equals(post.get("access", ""));
+            localhostAccess = Domains.isLocalhost(post.get("access", ""));
             final String user = (post == null) ? "" : post.get("adminuser", "");
             final String pw1  = (post == null) ? "" : post.get("adminpw1", "");
             final String pw2  = (post == null) ? "" : post.get("adminpw2", "");
@@ -63,38 +65,38 @@ public class ConfigAccounts_p {
             // may be overwritten if new password is given
             if (user.length() > 0 && pw1.length() > 3 && pw1.equals(pw2)) {
                 // check passed. set account:
-                env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
+                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig("adminAccount", "");
             }
-            
+
             if (localhostAccess) {
 
             	sb.setConfig("adminAccountForLocalhost", true);
             	// if an localhost access is configured, check if a local password is given
             	// if not, set a random password
-            	if (env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+            	if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
             		// make a 'random' password
-            		env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "0000" + sb.genRandomPassword());
+            		env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + sb.genRandomPassword());
             		env.setConfig("adminAccount", "");
             	}
             } else {
                 sb.setConfig("adminAccountForLocalhost", false);
-                if (env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
+                if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
                     // make shure that the user can still use the interface after a random password was set
-                    env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");
+                    env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
                 }
             }
         }
-        
-        if (env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0 && !env.getConfigBool("adminAccountForLocalhost", false)) {
+
+        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0 && !env.getConfigBool("adminAccountForLocalhost", false)) {
             prop.put("passwordNotSetWarning", 1);
         }
-        
+
         prop.put("localhost.checked", (localhostAccess) ? 1 : 0);
         prop.put("account.checked", (localhostAccess) ? 0 : 1);
         prop.put("statusPassword", localhostAccess ? "0" : "1");
         prop.put("defaultUser", "admin");
-        
+
         //default values
         prop.put("current_user", "newuser");
         prop.put("username", "");
@@ -103,23 +105,23 @@ public class ConfigAccounts_p {
         prop.put("address", "");
         prop.put("timelimit", "");
         prop.put("timeused", "");
-        final String[] rightNames = UserDB.Entry.RIGHT_NAMES.split(",");
-        final String[] rights = UserDB.Entry.RIGHT_TYPES.split(",");
+
+        final AccessRight[] rights = AccessRight.values();
         int c = 0;
-        for (final String right : rights) {
-            prop.put("rights_" + c + "_name", right);
-            prop.put("rights_" + c +"_friendlyName", rightNames[c]);
+        for (final AccessRight right : rights) {
+            prop.put("rights_" + c + "_name", right.toString());
+            prop.put("rights_" + c +"_friendlyName", right.getFriendlyName());
             prop.put("rights_" + c + "_set", "0");
             c++;
         }
         prop.put("rights", c);
-        
+
         prop.put("users", "0");
-        
+
         if (sb.userDB == null) {
             return prop;
         }
-        
+
         if (post == null) {
             //do nothing
 
@@ -128,7 +130,7 @@ public class ConfigAccounts_p {
             //current_user = edited user
         } else if (post.containsKey("user") && !"newuser".equals(post.get("user"))){
             if (post.containsKey("change_user")) {
-                //defaults for newuser are set above                
+                //defaults for newuser are set above
                 entry = sb.userDB.getEntry(post.get("user"));
                 // program crashes if a submit with empty username was made on previous mask and the user clicked on the
                 // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
@@ -142,7 +144,7 @@ public class ConfigAccounts_p {
                     prop.put("timelimit", entry.getTimeLimit());
                     prop.put("timeused", entry.getTimeUsed());
                     int count = 0;
-                    for (final String right : rights){
+                    for (final AccessRight right : rights){
                         prop.put("rights_" + count + "_set", entry.hasRight(right) ? "1" : "0");
                         count++;
                     }
@@ -169,15 +171,15 @@ public class ConfigAccounts_p {
             final String address = post.get("address");
             final String timeLimit = post.get("timelimit");
             final String timeUsed = post.get("timeused");
-            final Map<String, String> rightsSet = new HashMap<String, String>();
+            final Map<AccessRight, String> rightsSet = new EnumMap<AccessRight, String>(AccessRight.class);
 
-            for(final String right : rights) {
-                rightsSet.put(right, post.containsKey(right)&&"on".equals(post.get(right)) ? "true" : "false");
+            for(final AccessRight right : rights) {
+                rightsSet.put(right, post.containsKey(right.toString()) && "on".equals(post.get(right.toString())) ? "true" : "false");
             }
-            
+
             final Map<String, String> mem = new HashMap<String, String>();
             if( "newuser".equals(post.get("current_user"))){ //new user
-                
+
                 if (!"".equals(pw1)) { //change only if set
                     mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username + ":" + pw1));
                 }
@@ -188,8 +190,8 @@ public class ConfigAccounts_p {
                 mem.put(UserDB.Entry.TIME_LIMIT, timeLimit);
                 mem.put(UserDB.Entry.TIME_USED, timeUsed);
 
-                for (final String right : rights) {
-                    mem.put(right, rightsSet.get(right));
+                for (final AccessRight right : rights) {
+                    mem.put(right.toString(), rightsSet.get(right));
                 }
 
                 try {
@@ -200,7 +202,7 @@ public class ConfigAccounts_p {
                 } catch (final IllegalArgumentException e) {
                     prop.put("error", "3");
                 }
-                
+
             } else { //edit user
 
                 entry = sb.userDB.getEntry(username);
@@ -217,8 +219,8 @@ public class ConfigAccounts_p {
                         entry.setProperty(UserDB.Entry.TIME_LIMIT, timeLimit);
                         entry.setProperty(UserDB.Entry.TIME_USED, timeUsed);
 
-                        for(final String right : rights) {
-                            entry.setProperty(right, rightsSet.get(right));
+                        for(final AccessRight right : rights) {
+                            entry.setProperty(right.toString(), rightsSet.get(right));
                         }
 
                     } catch (final Exception e) {
@@ -233,7 +235,7 @@ public class ConfigAccounts_p {
             }//edit user
             prop.putHTML("username", username);
         }
-		
+
         //Generate Userlist
         final Iterator<UserDB.Entry> it = sb.userDB.iterator(true);
         int numUsers=0;

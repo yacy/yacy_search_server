@@ -34,10 +34,10 @@ import java.net.MalformedURLException;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.search.Switchboard;
 
 import de.anomic.data.ListManager;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -64,21 +64,23 @@ public class BlacklistTest_p {
             DigestURI testurl = null;
             try {
                 testurl = new DigestURI(urlstring);
-            } catch (final MalformedURLException e) { testurl = null; }
+            } catch (final MalformedURLException e) {
+            	testurl = null;
+            }
             if(testurl != null) {
                 prop.putHTML("url",testurl.toString());
                 prop.putHTML("testlist_url",testurl.toString());
-                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, testurl))
+                if(Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, testurl))
                         prop.put("testlist_listedincrawler", "1");
-                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, testurl))
+                if(Switchboard.urlBlacklist.isListed(BlacklistType.DHT, testurl))
                         prop.put("testlist_listedindht", "1");
-                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, testurl))
+                if(Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, testurl))
                         prop.put("testlist_listedinnews", "1");
-                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, testurl))
+                if(Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, testurl))
                         prop.put("testlist_listedinproxy", "1");
-                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SEARCH, testurl))
+                if(Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, testurl))
                         prop.put("testlist_listedinsearch", "1");
-                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, testurl))
+                if(Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS, testurl))
                         prop.put("testlist_listedinsurftips", "1");
             }
             else {

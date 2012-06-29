@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,8 +31,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.services.federated.solr.ShardSolrConnector;
+import net.yacy.cora.services.federated.solr.SolrConnector;
+import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
@@ -44,15 +50,31 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
-
+import net.yacy.search.index.SolrConfiguration;
 import de.anomic.crawler.retrieval.Request;
 
 public class ZURL implements Iterable<ZURL.Entry> {
-    
+
     private static final int EcoFSBufferSize = 2000;
     private static final int maxStackSize    = 1000;
-    
-    public final static Row rowdef = new Row(
+
+    public enum FailCategory {
+        // TEMPORARY categories are such failure cases that should be tried again
+        // FINAL categories are such failure cases that are final and should not be tried again
+        TEMPORARY_NETWORK_FAILURE(true), // an entity could not been loaded
+        FINAL_PROCESS_CONTEXT(false),    // because of a processing context we do not want that url again (i.e. remote crawling)
+        FINAL_LOAD_CONTEXT(false),       // the crawler configuration does not want to load the entity
+        FINAL_ROBOTS_RULE(true),         // a remote server denies indexing or loading
+        FINAL_REDIRECT_RULE(true);       // the remote server redirects this page, thus disallowing reading of content
+
+        public final boolean store;
+
+        private FailCategory(boolean store) {
+            this.store = store;
+        }
+    }
+
+    private final static Row rowdef = new Row(
             "String urlhash-"   + Word.commonHashLength + ", " + // the url's hash
             "String executor-"  + Word.commonHashLength + ", " + // the crawling executor
             "Cardinal workdate-8 {b256}, " +                           // the time when the url was last time tried to load
@@ -63,15 +85,21 @@ public class ZURL implements Iterable<ZURL.Entry> {
     );
 
     // the class object
-    protected Index urlIndex;
-    protected final ConcurrentLinkedQueue<byte[]> stack;
-    
+    private Index urlIndex;
+    private final Queue<byte[]> stack;
+    private final SolrConnector solrConnector;
+    private final SolrConfiguration solrConfiguration;
+
     public ZURL(
+            final SolrConnector solrConnector,
+            final SolrConfiguration solrConfiguration,
     		final File cachePath,
     		final String tablename,
     		final boolean startWithEmptyFile,
             final boolean useTailCache,
             final boolean exceed134217727) {
+        this.solrConnector = solrConnector;
+        this.solrConfiguration = solrConfiguration;
         // creates a new ZURL in a file
         cachePath.mkdirs();
         final File f = new File(cachePath, tablename);
@@ -81,69 +109,86 @@ public class ZURL implements Iterable<ZURL.Entry> {
             }
         }
         try {
-            this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
-        } catch (RowSpaceExceededException e) {
+            this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727, true);
+        } catch (final RowSpaceExceededException e) {
             try {
-                this.urlIndex = new Table(f, rowdef, 0, 0, false, exceed134217727);
-            } catch (RowSpaceExceededException e1) {
+                this.urlIndex = new Table(f, rowdef, 0, 0, false, exceed134217727, true);
+            } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }
         }
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
-        this.stack = new ConcurrentLinkedQueue<byte[]>();
+        this.stack = new LinkedBlockingQueue<byte[]>();
     }
-    
-    public ZURL() {
+
+    public ZURL(final ShardSolrConnector solrConnector,
+                    final SolrConfiguration solrConfiguration) {
+        this.solrConnector = solrConnector;
+        this.solrConfiguration = solrConfiguration;
         // creates a new ZUR in RAM
         this.urlIndex = new RowSet(rowdef);
-        this.stack = new ConcurrentLinkedQueue<byte[]>();
+        this.stack = new LinkedBlockingQueue<byte[]>();
     }
-    
+
     public void clear() throws IOException {
-        if (urlIndex != null) urlIndex.clear();
-        if (stack != null) stack.clear();
+        if (this.urlIndex != null) this.urlIndex.clear();
+        if (this.stack != null) this.stack.clear();
     }
 
     public void close() {
-        try {this.clear();} catch (IOException e) {}
-        if (urlIndex != null) urlIndex.close();
+        try {clear();} catch (final IOException e) {}
+        if (this.urlIndex != null) this.urlIndex.close();
     }
 
     public boolean remove(final byte[] hash) {
         if (hash == null) return false;
         //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " remove " + hash);
         try {
-            urlIndex.delete(hash);
+            this.urlIndex.delete(hash);
             return true;
         } catch (final IOException e) {
             return false;
         }
     }
-    
+
     public void push(
             final Request bentry,
             final byte[] executor,
             final Date workdate,
             final int workcount,
-            String anycause) {
+            final FailCategory failCategory,
+            String anycause,
+            final int httpcode) {
         // assert executor != null; // null == proxy !
+        assert failCategory.store || httpcode == -1 : "failCategory=" + failCategory.name();
         if (exists(bentry.url().hash())) return; // don't insert double causes
         if (anycause == null) anycause = "unknown";
-        Entry entry = new Entry(bentry, executor, workdate, workcount, anycause);
+        final String reason = anycause + ((httpcode >= 0) ? " (http return code = " + httpcode + ")" : "");
+        final Entry entry = new Entry(bentry, executor, workdate, workcount, reason);
         put(entry);
-        stack.add(entry.hash());
-        Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + anycause);
-        while (stack.size() > maxStackSize) stack.poll();
+        this.stack.add(entry.hash());
+        Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + reason);
+        if (this.solrConnector != null && failCategory.store) {
+            // send the error to solr
+            try {
+                SolrDoc errorDoc = this.solrConfiguration.err(bentry.url(), failCategory.name() + " " + reason, httpcode);
+                this.solrConnector.add(errorDoc);
+            } catch (final IOException e) {
+                Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true, false) + " to solr: " + e.getMessage());
+            }
+        }
+        while (this.stack.size() > maxStackSize) this.stack.poll();
     }
-    
+
+    @Override
     public Iterator<ZURL.Entry> iterator() {
         return new EntryIterator();
     }
-    
+
     public ArrayList<ZURL.Entry> list(int max) {
-        ArrayList<ZURL.Entry> l = new ArrayList<ZURL.Entry>();
+        final ArrayList<ZURL.Entry> l = new ArrayList<ZURL.Entry>();
         DigestURI url;
-        for (ZURL.Entry entry: this) {
+        for (final ZURL.Entry entry: this) {
             if (entry == null) continue;
             url = entry.url();
             if (url == null) continue;
@@ -152,31 +197,34 @@ public class ZURL implements Iterable<ZURL.Entry> {
         }
         return l;
     }
-    
+
     private class EntryIterator implements Iterator<ZURL.Entry> {
         private final Iterator<byte[]> hi;
         public EntryIterator() {
-            this.hi = stack.iterator();
+            this.hi = ZURL.this.stack.iterator();
         }
+        @Override
         public boolean hasNext() {
-            return hi.hasNext();
+            return this.hi.hasNext();
         }
 
+        @Override
         public ZURL.Entry next() {
-            return get(hi.next());
+            return get(this.hi.next());
         }
 
+        @Override
         public void remove() {
-            hi.remove();
+            this.hi.remove();
         }
-        
+
     }
-   
+
     public ZURL.Entry get(final byte[] urlhash) {
         try {
-            if (urlIndex == null) return null;
+            if (this.urlIndex == null) return null;
             // System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " get " + urlhash);
-            final Row.Entry entry = urlIndex.get(urlhash);
+            final Row.Entry entry = this.urlIndex.get(urlhash, false);
             if (entry == null) return null;
             return new Entry(entry);
         } catch (final IOException e) {
@@ -189,7 +237,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
      * private put (use push instead)
      * @param entry
      */
-    private void put(Entry entry) {
+    private void put(final Entry entry) {
         // stores the values from the object variables into the database
         if (entry.stored) return;
         if (entry.bentry == null) return;
@@ -198,28 +246,28 @@ public class ZURL implements Iterable<ZURL.Entry> {
         newrow.setCol(1, entry.executor);
         newrow.setCol(2, entry.workdate.getTime());
         newrow.setCol(3, entry.workcount);
-        newrow.setCol(4, entry.anycause.getBytes());
+        newrow.setCol(4, UTF8.getBytes(entry.anycause));
         newrow.setCol(5, entry.bentry.toRow().bytes());
         try {
-            if (urlIndex != null) urlIndex.put(newrow);
+            if (this.urlIndex != null) this.urlIndex.put(newrow);
             entry.stored = true;
         } catch (final Exception e) {
             Log.logException(e);
         }
     }
-    
+
     public boolean exists(final byte[] urlHash) {
-        return urlIndex.has(urlHash);
+        return this.urlIndex.has(urlHash);
     }
-    
+
     public void clearStack() {
-        stack.clear();
+        this.stack.clear();
     }
-    
+
     public int stackSize() {
-        return stack.size();
+        return this.stack.size();
     }
-    
+
     public class Entry {
 
         Request bentry;    // the balancer entry
@@ -243,7 +291,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             this.workdate = (workdate == null) ? new Date() : workdate;
             this.workcount = workcount;
             this.anycause = (anycause == null) ? "" : anycause;
-            stored = false;
+            this.stored = false;
         }
 
         protected Entry(final Row.Entry entry) throws IOException {
@@ -251,9 +299,9 @@ public class ZURL implements Iterable<ZURL.Entry> {
             this.executor = entry.getColBytes(1, true);
             this.workdate = new Date(entry.getColLong(2));
             this.workcount = (int) entry.getColLong(3);
-            this.anycause = entry.getColString(4, "UTF-8");
+            this.anycause = entry.getColUTF8(4);
             this.bentry = new Request(Request.rowdef.newEntry(entry.getColBytes(5, false)));
-            assert (Base64Order.enhancedCoder.equal(entry.getPrimaryKeyBytes(), bentry.url().hash()));
+            assert (Base64Order.enhancedCoder.equal(entry.getPrimaryKeyBytes(), this.bentry.url().hash()));
             this.stored = true;
             return;
         }
@@ -261,11 +309,11 @@ public class ZURL implements Iterable<ZURL.Entry> {
         public DigestURI url() {
             return this.bentry.url();
         }
-        
+
         public byte[] initiator() {
             return this.bentry.initiator();
         }
-        
+
         public byte[] hash() {
             // return a url-hash, based on the md5 algorithm
             // the result is a String of 12 bytes within a 72-bit space
@@ -275,49 +323,52 @@ public class ZURL implements Iterable<ZURL.Entry> {
         }
 
         public Date workdate() {
-            return workdate;
+            return this.workdate;
         }
-        
+
         public byte[] executor() {
             // return the creator's hash
-            return executor;
+            return this.executor;
         }
-        
+
         public String anycause() {
-            return anycause;
+            return this.anycause;
         }
 
     }
 
     private class kiter implements Iterator<Entry> {
         // enumerates entry elements
-        private Iterator<Row.Entry> i;
+        private final Iterator<Row.Entry> i;
         private boolean error = false;
-        
+
         private kiter(final boolean up, final String firstHash) throws IOException {
-            i = urlIndex.rows(up, (firstHash == null) ? null : firstHash.getBytes());
-            error = false;
+            this.i = ZURL.this.urlIndex.rows(up, (firstHash == null) ? null : ASCII.getBytes(firstHash));
+            this.error = false;
         }
 
+        @Override
         public boolean hasNext() {
-            if (error) return false;
-            return i.hasNext();
+            if (this.error) return false;
+            return this.i.hasNext();
         }
 
+        @Override
         public Entry next() throws RuntimeException {
-            final Row.Entry e = i.next();
+            final Row.Entry e = this.i.next();
             if (e == null) return null;
             try {
                 return new Entry(e);
             } catch (final IOException ex) {
-                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getColString(0, null));
+                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getPrimaryKeyASCII());
             }
         }
-        
+
+        @Override
         public void remove() {
-            i.remove();
+            this.i.remove();
         }
-        
+
     }
 
     public Iterator<Entry> entries(final boolean up, final String firstHash) throws IOException {

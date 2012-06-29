@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -24,32 +24,31 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import de.anomic.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.search.Switchboard;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.server.servletProperties;
 
 public class compare_yacy {
-    
-    private static final String defaultsearch = "YaCy";
-    private static final String[] order = {defaultsearch, "YaCy (local)", "bing.com",
-        "google.de", "google.com", "scroogle.org",
-        "metager.de", "metager2.de (web)", "metager2.de (international)",
+
+    private static final String defaultsearchL = "YaCy";
+    private static final String defaultsearchR = "metager.de";
+    private static final String[] order = {defaultsearchL, "YaCy (local)", "bing.com",
+        /*"google.de",*/ defaultsearchR,
+        "metager2.de (web)", "metager2.de (international)",
         "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch",
         "Sciencenet", "dbpedia", "wolfram alpha", "OAIster@OCLC", "oai.yacy.net"};
     private static final Map<String, String> searchengines = new HashMap<String, String>();
     static {
-        searchengines.put(defaultsearch, "yacysearch.html?display=2&verify=true&resource=global&query=");
-        searchengines.put("YaCy (local)", "yacysearch.html?display=2&verify=true&resource=local&query=");
+        searchengines.put(defaultsearchL, "yacysearch.html?display=2&resource=global&query=");
+        searchengines.put("YaCy (local)", "yacysearch.html?display=2&resource=local&query=");
         searchengines.put("bing.com", "http://www.bing.com/search?q=");
-        searchengines.put("google.de", "http://www.google.de/search?q=");
-        searchengines.put("google.com", "http://www.google.com/search?q=");
-        searchengines.put("scroogle.org", "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=");
+        // searchengines.put("google.de", "http://www.google.de/#fp=1&q=");
+        // searchengines.put("google.com", "http://www.google.com/#fp=1&q=");
         searchengines.put("metager.de", "http://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
         searchengines.put("metager2.de (web)", "http://www.metager2.de/search.php?ses=web&q=");
         searchengines.put("metager2.de (international)", "http://www.metager2.de/search.php?ses=international&q=");
@@ -63,18 +62,20 @@ public class compare_yacy {
         searchengines.put("OAIster@OCLC", "http://oaister.worldcat.org/search?q=");
         searchengines.put("oai.yacy.net", "http://oai.yacy.net/yacysearch.html?verify=true&resource=local&nav=all&display=2&meanCount=5&query=");
     }
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         final servletProperties prop = new servletProperties();
-        
+
         prop.put("display", display);
-        
-        String default_left = sb.getConfig("compare_yacy.left", defaultsearch);
-        String default_right = sb.getConfig("compare_yacy.right", defaultsearch);
-        
+
+        String default_left = sb.getConfig("compare_yacy.left", defaultsearchL);
+        if (!searchengines.containsKey(default_left)) default_left = defaultsearchL;
+        String default_right = sb.getConfig("compare_yacy.right", defaultsearchR);
+        if (!searchengines.containsKey(default_right)) default_right = defaultsearchR;
+
         if (post != null) {
             if (searchengines.get(post.get("left", default_left)) != null) {
                 default_left = post.get("left", default_left);
@@ -85,7 +86,7 @@ public class compare_yacy {
                 sb.setConfig("compare_yacy.right", default_right);
             }
         }
-        
+
         prop.put("searchengines", order.length);
         String name;
         for (int i = 0; i < order.length; i++) {
@@ -97,16 +98,16 @@ public class compare_yacy {
 
         prop.putHTML("search_left", searchengines.get(default_left));
         prop.putHTML("search_right", searchengines.get(default_right));
-        
+
         if (post == null || post.get("query", "").length() == 0) {
             prop.put("search", 0);
             prop.put("search_query", "");
             return prop;
         }
-        
+
         prop.put("search", 1);
         prop.putHTML("search_query", post.get("query", ""));
-        
+
         // return rewrite properties
         return prop;
     }

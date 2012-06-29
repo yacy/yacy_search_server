@@ -32,41 +32,39 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.Network;
+import net.yacy.search.Switchboard;
+
+import com.google.common.io.Files;
 
 import de.anomic.data.BlogBoard;
+import de.anomic.data.BlogBoard.BlogEntry;
 import de.anomic.data.BlogBoardComments;
 import de.anomic.data.MessageBoard;
 import de.anomic.data.UserDB;
-import de.anomic.data.BlogBoard.BlogEntry;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 
 public class BlogComments {
 
-    private final static SimpleDateFormat SIMPLE_FORMATTER = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
-    // TODO: make userdefined date/time-strings (localisation)
+    private static final String DEFAULT_PAGE = "blog_default";
 
     public static String dateString(final Date date) {
-        return SIMPLE_FORMATTER.format(date);
+        return Blog.dateString(date);
     }
 
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        boolean hasRights = sb.verifyAuthentication(header, true);
+        boolean hasRights = sb.verifyAuthentication(header);
 
         prop.put("mode_admin", hasRights ? "1" : "0");
 
@@ -77,42 +75,37 @@ public class BlogComments {
 
         if (!hasRights) {
             final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
-            if (userentry != null && userentry.hasRight(UserDB.Entry.BLOG_RIGHT)) {
+            if (userentry != null && userentry.hasRight(UserDB.AccessRight.BLOG_RIGHT)) {
                 hasRights = true;
-            }
-            //opens login window if login link is clicked
-            else if (post.containsKey("login")) {
-                prop.put("AUTHENTICATE","admin log-in");
+            } else if (post.containsKey("login")) {
+                //opens login window if login link is clicked
+            	prop.authenticationRequired();
             }
         }
 
-        final String pagename = post.get("page", "blog_default");
-        final String ip = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        String pagename = post.get("page", DEFAULT_PAGE);
+        final String ip = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
-        String StrAuthor = post.get("author", "anonymous");
+        String strAuthor = post.get("author", "anonymous");
 
-        if ("anonymous".equals(StrAuthor)) {
-            StrAuthor = sb.blogDB.guessAuthor(ip);
+        if ("anonymous".equals(strAuthor)) {
+            strAuthor = sb.blogDB.guessAuthor(ip);
 
-            if (StrAuthor == null || StrAuthor.length() == 0) {
+            if (strAuthor == null || strAuthor.length() == 0) {
                 if (sb.peers.mySeed() == null) {
-                    StrAuthor = "anonymous";
+                    strAuthor = "anonymous";
                 } else {
-                    StrAuthor = sb.peers.mySeed().get("Name", "anonymous");
+                    strAuthor = sb.peers.mySeed().get("Name", "anonymous");
                 }
             }
         }
 
         byte[] author;
-        try {
-            author = StrAuthor.getBytes("UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            author = StrAuthor.getBytes();
-        }
+        author = UTF8.getBytes(strAuthor);
 
         final BlogBoard.BlogEntry page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
         final boolean pageExists = sb.blogDB.contains(pagename);
-        
+
         // comments not allowed
         prop.put("mode_allow", (page.getCommentMode() == 0) ? 0 : 1);
 
@@ -123,22 +116,14 @@ public class BlogComments {
                 if ("".equals(post.get("subject", ""))) {
                     post.putHTML("subject", "no title");
                 }
-                try {
-                    content = post.get("content", "").getBytes("UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    content = post.get("content", "").getBytes();
-                }
+                content = UTF8.getBytes(post.get("content", ""));
 
                 final Date date = null;
 
                 //set name for new entry or date for old entry
                 final String StrSubject = post.get("subject", "");
                 byte[] subject;
-                try {
-                    subject = StrSubject.getBytes("UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    subject = StrSubject.getBytes();
-                }
+                subject = UTF8.getBytes(StrSubject);
                 final String commentID = String.valueOf(System.currentTimeMillis());
                 final BlogEntry blogEntry = sb.blogDB.readBlogEntry(pagename);
                 blogEntry.addComment(commentID);
@@ -146,13 +131,13 @@ public class BlogComments {
                 sb.blogCommentDB.write(sb.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
                 prop.putHTML("LOCATION","BlogComments.html?page=" + pagename);
 
-                MessageBoard.entry msgEntry = null;
-                sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
+                MessageBoard.entry msgEntry = sb.messageDB.newEntry(
                         "blogComment",
-                        StrAuthor,
+                        strAuthor,
                         sb.peers.mySeed().hash,
                         sb.peers.mySeed().getName(), sb.peers.mySeed().hash,
-                        "new blog comment: " + UTF8.String(blogEntry.getSubject()), content));
+                        "new blog comment: " + UTF8.String(blogEntry.getSubject()), content);
+                sb.messageDB.write(msgEntry);
 
                 messageForwardingViaEmail(sb, msgEntry);
 
@@ -160,7 +145,7 @@ public class BlogComments {
                 final File notifierSource = new File(sb.getAppPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
                 final File notifierDest   = new File(sb.getDataPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
                 try {
-                    FileUtils.copy(notifierSource, notifierDest);
+                    Files.copy(notifierSource, notifierDest);
                 } catch (final IOException e) {
                     Log.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
 
@@ -188,7 +173,7 @@ public class BlogComments {
             prop.putHTML("mode_allow_author", UTF8.String(author));
             prop.putHTML("mode_subject", post.get("subject",""));
             prop.put("mode_date", dateString(new Date()));
-            prop.putWiki("mode_page", post.get("content", ""));
+            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", post.get("content", ""));
             prop.put("mode_page-code", post.get("content", ""));
         } else {
             // show blog-entry/entries
@@ -204,7 +189,7 @@ public class BlogComments {
                 prop.putHTML("mode_allow_author", UTF8.String(author));
                 prop.put("mode_comments", page.getCommentsSize());
                 prop.put("mode_date", dateString(page.getDate()));
-                prop.putWiki("mode_page", page.getPage());
+                prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", page.getPage());
                 if (hasRights) {
                     prop.put("mode_admin", "1");
                     prop.put("mode_admin_pageid", page.getKey());
@@ -230,12 +215,12 @@ public class BlogComments {
                 while (i.hasNext() && count < num) {
 
                     pageid = i.next();
-                    
+
                     if(start > 0) {
                         start--;
                         continue;
                     }
-                        
+
                     entry = sb.blogCommentDB.read(pageid);
 
                     if (commentMode == 2 && !hasRights && !entry.isAllowed()) {
@@ -247,7 +232,7 @@ public class BlogComments {
                     if (!xml) {
                         prop.putHTML("mode_entries_"+count+"_subject", UTF8.String(entry.getSubject()));
                         prop.putHTML("mode_entries_"+count+"_author", UTF8.String(entry.getAuthor()));
-                        prop.putWiki("mode_entries_"+count+"_page", entry.getPage());
+                        prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_entries_"+count+"_page", entry.getPage());
                     } else {
                         prop.putHTML("mode_entries_"+count+"_subject", UTF8.String(entry.getSubject()));
                         prop.putHTML("mode_entries_"+count+"_author", UTF8.String(entry.getAuthor()));
@@ -294,7 +279,7 @@ public class BlogComments {
 
     private static void messageForwardingViaEmail(final Switchboard sb, final MessageBoard.entry msgEntry) {
         try {
-            if (!Boolean.parseBoolean(sb.getConfig("msgForwardingEnabled","false"))) {
+            if (!sb.getConfigBool("msgForwardingEnabled",false)) {
                 return;
             }
 
@@ -322,7 +307,7 @@ public class BlogComments {
             .append("/")
             .append(msgEntry.authorHash())
             .append("\nMessage to:   ")
-            .append(msgEntry.recipient()) 
+            .append(msgEntry.recipient())
             .append("/")
             .append(msgEntry.recipientHash())
             .append("\nCategory:     ")
@@ -335,7 +320,7 @@ public class BlogComments {
             email.print(new String(emailTxt));
             email.close();
         } catch (final Exception e) {
-            yacyCore.log.logWarning("message: message forwarding via email failed. ",e);
+            Network.log.logWarning("message: message forwarding via email failed. ",e);
         }
     }
 }

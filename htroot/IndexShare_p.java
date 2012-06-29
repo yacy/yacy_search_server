@@ -29,10 +29,10 @@
 //import java.io.*;
 //import de.anomic.tools.*;
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -66,10 +66,10 @@ public class IndexShare_p {
         }
         
         if (post.containsKey("indexsharesetting")) {
-            sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, (post.containsKey("distribute")) ? "true" : "false");
-            sb.setConfig("allowReceiveIndex", (post.containsKey("receive")) ? "true" : "false");
-            sb.setConfig("defaultLinkReceiveFrequency", post.get("linkfreq", "30"));
-            sb.setConfig("defaultWordReceiveFrequency", post.get("wordfreq", "10"));
+            sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, post.containsKey("distribute"));
+            sb.setConfig("allowReceiveIndex", post.containsKey("receive"));
+            sb.setConfig("defaultLinkReceiveFrequency", post.getInt("linkfreq", 30));
+            sb.setConfig("defaultWordReceiveFrequency", post.getInt("wordfreq", 10));
         }
 
         // insert constants

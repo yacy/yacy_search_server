@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -30,10 +30,10 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 // this is a new implementation of this parser idiom using multiple documents as result set
 
@@ -47,15 +47,15 @@ public class sidAudioParser extends AbstractParser implements Parser {
 
     public sidAudioParser() {
         super("Commodore 64 SID Audio File Parser");
-        SUPPORTED_EXTENSIONS.add("sid");
-        SUPPORTED_MIME_TYPES.add("audio/prs.sid");
-        SUPPORTED_MIME_TYPES.add("audio/psid");
-        SUPPORTED_MIME_TYPES.add("audio/x-psid");
-        SUPPORTED_MIME_TYPES.add("audio/sidtune");
-        SUPPORTED_MIME_TYPES.add("audio/x-sidtune");
+        this.SUPPORTED_EXTENSIONS.add("sid");
+        this.SUPPORTED_MIME_TYPES.add("audio/prs.sid");
+        this.SUPPORTED_MIME_TYPES.add("audio/psid");
+        this.SUPPORTED_MIME_TYPES.add("audio/x-psid");
+        this.SUPPORTED_MIME_TYPES.add("audio/sidtune");
+        this.SUPPORTED_MIME_TYPES.add("audio/x-sidtune");
     }
-    
-    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+
+    public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException
     {
@@ -64,7 +64,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
             final byte[] b = new byte[available];
 
             if (available >= 128 && source.read(b) >= 128) {
-                
+
                 final int version = (b[4] << 2) + b[5];
                 Map<String, String> header = new HashMap<String, String>();
                 switch (version) {
@@ -78,9 +78,11 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         throw new Parser.Failure("Unable to parse SID file, unexpected version: " + version, location);
                 }
 
-                return new Document[]{new Document(location,
+                return new Document[]{new Document(
+                        location,
                         mimeType,
                         "UTF-8",
+                        this,
                         null,
                         null,
                         header.get("name"),
@@ -88,6 +90,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         header.get("publisher"),
                         null,
                         null,
+                        0.0f, 0.0f,
                         null,
                         null,
                         null,

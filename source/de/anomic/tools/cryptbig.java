@@ -116,7 +116,7 @@ public class cryptbig {
 	    final SecretKey key = keyFactory.generateSecret(keySpec);
 
 	    // create parameter spec for PBE
-	    final PBEParameterSpec paramSpec = new PBEParameterSpec(salt.getBytes(), 1000 /*ITERATIONS*/);
+	    final PBEParameterSpec paramSpec = new PBEParameterSpec(UTF8.getBytes(salt), 1000 /*ITERATIONS*/);
         
 	    // Create a cipher and initialize it for encrypting end decrypting
 	    cryptMethod = method;
@@ -261,10 +261,10 @@ public class cryptbig {
 		final String A = UTF8.String(ecipher.doFinal(X.getBytes("UTF8")));
 		final String B = UTF8.String(ecipher.doFinal(Base64Order.standardCoder.encodeLongSB(A.length(), 2).toString().getBytes("UTF8"))); // most probable not longer than 4
 		final String C = Base64Order.standardCoder.encodeLongSB(B.length(), 1).toString(); // fixed length 1 (6 bits, that should be enough)
-		fout.write(magicString.getBytes()); // the magic string, used to identify a 'crypt'-file
-		fout.write(C.getBytes());
-		fout.write(B.getBytes());
-		fout.write(A.getBytes());
+		fout.write(UTF8.getBytes(magicString)); // the magic string, used to identify a 'crypt'-file
+		fout.write(UTF8.getBytes(C));
+		fout.write(UTF8.getBytes(B));
+		fout.write(UTF8.getBytes(A));
 
 		// write content of file
 		copy(fout, fin, 512);

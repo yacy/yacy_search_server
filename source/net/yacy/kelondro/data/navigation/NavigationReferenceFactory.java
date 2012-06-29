@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,21 +26,28 @@
 
 package net.yacy.kelondro.data.navigation;
 
+import java.io.Serializable;
+
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 
-public class NavigationReferenceFactory implements ReferenceFactory<NavigationReference> {
+public class NavigationReferenceFactory implements ReferenceFactory<NavigationReference>, Serializable {
 
+    private static final long serialVersionUID=-3440570952034279619L;
+
+    @Override
     public NavigationReference produceSlow(final Entry e) {
         return new NavigationReferenceRow(e);
     }
-    
+
+    @Override
     public NavigationReference produceFast(final NavigationReference r) {
         if (r instanceof NavigationReferenceVars) return r;
         return new NavigationReferenceVars(r);
     }
-    
+
+    @Override
     public Row getRow() {
         return NavigationReferenceRow.navEntryRow;
     }

@@ -1,4 +1,4 @@
-// ConfigGeneric_p.java 
+// ConfigProperties_p.java 
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -43,29 +43,34 @@ public class ConfigProperties_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        int count = 0;
-        String key;
+        
+        String key = "";
+        String value = "";
 
         //change a key
-        if(post != null && post.containsKey("key") && post.containsKey("value")){
-            key = post.get("key");
-            final String value = post.get("value");
-            if (!"".equals(key)) {
+        if (post != null && post.containsKey("key") && post.containsKey("value")) {
+            key = post.get("key").trim();
+            value = post.get("value").trim();
+            if (key != null && !key.isEmpty()) {
                 env.setConfig(key, value);
             }
         }
+        prop.putHTML("keyPosted", key);
+        prop.putHTML("valuePosted", value);
+        
         Iterator<String> keys = env.configKeys();
 
         final List<String> list = new ArrayList<String>(250);
         
-        while(keys.hasNext()){
+        while (keys.hasNext()) {
             list.add(keys.next());
         }
-        
+
         Collections.sort(list);
-        
+
+        int count = 0;
         keys = list.iterator();
-        while(keys.hasNext()){
+        while (keys.hasNext()) {
             key = keys.next();
 
             // only display lines if they are no commment

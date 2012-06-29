@@ -1,4 +1,4 @@
-// crypt.java 
+// crypt.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -24,8 +24,6 @@
 
 package de.anomic.tools;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.Random;
 
 import net.yacy.kelondro.logging.Log;
@@ -57,10 +55,9 @@ public class crypt {
     public static final String vDATE = "20030925";
     public static final String copyright = "[ 'crypt' v" + vDATE + " by Michael Christen / www.anomic.de ]";
     public static final String magicString = "crypt|anomic.de|0"; // magic identifier inside every '.crypt' - file
-    public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.ENGLISH);
 
     String cryptMethod; // one of ["TripleDES", "Blowfish", "DESede", "DES"]
-    //private static final String defaultMethod = "PBEWithMD5AndDES"; //"DES";    
+    //private static final String defaultMethod = "PBEWithMD5AndDES"; //"DES";
 
     // --------------------------------------------------------
     // Section: simple Codings

@@ -1,8 +1,8 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <link rel="shortcut icon" href="favicon.ico" />
   <meta name="Content-Language" content="English, Englisch" />
-  <meta name="keywords" content="Anomic YaCy HTTP Proxy search engine spider indexer java network open free download Mac Windows Linux Software development" />
-  <meta name="description" content="Anomic Software HTTP Proxy Freeware Home Page" />
+  <meta name="keywords" content="YaCy HTTP search engine spider indexer java network open free download Mac Windows Linux Software development" />
+  <meta name="description" content="Software HTTP Freeware Home Page" />
   <meta name="copyright" content="Michael Christen et al." />
   <link rel="stylesheet" type="text/css" media="all" href="/env/base.css" />
   <link rel="stylesheet" type="text/css" media="screen" href="/env/style.css" />
@@ -15,8 +15,6 @@
   <!--[if lte IE 7.0]>
    <link rel="stylesheet" type="text/css" media="screen" href="/env/ie7.css" />
   <![endif]-->
-  <!-- these stylesheets are needed for the portalseach -->
-	<link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.base.css" rel="stylesheet" />
-	<link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" />
-	<link media="screen" type="text/css" href="/yacy/ui/css/yacyui-portalsearch.css" rel="stylesheet" />
-<!-- (C), Architecture and Realisation: Michael Peter Christen; Contact: mc <at> anomic.de -->
+  #%env/templates/jqueryheader.template%#
+  #%env/templates/portalheader.template%#
+<!-- (C), Architecture: Michael Peter Christen; Contact: mc <at> yacy.net -->

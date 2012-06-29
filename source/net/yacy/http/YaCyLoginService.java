@@ -29,13 +29,12 @@ import java.security.Principal;
 
 import javax.security.auth.Subject;
 
+import net.yacy.search.Switchboard;
+
 import org.eclipse.jetty.http.security.Credential;
 import org.eclipse.jetty.security.IdentityService;
 import org.eclipse.jetty.security.MappedLoginService;
 import org.eclipse.jetty.server.UserIdentity;
-
-import de.anomic.search.Switchboard;
-
 
 /**
  * jetty login service, provides one admin user

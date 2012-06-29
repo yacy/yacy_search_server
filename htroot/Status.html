@@ -15,7 +15,7 @@
         }
       }
       function reloadGraph() {
-	    document.images["graph"].src="PerformanceGraph.png?time="+(new Date()).getTime();
+	    document.images["graph"].src="PerformanceGraph.png?nomem=&time="+(new Date()).getTime();
 	    window.status="";
 	  }
       function init() {
@@ -28,7 +28,8 @@
   <body onload="init();">
 	#%env/templates/header.template%#
     #%env/templates/submenuConfig.template%#
-    
+<a href="https://gitorious.org/yacy/rc1"><img src="env/grafics/forkme.png" style="position:absolute;top:0px;right:0px;z-index: 100;"/></a>
+
     #(showPrivateTable)#
     <div class="SubMenu">
       <ul class="SubMenu">
@@ -45,9 +46,9 @@
     <div class="welcome">
     <div style="margin:auto;text-align:center;">
       <h2><img src="/env/grafics/kaskelix.png" width="128" height="64" alt="YaCy Websearch" style="margin-right:5px; vertical-align:middle;" />Welcome to YaCy!</h2>
-      <iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,DHTRECEIVE,DHTSEND&amp;width=600px&amp;height=180px&amp;maxlines=20&amp;maxwidth=120"
+      <iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,DHTRECEIVE,DHTSEND,PROXY&amp;width=600px&amp;height=180px&amp;maxlines=20&amp;maxwidth=120"
               style="width:600px;height:180px;margin:0px;border:1px solid black;" scrolling="no" name="newsframe"></iframe><br />
-      <img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph" width="660" height="240"/><br />
+      <img src="PerformanceGraph.png?nomem=" id="graph" alt="PerformanceGraph" width="660" height="240"/><br />
       <img src="Banner.png?textcolor=000000&amp;bgcolor=e7effc&amp;bordercolor=5090d0" alt="banner" width="468" height="60"/>
     </div>
 
@@ -68,6 +69,12 @@
     <dd class="hint">You have not published your peer seed yet. This happens automatically, just wait.
     </dd>
     #(/urgentStatusVirgin)#
+    
+    #(hintStatusPrivate)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="idea"/></dt>
+    <dd class="hint">Your network configuration is in private mode. Your peer seed will not be published.
+    </dd>
+    #(/hintStatusPrivate)#
    
     <!-- warnings -->
     
@@ -102,6 +109,12 @@
     it as soon as possible and restart YaCy.
     </dd>
     #(/warningMemoryLow)#
+    
+    #(warningCrawlPaused)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
+    <dd class="hint">Crawling is paused! If the crawling was paused automatically, please check your disk space.
+    </dd>
+    #(/warningCrawlPaused)#
     
      <!-- hints -->
     
@@ -156,6 +169,12 @@
 	<dd class="hint">Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.
     </dd>
     #(/hintCrawlMonitor)#
+    
+    #(hintSupport)#::
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>
+	<dd class="hint">If you need professional support, please write to <tt>support@yacy.net</tt><br>For community support, please visit our <a href="http://forum.yacy.de">forum</a>.
+    </dd>
+    #(/hintSupport)#
     
     <!-- Social Networking -->
     <!--

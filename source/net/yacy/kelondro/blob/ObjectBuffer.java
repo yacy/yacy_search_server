@@ -56,6 +56,7 @@
 
 package net.yacy.kelondro.blob;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.order.NaturalOrder;
 
 public class ObjectBuffer {
@@ -123,12 +124,12 @@ public class ObjectBuffer {
     public void put(final String key, final Object value) {
         if ((key == null) || (value == null)) return;
         synchronized(this) {
-            if (NaturalOrder.naturalOrder.equal(this.key, key.getBytes())){
+            if (NaturalOrder.naturalOrder.equal(this.key, UTF8.getBytes(key))){
                 this.writeDouble++;
             } else {
                 this.writeUnique++; 
             }
-            this.key = key.getBytes();
+            this.key = UTF8.getBytes(key);
             this.value = value;
         }
     }
@@ -149,7 +150,7 @@ public class ObjectBuffer {
     public Object get(final String key) {
         if (key == null) return null;
         synchronized(this) {
-            if (NaturalOrder.naturalOrder.equal(this.key, key.getBytes())){
+            if (NaturalOrder.naturalOrder.equal(this.key, UTF8.getBytes(key))){
                 this.readHit++;
                 return this.value;
             } else {
@@ -172,7 +173,7 @@ public class ObjectBuffer {
     public void remove(final String key) {
         if (key == null) return;
         synchronized(this) {
-            if (NaturalOrder.naturalOrder.equal(this.key, key.getBytes())){
+            if (NaturalOrder.naturalOrder.equal(this.key, UTF8.getBytes(key))){
                 this.key = null;
                 this.value = null;
             }

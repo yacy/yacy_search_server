@@ -7,7 +7,7 @@
 		
 		var height=document.documentElement.clientHeight - 240;    			
  		$('#ymarks').flexigrid({
-	 		url: '/api/bookmarks/get_bookmarks.json?display=1',
+	 		url: '/api/ymarks/get_ymark.json',
 			dataType: 'json',
 	 		method: 'GET',
 	 		colModel: [	
@@ -34,18 +34,20 @@
 				{name: 'Help', bclass: 'help', onpress: bm_action},
 			],
 			searchitems : [
-				{display: 'Tags', name : 'tags'}
+				{display: 'Tags', name : 'tags'},
+				{display: 'Folders', name : 'folders'},
+				{display: 'Title', name : 'title'},
 			],													
 			useRp: true,
 			rp: 15,
-			sortname: "date",
+			sortname: "title",
 			sortorder: "asc",
 			usepager: true,					
 			striped: true,
 			nowrap: false,			 									    				
 	 		height: height,
-	 		query: qtag,
-	 		qtype: "tags",
+	 		query: ".*",
+	 		qtype: "title",
 	 		title: 'YaCy Bookmarks: ' + HTMLenc(qtag)										    				
  		});    			
 
@@ -83,7 +85,7 @@
 				var url = $("input[name='bm_url']").getValue();
 				$.ajax({
 					type: "GET",
-					url: "/api/util/getpageinfo_p.xml?url="+url,			
+					url: "/api/getpageinfo_p.xml?url="+url,			
 					dataType: "xml",
 					success: function(xml) {
 						var title = $(xml).find('title').text();

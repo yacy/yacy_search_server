@@ -2,6 +2,7 @@
 ; ----------------------------------------
 ;(C) 2004-2006 by Alexander Schier
 ;(C) 2008-2010 by David Wieditz
+;(C) 2011-     by Rene Kluge
 /*----------------------------------------
 MANUALS
 http://nsis.sourceforge.net/Docs/
@@ -16,9 +17,9 @@ COMMAND LINE OPTIONS (case sensitive):
 ; MODERN UI
 
 !include MUI2.nsh
-
 !include x64.nsh
 !include FileFunc.nsh
+!include WinVer.nsh
 
 ; ----------------------------------------
 ; GENERAL
@@ -38,7 +39,15 @@ InstallDir "$PROFILE\YaCy"
 InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString"
 
 ;recommend free space in GB for YaCy
-!define RecommendSpace "30"
+!define RecommendSpace "4"
+
+; commands for firewall config, see http://support.microsoft.com/kb/947709/en-us
+!define WinXPAddFwRulePort 'netsh firewall add allowedprogram name="YaCy" program="%SystemRoot%\System32\javaw.exe"'
+!define WinXPDelFwRulePort 'netsh firewall del allowedprogram program="%SystemRoot%\System32\javaw.exe"'
+!define WinVistaAddFwRulePort 'netsh advfirewall firewall add rule name="YaCy" program="%SystemRoot%\System32\javaw.exe" dir=in action=allow'
+!define WinVistaDelFwRulePort 'netsh advfirewall firewall del rule name="YaCy"'
+var WinAddFwRulePort
+var WinDelFwRulePort
 
 ;requested execution level on Vista / 7
 RequestExecutionLevel admin
@@ -49,17 +58,24 @@ SetCompressor /SOLID LZMA
 ; ----------------------------------------
 ; JAVA VERSION
 ; http://www.java.com/de/download/manual.jsp BundleId +1 / +2
+; User-Agent to see the 64bit link: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Win64; x64; Trident/4.0)
 
+; at least we need Java 6
 !define JRE_VERSION6 "1.6"
-;!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=37718" ;jre-6u18-windows-i586.exe
-;!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=37401" ;jre-6u18-windows-x64.exe
-!define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
-!define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
+
+; download link Oracle Java 7 Update 4
+; 32 bit
+!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=63691"
+; 64 bit
+!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=63692"
+
+;!define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
+;!define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
 
 ; ----------------------------------------
 ; GENERAL APPEARANCE
 
-BrandingText "yacy.net"
+;BrandingText "yacy.net"
 
 !define MUI_ICON "RELEASE\MAIN\addon\YaCy.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
@@ -88,6 +104,7 @@ ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
 
 !insertmacro MUI_PAGE_INSTFILES
 
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW SHOW_PageFinish_custom
 !define MUI_FINISHPAGE_SHOWREADME http://www.yacy-websuche.de/wiki/index.php/InstallerFinished
 !define MUI_FINISHPAGE_SHOWREADME_TEXT $(finishPage)
 !insertmacro MUI_PAGE_FINISH
@@ -112,6 +129,7 @@ LangString noAdminForJava 0 "You need Administrator privileges to install Java. 
 LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
 LangString yacyNoHd 0 "YaCy should be installed on a hard disk. Continue with selected folder?" 
 LangString yacyNeedSpace 0 "We recommend ${RecommendSpace} GB free space for YaCy. There are only $TempDriveFree GB left. Continue anyway?"
+LangString yacyNeedOs 0 "Please run Windows 2000 or better (e.g. Windows XP, Vista or Windows 7) for YaCy."
 
 LangString stillRunning ${LANG_FRENCH} "YaCy is still active. Please stop YaCy first."
 LangString keepData 0 "Do you want to keep the data?"
@@ -119,6 +137,7 @@ LangString noAdminForJava 0 "You need Administrator privileges to install Java. 
 LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
 LangString yacyNoHd 0 "YaCy should be installed on a hard disk. Continue with selected folder?"
 LangString yacyNeedSpace 0 "We recommend ${RecommendSpace} GB free space for YaCy. There are only $TempDriveFree GB left. Continue anyway?"
+LangString yacyNeedOs 0 "Please run Windows 2000 or better (e.g. Windows XP, Vista or Windows 7) for YaCy."
 
 LangString stillRunning ${LANG_GERMAN} "YaCy ist noch aktiv. Bitte beenden Sie YaCy."
 LangString keepData 0 "Moechten Sie die Daten behalten?"
@@ -126,6 +145,7 @@ LangString noAdminForJava 0 "Sie benoetigen Administrator-Rechte um Java zu inst
 LangString finishPage 0 "Zeige die Windows Firewall Konfiguration fuer YaCy."
 LangString yacyNoHd 0 "YaCy sollte auf einer Festplatte installiert werden. Soll der gewaehlte Ordner trotzdem verwendet werden?" 
 LangString yacyNeedSpace 0 "Wir empfehlen ${RecommendSpace} GB fuer YaCy. Es sind noch $TempDriveFree GB frei. Trotzdem fortfahren?"
+LangString yacyNeedOs 0 "YaCy benoetigt Windows 2000 oder besser (z.B. Windows XP, Vista oder Windows 7)."
 
 ; ----------------------------------------
 ; INSTALLABLE MODULES
@@ -143,8 +163,8 @@ Section "YaCy"
 	
 	SetOutPath $INSTDIR
 	;set noindex attribute for windows indexing service
-    Exec 'attrib +I "$INSTDIR"'
-    Exec 'attrib +I "$INSTDIR\*" /S /D'
+    	nsExec::Exec 'attrib +I "$INSTDIR"'
+	nsExec::Exec 'attrib +I "$INSTDIR\*" /S /D'
     
 	File /r "RELEASE\MAIN\*"
 
@@ -153,10 +173,10 @@ Section "YaCy"
 	WriteUninstaller "uninstall.exe"
 SectionEnd
 
-Section "Sun Java"
-    SectionIn 1 RO
-    SetShellVarContext current
-    Call DetectJRE
+Section "Java (Oracle JRE)" Sec_Java_id
+    	SectionIn 1 RO
+    	SetShellVarContext current
+    	Call GetJRE
 SectionEnd
 
 Section "Start Menu Group"
@@ -174,6 +194,12 @@ Section "Desktop Icon"
 	CreateShortCut "$DESKTOP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
+Section "Configure Firewall" Sec_Firewall_id
+	SectionIn 1
+	SetShellVarContext current
+	call OpenFirewall	
+SectionEnd
+
 /*
 Section "YaCy in Startup"
 	SetShellVarContext current
@@ -185,15 +211,18 @@ SectionEnd
 ; UNINSTALLER
 
 Section "Uninstall"
-	IfFileExists "$INSTDIR\DATA\yacy.running" 0 uninstall
+	ClearErrors
+	Delete "$INSTDIR\DATA\yacy.running"
+	IfErrors 0 uninstall
 	MessageBox MB_ICONSTOP "$(stillRunning)" /SD IDOK
 	Goto nouninstall
-    
+
 	uninstall:
+	Call un.CloseFirewall
 	SetShellVarContext current
 
 	RMDir /r "$INSTDIR\addon"
-    RMDir /r "$INSTDIR\bin"
+    	RMDir /r "$INSTDIR\bin"
 	RMDir /r "$INSTDIR\classes"
 	RMDir /r "$INSTDIR\defaults"
 	RMDir /r "$INSTDIR\htroot"
@@ -223,44 +252,89 @@ SectionEnd
 ; ----------------------------------------
 ; FUNCTIONS
 
-Function GetJRE
+Function .onInit
+	; check Windows-Version, need Win 2000 or higher
+	${If} ${AtMostWinME} 
+		MessageBox MB_ICONSTOP "$(yacyNeedOs)" 
+		Abort 
+	${EndIf}		
+	
+	; init of JRE section
+	; detect JRE first
+	var /global InstalledJREVersion
+	${If} ${RunningX64}
+		SetRegView 64
+	${EndIf}
+	ReadRegStr $InstalledJREVersion HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
+	; if right JRE already installed hide and deselect JRE section
+	${If} $InstalledJREVersion = ${JRE_VERSION6}
+		SectionSetText ${Sec_Java_id} ""
+		SectionSetFlags ${Sec_Java_id} 0
+	${EndIf}
+	
+	; init of Firewall section, only valid for WindowsXP SP2/SP3 and Vista/Win 7 with Admin 
+	var /global FirewallServiceStart 
+	IntOp $FirewallServiceStart 3 + 0
 
+	${If} ${IsWinVista} 
+	${OrIf} ${IsWin7}
+		StrCpy $WinAddFwRulePort '${WinVistaAddFwRulePort}'
+		StrCpy $WinDelFwRulePort '${WinVistaDelFwRulePort}'
+		ReadRegDWORD $FirewallServiceStart HKLM "SYSTEM\CurrentControlSet\services\MpsSvc" "Start"
+	${EndIf}
+
+	${If} ${IsWinXP} 
+	${AndIf} ${AtLeastServicePack} 2
+		StrCpy $WinAddFwRulePort '${WinXPAddFwRulePort}'
+		StrCpy $WinDelFwRulePort '${WinXPDelFwRulePort}'
+		ReadRegDWORD $FirewallServiceStart HKLM "SYSTEM\CurrentControlSet\services\SharedAccess" "Start"
+	${EndIf}
+	
+	;need Admin for firewall-config
+	${IfNot} $0 = "Admin" 
+		IntOp $FirewallServiceStart 3 + 0
+	${EndIf}
+
+	; hide and deselect Firewall if no proper configuration
+	${If} $FirewallServiceStart > 2 
+		SectionSetText ${Sec_Firewall_id} ""
+		SectionSetFlags ${Sec_Firewall_id} 0
+	${EndIf}
+FunctionEnd
+
+Function GetJRE
 ; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
-    ${If} ${RunningX64}
-    StrCpy $3 ${JRE_64}
-    ${Else}
-    StrCpy $3 ${JRE_32}
-    ${EndIf}
-    
+    	${If} ${RunningX64}
+    		StrCpy $3 ${JRE_64} 
+    	${Else}
+    		StrCpy $3 ${JRE_32}
+    	${EndIf}
+
+	;check if admin before download, advise if non    
 	userInfo::getAccountType
 	Pop $0
-		StrCmp $0 "Admin" download ; download without message if admin
+
+	${IfNot} $0 = "Admin" 
 		MessageBox MB_ICONEXCLAMATION "$(noAdminForJava)" /SD IDOK
-    download:
+	${EndIf}
+
 	SetShellVarContext all
 	StrCpy $2 "$DOCUMENTS\Java Runtime (install for YaCy).exe"
 	SetShellVarContext current
 	nsisdl::download /TIMEOUT=30000 $3 $2
 	Pop $R0 ;Get the return value
-		StrCmp $R0 "success" +3
+	
+	${IfNot} $R0 = "success" 
 		MessageBox MB_OK "Download failed: $R0" /SD IDOK
 		Return
-	StrCmp $0 "Admin" install ; install if admin
-		CreateShortCut "$DESKTOP\Install Java for YaCy.lnk" "$2"
-		Return ; don't delete if not admin
-    install:
-	ExecWait "$2 /s"
-	Delete $2
-FunctionEnd
-
-Function DetectJRE
-	${If} ${RunningX64}
-		SetRegView 64
 	${EndIf}
-	ReadRegStr $2 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
-	StrCmp $2 ${JRE_VERSION6} doneDetectJRE
-	Call GetJRE
-	doneDetectJRE:
+
+	${If} $0 == "Admin" 
+		ExecWait "$2 /s"
+		Delete $2
+	${Else}
+		CreateShortCut "$DESKTOP\Install Java for YaCy.lnk" "$2"
+	${EndIf}
 FunctionEnd
 
 Function CheckDriveSpace
@@ -268,31 +342,31 @@ Function CheckDriveSpace
    	var /global TempDriveFree
    	var /global RootFolderType
 
-; If "\\Folder" it's a Network-Folder
+	; if "\\Folder" it's a Network-Folder
    	StrCpy $RootFolder $InstDir 2
    	StrCmp $RootFolder "\\" NetworkFolder Driveletter
 
    	Networkfolder:
-; prepare String for DriveSpace
+		; prepare String for DriveSpace
       		${GetRoot} $RootFolder $InstDir
       		goto NoHDD
 
-; Now check drive-letters
+	; now check drive-letters
    	Driveletter:
    		StrCpy $RootFolder $InstDir 3
 
-; prepare for {GetDrives-Loop}
+		; prepare for {GetDrives-Loop}
    		StrCpy $RootFolderType "invalid"
    		${GetDrives} "ALL" "CheckDriveType"
 
-; jump if error
+		; jump if error
    		StrCmp $RootFolderType "invalid" CheckSpace
 
-; jump if HDD
+		; jump if HDD
    		StrCmp $RootFolderType "HDD" CheckSpace
 
    	NoHDD:
-; Stay on folder-selection if user wants to give another folder, else check free space
+	; stay on folder-selection if user wants to give another folder, else check free space
       		MessageBox MB_ICONEXCLAMATION|MB_YESNO "$(yacyNoHd)" IDYES NextPage
       		Abort      
 
@@ -300,7 +374,7 @@ Function CheckDriveSpace
 
    	ClearErrors
    	${DriveSpace} $RootFolder "/D=F /S=G" $TempDriveFree
-; If DriveSpace fails for any reason -> jump ahead
+	; if DriveSpace fails for any reason -> jump ahead
    	IfErrors NextPage
 
    	${If} $TempDriveFree < ${RecommendSpace} 
@@ -313,8 +387,40 @@ FunctionEnd
 
 Function CheckDriveType
 ; based on http://nsis.sourceforge.net/GetDrives  
-   	StrCmp $9 $RootFolder 0 +3
-   	StrCpy $RootFolderType $8   
-   	StrCpy $0 StopGetDrives
+   	${If} $9 == $RootFolder 
+   		StrCpy $RootFolderType $8   
+   		StrCpy $0 StopGetDrives
+	${EndIf}
    	Push $0
+FunctionEnd
+
+Function OpenFirewall
+	var /global ExecErrorCode
+	; run netsh 
+	nsExec::ExecToStack '$WinAddFwRulePort'
+	pop $ExecErrorCode
+	; if run without error register for uninstall and clear finish page 
+	${If} $ExecErrorCode = "0"
+		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRulePort" '$WinDelFwRulePort'
+		IntOp $FirewallServiceStart 0 + 0
+	${Else}
+		IntOp $FirewallServiceStart 3 + 0
+	${EndIf}
+FunctionEnd
+
+Function SHOW_PageFinish_custom
+	; hide and disable firewall info from wiki if firewall is open
+	${If} $FirewallServiceStart = 0 
+		SendMessage $mui.FinishPage.ShowReadme ${BM_SETCHECK} 0 0
+	    	ShowWindow $mui.FinishPage.ShowReadme ${SW_HIDE}
+	${EndIf}
+FunctionEnd
+
+Function un.CloseFirewall
+	; get string for closing port from registy
+	ReadRegStr '$WinDelFwRulePort' HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRulePort"
+	; if found > run netsh to close port
+	${IfNot} '$WinDelFwRulePort' == '' 
+		nsExec::ExecToStack '$WinDelFwRulePort'
+	${EndIf}
 FunctionEnd

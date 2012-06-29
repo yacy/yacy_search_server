@@ -268,73 +268,7 @@ Cookies==Cookies
 #---------------------------
 YaCy: Help==YaCy: Aide
 >Help==>aide
-This is a distributed web crawler and also a caching HTTP proxy. You are using the <em>online-interface</em> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <em>global</em> index.==Yacy est un moteur de recherche qui fonctionne sur le principe de calcul distribué. Cela s'appelle plutôt ici "indexations et recherches distribuées" sur internet. En outre, il est fourni avec un serveur proxy HTTP. Vous utilisez l'<em>Interface en ligne</em> de YaCy. Vous pouvez utiliser cette interface pour configurer vos paramètres personnels, ceux du proxy, ceux du crawl et le contrôle d'accès. Vous pouvez aussi utiliser l'interface pour lancer des crawls, envoyer des messages à d'autres utilisateurs ou surveiller vos index, l'état de votre cache et les processus de crawl. Il est particulièrement important que l'on puisse utiliser la page de recherche pour rechercher soit sur son propre index soit sur l'index <em>global</em>.
-For more detailed information, visit the==Pour de plus amples informations, consulter la
-YaCy homepage==page d'accueil YaCy
-Local and Global Search: Options and Functions==Recherche locale ou globale: options et fonctions
-The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Le proxy fournit une interface de recherche qui utilise votre index local créé par les pages visitées par le proxy.
-The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==La recherche peut aussi être globale en interrogeant les autres pairs. Vous pouvez utiliser les options suivantes pour améliorer vos résultats
-Search Word List==recherche sur une liste de mots
-You can search for several words simultanous. Words must be separated by a single space.==Vous pouvez lancer un recherche pour plusieurs mots simultanément. Les mots doivent être séparés par un espace.
-The words are treated conjunctive, that means every must occur in the result, not any.==La recherche est conjonctive, c'est à dire que les résultats contiennent chacun tous les mots et pas seulement certain.
-If you do a global search \(see below\) you may get different results each time you do a search.==Si vous faites une recherche globale \(voir ci-dessous\), vous pouvez obtenir des résultats différents à chaque recherche.
-Maximum Number of Results==Nombre maximal de résultats
 
-You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Vous pouvez choisir le nombre maximal de liens. Nous ne supportons pas encore les pages de résultat multiples pour chaque lien possible.
-Instead we encourage you to enhance the search result by submitting more search words.==A la place, nous vous conseillons d'élargir la recherche en soumettant des mots supplémentaire.
-Result Order Options==Ordre des résultats
-The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Le moteur de recherche fournit une évaluation experimentale de la 'Qualité'. Contrairement aux autres moteurs nous fournissons aussi
-a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==un classement par date. Si vous triez dans l'ordre 'Date-Qualité' les pages les plus fraîches sont affichées en tête.
-For pages that have the same date the second order, 'Quality' is applied.==Pour les pages qui ont la même date, le tri par 'Qualité' est appliqué.
-Resource Domain==Domaine de recherche
-This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Ce moteur de recherche est construit pour rechercher les pages qui passent par le proxy. Mais l'index est aussi partagé avec les autre pairs,
-so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==ainsi vous pouvez aussi chercher globalement: cette fonction est rudimentaire mais vous pouvez l'utiliser pour tester. Les nouvelles versions
-automatically distribute index information <em>before</em> a search happends to form a performant distributed hash table -- a very fast global search.==distriburont automatiquement les information d'index <em>avant</em> qu'une recherche survienne pour former une table de hâchage distribuée -- une recherche globale très rapide.
-Maximum Search Time==Temps de recherche maximal
-Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Une recherche sur l'index local est très rapide. Elle arrive dans la milliseconde même pour un grand nombre de pages (millions).
-global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==Au contraire, une recherche globale nécessite plus de temps pour trouver les pairs qui contiennent les meilleurs résultats de recherche. C'est particulierement le cas lorsque l'index
-distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==distribué est en phase de test. Les résultats de recherche deviennent meilleurs et plus long (une recherche répétée produit tout de suite plus de résultats)
-the search time is.==le temps de recherche est.
-You may want to use accesskeys to navigate through the YaCy webinterface:==Vous pouvez utiliser des combinaisons de touches pur naviguer sur l'interface web de YaCy:
-Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows et Internet Explorer: Alt \+ Touche \+ Enter
-Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows et Mozilla/Firefox/Netscape: Alt \+ Touche
-Windows and Opera: Shift \+ Esc \+ Accesskey==Windows et Opera: Shift + Touche + Taste
-Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter==Macintosh et Internet Explorer: Str \+ Touche \+ Enter
-Macintosh and Safari: Strg \+ Accesskey==Macintosh et Safari: Strg \+ Touche
-Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh et Mozilla/Firefox/Netscape: Strg \+ Touche
-Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh et Opera: Shift \+ Esc \+ Touche
-Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake et Galeon/Mozilla: Alt \+ Touche
-All OS and Amaya: Strg \+ Accesskey==Toutes versions D'OS et Amaya: Strg \+ Touche
-Search Page==Page de recherche
-Network==Réseau
-Status==Etat
-
-YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy utilise des expressions régulières pour certaines fonctions comme la liste noire.
-There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Il y a des standards pour ces expressions, YaCy s'oriente vers celui utilisé par Perl 5.
-Here ist a short overview about the functions, which should fir for most cases\:<==Vous trouverez ici un bref aperçu des fonctions qui doivent couvrir la plupart des cas\:<
-
-arbitrary character==caractère arbitraire
-character x==caractère x
-not x==non x
-0 or more times x==0 ou plusieurs occurrences de x
-0 or 1 time x==0 ou 1 occurrence de x
-1 or more times x==1 ou plusieurs occurrences de x
-concatenation of x and y==concatenation de x et y
-x or y==x ou y
-String "foo" or string "bar"==chaîne "foo" ou chaîne "bar"
-a or b or c \(same as a\|b\|c\)==a ou b ou c (équivalent à a|b|c)
-a or b or c \(same as above\)==a oder b oder c (équivalent à ci-dessus)
-exactly n appearances of x==exactement n occurrences de x
-at least n appearances of x==au moins n occurrence de x
-at least n, maximum m appearanches of x==au moins n, au plus m occurrences de x
-Modify priority of instructions==Modifie la priorité des instructions
-Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Caractère d'échappement, utilisé pour exprimer les caractères spéciaux \(par exemple "\[" or "\*"\), en oubliant leur signification spéciale.
-Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==l'expression régulière traite par ordre de priorité décroissante: concaténation, opérateurs unaires \(\*,\+,\^,\{\}\) opérateurs binaires \(\|\). Cela peut être altérer par les crochets.
-Example:==Exemple:
-This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Cela fait correspondre heise.de/ avec une chaîne devant, par exemple "http://www.",suivi par une chaîne arbitraire un slash et un nombre. Le point dans "heise.de" n'est pas "échappé" par "\\" car il représente n'importe quel caractère, donc y compris lui même.
-A possible URL which would match this regexp is\:==Une URL possible pouvant correspondre à cette espression est:
-An URL which would not match is:==Une URL qui ne correspond pas est:
-There is ".html" at the end, which is not included with the Regular Expression.==Il y a ".html" à la fin qui n'est pas inclus dans l'expression régulière.
 #-----------------------------
 
 #File: index.html

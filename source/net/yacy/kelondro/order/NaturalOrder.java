@@ -26,39 +26,46 @@
 
 package net.yacy.kelondro.order;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import net.yacy.cora.order.AbstractOrder;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.Order;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 
-public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
-    
+public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable, Serializable {
+
+    private static final long serialVersionUID=7170913936645013046L;
     public static final ByteOrder naturalOrder = new NaturalOrder(true);
     public static final Comparator<String> naturalComparator = new StringOrder(naturalOrder);
     public NaturalOrder(final boolean ascending) {
         this.asc = ascending;
         this.zero = null;
     }
-    
-    public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException {
+
+    public HandleSet getHandleSet(final int keylength, final int space) {
         return new HandleSet(keylength, this, space);
     }
-    
+
+    @Override
     public boolean wellformed(final byte[] a) {
         return true;
     }
-    
+
+    @Override
     public boolean wellformed(final byte[] a, final int astart, final int alength) {
         return true;
     }
-    
+
+    @Override
     public final Order<byte[]> clone() {
         final NaturalOrder o = new NaturalOrder(this.asc);
         o.rotate(this.zero);
         return o;
     }
-    
+
     public static ByteOrder orderBySignature(final String signature) {
         ByteOrder oo = null;
         if (oo == null) oo = NaturalOrder.bySignature(signature);
@@ -66,30 +73,32 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         if (oo == null) oo = new NaturalOrder(true);
         return oo;
     }
-    
+
     public final static ByteOrder bySignature(final String signature) {
         if (signature.equals("nd")) return new NaturalOrder(false);
         if (signature.equals("nu")) return new NaturalOrder(true);
         return null;
     }
-    
+
+    @Override
     public final String signature() {
-        if (!asc) return "nd";
-        if ( asc) return "nu";
+        if (!this.asc) return "nd";
+        if ( this.asc) return "nu";
         return null;
     }
-    
-    private final static long cardinalI(final byte[] key, int off, int len) {
+
+    private final static long cardinalI(final byte[] key, int off, final int len) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
-        int lim = off + Math.min(8, len);
-        int lim8 = off + 8;
+        final int lim = off + Math.min(8, len);
+        final int lim8 = off + 8;
         while (off < lim) c = (c << 8) | ((long) key[off++] & 0xFF);
         while (off++ < lim8) c = (c << 8);
         c = c >>> 1;
         return c;
     }
-    
+
+    @Override
     public final long cardinal(final byte[] key) {
         if (this.zero == null) return cardinalI(key, 0, key.length);
         final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
@@ -97,15 +106,16 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
-    
-    public long cardinal(final byte[] key, int off, int len) {
+
+    @Override
+    public long cardinal(final byte[] key, final int off, final int len) {
         if (this.zero == null) return cardinalI(key, off, len);
         final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
         final long keyCardinal = cardinalI(key, off, len);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
-    
+
     public final static byte[] encodeLong(long c, int length) {
         final byte[] b = new byte[length];
         while (length > 0) {
@@ -130,7 +140,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         while (p < s.length) c = (c << 8) | ((long) s[p++] & 0xFF);
         return c;
     }
-    
+
     public final static long decodeLong(final byte[] s, int offset, final int length) {
         if (s == null) return 0;
         long c = 0;
@@ -142,41 +152,59 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
     private static final int sig(final int x) {
         return (x > 0) ? 1 : (x < 0) ? -1 : 0;
     }
-    
+
     // Compares its two arguments for order.
     // Returns -1, 0, or 1 as the first argument
     // is less than, equal to, or greater than the second.
     // two arrays are also equal if one array is a subset of the other's array
     // with filled-up char(0)-values
+    @Override
     public final int compare(final byte[] a, final byte[] b) {
         if (a.length == b.length) {
-            return (asc) ? compare0(a, 0, b, 0, a.length) : compare0(b, 0, a, 0, a.length);
+            return (this.asc) ? compare0(a, b, a.length) : compare0(b, 0, a, 0, a.length);
         }
-        int length = Math.min(a.length, b.length);
-        if (asc) {
-            int c = compare0(a, 0, b, 0, length);
+        final int length = Math.min(a.length, b.length);
+        if (this.asc) {
+            final int c = compare0(a, b, length);
             if (c != 0) return c;
             return (a.length > b.length) ? 1 : -1;
         }
-        int c = compare0(b, 0, a, 0, length);
+        final int c = compare0(b, a, length);
         if (c != 0) return c;
         return (a.length > b.length) ? -1 : 1;
     }
 
-    public final int compare(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
-        return (asc) ? compare0(a, aoffset, b, boffset, length) : compare0(b, boffset, a, aoffset, length);
+    @Override
+    public final int compare(final byte[] a, final byte[] b, final int length) {
+        return (this.asc) ? compare0(a, b, length) : compare0(b, a, length);
     }
 
-    public final int compare0(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
-        if (zero == null) return compares(a, aoffset, b, boffset, length);
+    @Override
+    public final int compare(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
+        return (this.asc) ? compare0(a, aoffset, b, boffset, length) : compare0(b, boffset, a, aoffset, length);
+    }
+
+    private final int compare0(final byte[] a, final byte[] b, final int length) {
+        if (this.zero == null) return compares(a, b, length);
         // we have an artificial start point. check all combinations
-        assert length == zero.length;
-        final int az = compares(a, aoffset, zero, 0, length); // -1 if a < z; 0 if a == z; 1 if a > z
-        final int bz = compares(b, boffset, zero, 0, length); // -1 if b < z; 0 if b == z; 1 if b > z
+        assert length == this.zero.length;
+        final int az = compares(a, this.zero, length); // -1 if a < z; 0 if a == z; 1 if a > z
+        final int bz = compares(b, this.zero, length); // -1 if b < z; 0 if b == z; 1 if b > z
+        if (az == bz) return compares(a, b, length);
+        return sig(az - bz);
+    }
+
+    private final int compare0(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
+        if (this.zero == null) return compares(a, aoffset, b, boffset, length);
+        // we have an artificial start point. check all combinations
+        assert length == this.zero.length;
+        final int az = compares(a, aoffset, this.zero, 0, length); // -1 if a < z; 0 if a == z; 1 if a > z
+        final int bz = compares(b, boffset, this.zero, 0, length); // -1 if b < z; 0 if b == z; 1 if b > z
         if (az == bz) return compares(a, aoffset, b, boffset, length);
         return sig(az - bz);
     }
 
+    @Override
     public final boolean equal(final byte[] a, final byte[] b) {
         if ((a == null) && (b == null)) return true;
         if ((a == null) || (b == null)) return false;
@@ -189,7 +217,8 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         }
         return true;
     }
-    
+
+    @Override
     public final boolean equal(final byte[] a, int astart, final byte[] b, int bstart, int length) {
         if ((a == null) && (b == null)) return true;
         if ((a == null) || (b == null)) return false;
@@ -198,8 +227,23 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         }
         return true;
     }
-   
-    public static final int compares(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
+
+    private static final int compares(final byte[] a, final byte[] b, final int length) {
+        int i = 0;
+        int aa, bb;
+        while (i < length) {
+            aa = 0xff & a[i];
+            bb = 0xff & b[i];
+            if (aa > bb) return 1;
+            if (aa < bb) return -1;
+            // else the bytes are equal and it may go on yet undecided
+            i++;
+        }
+        // they are equal
+        return 0;
+    }
+
+    private static final int compares(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
         int i = 0;
         int aa, bb;
         while (i < length) {
@@ -224,7 +268,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         sb.append(']');
         return sb.toString();
     }
-    
+
     public static final String table(final byte[] b, final int linewidth) {
         if (b == null) return "NULL";
         if (b.length == 0) return "[]";
@@ -240,36 +284,39 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         sb.append('\n');
         return sb.toString();
     }
-    
-    public static Iterator<Long> LongIterator(Iterator<byte[]> b256Iterator) {
+
+    public static Iterator<Long> LongIterator(final Iterator<byte[]> b256Iterator) {
         return new LongIter(b256Iterator);
     }
-    
+
     public static class LongIter implements Iterator<Long> {
 
         private final Iterator<byte[]> b256Iterator;
-        
-        public LongIter(Iterator<byte[]> b256Iterator) {
+
+        public LongIter(final Iterator<byte[]> b256Iterator) {
             this.b256Iterator = b256Iterator;
         }
-        
+
+        @Override
         public boolean hasNext() {
             return this.b256Iterator.hasNext();
         }
 
+        @Override
         public Long next() {
-            byte[] b = this.b256Iterator.next();
+            final byte[] b = this.b256Iterator.next();
             assert (b != null);
             if (b == null) return null;
             return Long.valueOf(decodeLong(b));
         }
 
+        @Override
         public void remove() {
             this.b256Iterator.remove();
         }
-        
+
     }
-    
+
     public static void main(final String[] args) {
         final byte[] t = new byte[12];
         for (int i = 0; i < 12; i++) t[i] = (byte) 255;
@@ -277,5 +324,5 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         final Order<byte[]> o = new NaturalOrder(true);
         System.out.println(o.partition(t, 16));
     }
-    
+
 }

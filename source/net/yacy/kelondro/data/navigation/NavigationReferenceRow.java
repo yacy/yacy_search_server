@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -28,7 +28,7 @@ package net.yacy.kelondro.data.navigation;
 
 import java.util.Collection;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
@@ -61,7 +61,7 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         },
         Base64Order.enhancedCoder
     );
-    
+
     // static properties
     private static final int col_navhash       =  0; // n 24 the navigation hash and reference hash b64-encoded
     private static final int col_count         =  1; // c the number of occurences
@@ -78,7 +78,7 @@ public final class NavigationReferenceRow extends AbstractReference implements N
     public  static final int flag_app_emphasized    = 6; // word is emphasized in text (i.e. bold, italics, special size)
 
     private final Row.Entry entry;
-    
+
     public NavigationReferenceRow(
             final byte[]   termhash,
             final byte[]   refhash,
@@ -86,48 +86,48 @@ public final class NavigationReferenceRow extends AbstractReference implements N
             final int      pos,
             final byte     flags
     ) {
-        assert (termhash.length == 12) : "termhash = " + UTF8.String(termhash);
-        assert (refhash.length == 12) : "refhash = " + UTF8.String(refhash);
+        assert (termhash.length == 12) : "termhash = " + ASCII.String(termhash);
+        assert (refhash.length == 12) : "refhash = " + ASCII.String(refhash);
         this.entry = navEntryRow.newEntry();
-        this.entry.setCol(col_navhash, UTF8.String(termhash) + UTF8.String(refhash), null);
+        this.entry.setCol(col_navhash, ASCII.String(termhash) + ASCII.String(refhash));
         this.entry.setCol(col_count, count);
         this.entry.setCol(col_pos, pos);
         this.entry.setCol(col_flags, flags);
     }
-    
+
     public NavigationReferenceRow(final byte[] row) {
         this.entry = navEntryRow.newEntry(row);
     }
-    
+
     public NavigationReferenceRow(final Row.Entry entry) {
         this.entry = entry;
     }
-    
+
     @Override
     public NavigationReferenceRow clone() {
         final byte[] b = new byte[navEntryRow.objectsize];
-        System.arraycopy(entry.bytes(), 0, b, 0, navEntryRow.objectsize);
+        System.arraycopy(this.entry.bytes(), 0, b, 0, navEntryRow.objectsize);
         return new NavigationReferenceRow(b);
     }
 
     public String toPropertyForm() {
-        return entry.toPropertyForm(true, true, false);
+        return this.entry.toPropertyForm('=', true, true, false, false);
     }
-    
+
     public Entry toKelondroEntry() {
         return this.entry;
     }
 
     public String navigationHash() {
-        return this.entry.getColString(col_navhash, null);
+        return this.entry.getColASCII(col_navhash);
     }
 
-    public byte[] metadataHash() {
-        return navigationHash().substring(12).getBytes();
+    public byte[] urlhash() {
+        return ASCII.getBytes(navigationHash().substring(12));
     }
 
     public byte[] termHash() {
-        return navigationHash().substring(0, 12).getBytes();
+        return ASCII.getBytes(navigationHash().substring(0, 12));
     }
 
     public int hitcount() {
@@ -138,35 +138,35 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         assert p == 0 : "p = " + p;
         return (int) this.entry.getColLong(col_pos);
     }
-    
+
     public byte flags() {
         return (byte) this.entry.getColLong(col_flags);
     }
- 
+
     @Override
     public String toString() {
         return toPropertyForm();
     }
-    
+
     @Override
     public int hashCode() {
-        return this.navigationHash().hashCode();
+        return navigationHash().hashCode();
     }
-    
+
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof NavigationReferenceRow)) return false;
-        NavigationReferenceRow other = (NavigationReferenceRow) obj;
-        return this.navigationHash().equals(other.navigationHash());
+        final NavigationReferenceRow other = (NavigationReferenceRow) obj;
+        return navigationHash().equals(other.navigationHash());
     }
-    
+
     public boolean isOlder(final Reference other) {
         return false;
     }
 
-    
+
     // unsupported operations:
 
     public void join(final Reference oe) {
@@ -180,5 +180,5 @@ public final class NavigationReferenceRow extends AbstractReference implements N
     public Collection<Integer> positions() {
         throw new UnsupportedOperationException();
     }
-    
+
 }

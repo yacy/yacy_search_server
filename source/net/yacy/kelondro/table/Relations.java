@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -44,7 +45,7 @@ public class Relations {
     private HashMap<String, Index> relations;
     private final boolean useTailCache;
     private final boolean exceed134217727;
-    
+
     public Relations(
     		final File location,
             final boolean useTailCache,
@@ -53,20 +54,20 @@ public class Relations {
         this.useTailCache = useTailCache;
         this.exceed134217727 = exceed134217727;
     }
-    
+
     private static Row rowdef(String filename) {
         int p = filename.lastIndexOf('.');
         if (p >= 0) filename = filename.substring(0, p);
         p = filename.lastIndexOf('-');
         assert p >= 0;
-        final int payloadsize = Integer.parseInt(filename.substring(p + 1));
+        final int payloadsize = NumberTools.parseIntDecSubstring(filename, p + 1);
         filename = filename.substring(0, p);
         p = filename.lastIndexOf('-');
         assert p >= 0;
-        final int keysize = Integer.parseInt(filename.substring(p + 1));
+        final int keysize = NumberTools.parseIntDecSubstring(filename, p + 1);
         return rowdef(keysize, payloadsize);
     }
-    
+
     private static Row rowdef(final int keysize, final int payloadsize) {
         return new Row(
                 "byte[] key-" + keysize + ", " +
@@ -75,17 +76,17 @@ public class Relations {
                 "byte[] node-" + payloadsize,
                 NaturalOrder.naturalOrder);
     }
-    
+
     private static String filename(final String tablename, final int keysize, final int payloadsize) {
         return tablename + "-" + keysize + "-" + payloadsize + ".eco";
     }
-    
+
     public void declareRelation(final String name, final int keysize, final int payloadsize) throws RowSpaceExceededException {
         // try to get the relation from the relation-cache
-        final Index relation = relations.get(name);
+        final Index relation = this.relations.get(name);
         if (relation != null) return;
         // try to find the relation as stored on file
-        final String[] list = baseDir.list();
+        final String[] list = this.baseDir.list();
         final String targetfilename = filename(name, keysize, payloadsize);
         for (int i = 0; i < list.length; i++) {
             if (list[i].startsWith(name)) {
@@ -94,11 +95,11 @@ public class Relations {
                 if (row.primaryKeyLength != keysize || row.column(1).cellwidth != payloadsize) continue; // a wrong table
                 Index table;
                 try {
-                    table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
-                } catch (RowSpaceExceededException e) {
-                    table = new Table(new File(baseDir, list[i]), row, 0, 0, false, this.exceed134217727);
+                    table = new Table(new File(this.baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727, true);
+                } catch (final RowSpaceExceededException e) {
+                    table = new Table(new File(this.baseDir, list[i]), row, 0, 0, false, this.exceed134217727, true);
                 }
-                relations.put(name, table);
+                this.relations.put(name, table);
                 return;
             }
         }
@@ -106,42 +107,42 @@ public class Relations {
         final Row row = rowdef(keysize, payloadsize);
         Index table;
         try {
-            table = new Table(new File(baseDir, targetfilename), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
-        } catch (RowSpaceExceededException e) {
-            table = new Table(new File(baseDir, targetfilename), row, 0, 0, false, this.exceed134217727);
+            table = new Table(new File(this.baseDir, targetfilename), row, 1024*1024, 0, this.useTailCache, this.exceed134217727, true);
+        } catch (final RowSpaceExceededException e) {
+            table = new Table(new File(this.baseDir, targetfilename), row, 0, 0, false, this.exceed134217727, true);
         }
-        relations.put(name, table);
+        this.relations.put(name, table);
     }
-    
+
     public Index getRelation(final String name) throws RowSpaceExceededException {
         // try to get the relation from the relation-cache
-        final Index relation = relations.get(name);
+        final Index relation = this.relations.get(name);
         if (relation != null) return relation;
         // try to find the relation as stored on file
-        final String[] list = baseDir.list();
-        for (int i = 0; i < list.length; i++) {
-            if (list[i].startsWith(name)) {
-                final Row row = rowdef(list[i]);
+        final String[] list = this.baseDir.list();
+        for (final String element : list) {
+            if (element.startsWith(name)) {
+                final Row row = rowdef(element);
                 Index table;
                 try {
-                    table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
-                } catch (RowSpaceExceededException e) {
-                    table = new Table(new File(baseDir, list[i]), row, 0, 0, false, this.exceed134217727);
+                    table = new Table(new File(this.baseDir, element), row, 1024*1024, 0, this.useTailCache, this.exceed134217727, true);
+                } catch (final RowSpaceExceededException e) {
+                    table = new Table(new File(this.baseDir, element), row, 0, 0, false, this.exceed134217727, true);
                 }
-                relations.put(name, table);
+                this.relations.put(name, table);
                 return table;
             }
         }
         // the relation does not exist
         return null;
     }
-    
+
     public String putRelation(final String name, final String key, final String value) throws IOException, RowSpaceExceededException {
-        final byte[] r = putRelation(name, key.getBytes(), value.getBytes());
+        final byte[] r = putRelation(name, UTF8.getBytes(key), UTF8.getBytes(value));
         if (r == null) return null;
         return UTF8.String(r);
     }
-    
+
     public byte[] putRelation(final String name, final byte[] key, final byte[] value) throws IOException, RowSpaceExceededException {
         final Index table = getRelation(name);
         if (table == null) return null;
@@ -154,27 +155,27 @@ public class Relations {
         if (oldentry == null) return null;
         return oldentry.getColBytes(3, true);
     }
-    
+
     public String getRelation(final String name, final String key) throws IOException, RowSpaceExceededException {
-        final byte[] r = getRelation(name, key.getBytes());
+        final byte[] r = getRelation(name, UTF8.getBytes(key));
         if (r == null) return null;
         return UTF8.String(r);
     }
-    
+
     public byte[] getRelation(final String name, final byte[] key) throws IOException, RowSpaceExceededException {
         final Index table = getRelation(name);
         if (table == null) return null;
-        final Row.Entry entry = table.get(key);
+        final Row.Entry entry = table.get(key, false);
         if (entry == null) return null;
         return entry.getColBytes(3, true);
     }
-    
+
     public boolean hasRelation(final String name, final byte[] key) throws RowSpaceExceededException {
         final Index table = getRelation(name);
         if (table == null) return false;
         return table.has(key);
     }
-    
+
     public byte[] removeRelation(final String name, final byte[] key) throws IOException, RowSpaceExceededException {
         final Index table = getRelation(name);
         if (table == null) return null;
@@ -182,7 +183,7 @@ public class Relations {
         if (entry == null) return null;
         return entry.getColBytes(3, true);
     }
-    
+
     public static void main(final String args[]) {
         final Relations r = new Relations(new File("/Users/admin/"), true, true);
         try {
@@ -192,9 +193,9 @@ public class Relations {
             r.putRelation(table1, "abcdefg", "eineintrag");
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
         }
     }
-    
+
 }

@@ -1,4 +1,30 @@
-    "navigation": [#(nav-domains)#::
+    "navigation": [#(nav-filetypes)#::
+    {
+      "facetname": "filetypes",
+      "displayname": "Filetype",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-filetypes)##(nav-protocols)#::
+    {
+      "facetname": "protocols",
+      "displayname": "Protocol",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-protocols)##(nav-domains)#::
     {
       "facetname": "domains",
       "displayname": "Domains",
@@ -8,7 +34,7 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     },#(/nav-domains)##(nav-namespace)#::
@@ -21,7 +47,7 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     },#(/nav-namespace)##(nav-authors)#::
@@ -34,10 +60,23 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-authors)##(nav-topics)#::
+    },#(/nav-authors)##{nav-vocabulary}#
+    {
+      "facetname": "#[navname]#",
+      "displayname": "#[navname]#",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#{/nav-vocabulary}##(nav-topics)#::
     {
       "facetname": "topics",
       "displayname": "Topics",
@@ -47,8 +86,9 @@
       "mean": "0",
       "elements": [
 #{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
     }#(/nav-topics)#
-    ]
+    ],
+    "totalResults": "#[num-results_totalcount]#"

@@ -2,12 +2,14 @@ function xmlhttpPost() {
     var searchform = document.forms['searchform'];
     var rsslink = document.getElementById("rsslink");
     if (rsslink != null) rsslink.href="yacysearch.rss?query=" + searchform.query.value;
-    search(searchform.query.value);
+    search(searchform.query.value, searchform.maximumRecords.value, searchform.startRecord.value);
 }
 
 // static variables
 var start = new Date();
 var query = "";
+var maximumRecords = "1000";
+var startRecord = "0";
 var searchresult;
 var totalResults = 0;
 var filetypes;
@@ -16,8 +18,14 @@ var script = "";
 var modifier = "";
 var modifiertype = "";
 
-function search(search) {
+function search(search, count, offset) {
+  var navhtml = document.getElementById("searchnavigation");
+  if (navhtml != null) navhtml.innerHTML = "<div>loading from local index...</div>";
   query = search;
+  maximumRecords = count;
+  if (count == "") maximumRecords = 100;
+  startRecord = offset;
+  if (offset == "") startRecord = 0;
   start = new Date();
   if (query == null || query == "") {
     return;
@@ -28,7 +36,7 @@ function search(search) {
   } else if (window.ActiveXObject) { // IE
     self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
   }
-  self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&maximumRecords=1000&nav=all&query=" + query, true);
+  self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&nav=all&contentdom=all&maximumRecords=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
   self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {
@@ -45,6 +53,7 @@ function navget(list, name) {
 }
 
 function preparepage(str) {
+  document.getElementById("searchnavigation").innerHTML = "<div>parsing result...</div>";
   var raw = document.getElementById("raw");
   if (raw != null) raw.innerHTML = str;
   var rsp = eval("(" + str + ")");
@@ -63,11 +72,15 @@ function preparepage(str) {
 
 
   if (modifiertype == "png" || modifiertype == "gif" || modifiertype == "jpg") {
-    document.getElementById("searchresults").innerHTML = resultImages();
+    var tt = resultImages();
+    document.getElementById("searchresults").innerHTML = tt;
   } else {
-    document.getElementById("searchresults").innerHTML = resultList();
+    var tt = resultList();
+    document.getElementById("searchresults").innerHTML = tt;
   }
-  document.getElementById("searchnavigation").innerHTML = resultNavigation();
+  var tt = resultNavigation();
+  document.getElementById("searchnavigation").innerHTML = tt;
+  document.getElementById("serverlist").innerHTML = "";
   hideDownloadScript();
 }
 
@@ -84,18 +97,26 @@ function hideDownloadScript() {
 
 function resultNavigation() {
   var html = "";
+  if (searchresult.length > totalResults) totalResults = searchresult.length;
   if (totalResults > 0) {
-      html += "<div>" + searchresult.length + " results from a total of " + totalResults + " docs in index (not showing offline resources); search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds.&nbsp;";
-      html += "<div id=\"downloadbutton\" style=\"inline\"></div></div>";
+      html += "<div>" + searchresult.length + " results from a total of " + totalResults + " docs in index; search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds.&nbsp;";
+      html += "<div style=\"clear:left\">";
+      html += "<div style=\"display:inline\" id=\"downloadbutton\"></div>";
+      if (maximumRecords != 10 && totalResults >= 10) html += "<input type=\"button\" value=\"10 results\" onClick=\"window.location.href='/yacyinteractive.html?query=" + query + "&startRecord=" + startRecord + "&maximumRecords=10'\"/>";
+      if (maximumRecords != 100 && totalResults >= 100) html += "<input type=\"button\" value=\"100 results\" onClick=\"window.location.href='/yacyinteractive.html?query=" + query + "&startRecord=" + startRecord + "&maximumRecords=100'\"/>";
+      if (maximumRecords != 1000 && totalResults >= 1000) html += "<input type=\"button\" value=\"1000 results\" onClick=\"window.location.href='/yacyinteractive.html?query=" + query + "&startRecord=" + startRecord + "&maximumRecords=1000'\"/>";
+      if (totalResults <= 10000 && maximumRecords < totalResults) html += "<input type=\"button\" value=\"all results\" onClick=\"window.location.href='/yacyinteractive.html?query=" + query + "&startRecord=" + startRecord + "&maximumRecords=" + Math.max(100,totalResults) + "'\"/>";
+      html += "</div>"; // for inline
+      html += "</div>"; // for result statistic wrapper
   } else {
       if (query == "") {
          html += "please enter some search words<br\>or use the following predefined search queries:<br\>";
          html += "find images: ";
-         html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=png+filetype:png\">png</a>),";
-         html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=gif+filetype:gif\">gif</a>),";
-         html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=jpg+filetype:jpg\">jpg</a>)<br>";
+         html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=png+filetype:png&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">png</a>),";
+         html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=gif+filetype:gif&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">gif</a>),";
+         html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=jpg+filetype:jpg&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">jpg</a>)<br>";
          html += "list: ";
-         html += "<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=pdf+/date+filetype:pdf\">recent pdf</a><br>";
+         html += "<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=pdf+/date+filetype:pdf&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">recent pdf</a><br>";
          //html += "<iframe src=\"rssTerminal.html?set=LOCALINDEXING&amp;width=600px&amp;height=180px&amp;maxlines=20&amp;maxwidth=120\" ";
          //html += "style=\"width:600px;height:180px;margin:0px;\" scrolling=\"no\" name=\"newsframe\"></iframe>";
       } else {
@@ -107,7 +128,7 @@ function resultNavigation() {
   var extnav = "";
   for (var key in filetypes) {
       if (filetypes[key] > 0)  {
-        extnav += "<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query + "+filetype:" + key + "\">" + key + "</a>(" + filetypes[key] + ")&nbsp;&nbsp;";
+        extnav += "<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query + "+filetype:" + key + "&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">" + key + "</a>(" + filetypes[key] + ")&nbsp;&nbsp;";
       }
   }
   if (extnav.length > 0) {
@@ -115,7 +136,7 @@ function resultNavigation() {
   } else {
       // check if there is a filetype constraint and offer a removal
       if (modifier != "") {
-        html += "<span style=\"display:block\"><a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query.substring(0, query.length - 12) + "\">remove the filter '" + modifier + "'</a></span>";
+        html += "<span style=\"display:block\"><a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query.substring(0, query.length - 12) + "&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">remove the filter '" + modifier + "'</a></span>";
       }
   }
 
@@ -124,7 +145,7 @@ function resultNavigation() {
   if (topics && topics.length > 0) {
     var topwords = "";
     for (var i = 0; i < topics.elements.length; i++) {
-        topwords += "<a href=\"/yacyinteractive.html?query=" + query + "+" + topics.elements[i].name + "\">" + topics.elements[i].name + "</a> ";
+        topwords += "<a href=\"/yacyinteractive.html?query=" + query + "+" + topics.elements[i].name + "&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">" + topics.elements[i].name + "</a> ";
         if (i > 10) break;
     }
     html += "&nbsp;&nbsp;&nbsp;topwords: " + topwords;
@@ -136,6 +157,7 @@ function resultNavigation() {
 function resultList() {
   var html = "";
   if (searchresult.length > 0) {
+    document.getElementById("searchnavigation").innerHTML = "<div>found " + searchresult.length + " documents, preparing table...</div>";
     html += "<table class=\"sortable\" id=\"sortable\" border=\"0\" cellpadding=\"0\" cellspacing=\"1\" width=\"99%\">";
     html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"10\">count</td><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"260\">Path</td><td width=\"360\">Name</td><td width=\"60\">Size</td><td width=\"75\">Date</td></tr>";
     for (var i = 0; i < searchresult.length; i++) { html += resultLine("row", searchresult[i], i + 1); }
@@ -146,12 +168,15 @@ function resultList() {
 
 function resultImages() {
   var html = "";
+  document.getElementById("searchnavigation").innerHTML = "<div>found " + searchresult.length + " images, preparing...</div>";
   for (var i = 0; i < searchresult.length; i++) { html += resultLine("image", searchresult[i]); }
   return html;
 }
 
 function resultLine(type, item, linenumber) {
   // evaluate item
+  if (item == null) return "";
+  if (item.link == null) return "";
   p = item.link.indexOf("//");
   protocol = "";
   host = "";
@@ -193,13 +218,13 @@ function resultLine(type, item, linenumber) {
   // make table row
   var html = "";
   if (type == "row") {
-    html += "<tr class=\"TableCellLight\">";
+    html += "<tr class=\"TableCellDark\">";
     html += "<td align=\"left\">" + linenumber + "</td>";
     html += "<td align=\"left\">" + protocol + "</td>";
     html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>";
-    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + path + "</a></td>";
+    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + path + "/\">" + path + "</a></td>";
     html += "<td align=\"left\"><a href=\"" + item.link + "\">" + title + "</a></td>";
-    html += "<td align=\"right\">" + item.sizename + "</td>";
+    if (item.sizename == "-1 bytes") html += "<td></td>"; else html += "<td align=\"right\">" + item.sizename + "</td>";
     //html += "<td>" + item.description + "</td>";
     html += "<td align=\"right\">" + pd + "</td>";
     html += "</tr>";
@@ -207,7 +232,8 @@ function resultLine(type, item, linenumber) {
   if (type == "image") {
     html += "<div style=\"float:left\">";
     html += "<a href=\"" + item.link + "\" class=\"thumblink\" onclick=\"return hs.expand(this)\">";
-    html += "<img src=\"/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=" + item.code + "\" alt=\"" + title + "\" />";
+    //html += "<img src=\"/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=" + item.code + "\" alt=\"" + title + "\" />";
+    html += "<img src=\"" + item.link + "\" width=\"96\" height=\"96\" alt=\"" + title + "\" />";
     html += "</a>";
     var name = title;
     while ((p = name.indexOf("/")) >= 0) { name = name.substring(p + 1); }

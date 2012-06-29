@@ -1,5 +1,6 @@
 package de.anomic.yacy;
 
+import net.yacy.peers.operation.yacyVersion;
 import junit.framework.TestCase;
 
 public class yacyVersionTest extends TestCase {

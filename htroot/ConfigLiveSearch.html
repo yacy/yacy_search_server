@@ -8,37 +8,74 @@
   <body id="ConfigSkins">
     #%env/templates/header.template%#
     #%env/templates/submenuPortalIntegration.template%#
-    <h2>Integration of a Search Field for Live Search</h2>
+    <h2>Integration of Live Search with YaCy Search Widget</h2>
     <p>
       A 'Live-Search' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page.
       This is the same function as can be seen on all pages of the YaCy online-interface (look at the window in the upper right corner).
-      Just use the code snippet below to integrate that in your own web pages.
-      Please check if the address, as given in the example '#[ip]#:#[port]#' here is correct and replace it with more appropriate values if necessary.
+    </p>
+    <p>  
+      There are basically two methods for integrating the YaCy Search Widget with your web site.
+    <ol>
+      <li>Static hosting of widget on own HTTP server</li>
+      <li>Remote access through selected YaCy Peer</li>
+    </ol>           
     </p>
 
-<h4>Code Snippet:</h4>
+<h4>Static hosting of widget on own HTTP server</h4>
+Advantages:
+<ul>
+<li>faster connection speed</li>
+<li>possibility for local adaptions</li>
+</ul>
+Disadvantages:
+<ul>
+<li>No automatic update to future releases of YaCy Search Widget</li>
+<li>Ajax/JSONP cross domain requests needed to query remote YaCy Peer</li>
+</ul>
+Installing:
+<ul>
+<li>download yacy-portalsearch.tar.gz from <a href="http://yacy.net/" target="_blank">http://yacy.net</a> </li>
+<li>unpack within your HTTP servers path</li>
+<li>use ./yacy/portalsearch/yacy-portalsearch.html as reference for integration with your own portal page</li>
+</ul>
+<h4>Remote access through selected YaCy Peer</h4>
+Advantages:
+<ul>
+<li>Always latest version of YaCy Search Widget</li>
+<li>No Ajax/JSONP cross domain requests, as Search Widget and YaCy Peer are hosted on the same domain.</li>
+</ul>
+Disadvantages:
+<ul>
+<li>Under certain cirumstances slower than static hosting</li>
+</ul>
+Installing:
+<ul>
+<li>Just use the code snippet below and paste it any place in your own portal page</li>
+<li>Please check if '#[ip]#:#[port]#' is appropriate or replace it with address of the YaCy Peer holding your index</li>
+</ul>
+
 <pre>
-&lt;script src="http://#[ip]#:#[port]#/yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="http://#[ip]#:#[port]#/jquery/js/jquery-1.7.min.js" type="text/javascript" type="text/javascript"&gt;&lt;/script&gt;
 &lt;script&gt;			
 	$(document).ready(function() {
 		yconf = {
-			url    : 'http://#[ip]#:#[port]#',
-			logo   : '/yacy/ui/img/yacy-logo.png',
-			link   : 'http://www.yacy.net',
-			global : false,
-			width  : 500,
-			height : 620,
+			url      : 'http://#[ip]#:#[port]#',
+			title    : 'YaCy Search Widget',
+			logo     : '/yacy/ui/img/yacy-logo.png',
+			link     : 'http://www.yacy.net',
+			global   : false,
+			width    : 500,
+			height   : 600,
 			position : ['top',30],
-			theme  : 'start',
-			title  : 'YaCy Portal Search'
+			theme    : 'start'
 		};
-		$.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
+		$.getScript(yconf.url+'/portalsearch/yacy-portalsearch.js', function(){});
 	});
 &lt;/script&gt;
 &lt;div id="yacylivesearch"&gt;
 	&lt;form id="ysearch" method="get" accept-charset="UTF-8" action="http://#[ip]#:#[port]#/yacysearch.html"&gt;
 		Live Search &lt;input name="query" id="yquery" class="fancy" type="text" size="15" maxlength="80" value=""/&gt;
-		&lt;input type="hidden" name="verify" value="true" /&gt;
+		&lt;input type="hidden" name="verify" value="cacheonly" /&gt;
 		&lt;input type="hidden" name="maximumRecords" value="20" /&gt;
 		&lt;input type="hidden" name="resource" value="local" /&gt;
 		&lt;input type="hidden" name="urlmaskfilter" value=".*" /&gt;
@@ -52,15 +89,15 @@
 <h4>Configuration options and defaults for 'yconf':</h4>
 <h5>Defaults</h5>
 <form action=""><dl>
-<dt>url</dt><dd>is a mandatory property - no default</dd>
+<dt>url</dt><dd>http://localhost:8090</dd>
 <dt>global</dt><dd>false</dd>
 <dt>theme</dt><dd>'start'</dd>
-<dt>title</dt><dd>'YaCy P2P Web Search'</dd>
+<dt>title</dt><dd>'YaCy Search Widget'</dd>
 <dt>logo</dt><dd>'/yacy/ui/img/yacy-logo.png'</dd>
 <dt>link</dt><dd>'http://www.yacy.net'</dd>
-<dt>width</dt><dd>420</dd>
-<dt>height</dt><dd>500</dd>
-<dt>position</dt><dd>['top',50]</dd>
+<dt>width</dt><dd>640</dd>
+<dt>height</dt><dd>640</dd>
+<dt>position</dt><dd>[150,50]</dd>
 <dt>modal</dt><dd>false</dd>
 <dt>resizable</dt><dd>true</dd>
 <dt>show</dt><dd>''</dd>
@@ -79,30 +116,19 @@ If resizable is set to true, the dialog will be resizeable.
 </p>
 <h5>Load JavaScript load_js (true | false)</h5>
 <p>
-If load_js is set to false, you have to manually load the needed JavaScript on your portal page. This can help to avoid timing problems or double loading.
+This parameter is used for static hosting only.
 </p>
-<pre>
-&lt;script src="/yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"&gt;&lt;/script&gt;    
-&lt;script src="/yacy/ui/js/jquery-ui-1.7.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
-&lt;script src="/yacy/ui/js/jquery.dimensions.min.js"&gt;&lt;/script&gt;
-&lt;script src="/yacy/ui/js/jquery.query.js"&gt;&lt;/script&gt;
-&lt;script src="/yacy/ui/js/jquery.form.js"&gt;&lt;/script&gt;
-&lt;script src="/yacy/ui/js/jquery.field.min.js"&gt;&lt;/script&gt;
-</pre>
 <h5>Load Stylesheets load_css (true | false)</h5>
 <p>
-If load_css is set to false, you have to manually load the needed CSS on your portal page. This can help to avoid timing problems or double loading.
+This parameter is used for static hosting only.
 </p>
-<pre>
-&lt;link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.base.css" rel="stylesheet" /&gt;	
-&lt;link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" /&gt;
-&lt;link media="screen" type="text/css" href="/yacy/ui/css/yacyui-portalsearch.css" rel="stylesheet" /&gt;
-</pre>
 <h5>Themes</h5>
-<p>You can <a href="http://jquery-ui.googlecode.com/files/jquery-ui-themes-1.7.zip" target="_blank">
-download</a> ready made themes or <a href="http://jqueryui.com/themeroller/" target="_blank">create</a> 
-your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/</p>			
-	
+<p>You can download standard jquery-ui themes or create your own custom themes on 
+<a href="http://jqueryui.com/" target="_blank">
+http://jqueryui.com/</a> 
+<br/>Themes are installed in ./yacy/jquery/themes/ (static hosting) or in DATA/HTDOCS/jquery/themes/ on remote YaCy Peer.
+YaCy ships with 'start' and 'smoothness' themes pre-installed.</p>			
+
     #%env/templates/footer.template%#
   </body>
 </html>

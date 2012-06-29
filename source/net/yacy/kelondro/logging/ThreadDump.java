@@ -26,58 +26,64 @@
 package net.yacy.kelondro.logging;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.OS;
 import de.anomic.tools.nxTools;
 
-public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> implements Map<ThreadDump.Thread, List<String>> {
+public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> implements Map<ThreadDump.StackTrace, List<String>> {
 
     private static final long serialVersionUID = -5587850671040354397L;
 
-    public class Thread {
-        public String name;
-        public Thread(final String name) {
-            this.name = name;
+    private static final String multiDumpFilter = ".*((java.net.DatagramSocket.receive)|(java.lang.Thread.getAllStackTraces)|(java.net.SocketInputStream.read)|(java.net.ServerSocket.accept)|(java.net.Socket.connect)).*";
+    private static final Pattern multiDumpFilterPattern = Pattern.compile(multiDumpFilter);
+
+    public static class StackTrace {
+        public String text;
+        public Thread.State state;
+        public StackTrace(final String text, final Thread.State state) {
+            this.state = state;
+            this.text = text;
         }
         @Override
-        public boolean equals(Object a) {
-            return (a != null && a instanceof Thread && this.name.equals(((Thread) a).name));
+        public boolean equals(final Object a) {
+            return (a != null && a instanceof StackTrace && this.text.equals(((StackTrace) a).text));
         }
-        public boolean equals(Thread a) {
-            return (a != null && this.name.equals(a.name));
+        public boolean equals(final StackTrace a) {
+            return (a != null && this.text.equals(a.text));
         }
         @Override
         public int hashCode() {
-            return this.name.hashCode();
+            return this.text.hashCode();
         }
         @Override
         public String toString() {
-            return this.name;
+            return this.text;
         }
     }
-    
-    public class Lock {
+
+    public static class Lock {
         public String id;
         public Lock(final String name) {
             this.id = name;
         }
         @Override
-        public boolean equals(Object a) {
+        public boolean equals(final Object a) {
             return (a != null && a instanceof Lock && this.id.equals(((Lock) a).id));
         }
-        public boolean equals(Lock a) {
+        public boolean equals(final Lock a) {
             return (a != null && this.id.equals(a.id));
         }
         @Override
@@ -90,31 +96,95 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
         }
     }
 
-    public static Map<java.lang.Thread, StackTraceElement[]> getAllStackTraces() {
-        return java.lang.Thread.getAllStackTraces();
+    public static Map<Thread, StackTraceElement[]> getAllStackTraces() {
+        return Thread.getAllStackTraces();
     }
-    
-    public ThreadDump(final File f) throws IOException {
-        this(new FileInputStream(f));
+
+    public static boolean canProduceLockedBy(final File logFile) {
+
+        // check os version
+        if (!OS.canExecUnix) return false;
+
+        // check if log file exists
+        if (!logFile.exists()) return false;
+
+        // check last modification date of log file
+        if (System.currentTimeMillis() - logFile.lastModified() > 60000) return false;
+
+        return true;
     }
-    
+
+    public ThreadDump(final File logFile) throws IOException {
+        super();
+
+        // try to get the thread dump from yacy.log which is available when YaCy is started with
+        // startYACY.sh -l
+        long sizeBefore = 0;
+        if (canProduceLockedBy(logFile)) {
+            sizeBefore = logFile.length();
+
+            // get the current process PID
+            final int pid = OS.getPID();
+
+            // call kill -3 on the pid
+            if (pid >= 0) try {OS.execSynchronous("kill -3 " + pid);} catch (final IOException e) {}
+        }
+
+        // read the log from the dump
+        final long sizeAfter = logFile.length();
+        if (sizeAfter <= sizeBefore) return;
+
+        final RandomAccessFile raf = new RandomAccessFile(logFile, "r");
+        raf.seek(sizeBefore);
+        final byte[] b = new byte[(int) (sizeAfter - sizeBefore)];
+        raf.readFully(b);
+        raf.close();
+
+        // import the thread dump;
+        importText(new ByteArrayInputStream(b));
+    }
+
     public ThreadDump(final InputStream is) throws IOException {
         super();
+        importText(is);
+    }
+
+    private static final String statestatement = "java.lang.Thread.State:";
+
+    public static Thread.State threadState(String line) {
+        int p = line.indexOf(statestatement);
+        if (p < 0) return null;
+        line = line.substring(p + statestatement.length()).trim();
+        p = line.indexOf(' ');
+        if (p >= 0) line = line.substring(0, p).trim();
+        try {
+            return Thread.State.valueOf(line);
+        } catch (final IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private void importText(final InputStream is) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String line;
         String thread = null;
         int p;
         List<String> list = new ArrayList<String>();
+        Thread.State state = null;
+        Thread.State state0;
         while ((line = br.readLine()) != null) {
+            state0 = threadState(line);
+            if (state0 != null) state = state0;
             if (line.isEmpty()) {
                 if (thread != null) {
-                    this.put(new ThreadDump.Thread(thread), list);
+                    put(new ThreadDump.StackTrace(thread, state), list);
                 }
                 list = new ArrayList<String>();
                 thread = null;
+                state = null;
                 continue;
             }
-            if (line.charAt(0) == '"' && (p = line.indexOf("\" prio=")) > 0) {
+            if (line.charAt(0) == '"' && (p = line.indexOf("\" prio=",0)) > 0) {
                 // start a new thread
                 thread = line.substring(1, p);
                 continue;
@@ -123,97 +193,23 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
                 list.add(line);
             }
         }
+        // recognize last thread
+        if (thread != null) {
+            put(new ThreadDump.StackTrace(thread, state), list);
+        }
     }
-    
-    public static void appendStackTraces(final File rootPath,
-            final StringBuilder buffer,
-            final Map<java.lang.Thread, StackTraceElement[]> stackTraces,
+
+    public ThreadDump(
+            final File appPath,
+            final Map<Thread, StackTraceElement[]> stackTraces,
             final boolean plain,
-            final java.lang.Thread.State stateIn)
-    {
-        bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
-        bufferappend(buffer, plain, "");
-        // collect single dumps
-        final Map<String, SortedSet<String>> dumps = dumpCollection(rootPath, stackTraces, plain, stateIn);
-        
-        // write dumps
-        for (final Entry<String, SortedSet<String>> entry: dumps.entrySet()) {
-            SortedSet<String> threads = entry.getValue();
-            for (final String t: threads) bufferappend(buffer, plain, t);
-            bufferappend(buffer, plain, entry.getKey());
-            bufferappend(buffer, plain, "");
-        }
-        bufferappend(buffer, plain, "");
-    }
-    
-    public static void appendStackTraceStats(final File rootPath,
-            final StringBuilder buffer,
-            final List<Map<java.lang.Thread, StackTraceElement[]>> traces,
-            final boolean plain,
-            final java.lang.Thread.State stateIn)
-    {
-        if (stateIn != null) {
-            bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
-            bufferappend(buffer, plain, "");
-        }
-        // collect single dumps
-        Map<String, Integer> dumps = dumpStatistic(rootPath, traces, plain, stateIn);
-        
-        // write dumps
-        while (!dumps.isEmpty()) {
-            final Entry<String, Integer> e = removeMax(dumps);
-            bufferappend(buffer, plain, "Occurrences: " + e.getValue());
-            bufferappend(buffer, plain, e.getKey());
-            //bufferappend(buffer, plain, "");
-        }
-        bufferappend(buffer, plain, "");
-    }
-    
-    private static Entry<String, Integer> removeMax(final Map<String, Integer> result) {
-        Entry<String, Integer> max = null;
-        for (final Entry<String, Integer> e: result.entrySet()) {
-            if (max == null || e.getValue().intValue() > max.getValue().intValue()) {
-                max = e;
-            }
-        }
-        result.remove(max.getKey());
-        return max;
-    }
-    
-    private static Map<String, Integer> dumpStatistic(final File rootPath,
-            final List<Map<java.lang.Thread,StackTraceElement[]>> stackTraces,
-            final boolean plain,
-            final java.lang.Thread.State stateIn)
-    {
-        final Map<String, Integer> result = new HashMap<String, Integer>();
-        Map<String, SortedSet<String>> x;
-        int count;
-        for (final Map<java.lang.Thread,StackTraceElement[]> trace: stackTraces) {
-            x = dumpCollection(rootPath, trace, plain, stateIn);
-            for (final Entry<String, SortedSet<String>> e: x.entrySet()) {
-                Integer c = result.get(e.getKey());
-                count = e.getValue().size();
-                if (c == null) result.put(e.getKey(), Integer.valueOf(count));
-                else {
-                    c = Integer.valueOf(c.intValue() + count);
-                    result.put(e.getKey(), c);
-                }
-            }
-        }
-        return result;
-    }
-    
-    private static Map<String, SortedSet<String>> dumpCollection(final File appPath,
-            final Map<java.lang.Thread,StackTraceElement[]> stackTraces,
-            final boolean plain,
-            final java.lang.Thread.State stateIn)
-    {
+            final Thread.State stateIn) {
+        super();
         final File classPath = new File(appPath, "source");
-  
-        java.lang.Thread thread;
+
+        Thread thread;
         // collect single dumps
-        final Map<String, SortedSet<String>> dumps = new HashMap<String, SortedSet<String>>();
-        for (final Entry<java.lang.Thread, StackTraceElement[]> entry: stackTraces.entrySet()) {
+        for (final Map.Entry<Thread, StackTraceElement[]> entry: stackTraces.entrySet()) {
             thread = entry.getKey();
             final StackTraceElement[] stackTraceElements = entry.getValue();
             StackTraceElement ste;
@@ -221,16 +217,16 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
             String tracename = "";
             File classFile;
             if ((stateIn == null || stateIn.equals(thread.getState())) && stackTraceElements.length > 0) {
-                StringBuilder sb = new StringBuilder(3000);
+                final StringBuilder sb = new StringBuilder(3000);
                 if (plain) {
                     classFile = getClassFile(classPath, stackTraceElements[stackTraceElements.length - 1].getClassName());
                     tracename = classFile.getName();
                     if (tracename.endsWith(".java")) tracename = tracename.substring(0, tracename.length() - 5);
                     if (tracename.length() > 20) tracename = tracename.substring(0, 20);
                     while (tracename.length() < 20) tracename = tracename + "_";
-                    tracename = "[" + tracename + "] ";                
-                }                
-                String threadtitle = tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString();
+                    tracename = "[" + tracename + "] ";
+                }
+                final String threadtitle = tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString();
                 String className;
                 boolean cutcore = true;
                 for (int i = 0; i < stackTraceElements.length; i++) {
@@ -254,21 +250,109 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
                     }
                 }
                 final String threaddump = sb.toString();
-                SortedSet<String> threads = dumps.get(threaddump);
-                if (threads == null) threads = new TreeSet<String>();
+                List<String> threads = get(threaddump);
+                if (threads == null) threads = new ArrayList<String>();
+                Thread.State state = null;
+                for (final String t: threads) {
+                    final int p = t.indexOf(statestatement);
+                    if (p >= 0) {
+                        state = Thread.State.valueOf(t.substring(p + statestatement.length()).trim());
+                    }
+                }
                 threads.add(threadtitle);
-                dumps.put(threaddump, threads);
+                put(new StackTrace(threaddump, state), threads);
             }
         }
-        return dumps;
     }
-    
+
+    public void appendStackTraces(
+            final StringBuilder buffer,
+            final boolean plain,
+            final Thread.State stateIn) {
+        bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
+        bufferappend(buffer, plain, "");
+
+        // write dumps
+        for (final Map.Entry<StackTrace, List<String>> entry: entrySet()) {
+            final List<String> threads = entry.getValue();
+            for (final String t: threads) bufferappend(buffer, plain, t);
+            bufferappend(buffer, plain, entry.getKey().text);
+            bufferappend(buffer, plain, "");
+        }
+        bufferappend(buffer, plain, "");
+    }
+
+    public void appendBlockTraces(
+            final StringBuilder buffer,
+            final boolean plain) {
+        bufferappend(buffer, plain, "THREADS WITH STATES: LOCK FOR OTHERS");
+        bufferappend(buffer, plain, "");
+
+        final Map<StackTrace, Integer> locks = countLocks();
+        for (int i = size() + 10; i > 0; i--) {
+            for (final Map.Entry<StackTrace, Integer> entry: locks.entrySet()) {
+                if (entry.getValue().intValue() == i) {
+                	bufferappend(buffer, plain, "holds lock for " + i + " threads:");
+                	final List<String> list = get(entry.getKey());
+                    if (list == null) continue;
+                    bufferappend(buffer, plain, "Thread= " + entry.getKey());
+                    for (final String s: list) bufferappend(buffer, plain, "  " + (plain ? s : s.replaceAll("<", "&lt;").replaceAll(">", "&gt;")));
+                    bufferappend(buffer, plain, "");
+                }
+            }
+        }
+        bufferappend(buffer, plain, "");
+    }
+
+
+    public static void appendStackTraceStats(
+            final File rootPath,
+            final StringBuilder buffer,
+            final List<Map<Thread, StackTraceElement[]>> stackTraces,
+            final boolean plain) {
+
+        // collect single dumps
+        final Map<String, Integer> dumps = new HashMap<String, Integer>();
+        ThreadDump x;
+        for (final Map<Thread, StackTraceElement[]> trace: stackTraces) {
+            x = new ThreadDump(rootPath, trace, plain, Thread.State.RUNNABLE);
+            for (final Map.Entry<StackTrace, List<String>> e: x.entrySet()) {
+                if (multiDumpFilterPattern.matcher(e.getKey().text).matches()) continue;
+                Integer c = dumps.get(e.getKey().text);
+                if (c == null) dumps.put(e.getKey().text, Integer.valueOf(1));
+                else {
+                    c = Integer.valueOf(c.intValue() + 1);
+                    dumps.put(e.getKey().text, c);
+                }
+            }
+        }
+
+        // write dumps
+        while (!dumps.isEmpty()) {
+            final Map.Entry<String, Integer> e = removeMax(dumps);
+            bufferappend(buffer, plain, "Occurrences: " + e.getValue());
+            bufferappend(buffer, plain, e.getKey());
+        }
+        bufferappend(buffer, plain, "");
+    }
+
+    private static Map.Entry<String, Integer> removeMax(final Map<String, Integer> result) {
+        Map.Entry<String, Integer> max = null;
+        for (final Map.Entry<String, Integer> e: result.entrySet()) {
+            if (max == null || e.getValue().intValue() > max.getValue().intValue()) {
+                max = e;
+            }
+        }
+        result.remove(max.getKey());
+        return max;
+    }
+
     private static File getClassFile(final File sourcePath, final String classname) {
         final String classPath = classname.replace('.', '/') + ".java";
         final File file = new File(sourcePath, classPath);
         return file;
     }
-    
+
     private static String getLine(final File file, final int line) {
         // find class
         if (!file.exists()) return "";
@@ -280,90 +364,118 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
             return "@EXCEPTION: " + e.getMessage();
         }
     }
-    
+
     public static void bufferappend(final StringBuilder buffer, final boolean plain, final String a) {
         buffer.append(a);
         buffer.append(plain ? "\n" : "<br />");
     }
-    
+
+
+    public List<Map.Entry<StackTrace, List<String>>> freerun() {
+        final List<Map.Entry<StackTrace, List<String>>> runner = new ArrayList<Map.Entry<StackTrace, List<String>>>();
+        runf: for (final Map.Entry<StackTrace, List<String>> entry: entrySet()) {
+            // check if the thread is locked or holds a lock
+            if (entry.getKey().state != Thread.State.RUNNABLE) continue runf;
+            for (final String s: entry.getValue()) {
+                if (s.indexOf("locked <") > 0 || s.indexOf("waiting to lock",0) > 0) continue runf;
+            }
+            runner.add(entry);
+        }
+        return runner;
+    }
+
     /**
      * find all locks in this dump
      * @return a map from lock ids to the name of the thread where the lock occurs
      */
-    public Map<Lock, Thread> locks() {
+    public Map<Lock, StackTrace> locks() {
         int p;
-        final Map<Lock, Thread> locks = new HashMap<Lock, Thread>();
-        for (final Map.Entry<Thread, List<String>> entry: this.entrySet()) {
+        final Map<Lock, StackTrace> locks = new HashMap<Lock, StackTrace>();
+        for (final Map.Entry<StackTrace, List<String>> entry: entrySet()) {
             for (final String s: entry.getValue()) {
-                if ((p = s.indexOf("locked <")) > 0) {
+                if ((p = s.indexOf("locked <",0)) > 0) {
                     locks.put(new Lock(s.substring(p + 8, s.indexOf('>'))), entry.getKey());
-                    
+
                 }
             }
         }
         return locks;
     }
-    
+
     /**
      * check if a thread is locked by another thread
      * @param threadName
      * @return the thread id if there is a lock or null if there is none
      */
-    public Lock lockedBy(final Thread threadName) {
+    public Lock lockedBy(final StackTrace threadName) {
         int p;
-        final List<String> list = this.get(threadName);
+        final List<String> list = get(threadName);
         if (list == null) return null;
         for (final String s: list) {
-            if ((p = s.indexOf("<")) > 0 && s.indexOf("locked <") < 0) {
+            if ((p = s.indexOf('<',0)) > 0 && s.indexOf("locked <",0) < 0) {
                 return new Lock(s.substring(p + 1, s.indexOf('>')));
             }
         }
         return null;
     }
-    
-    public Map<Thread, Integer> countLocks() {
-        final Map<Lock, Thread> locks = locks();
-        final Map<Thread, Integer> count = new HashMap<Thread, Integer>();
-        for (final Map.Entry<Lock, Thread> entry: locks.entrySet()) {
+
+    public Map<StackTrace, Integer> countLocks() {
+        final Map<Lock, StackTrace> locks = locks();
+        final Map<StackTrace, Integer> count = new HashMap<StackTrace, Integer>();
+        for (final Map.Entry<Lock, StackTrace> entry: locks.entrySet()) {
             // look where the lock has an effect
             int c = 0;
-            for (final Thread thread: this.keySet()) if (entry.getKey().equals(lockedBy(thread))) c++;
+            for (final StackTrace thread: keySet()) if (entry.getKey().equals(lockedBy(thread))) c++;
             if (c > 0) count.put(entry.getValue(), c);
         }
         return count;
     }
-    
+
     public void print() {
-        for (final Thread thread: this.keySet()) print(thread);
+        for (final StackTrace thread: keySet()) print(thread);
     }
 
-    public void print(Thread thread) {
-        final List<String> list = this.get(thread);
+    public void print(final StackTrace thread) {
+        final List<String> list = get(thread);
         if (list == null) return;
         System.out.println("Thread: " + thread);
-        for (String s: list) System.out.println("  " + s);
+        for (final String s: list) System.out.println("  " + s);
         System.out.println("");
     }
-    
-    public static void main(String[] args) {
+
+    public static void main(final String[] args) {
+        ThreadDump dump = null;
+        if (args.length == 0) {
+            //dump = new ThreadDump();
+        }
         if (args.length == 2 && args[0].equals("-f")) {
-            File dumpfile = new File(args[1]);
-            ThreadDump dump = null;
+            final File dumpfile = new File(args[1]);
             try {
                 dump = new ThreadDump(dumpfile);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
-            //dump.print();
-            Map<Thread, Integer> locks = dump.countLocks();
-            for (int i = 0; i < dump.size() + 10; i++) {
-                for (Map.Entry<Thread, Integer> entry: locks.entrySet()) {
-                    if (entry.getValue().intValue() == i) {
-                        System.out.println("holds lock for " + i + " threads:");
-                        dump.print(entry.getKey());
-                    }
+        }
+        //dump.print();
+        assert dump != null;
+        final Map<StackTrace, Integer> locks = dump.countLocks();
+        final List<Map.Entry<StackTrace, List<String>>> freerun = dump.freerun();
+        assert locks != null;
+        System.out.println("*** Thread Dump Lock report; dump size = " + dump.size() + ", locks = " + locks.size() + ", freerunner = " + freerun.size());
+        for (int i = 0; i < dump.size() + 10; i++) {
+            for (final Map.Entry<StackTrace, Integer> entry: locks.entrySet()) {
+                if (entry.getValue().intValue() == i) {
+                    System.out.println("holds lock for " + i + " threads:");
+                    dump.print(entry.getKey());
                 }
             }
         }
+
+        System.out.println("*** Thread freerunner report; dump size = " + dump.size() + ", locks = " + locks.size() + ", freerunner = " + freerun.size());
+        for (final Map.Entry<StackTrace, List<String>> entry: freerun) {
+            System.out.println("freerunner:");
+            dump.print(entry.getKey());
+        }
+
     }
 }

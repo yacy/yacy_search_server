@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,16 +26,18 @@
 
 package net.yacy.kelondro.data.meta;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Row;
@@ -46,17 +48,16 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.kelondro.util.kelondroException;
 import net.yacy.kelondro.util.MapTools;
-
+import net.yacy.kelondro.util.kelondroException;
+import net.yacy.search.query.QueryParams;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.search.QueryParams;
 import de.anomic.tools.crypt;
 
 public class URIMetadataRow implements URIMetadata {
 
     // this object stores attributes for URL entries
-    
+
     public static final Row rowdef = new Row(
         "String hash-12, " +            // the url's hash
         "String comp-360, " +           // components: the url, description, author, tags and publisher
@@ -69,16 +70,16 @@ public class URIMetadataRow implements URIMetadata {
         "Cardinal wc-3 {b256}, " +      // size of file by number of words; for video and audio: seconds
         "byte[] dt-1, " +               // doctype, taken from extension or any other heuristic
         "Bitfield flags-4, " +          // flags; any stuff (see Word-Entity definition)
-        "String lang-2, " +             // language
-        "Cardinal llocal-2 {b256}, " +  // # of outlinks to same domain; for video and image: width 
+        "byte[] lang-2, " +             // language
+        "Cardinal llocal-2 {b256}, " +  // # of outlinks to same domain; for video and image: width
         "Cardinal lother-2 {b256}, " +  // # of outlinks to outside domain; for video and image: height
         "Cardinal limage-2 {b256}, " +  // # of embedded image links
         "Cardinal laudio-2 {b256}, " +  // # of embedded audio links; for audio: track number; for video: number of audio tracks
         "Cardinal lvideo-2 {b256}, " +  // # of embedded video links
         "Cardinal lapp-2 {b256}",       // # of embedded links to applications
         Base64Order.enhancedCoder
-    );      
-    
+    );
+
     /* ===========================================================================
      * Constants to access the various columns of an URL entry
      * =========================================================================== */
@@ -100,13 +101,13 @@ public class URIMetadataRow implements URIMetadata {
     private static final int col_laudio   = 15; // # of embedded audio links; for audio: track number; for video: number of audio tracks
     private static final int col_lvideo   = 16; // # of embedded video links
     private static final int col_lapp     = 17; // # of embedded links to applications
-    
+
     private final Row.Entry entry;
     private final String snippet;
     private WordReferenceVars word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
     private Components comp;
-    
+
     public URIMetadataRow() {
         // create a dummy entry, good to produce poison objects
         this.entry = rowdef.newEntry();
@@ -115,13 +116,14 @@ public class URIMetadataRow implements URIMetadata {
         this.ranking = 0;
         this.comp = null;
     }
-    
+
     public URIMetadataRow(
             final DigestURI url,
             final String dc_title,
             final String dc_creator,
             final String dc_subject,
             final String dc_publisher,
+            final double lon, final double lat, // decimal degrees as in WGS84; if unknown both values may be 0.0d;
             final Date mod,
             final Date load,
             final Date fresh,
@@ -131,7 +133,7 @@ public class URIMetadataRow implements URIMetadata {
             final int wc,
             final char dt,
             final Bitfield flags,
-            final String lang,
+            final byte[] lang,
             final int llocal,
             final int lother,
             final int laudio,
@@ -141,25 +143,17 @@ public class URIMetadataRow implements URIMetadata {
         // create new entry
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash());
-        this.entry.setCol(col_comp, encodeComp(url, dc_title, dc_creator, dc_subject, dc_publisher));
+        this.entry.setCol(col_comp, encodeComp(url, dc_title, dc_creator, dc_subject, dc_publisher, lat, lon));
         encodeDate(col_mod, mod);
         encodeDate(col_load, load);
         encodeDate(col_fresh, fresh);
-        try {
-			this.entry.setCol(col_referrer, (referrer == null) ? null : referrer.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			this.entry.setCol(col_referrer, (referrer == null) ? null : referrer.getBytes());
-		}
+        this.entry.setCol(col_referrer, (referrer == null) ? null : UTF8.getBytes(referrer));
         this.entry.setCol(col_md5, md5);
         this.entry.setCol(col_size, size);
         this.entry.setCol(col_wc, wc);
         this.entry.setCol(col_dt, new byte[]{(byte) dt});
         this.entry.setCol(col_flags, flags.bytes());
-        try {
-			this.entry.setCol(col_lang, lang.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			this.entry.setCol(col_lang, lang.getBytes());
-		}
+        this.entry.setCol(col_lang, lang);
         this.entry.setCol(col_llocal, llocal);
         this.entry.setCol(col_lother, lother);
         this.entry.setCol(col_limage, limage);
@@ -173,6 +167,12 @@ public class URIMetadataRow implements URIMetadata {
         this.comp = null;
     }
 
+	@Override
+	public Map<String, byte[]> toMap() {
+		// TODO to be implemented
+		return null;
+	}
+
     private void encodeDate(final int col, final Date d) {
         // calculates the number of days since 1.1.1970 and returns this as 4-byte array
         // 86400000 is the number of milliseconds in one day
@@ -180,28 +180,35 @@ public class URIMetadataRow implements URIMetadata {
     }
 
     private Date decodeDate(final int col) {
-        long t = this.entry.getColLong(col);
+        final long t = this.entry.getColLong(col);
         /*if (t < 14600) */return new Date(86400000L * t); // time was stored as number of days since epoch
         /*
         if (t < 350400) return new Date(3600000L * t); // hours since epoch
         if (t < 21024000) return new Date(60000L * t); // minutes since epoch
         */
     }
-    
-    public static byte[] encodeComp(final DigestURI url, final String dc_title, final String dc_creator, final String dc_subject, final String dc_publisher) {
-        final CharBuffer s = new CharBuffer(360);
-        s.append(url.toNormalform(false, true)).append(10);
-        s.append(dc_title).append(10);
-        s.append(dc_creator).append(10);
-        s.append(dc_subject).append(10);
-        s.append(dc_publisher).append(10);
-        try {
-			return s.toString().getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			return s.toString().getBytes();
-		}
+
+    public static byte[] encodeComp(
+            final DigestURI url,
+            final String dc_title,
+            final String dc_creator,
+            final String dc_subject,
+            final String dc_publisher,
+            final double lat,
+            final double lon) {
+        final CharBuffer s = new CharBuffer(3600, 360);
+        s.append(url.toNormalform(false, true)).appendLF();
+        s.append(dc_title).appendLF();
+        if (dc_creator.length() > 80) s.append(dc_creator, 0, 80); else s.append(dc_creator);
+        s.appendLF();
+        if (dc_subject.length() > 120) s.append(dc_subject, 0, 120); else s.append(dc_subject);
+        s.appendLF();
+        if (dc_publisher.length() > 80) s.append(dc_publisher, 0, 80); else s.append(dc_publisher);
+        s.appendLF();
+        if (lon == 0.0f && lat == 0.0f) s.appendLF(); else s.append(Double.toString(lat)).append(',').append(Double.toString(lon)).appendLF();
+		return UTF8.getBytes(s.toString());
     }
-    
+
     public URIMetadataRow(final Row.Entry entry, final WordReferenceVars searchedWord, final long ranking) {
         this.entry = entry;
         this.snippet = null;
@@ -216,22 +223,25 @@ public class URIMetadataRow implements URIMetadata {
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         DigestURI url;
         try {
-            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", ""), null), prop.getProperty("hash").getBytes());
+            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", ""), null), ASCII.getBytes(prop.getProperty("hash")));
         } catch (final MalformedURLException e) {
             url = null;
         }
         String descr = crypt.simpleDecode(prop.getProperty("descr", ""), null); if (descr == null) descr = "";
         String dc_creator = crypt.simpleDecode(prop.getProperty("author", ""), null); if (dc_creator == null) dc_creator = "";
         String tags = crypt.simpleDecode(prop.getProperty("tags", ""), null); if (tags == null) tags = "";
+        tags = Tagging.cleanTagFromAutotagging(tags);
         String dc_publisher = crypt.simpleDecode(prop.getProperty("publisher", ""), null); if (dc_publisher == null) dc_publisher = "";
-        
+        String lons = crypt.simpleDecode(prop.getProperty("lon", "0.0"), null); if (lons == null) lons = "0.0";
+        String lats = crypt.simpleDecode(prop.getProperty("lat", "0.0"), null); if (lats == null) lats = "0.0";
+
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash()); // FIXME potential null pointer access
-        this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, dc_publisher));
+        this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, dc_publisher, Float.parseFloat(lats), Float.parseFloat(lons)));
 
         // create new formatters to make concurrency possible
-        GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
-        
+        final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
+
         try {
             encodeDate(col_mod, formatter.parse(prop.getProperty("mod", "20000101")));
         } catch (final ParseException e) {
@@ -247,23 +257,15 @@ public class URIMetadataRow implements URIMetadata {
         } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
-        try {
-			this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e1) {
-			this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes());
-		}
+        this.entry.setCol(col_referrer, UTF8.getBytes(prop.getProperty("referrer", "")));
         this.entry.setCol(col_md5, Digest.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
-        String dt = prop.getProperty("dt", "t");
+        final String dt = prop.getProperty("dt", "t");
         this.entry.setCol(col_dt, dt.length() > 0 ? new byte[]{(byte) dt.charAt(0)} : new byte[]{(byte) 't'});
         final String flags = prop.getProperty("flags", "AAAAAA");
         this.entry.setCol(col_flags, (flags.length() > 6) ? QueryParams.empty_constraint.bytes() : (new Bitfield(4, flags)).bytes());
-        try {
-			this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes());
-		}
+        this.entry.setCol(col_lang, UTF8.getBytes(prop.getProperty("lang", "uk")));
         this.entry.setCol(col_llocal, Integer.parseInt(prop.getProperty("llocal", "0")));
         this.entry.setCol(col_lother, Integer.parseInt(prop.getProperty("lother", "0")));
         this.entry.setCol(col_limage, Integer.parseInt(prop.getProperty("limage", "0")));
@@ -294,16 +296,16 @@ public class URIMetadataRow implements URIMetadata {
 
     private StringBuilder corePropList() {
         // generate a parseable string; this is a simple property-list
-        final Components metadata = this.metadata();
+        final Components metadata = metadata();
         final StringBuilder s = new StringBuilder(300);
         if (metadata == null) return null;
         //System.out.println("author=" + comp.author());
-        
+
         // create new formatters to make concurrency possible
-        GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
-        
+        final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
+
         try {
-            s.append("hash=").append(UTF8.String(hash()));
+            s.append("hash=").append(ASCII.String(hash()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",url=").append(crypt.simpleEncode(metadata.url().toNormalform(false, true)));
             assert (s.toString().indexOf(0) < 0);
@@ -311,9 +313,13 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",author=").append(crypt.simpleEncode(metadata.dc_creator()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",tags=").append(crypt.simpleEncode(metadata.dc_subject()));
+            s.append(",tags=").append(crypt.simpleEncode(Tagging.cleanTagFromAutotagging(metadata.dc_subject())));
             assert (s.toString().indexOf(0) < 0);
             s.append(",publisher=").append(crypt.simpleEncode(metadata.dc_publisher()));
+            assert (s.toString().indexOf(0) < 0);
+            s.append(",lat=").append(metadata.lat());
+            assert (s.toString().indexOf(0) < 0);
+            s.append(",lon=").append(metadata.lon());
             assert (s.toString().indexOf(0) < 0);
             s.append(",mod=").append(formatter.format(moddate()));
             assert (s.toString().indexOf(0) < 0);
@@ -321,7 +327,7 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",fresh=").append(formatter.format(freshdate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",referrer=").append(referrerHash() == null ? "" : UTF8.String(referrerHash()));
+            s.append(",referrer=").append(referrerHash() == null ? "" : ASCII.String(referrerHash()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",md5=").append(md5());
             assert (s.toString().indexOf(0) < 0);
@@ -333,7 +339,7 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",flags=").append(flags().exportB64());
             assert (s.toString().indexOf(0) < 0);
-            s.append(",lang=").append(language());
+            s.append(",lang=").append(language() == null ? "EN" : UTF8.String(language()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",llocal=").append(llocal());
             assert (s.toString().indexOf(0) < 0);
@@ -347,15 +353,16 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",lapp=").append(lapp());
             assert (s.toString().indexOf(0) < 0);
-            
+
             if (this.word != null) {
                 // append also word properties
-                s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(word.toPropertyForm()));
+                final String wprop = this.word.toPropertyForm();
+                s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(wprop));
             }
             assert (s.toString().indexOf(0) < 0);
             return s;
 
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             //          serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
             //          if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
             //          if (loaddate == null) serverLog.logFailure("plasmaLURL.corePropList", "loaddate=null");
@@ -376,26 +383,66 @@ public class URIMetadataRow implements URIMetadata {
         return this.entry.getPrimaryKeyBytes();
     }
 
+    private String hostHash = null;
+    public String hosthash() {
+        if (this.hostHash != null) return this.hostHash;
+        this.hostHash = ASCII.String(this.entry.getPrimaryKeyBytes(), 6, 6);
+        return this.hostHash;
+    }
+
     public long ranking() {
     	return this.ranking;
     }
-    
-    public Components metadata() {
+
+    public boolean matches(final Pattern matcher) {
+        return this.metadata().matches(matcher);
+    }
+
+    public DigestURI url() {
+        return this.metadata().url();
+    }
+
+    public String  dc_title()  {
+        return this.metadata().dc_title();
+    }
+
+    public String  dc_creator() {
+        return this.metadata().dc_creator();
+    }
+
+    public String  dc_publisher() {
+        return this.metadata().dc_publisher();
+    }
+
+    public String  dc_subject()   {
+        return this.metadata().dc_subject();
+    }
+
+    public double lat() {
+        return this.metadata().lat();
+    }
+
+    public double lon() {
+        return this.metadata().lon();
+    }
+
+    private Components metadata() {
         // avoid double computation of metadata elements
         if (this.comp != null) return this.comp;
         // parse elements from comp field;
-        byte[] c = this.entry.getColBytes(col_comp, true);
-        List<byte[]> cl = ByteBuffer.split(c, (byte) 10);
+        final byte[] c = this.entry.getColBytes(col_comp, true);
+        final List<byte[]> cl = ByteBuffer.split(c, (byte) 10);
         this.comp = new Components(
                     (cl.size() > 0) ? UTF8.String(cl.get(0)) : "",
                     hash(),
                     (cl.size() > 1) ? UTF8.String(cl.get(1)) : "",
                     (cl.size() > 2) ? UTF8.String(cl.get(2)) : "",
                     (cl.size() > 3) ? UTF8.String(cl.get(3)) : "",
-                    (cl.size() > 4) ? UTF8.String(cl.get(4)) : "");
+                    (cl.size() > 4) ? UTF8.String(cl.get(4)) : "",
+                    (cl.size() > 5) ? UTF8.String(cl.get(5)) : "");
         return this.comp;
     }
-    
+
     public Date moddate() {
         return decodeDate(col_mod);
     }
@@ -411,7 +458,7 @@ public class URIMetadataRow implements URIMetadata {
     public byte[] referrerHash() {
         // return the creator's hash or null if there is none
         // FIXME: There seem to be some malformed entries in the databasees like "null\0\0\0\0\0\0\0\0"
-        final byte[] r = entry.getColBytes(col_referrer, true);
+        final byte[] r = this.entry.getColBytes(col_referrer, true);
         if (r != null) {
             int i = r.length;
             while (i > 0) {
@@ -423,15 +470,21 @@ public class URIMetadataRow implements URIMetadata {
 
     public String md5() {
         // returns the md5 in hex representation
-        return Digest.encodeHex(entry.getColBytes(col_md5, true));
+        return Digest.encodeHex(this.entry.getColBytes(col_md5, true));
     }
 
     public char doctype() {
-        return (char) entry.getColByte(col_dt);
+        return (char) this.entry.getColByte(col_dt);
     }
 
-    public String language() {
-        return this.entry.getColString(col_lang, null);
+    public byte[] language() {
+        byte[] b = this.entry.getColBytes(col_lang, true);
+        if (b == null || b[0] == (byte)'[') {
+            String tld = this.metadata().url.getTLD();
+            if (tld.length() < 2 || tld.length() > 2) return ASCII.getBytes("en");
+            return ASCII.getBytes(tld);
+        }
+        return b;
     }
 
     public int size() {
@@ -469,15 +522,15 @@ public class URIMetadataRow implements URIMetadata {
     public int lapp() {
         return (int) this.entry.getColLong(col_lapp);
     }
-    
+
     public String snippet() {
         // the snippet may appear here if the url was transported in a remote search
         // it will not be saved anywhere, but can only be requested here
-        return snippet;
+        return this.snippet;
     }
 
     public WordReferenceVars word() {
-        return word;
+        return this.word;
     }
 
     public boolean isOlder(final URIMetadata other) {
@@ -511,20 +564,20 @@ public class URIMetadataRow implements URIMetadata {
 
     public Request toBalancerEntry(final String initiatorHash) {
         return new Request(
-                initiatorHash.getBytes(), 
-                metadata().url(), 
-                referrerHash(), 
+                ASCII.getBytes(initiatorHash),
+                metadata().url(),
+                referrerHash(),
                 metadata().dc_title(),
                 moddate(),
                 null,
-                0, 
-                0, 
+                0,
+                0,
                 0,
                 0);
     }
-    
+
     /**
-     * @return the object as String.<br> 
+     * @return the object as String.<br>
      * This e.g. looks like this:
      * <pre>{hash=jmqfMk7Y3NKw,referrer=------------,mod=20050610,load=20051003,size=51666,wc=1392,cc=0,local=true,q=AEn,dt=h,lang=uk,url=b|aHR0cDovL3d3dy50cmFuc3BhcmVuY3kub3JnL3N1cnZleXMv,descr=b|S25vd2xlZGdlIENlbnRyZTogQ29ycnVwdGlvbiBTdXJ2ZXlzIGFuZCBJbmRpY2Vz}</pre>
      */
@@ -539,14 +592,22 @@ public class URIMetadataRow implements URIMetadata {
         return core.toString();
         //return "{" + core + "}";
     }
-    
-    public class Components {
+
+    private class Components {
         private DigestURI url;
         private String urlRaw;
         private byte[] urlHash;
         private final String dc_title, dc_creator, dc_subject, dc_publisher;
-        
-        public Components(final String urlRaw, final byte[] urlhash, final String title, final String author, final String tags, final String publisher) {
+        private final String latlon; // a comma-separated tuple as "<latitude>,<longitude>" where the coordinates are given as WGS84 spatial coordinates in decimal degrees
+
+        public Components(
+                final String urlRaw,
+                final byte[] urlhash,
+                final String title,
+                final String author,
+                final String tags,
+                final String publisher,
+                final String latlon) {
             this.url = null;
             this.urlRaw = urlRaw;
             this.urlHash = urlhash;
@@ -554,8 +615,9 @@ public class URIMetadataRow implements URIMetadata {
             this.dc_creator = author;
             this.dc_subject = tags;
             this.dc_publisher = publisher;
+            this.latlon = latlon;
         }
-        public boolean matches(Pattern matcher) {
+        public boolean matches(final Pattern matcher) {
             if (this.urlRaw != null) return matcher.matcher(this.urlRaw.toLowerCase()).matches();
             if (this.url != null) return matcher.matcher(this.url.toNormalform(true, true).toLowerCase()).matches();
             return false;
@@ -564,7 +626,7 @@ public class URIMetadataRow implements URIMetadata {
             if (this.url == null) {
                 try {
                     this.url = new DigestURI(this.urlRaw, this.urlHash);
-                } catch (MalformedURLException e) {
+                } catch (final MalformedURLException e) {
                     this.url = null;
                 }
                 this.urlRaw = null;
@@ -576,6 +638,16 @@ public class URIMetadataRow implements URIMetadata {
         public String  dc_creator() { return this.dc_creator; }
         public String  dc_publisher() { return this.dc_publisher; }
         public String  dc_subject()   { return this.dc_subject; }
-        
+        public double lat() {
+            if (this.latlon == null || this.latlon.length() == 0) return 0.0d;
+            final int p = this.latlon.indexOf(',');
+            return p < 0 ? 0.0f : Double.parseDouble(this.latlon.substring(0, p));
+        }
+        public double lon() {
+            if (this.latlon == null || this.latlon.length() == 0) return 0.0d;
+            final int p = this.latlon.indexOf(',');
+            return p < 0 ? 0.0f : Double.parseDouble(this.latlon.substring(p + 1));
+        }
     }
+
 }

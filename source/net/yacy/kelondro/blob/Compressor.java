@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -32,142 +32,83 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.util.MemoryControl;
 
 
-public class Compressor implements BLOB {
+public class Compressor implements BLOB, Iterable<byte[]> {
 
     static byte[] gzipMagic  = {(byte) 'z', (byte) '|'}; // magic for gzip-encoded content
     static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)
-    
+
     private final BLOB backend;
-    private Map<String, byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
-    private BlockingQueue<Entity> writeQueue;
+    private TreeMap<byte[], byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
     private long bufferlength;
     private final long maxbufferlength;
-    private final Worker[] worker;
-    
-    public Compressor(BLOB backend, long buffersize) {
+
+    public Compressor(final BLOB backend, final long buffersize) {
         this.backend = backend;
         this.maxbufferlength = buffersize;
-        this.writeQueue = new LinkedBlockingQueue<Entity>();
-        this.worker = new Worker[Math.min(4, Runtime.getRuntime().availableProcessors())];
-        for (int i = 0; i < this.worker.length; i++) {
-            this.worker[i] = new Worker();
-            this.worker[i].start();
-        }
         initBuffer();
     }
-    
+
+    @Override
     public long mem() {
-        return backend.mem();
+        return this.backend.mem();
     }
-    
+
+    @Override
     public void trim() {
         this.backend.trim();
     }
-    
-    private static class Entity implements Map.Entry<String, byte[]> {
-        private String key;
-        private byte[] payload;
-        public Entity(String key, byte[] payload) {
-            this.key = key;
-            this.payload = payload;
-        }
-        public String getKey() {
-            return this.key;
-        }
 
-        public byte[] getValue() {
-            return this.payload;
-        }
-
-        public byte[] setValue(byte[] payload) {
-            byte[] payload0 = payload;
-            this.payload = payload;
-            return payload0;
-        }
-    }
-    
-    private final static Entity poisonWorkerEntry = new Entity("poison", null);
-    
-    private class Worker extends Thread {
-        public Worker() {
-        }
-        @Override
-        public void run() {
-            Entity entry;
-            try {
-                while ((entry = writeQueue.take()) != poisonWorkerEntry) {
-                    try {
-                        Compressor.this.backend.insert(entry.getKey().getBytes(), compress(entry.getValue()));
-                    } catch (IOException e) {
-                        Log.logException(e);
-                        buffer.put(entry.getKey(), entry.getValue());
-                    }
-                }
-            } catch (InterruptedException e) {
-                Log.logException(e);
-            }
-        }
-    }
-    
+    @Override
     public String name() {
         return this.backend.name();
     }
-    
+
+    @Override
     public synchronized void clear() throws IOException {
         initBuffer();
-        this.writeQueue.clear();
         this.backend.clear();
     }
-    
+
     private void initBuffer() {
-        this.buffer = new ConcurrentHashMap<String, byte[]>();
+        this.buffer = new TreeMap<byte[], byte[]>(this.backend.ordering());
         this.bufferlength = 0;
     }
 
+    @Override
     public ByteOrder ordering() {
         return this.backend.ordering();
     }
-    
-    public synchronized void close(boolean writeIDX) {
+
+    @Override
+    public synchronized void close(final boolean writeIDX) {
         // no more thread is running, flush all queues
         flushAll();
-        for (int i = 0; i < this.worker.length; i++) try {
-            this.writeQueue.put(poisonWorkerEntry);
-        } catch (InterruptedException e) {
-            Log.logException(e);
-        }
-        for (int i = 0; i < this.worker.length; i++) try {
-            this.worker[i].join();
-        } catch (InterruptedException e) {
-            Log.logException(e);
-        }
         this.backend.close(writeIDX);
     }
-    
-    private byte[] compress(byte[] b) {
-        int l = b.length;
+
+    private static byte[] compress(final byte[] b) {
+        final int l = b.length;
         if (l < 100) return markWithPlainMagic(b);
-        byte[] bb = compressAddMagic(b);
+        final byte[] bb = compressAddMagic(b);
         if (bb.length >= l) return markWithPlainMagic(b);
         return bb;
     }
-    
-    private byte[] compressAddMagic(byte[] b) {
+
+    private static byte[] compressAddMagic(final byte[] b) {
         // compress a byte array and add a leading magic for the compression
         try {
             //System.out.print("/(" + cdr + ")"); // DEBUG
@@ -178,27 +119,27 @@ public class Compressor implements BLOB {
             os.close();
             baos.close();
             return baos.toByteArray();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logSevere("Compressor", "", e);
             return null;
         }
     }
-    
-    private byte[] markWithPlainMagic(byte[] b) {
+
+    private static byte[] markWithPlainMagic(final byte[] b) {
         //System.out.print("+"); // DEBUG
-        byte[] r = new byte[b.length + 2];
+        final byte[] r = new byte[b.length + 2];
         r[0] = plainMagic[0];
         r[1] = plainMagic[1];
         System.arraycopy(b, 0, r, 2, b.length);
         return r;
     }
 
-    private byte[] decompress(byte[] b) {
+    private static byte[] decompress(final byte[] b) {
         // use a magic in the head of the bytes to identify compression type
         if (b == null) return null;
         if (ByteArray.startsWith(b, gzipMagic)) {
             //System.out.print("\\"); // DEBUG
-            ByteArrayInputStream bais = new ByteArrayInputStream(b);
+            final ByteArrayInputStream bais = new ByteArrayInputStream(b);
             // eat up the magic
             bais.read();
             bais.read();
@@ -207,21 +148,21 @@ public class Compressor implements BLOB {
             try {
                 gis = new GZIPInputStream(bais);
                 final ByteArrayOutputStream baos = new ByteArrayOutputStream(b.length);
-                final byte[] buf = new byte[1024];
+                final byte[] buf = new byte[1024 * 4];
                 int n;
                 while ((n = gis.read(buf)) > 0) baos.write(buf, 0, n);
                 gis.close();
                 bais.close();
                 baos.close();
-                
+
                 return baos.toByteArray();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
                 return null;
             }
         } else if (ByteArray.startsWith(b, plainMagic)) {
             //System.out.print("-"); // DEBUG
-            byte[] r = new byte[b.length - 2];
+            final byte[] r = new byte[b.length - 2];
             System.arraycopy(b, 2, r, 0, b.length - 2);
             return r;
         } else {
@@ -230,85 +171,92 @@ public class Compressor implements BLOB {
         }
     }
 
-    public byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
+    @Override
+    public byte[] get(final byte[] key) throws IOException, RowSpaceExceededException {
         // depending on the source of the result, we additionally do entry compression
         // because if a document was read once, we think that it will not be retrieved another time again soon
-        String keys = UTF8.String(key);
         byte[] b = null;
         synchronized (this) {
-            b = buffer.remove(keys);
+            b = this.buffer.remove(key);
             if (b != null) {
-                // compress the entry now and put it to the backend
-                try {
-                    this.writeQueue.put(new Entity(keys, b));
-                    this.bufferlength = this.bufferlength - b.length;
-                    return b;
-                } catch (InterruptedException e) {
-                    Log.logException(e);
-                    buffer.put(keys, b);
-                }
+                this.backend.insert(key, compress(b));
+                this.bufferlength = this.bufferlength - b.length;
+                return b;
             }
-            
-            // return from the backend
-            b = this.backend.get(key);
         }
+
+        // return from the backend
+        b = this.backend.get(key);
         if (b == null) return null;
+        if (!MemoryControl.request(b.length * 2, true)) {
+            throw new RowSpaceExceededException(b.length * 2, "decompress needs 2 * " + b.length + " bytes");
+        }
         return decompress(b);
     }
 
-    public byte[] get(Object key) {
+    @Override
+    public byte[] get(final Object key) {
         if (!(key instanceof byte[])) return null;
         try {
             return get((byte[]) key);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             Log.logException(e);
         }
         return null;
     }
-    
-    public synchronized boolean containsKey(byte[] key) {
-        return this.buffer.containsKey(UTF8.String(key)) || this.backend.containsKey(key);
+
+    @Override
+    public boolean containsKey(final byte[] key) {
+        synchronized (this) {
+            return this.buffer.containsKey(key) || this.backend.containsKey(key);
+        }
     }
 
+    @Override
     public int keylength() {
         return this.backend.keylength();
     }
 
+    @Override
     public synchronized long length() {
         try {
             return this.backend.length() + this.bufferlength;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
             return 0;
         }
     }
-    
-    public synchronized long length(byte[] key) throws IOException {
-        byte[] b = buffer.get(UTF8.String(key));
-        if (b != null) return b.length;
-        try {
-            b = this.backend.get(key);
-            if (b == null) return 0;
-            b = decompress(b);
-            return (b == null) ? 0 : b.length;
-        } catch (RowSpaceExceededException e) {
-            throw new IOException(e.getMessage());
+
+    @Override
+    public long length(final byte[] key) throws IOException {
+        synchronized (this) {
+            byte[] b = this.buffer.get(key);
+            if (b != null) return b.length;
+            try {
+                b = this.backend.get(key);
+                if (b == null) return 0;
+                b = decompress(b);
+                return (b == null) ? 0 : b.length;
+            } catch (final RowSpaceExceededException e) {
+                throw new IOException(e.getMessage());
+            }
         }
     }
-    
-    private int removeFromQueues(byte[] key) {
-        byte[] b = buffer.remove(UTF8.String(key));
+
+    private int removeFromQueues(final byte[] key) {
+        final byte[] b = this.buffer.remove(key);
         if (b != null) return b.length;
         return 0;
     }
-    
-    public void insert(byte[] key, byte[] b) throws IOException {
-        
+
+    @Override
+    public void insert(final byte[] key, final byte[] b) throws IOException {
+
         // first ensure that the files do not exist anywhere
         delete(key);
-        
+
         // check if the buffer is full or could be full after this write
         if (this.bufferlength + b.length * 2 > this.maxbufferlength) synchronized (this) {
             // in case that we compress, just compress as much as is necessary to get enough room
@@ -324,78 +272,98 @@ public class Compressor implements BLOB {
         // they are either written uncompressed to the database
         // or compressed later
         synchronized (this) {
-            this.buffer.put(UTF8.String(key), b);
+            this.buffer.put(key, b);
             this.bufferlength += b.length;
         }
+
+        if (MemoryControl.shortStatus()) flushAll();
     }
 
-    public synchronized void delete(byte[] key) throws IOException {
+    @Override
+    public synchronized void delete(final byte[] key) throws IOException {
         this.backend.delete(key);
-        long rx = removeFromQueues(key);
+        final long rx = removeFromQueues(key);
         if (rx > 0) this.bufferlength -= rx;
     }
 
+    @Override
     public synchronized int size() {
         return this.backend.size() + this.buffer.size();
     }
-    
+
+    @Override
     public synchronized boolean isEmpty() {
         if (!this.backend.isEmpty()) return false;
         if (!this.buffer.isEmpty()) return false;
         return true;
     }
-    
-    public synchronized CloneableIterator<byte[]> keys(boolean up, boolean rotating) throws IOException {
+
+    @Override
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         flushAll();
         return this.backend.keys(up, rotating);
     }
 
-    public synchronized CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+    @Override
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         flushAll();
         return this.backend.keys(up, firstKey);
     }
-    
+
+    @Override
+    public Iterator<byte[]> iterator() {
+        flushAll();
+        try {
+            return this.backend.keys(true, false);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     private boolean flushOne() {
         if (this.buffer.isEmpty()) return false;
         // depending on process case, write it to the file or compress it to the other queue
-        Map.Entry<String, byte[]> entry = this.buffer.entrySet().iterator().next();
+        final Map.Entry<byte[], byte[]> entry = this.buffer.entrySet().iterator().next();
         this.buffer.remove(entry.getKey());
         try {
-            this.writeQueue.put(new Entity(entry.getKey(), entry.getValue()));
+            this.backend.insert(entry.getKey(), compress(entry.getValue()));
             this.bufferlength -= entry.getValue().length;
             return true;
-        } catch (InterruptedException e) {
+        } catch (final IOException e) {
             this.buffer.put(entry.getKey(), entry.getValue());
             return false;
         }
     }
 
-    private void flushAll() {
+    public void flushAll() {
         while (!this.buffer.isEmpty()) {
             if (!flushOne()) break;
         }
     }
 
-    public int replace(byte[] key, Rewriter rewriter) throws IOException, RowSpaceExceededException {
-        byte[] b = get(key);
+    @Override
+    public int replace(final byte[] key, final Rewriter rewriter) throws IOException, RowSpaceExceededException {
+        final byte[] b = get(key);
         if (b == null) return 0;
-        byte[] c = rewriter.rewrite(b);
-        int reduction = c.length - b.length;
+        final byte[] c = rewriter.rewrite(b);
+        final int reduction = c.length - b.length;
         assert reduction >= 0;
         if (reduction == 0) return 0;
-        this.insert(key, c);
+        insert(key, c);
         return reduction;
     }
-    
-    public int reduce(byte[] key, Reducer reducer) throws IOException, RowSpaceExceededException {
-        byte[] b = get(key);
+
+    @Override
+    public int reduce(final byte[] key, final Reducer reducer) throws IOException, RowSpaceExceededException {
+        final byte[] b = get(key);
         if (b == null) return 0;
-        byte[] c = reducer.rewrite(b);
-        int reduction = c.length - b.length;
+        final byte[] c = reducer.rewrite(b);
+        final int reduction = c.length - b.length;
         assert reduction >= 0;
         if (reduction == 0) return 0;
-        this.insert(key, c);
+        insert(key, c);
         return reduction;
     }
+
 
 }

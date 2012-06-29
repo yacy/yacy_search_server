@@ -5,10 +5,10 @@
 //
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.graphics.OSMTile;
 import net.yacy.visualization.RasterPlotter;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.graphics.OSMTile;
 
 public class osm {
 

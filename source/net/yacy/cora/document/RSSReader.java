@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -20,59 +20,83 @@
 
 package net.yacy.cora.document;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 
 public class RSSReader extends DefaultHandler {
-    
+
     // class variables
     private RSSMessage item;
     private final StringBuilder buffer;
     private boolean parsingChannel, parsingImage, parsingItem;
     private final RSSFeed theChannel;
     private Type type;
-    
+
     public enum Type { rss, atom, rdf, none };
-    
-    private RSSReader(int maxsize) {
-        theChannel = new RSSFeed(maxsize);
-        buffer = new StringBuilder(300);
-        item = null;
-        parsingChannel = false;
-        parsingImage = false;
-        parsingItem = false;
-        type = Type.none;
+
+    private RSSReader(final int maxsize) {
+        this.theChannel = new RSSFeed(maxsize);
+        this.buffer = new StringBuilder(300);
+        this.item = null;
+        this.parsingChannel = false;
+        this.parsingImage = false;
+        this.parsingItem = false;
+        this.type = Type.none;
     }
     
-    public RSSReader(int maxsize, final InputStream stream, Type type) throws IOException {
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static SAXParser getParser() throws SAXException {
+    	SAXParser parser = tlSax.get();
+    	if (parser == null) {
+    		try {
+				parser = SAXParserFactory.newInstance().newSAXParser();
+			} catch (ParserConfigurationException e) {
+				throw new SAXException(e.getMessage(), e);
+			}
+    		tlSax.set(parser);
+    	}
+    	return parser;
+    }
+    
+    public RSSReader(final int maxsize, InputStream stream, final Type type) throws IOException {
         this(maxsize);
         this.type = type;
-        final SAXParserFactory factory = SAXParserFactory.newInstance();
+        if (!(stream instanceof ByteArrayInputStream) && !(stream instanceof BufferedInputStream)) stream = new BufferedInputStream(stream);
         try {
-            final SAXParser saxParser = factory.newSAXParser();
+            final SAXParser saxParser = getParser();
+            // do not look at external dtd - see: http://www.ibm.com/developerworks/xml/library/x-tipcfsx/index.html
+            saxParser.getXMLReader().setEntityResolver(new EntityResolver() {
+				@Override
+				public InputSource resolveEntity(final String arg0, final String arg1)
+						throws SAXException, IOException {
+					return new InputSource(new StringReader(""));
+				}
+            });
             saxParser.parse(stream, this);
-        } catch (SAXException e) {
-            throw new IOException (e.getMessage());
-        } catch (ParserConfigurationException e) {
+        } catch (final SAXException e) {
             throw new IOException (e.getMessage());
         }
     }
-    
+
     public Type getType() {
         return this.type;
     }
-    
-    public static RSSReader parse(int maxsize, final byte[] a) throws IOException {
+
+    public static RSSReader parse(final int maxsize, final byte[] a) throws IOException {
 
         // check integrity of array
         if ((a == null) || (a.length == 0)) {
@@ -81,21 +105,18 @@ public class RSSReader extends DefaultHandler {
         if (a.length < 100) {
             throw new IOException("response=" + UTF8.String(a));
         }
-        if (!equals(a, "<?xml".getBytes()) && !equals(a, "<rss".getBytes())) {
+        if (!equals(a, UTF8.getBytes("<?xml")) && !equals(a, UTF8.getBytes("<rss"))) {
             throw new IOException("response does not contain valid xml");
         }
-        final String end = UTF8.String(a, a.length - 80, 80);
-        Type type = Type.none;
-        if (end.indexOf("rss") > 0) type = Type.rss;
-        if (end.indexOf("feed") > 0) type = Type.atom;
-        if (end.indexOf("rdf") > 0) type = Type.rdf;
+
+        final Type type = findOutType(a);
         if (type == Type.none) {
             throw new IOException("response incomplete");
         }
-        
+
         // make input stream
         final ByteArrayInputStream bais = new ByteArrayInputStream(a);
-        
+
         // parse stream
         RSSReader reader = null;
         try {
@@ -106,7 +127,36 @@ public class RSSReader extends DefaultHandler {
         try { bais.close(); } catch (final IOException e) {}
         return reader;
     }
-    
+
+    /**
+     * Tries to find out the type of feed by stepping through its data
+     * starting in the end and looking at the last XML tag. Just grabbing
+     * the last few characters of the data does not work since some
+     * people add quite long comments at the end of their feeds.
+     * @param a contains the feed
+     * @return type of feed
+     */
+    private static Type findOutType(final byte[] a) {
+        String end;
+        int i = 1;
+
+        do {
+            /* In first iteration grab the last 80 characters, after that
+             * move towards the start of the data and take some more (90)
+             * to have an overlap in order to not miss anything if the tag
+             * is on the border of two 80 character blocks.
+             */
+            end = UTF8.String(a, a.length - (i * 80), (80 + ((i > 1)? 10 : 0)));
+            i++;
+        } while(!end.contains("</"));
+
+        Type type = Type.none;
+        if (end.indexOf("rss",0) > 0) type = Type.rss;
+        if (end.indexOf("feed",0) > 0) type = Type.atom;
+        if (end.indexOf("rdf",0) > 0) type = Type.rdf;
+        return type;
+    }
+
     private final static boolean equals(final byte[] buffer, final byte[] pattern) {
         // compares two byte arrays: true, if pattern appears completely at offset position
         if (buffer.length < pattern.length) return false;
@@ -118,25 +168,25 @@ public class RSSReader extends DefaultHandler {
     public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
         if ("channel".equals(tag)) {
             this.type = Type.rss;
-            item = new RSSMessage();
-            parsingChannel = true;
+            this.item = new RSSMessage();
+            this.parsingChannel = true;
         } else if ("feed".equals(tag)) {
             this.type = Type.atom;
-            item = new RSSMessage();
-            parsingChannel = true;
+            this.item = new RSSMessage();
+            this.parsingChannel = true;
         } else if ("item".equals(tag) || "entry".equals(tag)) {
-            if (parsingChannel) {
+            if (this.parsingChannel) {
                 // the channel ends with the first item not with the channel close tag
-                theChannel.setChannel(item);
-                parsingChannel = false;
+                this.theChannel.setChannel(this.item);
+                this.parsingChannel = false;
             }
-            item = new RSSMessage();
-            parsingItem = true;
-        } else if (parsingItem && this.type == Type.atom && "link".equals(tag)) {
-            String url = atts.getValue("href");
-            if (url != null && url.length() > 0) item.setValue("link", url);
+            this.item = new RSSMessage();
+            this.parsingItem = true;
+        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag)) {
+            final String url = atts.getValue("href");
+            if (url != null && url.length() > 0) this.item.setValue("link", url);
         } else if ("image".equals(tag)) {
-            parsingImage = true;
+            this.parsingImage = true;
         }
     }
 
@@ -144,37 +194,37 @@ public class RSSReader extends DefaultHandler {
     public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
         if ("channel".equals(tag) || "feed".equals(tag)) {
-            if (parsingChannel) theChannel.setChannel(item);
-            parsingChannel = false;
+            if (this.parsingChannel) this.theChannel.setChannel(this.item);
+            this.parsingChannel = false;
         } else if ("item".equals(tag) || "entry".equals(tag)) {
-            theChannel.addMessage(item);
-            parsingItem = false;
+            this.theChannel.addMessage(this.item);
+            this.parsingItem = false;
         } else if ("image".equals(tag)) {
-            parsingImage = false;
-        } else if ((parsingImage) && (parsingChannel)) {
-            final String value = buffer.toString().trim();
-            buffer.setLength(0);
-            if ("url".equals(tag)) theChannel.setImage(value);
-        } else if (parsingItem)  {
-            final String value = buffer.toString().trim();
-            buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag) && value.length() > 0) item.setValue(tag, value);
-        } else if (parsingChannel) {
-            final String value = buffer.toString().trim();
-            buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag)) item.setValue(tag, value);
+            this.parsingImage = false;
+        } else if ((this.parsingImage) && (this.parsingChannel)) {
+            final String value = this.buffer.toString().trim();
+            this.buffer.setLength(0);
+            if ("url".equals(tag)) this.theChannel.setImage(value);
+        } else if (this.parsingItem)  {
+            final String value = this.buffer.toString().trim();
+            this.buffer.setLength(0);
+            if (RSSMessage.tags.contains(tag) && value.length() > 0) this.item.setValue(tag, value);
+        } else if (this.parsingChannel) {
+            final String value = this.buffer.toString().trim();
+            this.buffer.setLength(0);
+            if (RSSMessage.tags.contains(tag)) this.item.setValue(tag, value);
         }
     }
 
     @Override
     public void characters(final char ch[], final int start, final int length) {
-        if (parsingItem || parsingChannel) {
-            buffer.append(ch, start, length);
+        if (this.parsingItem || this.parsingChannel) {
+            this.buffer.append(ch, start, length);
         }
     }
-    
+
     public RSSFeed getFeed() {
-        return theChannel;
+        return this.theChannel;
     }
 
 }

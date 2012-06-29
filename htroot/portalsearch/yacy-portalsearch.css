@@ -1,0 +1,143 @@
+.ui-dialog .ui-dialog-title {
+	font-size: 14px;
+}
+.ui-dialog .ui-dialog-buttonpane button {
+	font-size: 14px;
+}
+
+.ynav-cancel {
+	vertical-align: middle;
+	margin-left: 5px;
+	cursor: pointer;
+}
+
+.ynav .ui-autocomplete-input {
+	font-size: 14px;
+	padding: 2px;
+	width: 150px;
+	margin-bottom: 10px;
+}
+
+.ui-autocomplete {
+	font-size: 12px;
+}
+
+.ynav {
+	font-size: 12px;
+}
+.ynav label {
+	font-size: 12px;
+}
+.ynav .ui-button {
+	vertical-align: top;
+	font-size: 10px;
+}
+.yradio {
+	margin-top: 5px; 
+	margin-bottom: 10px;
+	margin-left: 5px; 
+	text-align: left;
+	font-size: 11px;
+}
+
+#yacylivesearch form * { 
+	display: inline; 
+}
+#ysearch .fancy {
+	height:18px;
+	background: white;
+	background-image: url(/yacy/ui/img-2/magnify.png);
+	background-repeat: no-repeat;
+	background-position: 2px 1px;
+	padding-left: 20px;
+	border-width: thin;
+	border-color: #239AFF;
+	border-style: solid;
+	-moz-border-radius: 5px; 
+	-webkit-border-radius: 5px;
+}
+
+#ypopup * {
+	margin: 0;
+    padding: 0;
+	font-size: 12px;	
+	text-align: left;
+	font-family:Verdana,Arial,sans-serif;
+}
+#ypopup .url {
+	padding-top: 1px;
+	font-size: 0.9em;
+  	line-height: 1.2em;
+	padding-left: 18px;
+}
+#ypopup .date {
+	font-size: 0.9em;
+  	line-height: 1.2em;
+	margin-bottom: 0.8em;
+	padding-left: 18px;
+}
+#ypopup .url a {
+  	color:#20A020;
+  	text-decoration:none;
+}
+#ypopup h3.linktitle {
+    font-size: 1.0em;
+    line-height: 1.2em;
+	color:#239AFF;
+	padding-left: 18px;
+	border-bottom: none;
+}
+#ypopup h3.linktitle a {
+	text-decoration:none;
+	color:#239AFF;
+}
+#ypopup .desc {
+  	font-style:italic;
+	font-size: 0.9em;
+  	color: #808080;
+  	line-height: 1.2em;
+	padding-left: 18px;	
+}
+#ypopup .favicon {  
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;  
+  margin-left: -24px;
+  float: left;
+}
+.classic {
+	font-size: 12px;	
+	text-align: left;
+}
+.classic .linktitle, .classic .url, .classic .date, .classic .desc {
+	margin-left: 40px;
+}
+.ymsg {
+	margin-top: 10px;
+	margin-bottom: 20px;
+	margin-left: -20px;
+	color:#239AFF;
+	font-size: 12px;
+}
+.ymsg img {
+	width: 50px;
+	height: 32px;
+	vertical-align: middle;	
+	border: 0;
+}
+.ytxt {
+	font-size: 12px;
+	margin-left: 8px;
+	margin-right: 5px;
+	margin-bottom: 20px;
+}
+
+.ynav {
+	margin-left: 8px; 
+	margin-right: 5px;
+}
+#ypopup .yloading {
+	margin-top: 150px;
+	margin-left: -12px;
+	text-align: center;
+}

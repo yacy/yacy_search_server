@@ -34,8 +34,9 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
     private final String alt;
     private final int width, height;
     private final long fileSize;
-    
+
     public ImageEntry(final MultiProtocolURI url, final String alt, final int width, final int height, long fileSize) {
+        assert url != null;
         this.url = url;
         this.alt = alt;
         this.width = width;
@@ -46,7 +47,7 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
     public MultiProtocolURI url() {
         return this.url;
     }
-    
+
     public String alt() {
         return this.alt;
     }
@@ -58,14 +59,18 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
     public int height() {
         return this.height;
     }
-    
+
     public long fileSize() {
         return this.fileSize;
     }
 
     @Override
     public String toString() {
-        return "{" + url.toString() + ", " + alt + ", " + width + "/" + height + "}";
+        return "<img url=\"" + this.url.toNormalform(false, false) + "\"" +
+               (this.alt != null && this.alt.length() > 0 ? " alt=\"" + this.alt + "\"" : "") +
+               (this.width >= 0 ? " width=\"" + this.width + "\"" : "") +
+               (this.height >= 0 ? " height=\"" + this.height + "\"" : "") +
+               ">";
     }
 
     @Override
@@ -74,17 +79,18 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         // this hash method therefore tries to compute a 'perfect hash' based on the size of the images
         // unfortunately it can not be ensured that all images get different hashes, but this should appear
         // only in very rare cases
-        if (width < 0 || height < 0)
-            return /*0x7FFF0000 |*/ (url.hashCode() & 0xFFFF);
-        return ((0x7FFF - (((width * height) >> 9) & 0x7FFF)) << 16) | (url.hashCode() & 0xFFFF);
+        if (this.width < 0 || this.height < 0)
+            return /*0x7FFF0000 |*/ (this.url.hashCode() & 0xFFFF);
+        return ((0x7FFF - (((this.width * this.height) >> 9) & 0x7FFF)) << 16) | (this.url.hashCode() & 0xFFFF);
     }
-    
+
+    @Override
     public int compareTo(final ImageEntry h) {
         // this is needed if this object is stored in a TreeSet
         // this method uses the image-size ordering from the hashCode method
         // assuming that hashCode would return a 'perfect hash' this method would
         // create a total ordering on images with respect on the image size
-        assert (url != null);
+        assert (this.url != null);
         if (this.url.toNormalform(true, true).equals((h).url.toNormalform(true, true))) return 0;
         final int thc = this.hashCode();
         final int ohc = (h).hashCode();
@@ -93,10 +99,11 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         return this.url.toString().compareTo((h).url.toString());
     }
 
+    @Override
     public int compare(ImageEntry o1, ImageEntry o2) {
         return o1.compareTo(o2);
     }
-    
+
     @Override
     public boolean equals(final Object o) {
         if(o != null && o instanceof ImageEntry) {

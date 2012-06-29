@@ -1,8 +1,8 @@
 /* base.css - Layout and general style */
 /*
-	$LastChangedDate:  23.01.2007 $
-	$LastChangedRevision:  $
-	$LastChangedBy:  netbude $
+	$LastChangedDate$
+	$LastChangedRevision$
+	$LastChangedBy$
 */
 
 /*
@@ -76,11 +76,11 @@ h4 {
 }
 
 a:link {
-  text-decoration:none;
+  text-decoration:underline;
 }
 
 a:visited {
-  text-decoration:none;
+  text-decoration:underline;
 }
 
 a:hover {
@@ -171,6 +171,10 @@ tt, *.tt {
   text-decoration: line-through;
 }
 
+.underline {
+  text-decoration: underline;
+}
+
 .Headline {
   font-weight: bold;
   font-size: 160%;
@@ -222,8 +226,8 @@ tt, *.tt {
 
 .thumbcontainer {
   margin: 2px;
-  width: 96px;
-  height: 96px; /* 96px thumbnail + some lines of text */
+  width: 128px;
+  height: 128px; /* 96px thumbnail + some lines of text */
   float: left;
 }
 
@@ -296,6 +300,7 @@ clear:both;
 	position: absolute;
 	left: 0px;
 	top: 0px;
+	z-index: -10;
 }
 
 div.bookmarkList {
@@ -314,7 +319,8 @@ div.bookmark {
 div.SubMenugroup{
   float:left;
   margin-right:1px;
-  margin-top:0;
+  margin-top:0px;
+  margin-bottom:2px;
 }
 
 div.content {
@@ -395,10 +401,10 @@ div.yacylogo {
 */
 
 div.head h1 {
-  padding:4px;
-  background:url(/env/grafics/yacy.gif) 10px center no-repeat;
+  padding:6px;
+  background:url(/env/grafics/yacy.png) 10px center no-repeat;
   font-weight: bold;
-  font-size: 1.6em;
+  font-size: 1.8em;
   text-align: center;
   margin:0;
 }
@@ -435,7 +441,7 @@ form.search.small h2 {
   margin-bottom:5px;
 }
 
-li.menugroup h3{
+li.menugroup h3 {
 	font-size: 1em; font-weight: bold;
 	margin: 0; padding: 1px 10px;
 }
@@ -452,6 +458,7 @@ div.SubMenu h3 {
   margin:0;
   margin-bottom:1px;
   padding:1px 10px;
+  clear: both;
 }
 
 h4.bookmarkTitle {
@@ -526,10 +533,10 @@ ul.SubMenu a.MenuItemLink {
 
 a.thumblink {
   display:block;
-  width: 96px;
-  height: 96px;
+  width: 128px;
+  height: 128px;
   margin: 2px;
-  line-height: 96px;
+  line-height: 128px;
   text-align: center;
   overflow: hidden;
 }
@@ -596,6 +603,10 @@ li.menugroup {
 <dl>, <dd>, <dt>
 */
 
+dd {
+  text-align:left;
+}
+
 dl.pairs dd, form dd {
   padding:0.25%;
   margin:0 0 0.25% 0.25%;
@@ -614,10 +625,37 @@ form dt, dl.pairs dt {
 
 dt.hintIcon {
 	float:left;
+    clear:both;
 }
 
 dd.hint {
+	padding-top: 10px;
 	padding-bottom: 10px;
+}
+
+dl.bplike
+{
+	float: left;
+	margin: 0 0;
+	width: 184px;
+	padding: 0;
+}
+
+.bplike dt
+{
+	clear: left;
+	float: left;
+	width: 20px;
+	margin: 0;
+	padding: 0px;
+}
+
+.bplike dd
+{
+	float: left;
+	width: 155px;
+	margin: 0px;
+	padding: 0px;
 }
 
 /*----------
@@ -631,6 +669,10 @@ form.search.small {
   text-align:left;
   margin-bottom:5px;
   white-space:nowrap;
+}
+
+.searchinput {
+  font-size:16px;
 }
 
 /*----------

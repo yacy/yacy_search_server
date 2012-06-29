@@ -25,10 +25,13 @@
 package net.yacy.document.content;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.zip.GZIPInputStream;
@@ -41,12 +44,24 @@ import javax.xml.parsers.SAXParserFactory;
 import net.yacy.kelondro.logging.Log;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 
 public class SurrogateReader extends DefaultHandler implements Runnable {
+
+    // definition of the surrogate main element
+    public final static String SURROGATES_MAIN_ELEMENT_NAME =
+        "surrogates";
+    public final static String SURROGATES_MAIN_ELEMENT_OPEN =
+        "<" + SURROGATES_MAIN_ELEMENT_NAME +
+        " xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
+        " xmlns:yacy=\"http://yacy.net/\"" +
+        " xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\">";
+    public final static String SURROGATES_MAIN_ELEMENT_CLOSE =
+        "</" + SURROGATES_MAIN_ELEMENT_NAME + ">";
 
     // class variables
     private final StringBuilder buffer;
@@ -55,7 +70,22 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private String elementName;
     private final BlockingQueue<DCEntry> surrogates;
     private SAXParser saxParser;
-    private final InputStream stream;
+    private final InputSource inputSource;
+    private final InputStream inputStream;
+
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static SAXParser getParser() throws SAXException {
+    	SAXParser parser = tlSax.get();
+    	if (parser == null) {
+    		try {
+				parser = SAXParserFactory.newInstance().newSAXParser();
+			} catch (ParserConfigurationException e) {
+				throw new SAXException(e.getMessage(), e);
+			}
+    		tlSax.set(parser);
+    	}
+    	return parser;
+    }
     
     public SurrogateReader(final InputStream stream, int queueSize) throws IOException {
         this.buffer = new StringBuilder(300);
@@ -63,13 +93,14 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         this.surrogate = null;
         this.elementName = null;
         this.surrogates = new ArrayBlockingQueue<DCEntry>(queueSize);
-        this.stream = stream;
-        final SAXParserFactory factory = SAXParserFactory.newInstance();
+        
+        Reader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        this.inputSource = new InputSource(reader);
+        this.inputSource.setEncoding("UTF-8");
+        this.inputStream = stream;
+        
         try {
-            this.saxParser = factory.newSAXParser();
-        } catch (ParserConfigurationException e) {
-            Log.logException(e);
-            throw new IOException(e.getMessage());
+            this.saxParser = getParser();
         } catch (SAXException e) {
             Log.logException(e);
             throw new IOException(e.getMessage());
@@ -78,7 +109,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     
     public void run() {
         try {
-            this.saxParser.parse(this.stream, this);
+            this.saxParser.parse(this.inputSource, this);
         } catch (SAXParseException e) {
             Log.logException(e);
         } catch (SAXException e) {
@@ -92,7 +123,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
 			    Log.logException(e1);
 			}
 			try {
-        		this.stream.close();
+        		this.inputStream.close();
 			} catch (IOException e) {
 			    Log.logException(e);
 			}
@@ -109,7 +140,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         } else if ("value".equals(tag)) {
             this.buffer.setLength(0);
             this.parsingValue = true;
-        } else if (tag.startsWith("dc:")) {
+        } else if (tag.startsWith("dc:") || tag.startsWith("geo:")) {
             // parse dublin core attribute
             this.elementName = tag;
             this.parsingValue = true;
@@ -142,7 +173,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             }
             this.buffer.setLength(0);
             this.parsingValue = false;
-        } else if (tag.startsWith("dc:")) {
+        } else if (tag.startsWith("dc:") || tag.startsWith("geo:")) {
             final String value = buffer.toString().trim();
             if (this.elementName != null && tag.equals(this.elementName)) {
                 value.replaceAll(";", ",");

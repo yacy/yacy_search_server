@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,7 +27,6 @@ package net.yacy.document.content;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.Collator;
 import java.text.ParseException;
@@ -37,15 +36,16 @@ import java.util.Locale;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 
 public class DCEntry extends TreeMap<String, String> {
-    
+
     private static final long    serialVersionUID = -2050291583515701559L;
-    
+
     // use a collator to relax when distinguishing between lowercase und uppercase letters
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
@@ -53,17 +53,19 @@ public class DCEntry extends TreeMap<String, String> {
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
     public  static final DCEntry poison = new DCEntry();
-    
+
     public DCEntry() {
         super((Collator) insensitiveCollator.clone());
     }
-    
+
     public DCEntry(
             DigestURI url,
             Date date,
             String title,
             String author,
-            String body
+            String body,
+            double lat,
+            double lon
             ) {
         super((Collator) insensitiveCollator.clone());
         this.put("dc:identifier", url.toNormalform(true, false));
@@ -71,8 +73,10 @@ public class DCEntry extends TreeMap<String, String> {
         this.put("dc:title", title);
         this.put("dc:creator", author);
         this.put("dc:description", body);
+        this.put("geo:lat", Double.toString(lat));
+        this.put("geo:long", Double.toString(lon));
     }
-    
+
     /*
     DC according to rfc 5013
 
@@ -104,7 +108,7 @@ public class DCEntry extends TreeMap<String, String> {
             return new Date();
         }
     }
-    
+
     public DigestURI getIdentifier(boolean useRelationAsAlternative) {
         String u = this.get("url");
         if (u == null) u = this.get("dc:identifier");
@@ -126,7 +130,7 @@ public class DCEntry extends TreeMap<String, String> {
             return null;
         }
     }
-    
+
     public DigestURI getRelation() {
         String u = this.get("dc:relation");
         if (u == null) return null;
@@ -142,7 +146,7 @@ public class DCEntry extends TreeMap<String, String> {
             return null;
         }
     }
-    
+
     private String bestU(String[] urls) {
         for (String uu: urls) {
             if (uu.startsWith("http://") && (uu.endsWith(".html") || uu.endsWith(".htm") || uu.endsWith(".pdf") || uu.endsWith(".doc") || uu.endsWith(".rss") || uu.endsWith(".xml"))) return uu;
@@ -160,38 +164,39 @@ public class DCEntry extends TreeMap<String, String> {
         }
         return urls[0];
     }
-    
-    public String getLanguage() {
-        String l = this.get("language");
-        if (l == null) l = this.get("dc:language");
-        if (l == null) return getIdentifier(true).language();
+
+    //modified by copperdust; Ukraine, 2012
+    public String getLanguage() {//final language computation
+        String l = this.get("dc:language");//from document metainfo
+        if (l == null) l = getIdentifier(true).language();//from symbolic frequency table
+        if (l == null) return this.get("language");//from TLD
         return l;
     }
-    
+
     public String getType() {
         String t = this.get("dc:type");
         if (t == null) return "";
         return t;
     }
-    
+
     public String getFormat() {
         String t = this.get("dc:format");
         if (t == null) return "";
         return t;
     }
-    
+
     public String getSource() {
         String t = this.get("dc:source");
         if (t == null) return "";
         return t;
     }
-    
+
     public String getRights() {
         String t = this.get("dc:rights");
         if (t == null) return "";
         return t;
     }
-    
+
     public String getTitle() {
         String t = this.get("title");
         if (t == null) t = this.get("dc:title");
@@ -199,14 +204,14 @@ public class DCEntry extends TreeMap<String, String> {
         if (t == null) return "";
         return t;
     }
-    
+
     public String getPublisher() {
         String t = this.get("dc:publisher");
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
     }
-    
+
     public String getCreator() {
         String t = this.get("author");
         if (t == null) t = this.get("dc:creator");
@@ -214,7 +219,7 @@ public class DCEntry extends TreeMap<String, String> {
         if (t == null) return "";
         return t;
     }
-    
+
     public String getDescription() {
         String t = this.get("body");
         if (t == null) t = this.get("dc:description");
@@ -222,15 +227,31 @@ public class DCEntry extends TreeMap<String, String> {
         if (t == null) return "";
         return t;
     }
-    
+
     public String[] getSubject() {
         String t = this.get("categories");
-        if (t == null) this.get("dc:subject");
+        if (t == null) t = this.get("dc:subject");
         t = stripCDATA(t);
         if (t == null) return new String[]{};
         return t.split(";");
     }
-    
+
+    public double getLon() {
+        String t = this.get("geo:long");
+        if (t == null) t = this.get("geo:lon");
+        t = stripCDATA(t);
+        if (t == null) return 0.0d;
+        return Double.parseDouble(t);
+    }
+
+    public double getLat() {
+        String t = this.get("geo:lat");
+        if (t == null) t = this.get("geo:lat");
+        t = stripCDATA(t);
+        if (t == null) return 0.0d;
+        return Double.parseDouble(t);
+    }
+
     private String stripCDATA(String s) {
         if (s == null) return null;
         s = s.trim();
@@ -238,34 +259,31 @@ public class DCEntry extends TreeMap<String, String> {
         if (s.endsWith("]]")) s = s.substring(0, s.length() - 2);
         return s;
     }
-    
+
     public Document document() {
         HashSet<String> languages = new HashSet<String>();
         languages.add(getLanguage());
-        
-        try {
-            return new Document(
-                getIdentifier(true),
-                "text/html",
-                "UTF-8",
-                languages,
-                getSubject(),
-                getTitle(),
-                getCreator(),
-                getPublisher(),
-                null,
-                "",
-                getDescription().getBytes("UTF-8"),
-                null,
-                null,
-                null,
-                false);
-        } catch (UnsupportedEncodingException e) {
-            Log.logException(e);
-            return null;
-        }
+
+        return new Document(
+            getIdentifier(true),
+            "text/html",
+            "UTF-8",
+            this,
+            languages,
+            getSubject(),
+            getTitle(),
+            getCreator(),
+            getPublisher(),
+            null,
+            "",
+            getLon(), getLat(),
+            UTF8.getBytes(getDescription()),
+            null,
+            null,
+            null,
+            false);
     }
-    
+
     public void writeXML(OutputStreamWriter os) throws IOException {
         Document doc = document();
         if (doc != null) {

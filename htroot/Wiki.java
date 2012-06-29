@@ -1,4 +1,4 @@
-// Wiki.java 
+// Wiki.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -31,24 +31,24 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-
+import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.peers.NewsPool;
+import net.yacy.search.Switchboard;
 import de.anomic.data.Diff;
 import de.anomic.data.wiki.WikiBoard;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsPool;
-import java.util.Map;
 
 public class Wiki {
     private static final String ANONYMOUS = "anonymous";
@@ -70,13 +70,11 @@ public class Wiki {
             post.put("page", "start");
         }
 
-        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
-        prop.put("display", display);
-        
+        prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
+
         String access = sb.getConfig("WikiAccess", "admin");
         final String pagename = get(post, "page", "start");
-        final String ip = get(post, HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = get(post, HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
         String author = get(post, "author", ANONYMOUS);
         if (author.equals(ANONYMOUS)) {
             author = WikiBoard.guessAuthor(ip);
@@ -84,15 +82,15 @@ public class Wiki {
                 author = (sb.peers.mySeed() == null) ? ANONYMOUS : sb.peers.mySeed().get("Name", ANONYMOUS);
             }
         }
-        
+
         if (post != null && post.containsKey("access")) {
             // only the administrator may change the access right
-            if (!sb.verifyAuthentication(header, true)) {
+            if (!sb.verifyAuthentication(header)) {
                 // check access right for admin
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            	prop.authenticationRequired();
                 return prop;
             }
-            
+
             access = post.get("access", "admin");
             sb.setConfig("WikiAccess", access);
         }
@@ -103,61 +101,52 @@ public class Wiki {
         }
 
         WikiBoard.Entry page = sb.wikiDB.read(pagename);
-        
+
         if (post != null && post.containsKey("submit")) {
-            
-            if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
+
+            if ((access.equals("admin") && (!sb.verifyAuthentication(header)))) {
                 // check access right for admin
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            	prop.authenticationRequired();
                 return prop;
             }
-            
+
             // store a new page
             byte[] content;
-            try {
-                content = post.get("content", "").getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                content = post.get("content", "").getBytes();
-            }
+            content = UTF8.getBytes(post.get("content", ""));
             final WikiBoard.Entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
             sb.wikiDB.write(newEntry);
             // create a news message
             final Map<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
-            if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !UTF8.String(page.page()).equals(UTF8.String(content))) {
-                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map);
+            if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !ByteBuffer.equals(page.page(), content)) {
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_WIKI_UPDATE, map);
             }
             page = newEntry;
             prop.putHTML("LOCATION", "/Wiki.html?page=" + pagename);
-            prop.put("LOCATION", prop.get("LOCATION") + "&display=" + display);
+            prop.put("LOCATION", prop.get("LOCATION"));
         }
 
-        prop.put("mode_display", display);
-
         if (post != null && post.containsKey("edit")) {
-            if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
+            if ((access.equals("admin") && (!sb.verifyAuthentication(header)))) {
                 // check access right for admin
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            	prop.authenticationRequired();
                 return prop;
             }
-            
+
             prop.put("mode", "1"); //edit
             prop.putHTML("mode_author", author);
             prop.putHTML("mode_page-code", UTF8.String(page.page()));
-            prop.putHTML("mode_pagename", pagename);
-            prop.put("mode_display", display);
-        }
+            prop.putHTML("mode_pagename", pagename);        }
 
         //contributed by [MN]
         else if (post != null && post.containsKey("preview")) {
             // preview the page
             prop.put("mode", "2");//preview
             prop.putHTML("mode_pagename", pagename);
-            prop.put("mode_display", display);
             prop.putHTML("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
-            prop.putWiki("mode_page", post.get("content", ""));
+            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", post.get("content", ""));
             prop.putHTML("mode_page-code", post.get("content", ""));
         }
         //end contrib of [MN]
@@ -183,16 +172,12 @@ public class Wiki {
                 prop.putHTML("mode_error_message", e.getMessage());
             }
             prop.putHTML("mode_pagename", pagename);
-            prop.put("mode_display", display);
-        }
-        
-        else if (post != null && post.containsKey("diff")) {
+        } else if (post != null && post.containsKey("diff")) {
             // Diff
             prop.put("mode", "4");
             prop.putHTML("mode_page", pagename);
             prop.putHTML("mode_error_page", pagename);
-            prop.put("mode_error_display", display);
-            
+
             try {
                 final Iterator<byte[]> it = sb.wikiDB.keysBkp(true);
                 WikiBoard.Entry entry;
@@ -216,26 +201,26 @@ public class Wiki {
                     count++;
                 }
                 count--;    // don't show current version
-                
+
                 if (!oldselected) { // select latest old entry
                     prop.put("mode_error_versions_" + (count - 1) + "_oldselected", "1");
                 }
                 if (!newselected) { // select latest new entry (== current)
                     prop.put("mode_error_curselected", "1");
                 }
-                
+
                 if (count == 0) {
                     prop.put("mode_error", "2"); // no entries found
                 } else {
                     prop.put("mode_error_versions", count);
                 }
-                
+
                 entry = sb.wikiDB.read(pagename);
                 if (entry != null) {
                     prop.put("mode_error_curdate", WikiBoard.dateString(entry.date()));
                     prop.put("mode_error_curfdate", dateString(entry.date()));
                 }
-                
+
                 if (nentry == null) {
                     nentry = entry;
                 }
@@ -249,10 +234,9 @@ public class Wiki {
                 } else if (post.containsKey("viewold") && oentry != null) {
                     prop.put("mode_versioning", "2");
                     prop.putHTML("mode_versioning_pagename", pagename);
-                    prop.put("mode_versioning_display", display);
                     prop.putHTML("mode_versioning_author", oentry.author());
                     prop.put("mode_versioning_date", dateString(oentry.date()));
-                    prop.putWiki("mode_versioning_page", oentry.page());
+                    prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_versioning_page", oentry.page());
                     prop.putHTML("mode_versioning_page-code", UTF8.String(oentry.page()));
                 }
             } catch (final IOException e) {
@@ -265,10 +249,9 @@ public class Wiki {
             // show page
             prop.put("mode", "0"); //viewing
             prop.putHTML("mode_pagename", pagename);
-            prop.put("mode_display", display);
             prop.putHTML("mode_author", page.author());
             prop.put("mode_date", dateString(page.date()));
-            prop.putWiki("mode_page", page.page());
+            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", page.page());
 
             prop.put("controls", "0");
             prop.putHTML("controls_pagename", pagename);
@@ -281,7 +264,7 @@ public class Wiki {
 
     /**
      * get key from post, use dflt if (not present or post == null)
-     * 
+     *
      * @param post
      * @param string
      * @param string2

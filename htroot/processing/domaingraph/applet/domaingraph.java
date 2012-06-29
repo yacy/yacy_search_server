@@ -119,14 +119,14 @@ public void processRequestResponse(int steps) {
         
       </domain>
       */
-      int p = line.indexOf("<domain");
+      int p = line.indexOf("<domain",0);
       if (p >= 0) {
         //println("domain   :" + line.substring(p + 8, line.length() - 1).trim());
         processDomain(parseProps(line.substring(p + 8, line.length() - 1).trim()));
       }
-      p = line.indexOf("<reference");
+      p = line.indexOf("<reference",0);
       if (p >= 0) {
-        int q = line.indexOf("</reference>");
+        int q = line.indexOf("</reference>",0);
         if (q > 0) {
             int r = line.lastIndexOf('>', q);
             if (r > 0) {
@@ -192,7 +192,7 @@ public HashMap parseProps(String s) {
   int p;
   String z;
   for (int i = 0; i < l.length; i++) {
-    p = l[i].indexOf('=');
+    p = l[i].indexOf('=',0);
     if (p > 0) {
       z = l[i].substring(p + 1).trim();
       if (z.length() > 0 && z.charAt(0) == '"') z = z.substring(1);

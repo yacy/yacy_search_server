@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class can try to identify the language a text is written in.
@@ -36,15 +37,15 @@ import java.util.Vector;
 public final class Identificator {
 
     private static final LanguageStatisticsHolder languages = LanguageStatisticsHolder.getInstance();
-    
-    private final Map<Character, Integer> letter;
+
+    private final Map<Character, AtomicInteger> letter;
     private int letters;
     private String language;
-    
+
     public Identificator() {
-        letter = new HashMap<Character, Integer>();
-        letters = 0;
-        language = null;
+        this.letter = new HashMap<Character, AtomicInteger>();
+        this.letters = 0;
+        this.language = null;
     }
 
     /**
@@ -58,7 +59,7 @@ public final class Identificator {
         // only test the first 100000 characters of a text
         return getLanguage(text, 100000);
     }
-    
+
     /**
      * This method tries to return the language a text is written in. The method will
      * use the number characters defined in the parameter limit.
@@ -67,120 +68,125 @@ public final class Identificator {
      * @return the language or null if the method was not able to find out the language
      */
     public static String getLanguage(final String text, final int limit) {
-        
+
         int upperLimit = text.length();
         if (upperLimit > limit) {
             upperLimit = limit;
         }
 
-        Identificator id = new Identificator();
-        
+        final Identificator id = new Identificator();
+
         // count number of characters in text
         for (int i = 0; i < upperLimit; i++) id.inc(text.charAt(i));
-        
+
         return id.getLanguage();
     }
-    
+
     public void inc(final char c) {
         if (!Character.isLetter(c)) return;
-        Character cc = Character.toLowerCase(c);
-        Integer i = letter.get(cc);
+        final Character cc = Character.toLowerCase(c);
+        final AtomicInteger i = this.letter.get(cc);
         if (i == null) {
-            letter.put(cc, 1);
+            this.letter.put(cc, new AtomicInteger(1));
         } else {
-            letter.put(cc, i.intValue() + 1);
+            i.incrementAndGet();
         }
-        letters++;
+        this.letters++;
     }
-    
-    public void add(String word) {
+
+    public void add(final String word) {
         if (word == null) return;
         for (int i = 0; i < word.length(); i++) inc(word.charAt(i));
     }
-    
+
+    //modified by copperdust; Ukraine, 2012
     public String getLanguage() {
-        
-        if (language != null) return language; // don't compute that twice
-        if (letters == 0) return null; // not enough information available
-        
+
+    	if (this.language != null) return this.language; // don't compute that twice
+        if (this.letters == 0) return null; // not enough information available
+
         final LanguageStatistics testStat = new LanguageStatistics("text");
-        
+
         // calculate percentage
         Character character;
         Character maxChar = null;
         int count = 0;
         int max = 0;
-        for (Map.Entry<Character, Integer> e: letter.entrySet()) {
+        for (final Map.Entry<Character, AtomicInteger> e: this.letter.entrySet()) {
             character = e.getKey();
             count = e.getValue().intValue();
             if (count > max) {
                 maxChar = character;
                 max = count;
             }
-            testStat.put(character, ((float) 100) * ((float) count) / ((float) letters));
+            testStat.put(character, ((float) 100) * ((float) count) / (this.letters));
         }
-        
+
         // create list with relevant languages
         final List<Integer> relevantLanguages = new Vector <Integer>();
         for (int i = 0; i < languages.size(); i++) {
-            
             // only languages that contain the most common character in the text will be tested
             if (languages.get(i).contains(maxChar)) {
                 relevantLanguages.add(i);
             }
         }
-        
+
         if (relevantLanguages.isEmpty()) return null;
-           
+
         // compare characters in text with characters in statistics
         final float[] offsetList = new float[relevantLanguages.size()];
-        final int[] votesList = new int[relevantLanguages.size()];
+        final float[] sumList = new float[relevantLanguages.size()];
 
-        Iterator<Character> iter = testStat.keySet().iterator();
-        float minimum;
+        final Iterator<Character> iter = testStat.keySet().iterator();
         float offset = 0;
         float valueCharacter;
-        int bestLanguage = -1;
         float value;
-        
+
         while (iter.hasNext()) {
-            minimum = 100.1f;
             character = iter.next();
             valueCharacter = testStat.get(character);
             for (int i = 0; i < relevantLanguages.size(); i++) {
                 value = languages.get(relevantLanguages.get(i)).get(character);
-                offset = Math.abs(value - valueCharacter);
-                offsetList[i] = offsetList[i] + offset;
-                if (offset < minimum) {
-                    minimum = offset;
-                    bestLanguage = i;
+                if (value > 0) {
+                	offset = Math.abs(value - valueCharacter);
+                	offsetList[i] = offsetList[i] + offset;
+                	sumList[i] = sumList[i] + value;// accumulation processed characters
+                	// normally must be 100 after loop for language written in
                 }
             }
-            votesList[bestLanguage] = ++votesList[bestLanguage];
         }
-   
-        // Now we can count how many votes each language got and how far it was away from the stats.
-        // If 2 languages have the same amount of votes, the one with the smaller offset wins.
-        int maxVotes = 0;
+        //50/50
+        //abs(50-40) + abs(50-10) = 10 + 40 = 50 -- 50 = 0 [60 must be]
+        //abs(50-25) + abs(50-25) = 25 + 25 = 50 -- 50 = 0 [0 must be]
+        
+        //75/25
+        //abs(50-60) + abs(50-15) = 10 + 35 = 45 -- 25 = 20 [60 must be]
+        //abs(50-12,5) + abs(50-12,5) = 37,5 + 37,5 = 75 -- 75 = 0 [0 must be]
+        
+        //25/75
+        //abs(50-20) + abs(50-5) = 30 + 45 = 75 -- 75 = 0 [60 must be]
+        //abs(50-37,5) + abs(50-37,5) = 12,5 + 12,5 = 25 -- 25 = 0 [0 must be]
+
+        // Now we can count how closer each language to current pattern.
         float minOffset = 100.1f;
-        for (int i = 0; i < votesList.length; i++) {
-            if ((votesList[i] == maxVotes && offsetList[i] < minOffset) || (votesList[i] > maxVotes)) {
-                maxVotes = votesList[i];
-                minOffset = offsetList[i];
+        int bestLanguage = -1;
+        for (int i = 0; i < sumList.length; i++) {
+            offset = offsetList[i] + 100 - sumList[i];// actual difference
+            if (offset < minOffset) {
+                minOffset = offset;
                 bestLanguage = i;
             }
         }
-        
-        // Only return name of language of offset is smaller than 20%. This 
-        // prevents a language beeing reported that has won the voting, but
-        // is still not the right language.
-        if (offset < 20) {
-            language = languages.get(relevantLanguages.get(bestLanguage)).getName();
-            return language;
+
+        // Return name of language only if offset is smaller than 30%.
+        // Prevents wrong language detection due to actual language not in langstats.
+        if (minOffset < 30) {
+            this.language = languages.get(relevantLanguages.get(bestLanguage)).getName();
+            return this.language;
         }
-        
+
         return null;
-        
+
     }
-    
+
 }

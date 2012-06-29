@@ -27,13 +27,13 @@
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.NewsDB;
+import net.yacy.peers.NewsPool;
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsDB;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacySeed;
 
 public class CrawlMonitorRemoteStart {
     
@@ -45,17 +45,17 @@ public class CrawlMonitorRemoteStart {
         boolean dark = true;   
         
         // create other peer crawl table using YaCyNews
-        Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+        Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB, true);
         int showedCrawl = 0;
-        yacyNewsDB.Record record;
-        yacySeed peer;
+        NewsDB.Record record;
+        Seed peer;
         String peername;
         while (recordIterator.hasNext()) {
             record = recordIterator.next();
             if (record == null) {
                 continue;
             }
-            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
+            if (record.category().equals(NewsPool.CATEGORY_CRAWL_START)) {
                 peer = sb.peers.get(record.originator());
                 peername = (peer == null) ? record.originator() : peer.getName();
 
@@ -75,14 +75,14 @@ public class CrawlMonitorRemoteStart {
         prop.put("otherCrawlStartInProgress", showedCrawl);
         
         // finished remote crawls
-        recordIterator = sb.peers.newsPool.recordIterator(yacyNewsPool.PROCESSED_DB, true);
+        recordIterator = sb.peers.newsPool.recordIterator(NewsPool.PROCESSED_DB, true);
         showedCrawl = 0;
         while (recordIterator.hasNext()) {
             record = recordIterator.next();
             if (record == null) {
                 continue;
             }
-            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
+            if (record.category().equals(NewsPool.CATEGORY_CRAWL_START)) {
                 peer = sb.peers.get(record.originator());
                 peername = (peer == null) ? record.originator() : peer.getName();
 

@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Cleaner</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControlCleaner">
+  <div id="fullcontent">
+  	#(inline)##%env/templates/header.template%#
+    
+    <h2>Steering of API Actions</h2>
+    <p>This table shows search results that had been sorted out from the search result display because their content had not been verified.
+    This means that the searched word does not appear on the search page.
+    </p>::#(/inline)#
+    #(showtable)#::
+    <form action="IndexControlCleaner_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="cleanerlist">
+      <fieldset>
+      <legend><label for="apilist">Recorded Actions</label></legend>
+      <p><span id="resCounter" style="display: inline;">
+      #(navigation)#
+      ::
+      #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
+      #[startRecord]#-#[to]# of #[of]#
+      #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
+      <img src="env/grafics/nave.gif" alt="" />
+      #(/navigation)#
+      <div>
+      <input type="hidden" name="startRecord" value="#[startRecord]#" />
+      <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
+      <input type="hidden" name="inline" value="#(inline)#false::true#(/inline)#" />
+      <input type="hidden" name="filter" value="#[filter]#" />
+      <input type="text" name="query" value="#[query]#" style="font-size:16px;float:left;border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;" />
+      </div>
+      </span><br/></p>
+      <p style="clear:both;">
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <th class="sorttable_nosort"><input type="checkbox" id="allswitch" onclick="checkAll(this.form.id, this.checked);" /></th>
+          <th>Type</th>
+          <th width="100">Comment</th>
+          <th>Call<br/>Count</th>
+          <th>Recording<br/>Date</th>
+          <th>Last&nbsp;Exec<br/>Date</th>
+          <th>Next&nbsp;Exec<br/>Date</th>
+          <th class="sorttable_nosort">Scheduler</th>
+          #(inline)#<th class="sorttable_nosort">URL</th>::#(/inline)#
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td>#[type]#</td>
+          <td>#[comment]#</td>
+          <td>#[callcount]#</td>
+          <td>#[dateRecording]#</td>
+          <td>#[dateLastExec]#</td>
+          <td>#[dateNextExec]#</td>
+          <td>
+          #(scheduler)#
+           <form action="Table_API_p.html" method="post" enctype="multipart/form-data" id="modify_repeat" accept-charset="UTF-8">
+            <select name="repeat_select" onchange='this.form.submit()'>
+              <option value="off" selected="selected">no repetition</option>
+              <option value="on">activate scheduler</option>
+            </select>
+            <input type="hidden" name="pk" value="#[pk]#" />
+            <input type="hidden" name="inline" value="#[inline]#" />
+            <input type="hidden" name="filter" value="#[filter]#" />
+          </form>
+          ::
+         <form action="Table_API_p.html" method="post" enctype="multipart/form-data" id="modify_repeat">
+            <table><tr><td>
+            <select name="repeat_time" onchange='this.form.submit()'>
+            #{scale}#
+              <option value="#[time]#" #(selected)#::selected="selected"#(/selected)#>#[time]#</option>
+            #{/scale}#
+            </select>
+            </td><td>
+            <select name="repeat_unit" onchange='this.form.submit()'>
+              <option value="selminutes" #(selectedMinutes)#::selected="selected"#(/selectedMinutes)#>minutes</option>
+              <option value="selhours" #(selectedHours)#::selected="selected"#(/selectedHours)#>hours</option>
+              <option value="seldays" #(selectedDays)#::selected="selected"#(/selectedDays)#>days</option>
+            </select>
+            </td></tr></table>
+            <input type="hidden" name="pk" value="#[pk]#" />
+            <input type="hidden" name="inline" value="#[inline]#" />
+            <input type="hidden" name="filter" value="#[filter]#" />
+            <noscript><input type="submit" value="Submit" /></noscript>
+        </form>
+          #(/scheduler)#
+          </td>
+          #(inline)#<td>#[url]#</td>::#(/inline)#
+        </tr>
+        #{/list}#
+        </fieldset>
+      </table>
+      </p>
+      <p>
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="deletefromindex" value="Delete selected references from the search index" />
+      <input type="submit" name="deleterows" value="Delete selected entries from the list" />
+      </p>
+      
+    </form>
+    #(/showtable)#
+    </div>
+    #%env/templates/footer.template%#
+  </body>
+</html>
+  

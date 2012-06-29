@@ -31,10 +31,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.ByteOrder;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -141,8 +141,8 @@ public final class HeapWriter {
             if (fingerprint == null) {
                 Log.logSevere("kelondroBLOBHeapWriter", "cannot write a dump for " + heapFileREADY.getName()+ ": fingerprint is null");
             } else {
-                new Gap().dump(HeapReader.fingerprintGapFile(this.heapFileREADY, fingerprint));
-                index.dump(HeapReader.fingerprintIndexFile(this.heapFileREADY, fingerprint));
+                new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
+                index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
                 Log.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
             }
             index.close();
@@ -154,4 +154,25 @@ public final class HeapWriter {
         }
     }
 
+    public static void delete(File f) {
+        File p = f.getParentFile();
+        String n = f.getName() + ".";
+        String[] l = p.list();
+        FileUtils.deletedelete(f);
+        for (String s: l) {
+            if (s.startsWith(n) &&
+                (s.endsWith(".idx") || s.endsWith(".gap")))
+               FileUtils.deletedelete(new File(p, s));
+        }
+    }
+    
+    protected static File fingerprintIndexFile(File f, String fingerprint) {
+        assert f != null;
+        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".idx");
+    }
+    
+    protected static File fingerprintGapFile(File f, String fingerprint) {
+        assert f != null;
+        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".gap");
+    }
 }

@@ -35,7 +35,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -48,8 +47,8 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 
+import de.anomic.crawler.Cache;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.client.Cache;
 import de.anomic.http.server.MultiOutputStream;
 
 /**
@@ -113,24 +112,24 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 				throw new ServletException("Unsupported Request Method");
 			}
 			HttpResponse responseHeader = client.getHttpResponse();
-            final ResponseHeader responseHeaderLegacy = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+            final ResponseHeader responseHeaderLegacy = new ResponseHeader(200, client.getHttpResponse().getAllHeaders());
             
 			cleanResponseHeader(responseHeader);
 			
 			// TODO: is this fast, if not, use value from ProxyCacheHandler
 			DigestURI digestURI = new DigestURI(url);
-			ResponseHeader cachedResponseHeader = Cache.getResponseHeader(digestURI);
+			ResponseHeader cachedResponseHeader = Cache.getResponseHeader(digestURI.hash());
 
             // the cache does either not exist or is (supposed to be) stale
             long sizeBeforeDelete = -1;
             if (cachedResponseHeader != null) {
                 // delete the cache
-                ResponseHeader rh = Cache.getResponseHeader(digestURI);
+                ResponseHeader rh = Cache.getResponseHeader(digestURI.hash());
                 if (rh != null && (sizeBeforeDelete = rh.getContentLength()) == 0) {
-                    byte[] b = Cache.getContent(new DigestURI(url));
+                    byte[] b = Cache.getContent(new DigestURI(url).hash());
                     if (b != null) sizeBeforeDelete = b.length;
                 }
-                Cache.delete(digestURI);
+                Cache.delete(digestURI.hash());
                 // log refresh miss 
             }
             
@@ -150,8 +149,8 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                     yacyRequest,
                     null,
                     responseHeaderLegacy,
-                    Integer.toString(client.getHttpResponse().getStatusLine().getStatusCode()),
-                    sb.crawler.defaultProxyProfile
+                    sb.crawler.defaultProxyProfile,
+                    false
             );
             
             final String storeError = yacyResponse.shallStoreCacheForProxy();

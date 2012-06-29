@@ -28,8 +28,8 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -41,30 +41,42 @@ public class ConfigParser {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        
+
         if (post != null) {
-            if (!sb.verifyAuthentication(header, false)) {
+            if (!sb.verifyAuthentication(header)) {
                 // force log-in
-                prop.put("AUTHENTICATE", "admin log-in");
+            	prop.authenticationRequired();
                 return prop;
             }
-            
+
             if (post.containsKey("parserSettings")) {
                 post.remove("parserSettings");
-                
+
                 for (final Parser parser: TextParser.parsers()) {
+                    for (final String ext: parser.supportedExtensions()) {
+                        TextParser.grantExtension(ext, "on".equals(post.get("extension_" + ext, "")));
+                    }
                     for (final String mimeType: parser.supportedMimeTypes()) {
                         TextParser.grantMime(mimeType, "on".equals(post.get("mimename_" + mimeType, "")));
                     }
                 }
                 env.setConfig(SwitchboardConstants.PARSER_MIME_DENY, TextParser.getDenyMime());
+                env.setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, TextParser.getDenyExtension());
             }
         }
-        
-        int i = 0;        
+
+        int i = 0;
         for (final Parser parser: TextParser.parsers()) {
             prop.put("parser_" + i + "_name", parser.getName());
-            
+
+            int extIdx = 0;
+            for (final String ext: parser.supportedExtensions()) {
+                prop.put("parser_" + i + "_ext_" + extIdx + "_extension", ext);
+                prop.put("parser_" + i + "_ext_" + extIdx + "_status", (TextParser.supportsExtension(ext) == null) ? 1 : 0);
+                extIdx++;
+            }
+            prop.put("parser_" + i + "_ext", extIdx);
+
             int mimeIdx = 0;
             for (final String mimeType: parser.supportedMimeTypes()) {
                 prop.put("parser_" + i + "_mime_" + mimeIdx + "_mimetype", mimeType);
@@ -74,9 +86,9 @@ public class ConfigParser {
             prop.put("parser_" + i + "_mime", mimeIdx);
             i++;
         }
-        
+
         prop.put("parser", i);
-        
+
         // return rewrite properties
         return prop;
     }

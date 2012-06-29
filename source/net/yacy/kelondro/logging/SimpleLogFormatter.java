@@ -1,4 +1,4 @@
-//SimpleLogFormatter.java 
+//SimpleLogFormatter.java
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -50,13 +50,13 @@ public final class SimpleLogFormatter extends SimpleFormatter {
     public SimpleLogFormatter() {
         super();
     }
-      
+
     @Override
     public final synchronized String format(final LogRecord record) {
-          
+
         final StringBuffer stringBuffer = this.buffer;
         stringBuffer.setLength(0);
-          
+
         // adding the loglevel
         final int logLevel = record.getLevel().intValue();
         if (logLevel == Log.LOGLEVEL_SEVERE)
@@ -67,16 +67,16 @@ public final class SimpleLogFormatter extends SimpleFormatter {
             this.buffer.append(Log.LOGTOKEN_CONFIG);
         else if (logLevel == Log.LOGLEVEL_INFO)
             this.buffer.append(Log.LOGTOKEN_INFO);
-        else if (logLevel == Log.LOGLEVEL_FINE) 
+        else if (logLevel == Log.LOGLEVEL_FINE)
             this.buffer.append(Log.LOGTOKEN_FINE);
-        else if (logLevel == Log.LOGLEVEL_FINER) 
-            this.buffer.append(Log.LOGTOKEN_FINER);        
-        else if (logLevel == Log.LOGLEVEL_FINEST) 
-            this.buffer.append(Log.LOGTOKEN_FINEST);            
-        else 
+        else if (logLevel == Log.LOGLEVEL_FINER)
+            this.buffer.append(Log.LOGTOKEN_FINER);
+        else if (logLevel == Log.LOGLEVEL_FINEST)
+            this.buffer.append(Log.LOGTOKEN_FINEST);
+        else
             this.buffer.append(Log.LOGTOKEN_FINE);
         this.buffer.append(' ');
-          
+
         // adding the logging date
         this.date.setTime(record.getMillis());
         this.position.setBeginIndex(0);
@@ -85,11 +85,11 @@ public final class SimpleLogFormatter extends SimpleFormatter {
         // adding the logger name
         stringBuffer.append(' ');
         stringBuffer.append(record.getLoggerName());
-          
+
         // adding the logging message
         stringBuffer.append(' ');
         stringBuffer.append(formatMessage(record));
-          
+
         // adding the stack trace if available
         stringBuffer.append(System.getProperty("line.separator"));
         if (record.getThrown() != null) {

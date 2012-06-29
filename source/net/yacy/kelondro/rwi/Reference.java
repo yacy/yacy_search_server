@@ -36,7 +36,7 @@ public interface Reference {
     
     public Entry toKelondroEntry();
 
-    public byte[] metadataHash();
+    public byte[] urlhash();
 
     public long lastModified();
     

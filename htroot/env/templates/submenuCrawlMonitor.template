@@ -5,18 +5,19 @@
   <div class="SubMenugroup">
     <h3>Processing Monitor</h3>
     <ul class="SubMenu">
-      <li><a href="/Crawler_p.html" class="MenuItemLink lock">Crawler Queues</a></li>
+      <li><a href="/Crawler_p.html" class="MenuItemLink lock">Crawler</a></li>
       <li><a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink lock">Loader</a></li>
-      <li><a href="/IndexCreateParserErrors_p.html" class="MenuItemLink lock">Parser Errors</a></li>
+      <li><a href="/IndexCreateParserErrors_p.html" class="MenuItemLink lock">Rejected URLs</a></li>
     </ul>
   </div>
   
   <div class="SubMenugroup">
     <h3>Queues</h3>
     <ul class="SubMenu">
-      <li><a href="/IndexCreateWWWLocalQueue_p.html" class="MenuItemLink lock">Local</a></li>
-      <li><a href="/IndexCreateWWWGlobalQueue_p.html" class="MenuItemLink lock">Global</a></li>
-      <li><a href="/IndexCreateWWWRemoteQueue_p.html" class="MenuItemLink lock">Remote</a></li>
+      <li><a href="/IndexCreateQueues_p.html?stack=LOCAL" class="MenuItemLink lock">Local</a></li>
+      <li><a href="/IndexCreateQueues_p.html?stack=GLOBAL" class="MenuItemLink lock">Global</a></li>
+      <li><a href="/IndexCreateQueues_p.html?stack=REMOTE" class="MenuItemLink lock">Remote</a></li>
+      <li><a href="/IndexCreateQueues_p.html?stack=NOLOAD" class="MenuItemLink lock">No-Load</a></li>
     </ul>
   </div>
   
@@ -26,5 +27,25 @@
       <li><a href="/CrawlProfileEditor_p.html" class="MenuItemLink lock">Scheduler and Profile Editor</a></li>
       <li><a href="/Table_RobotsTxt_p.html" class="MenuItemLink lock">robots.txt Monitor</a></li>
     </ul>
+  </div>
+
+</div>
+
+<div class="SubMenu">
+  <h3>Crawl Results</h3>
+</div>
+
+<div class="SubMenu">
+  <div class="SubMenugroup">
+      <ul class="SubMenu">
+        <li><a href="/CrawlResults.html" class="MenuItemLink">Overview</a></li>
+        <li><a href="/CrawlResults.html?process=1" class="MenuItemLink lock">(1) Receipts</a></li>
+        <li><a href="/CrawlResults.html?process=2" class="MenuItemLink lock">(2) Queries</a></li>
+        <li><a href="/CrawlResults.html?process=3" class="MenuItemLink lock">(3) DHT Transfer</a></li>
+        <li><a href="/CrawlResults.html?process=4" class="MenuItemLink lock">(4) Proxy Use</a></li>
+        <li><a href="/CrawlResults.html?process=5" class="MenuItemLink lock">(5) Local Crawling</a></li>
+        <li><a href="/CrawlResults.html?process=6" class="MenuItemLink">(6) Global Crawling</a></li>
+        <li><a href="/CrawlResults.html?process=7" class="MenuItemLink lock">(7) Surrogate Import</a></li>
+      </ul>
   </div>
 </div>

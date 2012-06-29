@@ -1,13 +1,12 @@
 <div class="SubMenu">
   <h3>Peer Administration Console</h3>
   <ul class="SubMenu">
-    <li><a href="/Status.html" class="MenuItemLink lock">Status</a></li>
+    <li><a href="/Status.html" class="MenuItemLink">Status</a></li>
     <li><a href="/ConfigBasic.html" class="MenuItemLink lock">Basic Configuration</a></li>
     <li><a href="/ConfigAccounts_p.html" class="MenuItemLink lock">Accounts</a></li>
     <li><a href="/ConfigNetwork_p.html" class="MenuItemLink lock">Network Configuration</a></li>
     <li><a href="/ConfigHeuristics_p.html" class="MenuItemLink lock">Heuristics</a></li>
-    <li><a href="/DictionaryLoader_p.html" class="MenuItemLink lock">Dictionary Loader</a></li>
-    <li><a href="/ConfigUpdate_p.html" class="MenuItemLink lock">System Update</a></li>
+    <li><a href="/ConfigUpdate_p.html" class="MenuItemLink lock">Download System Update</a></li>
   </ul>
 </div>
 <div class="SubMenu">
@@ -18,5 +17,6 @@
     <li><a href="/ConfigRobotsTxt_p.html" class="MenuItemLink lock">Local robots.txt</a></li>
     <li><a href="/ConfigHTCache_p.html" class="MenuItemLink lock">Web Cache</a></li>
     <li><a href="/ConfigProperties_p.html" class="MenuItemLink lock">Advanced Properties</a></li>
+    <li><a href="/Threaddump_p.html" class="MenuItemLink lock">Thread Dump</a></li>
   </ul>
 </div>

@@ -1,4 +1,4 @@
-//xlsParser.java 
+//xlsParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -29,10 +29,11 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
@@ -48,33 +49,34 @@ public class xlsParser extends AbstractParser implements Parser {
 
     public xlsParser(){
         super("Microsoft Excel Parser");
-        SUPPORTED_EXTENSIONS.add("xls");
-        SUPPORTED_EXTENSIONS.add("xla");
-        SUPPORTED_MIME_TYPES.add("application/msexcel");
-        SUPPORTED_MIME_TYPES.add("application/excel");
-        SUPPORTED_MIME_TYPES.add("application/vnd.ms-excel");
-        SUPPORTED_MIME_TYPES.add("application/x-excel");
-        SUPPORTED_MIME_TYPES.add("application/x-msexcel");
-        SUPPORTED_MIME_TYPES.add("application/x-ms-excel");
-        SUPPORTED_MIME_TYPES.add("application/x-dos_ms_excel");
-        SUPPORTED_MIME_TYPES.add("application/xls");
+        this.SUPPORTED_EXTENSIONS.add("xls");
+        this.SUPPORTED_EXTENSIONS.add("xla");
+        this.SUPPORTED_MIME_TYPES.add("application/msexcel");
+        this.SUPPORTED_MIME_TYPES.add("application/excel");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.ms-excel");
+        this.SUPPORTED_MIME_TYPES.add("application/x-excel");
+        this.SUPPORTED_MIME_TYPES.add("application/x-msexcel");
+        this.SUPPORTED_MIME_TYPES.add("application/x-ms-excel");
+        this.SUPPORTED_MIME_TYPES.add("application/x-dos_ms_excel");
+        this.SUPPORTED_MIME_TYPES.add("application/xls");
     }
 
     /*
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
-     */ 
-    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+     */
+    @Override
+    public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source) throws Parser.Failure,
             InterruptedException {
         return new XLSHSSFListener().parse(location, mimeType, charset, source);
     }
-    
+
     public class XLSHSSFListener implements HSSFListener {
 
         //StringBuilder for parsed text
         private final StringBuilder sbFoundStrings;
-        
+
 
         public XLSHSSFListener() {
             this.sbFoundStrings = new StringBuilder(100);
@@ -83,12 +85,12 @@ public class xlsParser extends AbstractParser implements Parser {
         /*
          * parses the source documents and returns a Document containing
          * all extracted information about the parsed document
-         */ 
-        public Document[] parse(final MultiProtocolURI location, final String mimeType,
+         */
+        public Document[] parse(final DigestURI location, final String mimeType,
                 final String charset, final InputStream source) throws Parser.Failure,
                 InterruptedException {
             try {
-                
+
                 //create a new org.apache.poi.poifs.filesystem.Filesystem
                 final POIFSFileSystem poifs = new POIFSFileSystem(source);
                 //get the Workbook (excel part) stream in a InputStream
@@ -103,10 +105,10 @@ public class xlsParser extends AbstractParser implements Parser {
                 factory.processEvents(req, din);
                 //close our document input stream (don't want to leak these!)
                 din.close();
-                
+
                 //now the parsed strings are in the StringBuilder, now convert them to a String
-                final String contents = sbFoundStrings.toString().trim();
-                
+                final String contents = this.sbFoundStrings.toString().trim();
+
                 /*
                  * create the plasmaParserDocument for the database
                  * and set shortText and bodyText properly
@@ -115,6 +117,7 @@ public class xlsParser extends AbstractParser implements Parser {
                         location,
                         mimeType,
                         "UTF-8",
+                        this,
                         null,
                         null,
                         location.getFile(),
@@ -122,12 +125,13 @@ public class xlsParser extends AbstractParser implements Parser {
                         "", // TODO: publisher
                         null,
                         null,
-                        contents.getBytes("UTF-8"),
+                        0.0f, 0.0f,
+                        UTF8.getBytes(contents),
                         null,
                         null,
                         null,
                         false)};
-            } catch (final Exception e) { 
+            } catch (final Exception e) {
                 if (e instanceof InterruptedException) throw (InterruptedException) e;
 
                 /*
@@ -139,22 +143,23 @@ public class xlsParser extends AbstractParser implements Parser {
             }
         }
 
+        @Override
         public void processRecord(final Record record) {
             SSTRecord sstrec = null;
             switch (record.getSid()){
                 case NumberRecord.sid: {
                     final NumberRecord numrec = (NumberRecord) record;
-                    sbFoundStrings.append(numrec.getValue());
+                    this.sbFoundStrings.append(numrec.getValue());
                     break;
                 }
                 //unique string records
                 case SSTRecord.sid: {
                     sstrec = (SSTRecord) record;
                     for (int k = 0; k < sstrec.getNumUniqueStrings(); k++){
-                        sbFoundStrings.append( sstrec.getString(k) );
-                        
+                        this.sbFoundStrings.append( sstrec.getString(k) );
+
                         //add line seperator
-                        sbFoundStrings.append( "\n" );
+                        this.sbFoundStrings.append( "\n" );
                     }
                     break;
                 }
@@ -166,10 +171,10 @@ public class xlsParser extends AbstractParser implements Parser {
                 }
                 */
             }
-            
+
             //add line seperator
-            sbFoundStrings.append( "\n" );
+            this.sbFoundStrings.append( "\n" );
         }
     }
-    
+
 }

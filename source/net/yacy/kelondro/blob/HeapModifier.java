@@ -29,10 +29,10 @@ import java.io.IOException;
 import java.util.SortedMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.ByteOrder;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.CachedFileWriter;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -62,6 +62,7 @@ public class HeapModifier extends HeapReader implements BLOB {
      * clears the content of the database
      * @throws IOException
      */
+    @Override
     public synchronized void clear() throws IOException {
         this.index.clear();
         this.free.clear();
@@ -69,7 +70,7 @@ public class HeapModifier extends HeapReader implements BLOB {
         this.file = null;
         FileUtils.deletedelete(this.heapFile);
         super.deleteFingerprint();
-        this.file = new CachedFileWriter(heapFile);
+        this.file = new CachedFileWriter(this.heapFile);
     }
 
     /**
@@ -96,29 +97,30 @@ public class HeapModifier extends HeapReader implements BLOB {
      * @param key  the primary key
      * @throws IOException
      */
+    @Override
     public void delete(byte[] key) throws IOException {
         key = normalizeKey(key);
 
         // pre-check before synchronization
-        long seek = index.get(key);
+        long seek = this.index.get(key);
         if (seek < 0) return;
         
         synchronized (this) {
             // check again if the index contains the key
-            seek = index.get(key);
+            seek = this.index.get(key);
             if (seek < 0) return;
             
             // check consistency of the index
-            assert (checkKey(key, seek)) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + seek;
+            //assert (checkKey(key, seek)) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + seek;
             
             // access the file and read the container
             this.file.seek(seek);
-            int size = file.readInt();
+            int size = this.file.readInt();
             //assert seek + size + 4 <= this.file.length() : heapFile.getName() + ": too long size " + size + " in record at " + seek;
             long filelength = this.file.length(); // put in separate variable for debugging
             if (seek + size + 4 > filelength) {
-                Log.logSevere("BLOBHeap", heapFile.getName() + ": too long size " + size + " in record at " + seek);
-                throw new IOException(heapFile.getName() + ": too long size " + size + " in record at " + seek);
+                Log.logSevere("BLOBHeap", this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
+                throw new IOException(this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
             }
             super.deleteFingerprint();
             
@@ -238,35 +240,38 @@ public class HeapModifier extends HeapReader implements BLOB {
         }
     }
 
-	public void insert(byte[] key, byte[] b) throws IOException {
+	@Override
+    public void insert(byte[] key, byte[] b) throws IOException {
 		throw new UnsupportedOperationException("put is not supported in BLOBHeapModifier");
 	}
 
-	public int replace(byte[] key, final Rewriter rewriter) throws IOException {
+	@Override
+    public int replace(byte[] key, final Rewriter rewriter) throws IOException {
 	    throw new UnsupportedOperationException();
     }
 	
-	public int reduce(byte[] key, final Reducer reducer) throws IOException, RowSpaceExceededException {
+	@Override
+    public int reduce(byte[] key, final Reducer reducer) throws IOException, RowSpaceExceededException {
         key = normalizeKey(key);
         assert key.length == this.keylength;
      
         // pre-check before synchronization
-        long pos = index.get(key);
+        long pos = this.index.get(key);
         if (pos < 0) return 0;
         
         synchronized (this) {
             long m = this.mem();
             
             // check again if the index contains the key
-            pos = index.get(key);
+            pos = this.index.get(key);
             if (pos < 0) return 0;
             
             // check consistency of the index
-            assert checkKey(key, pos) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + pos;
+            //assert checkKey(key, pos) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + pos;
             
             // access the file and read the container
-            file.seek(pos);
-            final int len = file.readInt() - this.keylength;
+            this.file.seek(pos);
+            final int len = this.file.readInt() - this.keylength;
             if (MemoryControl.available() < len) {
                 if (!MemoryControl.request(len, true)) return 0; // not enough memory available for this blob
             }
@@ -274,12 +279,12 @@ public class HeapModifier extends HeapReader implements BLOB {
             
             // read the key
             final byte[] keyf = new byte[this.keylength];
-            file.readFully(keyf, 0, keyf.length);
-            assert this.ordering.equal(key, keyf);
+            this.file.readFully(keyf, 0, keyf.length);
+            assert this.ordering == null || this.ordering.equal(key, keyf);
             
             // read the blob
             byte[] blob = new byte[len];
-            file.readFully(blob, 0, blob.length);
+            this.file.readFully(blob, 0, blob.length);
             
             // rewrite the entry
             blob = reducer.rewrite(blob);
@@ -287,7 +292,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             if (reduction == 0) {
                 // even if the reduction is zero then it is still be possible that the record has been changed
                 this.file.seek(pos + 4 + key.length);
-                file.write(blob);
+                this.file.write(blob);
                 return 0;
             }
             
@@ -297,14 +302,14 @@ public class HeapModifier extends HeapReader implements BLOB {
             
             // replace old content
             this.file.seek(pos);
-            file.writeInt(blob.length + key.length);
-            file.write(key);
-            file.write(blob);
+            this.file.writeInt(blob.length + key.length);
+            this.file.write(key);
+            this.file.write(blob);
             
             // define the new empty entry
             final int newfreereclen = reduction - 4;
             assert newfreereclen >= 0;
-            file.writeInt(newfreereclen);
+            this.file.writeInt(newfreereclen);
             
             // fill zeros to the content
             int l = newfreereclen; byte[] fill = new byte[newfreereclen];

@@ -3,14 +3,11 @@ BAR_IMG1="/env/grafics/green-block.png";
 BAR_IMG2="/env/grafics/red-block.png";
 WORDCACHEBAR_LENGTH=1/4;
 
-
 var statusRPC;
-var queuesRPC;
-var refreshInterval=5;
+var refreshInterval=2;
 var wait=0;
 var changing=false; //change the interval
 var statusLoaded=true;
-var queueLoaded=true;
 
 function initCrawler(){
     refresh();
@@ -38,21 +35,21 @@ function newInterval(){
 	countInterval=window.setInterval("countdown()", 1000);
 	changing=false;
 }
+
 function countdown(){
-	if(statusLoaded && queueLoaded){
-		document.getElementById("nextUpdate").value=wait;
-                wait--;
-		if(wait==0){
+	if(statusLoaded){
+        wait--;
+		if (wait == 0) {
 			refresh();
 		}
 	}
 }
+
 function refresh(){
 	wait=refreshInterval;
 	statusLoaded=false;
-	queueLoaded=false;
 	requestStatus();
-	requestQueues();
+	getRSS("/api/feed.xml?count=20&set=REMOTEINDEXING,LOCALINDEXING&time=" + (new Date()).getTime());
 }
 
 function requestStatus(){
@@ -60,13 +57,6 @@ function requestStatus(){
 	statusRPC.open('get', '/api/status_p.xml?html=');
 	statusRPC.onreadystatechange = handleStatus;
 	statusRPC.send(null);
-}
-function requestQueues(){
-	queuesRPC=createRequestObject();
-	queuesRPC.open('get', '/api/queues_p.xml?html=');
-	queuesRPC.onreadystatechange = handleQueues;
-	queuesRPC.send(null);
-
 }
 
 function handleStatus(){
@@ -96,80 +86,44 @@ function handleStatus(){
     trafCrawlerSpan = document.getElementById("trafficCrawler");
     removeAllChildren(trafCrawlerSpan);
 	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawlerValue) / 1024 / 10.24) / 100));
-    
-	var wordCacheSize=getValue(getFirstChild(statusTag, "wordCacheSize"));
-	var wordCacheMaxSize=getValue(getFirstChild(statusTag, "wordCacheMaxSize"));
-
-	wordCacheNum=document.getElementById("wordcacheNum");
-	removeAllChildren(wordCacheNum);
-	wordCacheNum.appendChild(document.createTextNode(wordCacheSize+"/"+wordCacheMaxSize));
 	
-	wordCacheSpan=document.getElementById("wordcacheSpan");
-	removeAllChildren(wordCacheSpan);
-	var img;
-	var percent=Math.round(wordCacheSize/wordCacheMaxSize*100);
-	for(i=0;i<percent*WORDCACHEBAR_LENGTH;i++){
-		img=document.createElement("img");
-		img.setAttribute("src", BAR_IMG2);
-		wordCacheSpan.appendChild(img);
-	}
-	for(i=0;i<(100-percent)*WORDCACHEBAR_LENGTH;i++){
-		img=document.createElement("img");
-		img.setAttribute("src", BAR_IMG1);
-		wordCacheSpan.appendChild(img);
-	}
+	dbsize=getFirstChild(statusTag, "dbsize");
+	urlpublictextSize=getValue(getFirstChild(dbsize, "urlpublictext"));
+	rwipublictextSize=getValue(getFirstChild(dbsize, "rwipublictext"));
+	document.getElementById("urldbsize").firstChild.nodeValue=urlpublictextSize;
+	document.getElementById("rwidbsize").firstChild.nodeValue=rwipublictextSize;
+	
+	loaderqueue=getFirstChild(statusTag, "loaderqueue");	
+	loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));
+	loaderqueue_max=getValue(getFirstChild(loaderqueue, "max"));
+	document.getElementById("loaderqueuesize").firstChild.nodeValue=loaderqueue_size;
+	document.getElementById("loaderqueuemax").firstChild.nodeValue=loaderqueue_max;
+	
+	localcrawlerqueue=getFirstChild(statusTag, "localcrawlerqueue");
+	localcrawlerqueue_size=getValue(getFirstChild(localcrawlerqueue, "size"));
+	localcrawlerqueue_state=getValue(getFirstChild(localcrawlerqueue, "state"));
+	document.getElementById("localcrawlerqueuesize").firstChild.nodeValue=localcrawlerqueue_size;
+	putQueueState("localcrawler", localcrawlerqueue_state);
+	
+	limitcrawlerqueue=getFirstChild(statusTag, "limitcrawlerqueue");
+	limitcrawlerqueue_size=getValue(getFirstChild(limitcrawlerqueue, "size"));
+	limitcrawlerqueue_state=getValue(getFirstChild(limitcrawlerqueue, "state"));
+	document.getElementById("limitcrawlerqueuesize").firstChild.nodeValue=limitcrawlerqueue_size;
+	putQueueState("limitcrawler", limitcrawlerqueue_state);
+	
+	remotecrawlerqueue=getFirstChild(statusTag, "remotecrawlerqueue");
+	remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
+	remotecrawlerqueue_state=getValue(getFirstChild(remotecrawlerqueue, "state"));
+	document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
+	putQueueState("remotecrawler", remotecrawlerqueue_state);
+	
+	noloadcrawlerqueue=getFirstChild(statusTag, "noloadcrawlerqueue");
+	noloadcrawlerqueue_size=getValue(getFirstChild(noloadcrawlerqueue, "size"));
+	noloadcrawlerqueue_state=getValue(getFirstChild(noloadcrawlerqueue, "state"));
+	document.getElementById("noloadcrawlerqueuesize").firstChild.nodeValue=noloadcrawlerqueue_size;
+	putQueueState("noloadcrawler", noloadcrawlerqueue_state);
+
 	statusLoaded=true;
-}
-
-function handleQueues(){
-    if(queuesRPC.readyState != 4){
-		return;
-	}
-	var queuesResponse = queuesRPC.responseXML;
-	//xml=getFirstChild(queuesResponse);
-	xml=getFirstChild(queuesResponse, "queues");
-	if(queuesResponse != null){
-		clearTable(document.getElementById("queueTable"), 1);
-	
-		dbsize=getFirstChild(xml, "dbsize");
-		urlpublictextSize=getValue(getFirstChild(dbsize, "urlpublictext"));
-		rwipublictextSize=getValue(getFirstChild(dbsize, "rwipublictext"));
-		document.getElementById("urldbsize").firstChild.nodeValue=urlpublictextSize;
-		document.getElementById("rwidbsize").firstChild.nodeValue=rwipublictextSize;
-		
-		loaderqueue=getFirstChild(xml, "loaderqueue");
-		updateTable(loaderqueue, "loader");
-		
-		loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));
-		loaderqueue_max=getValue(getFirstChild(loaderqueue, "max"));
-		document.getElementById("loaderqueuesize").firstChild.nodeValue=loaderqueue_size;
-		document.getElementById("loaderqueuemax").firstChild.nodeValue=loaderqueue_max;
-		
-		localcrawlerqueue=getFirstChild(xml, "localcrawlerqueue");
-		localcrawlerqueue_size=getValue(getFirstChild(localcrawlerqueue, "size"));
-		localcrawlerqueue_state=getValue(getFirstChild(localcrawlerqueue, "state"));
-		document.getElementById("localcrawlerqueuesize").firstChild.nodeValue=localcrawlerqueue_size;
-		putQueueState("localcrawler", localcrawlerqueue_state);
-		
-		updateTable(localcrawlerqueue, "local crawler");
-		
-		limitcrawlerqueue=getFirstChild(xml, "limitcrawlerqueue");
-		updateTable(limitcrawlerqueue, "limitCrawlerTable");
-		limitcrawlerqueue_size=getValue(getFirstChild(limitcrawlerqueue, "size"));
-		limitcrawlerqueue_state=getValue(getFirstChild(limitcrawlerqueue, "state"));
-		document.getElementById("limitcrawlerqueuesize").firstChild.nodeValue=limitcrawlerqueue_size;
-		putQueueState("limitcrawler", limitcrawlerqueue_state);
-		updateTable(limitcrawlerqueue, "limit crawler");
-		
-		remotecrawlerqueue=getFirstChild(xml, "remotecrawlerqueue");
-		updateTable(remotecrawlerqueue, "remoteCrawlerTable");
-		remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
-		remotecrawlerqueue_state=getValue(getFirstChild(remotecrawlerqueue, "state"));
-		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
-		putQueueState("remotecrawler", remotecrawlerqueue_state);
-		updateTable(remotecrawlerqueue, "remote crawler");
-	}
-	queueLoaded=true;
 }
 
 function putQueueState(queue, state) {
@@ -177,52 +131,15 @@ function putQueueState(queue, state) {
 	img = document.getElementById(queue + "stateIMG");
 	if (state == "paused") {
 		a.href = "Crawler_p.html?continue=" + queue;
-		a.title = "Continue this queue";
+		a.title = "Continue this queue (" + state + ")";
 		img.src = "/env/grafics/start.gif";
 		img.alt = "Continue this queue";
 	} else {
 		a.href = "Crawler_p.html?pause=" + queue;
-		a.title = "Pause this queue";
+		a.title = "Pause this queue (" + state + ")";
 		img.src = "/env/grafics/stop.gif";
 		img.alt = "Pause this queue";
 	}
-}
-
-function updateTable(indexingqueue, tablename){
-	indexingTable=document.getElementById("queueTable");
-	entries=indexingqueue.getElementsByTagName("entry");
-        
-    dark=false;
-    for(i=0;i<entries.length;i++){
-		profile=getValue(getFirstChild(entries[i], "profile"));
-		initiator=getValue(getFirstChild(entries[i], "initiator"));
-		depth=getValue(getFirstChild(entries[i], "depth"));
-		modified=getValue(getFirstChild(entries[i], "modified"));
-		anchor=getValue(getFirstChild(entries[i], "anchor"));
-		url=getValue(getFirstChild(entries[i], "url"));
-		size=getValue(getFirstChild(entries[i], "size"));
-		hash=getValue(getFirstChild(entries[i], "hash"));
-		inProcess=false;
-		if(getValue(getFirstChild(entries[i], "inProcess"))=="true"){
-			inProcess=true;
-		}
-		if (tablename=="indexingTable")
-			deletebutton=createLinkCol("IndexCreateIndexingQueue_p.html?deleteEntry="+hash, DELETE_STRING);
-		else
-			deletebutton=createCol("");
-		row=createIndexingRow(tablename, profile, initiator, depth, modified, anchor, url, size, deletebutton);
-		
-		//create row
-		if(inProcess){
-            row.setAttribute("class", "TableCellActive");
-        }else if(dark){
-            row.setAttribute("class", "TableCellDark");
-        }else{
-            row.setAttribute("class", "TableCellLight");
-        }
-        getFirstChild(indexingTable, "tbody").appendChild(row);
-        dark=!dark;
-    }
 }
 
 function shortenURL(url) {
@@ -246,4 +163,19 @@ function createIndexingRow(queue, profile, initiator, depth, modified, anchor, u
 	row.appendChild(createCol(size));
 	row.appendChild(deletebutton);
 	return row;
+}
+
+crawllist_head = "<table cellpadding='2' cellspacing='1' ><tr class='TableHeader'><td width='50%'><strong>Title</strong></td><td width='50%'><strong>URL</strong></td></tr>";
+crawllist_body = "";
+crawllist_tail = "</table>";
+function showRSS(RSS) {
+  var doc = document.getElementById("crawllist");
+  if (doc != null) {
+    if (crawllist_body.length > 100000) crawllist_body = "";
+    for (var i=0; i<RSS.items.length; i++) {
+      crawllist_body = "<tr class='TableCellLight'><td><a href='ViewFile.html?action=info&urlHash=" + RSS.items[i].guid.value + "' class='small' target='_blank' title='" + RSS.items[i].link + "'>" + RSS.items[i].description + "</a></td><td><a href='ViewFile.html?action=info&urlHash=" + RSS.items[i].guid.value + "' class='small' target='_blank' title='" + RSS.items[i].link + "'>" + RSS.items[i].link + "</a></td></tr>" + crawllist_body;
+    }
+    doc.innerHTML = crawllist_head + crawllist_body + crawllist_tail;
+  }
+  return true;
 }

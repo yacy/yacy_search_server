@@ -1,0 +1,15 @@
+<!-- YaCy Portalseach by apfelmaennchen <sof@gmx.de> -->
+  <!-- /env/portalinput.template -->
+<div id="yacylivesearch">
+		<form id="ysearch" method="get" accept-charset="UTF-8" action="yacysearch.html"><p>
+			<input name="query" id="yquery" class="fancy" type="text" size="20" maxlength="80" value=""/>
+			<input type="hidden" name="verify" value="cacheonly" />
+			<input type="hidden" name="maximumRecords" value="10" />
+			<input type="hidden" name="resource" value="local" />
+			<input type="hidden" name="urlmaskfilter" value=".*" />
+			<input type="hidden" name="prefermaskfilter" value="" />
+			<input type="hidden" name="former" value="" />
+			<input type="hidden" name="nav" value="all" /></p>
+		</form>
+	</div>
+  <!-- END YaCy Portalsearch -->

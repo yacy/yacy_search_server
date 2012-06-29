@@ -32,25 +32,27 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.peers.Seed;
+import net.yacy.peers.graphics.BannerData;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.visualization.RasterPlotter;
-
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.graphics.NetworkGraph;
 
-/** draw a banner with information about the peer */
+/** Draw a banner with information about the peer. */
 public class Banner {
 
-    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
+    public static RasterPlotter respond(
+        final RequestHeader header,
+        final serverObjects post,
+        final serverSwitch env) throws IOException {
         final Switchboard sb = (Switchboard) env;
-        final String IMAGE = "htroot/env/grafics/yacy.gif";
+        final String pathToImage = "htroot/env/grafics/yacy.png";
         int width = 468;
         int height = 60;
-        String bgcolor     = "e7effc";
-        String textcolor   = "000000";
+        String bgcolor = "e7effc";
+        String textcolor = "000000";
         String bordercolor = "5090d0";
 
         if (post != null) {
@@ -61,41 +63,45 @@ public class Banner {
             height = post.getInt("heigth", height);
         }
 
-        String name    = "";
-        long   links   = 0;
-        long   words   = 0;
-        int    myppm   = 0;
-        double myqph   = 0;
-        String type    = "";
-        final String network = env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified").toUpperCase();
-        final int    peers   = sb.peers.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
-        long   nlinks  = sb.peers.countActiveURL();
-        long   nwords  = sb.peers.countActiveRWI();
-        final double nqpm    = sb.peers.countActiveQPM();
-        long   nppm    = sb.peers.countActivePPM();
-        double nqph    = 0;
+        String name = "";
+        long links = 0;
+        long words = 0;
+        int myppm = 0;
+        double myqph = 0;
+        String type = "";
+        final String network =
+                env.getConfig(
+                        SwitchboardConstants.NETWORK_NAME,
+                        "unspecified").toUpperCase();
+     // the '+ 1': the own peer is not included in sizeConnected()
+        final int peers = sb.peers.sizeConnected() + 1;
+        long nlinks = sb.peers.countActiveURL();
+        long nwords = sb.peers.countActiveRWI();
+        final double nqpm = sb.peers.countActiveQPM();
+        long nppm = sb.peers.countActivePPM();
+        double nqph = 0;
 
-        final yacySeed seed = sb.peers.mySeed();
-        if (seed != null){
-            name    = seed.get(yacySeed.NAME, "-").toUpperCase();
-            links   = seed.getLinkCount();
-            words   = seed.getWordCount();
-            myppm   = seed.getPPM();
-            myqph   = 60d * seed.getQPM();
+        final Seed seed = sb.peers.mySeed();
+        if (seed != null) {
+            name = seed.get(Seed.NAME, "-").toUpperCase();
+            links = seed.getLinkCount();
+            words = seed.getWordCount();
+            myppm = seed.getPPM();
+            myqph = 60d * seed.getQPM();
 
             if (sb.peers.mySeed().isVirgin()) {
                 type = "VIRGIN";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(sb.peers.mySeed().isJunior()) {
+            } else if (sb.peers.mySeed().isJunior()) {
                 type = "JUNIOR";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(sb.peers.mySeed().isSenior()) {
+            } else if (sb.peers.mySeed().isSenior()) {
                 type = "SENIOR";
                 nlinks = nlinks + links;
                 nwords = nwords + words;
                 nqph = Math.round(6000d * nqpm + 100d * myqph) / 100d;
                 nppm = nppm + myppm;
-            } else if(sb.peers.mySeed().isPrincipal()) {
+            } else if (sb.peers.mySeed().isPrincipal()) {
                 type = "PRINCIPAL";
                 nlinks = nlinks + links;
                 nwords = nwords + words;
@@ -104,13 +110,23 @@ public class Banner {
             }
         }
 
-        if (!NetworkGraph.logoIsLoaded()) {
-            ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
-            final BufferedImage logo = ImageIO.read(new File(IMAGE));
-            return NetworkGraph.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm, logo);
+        final BannerData data =
+                new BannerData(
+                        width, height, bgcolor, textcolor, bordercolor, name, links,
+                        words, type, myppm, network, peers, nlinks, nwords,
+                        nqph, nppm);
+
+        if (!net.yacy.peers.graphics.Banner.logoIsLoaded()) {
+         // do not write a cache to disc; keep in RAM
+            ImageIO.setUseCache(false);
+            final BufferedImage logo = ImageIO.read(new File(pathToImage));
+            return net.yacy.peers.graphics.Banner.getBannerPicture(
+                data,
+                1000,
+                logo);
         }
-        
-        return NetworkGraph.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm);
+
+        return net.yacy.peers.graphics.Banner.getBannerPicture(data, 1000);
     }
 
 }

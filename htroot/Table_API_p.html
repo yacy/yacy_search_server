@@ -18,9 +18,25 @@
     }
     -->
     </script>
+    <script type="text/javascript">
+    function submitchange(from) {
+    	document.getElementById("apilist").action = "Table_API_p.html#" + from;
+        document.getElementById ("scheduleevent").value = "true";
+        document.getElementById("current_schedule_pk").value = from;
+    	document.getElementById("apilist").submit();
+    }
+    </script>
     <script type="text/javascript" src="/js/sorttable.js"></script>
   </head>
   <body id="Tables">
+  
+<div id="api">
+<a href="/api/table_p.xml?table=api&count=100&search=" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>The information that is presented on this page can also be retrieved as XML
+Click the API icon to see the XML.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
+</div>
+  
     <div id="fullcontent">
   	#(inline)##%env/templates/header.template%#
     
@@ -66,7 +82,7 @@
           #(inline)#<th class="sorttable_nosort">URL</th>::#(/inline)#
         </tr>
         #{list}#
-        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" id="#[pk]#">
           <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
           <td>#[type]#</td>
           <td>#[comment]#</td>
@@ -76,41 +92,26 @@
           <td>#[dateNextExec]#</td>
           <td>
           #(scheduler)#
-           <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="modify_repeat">
-            <select name="repeat_select" onchange='this.form.submit()'>
+            <select name="repeat_select_#[pk]#" onchange='submitchange("#[pk]#")'>
               <option value="off" selected="selected">no repetition</option>
               <option value="on">activate scheduler</option>
             </select>
-            <input type="hidden" name="startRecord" value="#[startRecord]#" />
-            <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
-            <input type="hidden" name="pk" value="#[pk]#" />
-            <input type="hidden" name="inline" value="#[inline]#" />
-            <input type="hidden" name="filter" value="#[filter]#" />
-          </form>
-          ::
-         <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="modify_repeat">
+          ::         
             <table>
                 <tr><td>
-                    <select name="repeat_time" onchange='this.form.submit()'>
+                    <select name="repeat_time_#[pk]#" onchange='submitchange("#[pk]#")'>
                     #{scale}#
                       <option value="#[time]#" #(selected)#::selected="selected"#(/selected)#>#[time]#</option>
                     #{/scale}#
                     </select>
                 </td><td>
-                    <select name="repeat_unit" onchange='this.form.submit()'>
+                    <select name="repeat_unit_#[pk]#" onchange='submitchange("#[pk]#")'>
                       <option value="selminutes" #(selectedMinutes)#::selected="selected"#(/selectedMinutes)#>minutes</option>
                       <option value="selhours" #(selectedHours)#::selected="selected"#(/selectedHours)#>hours</option>
                       <option value="seldays" #(selectedDays)#::selected="selected"#(/selectedDays)#>days</option>
                     </select>
                 </td></tr>
-            </table>
-            <input type="hidden" name="startRecord" value="#[startRecord]#" />
-            <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
-            <input type="hidden" name="pk" value="#[pk]#" />
-            <input type="hidden" name="inline" value="#[inline]#" />
-            <input type="hidden" name="filter" value="#[filter]#" />
-            <noscript><input type="submit" value="Submit" /></noscript>
-        </form>
+            </table>          
           #(/scheduler)#
           </td>
           #(inline)#<td>#[url]#</td>::#(/inline)#
@@ -120,6 +121,8 @@
       </div>
       </fieldset>
       <p>
+      <input type="hidden" name="scheduleevent" id="scheduleevent" value="false" />
+      <input type="hidden" name="current_schedule_pk" id="current_schedule_pk" value="" />
       <input type="hidden" name="num" value="#[num]#" />
       <input type="submit" name="execrows" value="Execute Selected Actions" />
       <input type="submit" name="deleterows" value="Delete Selected Actions" />

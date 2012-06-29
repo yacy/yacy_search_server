@@ -1,4 +1,4 @@
-// Messages_p.java 
+// Messages_p.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -35,13 +35,14 @@ import java.util.TreeMap;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
+
+import com.google.common.io.Files;
 
 import de.anomic.data.MessageBoard;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeed;
 
 public class Messages_p {
 
@@ -68,10 +69,10 @@ public class Messages_p {
             int peerCount = 0;
             try {
                 final TreeMap<String, String> hostList = new TreeMap<String, String>();
-                final Iterator<yacySeed> e = sb.peers.seedsConnected(true, false, null, (float) 0.0);
+                final Iterator<Seed> e = sb.peers.seedsConnected(true, false, null, (float) 0.0);
                 while (e.hasNext()) {
-                    final yacySeed seed = e.next();
-                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
+                    final Seed seed = e.next();
+                    if (seed != null) hostList.put(seed.get(Seed.NAME, "nameless"),seed.hash);
                 }
 
                 String peername;
@@ -98,7 +99,7 @@ public class Messages_p {
         final File notifierSource = new File(sb.getAppPath(), sb.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
         final File notifierDest = new File(sb.getDataPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
         try {
-            FileUtils.copy(notifierSource, notifierDest);
+            Files.copy(notifierSource, notifierDest);
         } catch (final IOException e) {
         }
 
@@ -160,7 +161,7 @@ public class Messages_p {
             prop.putXML("mode_subject", message.subject());
             String theMessage = null;
             theMessage = UTF8.String(message.message());
-            prop.putWiki("mode_message", theMessage);
+            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_message", theMessage);
             prop.put("mode_hash", message.authorHash());
             prop.putXML("mode_key", key);
         }

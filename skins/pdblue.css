@@ -79,6 +79,10 @@ table {
   background-color: #ECF1F8;
 }
 
+.TableCellDark:target, .TableCellLight:target {
+  background-color: #FFCCCC;
+}
+
 .TableCellSummary {
   background-color: #FFCCCC;
   border:1px solid #888888;

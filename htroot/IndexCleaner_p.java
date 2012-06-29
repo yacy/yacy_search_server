@@ -24,12 +24,12 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.search.MetadataRepository;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.MetadataRepository;
+import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -108,8 +108,8 @@ public class IndexCleaner_p {
             prop.put("rwidb_threadToString", indexCleanerThread.toString());
             prop.putNum("rwidb_RWIcountstart", indexCleanerThread.rwiCountAtStart);
             prop.putNum("rwidb_RWIcountnow", indexCleanerThread.rwisize());
-            prop.put("rwidb_wordHashNow", (indexCleanerThread.wordHashNow == null) ? "NULL" : UTF8.String(indexCleanerThread.wordHashNow));
-            prop.put("rwidb_lastWordHash", (indexCleanerThread.lastWordHash == null) ? "null" : UTF8.String(indexCleanerThread.lastWordHash));
+            prop.put("rwidb_wordHashNow", (indexCleanerThread.wordHashNow == null) ? "NULL" : ASCII.String(indexCleanerThread.wordHashNow));
+            prop.put("rwidb_lastWordHash", (indexCleanerThread.lastWordHash == null) ? "null" : ASCII.String(indexCleanerThread.lastWordHash));
             prop.putNum("rwidb_lastDeletionCounter", indexCleanerThread.lastDeletionCounter);
 
         }

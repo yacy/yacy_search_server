@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,14 +27,16 @@
 package de.anomic.crawler;
 
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 public class ResultImages {
@@ -42,26 +44,30 @@ public class ResultImages {
     // we maintain two different queues for private and public crawls and divide both into two halves:
     // such images that appear to be good quality for a image monitor bacause their size is known, and other images
     // that are not declared with sizes.
-    private static final ConcurrentLinkedQueue<OriginEntry> privateImageQueueHigh = new ConcurrentLinkedQueue<OriginEntry>();
-    private static final ConcurrentLinkedQueue<OriginEntry> privateImageQueueLow = new ConcurrentLinkedQueue<OriginEntry>();
-    private static final ConcurrentLinkedQueue<OriginEntry> publicImageQueueHigh = new ConcurrentLinkedQueue<OriginEntry>();
-    private static final ConcurrentLinkedQueue<OriginEntry> publicImageQueueLow = new ConcurrentLinkedQueue<OriginEntry>();
+    private static final Queue<OriginEntry> privateImageQueueHigh = new LinkedBlockingQueue<OriginEntry>();
+    private static final Queue<OriginEntry> privateImageQueueLow = new LinkedBlockingQueue<OriginEntry>();
+    private static final Queue<OriginEntry> publicImageQueueHigh = new LinkedBlockingQueue<OriginEntry>();
+    private static final Queue<OriginEntry> publicImageQueueLow = new LinkedBlockingQueue<OriginEntry>();
 
     // we also check all links for a double-check so we don't get the same image more than once in any queue
     // image links may appear double here even if the pages where the image links are embedded already are checked for double-occurrence:
     // the same images may be linked from different pages
     private static final ConcurrentMap<MultiProtocolURI, Long> doubleCheck = new ConcurrentHashMap<MultiProtocolURI, Long>(); // (url, time) when the url appeared first
-    
+
     public static void registerImages(final DigestURI source, final Document document, final boolean privateEntry) {
         if (document == null) return;
         if (source == null) return;
-        
+
+        if (MemoryControl.shortStatus()) clearQueues();
+        limitQueues(1000);
+
         final Map<MultiProtocolURI, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
+            if (image == null || image.url() == null) continue;
             if (doubleCheck.containsKey(image.url())) continue;
             doubleCheck.put(image.url(), System.currentTimeMillis());
-            
+
             final String name = image.url().getFile();
             boolean good = false;
             if (image.width() > 120 &&
@@ -71,7 +77,7 @@ public class ResultImages {
                 name.lastIndexOf(".gif") == -1) {
                 // && ((urlString.lastIndexOf(".jpg") != -1)) ||
                 // ((urlString.lastIndexOf(".png") != -1)){
-                
+
                 good = true;
                 float ratio;
                 if (image.width() > image.height()) {
@@ -96,7 +102,7 @@ public class ResultImages {
             }
         }
     }
-    
+
     public static OriginEntry next(final boolean privateEntryOnly) {
         OriginEntry e = null;
         if (privateEntryOnly) {
@@ -110,7 +116,7 @@ public class ResultImages {
         }
         return e;
     }
-    
+
     public static int queueSize(final boolean privateEntryOnly) {
         int publicSize = 0;
         if (!privateEntryOnly) {
@@ -118,23 +124,23 @@ public class ResultImages {
         }
         return privateImageQueueHigh.size() + privateImageQueueLow.size() + publicSize;
     }
-    
+
     public static int privateQueueHighSize() {
         return privateImageQueueHigh.size();
     }
-    
+
     public static int privateQueueLowSize() {
         return privateImageQueueLow.size();
     }
-    
+
     public static int publicQueueHighSize() {
         return publicImageQueueHigh.size();
     }
-    
+
     public static int publicQueueLowSize() {
         return publicImageQueueLow.size();
     }
-    
+
     public static void clearQueues() {
         privateImageQueueHigh.clear();
         privateImageQueueLow.clear();
@@ -142,7 +148,14 @@ public class ResultImages {
         publicImageQueueLow.clear();
         doubleCheck.clear();
     }
-    
+
+    public static void limitQueues(int limit) {
+        while (privateImageQueueHigh.size() > limit) privateImageQueueHigh.poll();
+        while (privateImageQueueLow.size() > limit) privateImageQueueLow.poll();
+        while (publicImageQueueHigh.size() > limit) publicImageQueueHigh.poll();
+        while (publicImageQueueLow.size() > limit) publicImageQueueLow.poll();
+    }
+
     public static class OriginEntry {
         public ImageEntry imageEntry;
         public MultiProtocolURI baseURL;
@@ -151,5 +164,5 @@ public class ResultImages {
             this.baseURL = baseURL;
         }
     }
-    
+
 }

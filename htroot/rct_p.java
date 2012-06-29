@@ -33,14 +33,14 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
+import net.yacy.peers.dht.PeerSelection;
+import net.yacy.search.Switchboard;
 
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.dht.PeerSelection;
 
 public class rct_p {
     
@@ -52,8 +52,8 @@ public class rct_p {
         if (post != null) {
             if (post.containsKey("retrieve")) {
                 final String peerhash = post.get("peer", null);
-                final yacySeed seed = (peerhash == null) ? null : sb.peers.getConnected(peerhash);
-                final RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.peers, seed, 20, 60000);
+                final Seed seed = (peerhash == null) ? null : sb.peers.getConnected(peerhash);
+                final RSSFeed feed = (seed == null) ? null : Protocol.queryRemoteCrawlURLs(sb.peers, seed, 20, 60000);
                 if (feed != null) {
                     for (final Hit item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
@@ -108,15 +108,15 @@ public class rct_p {
     
     private static void listHosts(final Switchboard sb, final serverObjects prop) {
         // list known hosts
-        yacySeed seed;
+        Seed seed;
         int hc = 0;
         if (sb.peers != null && sb.peers.sizeConnected() > 0) {
-            final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.peers);
+            final Iterator<Seed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.peers);
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) {
                     prop.put("hosts_" + hc + "_hosthash", seed.hash);
-                    prop.putHTML("hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless") + " (" + seed.getLong(yacySeed.RCOUNT, 0) + ")");
+                    prop.putHTML("hosts_" + hc + "_hostname", seed.hash + " " + seed.get(Seed.NAME, "nameless") + " (" + seed.getLong(Seed.RCOUNT, 0) + ")");
                     hc++;
                 }
             }

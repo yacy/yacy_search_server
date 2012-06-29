@@ -1,4 +1,4 @@
-//bzipParser.java 
+//bzipParser.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -31,37 +31,38 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
-import org.apache.tools.bzip2.CBZip2InputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 
 public class bzipParser extends AbstractParser implements Parser {
-    
-    public bzipParser() {        
+
+    public bzipParser() {
         super("Bzip 2 UNIX Compressed File Parser");
-        SUPPORTED_EXTENSIONS.add("bz2");
-        SUPPORTED_EXTENSIONS.add("tbz");
-        SUPPORTED_EXTENSIONS.add("tbz2");
-        SUPPORTED_MIME_TYPES.add("application/x-bzip2");
-        SUPPORTED_MIME_TYPES.add("application/bzip2");
-        SUPPORTED_MIME_TYPES.add("application/x-bz2");
-        SUPPORTED_MIME_TYPES.add("application/x-bzip");
-        SUPPORTED_MIME_TYPES.add("application/x-stuffit");
+        this.SUPPORTED_EXTENSIONS.add("bz2");
+        this.SUPPORTED_EXTENSIONS.add("tbz");
+        this.SUPPORTED_EXTENSIONS.add("tbz2");
+        this.SUPPORTED_MIME_TYPES.add("application/x-bzip2");
+        this.SUPPORTED_MIME_TYPES.add("application/bzip2");
+        this.SUPPORTED_MIME_TYPES.add("application/x-bz2");
+        this.SUPPORTED_MIME_TYPES.add("application/x-bzip");
+        this.SUPPORTED_MIME_TYPES.add("application/x-stuffit");
     }
-    
-    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+
+    @Override
+    public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
-        
+
         File tempFile = null;
         Document[] docs;
-        try {           
+        try {
             /*
              * First we have to consume the first two char from the stream. Otherwise
              * the bzip decompression will fail with a nullpointerException!
@@ -73,31 +74,31 @@ public class bzipParser extends AbstractParser implements Parser {
             b = source.read();
             if (b != 'Z') {
                 throw new Exception("Invalid bz2 content.");
-            }           
-            
+            }
+
             int read = 0;
             final byte[] data = new byte[1024];
-            final CBZip2InputStream zippedContent = new CBZip2InputStream(source);        
-            
+            final BZip2CompressorInputStream zippedContent = new BZip2CompressorInputStream(source);
+
             tempFile = File.createTempFile("bunzip","tmp");
             tempFile.deleteOnExit();
-            
+
             // creating a temp file to store the uncompressed data
             final FileOutputStream out = new FileOutputStream(tempFile);
-            
+
             // reading gzip file and store it uncompressed
             while((read = zippedContent.read(data, 0, 1024)) != -1) {
                 out.write(data, 0, read);
             }
             zippedContent.close();
             out.close();
-            
+
             // creating a new parser class to parse the unzipped content
             docs = TextParser.parseSource(location, null, null, tempFile);
-        } catch (final Exception e) {  
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
-            
+
             throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(),location);
         } finally {
             if (tempFile != null) FileUtils.deletedelete(tempFile);

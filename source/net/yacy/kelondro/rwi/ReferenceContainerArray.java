@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -29,164 +29,253 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.sorting.Rating;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.BLOB;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.CloneableIterator;
 
 
 public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
+    private final static long METHOD_MAXRUNTIME = 5000L;
+
     protected final ReferenceFactory<ReferenceType> factory;
-    protected final Row payloadrow;
     protected final ArrayStack array;
-    private   final IODispatcher merger;
-    
+
     /**
-     * open a index container based on a BLOB dump. The content of the BLOB will not be read
+     * open a index container array based on BLOB dumps. The content of the BLOBs will not be read
      * unless a .idx file exists. Only the .idx file is opened to get a fast read access to
      * the BLOB. This class provides no write methods, because BLOB files should not be
      * written in random access. To support deletion, a write access to the BLOB for deletion
      * is still possible
-     * @param payloadrow
+     * @param payloadrow the row definition for the BLOB data structure
      * @param log
-     * @throws IOException 
+     * @throws IOException
      */
     public ReferenceContainerArray(
     		final File heapLocation,
     		final String prefix,
     		final ReferenceFactory<ReferenceType> factory,
     		final ByteOrder termOrder,
-    		final Row payloadrow,
-    		IODispatcher merger) throws IOException {
+    		final int termSize) throws IOException {
         this.factory = factory;
-        this.payloadrow = payloadrow;
         this.array = new ArrayStack(
             heapLocation,
             prefix,
-            payloadrow.primaryKeyLength,
             termOrder,
+            termSize,
             0,
             true);
-        assert merger != null;
-        this.merger = merger;
     }
-    
-    public void close() {
+
+    public synchronized void close() {
         this.array.close(true);
     }
-    
+
     public void clear() throws IOException {
     	this.array.clear();
     }
-    
+
     public long mem() {
-        return array.mem();
+        return this.array.mem();
     }
-    
+
     public int[] sizes() {
         return (this.array == null) ? new int[0] : this.array.sizes();
     }
-    
+
     public ByteOrder ordering() {
         return this.array.ordering();
     }
-    
+
     public File newContainerBLOBFile() {
     	return this.array.newBLOB(new Date());
     }
-    
-    public void mountBLOBFile(File location) throws IOException {
+
+    public void mountBLOBFile(final File location) throws IOException {
         this.array.mountBLOB(location, false);
     }
-    
+
     public Row rowdef() {
-        return this.payloadrow;
+        return this.factory.getRow();
     }
-    
+
     /**
      * return an iterator object that creates top-level-clones of the indexContainers
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
-     * @throws IOException 
+     * @throws IOException
      */
-    public CloneableIterator<ReferenceContainer<ReferenceType>> wordContainerIterator(final byte[] startWordHash, final boolean rot) {
+    public CloneableIterator<ReferenceContainer<ReferenceType>> referenceContainerIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) {
         try {
-            return new heapCacheIterator(startWordHash, rot);
-        } catch (IOException e) {
+            return new ReferenceContainerIterator(startWordHash, rot, excludePrivate);
+        } catch (final IOException e) {
             Log.logException(e);
             return null;
         }
     }
 
-    /**
-     * cache iterator: iterates objects within the heap cache. This can only be used
-     * for write-enabled heaps, read-only heaps do not have a heap cache
-     */
-    public class heapCacheIterator implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
+    public class ReferenceContainerIterator implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
         // so this class simulates wCache.tailMap(startWordHash).values().iterator()
         // plus the mentioned features
-        
-        private final boolean rot;
+
+        private final boolean rot, excludePrivate;
         protected CloneableIterator<byte[]> iterator;
-        
-        public heapCacheIterator(final byte[] startWordHash, final boolean rot) throws IOException {
+
+        public ReferenceContainerIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) throws IOException {
             this.rot = rot;
-            this.iterator = array.keys(true, startWordHash);
+            this.excludePrivate = excludePrivate;
+            this.iterator = ReferenceContainerArray.this.array.keys(true, startWordHash);
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
-        
-        public heapCacheIterator clone(final Object secondWordHash) {
+
+        @Override
+        public ReferenceContainerIterator clone(final Object secondWordHash) {
             try {
-				return new heapCacheIterator((byte[]) secondWordHash, rot);
-			} catch (IOException e) {
+				return new ReferenceContainerIterator((byte[]) secondWordHash, this.rot, this.excludePrivate);
+			} catch (final IOException e) {
 			    Log.logException(e);
 				return null;
 			}
         }
-        
+
+        @Override
         public boolean hasNext() {
             if (this.iterator == null) return false;
-            if (rot) return true;
-            return iterator.hasNext();
+            if (this.rot) return true;
+            return this.iterator.hasNext();
         }
 
+        @Override
         public ReferenceContainer<ReferenceType> next() {
-			if (iterator.hasNext()) try {
-                return get(iterator.next());
-            } catch (Exception e) {
+			while (this.iterator.hasNext()) try {
+			    byte[] b = this.iterator.next();
+			    if (this.excludePrivate && Word.isPrivate(b)) continue;
+                return get(b);
+            } catch (final Throwable e) {
                 Log.logException(e);
                 return null;
             }
             // rotation iteration
-            if (!rot) {
+            if (!this.rot) {
                 return null;
             }
             try {
-                iterator = array.keys(true, null);
-                return get(iterator.next());
-            } catch (Exception e) {
+                this.iterator = ReferenceContainerArray.this.array.keys(true, null);
+                while (this.iterator.hasNext()) {
+                    byte[] b = this.iterator.next();
+                    if (this.excludePrivate && Word.isPrivate(b)) continue;
+                    return get(b);
+                }
+                return null;
+            } catch (final Throwable e) {
                 Log.logException(e);
                 return null;
             }
         }
 
+        @Override
         public void remove() {
-            iterator.remove();
+            this.iterator.remove();
         }
 
+        @Override
         public Iterator<ReferenceContainer<ReferenceType>> iterator() {
             return this;
         }
-        
+
+    }
+
+    /**
+     * return an iterator object that counts the number of references in indexContainers
+     * the startWordHash may be null to iterate all from the beginning
+     * @throws IOException
+     */
+    public CloneableIterator<Rating<byte[]>> referenceCountIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) {
+        try {
+            return new ReferenceCountIterator(startWordHash, rot, excludePrivate);
+        } catch (final IOException e) {
+            Log.logException(e);
+            return null;
+        }
+    }
+
+    public class ReferenceCountIterator implements CloneableIterator<Rating<byte[]>>, Iterable<Rating<byte[]>> {
+
+        private final boolean rot, excludePrivate;
+        protected CloneableIterator<byte[]> iterator;
+
+        public ReferenceCountIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) throws IOException {
+            this.rot = rot;
+            this.excludePrivate = excludePrivate;
+            this.iterator = ReferenceContainerArray.this.array.keys(true, startWordHash);
+            // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
+        }
+
+        @Override
+        public ReferenceCountIterator clone(final Object secondWordHash) {
+            try {
+                return new ReferenceCountIterator((byte[]) secondWordHash, this.rot, this.excludePrivate);
+            } catch (final IOException e) {
+                Log.logException(e);
+                return null;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (this.iterator == null) return false;
+            if (this.rot) return true;
+            return this.iterator.hasNext();
+        }
+
+        @Override
+        public Rating<byte[]> next() {
+            byte[] reference;
+            while (this.iterator.hasNext()) try {
+                reference = this.iterator.next();
+                if (this.excludePrivate && Word.isPrivate(reference)) continue;
+                return new Rating<byte[]>(reference, count(reference));
+            } catch (final Throwable e) {
+                Log.logException(e);
+                return null;
+            }
+            // rotation iteration
+            if (!this.rot) {
+                return null;
+            }
+            while (this.iterator.hasNext()) try {
+                this.iterator = ReferenceContainerArray.this.array.keys(true, null);
+                reference = this.iterator.next();
+                if (this.excludePrivate && Word.isPrivate(reference)) continue;
+                return new Rating<byte[]>(reference, count(reference));
+            } catch (final Throwable e) {
+                Log.logException(e);
+                return null;
+            }
+            return null;
+        }
+
+        @Override
+        public void remove() {
+            this.iterator.remove();
+        }
+
+        @Override
+        public Iterator<Rating<byte[]>> iterator() {
+            return this;
+        }
+
     }
 
     /**
@@ -194,66 +283,66 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * this works with heaps in write- and read-mode
      * @param key
      * @return true, if the key is used in the heap; false otherwise
-     * @throws IOException 
+     * @throws IOException
      */
     public boolean has(final byte[] termHash) {
         return this.array.containsKey(termHash);
     }
-    
+
     /**
      * get a indexContainer from a heap
      * @param key
      * @return the indexContainer if one exist, null otherwise
-     * @throws IOException 
-     * @throws RowSpaceExceededException 
+     * @throws IOException
+     * @throws RowSpaceExceededException
      */
     public ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException, RowSpaceExceededException {
-        long timeout = System.currentTimeMillis() + 3000;
-        Iterator<byte[]> entries = this.array.getAll(termHash).iterator();
+        final long timeout = System.currentTimeMillis() + METHOD_MAXRUNTIME;
+        final Iterator<byte[]> entries = this.array.getAll(termHash).iterator();
     	if (entries == null || !entries.hasNext()) return null;
-    	byte[] a = entries.next();
+    	final byte[] a = entries.next();
     	int k = 1;
-    	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, payloadrow));
+    	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, this.factory.getRow()));
     	if (System.currentTimeMillis() > timeout) {
-    	    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
+    	    Log.logWarning("ReferenceContainerArray", "timout in get() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
     	    return c;
     	}
     	while (entries.hasNext()) {
-    		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), payloadrow)));
+    		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), this.factory.getRow())));
     		k++;
     		if (System.currentTimeMillis() > timeout) {
-    		    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 3000");
+    		    Log.logWarning("ReferenceContainerArray", "timout in get() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
     		    return c;
             }
     	}
     	return c;
     }
-    
+
     public int count(final byte[] termHash) throws IOException {
-        long timeout = System.currentTimeMillis() + 3000;
-        Iterator<Long> entries = this.array.lengthAll(termHash).iterator();
+        final long timeout = System.currentTimeMillis() + METHOD_MAXRUNTIME;
+        final Iterator<Long> entries = this.array.lengthAll(termHash).iterator();
         if (entries == null || !entries.hasNext()) return 0;
-        Long a = entries.next();
+        final Long a = entries.next();
         int k = 1;
-        int c = RowSet.importRowCount(a, payloadrow);
+        int c = RowSet.importRowCount(a, this.factory.getRow());
         assert c >= 0;
         if (System.currentTimeMillis() > timeout) {
-            Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
+            Log.logWarning("ReferenceContainerArray", "timout in count() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
             return c;
         }
         while (entries.hasNext()) {
-            c += RowSet.importRowCount(entries.next(), payloadrow);
+            c += RowSet.importRowCount(entries.next(), this.factory.getRow());
             assert c >= 0;
             k++;
             if (System.currentTimeMillis() > timeout) {
-                Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 3000");
+                Log.logWarning("ReferenceContainerArray", "timout in count() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
                 return c;
             }
         }
         assert c >= 0;
         return c;
     }
-    
+
     /**
      * calculate an upper limit for a ranking number of the container size
      * the returned number is not a counter. It can only be used to compare the
@@ -265,110 +354,100 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public long lenghtRankingUpperLimit(final byte[] termHash) throws IOException {
         return this.array.lengthAdd(termHash);
     }
-    
+
     /**
      * delete a indexContainer from the heap cache. This can only be used for write-enabled heaps
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null otherwise
-     * @throws IOException 
+     * @throws IOException
      */
     public void delete(final byte[] termHash) throws IOException {
         // returns the index that had been deleted
-    	array.delete(termHash);
+    	this.array.delete(termHash);
     }
-    
-    public int reduce(final byte[] termHash, ContainerReducer<ReferenceType> reducer) throws IOException, RowSpaceExceededException {
-        return array.reduce(termHash, new BLOBReducer(termHash, reducer));
+
+    public int reduce(final byte[] termHash, final ContainerReducer<ReferenceType> reducer) throws IOException, RowSpaceExceededException {
+        return this.array.reduce(termHash, new BLOBReducer(termHash, reducer));
     }
-    
+
     public class BLOBReducer implements BLOB.Reducer {
 
         ContainerReducer<ReferenceType> rewriter;
         byte[] wordHash;
-        
-        public BLOBReducer(byte[] wordHash, ContainerReducer<ReferenceType> rewriter) {
+
+        public BLOBReducer(final byte[] wordHash, final ContainerReducer<ReferenceType> rewriter) {
             this.rewriter = rewriter;
             this.wordHash = wordHash;
         }
-        
-        public byte[] rewrite(byte[] b) throws RowSpaceExceededException {
+
+        @Override
+        public byte[] rewrite(final byte[] b) throws RowSpaceExceededException {
             if (b == null) return null;
-            ReferenceContainer<ReferenceType> c = rewriter.reduce(new ReferenceContainer<ReferenceType>(factory, this.wordHash, RowSet.importRowSet(b, payloadrow)));
+            final ReferenceContainer<ReferenceType> c = this.rewriter.reduce(new ReferenceContainer<ReferenceType>(ReferenceContainerArray.this.factory, this.wordHash, RowSet.importRowSet(b, ReferenceContainerArray.this.factory.getRow())));
             if (c == null) return null;
-            byte bb[] = c.exportCollection();
+            final byte bb[] = c.exportCollection();
             assert bb.length <= b.length;
             return bb;
         }
     }
 
     public interface ContainerReducer<ReferenceType extends Reference> {
-        
+
         public ReferenceContainer<ReferenceType> reduce(ReferenceContainer<ReferenceType> container);
-        
+
     }
-   
+
     public int entries() {
         return this.array.entries();
     }
-    
-    public boolean shrink(long targetFileSize, long maxFileSize) {
-        if (this.array.entries() < 2) return false;
-        boolean donesomething = false;
-        
-        // first try to merge small files that match
-        while (this.merger.queueLength() < 3 || this.array.entries() >= 50) {
-            File[] ff = this.array.unmountBestMatch(2.0f, targetFileSize);
-            if (ff == null) break;
-            Log.logInfo("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
-            merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
-            donesomething = true;
-        }
-        
-        // then try to merge simply any small file
-        while (this.merger.queueLength() < 2) {
-            File[] ff = this.array.unmountSmallest(targetFileSize);
-            if (ff == null) break;
-            Log.logInfo("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
-            merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
-            donesomething = true;
-        }
-        
-        // if there is no small file, then merge matching files up to limit
-        while (this.merger.queueLength() < 1) {
-            File[] ff = this.array.unmountBestMatch(2.0f, maxFileSize);
-            if (ff == null) break;
-            Log.logInfo("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
-            merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
-            donesomething = true;
-        }
 
-        // rewrite old files (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
-        while (this.merger.queueLength() < 1) {
-            File ff = this.array.unmountOldest();
-            if (ff == null) break;
-            Log.logInfo("RICELL-shrink4/rewrite", "unmountOldest()");
-            merger.merge(ff, null, this.factory, this.array, this.payloadrow, newContainerBLOBFile());
-            donesomething = true;
-        }
-
-        return donesomething;
+    public boolean shrinkBestSmallFiles(final IODispatcher merger, final long targetFileSize) {
+        final File[] ff = this.array.unmountBestMatch(2.0f, targetFileSize);
+        if (ff == null) return false;
+        Log.logInfo("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
+        merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
+        return true;
     }
-    
+
+    public boolean shrinkAnySmallFiles(final IODispatcher merger, final long targetFileSize) {
+        final File[] ff = this.array.unmountSmallest(targetFileSize);
+        if (ff == null) return false;
+        Log.logInfo("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
+        merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
+        return true;
+    }
+
+    public boolean shrinkUpToMaxSizeFiles(final IODispatcher merger, final long maxFileSize) {
+        final File[] ff = this.array.unmountBestMatch(2.0f, maxFileSize);
+        if (ff == null) return false;
+        Log.logInfo("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
+        merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
+        return true;
+    }
+
+    public boolean shrinkOldFiles(final IODispatcher merger, final long targetFileSize) {
+        final File ff = this.array.unmountOldest();
+        if (ff == null) return false;
+        Log.logInfo("RICELL-shrink4/rewrite", "unmountOldest()");
+        merger.merge(ff, null, this.factory, this.array, newContainerBLOBFile());
+        return true;
+    }
+
     public static <ReferenceType extends Reference> HandleMap referenceHashes(
                             final File heapLocation,
                             final ReferenceFactory<ReferenceType> factory,
                             final ByteOrder termOrder,
                             final Row payloadrow) throws IOException, RowSpaceExceededException {
-       
+
         System.out.println("CELL REFERENCE COLLECTION startup");
-        HandleMap references = new HandleMap(payloadrow.primaryKeyLength, termOrder, 4, 1000000, heapLocation.getAbsolutePath());
-        String[] files = heapLocation.list();
-        for (String f: files) {
+        final HandleMap references = new HandleMap(payloadrow.primaryKeyLength, termOrder, 4, 1000000, heapLocation.getAbsolutePath());
+        final String[] files = heapLocation.list();
+        for (final String f: files) {
             if (f.length() < 22 || !f.startsWith("text.index") || !f.endsWith(".blob")) continue;
-            File fl = new File(heapLocation, f);
+            final File fl = new File(heapLocation, f);
             System.out.println("CELL REFERENCE COLLECTION opening blob " + fl);
-            CloneableIterator<ReferenceContainer<ReferenceType>>  ei = new ReferenceIterator<ReferenceType>(fl, factory, payloadrow);
-        
+            final CloneableIterator<ReferenceContainer<ReferenceType>>  ei = new ReferenceIterator<ReferenceType>(fl, factory);
+
             ReferenceContainer<ReferenceType> container;
             final long start = System.currentTimeMillis();
             long lastlog = start - 27000;
@@ -378,11 +457,11 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             while (ei.hasNext()) {
                 container = ei.next();
                 if (container == null) continue;
-                Iterator<ReferenceType> refi = container.entries();
+                final Iterator<ReferenceType> refi = container.entries();
                 while (refi.hasNext()) {
                 	reference = refi.next();
                 	if (reference == null) continue;
-                	mh = reference.metadataHash();
+                	mh = reference.urlhash();
                 	if (mh == null) continue;
                     references.inc(mh);
                 }
@@ -394,9 +473,10 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 }
             }
         }
+        references.trim();
         System.out.println("CELL REFERENCE COLLECTION finished");
         return references;
     }
 
-    
+
 }

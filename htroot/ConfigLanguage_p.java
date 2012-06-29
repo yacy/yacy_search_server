@@ -34,37 +34,35 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
-
-import de.anomic.data.WorkTables;
+import net.yacy.search.Switchboard;
 import de.anomic.data.Translator;
-import de.anomic.search.Switchboard;
+import de.anomic.data.WorkTables;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import java.util.Collections;
-import java.util.Map;
 
 
 public class ConfigLanguage_p {
 
-    private final static String LANG_FILENAME_FILTER = "^.*\\.lng$";
-
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
-        final String langPath = env.getDataPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
+        Switchboard sb = (Switchboard) env;
+        final File langPath = new File(sb.getAppPath("locale.source", "locales").getAbsolutePath());
 
         //Fallback
         //prop.put("currentlang", ""); //is done by Translationtemplate
         prop.put("status", "0");//nothing
 
-        List<String> langFiles = FileUtils.getDirListing(langPath, LANG_FILENAME_FILTER);
+        List<String> langFiles = Translator.langFiles(langPath);
         if (langFiles == null) {
             return prop;
         }
@@ -103,7 +101,7 @@ public class ConfigLanguage_p {
                 Iterator<String> it;
                 try {
                     final DigestURI u = new DigestURI(url);
-                    it = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
+                    it = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
                 } catch(final IOException e) {
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);
@@ -128,7 +126,7 @@ public class ConfigLanguage_p {
         }
 
         //re-read language files
-        langFiles = FileUtils.getDirListing(langPath, LANG_FILENAME_FILTER);
+        langFiles = Translator.langFiles(langPath);
         Collections.sort(langFiles);
         final Map<String, String> langNames = Translator.langMap(env);
 

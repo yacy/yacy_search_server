@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -46,7 +46,7 @@ public final class BufferedRecords {
     private final Records efs;
     private final int maxEntries;
     private final TreeMap<Long, byte[]> buffer;
-    
+
     public BufferedRecords(final Records efs, final int maxEntries) {
         this.efs = efs;
         this.maxEntries = maxEntries;
@@ -59,24 +59,24 @@ public final class BufferedRecords {
      * @throws IOException
      */
     public synchronized void flushBuffer() throws IOException {
-        this.flushBuffer0();
-        if (efs != null) efs.flushBuffer();
+        flushBuffer0();
+        if (this.efs != null) this.efs.flushBuffer();
     }
-    
+
     private final void flushBuffer0() throws IOException {
-        if (efs == null) return;
-        for (Map.Entry<Long, byte[]> entry: buffer.entrySet()) {
-            efs.put(entry.getKey().intValue(), entry.getValue(), 0);
+        if (this.efs == null) return;
+        for (final Map.Entry<Long, byte[]> entry: this.buffer.entrySet()) {
+            this.efs.put(entry.getKey().intValue(), entry.getValue(), 0);
         }
-        buffer.clear();
+        this.buffer.clear();
     }
-    
+
     public final synchronized long size() throws IOException {
-        return efs == null ? 0 : efs.size();
+        return this.efs == null ? 0 : this.efs.size();
     }
-    
+
     public final File filename() {
-        return efs.filename();
+        return this.efs.filename();
     }
 
     public final synchronized void close() {
@@ -85,69 +85,69 @@ public final class BufferedRecords {
         } catch (final IOException e) {
             Log.logException(e);
         }
-        if (efs != null) efs.close();
+        if (this.efs != null) this.efs.close();
     }
 
     @Override
     protected final synchronized void finalize() {
-        if (this.efs != null) this.close();
+        if (this.efs != null) close();
     }
-    
-    public final synchronized void get(final long index, final byte[] b, final int start) throws IOException {
-        Long idx = Long.valueOf(index);
+
+    public final void get(final long index, final byte[] b, final int start) throws IOException {
+        final Long idx = Long.valueOf(index);
         final byte[] bb;
         synchronized (this) {
-            assert b.length - start >= efs.recordsize;
-            if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
-            bb = buffer.get(idx);
+            assert b.length - start >= this.efs.recordsize;
+            bb = this.buffer.get(idx);
             if (bb == null) {
-                efs.get(index, b, start);
+                if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + size() + ")");
+                this.efs.get(index, b, start);
                 return;
             }
         }
-        System.arraycopy(bb, 0, b, start, efs.recordsize);
+        System.arraycopy(bb, 0, b, start, this.efs.recordsize);
     }
 
     public final synchronized void put(final long index, final byte[] b, final int start) throws IOException {
-        assert b.length - start >= efs.recordsize;
+        assert b.length - start >= this.efs.recordsize;
         final long s = size();
-        if (index > s) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
+        if (index > s) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.put(" + index + ") outside bounds (" + size() + ")");
         if (index == s) {
-            efs.add(b, start);
+            this.efs.add(b, start);
         } else {
-            final byte[] bb = new byte[efs.recordsize];
-            System.arraycopy(b, start, bb, 0, efs.recordsize);
-            buffer.put(Long.valueOf(index), bb);
-            if (buffer.size() > this.maxEntries) flushBuffer0();
+            final byte[] bb = new byte[this.efs.recordsize];
+            System.arraycopy(b, start, bb, 0, this.efs.recordsize);
+            this.buffer.put(Long.valueOf(index), bb);
+            if (this.buffer.size() > this.maxEntries) flushBuffer0();
        }
     }
-    
+
     public final synchronized void add(final byte[] b, final int start) throws IOException {
-        assert b.length - start >= efs.recordsize;
+        assert b.length - start >= this.efs.recordsize;
         // index == size() == efs.size();
-        efs.add(b, start);
+        this.efs.add(b, start);
     }
 
     public final synchronized void cleanLast(final byte[] b, final int start) throws IOException {
-        assert b.length - start >= efs.recordsize;
-        final byte[] bb = buffer.remove(Long.valueOf(size() - 1));
+        assert b.length - start >= this.efs.recordsize;
+        final byte[] bb = this.buffer.remove(Long.valueOf(size() - 1));
         if (bb == null) {
-            efs.cleanLast(b, start);
+            this.efs.cleanLast(b, start);
         } else {
-            System.arraycopy(bb, 0, b, start, efs.recordsize);
-            efs.cleanLast();
+            System.arraycopy(bb, 0, b, start, this.efs.recordsize);
+            this.efs.cleanLast();
         }
     }
-    
+
     public final synchronized void cleanLast() throws IOException {
-        buffer.remove(Long.valueOf(size() - 1));
-        efs.cleanLast();
+        this.buffer.remove(Long.valueOf(size() - 1));
+        this.efs.cleanLast();
     }
-    
+
     public final void deleteOnExit() {
-        efs.deleteOnExit();
+        this.efs.deleteOnExit();
     }
-    
+
     /**
      * main - writes some data and checks the tables size (with time measureing)
      * @param args
@@ -192,7 +192,7 @@ public final class BufferedRecords {
             }
             System.out.println("size() needs " + ((System.currentTimeMillis() - start) / 100) + " nanoseconds");
             System.out.println("size = " + c);
-            
+
             t.close();
         } catch (final IOException e) {
             Log.logException(e);

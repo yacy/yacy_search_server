@@ -112,7 +112,7 @@ public class bmpParser {
         public COLORTABLE(final byte[] s, final int offset, final INFOHEADER infoheader) {
             // read colortable
             colorbytes = 0; // for consistency check
-            if (infoheader.biClrUsed == 0) {
+            if (infoheader.biClrUsed == 0 || infoheader.biClrUsed > 1024) {
                 if ((infoheader.biBitCount == 1) || (infoheader.biBitCount == 4) || (infoheader.biBitCount == 8)) {
                     colorindex = new int[1 << infoheader.biBitCount];
                     colorbytes = 4 * colorindex.length;
@@ -126,7 +126,7 @@ public class bmpParser {
                     colorindex = null;
                 }
             } else {
-                colorindex = new int[infoheader.biClrUsed];
+                colorindex = new int[infoheader.biClrUsed]; // OOM DANGER!
                 colorbytes = 4 * colorindex.length;
                 int color;
                 for (int i = 0; i < colorindex.length; i++) {

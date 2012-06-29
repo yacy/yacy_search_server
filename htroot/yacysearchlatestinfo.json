@@ -1,0 +1,12 @@
+{
+"offset": "#[offset]#",
+"itemscount": "#[itemscount]#",
+"itemsperpage": "#[itemsperpage]#",
+"totalcount": "#[totalcount]#",
+"localResourceSize": "#[localResourceSize]#",
+"localMissCount": "#[localMissCount]#",
+"remoteResourceSize": "#[remoteResourceSize]#",
+"remoteIndexCount": "#[remoteIndexCount]#",
+"remotePeerCount": "#[remotePeerCount]#",
+"navurlBase": "#[navurlBase]#"
+}

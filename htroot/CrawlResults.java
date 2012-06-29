@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,21 +31,21 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-
+import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segments;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.ResultURLs.InitExecEntry;
-import de.anomic.search.Segments;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
-import de.anomic.yacy.yacySeed;
 
 public class CrawlResults {
 
@@ -55,12 +55,14 @@ public class CrawlResults {
         final serverObjects prop = new serverObjects();
 
         int lines = 500;
-        boolean showInit = env.getConfigBool("IndexMonitorInit", false);
-        boolean showExec = env.getConfigBool("IndexMonitorExec", false);
-        boolean showDate = env.getConfigBool("IndexMonitorDate", true);
-        boolean showWords = env.getConfigBool("IndexMonitorWords", true);
-        boolean showTitle = env.getConfigBool("IndexMonitorTitle", true);
-        boolean showURL = env.getConfigBool("IndexMonitorURL", true);
+        boolean showInit    = env.getConfigBool("IndexMonitorInit", false);
+        boolean showExec    = env.getConfigBool("IndexMonitorExec", false);
+        boolean showDate    = env.getConfigBool("IndexMonitorDate", true);
+        boolean showWords   = env.getConfigBool("IndexMonitorWords", true);
+        boolean showTitle   = env.getConfigBool("IndexMonitorTitle", true);
+        boolean showCountry = env.getConfigBool("IndexMonitorCountry", false);
+        boolean showIP      = env.getConfigBool("IndexMonitorIP", false);
+        boolean showURL     = env.getConfigBool("IndexMonitorURL", true);
 
         if (post == null) {
             post = new serverObjects();
@@ -70,7 +72,7 @@ public class CrawlResults {
         // find process number
         EventOrigin tabletype;
         try {
-            tabletype = EventOrigin.getEvent(Integer.parseInt(post.get("process", "0")));
+            tabletype = EventOrigin.getEvent(post.getInt("process", 0));
         } catch (final NumberFormatException e) {
             tabletype = EventOrigin.UNKNOWN;
         }
@@ -83,21 +85,21 @@ public class CrawlResults {
             // the main menu does a request to the local crawler page, but in case this table is empty, the overview page is shown
             tabletype = (ResultURLs.getStackSize(EventOrigin.SURROGATES) == 0) ? EventOrigin.UNKNOWN : EventOrigin.SURROGATES;
         }
-        
+
         // check if authorization is needed and/or given
         if (tabletype != EventOrigin.UNKNOWN ||
             (post != null && (post.containsKey("clearlist") ||
             post.containsKey("deleteentry")))) {
             final String authorization = (header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
             if (authorization.length() != 0) {
-                if (! sb.verifyAuthentication(header, true)){
+                if (! sb.verifyAuthentication(header)){
                     // force log-in (again, because wrong password was given)
-                    prop.put("AUTHENTICATE", "admin log-in");
+                	prop.authenticationRequired();
                     return prop;
                 }
             } else {
                 // force log-in
-                prop.put("AUTHENTICATE", "admin log-in");
+            	prop.authenticationRequired();
                 return prop;
             }
         }
@@ -105,7 +107,7 @@ public class CrawlResults {
         if (post != null) {
             // custom number of lines
             if (post.containsKey("count")) {
-                lines = Integer.parseInt(post.get("count", "500"));
+                lines = post.getInt("count", 500);
             }
 
             // do the commands
@@ -120,29 +122,31 @@ public class CrawlResults {
             }
 
             if (post.containsKey("deletedomain")) {
-                final String hashpart = post.get("hashpart", null);
                 final String domain = post.get("domain", null);
+                final String hashpart = domain == null ? null : DigestURI.hosthash6(domain);
                 if (hashpart != null) {
                     // delete all urls for this domain from database
                     try {
                         sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).deleteDomain(hashpart);
                         ResultURLs.deleteDomain(tabletype, domain, hashpart);
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         Log.logException(e);
                     }
                 }
             }
 
             if (post.containsKey("moreIndexed")) {
-                lines = Integer.parseInt(post.get("showIndexed", "500"));
+                lines = post.getInt("showIndexed", 500);
             }
 
-            if (post.get("si") != null) showInit = !("0".equals(post.get("si")));
-            if (post.get("se") != null) showExec = !("0".equals(post.get("se")));
-            if (post.get("sd") != null) showDate = !("0".equals(post.get("sd")));
-            if (post.get("sw") != null) showWords = !("0".equals(post.get("sw")));
-            if (post.get("st") != null) showTitle = !("0".equals(post.get("st")));
-            if (post.get("su") != null) showURL = !("0".equals(post.get("su")));
+            if (post.get("si") != null) showInit    = !("0".equals(post.get("si")));
+            if (post.get("se") != null) showExec    = !("0".equals(post.get("se")));
+            if (post.get("sd") != null) showDate    = !("0".equals(post.get("sd")));
+            if (post.get("sw") != null) showWords   = !("0".equals(post.get("sw")));
+            if (post.get("st") != null) showTitle   = !("0".equals(post.get("st")));
+            if (post.get("sc") != null) showCountry = !("0".equals(post.get("sc")));
+            if (post.get("sp") != null) showIP      = !("0".equals(post.get("sp")));
+            if (post.get("su") != null) showURL     = !("0".equals(post.get("su")));
         } // end != null
 
         // create table
@@ -160,21 +164,22 @@ public class CrawlResults {
                 prop.put("table_size_count", lines);
             }
             prop.put("table_size_all", ResultURLs.getStackSize(tabletype));
-            
+
             prop.putHTML("table_feedbackpage", "CrawlResults.html");
             prop.put("table_tabletype", tabletype.getCode());
-            prop.put("table_showInit", (showInit) ? "1" : "0");
-            prop.put("table_showExec", (showExec) ? "1" : "0");
-            prop.put("table_showDate", (showDate) ? "1" : "0");
-            prop.put("table_showWords", (showWords) ? "1" : "0");
-            prop.put("table_showTitle", (showTitle) ? "1" : "0");
-            prop.put("table_showURL", (showURL) ? "1" : "0");
+            prop.put("table_showInit",    (showInit) ? "1" : "0");
+            prop.put("table_showExec",    (showExec) ? "1" : "0");
+            prop.put("table_showDate",    (showDate) ? "1" : "0");
+            prop.put("table_showWords",   (showWords) ? "1" : "0");
+            prop.put("table_showTitle",   (showTitle) ? "1" : "0");
+            prop.put("table_showCountry", (showCountry) ? "1" : "0");
+            prop.put("table_showIP",      (showIP) ? "1" : "0");
+            prop.put("table_showURL",     (showURL) ? "1" : "0");
 
             boolean dark = true;
             String urlstr, urltxt;
-            yacySeed initiatorSeed, executorSeed;
+            Seed initiatorSeed, executorSeed;
             URIMetadataRow urle;
-            URIMetadataRow.Components metadata;
 
             int cnt = 0;
             final Iterator<Map.Entry<String, InitExecEntry>> i = ResultURLs.results(tabletype);
@@ -182,20 +187,18 @@ public class CrawlResults {
             while (i.hasNext()) {
                 entry = i.next();
                 try {
-                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(entry.getKey().getBytes(), null, 0);
+                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(UTF8.getBytes(entry.getKey()));
                     if (urle == null) {
                         Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;
                         urltxt = null;
-                        metadata = null;
                         continue;
                     }
-                    metadata = urle.metadata();
-                    urlstr = metadata.url().toNormalform(false, true);
+                    urlstr = urle.url().toNormalform(false, true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
-                    
-                    initiatorSeed = entry.getValue() == null || entry.getValue().initiatorHash == null ? null : sb.peers.getConnected(UTF8.String(entry.getValue().initiatorHash));
-                    executorSeed = entry.getValue() == null || entry.getValue().executorHash == null ? null : sb.peers.getConnected(UTF8.String(entry.getValue().executorHash));
+
+                    initiatorSeed = entry.getValue() == null || entry.getValue().initiatorHash == null ? null : sb.peers.getConnected(ASCII.String(entry.getValue().initiatorHash));
+                    executorSeed = entry.getValue() == null || entry.getValue().executorHash == null ? null : sb.peers.getConnected(ASCII.String(entry.getValue().executorHash));
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
                     prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");
@@ -228,27 +231,39 @@ public class CrawlResults {
 
                     if (showTitle) {
                         prop.put("table_indexed_" + cnt + "_showTitle", (showTitle) ? "1" : "0");
-                            prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
+                        prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
 
-                            if (metadata == null || metadata.dc_title() == null || metadata.dc_title().trim().length() == 0)
-                                prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "0");
-                            else {
-                                prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "1");
-                                prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", metadata.dc_title());
-                            }
+                        if (urle.dc_title() == null || urle.dc_title().trim().length() == 0)
+                            prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "0");
+                        else {
+                            prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "1");
+                            prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", urle.dc_title());
+                        }
 
-                            prop.put("table_indexed_" + cnt + "_showTitle_available_urlHash", entry.getKey());
-                            prop.putHTML("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);
+                        prop.put("table_indexed_" + cnt + "_showTitle_available_urlHash", entry.getKey());
+                        prop.putHTML("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);
                     } else
                         prop.put("table_indexed_" + cnt + "_showTitle", "0");
 
+                    if (showCountry && urle != null) {
+                        prop.put("table_indexed_" + cnt + "_showCountry", "1");
+                        prop.put("table_indexed_" + cnt + "_showCountry_country", urle.url().getLocale().getCountry());
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showCountry", "0");
+
+                    if (showIP && urle != null) {
+                        prop.put("table_indexed_" + cnt + "_showIP", "1");
+                        prop.put("table_indexed_" + cnt + "_showIP_ip", urle.url().getHost() == null ? "" : urle.url().getInetAddress().getHostAddress());
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showIP", "0");
+
                     if (showURL) {
                         prop.put("table_indexed_" + cnt + "_showURL", "1");
-                            prop.put("table_indexed_" + cnt + "_showURL_available", "1");
+                        prop.put("table_indexed_" + cnt + "_showURL_available", "1");
 
-                            prop.put("table_indexed_" + cnt + "_showURL_available_urlHash", entry.getKey());
-                            prop.putHTML("table_indexed_" + cnt + "_showURL_available_urltitle", urlstr);
-                            prop.put("table_indexed_" + cnt + "_showURL_available_url", urltxt);
+                        prop.put("table_indexed_" + cnt + "_showURL_available_urlHash", entry.getKey());
+                        prop.putHTML("table_indexed_" + cnt + "_showURL_available_urltitle", urlstr);
+                        prop.put("table_indexed_" + cnt + "_showURL_available_url", urltxt);
                     } else
                         prop.put("table_indexed_" + cnt + "_showURL", "0");
 
@@ -259,7 +274,7 @@ public class CrawlResults {
                 }
             }
             prop.put("table_indexed", cnt);
-            
+
             cnt = 0;
             dark = true;
             final Iterator<String> j = ResultURLs.domains(tabletype);
@@ -271,7 +286,6 @@ public class CrawlResults {
                 prop.put("table_domains_" + cnt + "_feedbackpage", "CrawlResults.html");
                 prop.put("table_domains_" + cnt + "_tabletype", tabletype.getCode());
                 prop.put("table_domains_" + cnt + "_domain", domain);
-                prop.put("table_domains_" + cnt + "_hashpart", DigestURI.hosthash6(domain));
                 prop.put("table_domains_" + cnt + "_count", ResultURLs.domainCount(tabletype, domain));
                 dark = !dark;
                 cnt++;

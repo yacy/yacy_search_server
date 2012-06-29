@@ -29,13 +29,12 @@ import java.net.MalformedURLException;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.search.Switchboard;
 
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.UserIdentity;
-
-import de.anomic.search.Switchboard;
 
 /**
  * jetty security handler

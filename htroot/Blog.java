@@ -30,33 +30,36 @@
 // javac -classpath .:../classes Blog.java
 // if the shell's current path is HTROOT
 
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-
+import net.yacy.peers.NewsPool;
+import net.yacy.search.Switchboard;
 import de.anomic.data.BlogBoard;
 import de.anomic.data.UserDB;
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsPool;
-import java.util.List;
-import java.util.Map;
 
 public class Blog {
 
     private static final String DEFAULT_PAGE = "blog_default";
 
-        private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
-        // TODO: make userdefined date/time-strings (localisation)
+        private static DateFormat SimpleFormatter = DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT, Locale.getDefault());
 
+    /**
+     * print localized date/time "yyyy/mm/dd HH:mm:ss"
+     * @param date
+     * @return
+     */
     public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }
@@ -66,21 +69,17 @@ public class Blog {
         final serverObjects prop = new serverObjects();
         BlogBoard.BlogEntry page = null;
 
-        boolean hasRights = sb.verifyAuthentication(header, true);
-        
+        boolean hasRights = sb.verifyAuthentication(header);
+
         //final int display = (hasRights || post == null) ? 1 : post.getInt("display", 0);
-        //prop.put("display", display);   
+        //prop.put("display", display);
         prop.put("display", 1); // Fixed to 1
 
-        
+
         final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
         final String address = sb.peers.mySeed().getPublicAddress();
 
-        if(hasRights) {
-            prop.put("mode_admin", "1");
-        } else {
-            prop.put("mode_admin", "0");
-        }
+        prop.put("mode_admin", hasRights ? "1" : "0");
 
         if (post == null) {
             prop.putHTML("peername", sb.peers.mySeed().getName());
@@ -93,37 +92,33 @@ public class Blog {
 
         if (!hasRights) {
             final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
-            if (userentry != null && userentry.hasRight(UserDB.Entry.BLOG_RIGHT)) {
+            if (userentry != null && userentry.hasRight(UserDB.AccessRight.BLOG_RIGHT)) {
                 hasRights=true;
             } else if (post.containsKey("login")) {
                 //opens login window if login link is clicked
-                prop.put("AUTHENTICATE","admin log-in");
+            	prop.authenticationRequired();
             }
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
 
-        String StrAuthor = post.get("author", "");
+        String strAuthor = post.get("author", "anonymous");
 
-        if ("anonymous".equals(StrAuthor)) {
-            StrAuthor = sb.blogDB.guessAuthor(ip);
+        if ("anonymous".equals(strAuthor)) {
+            strAuthor = sb.blogDB.guessAuthor(ip);
 
-            if (StrAuthor == null || StrAuthor.length() == 0) {
+            if (strAuthor == null || strAuthor.length() == 0) {
                 if (sb.peers.mySeed() == null) {
-                    StrAuthor = "anonymous";
+                    strAuthor = "anonymous";
                 } else {
-                    StrAuthor = sb.peers.mySeed().get("Name", "anonymous");
+                    strAuthor = sb.peers.mySeed().get("Name", "anonymous");
                 }
             }
         }
 
         byte[] author;
-        try {
-            author = StrAuthor.getBytes("UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            author = StrAuthor.getBytes();
-        }
+        author = UTF8.getBytes(strAuthor);
 
         if (hasRights && post.containsKey("delete") && "sure".equals(post.get("delete"))) {
             page = sb.blogDB.readBlogEntry(pagename);
@@ -141,11 +136,7 @@ public class Blog {
         if (post.containsKey("submit") && hasRights) {
             // store a new/edited blog-entry
             byte[] content;
-            try {
-                content = post.get("content", "").getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                content = post.get("content", "").getBytes();
-            }
+            content = UTF8.getBytes(post.get("content", ""));
 
             final Date date;
             List<String> comments = null;
@@ -162,11 +153,7 @@ public class Blog {
             final String commentMode = post.get("commentMode", "2");
             final String StrSubject = post.get("subject", "");
             byte[] subject;
-            try {
-                subject = StrSubject.getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                subject = StrSubject.getBytes();
-            }
+            subject = UTF8.getBytes(StrSubject);
 
             sb.blogDB.writeBlogEntry(sb.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
 
@@ -175,8 +162,8 @@ public class Blog {
                 final Map<String, String> map = new HashMap<String, String>();
                 map.put("page", pagename);
                 map.put("subject", StrSubject.replace(',', ' '));
-                map.put("author", StrAuthor.replace(',', ' '));
-                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map);
+                map.put("author", strAuthor.replace(',', ' '));
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_BLOG_ADD, map);
             }
         }
 
@@ -204,7 +191,7 @@ public class Blog {
                 prop.putHTML("mode_author", UTF8.String(author));
                 prop.putHTML("mode_subject", post.get("subject",""));
                 prop.put("mode_date", dateString(new Date()));
-                prop.putWiki("mode_page", post.get("content", ""));
+                prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", post.get("content", ""));
                 prop.putHTML("mode_page-code", post.get("content", ""));
             }
             else {
@@ -247,7 +234,7 @@ public class Blog {
             else {
                 //only show 1 entry
                 prop.put("mode_entries", "1");
-                putBlogEntry(prop, page, address, 0, hasRights, xml);
+                putBlogEntry(sb, prop, page, address, 0, hasRights, xml);
             }
         }
 
@@ -262,7 +249,7 @@ public class Blog {
             int start,
             int num,
             final boolean hasRights,
-            final boolean xml) 
+            final boolean xml)
     {
         final Iterator<String> i = switchboard.blogDB.getBlogIterator(false);
 
@@ -276,6 +263,7 @@ public class Blog {
         while (i.hasNext() && (num == 0 || num > count)) {
             if(0 < start--) continue;
             putBlogEntry(
+                    switchboard,
                     prop,
                     switchboard.blogDB.readBlogEntry(i.next()),
                     address,
@@ -301,17 +289,18 @@ public class Blog {
             prop.put("mode_preventries_start", prevstart);
             prop.put("mode_preventries_num", num);
         } else prop.put("mode_preventries", "0");
-                
+
         return prop;
     }
 
     private static serverObjects putBlogEntry(
+            final Switchboard sb,
             final serverObjects prop,
             final BlogBoard.BlogEntry entry,
             final String address,
             final int number,
             final boolean hasRights,
-            final boolean xml) 
+            final boolean xml)
     {
         prop.putHTML("mode_entries_" + number + "_subject", UTF8.String(entry.getSubject()));
 
@@ -337,7 +326,7 @@ public class Blog {
             prop.put("mode_entries_" + number + "_page", entry.getPage());
             prop.put("mode_entries_" + number + "_timestamp", entry.getTimestamp());
         } else {
-            prop.putWiki("mode_entries_" + number + "_page", entry.getPage());
+            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_entries_" + number + "_page", entry.getPage());
         }
 
         if (hasRights) {

@@ -2,19 +2,19 @@
  *  ResumptionToken
  *  Copyright 2009 by Michael Peter Christen
  *  First released 31.10.2009 at http://yacy.net
- *  
+ *
  *  This is a part of YaCy, a peer-to-peer based web search engine
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -35,17 +35,17 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
 public class ResumptionToken extends TreeMap<String, String> {
-    
+
     private static final long serialVersionUID = -8389462290545629792L;
 
     // use a collator to relax when distinguishing between lowercase und uppercase letters
@@ -54,21 +54,21 @@ public class ResumptionToken extends TreeMap<String, String> {
         insensitiveCollator.setStrength(Collator.SECONDARY);
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
-    
+
     int recordCounter;
-    
-    private DigestURI source;
-    
-    public ResumptionToken(DigestURI source, final byte[] b) throws IOException {
+
+    private final DigestURI source;
+
+    public ResumptionToken(final DigestURI source, final byte[] b) throws IOException {
         super((Collator) insensitiveCollator.clone());
         this.source = source;
         this.recordCounter = 0;
         new Parser(b);
     }
-    
+
     /*
     public ResumptionToken(
-            DigestURI source, 
+            DigestURI source,
             Date expirationDate,
             int completeListSize,
             int cursor,
@@ -82,9 +82,9 @@ public class ResumptionToken extends TreeMap<String, String> {
         this.put("cursor", Integer.toString(cursor));
         this.put("token", token);
     }
-    
+
     public ResumptionToken(
-            DigestURI source, 
+            DigestURI source,
             String expirationDate,
             int completeListSize,
             int cursor,
@@ -99,19 +99,19 @@ public class ResumptionToken extends TreeMap<String, String> {
         this.put("token", token);
     }
     */
-    
+
     /**
      * truncate the given url at the '?'
      * @param url
      * @return a string containing the url up to and including the '?'
      */
-    public static String truncatedURL(DigestURI url) {
+    public static String truncatedURL(final DigestURI url) {
         String u = url.toNormalform(true, true);
-        int i = u.indexOf('?');
+        final int i = u.indexOf('?');
         if (i > 0) u = u.substring(0, i + 1);
         return u;
     }
-    
+
     /**
      * while parsing the resumption token, also all records are counted
      * @return the result from counting the records
@@ -119,7 +119,7 @@ public class ResumptionToken extends TreeMap<String, String> {
     public int getRecordCounter() {
         return this.recordCounter;
     }
-    
+
     /**
      * compute a url that can be used to resume the retrieval from the OAI-PMH resource
      * @param givenURL
@@ -129,27 +129,27 @@ public class ResumptionToken extends TreeMap<String, String> {
     public DigestURI resumptionURL() throws IOException {
         // decide which kind of encoding strategy was used to get a resumptionToken:
 
-        String token = this.getToken();
+        final String token = getToken();
         if (token == null) throw new IOException("end of resumption reached - token == null");
         if (token.length() == 0) throw new IOException("end of resumption reached - token.length() == 0");
-        String url = truncatedURL(this.source);
-        
+        final String url = truncatedURL(this.source);
+
         // encoded state
-        if (token.indexOf("from=") >= 0) {
+        if (token.indexOf("from=",0) >= 0) {
             return new DigestURI(url + "verb=ListRecords&" + token);
         }
-        
+
         // cached result set
         // can be detected with given expiration date
-        Date expiration = getExpirationDate();
+        final Date expiration = getExpirationDate();
         if (expiration != null) {
             if (expiration.before(new Date())) throw new IOException("the resumption is expired at " + ISO8601Formatter.FORMATTER.format(expiration) + " (now: " + ISO8601Formatter.FORMATTER.format());
             // the resumption token is still fresh
         }
-        String u = url + "verb=ListRecords&resumptionToken=" + escape(token);
+        final String u = url + "verb=ListRecords&resumptionToken=" + escape(token);
         return new DigestURI(u);
     }
-    
+
     public static StringBuilder escape(final String s) {
         final int len = s.length();
         final StringBuilder sbuf = new StringBuilder(len + 10);
@@ -181,7 +181,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         }
         return sbuf;
     }
-    
+
     /**
      * an expiration date of a resumption token that addresses how long a cached set will
      * stay in the cache of the oai-pmh server. See:
@@ -189,16 +189,16 @@ public class ResumptionToken extends TreeMap<String, String> {
      * @return
      */
     public Date getExpirationDate() {
-        String d = this.get("expirationDate");
+        final String d = get("expirationDate");
         if (d == null) return null;
         try {
             return ISO8601Formatter.FORMATTER.parse(d);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             Log.logException(e);
             return new Date();
         }
     }
-    
+
     /**
      * The completeListSize attribute provides a place where the estimated number of results
      * in the complete list response may be announced. This is likely to be used for
@@ -212,11 +212,11 @@ public class ResumptionToken extends TreeMap<String, String> {
      * @return
      */
     public int getCompleteListSize() {
-        String t = this.get("completeListSize");
+        final String t = get("completeListSize");
         if (t == null) return 0;
         return Integer.parseInt(t);
     }
-    
+
     /**
      * The cursor attribute is the number of results returned so far in the complete list response,
      * thus it is always "0" in the first incomplete list response.
@@ -226,11 +226,11 @@ public class ResumptionToken extends TreeMap<String, String> {
      * @return
      */
     public int getCursor() {
-        String t = this.get("cursor");
+        final String t = get("cursor");
         if (t == null) return 0;
         return Integer.parseInt(t);
     }
-    
+
     /**
      * get a token of the stateless transfer in case that no expiration date is given
      * see:
@@ -238,12 +238,26 @@ public class ResumptionToken extends TreeMap<String, String> {
      * @return
      */
     public String getToken() {
-        return this.get("token");
+        return get("token");
     }
-    
+
     public String toString() {
-        return "source = " +  this.source + ", expirationDate=" + ISO8601Formatter.FORMATTER.format(this.getExpirationDate()) + ", completeListSize=" + getCompleteListSize() +
-        ", cursor=" + this.getCursor() + ", token=" + this.getToken();
+        return "source = " +  this.source + ", expirationDate=" + ISO8601Formatter.FORMATTER.format(getExpirationDate()) + ", completeListSize=" + getCompleteListSize() +
+        ", cursor=" + getCursor() + ", token=" + getToken();
+    }
+
+    private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
+    private static SAXParser getParser() throws SAXException {
+    	SAXParser parser = tlSax.get();
+    	if (parser == null) {
+    		try {
+				parser = SAXParserFactory.newInstance().newSAXParser();
+			} catch (ParserConfigurationException e) {
+				throw new SAXException(e.getMessage(), e);
+			}
+    		tlSax.set(parser);
+    	}
+    	return parser;
     }
     
     // get a resumption token using a SAX xml parser from am input stream
@@ -253,37 +267,33 @@ public class ResumptionToken extends TreeMap<String, String> {
         private final StringBuilder buffer;
         private boolean parsingValue;
         private SAXParser saxParser;
-        private InputStream stream;
+        private final InputStream stream;
         private Attributes atts;
-
+        
         public Parser(final byte[] b) throws IOException {
             this.buffer = new StringBuilder();
             this.parsingValue = false;
             this.atts = null;
-            final SAXParserFactory factory = SAXParserFactory.newInstance();
             this.stream = new ByteArrayInputStream(b);
             try {
-                this.saxParser = factory.newSAXParser();
+                this.saxParser = getParser();
                 this.saxParser.parse(this.stream, this);
-            } catch (SAXException e) {
+            } catch (final SAXException e) {
                 Log.logException(e);
                 Log.logWarning("ResumptionToken", "token was not parsed (1):\n" + UTF8.String(b));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
                 Log.logWarning("ResumptionToken", "token was not parsed (2):\n" + UTF8.String(b));
-            } catch (ParserConfigurationException e) {
-                Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed (3):\n" + UTF8.String(b));
                 throw new IOException(e.getMessage());
             } finally {
                 try {
                     this.stream.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.logException(e);
                 }
             }
         }
-        
+
         /*
          <resumptionToken expirationDate="2009-10-31T22:52:14Z"
          completeListSize="226"
@@ -298,7 +308,7 @@ public class ResumptionToken extends TreeMap<String, String> {
 
         public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
             if ("record".equals(tag)) {
-                recordCounter++;
+                ResumptionToken.this.recordCounter++;
             }
             if ("resumptionToken".equals(tag)) {
                 this.parsingValue = true;
@@ -309,18 +319,18 @@ public class ResumptionToken extends TreeMap<String, String> {
         public void endElement(final String uri, final String name, final String tag) {
             if (tag == null) return;
             if ("resumptionToken".equals(tag)) {
-                put("expirationDate", atts.getValue("expirationDate"));
-                put("completeListSize", atts.getValue("completeListSize"));
-                put("cursor", atts.getValue("cursor"));
-                put("token", buffer.toString());
+                put("expirationDate", this.atts.getValue("expirationDate"));
+                put("completeListSize", this.atts.getValue("completeListSize"));
+                put("cursor", this.atts.getValue("cursor"));
+                put("token", this.buffer.toString());
                 this.buffer.setLength(0);
                 this.parsingValue = false;
             }
         }
 
         public void characters(final char ch[], final int start, final int length) {
-            if (parsingValue) {
-                buffer.append(ch, start, length);
+            if (this.parsingValue) {
+                this.buffer.append(ch, start, length);
             }
         }
 

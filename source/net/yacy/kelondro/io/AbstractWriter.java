@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.util.ByteBuffer;
 
 
@@ -87,7 +88,7 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
     
     public final void writeLine(final String line) throws IOException {
         final byte[] b = new byte[line.length() + 2];
-        System.arraycopy(line.getBytes(), 0, b, 0, line.length());
+        System.arraycopy(UTF8.getBytes(line), 0, b, 0, line.length());
         b[b.length - 2] = cr;
         b[b.length - 1] = lf;
         this.write(b);
