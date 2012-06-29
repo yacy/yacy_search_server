@@ -49,7 +49,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.CrawlProfile;
 
 public class SMBLoader {
@@ -73,7 +72,7 @@ public class SMBLoader {
 
         RequestHeader requestHeader = new RequestHeader();
         if (request.referrerhash() != null) {
-            DigestURI ur = this.sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
+            DigestURI ur = this.sb.getURL(request.referrerhash());
             if (ur != null) requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true, false));
         }
 

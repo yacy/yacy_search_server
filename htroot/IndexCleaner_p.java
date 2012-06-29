@@ -29,7 +29,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.MetadataRepository;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -41,19 +40,10 @@ public class IndexCleaner_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         prop.put("title", "DbCleanup_p");
-        
+
         // get segment
-        Segment indexSegment = null;
-        if (post != null && post.containsKey("segment")) {
-            String segmentName = post.get("segment");
-            if (sb.indexSegments.segmentExist(segmentName)) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            }
-        } else {
-            // take default segment
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
-        
+        Segment indexSegment = sb.index;
+
         if (post!=null) {
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {

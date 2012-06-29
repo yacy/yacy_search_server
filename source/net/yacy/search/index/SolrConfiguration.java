@@ -58,12 +58,15 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
     private static final long serialVersionUID=-499100932212840385L;
 
+    private boolean lazy;
+
     /**
      * initialize with an empty ConfigurationSet which will cause that all the index
      * attributes are used
      */
     public SolrConfiguration() {
         super();
+        this.lazy = false;
     }
 
     /**
@@ -72,7 +75,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
      * or keyword = value lines (while value is a custom Solr field name
      * @param configurationFile
      */
-    public SolrConfiguration(final File configurationFile) {
+    public SolrConfiguration(final File configurationFile, boolean lazy) {
         super(configurationFile);
         // check consistency: compare with YaCyField enum
         if (this.isEmpty()) return;
@@ -86,22 +89,27 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 it.remove();
             }
         }
+        this.lazy = lazy;
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value) {
-        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.length() > 0))) solrdoc.addSolr(key, value);
+    }
+
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value, final float boost) {
+        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.length() > 0))) solrdoc.addSolr(key, value, boost);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final Date value) {
-        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
-    }
-
-    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final int value) {
-        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.getTime() > 0))) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String[] value) {
-        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.length > 0))) solrdoc.addSolr(key, value);
+    }
+
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final int value) {
+        if ((isEmpty() || contains(key.name())) && (!this.lazy || value > 0)) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final float value) {
@@ -114,10 +122,6 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final boolean value) {
         if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
-    }
-
-    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value, final float boost) {
-        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value, boost);
     }
 
 
@@ -347,6 +351,24 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                     inboundLinks.remove(canonical);
                     ouboundLinks.remove(canonical);
                     addSolr(solrdoc, SolrField.canonical_s, canonical.toNormalform(false, false));
+                }
+            }
+
+            // meta refresh tag
+            if (isEmpty() || contains(SolrField.refresh_s.name())) {
+                String refresh = html.getRefreshPath();
+                if (refresh != null && refresh.length() > 0) {
+                    MultiProtocolURI refreshURL;
+                    try {
+                        refreshURL = refresh.startsWith("http") ? new MultiProtocolURI(html.getRefreshPath()) : new MultiProtocolURI(digestURI, html.getRefreshPath());
+                        if (refreshURL != null) {
+                            inboundLinks.remove(refreshURL);
+                            ouboundLinks.remove(refreshURL);
+                            addSolr(solrdoc, SolrField.refresh_s, refreshURL.toNormalform(false, false));
+                        }
+                    } catch (MalformedURLException e) {
+                        addSolr(solrdoc, SolrField.refresh_s, refresh);
+                    }
                 }
             }
 

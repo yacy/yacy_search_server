@@ -53,7 +53,6 @@ import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL.FailCategory;
@@ -95,16 +94,7 @@ public class Crawler_p {
         prop.put("forwardToCrawlStart", "0");
 
         // get segment
-        Segment indexSegment = null;
-        if (post != null && post.containsKey("segment")) {
-            final String segmentName = post.get("segment");
-            if (sb.indexSegments.segmentExist(segmentName)) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            }
-        } else {
-            // take default segment
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
+        Segment indexSegment = sb.index;
 
         prop.put("info", "0");
 
@@ -182,7 +172,7 @@ public class Crawler_p {
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
                 final String ipMustNotMatch = post.get("ipMustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
                 if (ipMustMatch.length() < 2) ipMustMatch = CrawlProfile.MATCH_ALL_STRING;
-                final String countryMustMatch = post.getBoolean("countryMustMatchSwitch", false) ? post.get("countryMustMatchList", "") : "";
+                final String countryMustMatch = post.getBoolean("countryMustMatchSwitch") ? post.get("countryMustMatchList", "") : "";
                 sb.setConfig("crawlingIPMustMatch", ipMustMatch);
                 sb.setConfig("crawlingIPMustNotMatch", ipMustNotMatch);
                 if (countryMustMatch.length() > 0) sb.setConfig("crawlingCountryMustMatch", countryMustMatch);

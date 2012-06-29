@@ -1,4 +1,4 @@
-// IndexShare_p.java 
+// IndexShare_p.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -32,7 +32,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -44,17 +43,8 @@ public class IndexShare_p {
         final serverObjects prop = new serverObjects();
 
         // get segment
-        Segment indexSegment = null;
-        if (post != null && post.containsKey("segment")) {
-            String segmentName = post.get("segment");
-            if (sb.indexSegments.segmentExist(segmentName)) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            }
-        } else {
-            // take default segment
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
-        
+        Segment indexSegment = sb.index;
+
         if (post == null) {
             prop.put("linkfreq", sb.getConfigLong("defaultLinkReceiveFrequency",30));
             prop.put("wordfreq", sb.getConfigLong("defaultWordReceiveFrequency",10));
@@ -64,7 +54,7 @@ public class IndexShare_p {
             prop.putNum("ucount", indexSegment.urlMetadata().size());
             return prop; // be save
         }
-        
+
         if (post.containsKey("indexsharesetting")) {
             sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, post.containsKey("distribute"));
             sb.setConfig("allowReceiveIndex", post.containsKey("receive"));
@@ -75,7 +65,7 @@ public class IndexShare_p {
         // insert constants
         prop.putNum("wcount", indexSegment.termIndex().sizesMax());
         prop.putNum("ucount", indexSegment.urlMetadata().size());
-        
+
         // return rewrite properties
         return prop;
     }

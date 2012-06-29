@@ -8,47 +8,46 @@ import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.peers.graphics.NetworkGraph.CircleThreadPiece;
 import net.yacy.search.SwitchboardConstants;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class PeerLoadPicture {
-    
+
     public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         int width = 800;
         int height = 600;
         boolean showidle = true;
-        
+
         if (post != null) {
             width = post.getInt("width", 800);
             height = post.getInt("height", 600);
-            showidle = post.getBoolean("showidle", true);
+            showidle = post.getBoolean("showidle");
         }
-        
+
         final CircleThreadPiece idle = new CircleThreadPiece("Idle", new Color(170, 255, 170));
         final CircleThreadPiece misc = new CircleThreadPiece("Misc.", new Color(190,  50, 180));
         final HashMap<String, CircleThreadPiece> pieces = new HashMap<String, CircleThreadPiece>();
         pieces.put(null, idle);
         pieces.put(SwitchboardConstants.INDEX_DIST, new CircleThreadPiece("DHT-Distribution", new Color(119, 136, 153)));
         pieces.put(SwitchboardConstants.PEER_PING,  new CircleThreadPiece("YaCy Core",        new Color(255, 230, 160)));
-        
+
         final Iterator<String> threads = env.threadNames();
         String threadname;
         BusyThread thread;
-        
+
         long busy_time = 0;
-        
+
         //Iterate over threads
         while (threads.hasNext()) {
             threadname = threads.next();
             thread = env.getThread(threadname);
-            
+
             //count total times
             busy_time += thread.getBlockTime();
             busy_time += thread.getExecTime();
             if (showidle) idle.addExecTime(thread.getSleepTime());
-            
+
             //count threadgroup-specific times
             final CircleThreadPiece piece = pieces.get(threadname);
             if (piece == null) {
@@ -58,7 +57,7 @@ public class PeerLoadPicture {
             }
         }
         busy_time += idle.getExecTime();
-        
+
         // set respective angles
         final Iterator<CircleThreadPiece> it = pieces.values().iterator();
         CircleThreadPiece current;
@@ -69,7 +68,7 @@ public class PeerLoadPicture {
             if(current.getAngle() == 0) it.remove();
         }
         misc.setFraction(busy_time);
-        
+
         // too small values lead to an error, too big to huge CPU/memory consumption,
         // resulting in possible DOS.
         if (width < 40) width = 40;

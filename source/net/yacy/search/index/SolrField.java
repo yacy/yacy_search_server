@@ -82,6 +82,7 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     h6_txt(SolrType.text_general, true, true, true, "h6 header"),
     htags_i(SolrType.integer, true, true, "binary pattern for the existance of h1..h6 headlines"),
     canonical_s(SolrType.string, true, true, "url inside the canonical link element"),
+    refresh_s(SolrType.string, true, true, "link from the url property inside the refresh link element"),
     metagenerator_t(SolrType.text_general, true, true, "content of <meta name=\"generator\" content=#content#> tag"),
     boldcount_i(SolrType.integer, true, true, "total number of occurrences of <b> or <strong>"),
     bold_txt(SolrType.text_general, true, true, true, "all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order"),
@@ -150,6 +151,7 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
      * Returns the YaCy default or (if available) custom field name for Solr
      * @return SolrFieldname String
      */
+    @Override
     public final String getSolrFieldName() {
         return (this.solrFieldName == null ? this.name() : this.solrFieldName);
     }
@@ -167,26 +169,32 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
         }
     }
 
+    @Override
     public final SolrType getType() {
         return this.type;
     }
 
+    @Override
     public final boolean isIndexed() {
         return this.indexed;
     }
 
+    @Override
     public final boolean isStored() {
         return this.stored;
     }
 
+    @Override
     public final boolean isMultiValued() {
         return this.multiValued;
     }
 
+    @Override
     public final boolean isOmitNorms() {
         return this.omitNorms;
     }
 
+    @Override
     public final String getComment() {
         return this.comment;
     }

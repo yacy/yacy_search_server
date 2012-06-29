@@ -6,7 +6,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
@@ -35,7 +34,7 @@ public class add_ymark {
 
             if(post.containsKey("urlHash")) {
             	final String urlHash = post.get("urlHash",YMarkUtil.EMPTY_STRING);
-            	final DigestURI url = sb.indexSegments.segment(Segments.Process.PUBLIC).urlMetadata().load(urlHash.getBytes()).url();
+            	final DigestURI url = sb.index.urlMetadata().load(urlHash.getBytes()).url();
             	final String folders = post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.BOOKMARK.FOLDERS.deflt());
             	final String tags = post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.EMPTY_STRING);
             	try {
@@ -66,7 +65,7 @@ public class add_ymark {
 				}
 
 	        	final YMarkEntry bmk = new YMarkEntry();
-	        	
+
 	        	bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);
 	        	bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), post.get(YMarkEntry.BOOKMARK.TITLE.key(),YMarkEntry.BOOKMARK.TITLE.deflt()));
 	        	bmk.put(YMarkEntry.BOOKMARK.DESC.key(), post.get(YMarkEntry.BOOKMARK.DESC.key(),YMarkEntry.BOOKMARK.DESC.deflt()));

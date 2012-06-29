@@ -54,7 +54,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
@@ -93,13 +92,8 @@ public class ViewFile {
         }
 
         // get segment
-        Segment indexSegment = null;
+        Segment indexSegment = sb.index;
         final boolean authorized = sb.verifyAuthentication(header);
-        if (post != null && post.containsKey("segment") && authorized) {
-            indexSegment = sb.indexSegments.segment(post.get("segment"));
-        } else {
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
 
         if (post.containsKey("words"))
             prop.putHTML("error_words", post.get("words"));
@@ -151,7 +145,7 @@ public class ViewFile {
             // define an url by post parameter
             url = new DigestURI(MultiProtocolURI.unescape(urlString));
             urlHash = ASCII.String(url.hash());
-            pre = post.getBoolean("pre", false);
+            pre = post.getBoolean("pre");
         } catch (final MalformedURLException e) {}
 
 

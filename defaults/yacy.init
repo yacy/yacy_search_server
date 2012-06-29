@@ -1053,6 +1053,8 @@ federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
 federated.service.solr.indexing.commitWithinMs = 1000
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.schemefile = solr.keys.default.list
+# the lazy attribute causes that fields containing "" or 0 are not added and not written
+federated.service.solr.indexing.lazy = true
 
 # the indexing engine in YaCy can be switched off or on
 # (off may make sense if federated.service.solr.indexing.enabled = true)

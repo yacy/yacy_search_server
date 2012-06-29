@@ -42,7 +42,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.WorkTables;
 import de.anomic.server.serverObjects;
@@ -59,6 +58,7 @@ public class RSSLoader extends Thread {
         this.urlf = urlf;
     }
 
+    @Override
     public void run() {
         RSSReader rss = null;
         try {
@@ -89,7 +89,7 @@ public class RSSLoader extends Thread {
             try {
                 final DigestURI messageurl = new DigestURI(message.getLink());
                 if (indexTriggered.containsKey(messageurl.hash())) continue loop;
-                if (sb.urlExists(Segments.Process.LOCALCRAWLING, messageurl.hash()) != null) continue loop;
+                if (sb.urlExists(messageurl.hash()) != null) continue loop;
                 sb.addToIndex(messageurl, null, null);
                 indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 loadCount++;

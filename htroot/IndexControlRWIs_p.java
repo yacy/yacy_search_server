@@ -61,9 +61,7 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEventCache;
@@ -92,18 +90,8 @@ public class IndexControlRWIs_p
         prop.put("keyhash", "");
         prop.put("result", "");
         prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
-        prop.put("cleanup_solr", sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr() == null
+        prop.put("cleanup_solr", sb.index.getRemoteSolr() == null
             || !sb.getConfigBool("federated.service.solr.indexing.enabled", false) ? 0 : 1);
-
-        String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
-        int i = 0;
-        for ( final String s : sb.indexSegments.segmentNames() ) {
-            prop.put("segments_" + i + "_name", s);
-            prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
-            i++;
-        }
-        Segment segment = sb.indexSegments.segment(segmentName);
-        prop.put("segments", i);
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
@@ -113,18 +101,9 @@ public class IndexControlRWIs_p
         // clean up all search events
         SearchEventCache.cleanupEvents(true);
 
-        if ( post != null ) {
-            // default values
-            segmentName = post.get("segment", segmentName).trim();
-            i = 0;
-            for ( final String s : sb.indexSegments.segmentNames() ) {
-                prop.put("segments_" + i + "_name", s);
-                prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
-                i++;
-            }
-            prop.put("segments", i);
-            segment = sb.indexSegments.segment(segmentName);
+        Segment segment = sb.index;
 
+        if ( post != null ) {
             final String keystring = post.get("keystring", "").trim();
             byte[] keyhash = post.get("keyhash", "").trim().getBytes();
             if (keystring.length() > 0) {
@@ -180,7 +159,7 @@ public class IndexControlRWIs_p
                 if ( post.get("deleteSolr", "").equals("on")
                     && sb.getConfigBool("federated.service.solr.indexing.enabled", false) ) {
                     try {
-                        sb.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr().clear();
+                        sb.index.getRemoteSolr().clear();
                     } catch ( final Exception e ) {
                         Log.logException(e);
                     }
@@ -390,8 +369,8 @@ public class IndexControlRWIs_p
                     final Iterator<ReferenceContainer<WordReference>> containerIt =
                         segment.termIndex().referenceContainer(keyhash, true, false, 256, false).iterator();
                     ReferenceContainer<WordReference> container;
-                    i = 0;
-                    int rows = 0, cols = 0;
+
+                    int i = 0, rows = 0, cols = 0;
                     prop.put("keyhashsimilar", "1");
                     while ( containerIt.hasNext() && i < 256 ) {
                         container = containerIt.next();

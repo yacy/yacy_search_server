@@ -90,7 +90,7 @@ public class NetworkPicture
             passiveLimit = post.getInt("pal", passiveLimit);
             potentialLimit = post.getInt("pol", potentialLimit);
             maxCount = post.getInt("max", maxCount);
-            corona = post.getBoolean("corona", true);
+            corona = !post.containsKey("corona") || post.getBoolean("corona");
             coronaangle = (corona) ? post.getInt("coronaangle", 0) : -1;
             communicationTimeout = post.getLong("ct", -1);
             bgcolor = post.get("bgcolor", bgcolor);

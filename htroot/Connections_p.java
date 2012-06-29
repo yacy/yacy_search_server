@@ -30,6 +30,9 @@
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import net.yacy.cora.protocol.ConnectionInfo;
@@ -43,12 +46,9 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverCore.Session;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
-public final class Connections_p {    
-    
+public final class Connections_p {
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
@@ -57,44 +57,44 @@ public final class Connections_p {
         // server sessions
         // get the serverCore thread
         final WorkflowThread httpd = sb.getThread("10_httpd");
-        
-        // determines if name lookup should be done or not 
+
+        // determines if name lookup should be done or not
         final boolean doNameLookup;
-        if (post != null) {  
-            doNameLookup = (post.containsKey("nameLookup") && post.getBoolean("nameLookup", true));
+        if (post != null) {
+            doNameLookup = post.getBoolean("nameLookup");
             if (post.containsKey("closeServerSession")) {
                 final String sessionName = post.get("closeServerSession", null);
                 sb.closeSessions("10_httpd", sessionName);
                 prop.put("LOCATION","");
-                return prop;                
+                return prop;
             }
         } else {
             doNameLookup = false;
         }
-        
+
         // waiting for all threads to finish
         int idx = 0, numActiveRunning = 0, numActivePending = 0;
         boolean dark = true;
         for (final Session s: ((serverCore) httpd).getJobList()) {
             if (!s.isAlive()) continue;
-            
+
             // get the session runtime
             final long sessionTime = s.getTime();
-            
+
             // get the request command line
             String commandLine = s.getCommandLine();
             final boolean blockingRequest = (commandLine == null);
             final int commandCount = s.getCommandCount();
-            
+
             // get the source ip address and port
             final InetAddress userAddress = s.getUserAddress();
             final int userPort = s.getUserPort();
             if (userAddress == null) {
                 continue;
             }
-            
+
             String prot = "http"; // only httpd sessions listed
-            
+
             // determining if the source is a yacy host
             Seed seed = null;
             if (doNameLookup) {
@@ -104,7 +104,7 @@ public final class Connections_p {
                     seed = null;
                 }
             }
-            
+
             prop.put("list_" + idx + "_dark", dark ? "1" : "0");
             dark = !dark;
             try {
@@ -135,20 +135,20 @@ public final class Connections_p {
             }
             prop.putNum("list_" + idx + "_used", commandCount);
             idx++;
-        }     
+        }
         prop.put("list", idx);
-        
+
         prop.putNum("numMax", ((serverCore)httpd).getMaxSessionCount());
         prop.putNum("numActiveRunning", numActiveRunning);
         prop.putNum("numActivePending", numActivePending);
-        
+
         // client sessions
         final Set<ConnectionInfo> allConnections = ConnectionInfo.getAllConnections();
         // sorting: sort by initTime, decending
         List<ConnectionInfo> allConnectionsSorted = new LinkedList<ConnectionInfo>(allConnections);
         Collections.sort(allConnectionsSorted);
         Collections.reverse(allConnectionsSorted); // toggle ascending/descending
-        
+
         int c = 0;
         synchronized (allConnectionsSorted) {
         for (final ConnectionInfo conInfo: allConnectionsSorted) {
@@ -163,7 +163,7 @@ public final class Connections_p {
         }
         prop.put("clientList", c);
         prop.put("clientActive", ConnectionInfo.getCount());
-        
+
         // return rewrite values for templates
         return prop;
     }

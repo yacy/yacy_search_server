@@ -37,7 +37,6 @@ import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.ZURL.FailCategory;
@@ -150,7 +149,7 @@ public final class crawlReceipt {
 
         if ("fill".equals(result)) try {
             // put new entry into database
-            sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
+            sb.index.urlMetadata().store(entry);
             ResultURLs.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true));

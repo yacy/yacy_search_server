@@ -57,7 +57,7 @@ public class yacyinteractive {
         prop.putHTML("querys", query.replaceAll(" ", "+"));
         prop.put("serverlist", query.isEmpty() ? 1 : 0);
         prop.put("focus", focus ? 1 : 0);
-        prop.put("allowrealtime", sb.indexSegments.URLCount() < 100000 ? 1 : 0);
+        prop.put("allowrealtime", sb.index.URLCount() < 100000 ? 1 : 0);
         return prop;
     }
 }

@@ -184,6 +184,9 @@ host_s
 ## url inside the canonical link element, string
 canonical_s
 
+## link from the url property inside the refresh link element, string
+refresh_s
+
 ## all texts in <li> tags, textgen
 li_txt
 

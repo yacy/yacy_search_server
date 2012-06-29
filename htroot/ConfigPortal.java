@@ -77,29 +77,29 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.SEARCH_ITEMS, post.getInt("maximumRecords", 10));
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
                 HTTPDFileHandler.indexForward = post.get(SwitchboardConstants.INDEX_FORWARD, "");
-                sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu", true));
-                sb.setConfig("publicSearchpage", post.getBoolean("publicSearchpage", true));
-                sb.setConfig("search.options", post.getBoolean("search.options", false));
-                
-                sb.setConfig("interaction.userlogon.enabled", post.getBoolean("interaction.userlogon", false));
+                sb.setConfig("publicTopmenu", !post.containsKey("publicTopmenu") || post.getBoolean("publicTopmenu"));
+                sb.setConfig("publicSearchpage", !post.containsKey("publicSearchpage") || post.getBoolean("publicSearchpage"));
+                sb.setConfig("search.options", post.getBoolean("search.options"));
 
-                sb.setConfig("search.text", post.getBoolean("search.text", false));
-                sb.setConfig("search.image", post.getBoolean("search.image", false));
-                sb.setConfig("search.audio", post.getBoolean("search.audio", false));
-                sb.setConfig("search.video", post.getBoolean("search.video", false));
-                sb.setConfig("search.app", post.getBoolean("search.app", false));
+                sb.setConfig("interaction.userlogon.enabled", post.getBoolean("interaction.userlogon"));
 
-                sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date", false));
-                sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size", false));
-                sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false));
-                sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
-                sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
-                sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache", false));
-                sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy", false));
-                sb.setConfig("search.result.show.tags", post.getBoolean("search.result.show.tags", false));
+                sb.setConfig("search.text", post.getBoolean("search.text"));
+                sb.setConfig("search.image", post.getBoolean("search.image"));
+                sb.setConfig("search.audio", post.getBoolean("search.audio"));
+                sb.setConfig("search.video", post.getBoolean("search.video"));
+                sb.setConfig("search.app", post.getBoolean("search.app"));
+
+                sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date"));
+                sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size"));
+                sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata"));
+                sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser"));
+                sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures"));
+                sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache"));
+                sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy"));
+                sb.setConfig("search.result.show.tags", post.getBoolean("search.result.show.tags"));
 
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
-                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete", false));
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete"));
 
                 sb.setConfig("about.headline", post.get("about.headline", ""));
                 sb.setConfig("about.body", post.get("about.body", ""));
@@ -110,10 +110,10 @@ public class ConfigPortal {
 
                 // construct navigation String
                 String nav = "";
-                if (post.getBoolean("search.navigation.hosts", false)) nav += "hosts,";
-                if (post.getBoolean("search.navigation.authors", false)) nav += "authors,";
-                if (post.getBoolean("search.navigation.namespace", false)) nav += "namespace,";
-                if (post.getBoolean("search.navigation.topics", false)) nav += "topics,";
+                if (post.getBoolean("search.navigation.hosts")) nav += "hosts,";
+                if (post.getBoolean("search.navigation.authors")) nav += "authors,";
+                if (post.getBoolean("search.navigation.namespace")) nav += "namespace,";
+                if (post.getBoolean("search.navigation.topics")) nav += "topics,";
                 if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1); sb.setConfig("search.navigation", nav);
             }
             if (post.containsKey("searchpage_default")) {
@@ -164,7 +164,7 @@ public class ConfigPortal {
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
 
         prop.put("interaction.userlogon", sb.getConfigBool("interaction.userlogon.enabled", false) ? 1 : 0);
-        
+
         prop.put("search.text", sb.getConfigBool("search.text", false) ? 1 : 0);
         prop.put("search.image", sb.getConfigBool("search.image", false) ? 1 : 0);
         prop.put("search.audio", sb.getConfigBool("search.audio", false) ? 1 : 0);

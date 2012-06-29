@@ -54,7 +54,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.Cache;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.ZURL.FailCategory;
@@ -211,7 +210,7 @@ public final class LoaderDispatcher {
                 final RequestHeader requestHeader = new RequestHeader();
                 requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
                 DigestURI refererURL = null;
-                if (request.referrerhash() != null) refererURL = this.sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
+                if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
                 if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
                 final Response response = new Response(
                         request,

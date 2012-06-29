@@ -39,7 +39,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.Latency;
 import de.anomic.crawler.ZURL.FailCategory;
@@ -118,7 +117,7 @@ public final class HTTPLoader {
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         DigestURI refererURL = null;
-        if (request.referrerhash() != null) refererURL = this.sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
+        if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
         if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
         requestHeader.put(HeaderFramework.ACCEPT, this.sb.getConfig("crawler.http.accept", DEFAULT_ACCEPT));
         requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, this.sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
@@ -168,7 +167,7 @@ public final class HTTPLoader {
                     }
 
                     // check if the url was already indexed
-                    final String dbname = this.sb.urlExists(Segments.Process.LOCALCRAWLING, redirectionUrl.hash());
+                    final String dbname = this.sb.urlExists(redirectionUrl.hash());
                     if (dbname != null) { // customer request
                         this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection to double content", statusCode);
                         throw new IOException("CRAWLER Redirection of URL=" + requestURLString + " ignored. The url appears already in db " + dbname);

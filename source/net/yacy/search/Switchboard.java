@@ -144,7 +144,6 @@ import net.yacy.repository.Blacklist;
 import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import net.yacy.search.index.SolrConfiguration;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
@@ -218,7 +217,7 @@ public final class Switchboard extends serverSwitch
     public File queuesRoot;
     public File surrogatesInPath;
     public File surrogatesOutPath;
-    public Segments indexSegments;
+    public Segment index;
     public LoaderDispatcher loader;
     public CrawlSwitchboard crawler;
     public CrawlQueues crawlQueues;
@@ -379,16 +378,14 @@ public final class Switchboard extends serverSwitch
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
-        this.indexSegments =
-            new Segments(
+        this.index =
+            new Segment(
                 this.log,
-                segmentsPath,
+                new File(segmentsPath, "default"),
                 wordCacheMaxCount,
                 fileSizeMax,
                 this.useTailCache,
                 this.exceed134217727);
-        // set the default segment names
-        setDefaultSegments();
 
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
@@ -398,8 +395,9 @@ public final class Switchboard extends serverSwitch
         if ( !solrWorkProfile.exists() ) {
             Files.copy(solrBackupProfile, solrWorkProfile);
         }
-        final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile);
-        this.solrScheme = new SolrConfiguration(solrWorkProfile);
+        final boolean solrlazy = getConfigBool("federated.service.solr.indexing.lazy", true);
+        final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile, solrlazy);
+        this.solrScheme = new SolrConfiguration(solrWorkProfile, solrlazy);
 
         // update the working scheme with the backup scheme. This is necessary to include new features.
         // new features are always activated by default (if activated in input-backupScheme)
@@ -417,7 +415,7 @@ public final class Switchboard extends serverSwitch
                                 ShardSelection.Method.MODULO_HOST_MD5,
                                 10000, true);
                 solr.setCommitWithinMs(commitWithinMs);
-                this.indexSegments.segment(Segments.Process.LOCALCRAWLING).connectRemoteSolr(solr);
+                this.index.connectRemoteSolr(solr);
             } catch ( final IOException e ) {
                 Log.logException(e);
             }
@@ -465,7 +463,7 @@ public final class Switchboard extends serverSwitch
         // init a DHT transmission dispatcher
         this.dhtDispatcher =
             (this.peers.sizeConnected() == 0) ? null : new Dispatcher(
-                this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
+                this.index,
                 this.peers,
                 true,
                 10000);
@@ -766,7 +764,7 @@ public final class Switchboard extends serverSwitch
             new CrawlStacker(
                 this.crawlQueues,
                 this.crawler,
-                this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
+                this.index,
                 this.peers,
                 isIntranetMode(),
                 isGlobalMode(),
@@ -993,33 +991,6 @@ public final class Switchboard extends serverSwitch
         sb = this;
     }
 
-    private void setDefaultSegments() {
-        this.indexSegments.setSegment(
-            Segments.Process.RECEIPTS,
-            getConfig(SwitchboardConstants.SEGMENT_RECEIPTS, "default"));
-        this.indexSegments.setSegment(
-            Segments.Process.QUERIES,
-            getConfig(SwitchboardConstants.SEGMENT_QUERIES, "default"));
-        this.indexSegments.setSegment(
-            Segments.Process.DHTIN,
-            getConfig(SwitchboardConstants.SEGMENT_DHTIN, "default"));
-        this.indexSegments.setSegment(
-            Segments.Process.DHTOUT,
-            getConfig(SwitchboardConstants.SEGMENT_DHTOUT, "default"));
-        this.indexSegments.setSegment(
-            Segments.Process.PROXY,
-            getConfig(SwitchboardConstants.SEGMENT_PROXY, "default"));
-        this.indexSegments.setSegment(
-            Segments.Process.LOCALCRAWLING,
-            getConfig(SwitchboardConstants.SEGMENT_LOCALCRAWLING, "default"));
-        this.indexSegments.setSegment(
-            Segments.Process.REMOTECRAWLING,
-            getConfig(SwitchboardConstants.SEGMENT_REMOTECRAWLING, "default"));
-        this.indexSegments.setSegment(
-            Segments.Process.PUBLIC,
-            getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default"));
-    }
-
     public int getIndexingProcessorsQueueSize() {
         return this.indexingDocumentProcessor.queueSize()
             + this.indexingCondensementProcessor.queueSize()
@@ -1169,8 +1140,8 @@ public final class Switchboard extends serverSwitch
             if ( this.dhtDispatcher != null ) {
                 this.dhtDispatcher.close();
             }
-            synchronized ( this.indexSegments ) {
-                this.indexSegments.close();
+            synchronized ( this.index ) {
+                this.index.close();
             }
             this.crawlStacker.announceClose();
             this.crawlStacker.close();
@@ -1210,16 +1181,14 @@ public final class Switchboard extends serverSwitch
                 partitionExponent,
                 this.useTailCache,
                 this.exceed134217727);
-            this.indexSegments =
-                new Segments(
+            this.index =
+                new Segment(
                     this.log,
-                    new File(new File(indexPrimaryPath, networkName), "SEGMENTS"),
+                    new File(new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), "default"),
                     wordCacheMaxCount,
                     fileSizeMax,
                     this.useTailCache,
                     this.exceed134217727);
-            // set the default segment names
-            setDefaultSegments();
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
 
             // create a crawler
@@ -1228,7 +1197,7 @@ public final class Switchboard extends serverSwitch
             // init a DHT transmission dispatcher
             this.dhtDispatcher =
                 (this.peers.sizeConnected() == 0) ? null : new Dispatcher(
-                    this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
+                    this.index,
                     this.peers,
                     true,
                     10000);
@@ -1256,7 +1225,7 @@ public final class Switchboard extends serverSwitch
                 new CrawlStacker(
                     this.crawlQueues,
                     this.crawler,
-                    this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
+                    this.index,
                     this.peers,
                     "local.any".indexOf(getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global")) >= 0,
                     "global.any".indexOf(getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global")) >= 0,
@@ -1448,11 +1417,11 @@ public final class Switchboard extends serverSwitch
         }
     }
 
-    public String urlExists(final Segments.Process process, final byte[] hash) {
+    public String urlExists(final byte[] hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
-        if ( this.indexSegments.urlMetadata(process).exists(hash) ) {
+        if ( this.index.urlMetadata().exists(hash) ) {
             return "loaded";
         }
         return this.crawlQueues.urlExists(hash);
@@ -1464,14 +1433,14 @@ public final class Switchboard extends serverSwitch
         this.crawlQueues.urlRemove(hash);
     }
 
-    public DigestURI getURL(final Segments.Process process, final byte[] urlhash) {
+    public DigestURI getURL(final byte[] urlhash) {
         if ( urlhash == null ) {
             return null;
         }
         if ( urlhash.length == 0 ) {
             return null;
         }
-        final URIMetadataRow le = this.indexSegments.urlMetadata(process).load(urlhash);
+        final URIMetadataRow le = this.index.urlMetadata().load(urlhash);
         if ( le != null ) {
             return le.url();
         }
@@ -1605,7 +1574,7 @@ public final class Switchboard extends serverSwitch
         this.crawler.close();
         this.log
             .logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
-        this.indexSegments.close();
+        this.index.close();
         this.peers.close();
         Cache.close();
         this.tables.close();
@@ -1695,7 +1664,6 @@ public final class Switchboard extends serverSwitch
         }
         try {
             this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(
-                Segments.Process.LOCALCRAWLING,
                 response,
                 null,
                 null));
@@ -1809,9 +1777,7 @@ public final class Switchboard extends serverSwitch
                     0);
             response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false);
             final indexingQueueEntry queueEntry =
-                new indexingQueueEntry(Segments.Process.SURROGATES, response, new Document[] {
-                    document
-                }, null);
+                new indexingQueueEntry(response, new Document[] {document}, null);
 
             // place the queue entry into the concurrent process of the condenser (document analysis)
             try {
@@ -1886,18 +1852,15 @@ public final class Switchboard extends serverSwitch
 
     public static class indexingQueueEntry extends WorkflowJob
     {
-        public Segments.Process process;
         public Response queueEntry;
         public Document[] documents;
         public Condenser[] condenser;
 
         public indexingQueueEntry(
-            final Segments.Process process,
             final Response queueEntry,
             final Document[] documents,
             final Condenser[] condenser) {
             super();
-            this.process = process;
             this.queueEntry = queueEntry;
             this.documents = documents;
             this.condenser = condenser;
@@ -1928,9 +1891,7 @@ public final class Switchboard extends serverSwitch
 
             // clear caches if necessary
             if ( !MemoryControl.request(8000000L, false) ) {
-                for ( final Segment indexSegment : this.indexSegments ) {
-                    indexSegment.urlMetadata().clearCache();
-                }
+                sb.index.urlMetadata().clearCache();
                 SearchEventCache.cleanupEvents(false);
                 this.trail.clear();
             }
@@ -2300,7 +2261,7 @@ public final class Switchboard extends serverSwitch
         if ( documents == null ) {
             return null;
         }
-        return new indexingQueueEntry(in.process, in.queueEntry, documents, null);
+        return new indexingQueueEntry(in.queueEntry, documents, null);
     }
 
     private Document[] parseDocument(final Response response) throws InterruptedException {
@@ -2445,11 +2406,11 @@ public final class Switchboard extends serverSwitch
                     + in.queueEntry.url().toNormalform(false, true)
                     + "': indexing not wanted by crawl profile");
             }
-            return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+            return new indexingQueueEntry(in.queueEntry, in.documents, null);
         }
 
-        boolean localSolr = this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getLocalSolr() != null && getConfig("federated.service.yacy.indexing.engine", "classic").equals("solr");
-        boolean remoteSolr = this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr() != null && getConfigBool("federated.service.solr.indexing.enabled", false);
+        boolean localSolr = this.index.getLocalSolr() != null && getConfig("federated.service.yacy.indexing.engine", "classic").equals("solr");
+        boolean remoteSolr = this.index.getRemoteSolr() != null && getConfigBool("federated.service.solr.indexing.enabled", false);
         if (localSolr || remoteSolr) {
             // send the documents to solr
             for ( final Document doc : in.documents ) {
@@ -2469,8 +2430,8 @@ public final class Switchboard extends serverSwitch
                     }
                     try {
                         SolrDoc solrDoc = this.solrScheme.yacy2solr(id, in.queueEntry.getResponseHeader(), doc);
-                        if (localSolr) this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getLocalSolr().add(solrDoc);
-                        if (remoteSolr) this.indexSegments.segment(Segments.Process.LOCALCRAWLING).getRemoteSolr().add(solrDoc);
+                        if (localSolr) this.index.getLocalSolr().add(solrDoc);
+                        if (remoteSolr) this.index.getRemoteSolr().add(solrDoc);
                     } catch ( final IOException e ) {
                         Log.logWarning(
                             "SOLR",
@@ -2493,7 +2454,7 @@ public final class Switchboard extends serverSwitch
                     + in.queueEntry.url().toNormalform(false, true)
                     + "': indexing not wanted by federated rule for YaCy");
             }
-            return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+            return new indexingQueueEntry(in.queueEntry, in.documents, null);
         }
         final List<Document> doclist = new ArrayList<Document>();
 
@@ -2518,7 +2479,7 @@ public final class Switchboard extends serverSwitch
         }
 
         if ( doclist.isEmpty() ) {
-            return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+            return new indexingQueueEntry(in.queueEntry, in.documents, null);
         }
         in.documents = doclist.toArray(new Document[doclist.size()]);
         final Condenser[] condenser = new Condenser[in.documents.length];
@@ -2539,7 +2500,7 @@ public final class Switchboard extends serverSwitch
                 ? true
                 : !profile.remoteIndexing());
         }
-        return new indexingQueueEntry(in.process, in.queueEntry, in.documents, condenser);
+        return new indexingQueueEntry(in.queueEntry, in.documents, condenser);
     }
 
     public indexingQueueEntry webStructureAnalysis(final indexingQueueEntry in) {
@@ -2564,7 +2525,6 @@ public final class Switchboard extends serverSwitch
         if ( in.condenser != null ) {
             for ( int i = 0; i < in.documents.length; i++ ) {
                 storeDocumentIndex(
-                    in.process,
                     in.queueEntry,
                     in.documents[i],
                     in.condenser[i],
@@ -2576,7 +2536,6 @@ public final class Switchboard extends serverSwitch
     }
 
     private void storeDocumentIndex(
-        final Segments.Process process,
         final Response queueEntry,
         final Document document,
         final Condenser condenser,
@@ -2590,9 +2549,6 @@ public final class Switchboard extends serverSwitch
         final DigestURI url = new DigestURI(document.dc_source());
         final DigestURI referrerURL = queueEntry.referrerURL();
         EventOrigin processCase = queueEntry.processCase(this.peers.mySeed().hash);
-        if ( process == Segments.Process.SURROGATES ) {
-            processCase = EventOrigin.SURROGATES;
-        }
 
         if ( condenser == null || document.indexingDenied() ) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
@@ -2628,7 +2584,7 @@ public final class Switchboard extends serverSwitch
         URIMetadataRow newEntry = null;
         try {
             newEntry =
-                this.indexSegments.segment(process).storeDocument(
+                this.index.storeDocument(
                     url,
                     referrerURL,
                     queueEntry.lastModified(),
@@ -2762,11 +2718,10 @@ public final class Switchboard extends serverSwitch
     public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName)
         throws IOException,
         Parser.Failure {
-        final Segments.Process process = Segments.Process.LOCALCRAWLING;
         if ( searchEvent != null ) {
             searchEvent.addHeuristic(url.hash(), heuristicName, true);
         }
-        if ( this.indexSegments.segment(process).exists(url.hash()) ) {
+        if ( this.index.exists(url.hash()) ) {
             return; // don't do double-work
         }
         final Request request = this.loader.request(url, true, true);
@@ -2805,7 +2760,6 @@ public final class Switchboard extends serverSwitch
                             ResultImages.registerImages(url, document, true);
                             Switchboard.this.webStructure.generateCitationReference(url, document, condenser);
                             storeDocumentIndex(
-                                process,
                                 response,
                                 document,
                                 condenser,
@@ -3022,7 +2976,7 @@ public final class Switchboard extends serverSwitch
         if ( getConfig(SwitchboardConstants.INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false") ) {
             return "no DHT distribution: not enabled (per setting)";
         }
-        final Segment indexSegment = this.indexSegments.segment(segment);
+        final Segment indexSegment = this.index;
         if ( indexSegment.urlMetadata().size() < 10 ) {
             return "no DHT distribution: loadedURL.size() = " + indexSegment.urlMetadata().size();
         }
@@ -3298,12 +3252,12 @@ public final class Switchboard extends serverSwitch
         this.peers.mySeed().put(Seed.ISPEED, Integer.toString(currentPPM()));
         this.peers.mySeed().put(Seed.RSPEED, Float.toString(averageQPM()));
         this.peers.mySeed().put(Seed.UPTIME, Long.toString(uptime / 60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        this.peers.mySeed().put(Seed.LCOUNT, Long.toString(this.indexSegments.URLCount())); // the number of links that the peer has stored (LURL's)
+        this.peers.mySeed().put(Seed.LCOUNT, Long.toString(this.index.URLCount())); // the number of links that the peer has stored (LURL's)
         this.peers.mySeed().put(Seed.NCOUNT, Integer.toString(this.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         this.peers.mySeed().put(
             Seed.RCOUNT,
             Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.GLOBAL))); // the number of links that the peer provides for remote crawling (ZURL's)
-        this.peers.mySeed().put(Seed.ICOUNT, Long.toString(this.indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
+        this.peers.mySeed().put(Seed.ICOUNT, Long.toString(this.index.RWICount())); // the minimum number of words that the peer has indexed (as it says)
         this.peers.mySeed().put(Seed.SCOUNT, Integer.toString(this.peers.sizeConnected())); // the number of seeds that the peer has stored
         this.peers.mySeed().put(
             Seed.CCOUNT,

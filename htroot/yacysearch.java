@@ -73,7 +73,6 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
@@ -133,16 +132,7 @@ public class yacysearch {
         prop.put("sidebarVocabulary", j);
 
         // get segment
-        Segment indexSegment = null;
-        if ( post != null && post.containsKey("segment") ) {
-            final String segmentName = post.get("segment");
-            if ( sb.indexSegments.segmentExist(segmentName) ) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            }
-        } else {
-            // take default segment
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
+        Segment indexSegment = sb.index;
 
         final String EXT = header.get("EXT", "");
         final boolean rss = EXT.equals("rss");
