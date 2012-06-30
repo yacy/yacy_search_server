@@ -160,6 +160,7 @@ import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.CrawlStacker;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.NoticedURL;
+import de.anomic.crawler.NoticedURL.StackType;
 import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
@@ -2785,6 +2786,44 @@ public final class Switchboard extends serverSwitch
         }.start();
     }
 
+     /**
+     * add url to Crawler - which itself loads the URL, parses the content and adds it to the index
+     * transparent alternative to "addToIndex" including, double in crawler check, display in crawl monitor
+     * but doesn't return results for a ongoing search
+     *
+     * @param url the url that shall be indexed
+     * @param asglobal true adds the url to global crawl queue (for remote crawling), false to the local crawler
+     */
+    public void addToCrawler(final DigestURI url, final boolean asglobal) {
+
+        if ( this.index.exists(url.hash()) ) {
+            return; // don't do double-work
+        }
+        final Request request = this.loader.request(url, true, true);
+        final CrawlProfile profile = sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+        final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
+        if (acceptedError != null) {
+            this.log.logInfo("addToCrawler: cannot load "
+                    + url.toNormalform(false, false)
+                    + ": "
+                    + acceptedError);
+            return;
+        }
+        final String s;
+        if (asglobal) {
+            s = sb.crawlQueues.noticeURL.push(StackType.GLOBAL, request);
+        } else {
+            s = sb.crawlQueues.noticeURL.push(StackType.LOCAL, request);
+        }
+
+        if (s != null) {
+            Switchboard.this.log.logInfo("addToCrawler: failed to add "
+                    + url.toNormalform(false, false)
+                    + ": "
+                    + s);
+        }
+    }
+
     public class receiptSending implements Runnable
     {
         private final Seed initiatorPeer;
@@ -3142,6 +3181,46 @@ public final class Switchboard extends serverSwitch
                     Log.logException(e);
                 } finally {
                     searchEvent.getRankingResult().oneFeederTerminated();
+                }
+            }
+        }.start();
+    }
+
+    public final void heuristicSearchResults(final String host) {
+        new Thread() {
+
+            @Override
+            public void run() {
+
+                // get the links for a specific site
+                final DigestURI startUrl;
+                try {
+                    startUrl = new DigestURI(host);
+                } catch (final MalformedURLException e) {
+                    Log.logException(e);
+                    return;
+                }
+
+                final Map<MultiProtocolURI, String> links;
+                DigestURI url;
+                try {
+                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH);
+                    if (links != null) {
+                        if (links.size() < 1000) { // limit to 1000 to skip large index pages
+                            final Iterator<MultiProtocolURI> i = links.keySet().iterator();
+                            final boolean globalcrawljob = sb.getConfigBool("heuristic.searchresults.crawlglobal",false);
+                            while (i.hasNext()) {
+                                url = new DigestURI(i.next());
+                                boolean islocal = url.getHost().contentEquals(startUrl.getHost());
+                                // add all external links or links to different page to crawler
+                                if ( !islocal ) {// || (!startUrl.getPath().endsWith(url.getPath()))) {
+                                    addToCrawler(url,globalcrawljob);
+                                }
+                            }
+                        }
+                    }
+                } catch (final Throwable e) {
+                    Log.logException(e);
                 }
             }
         }.start();

@@ -1015,6 +1015,8 @@ about.body =
 # search heuristics
 heuristic.site = false
 heuristic.blekko = false
+heuristic.searchresults = false
+heuristic.searchresults.crawlglobal = false
 
 # colours for generic design
 color_background = #FFFFFF
