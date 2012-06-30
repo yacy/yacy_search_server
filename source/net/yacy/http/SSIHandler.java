@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HandlerContainer;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 
 /**
@@ -78,9 +79,9 @@ public class SSIHandler extends ContentModHandler implements Handler, HandlerCon
                 try {
                 	RequestDispatcher dispatcher = request.getRequestDispatcher("/"+path);
                 	dispatcher.include(request, response);
+                	response.flushBuffer();
                 } catch (Exception e) {
-                	// for debugging TODO: remove?
-                	e.printStackTrace();
+                	Log.logException(e);
                 	throw new ServletException();
                 }
             }

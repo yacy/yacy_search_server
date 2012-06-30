@@ -380,7 +380,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public Boolean GET(final String arg, final Session session) {
-        //System.out.println("GET " + arg);
+        System.out.println("GET " + arg);
         try {
             // parsing the http request line
             final HashMap<String, Object> prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);

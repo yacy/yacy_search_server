@@ -85,7 +85,6 @@ import net.yacy.search.index.Segment;
 import com.google.common.io.Files;
 
 import de.anomic.data.Translator;
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.server.serverCore;
 import de.anomic.tools.enumerateFiles;
 
