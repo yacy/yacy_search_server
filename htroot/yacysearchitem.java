@@ -248,6 +248,7 @@ public class yacysearchitem {
                 prop.put("content_loc_lat", result.lat());
                 prop.put("content_loc_lon", result.lon());
             }
+            if (sb.getConfigBool("heuristic.searchresults",false)) sb.heuristicSearchResults(resultUrlstring);
             theQuery.transmitcount = item + 1;
             return prop;
         }

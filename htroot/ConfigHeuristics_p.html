@@ -43,6 +43,34 @@
       </p>
     </fieldset>
     </form>
+    
+    <form id="HeuristicFormSearchResult" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+        <fieldset>
+            <table>
+                <tr>
+                    <td>
+                        <legend>
+                            <input type="checkbox" name="searchresult_check" id="searchresult" onclick="window.location.href='ConfigHeuristics_p.html?#(searchresult.checked)#searchresult_on=::searchresult_off=#(/searchresult.checked)#'" value="searchresult"#(searchresult.checked)#:: checked="checked"#(/searchresult.checked)# />
+                            <label for="searchresult">search-result: shallow crawl on all displayed search results</label>
+                        </legend>
+                    </td>
+                    <td>
+                        <legend>
+                            <input type="checkbox" name="searchresultglobal_check" id="searchresultglobal" onclick="window.location.href='ConfigHeuristics_p.html?#(searchresultglobal.checked)#searchresultglobal_on=::searchresultglobal_off=#(/searchresultglobal.checked)#'" value="siteresultglobal"#(searchresultglobal.checked)#:: checked="checked"#(/searchresultglobal.checked)# />
+                            <label for="searchresultglobal">add as global crawl job</label>
+                        </legend>
+                    </td>
+                </tr>
+            </table>
+      <p>
+      When a search is made then all displayed result links are crawled with a depth-1 crawl.
+      This means: right after the search request every page is loaded and every page that is linked on this page.
+      If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).
+      Default is to add the links to the local crawl queue (your peer crawls the linked pages).
+      </p>
+    </fieldset>
+    </form>
+    
     <form id="HeuristicFormBlekko" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>
@@ -55,8 +83,7 @@
       </p>
     </fieldset>
     </form>
-    
-    
+
     #%env/templates/footer.template%#
   </body>
 </html>

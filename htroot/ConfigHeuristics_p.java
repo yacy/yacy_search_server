@@ -45,13 +45,19 @@ public class ConfigHeuristics_p {
             
             if (post.containsKey("site_on")) sb.setConfig("heuristic.site", true);
             if (post.containsKey("site_off")) sb.setConfig("heuristic.site", false);
+            if (post.containsKey("searchresult_on")) sb.setConfig("heuristic.searchresults", true);
+            if (post.containsKey("searchresult_off")) sb.setConfig("heuristic.searchresults", false);
+            if (post.containsKey("searchresultglobal_on")) sb.setConfig("heuristic.searchresults.crawlglobal", true);
+            if (post.containsKey("searchresultglobal_off")) sb.setConfig("heuristic.searchresults.crawlglobal", false);
             if (post.containsKey("blekko_on")) sb.setConfig("heuristic.blekko", true);
             if (post.containsKey("blekko_off")) sb.setConfig("heuristic.blekko", false);
         }
         
         prop.put("site.checked", sb.getConfigBool("heuristic.site", false) ? 1 : 0);
+        prop.put("searchresult.checked", sb.getConfigBool("heuristic.searchresults", false) ? 1 : 0);
+        prop.put("searchresultglobal.checked", sb.getConfigBool("heuristic.searchresults.crawlglobal", false) ? 1 : 0);
         prop.put("blekko.checked", sb.getConfigBool("heuristic.blekko", false) ? 1 : 0);
-        
+
         return prop;
     }
 }
