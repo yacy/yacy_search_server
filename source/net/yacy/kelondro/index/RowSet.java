@@ -411,6 +411,10 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         public final void remove() {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public void close() {
+        }
     }
 
     @Override
@@ -477,6 +481,10 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         @Override
         public final void remove() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void close() {
         }
     }
 

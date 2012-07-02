@@ -1010,6 +1010,7 @@ public class ArrayStack implements BLOB {
             final HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order, writeBuffer);
             rewrite(i, order, writer);
             writer.close(true);
+            i.close();
         } catch (final IOException e) {
             Log.logSevere("ArrayStack", "cannot writing or close writing rewrite, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
             FileUtils.deletedelete(tmpFile);

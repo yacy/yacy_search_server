@@ -319,6 +319,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             return this;
         }
 
+        @Override
+        public void close() {
+        }
     }
 
     @Override
@@ -401,6 +404,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             return this;
         }
 
+        @Override
+        public void close() {
+        }
     }
 
     /**

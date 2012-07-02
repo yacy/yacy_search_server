@@ -121,6 +121,10 @@ public class BEncodedHeap implements MapStore {
                     return this;
                 }
 
+                @Override
+                public void close() {
+                }
+
             };
         }
     }

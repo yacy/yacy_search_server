@@ -809,6 +809,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return this.rowdef.newEntry(b);
     }
 
+    @Override
     public synchronized Entry removeOne() throws IOException {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
@@ -835,6 +836,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return lr;
     }
 
+    @Override
     public List<Row.Entry> top(int count) throws IOException {
         final ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
         if ((this.file == null) || (this.index == null)) return list;
@@ -849,6 +851,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return list;
     }
 
+    @Override
     public synchronized void clear() throws IOException {
         final File f = this.file.filename();
         this.file.close();
@@ -873,19 +876,23 @@ public class Table implements Index, Iterable<Row.Entry> {
         this.index.clear();
     }
 
+    @Override
     public Row row() {
         return this.rowdef;
     }
 
+    @Override
     public int size() {
         if (this.index == null) return 0;
         return this.index.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return this.index.isEmpty();
     }
 
+    @Override
     public Iterator<Entry> iterator() {
         try {
             return rows();
@@ -894,6 +901,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public synchronized CloneableIterator<Entry> rows() throws IOException {
         this.file.flushBuffer();
         return new rowIteratorNoOrder();
@@ -910,14 +918,17 @@ public class Table implements Index, Iterable<Row.Entry> {
             this.i = Table.this.index.iterator();
         }
 
+        @Override
         public CloneableIterator<Entry> clone(final Object modifier) {
             return new rowIteratorNoOrder();
         }
 
+        @Override
         public boolean hasNext() {
             return this.i != null && this.i.hasNext();
         }
 
+        @Override
         public Entry next() {
             final Row.Entry entry = this.i.next();
             if (entry == null) return null;
@@ -931,6 +942,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             }
         }
 
+        @Override
         public void remove() {
             if (this.key != null) {
                 try {
@@ -942,14 +954,22 @@ public class Table implements Index, Iterable<Row.Entry> {
             }
         }
 
+        @Override
+        public void close() {
+            if (this.i instanceof CloneableIterator) {
+                ((CloneableIterator<Entry>) this.i).close();
+            }
+        }
+
     }
 
+    @Override
     public synchronized CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         return new rowIterator(up, firstKey);
     }
 
     private class rowIterator implements CloneableIterator<Entry> {
-        private final Iterator<byte[]> i;
+        private final CloneableIterator<byte[]> i;
         private final boolean up;
         private final byte[] fk;
         private int c;
@@ -961,14 +981,17 @@ public class Table implements Index, Iterable<Row.Entry> {
             this.c = -1;
         }
 
+        @Override
         public CloneableIterator<Entry> clone(final Object modifier) {
             return new rowIterator(this.up, this.fk);
         }
 
+        @Override
         public boolean hasNext() {
             return this.i.hasNext();
         }
 
+        @Override
         public Entry next() {
             final byte[] k = this.i.next();
             assert k != null;
@@ -995,10 +1018,15 @@ public class Table implements Index, Iterable<Row.Entry> {
             return Table.this.rowdef.newEntry(b);
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException("no remove in Table.rowIterator");
         }
 
+        @Override
+        public void close() {
+            this.i.close();
+        }
     }
 
     private static byte[] testWord(final char c) {
@@ -1125,6 +1153,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         */
     }
 
+    @Override
     public void deleteOnExit() {
         this.file.deleteOnExit();
     }

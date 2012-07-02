@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -30,12 +30,12 @@ import net.yacy.cora.order.CloneableIterator;
 
 
 public class RotateIterator<E> implements CloneableIterator<E> {
-    
+
     CloneableIterator<E> a, clone;
     Object modifier;
     boolean nempty;
     int terminationCount;
-    
+
     public RotateIterator(final CloneableIterator<E> a, final Object modifier, final int terminationCount) {
         // this works currently only for String-type key iterations
         this.a = a;
@@ -44,29 +44,39 @@ public class RotateIterator<E> implements CloneableIterator<E> {
         this.clone = a.clone(modifier);
         this.nempty = this.clone.hasNext();
     }
-    
-	public RotateIterator<E> clone(final Object modifier) {
-        return new RotateIterator<E>(a, modifier, terminationCount - 1);
+
+	@Override
+    public RotateIterator<E> clone(final Object modifier) {
+        return new RotateIterator<E>(this.a, modifier, this.terminationCount - 1);
     }
-    
+
+    @Override
     public boolean hasNext() {
-        return (terminationCount > 0) && (this.nempty);
+        return (this.terminationCount > 0) && (this.nempty);
     }
-    
+
+    @Override
     public E next() {
     	// attention: this iterator has no termination - on purpose.
     	// it must be taken care that a calling method has a termination predicate different
     	// from the hasNext() method
-        if (!(a.hasNext())) {
-            a = clone.clone(modifier);
-            assert a.hasNext();
+        if (!(this.a.hasNext())) {
+            this.a = this.clone.clone(this.modifier);
+            assert this.a.hasNext();
         }
-        terminationCount--;
-        return a.next();
+        this.terminationCount--;
+        return this.a.next();
     }
-    
+
+    @Override
     public void remove() {
-        a.remove();
+        this.a.remove();
     }
-    
+
+    @Override
+    public void close() {
+        this.a.close();
+        this.clone.close();
+    }
+
 }

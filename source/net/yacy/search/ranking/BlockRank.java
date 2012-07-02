@@ -144,6 +144,7 @@ public class BlockRank {
                 final ReferenceContainer<HostReference> references = ri.next();
                 index.add(references);
             }
+            ri.close();
         } catch (final IOException e) {
             Log.logException(e);
         } catch (final RowSpaceExceededException e) {

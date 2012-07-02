@@ -28,8 +28,17 @@ import java.util.Iterator;
 
 public interface CloneableIterator<E> extends Iterator<E> {
 
-    // clone the iterator using a modifier
-    // the modifier can be i.e. a re-start position
+    /**
+     * clone the iterator using a modifier
+     * the modifier can be i.e. a re-start position
+     * @param modifier
+     * @return
+     */
     public CloneableIterator<E> clone(Object modifier);
-    
+
+    /**
+     * a CloneableIterator should be closed after usage to free resources
+     */
+    public void close();
+
 }

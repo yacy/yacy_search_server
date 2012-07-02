@@ -194,6 +194,11 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             return this;
         }
 
+        @Override
+        public void close() {
+            this.iterator.close();
+        }
+
     }
 
     /**
@@ -274,6 +279,11 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         @Override
         public Iterator<Rating<byte[]>> iterator() {
             return this;
+        }
+
+        @Override
+        public void close() {
+            this.iterator.close();
         }
 
     }
@@ -446,7 +456,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             if (f.length() < 22 || !f.startsWith("text.index") || !f.endsWith(".blob")) continue;
             final File fl = new File(heapLocation, f);
             System.out.println("CELL REFERENCE COLLECTION opening blob " + fl);
-            final CloneableIterator<ReferenceContainer<ReferenceType>>  ei = new ReferenceIterator<ReferenceType>(fl, factory);
+            final CloneableIterator<ReferenceContainer<ReferenceType>> ei = new ReferenceIterator<ReferenceType>(fl, factory);
 
             ReferenceContainer<ReferenceType> container;
             final long start = System.currentTimeMillis();
@@ -472,6 +482,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                     lastlog = System.currentTimeMillis();
                 }
             }
+            ei.close();
         }
         references.trim();
         System.out.println("CELL REFERENCE COLLECTION finished");

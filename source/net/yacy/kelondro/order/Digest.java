@@ -56,7 +56,7 @@ public class Digest {
 
 	public static BlockingQueue<MessageDigest> digestPool = new LinkedBlockingDeque<MessageDigest>();
 
-    private static final int md5CacheSize = Math.max(200000, Math.min(10000000, (int) (MemoryControl.available() / 20000L)));
+    private static final int md5CacheSize = Math.max(100000, Math.min(1000000, (int) (MemoryControl.available() / 40000L)));
     private static ARC<String, byte[]> md5Cache = null;
     static {
         try {

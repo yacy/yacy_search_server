@@ -56,7 +56,7 @@ public class Word {
      */
     public static final int commonHashLength = 12;
 
-    private static final int hashCacheSize = Math.max(200000, Math.min(10000000, (int) (MemoryControl.available() / 20000L)));
+    private static final int hashCacheSize = Math.max(100000, Math.min(1000000, (int) (MemoryControl.available() / 40000L)));
     private static ARC<String, byte[]> hashCache = null;
     static {
         try {

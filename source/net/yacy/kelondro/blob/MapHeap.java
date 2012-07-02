@@ -385,14 +385,15 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         final boolean up, rotating;
         final byte[] firstKey, secondKey;
         Iterator<byte[]> iterator;
+        final private CloneableIterator<byte[]> blobkeys;
 
         public KeyIterator(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
             this.up = up;
             this.rotating = rotating;
             this.firstKey = firstKey;
             this.secondKey = secondKey;
-            final CloneableIterator<byte[]> i = MapHeap.this.blob.keys(up, firstKey);
-            this.iterator = rotating ? new RotateIterator<byte[]>(i, secondKey, MapHeap.this.blob.size()) : i;
+            this.blobkeys = MapHeap.this.blob.keys(up, firstKey);
+            this.iterator = rotating ? new RotateIterator<byte[]>(this.blobkeys, secondKey, MapHeap.this.blob.size()) : this.blobkeys;
         }
 
         @Override
@@ -421,6 +422,10 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             }
         }
 
+        @Override
+        public void close() {
+            this.blobkeys.close();
+        }
     }
 
     public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final boolean rotating) throws IOException {

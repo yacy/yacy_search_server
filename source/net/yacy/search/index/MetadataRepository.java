@@ -281,7 +281,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
 
     public class kiter implements CloneableIterator<URIMetadataRow> {
         // enumerates entry elements
-        private final Iterator<Row.Entry> iter;
+        private final CloneableIterator<Row.Entry> iter;
         private final boolean error;
         boolean up;
 
@@ -325,6 +325,11 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         @Override
         public final void remove() {
             this.iter.remove();
+        }
+
+        @Override
+        public void close() {
+            this.iter.close();
         }
     }
 
