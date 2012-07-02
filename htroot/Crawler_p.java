@@ -50,6 +50,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
@@ -322,7 +323,7 @@ public class Crawler_p {
                         sb.crawlQueues.errorURL.remove(urlhash);
 
                         // get a scraper to get the title
-                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH);
+                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER);
                         final String title = scraper == null ? url.toNormalform(true, true) : scraper.dc_title();
                         final String description = scraper.dc_description();
 
@@ -544,7 +545,7 @@ public class Crawler_p {
                     try {
                         final DigestURI sitelistURL = new DigestURI(crawlingStart);
                         // download document
-                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH);
+                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER);
                         // String title = scraper.getTitle();
                         // String description = scraper.getDescription();
 
@@ -647,11 +648,11 @@ public class Crawler_p {
 
     private static long recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
         if (!recrawlIfOlderCheck) return 0L;
-        if ("year".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
-        if ("month".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 30L;
-        if ("day".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L;
-        if ("hour".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L;
-        return System.currentTimeMillis() - (long) recrawlIfOlderNumber;
+        if ("year".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
+        if ("month".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 30L;
+        if ("day".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L;
+        if ("hour".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L;
+        return System.currentTimeMillis() - recrawlIfOlderNumber;
     }
 
     private static void setPerformance(final Switchboard sb, final serverObjects post) {

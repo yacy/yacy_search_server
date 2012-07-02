@@ -163,7 +163,7 @@ public class ViewFile {
 
         Response response = null;
         try {
-            response = sb.loader.load(sb.loader.request(url, true, false), authorized ? CacheStrategy.IFEXIST : CacheStrategy.CACHEONLY, Integer.MAX_VALUE, true);
+            response = sb.loader.load(sb.loader.request(url, true, false), authorized ? CacheStrategy.IFEXIST : CacheStrategy.CACHEONLY, Integer.MAX_VALUE, null);
         } catch (final IOException e) {
             prop.put("error", "4");
             prop.put("error_errorText", "error loading resource: " + e.getMessage());

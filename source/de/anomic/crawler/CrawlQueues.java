@@ -49,6 +49,7 @@ import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.Switchboard.indexingQueueEntry;
 import net.yacy.search.SwitchboardConstants;
@@ -655,7 +656,7 @@ public class CrawlQueues {
                     try {
                         this.request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
                         final CrawlProfile e = CrawlQueues.this.sb.crawler.getActive(UTF8.getBytes(this.request.profileHandle()));
-                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), true);
+                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), BlacklistType.CRAWLER);
                         if (response == null) {
                             this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (CrawlQueues.this.log.isFine()) {

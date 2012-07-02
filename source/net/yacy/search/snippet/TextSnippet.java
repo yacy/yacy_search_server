@@ -53,6 +53,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.peers.RemoteSearch;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.retrieval.Request;
@@ -209,7 +210,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     final Request request = loader == null ? null : loader.request(url, true, reindexing);
                     Response response;
                     try {
-                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, true);
+                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH);
                     } catch (IOException e1) {
                         response = null;
                     }
@@ -242,7 +243,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // try to load the resource from the cache
             Response response = null;
             try {
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB() || cacheStrategy == null) ? CacheStrategy.NOCACHE : cacheStrategy, true);
+                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB() || cacheStrategy == null) ? CacheStrategy.NOCACHE : cacheStrategy, BlacklistType.SEARCH);
             } catch (IOException e) {
                 response = null;
             }

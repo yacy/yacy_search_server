@@ -37,6 +37,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 
 import org.w3c.dom.Document;
@@ -94,7 +95,7 @@ public class getpageinfo_p {
                 }
                 net.yacy.document.Document scraper = null;
                 if (u != null) try {
-                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST);
+                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER);
                 } catch (final IOException e) {
                     Log.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"

@@ -538,7 +538,7 @@ public class Segment {
 
         try {
             // parse the resource
-            final Document document = Document.mergeDocuments(entry.url(), null, loader.loadDocuments(loader.request(entry.url(), true, false), cacheStrategy, 10000, Integer.MAX_VALUE));
+            final Document document = Document.mergeDocuments(entry.url(), null, loader.loadDocuments(loader.request(entry.url(), true, false), cacheStrategy, 10000, Integer.MAX_VALUE, null));
             if (document == null) {
                 // delete just the url entry
                 urlMetadata().remove(urlhash);

@@ -69,14 +69,14 @@ public final class HTTPLoader {
         this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 30000);
     }
 
-    public Response load(final Request entry, final int maxFileSize, final boolean checkBlacklist) throws IOException {
+    public Response load(final Request entry, final int maxFileSize, final BlacklistType blacklistType) throws IOException {
         final long start = System.currentTimeMillis();
-        final Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, checkBlacklist);
+        final Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType);
         Latency.update(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
 
-    private Response load(final Request request, final int retryCount, final int maxFileSize, final boolean checkBlacklist) throws IOException {
+    private Response load(final Request request, final int retryCount, final int maxFileSize, final BlacklistType blacklistType) throws IOException {
 
         byte[] myHash = this.sb.peers.mySeed().hash.getBytes();
 
@@ -96,7 +96,7 @@ public final class HTTPLoader {
 
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
-        if (checkBlacklist && Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, hostlow, path)) {
+        if (blacklistType != null && Switchboard.urlBlacklist.isListed(blacklistType, hostlow, path)) {
             this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
@@ -175,7 +175,7 @@ public final class HTTPLoader {
 
                     // retry crawling with new url
                     request.redirectURL(redirectionUrl);
-                    return load(request, retryCount - 1, maxFileSize, checkBlacklist);
+                    return load(request, retryCount - 1, maxFileSize, blacklistType);
     	    } else {
     	        // we don't want to follow redirects
                 this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);

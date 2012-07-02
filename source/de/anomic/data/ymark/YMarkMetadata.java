@@ -97,7 +97,7 @@ public class YMarkMetadata {
 	public Document loadDocument(final LoaderDispatcher loader) throws IOException, Failure {
 		if(this.document == null) {
 			Response response = null;
-			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, true);
+			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null);
 			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		}
 		return this.document;

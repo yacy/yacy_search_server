@@ -69,7 +69,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			return null;
 		}
 		try {
-			response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, true);
+			response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null);
 		} catch (final IOException e) {
 			Log.logWarning(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to IOException for url: "+url);
 			return null;

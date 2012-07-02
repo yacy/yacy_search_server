@@ -97,7 +97,7 @@ public class webstructure {
                 prop.put("references", 1);
                 net.yacy.document.Document scraper = null;
                 if (url != null) try {
-                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST);
+                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST, null);
                 } catch (final IOException e) {
                     Log.logException(e);
                 }

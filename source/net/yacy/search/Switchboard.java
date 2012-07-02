@@ -141,6 +141,7 @@ import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.peers.operation.yacyRelease;
 import net.yacy.peers.operation.yacyUpdateLocation;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
@@ -2746,7 +2747,7 @@ public final class Switchboard extends serverSwitch
                 Thread.currentThread().setName("Switchboard.addToIndex:" + urls);
                 try {
                     final Response response =
-                        Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, true);
+                        Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER);
                     if ( response == null ) {
                         throw new IOException("response == null");
                     }
@@ -3173,7 +3174,7 @@ public final class Switchboard extends serverSwitch
                 final Map<MultiProtocolURI, String> links;
                 searchEvent.getRankingResult().oneFeederStarted();
                 try {
-                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE);
+                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH);
                     if ( links != null ) {
                         final Iterator<MultiProtocolURI> i = links.keySet().iterator();
                         while ( i.hasNext() ) {
@@ -3212,7 +3213,7 @@ public final class Switchboard extends serverSwitch
                 final Map<MultiProtocolURI, String> links;
                 DigestURI url;
                 try {
-                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH);
+                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH);
                     if (links != null) {
                         if (links.size() < 1000) { // limit to 1000 to skip large index pages
                             final Iterator<MultiProtocolURI> i = links.keySet().iterator();
@@ -3276,7 +3277,7 @@ public final class Switchboard extends serverSwitch
                 searchEvent.getRankingResult().oneFeederStarted();
                 try {
                     final Response response =
-                        sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, true);
+                        sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, BlacklistType.SEARCH);
                     final byte[] resource = (response == null) ? null : response.getContent();
                     //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);

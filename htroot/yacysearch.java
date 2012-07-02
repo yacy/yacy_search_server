@@ -69,6 +69,7 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -667,7 +668,7 @@ public class yacysearch {
                                 sb.loader.request(urlentry.url(), true, false),
                                 CacheStrategy.IFEXIST,
                                 5000,
-                                Integer.MAX_VALUE);
+                                Integer.MAX_VALUE, BlacklistType.SEARCH);
                     } catch ( final IOException e ) {
                     } catch ( final Parser.Failure e ) {
                     }

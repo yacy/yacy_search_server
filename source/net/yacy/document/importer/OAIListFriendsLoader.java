@@ -62,7 +62,7 @@ public class OAIListFriendsLoader implements Serializable {
         listFriends.putAll(moreFriends);
         if (loader != null) for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) {
             try {
-                loader.loadIfNotExistBackground(new DigestURI(oaiFriend.getKey()), oaiFriend.getValue(), Integer.MAX_VALUE);
+                loader.loadIfNotExistBackground(new DigestURI(oaiFriend.getKey()), oaiFriend.getValue(), Integer.MAX_VALUE, null);
             } catch (final MalformedURLException e) {
             }
         }
@@ -87,7 +87,7 @@ public class OAIListFriendsLoader implements Serializable {
         Map<String, String> m;
         for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) try {
             if (!oaiFriend.getValue().exists()) {
-                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, true);
+                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null);
                 if (response != null) FileUtils.copy(response.getContent(), oaiFriend.getValue());
             }
 
@@ -116,7 +116,7 @@ public class OAIListFriendsLoader implements Serializable {
     	}
     	return parser;
     }
-    
+
     // get a resumption token using a SAX xml parser from am input stream
     public static class Parser extends DefaultHandler {
 
@@ -162,11 +162,12 @@ public class OAIListFriendsLoader implements Serializable {
          <baseURL id="http://roar.eprints.org/id/eprint/1064">http://oai.repec.openlib.org/</baseURL>
          </BaseURLs>
          */
-        
+
         public int getCounter() {
         	return this.recordCounter;
         }
 
+        @Override
         public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
             if ("baseURL".equals(tag)) {
                 this.recordCounter++;
@@ -175,6 +176,7 @@ public class OAIListFriendsLoader implements Serializable {
             }
         }
 
+        @Override
         public void endElement(final String uri, final String name, final String tag) {
             if (tag == null) return;
             if ("baseURL".equals(tag)) {
@@ -184,6 +186,7 @@ public class OAIListFriendsLoader implements Serializable {
             }
         }
 
+        @Override
         public void characters(final char ch[], final int start, final int length) {
             if (this.parsingValue) {
                 this.buffer.append(ch, start, length);

@@ -54,7 +54,7 @@ public class OAIPMHLoader {
         for (int i = 0; i < 5; i++) {
             // make some retries if first attempt fails
             try {
-                response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, true);
+                response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null);
                 break;
             } catch (IOException e) {
                 Log.logWarning("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true, false));

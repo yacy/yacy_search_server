@@ -196,7 +196,7 @@ public class Bookmarks {
                         // try to get the bookmark from the LURL database
                         final URIMetadataRow urlentry = sb.index.urlMetadata().load(ASCII.getBytes(urlHash));
                         if (urlentry != null) try {
-                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE));
+                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE, null));
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", urlentry.url().toNormalform(false, true));
                             prop.putHTML("mode_title", urlentry.dc_title());
