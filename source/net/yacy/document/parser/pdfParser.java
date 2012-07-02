@@ -142,6 +142,7 @@ public class pdfParser extends AbstractParser implements Parser {
             final Thread t = new Thread() {
                 @Override
                 public void run() {
+                    Thread.currentThread().setName("pdfParser.getText:" + location);
                     try {
                         writer.append(stripper.getText(pdfDoc));
                     } catch (final Throwable e) {}

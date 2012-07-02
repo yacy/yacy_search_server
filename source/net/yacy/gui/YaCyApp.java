@@ -2,7 +2,7 @@
  *  YaCyApp
  *  Copyright 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 05.08.2010 at http://yacy.net
- *  
+ *
  *  $LastChangedDate$
  *  $LastChangedRevision$
  *  $LastChangedBy$
@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -48,7 +48,7 @@ import net.yacy.gui.framework.Switchboard;
 import org.apache.log4j.Logger;
 
 public class YaCyApp {
-    
+
     public static Logger log = Logger.getLogger(YaCyApp.class);
     private static JFrame app;
     private static Operation operation;
@@ -70,33 +70,34 @@ public class YaCyApp {
         public splashCanvas(ImageObserver obs) { this.obs = obs; }
         @Override
         public void paint(Graphics g) {
-            if (splashImg != null) g.drawImage(splashImg, 0, 0, obs);
+            if (splashImg != null) g.drawImage(splashImg, 0, 0, this.obs);
         }
     }
-    
+
     public static class Op implements Operation {
-        
+
         JFrame app;
         final String host;
         final int port;
-        
+
         public Op(JFrame app, String host, int port) {
             this.app = app;
             this.host = host;
             this.port = port;
         }
-        
+
+        @Override
         public void closeAndExit() {
-            if (app != null) app.setVisible(false); // fake closing
+            if (this.app != null) this.app.setVisible(false); // fake closing
             //Browser.openBrowser("http://" + host + ":" + port + "/Steering.html?shutdown=");
             net.yacy.search.Switchboard.getSwitchboard().terminate(10, "shutdown request from gui");
             Switchboard.shutdown();
             //System.exit(0);
         }
     }
-    
+
     public static void start(String host, int port) {
-   
+
         Switchboard.startInfoUpdater();
         operation = new Op(app, host, port);
 
@@ -108,6 +109,7 @@ public class YaCyApp {
         OpenItem.setEnabled(false);
         JMenuItem QuitItem = new JMenuItem("Quit");
         QuitItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 operation.closeAndExit();
             }
@@ -115,7 +117,7 @@ public class YaCyApp {
         FileMenu.add(OpenItem);
         FileMenu.add(QuitItem);
         menues.add(FileMenu);
-        
+
         // the edit menu
         JMenu EditMenu = new JMenu("Edit");
         JMenuItem CutItem = new JMenuItem("Cut");
@@ -128,12 +130,13 @@ public class YaCyApp {
         EditMenu.add(CopyItem);
         EditMenu.add(PasteItem);
         menues.add(EditMenu);
-        
+
         // registering shutdown hook
         log.info("Registering Shutdown Hook");
         Thread t = new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("YaCyApp");
                 app = new Application("YaCy GUI", operation, menues, new InfoPage("localhost", 8090));
                 app.setLocationRelativeTo(null);
                 app.setVisible(true);
@@ -142,12 +145,12 @@ public class YaCyApp {
         Switchboard.addShutdownHook(t, net.yacy.yacy.shutdownSemaphore);
         SwingUtilities.invokeLater(t);
     }
-    
+
     public static void main(String[] args) {
-        
+
         if (args.length > 0) Switchboard.load(new File(args[0]));
         start("localhost", 8090);
-        
+
     }
 
 }

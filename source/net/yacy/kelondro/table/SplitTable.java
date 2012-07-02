@@ -227,6 +227,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             final Thread p = new Thread() {
                 @Override
                 public void run() {
+                    Thread.currentThread().setName("SplitTable.warmUp");
                     a.warmUp();
                 }
             };

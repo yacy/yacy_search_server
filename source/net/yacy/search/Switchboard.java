@@ -339,6 +339,7 @@ public final class Switchboard extends serverSwitch
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("LibraryProvider.initialize");
                 LibraryProvider.initialize(Switchboard.this.dictionariesPath);
             }
         }.start();
@@ -662,6 +663,7 @@ public final class Switchboard extends serverSwitch
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("Switchboard.initBookmarks");
                 try {
                     initBookmarks();
                 } catch ( final IOException e ) {
@@ -1157,8 +1159,8 @@ public final class Switchboard extends serverSwitch
             final int wordCacheMaxCount =
                 (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
             final long fileSizeMax =
-                (OS.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb
-                    .getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
+                (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb
+                    .getConfigLong("filesize.max.other", Integer.MAX_VALUE);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
             final int partitionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
             final String networkName = getConfig(SwitchboardConstants.NETWORK_NAME, "");
@@ -2727,9 +2729,10 @@ public final class Switchboard extends serverSwitch
         final Request request = this.loader.request(url, true, true);
         final CrawlProfile profile = sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
         final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
+        final String urls = url.toNormalform(false, false);
         if ( acceptedError != null ) {
             this.log.logWarning("addToIndex: cannot load "
-                + url.toNormalform(false, false)
+                + urls
                 + ": "
                 + acceptedError);
             return;
@@ -2737,6 +2740,7 @@ public final class Switchboard extends serverSwitch
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("Switchboard.addToIndex:" + urls);
                 try {
                     final Response response =
                         Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, true);
@@ -2795,6 +2799,7 @@ public final class Switchboard extends serverSwitch
             this.reference = reference;
         }
 
+        @Override
         public void run() {
             final long t = System.currentTimeMillis();
             final Map<String, String> response =
@@ -3109,6 +3114,7 @@ public final class Switchboard extends serverSwitch
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("Switchboard.heuristicSite:" + host);
                 String r = host;
                 if ( r.indexOf("//", 0) < 0 ) {
                     r = "http://" + r;
@@ -3161,6 +3167,7 @@ public final class Switchboard extends serverSwitch
             public void run() {
                 QueryParams query = searchEvent.getQuery();
                 String queryString = query.queryString(true);
+                Thread.currentThread().setName("Switchboard.heuristicRSS:" + queryString);
                 final int meta = queryString.indexOf("heuristic:", 0);
                 if ( meta >= 0 ) {
                     final int q = queryString.indexOf(' ', meta);

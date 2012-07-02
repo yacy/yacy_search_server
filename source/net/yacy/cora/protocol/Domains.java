@@ -746,6 +746,7 @@ public class Domains {
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("Domains: init");
                 // try to get local addresses from interfaces
                 try {
                     final Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();

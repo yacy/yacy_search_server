@@ -103,6 +103,7 @@ public final class Cache {
             Thread startupCleanup = new Thread() {
                 @Override
                 public void run() {
+                    Thread.currentThread().setName("Cache startupCleanup");
                     // enumerate the responseHeaderDB and find out all entries that are not inside the fileDBunbuffered
                     BlockingQueue<byte[]> q = responseHeaderDB.keyQueue(1000);
                     final HandleSet delkeys = new HandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
@@ -146,7 +147,7 @@ public final class Cache {
     public static void commit() {
     	fileDB.flushAll();
     }
-    
+
     /**
      * clear the cache
      */

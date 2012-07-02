@@ -185,6 +185,7 @@ public final class CrawlStacker {
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("enqueueEntriesAsynchronous");
                 enqueueEntries(initiator, profileHandle, hyperlinks, true);
             }
         }.start();
@@ -240,6 +241,7 @@ public final class CrawlStacker {
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("enqueueEntriesFTP");
                 BlockingQueue<FTPClient.entryInfo> queue;
                 try {
                     queue = FTPClient.sitelist(host, port);

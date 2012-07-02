@@ -237,6 +237,7 @@ public class FTPClient {
             super();
         }
 
+        @Override
         public synchronized Class<?> loadClass(final String classname, final boolean resolve) throws ClassNotFoundException {
             Class<?> c = findLoadedClass(classname);
             if (c == null) {
@@ -945,8 +946,8 @@ public class FTPClient {
             return true;
         }
         final String[] name = this.currentLocalPath.list();
-        for (int n = 0; n < name.length; ++n) {
-            log.info(ls(new File(this.currentLocalPath, name[n])));
+        for (String element : name) {
+            log.info(ls(new File(this.currentLocalPath, element)));
         }
         return true;
     }
@@ -2539,6 +2540,7 @@ public class FTPClient {
             @Override
             public void run() {
                 try {
+                    Thread.currentThread().setName("FTP.sitelist(" + host + ":" + port + ")");
                     sitelist(ftpClient, "/", queue);
                     ftpClient.quit();
                 } catch (final Exception e) {} finally {
@@ -2757,8 +2759,10 @@ public class FTPClient {
             this.password = p;
         }
 
+        @Override
         public final void run() {
             try {
+                Thread.currentThread().setName("FTP.pt(" + this.host + ")");
                 put(this.host, this.localFile, this.remotePath, this.remoteName, this.account, this.password);
             } catch (final IOException e) {
                 log.error(e, e);

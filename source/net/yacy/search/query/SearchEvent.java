@@ -163,6 +163,7 @@ public final class SearchEvent
                 new Thread() {
                     @Override
                     public void run() {
+                        Thread.currentThread().setName("SearchEvent.primaryRemoteSearches");
                         RemoteSearch.primaryRemoteSearches(
                             SearchEvent.this.primarySearchThreadsL,
                             QueryParams.hashSet2hashString(SearchEvent.this.query.queryHashes),
@@ -553,6 +554,7 @@ public final class SearchEvent
             new Thread() {
                 @Override
                 public void run() {
+                    Thread.currentThread().setName("SearchEvent.paddAbstract:" + wordhash);
                     for ( final Map.Entry<String, StringBuilder> oneref : singleAbstract.entrySet() ) {
                         final String urlhash = oneref.getKey();
                         final StringBuilder peerlistNew = oneref.getValue();

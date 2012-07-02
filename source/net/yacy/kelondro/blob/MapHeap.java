@@ -525,6 +525,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         (new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("MapHeap.keyQueue:" + size);
                 try {
                     final Iterator<byte[]> i = MapHeap.this.blob.keys(true, false);
                     while (i.hasNext())
