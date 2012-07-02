@@ -3367,16 +3367,7 @@ public final class Switchboard extends serverSwitch
 
         String seedListFileURL;
         final int sc = this.peers.sizeConnected();
-
-        final RequestHeader reqHeader = new RequestHeader();
-        reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
-        reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
-        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
-        final HTTPClient client = new HTTPClient();
-        client.setHeader(reqHeader.entrySet());
-        client.setTimout((int) getConfigLong("bootstrapLoadTimeout", 10000));
-
-        Network.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
+        Network.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run, concurrently starting seedlist loader");
 
         // - use the superseed to further fill up the seedDB
         AtomicInteger scc = new AtomicInteger(0);
@@ -3391,15 +3382,12 @@ public final class Switchboard extends serverSwitch
             }
             c++;
             if ( seedListFileURL.startsWith("http://") || seedListFileURL.startsWith("https://") ) {
-                loadSeedListConcurrently(this.peers, client, seedListFileURL, scc);
+                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 10000));
             }
         }
-        Network.log.logInfo("BOOTSTRAP: "
-            + (this.peers.sizeConnected() - sc)
-            + " new seeds while bootstraping.");
     }
 
-    private static void loadSeedListConcurrently(final SeedDB peers, final HTTPClient client, final String seedListFileURL, final AtomicInteger scc) {
+    private static void loadSeedListConcurrently(final SeedDB peers, final String seedListFileURL, final AtomicInteger scc, final int timeout) {
         // uses the superseed to initialize the database with known seeds
 
         Thread seedLoader = new Thread() {
@@ -3409,6 +3397,14 @@ public final class Switchboard extends serverSwitch
                 try {
                     DigestURI url = new DigestURI(seedListFileURL);
                     //final long start = System.currentTimeMillis();
+                    final RequestHeader reqHeader = new RequestHeader();
+                    reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
+                    reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
+                    reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
+                    final HTTPClient client = new HTTPClient();
+                    client.setHeader(reqHeader.entrySet());
+                    client.setTimout(timeout);
+
                     client.HEADResponse(url.toString());
                     int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
                     ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
@@ -3462,15 +3458,11 @@ public final class Switchboard extends serverSwitch
                 } catch ( final IOException e ) {
                     // this is when wget fails, commonly because of timeout
                     Network.log.logWarning("BOOTSTRAP: failed (1) to load seeds from seed-list URL "
-                        + seedListFileURL
-                        + ": "
-                        + e.getMessage());
+                        + seedListFileURL + ": " + e.getMessage());
                 } catch ( final Exception e ) {
                     // this is when wget fails; may be because of missing internet connection
                     Network.log.logSevere("BOOTSTRAP: failed (2) to load seeds from seed-list URL "
-                        + seedListFileURL
-                        + ": "
-                        + e.getMessage(), e);
+                        + seedListFileURL + ": " + e.getMessage(), e);
                 }
             }
         };
