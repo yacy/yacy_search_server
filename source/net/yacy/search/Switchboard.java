@@ -1686,9 +1686,10 @@ public final class Switchboard extends serverSwitch
         boolean moved = false;
         if ( s.endsWith("xml.zip") ) {
             // open the zip file with all the xml files in it
+            ZipInputStream zis = null;
             try {
                 final InputStream is = new BufferedInputStream(new FileInputStream(infile));
-                final ZipInputStream zis = new ZipInputStream(is);
+                zis = new ZipInputStream(is);
                 ZipEntry entry;
                 while ( (entry = zis.getNextEntry()) != null ) {
                     int size;
@@ -1705,6 +1706,7 @@ public final class Switchboard extends serverSwitch
                 Log.logException(e);
             } finally {
                 moved = infile.renameTo(outfile);
+                if (zis != null) try {zis.close();} catch (IOException e) {}
             }
             return moved;
         } else {

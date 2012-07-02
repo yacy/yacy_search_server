@@ -115,8 +115,9 @@ public class AccessTracker {
         while (localSearches.size() > 0) {
             addToDump(localSearches.removeFirst());
         }
+        RandomAccessFile raf = null;
         try {
-            final RandomAccessFile raf = new RandomAccessFile(file, "rw");
+            raf = new RandomAccessFile(file, "rw");
             raf.seek(raf.length());
             for (final String s: log) {
                 raf.write(UTF8.getBytes(s));
@@ -126,8 +127,9 @@ public class AccessTracker {
         } catch (final FileNotFoundException e) {
             Log.logException(e);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.logException(e);
+        } finally {
+            if (raf != null) try {raf.close();} catch (IOException e) {}
         }
     }
 }

@@ -167,6 +167,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream,documentCharset,location,null,false);
                 sourceStream = htmlFilter;
                 charset = htmlFilter.detectCharset();
+                htmlFilter.close();
             } catch (final IOException e1) {
                 throw new Parser.Failure("Charset error:" + e1.getMessage(), location);
             }

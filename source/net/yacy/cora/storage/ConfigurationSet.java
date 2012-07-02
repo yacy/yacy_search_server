@@ -38,6 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.yacy.cora.storage.ConfigurationSet.Entry;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.search.index.SolrField;
 /**
  * this class reads configuration attributes as a list of keywords from a list
@@ -64,8 +65,9 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
 
     public ConfigurationSet(final File file) {
         this.file = file;
+        BufferedReader br = null;
         try {
-            final BufferedReader br = new BufferedReader(new FileReader(this.file));
+            br = new BufferedReader(new FileReader(this.file));
             String s;
             boolean enabled;
             String comment, key, value;
@@ -112,7 +114,11 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
                     }
                 }
             }
-        } catch (final IOException e) {}
+        } catch (final IOException e) {
+            Log.logException(e);
+        } finally {
+            if (br != null) try {br.close();} catch (IOException e) {}
+        }
     }
 
     /**

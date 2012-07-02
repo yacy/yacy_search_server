@@ -66,6 +66,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -946,7 +947,7 @@ public final class HTTPDFileHandler {
                                 templatePatterns = new servletProperties((serverObjects) tmp);
                             }
                             // check if the servlets requests authentication
-                            if (templatePatterns.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
+                            if (templatePatterns.containsKey(serverObjects.ACTION_AUTHENTICATE)) {
                                 // handle brute-force protection
                                 if (realmProp != null) {
                                     Log.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
@@ -958,11 +959,11 @@ public final class HTTPDFileHandler {
                                 }
                                 // send authentication request to browser
                                 final ResponseHeader headers = getDefaultHeaders(path);
-                                headers.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"" + templatePatterns.get(servletProperties.ACTION_AUTHENTICATE, "") + "\"");
+                                headers.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"" + templatePatterns.get(serverObjects.ACTION_AUTHENTICATE, "") + "\"");
                                 HTTPDemon.sendRespondHeader(conProp,out,httpVersion,401,headers);
                                 return;
-                            } else if (templatePatterns.containsKey(servletProperties.ACTION_LOCATION)) {
-                                String location = templatePatterns.get(servletProperties.ACTION_LOCATION, "");
+                            } else if (templatePatterns.containsKey(serverObjects.ACTION_LOCATION)) {
+                                String location = templatePatterns.get(serverObjects.ACTION_LOCATION, "");
                                 if (location.length() == 0) location = path;
 
                                 final ResponseHeader headers = getDefaultHeaders(path);
@@ -1283,20 +1284,24 @@ public final class HTTPDFileHandler {
      * CGI scripts.
      * @param targetFile file to run
      * @return list of parts of command
+     * @throws FileNotFoundException
      * @throws IOException if file can not be accessed
      */
-    private static List<String> assembleCommandFromShebang(
-            final File targetFile)
-            throws IOException {
+    private static List<String> assembleCommandFromShebang(final File targetFile) throws FileNotFoundException {
         final List<String > ret = new ArrayList<String>();
-        final BufferedReader br =
-                new BufferedReader(new FileReader(targetFile), 512);
-        final String line = br.readLine();
-        if (line.startsWith("#!")) {
-            ret.addAll(Arrays.asList(line.substring(2).split(" ")));
+        final BufferedReader br = new BufferedReader(new FileReader(targetFile), 512);
+        String line;
+        try {
+            line = br.readLine();
+            if (line.startsWith("#!")) {
+                ret.addAll(Arrays.asList(line.substring(2).split(" ")));
+            }
+            ret.add(targetFile.getAbsolutePath());
+        } catch (IOException e) {
+            Log.logException(e);
+        } finally {
+            try {br.close();} catch (IOException e) {}
         }
-        ret.add(targetFile.getAbsolutePath());
-
         return ret;
     }
 
@@ -1599,16 +1604,13 @@ public final class HTTPDFileHandler {
 
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
-
 				final ChunkedOutputStream cos = new ChunkedOutputStream(out);
-
 				cos.write(sbb);
 				cos.finish();
+				cos.close();
 			} else {
 				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(sbb.length));
-
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
-
 				out.write(sbb);
 			}
 		} else {

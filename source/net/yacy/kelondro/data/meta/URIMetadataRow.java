@@ -206,7 +206,9 @@ public class URIMetadataRow implements URIMetadata {
         if (dc_publisher.length() > 80) s.append(dc_publisher, 0, 80); else s.append(dc_publisher);
         s.appendLF();
         if (lon == 0.0f && lat == 0.0f) s.appendLF(); else s.append(Double.toString(lat)).append(',').append(Double.toString(lon)).appendLF();
-		return UTF8.getBytes(s.toString());
+        String s0 = s.toString();
+        s.close();
+		return UTF8.getBytes(s0);
     }
 
     public URIMetadataRow(final Row.Entry entry, final WordReferenceVars searchedWord, final long ranking) {
@@ -375,6 +377,7 @@ public class URIMetadataRow implements URIMetadata {
         return this.entry;
     }
 
+    @Override
     public byte[] hash() {
         // return a url-hash, based on the md5 algorithm
         // the result is a String of 12 bytes within a 72-bit space
@@ -390,38 +393,47 @@ public class URIMetadataRow implements URIMetadata {
         return this.hostHash;
     }
 
+    @Override
     public long ranking() {
     	return this.ranking;
     }
 
+    @Override
     public boolean matches(final Pattern matcher) {
         return this.metadata().matches(matcher);
     }
 
+    @Override
     public DigestURI url() {
         return this.metadata().url();
     }
 
+    @Override
     public String  dc_title()  {
         return this.metadata().dc_title();
     }
 
+    @Override
     public String  dc_creator() {
         return this.metadata().dc_creator();
     }
 
+    @Override
     public String  dc_publisher() {
         return this.metadata().dc_publisher();
     }
 
+    @Override
     public String  dc_subject()   {
         return this.metadata().dc_subject();
     }
 
+    @Override
     public double lat() {
         return this.metadata().lat();
     }
 
+    @Override
     public double lon() {
         return this.metadata().lon();
     }
@@ -443,14 +455,17 @@ public class URIMetadataRow implements URIMetadata {
         return this.comp;
     }
 
+    @Override
     public Date moddate() {
         return decodeDate(col_mod);
     }
 
+    @Override
     public Date loaddate() {
         return decodeDate(col_load);
     }
 
+    @Override
     public Date freshdate() {
         return decodeDate(col_fresh);
     }
@@ -468,15 +483,18 @@ public class URIMetadataRow implements URIMetadata {
         return r;
     }
 
+    @Override
     public String md5() {
         // returns the md5 in hex representation
         return Digest.encodeHex(this.entry.getColBytes(col_md5, true));
     }
 
+    @Override
     public char doctype() {
         return (char) this.entry.getColByte(col_dt);
     }
 
+    @Override
     public byte[] language() {
         byte[] b = this.entry.getColBytes(col_lang, true);
         if (b == null || b[0] == (byte)'[') {
@@ -487,52 +505,64 @@ public class URIMetadataRow implements URIMetadata {
         return b;
     }
 
+    @Override
     public int size() {
         return (int) this.entry.getColLong(col_size);
     }
 
+    @Override
     public Bitfield flags() {
         return new Bitfield(this.entry.getColBytes(col_flags, true));
     }
 
+    @Override
     public int wordCount() {
         return (int) this.entry.getColLong(col_wc);
     }
 
+    @Override
     public int llocal() {
         return (int) this.entry.getColLong(col_llocal);
     }
 
+    @Override
     public int lother() {
         return (int) this.entry.getColLong(col_lother);
     }
 
+    @Override
     public int limage() {
         return (int) this.entry.getColLong(col_limage);
     }
 
+    @Override
     public int laudio() {
         return (int) this.entry.getColLong(col_laudio);
     }
 
+    @Override
     public int lvideo() {
         return (int) this.entry.getColLong(col_lvideo);
     }
 
+    @Override
     public int lapp() {
         return (int) this.entry.getColLong(col_lapp);
     }
 
+    @Override
     public String snippet() {
         // the snippet may appear here if the url was transported in a remote search
         // it will not be saved anywhere, but can only be requested here
         return this.snippet;
     }
 
+    @Override
     public WordReferenceVars word() {
         return this.word;
     }
 
+    @Override
     public boolean isOlder(final URIMetadata other) {
         if (other == null) return false;
         final Date tmoddate = moddate();
@@ -547,6 +577,7 @@ public class URIMetadataRow implements URIMetadata {
         return false;
     }
 
+    @Override
     public String toString(final String snippet) {
         // add information needed for remote transport
         final StringBuilder core = corePropList();

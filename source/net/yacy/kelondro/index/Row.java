@@ -27,6 +27,7 @@
 
 package net.yacy.kelondro.index;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -619,7 +620,9 @@ public final class Row implements Serializable {
             }
             if (includeBraces) bb.append('}');
             //System.out.println("DEBUG-ROW " + bb.toString());
-            return bb.toString();
+            String bbs = bb.toString();
+            try {bb.close();} catch (IOException e) {}
+            return bbs;
         }
 
         @Override

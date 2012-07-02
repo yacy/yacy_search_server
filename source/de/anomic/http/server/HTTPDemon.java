@@ -494,6 +494,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
     public Boolean POST(final String arg, final Session session) {
         //System.out.println("POST " + arg);
+        InputStream sessionIn = null;
+        boolean retv;
         try {
             final HashMap<String, Object> prop = parseRequestLine(HeaderFramework.METHOD_POST, arg, session);
 
@@ -504,7 +506,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     : readHeader(prop, session);
 
             // handle transfer-coding
-            final InputStream sessionIn;
             final String transferEncoding = header.get(HeaderFramework.TRANSFER_ENCODING);
             if (transferEncoding != null) {
                 if (!HeaderFramework.HTTP_VERSION_1_1.equals(httpVersion)) {
@@ -550,13 +551,17 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
-            if (sessionIn instanceof ChunkedInputStream) sessionIn.close(); // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
-            //return serverCore.RESUME_CONNECTION;
-            return prop.get(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            retv = prop.get(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
             logUnexpectedError(e, session.userAddress.getHostAddress());
-            return serverCore.TERMINATE_CONNECTION;
+            retv = serverCore.TERMINATE_CONNECTION;
+        } finally {
+            if (sessionIn != null && (sessionIn instanceof ChunkedInputStream)) {
+                // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
+                try {sessionIn.close();} catch (IOException e) {}
+            }
         }
+        return retv;
     }
 
     public static void handleTransparentProxySupport(final RequestHeader header, final HashMap<String, Object> prop, final String virtualHost, final boolean isTransparentProxy) {
@@ -933,6 +938,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
          * @see org.apache.commons.fileupload.RequestContext#getInputStream()
          */
         // @Override
+        @Override
         public InputStream getInputStream() throws IOException {
             return this.inStream;
         }

@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -203,6 +204,7 @@ public class vcfParser extends AbstractParser implements Parser {
                                              "\n\tLine-Nr: " + lineNr);
                 }
             }
+            try {inputReader.close();} catch (IOException e) {}
 
             final String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
             final byte[] text = UTF8.getBytes(parsedDataText.toString());

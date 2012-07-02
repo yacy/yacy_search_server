@@ -547,8 +547,7 @@ public final class FileUtils
         return set;
     }
 
-    public static void saveSet(final File file, final String format, final Set<byte[]> set, final String sep)
-        throws IOException {
+    public static void saveSet(final File file, final String format, final Set<byte[]> set, final String sep) throws IOException {
         final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
         if ( (format == null) || (format.equals("plain")) ) {
@@ -556,6 +555,7 @@ public final class FileUtils
         } else if ( format.equals("gzip") ) {
             os = new GZIPOutputStream(new FileOutputStream(tf));
         } else if ( format.equals("zip") ) {
+            @SuppressWarnings("resource")
             final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
             String name = file.getName();
             if ( name.endsWith(".zip") ) {
@@ -564,7 +564,8 @@ public final class FileUtils
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        if ( os != null ) {
+        IOException ex = null;
+        if ( os != null ) try {
             for ( final byte[] b : set ) {
                 os.write(b);
                 if ( sep != null ) {
@@ -572,12 +573,16 @@ public final class FileUtils
                 }
             }
             os.close();
+        } catch (IOException e) {
+            ex = e;
+        } finally {
+            os.close();
         }
+        if (ex != null) throw ex;
         forceMove(tf, file);
     }
 
-    public static void saveSet(final File file, final String format, final RowSet set, final String sep)
-        throws IOException {
+    public static void saveSet(final File file, final String format, final RowSet set, final String sep) throws IOException {
         final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
         if ( (format == null) || (format.equals("plain")) ) {
@@ -585,6 +590,7 @@ public final class FileUtils
         } else if ( format.equals("gzip") ) {
             os = new GZIPOutputStream(new FileOutputStream(tf));
         } else if ( format.equals("zip") ) {
+            @SuppressWarnings("resource")
             final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
             String name = file.getName();
             if ( name.endsWith(".zip") ) {
@@ -593,7 +599,8 @@ public final class FileUtils
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        if ( os != null ) {
+        IOException ex = null;
+        if ( os != null ) try {
             final Iterator<Row.Entry> i = set.iterator();
             if ( i.hasNext() ) {
                 os.write(i.next().getPrimaryKeyBytes());
@@ -604,8 +611,12 @@ public final class FileUtils
                 }
                 os.write(i.next().getPrimaryKeyBytes());
             }
+        } catch (IOException e) {
+            ex = e;
+        } finally {
             os.close();
         }
+        if (ex != null) throw ex;
         forceMove(tf, file);
     }
 
