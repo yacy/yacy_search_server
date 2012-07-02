@@ -68,6 +68,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.zip.GZIPInputStream;
@@ -3364,13 +3365,8 @@ public final class Switchboard extends serverSwitch
     public void loadSeedLists() {
         // uses the superseed to initialize the database with known seeds
 
-        Seed ys;
         String seedListFileURL;
-        DigestURI url;
-        Iterator<String> enu;
-        int lc;
         final int sc = this.peers.sizeConnected();
-        ResponseHeader header;
 
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
@@ -3378,12 +3374,13 @@ public final class Switchboard extends serverSwitch
         reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
-        client.setTimout((int) getConfigLong("bootstrapLoadTimeout", 20000));
+        client.setTimout((int) getConfigLong("bootstrapLoadTimeout", 10000));
 
         Network.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
 
         // - use the superseed to further fill up the seedDB
-        int ssc = 0, c = 0;
+        AtomicInteger scc = new AtomicInteger(0);
+        int c = 0;
         while ( true ) {
             if ( Thread.currentThread().isInterrupted() ) {
                 break;
@@ -3394,14 +3391,27 @@ public final class Switchboard extends serverSwitch
             }
             c++;
             if ( seedListFileURL.startsWith("http://") || seedListFileURL.startsWith("https://") ) {
+                loadSeedListConcurrently(this.peers, client, seedListFileURL, scc);
+            }
+        }
+        Network.log.logInfo("BOOTSTRAP: "
+            + (this.peers.sizeConnected() - sc)
+            + " new seeds while bootstraping.");
+    }
+
+    private static void loadSeedListConcurrently(final SeedDB peers, final HTTPClient client, final String seedListFileURL, final AtomicInteger scc) {
+        // uses the superseed to initialize the database with known seeds
+
+        Thread seedLoader = new Thread() {
+            @Override
+            public void run() {
                 // load the seed list
                 try {
-
-                    url = new DigestURI(seedListFileURL);
+                    DigestURI url = new DigestURI(seedListFileURL);
                     //final long start = System.currentTimeMillis();
                     client.HEADResponse(url.toString());
                     int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
-                    header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
+                    ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
                     //final long loadtime = System.currentTimeMillis() - start;
                     /*if (header == null) {
                         if (loadtime > getConfigLong("bootstrapLoadTimeout", 6000)) {
@@ -3413,34 +3423,31 @@ public final class Switchboard extends serverSwitch
                         Network.log.logWarning("BOOTSTRAP: seed-list URL "
                             + seedListFileURL
                             + " not usable, last-modified is missing");
-                    } else if ( (header.age() > 86400000) && (ssc > 0) ) {
+                    } else if ( (header.age() > 86400000) && (scc.get() > 0) ) {
                         Network.log.logInfo("BOOTSTRAP: seed-list URL "
                             + seedListFileURL
                             + " too old ("
                             + (header.age() / 86400000)
                             + " days)");
                     } else {
-                        ssc++;
+                        scc.incrementAndGet();
                         final byte[] content = client.GETbytes(url);
-                        enu = FileUtils.strings(content);
-                        lc = 0;
+                        Iterator<String> enu = FileUtils.strings(content);
+                        int lc = 0;
                         while ( enu.hasNext() ) {
                             try {
-                                ys = Seed.genRemoteSeed(enu.next(), null, false, null);
+                                Seed ys = Seed.genRemoteSeed(enu.next(), null, false, null);
                                 if ( (ys != null)
-                                    && (!this.peers.mySeedIsDefined() || !this.peers.mySeed().hash
-                                        .equals(ys.hash)) ) {
-                                    final long lastseen =
-                                        Math
-                                            .abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
+                                    && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
+                                    final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
                                     if ( lastseen < 240 ) {
-                                        if ( this.peers.peerActions.connectPeer(ys, false) ) {
+                                        if ( peers.peerActions.connectPeer(ys, false) ) {
                                             lc++;
                                         }
                                     }
                                 }
                             } catch ( final IOException e ) {
-                                Network.log.logInfo("BOOTSTRAP: bad seed: " + e.getMessage());
+                                Network.log.logInfo("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
                             }
                         }
                         Network.log.logInfo("BOOTSTRAP: "
@@ -3466,10 +3473,8 @@ public final class Switchboard extends serverSwitch
                         + e.getMessage(), e);
                 }
             }
-        }
-        Network.log.logInfo("BOOTSTRAP: "
-            + (this.peers.sizeConnected() - sc)
-            + " new seeds while bootstraping.");
+        };
+        seedLoader.start();
     }
 
     public void initRemoteProxy() {
