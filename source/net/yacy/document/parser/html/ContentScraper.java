@@ -55,11 +55,9 @@ import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ISO639;
-import net.yacy.kelondro.util.MemoryControl;
 
 
 public class ContentScraper extends AbstractScraper implements Scraper {
-	private static final String EMPTY_STRING = new String();
 	public static final int MAX_DOCSIZE = 40 * 1024 * 1024;
 
     private final char degree = '\u00B0';
@@ -364,7 +362,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 }
             }
         } else if (tagname.equalsIgnoreCase("area")) {
-            final String areatitle = cleanLine(tagopts.getProperty("title",EMPTY_STRING));
+            final String areatitle = cleanLine(tagopts.getProperty("title", EMPTY_STRING));
             //String alt   = tagopts.getProperty("alt",EMPTY_STRING);
             final String href  = tagopts.getProperty("href", EMPTY_STRING);
             if (href.length() > 0) {
@@ -537,26 +535,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         String line = cleanLine(super.stripAll(scraper.content.getChars()));
         scraper.close();
         return line;
-    }
-
-    private final static String cleanLine(final String s) {
-        if (!MemoryControl.request(s.length() * 2, false)) return EMPTY_STRING;
-        final StringBuilder sb = new StringBuilder(s.length());
-        char l = ' ';
-        char c;
-        for (int i = 0; i < s.length(); i++) {
-            c = s.charAt(i);
-            if (c < ' ') c = ' ';
-            if (c == ' ') {
-                if (l != ' ') sb.append(c);
-            } else {
-                sb.append(c);
-            }
-            l = c;
-        }
-
-        // return result
-        return sb.toString().trim();
     }
 
     public String getTitle() {
@@ -902,12 +880,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         System.out.println("TEXT     :" + this.content.toString());
     }
 
+    @Override
     public void registerHtmlFilterEventListener(final ScraperListener listener) {
         if (listener != null) {
             this.htmlFilterEventListeners.add(ScraperListener.class, listener);
         }
     }
 
+    @Override
     public void deregisterHtmlFilterEventListener(final ScraperListener listener) {
         if (listener != null) {
             this.htmlFilterEventListeners.remove(ScraperListener.class, listener);

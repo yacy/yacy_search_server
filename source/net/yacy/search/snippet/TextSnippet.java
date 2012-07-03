@@ -266,6 +266,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 this.resultStatus = ResultClass.SOURCE_WEB;
             }
 
+            // parse the document to get all sentenced; available for snippet computation
             Document document = null;
             try {
                 document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());

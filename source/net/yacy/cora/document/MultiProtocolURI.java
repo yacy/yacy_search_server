@@ -914,6 +914,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
           this.port == other.port;
     }
 
+    @Override
     public int compareTo(final MultiProtocolURI h) {
         return toString().compareTo(h.toString());
     }
@@ -1842,7 +1843,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      * Please call isHTTP(), isHTTPS() and isFTP() before using this class
      */
     public java.net.URL getURL() throws MalformedURLException {
-        if (!(isHTTP() || isHTTPS() || isFTP())) throw new UnsupportedOperationException();
+        if (!(isHTTP() || isHTTPS() || isFTP())) throw new MalformedURLException();
         return new java.net.URL(this.toNormalform(false, true));
     }
 
@@ -1850,8 +1851,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      * create a standard java File.
      * Please call isFile() before using this class
      */
-    public java.io.File getFSFile() {
-        if (!isFile()) throw new UnsupportedOperationException();
+    public java.io.File getFSFile() throws MalformedURLException {
+        if (!isFile()) throw new MalformedURLException();
         return new java.io.File(this.toNormalform(false, true).substring(7));
     }
 
@@ -1861,7 +1862,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      * @throws MalformedURLException
      */
     public SmbFile getSmbFile() throws MalformedURLException {
-        if (!isSMB()) throw new UnsupportedOperationException();
+        if (!isSMB()) throw new MalformedURLException();
         final String url = unescape(this.toNormalform(false, true));
         return new SmbFile(url);
     }

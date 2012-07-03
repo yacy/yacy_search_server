@@ -281,9 +281,9 @@ public final class TextParser {
         assert !parsers.isEmpty();
 
         Document[] docs = null;
-        final HashMap<Parser, Parser.Failure> failedParser = new HashMap<Parser, Parser.Failure>();
-        if (MemoryControl.request(sourceArray.length * 6, false)) {
-            for (final Parser parser: parsers) {
+        final Map<Parser, Parser.Failure> failedParser = new HashMap<Parser, Parser.Failure>();
+        for (final Parser parser: parsers) {
+            if (MemoryControl.request(sourceArray.length * 6, false)) {
             	ByteArrayInputStream bis;
             	if (mimeType.equals("text/plain") && parser.getName().equals("HTML Parser")) {
             	    // a hack to simulate html files .. is needed for NOLOAD queues. This throws their data into virtual text/plain messages.
