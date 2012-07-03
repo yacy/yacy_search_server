@@ -864,9 +864,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // free resources
         super.close();
         this.anchors.clear();
+        this.rss.clear();
+        this.css.clear();
+        this.script.clear();
+        this.frames.clear();
+        this.iframes.clear();
+        this.embeds.clear();
         this.images.clear();
+        this.metas.clear();
         this.title = null;
         this.headlines = null;
+        this.bold.clear();
+        this.italic.clear();
         this.content.clear();
         this.root = null;
     }

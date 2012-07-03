@@ -821,6 +821,17 @@ dc_rights
             ContentScraper.addAllImages(images, doc.getImages());
             if (doc.lon() != 0.0f && doc.lat() != 0.0f) { lon = doc.lon(); lat = doc.lat(); }
         }
+
+        // clean up parser data
+        for (final Document doc: docs) {
+            Object parserObject = doc.getParserObject();
+            if (parserObject instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) parserObject;
+                html.close();
+            }
+        }
+
+        // return consolidation
         return new Document(
                 location,
                 globalMime,

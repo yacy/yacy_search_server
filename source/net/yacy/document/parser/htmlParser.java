@@ -143,7 +143,6 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getRSS(),
                 scraper.getImages(),
                 scraper.indexingDenied());
-        //scraper.close();
         ppd.setFavicon(scraper.getFavicon());
 
         return ppd;
