@@ -544,7 +544,7 @@ public final class TransformerWriter extends Writer {
         System.exit(0);
         final char[] buffer = new char[512];
         try {
-            final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost:8090"));
+            final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost:8090"), 1000);
             final Transformer transformer = new ContentTransformer();
             final Reader is = new FileReader(args[0]);
             final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));

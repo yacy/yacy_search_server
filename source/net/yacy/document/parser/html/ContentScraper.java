@@ -32,7 +32,6 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -47,6 +46,7 @@ import javax.swing.event.EventListenerList;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.storage.HashARC;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.htmlParser;
@@ -131,6 +131,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final EventListenerList htmlFilterEventListeners;
     private double lon, lat;
     private MultiProtocolURI canonical;
+    private final int maxLinks;
 
 
     /**
@@ -149,21 +150,22 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final Evaluation evaluationScores;
 
     @SuppressWarnings("unchecked")
-    public ContentScraper(final MultiProtocolURI root) {
+    public ContentScraper(final MultiProtocolURI root, int maxLinks) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         assert root != null;
         this.root = root;
+        this.maxLinks = maxLinks;
         this.evaluationScores = new Evaluation();
-        this.rss = new HashMap<MultiProtocolURI, String>();
-        this.css = new HashMap<MultiProtocolURI, String>();
-        this.anchors = new HashMap<MultiProtocolURI, Properties>();
-        this.images = new HashMap<MultiProtocolURI, ImageEntry>();
-        this.embeds = new HashMap<MultiProtocolURI, EmbedEntry>();
+        this.rss = new HashARC<MultiProtocolURI, String>(maxLinks);
+        this.css = new HashARC<MultiProtocolURI, String>(maxLinks);
+        this.anchors = new HashARC<MultiProtocolURI, Properties>(maxLinks);
+        this.images = new HashARC<MultiProtocolURI, ImageEntry>(maxLinks);
+        this.embeds = new HashARC<MultiProtocolURI, EmbedEntry>(maxLinks);
         this.frames = new HashSet<MultiProtocolURI>();
         this.iframes = new HashSet<MultiProtocolURI>();
-        this.metas = new HashMap<String, String>();
+        this.metas = new HashARC<String, String>(maxLinks);
         this.script = new HashSet<MultiProtocolURI>();
         this.title = EMPTY_STRING;
         this.headlines = new ArrayList[6];
@@ -514,7 +516,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
         // start a new scraper to parse links inside this text
         // parsing the content
-        final ContentScraper scraper = new ContentScraper(this.root);
+        final ContentScraper scraper = new ContentScraper(this.root, this.maxLinks);
         final TransformerWriter writer = new TransformerWriter(null, null, scraper, null, false);
         try {
             FileUtils.copy(new CharArrayReader(inlineHtml), writer);
@@ -912,19 +914,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
 
-    public static ContentScraper parseResource(final File file) throws IOException {
+    public static ContentScraper parseResource(final File file, final int maxLinks) throws IOException {
         // load page
         final byte[] page = FileUtils.read(file);
         if (page == null) throw new IOException("no content in file " + file.toString());
 
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8", new MultiProtocolURI("http://localhost"),null,false);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8", new MultiProtocolURI("http://localhost"),null,false, maxLinks);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         htmlFilter.close();
         if (charset == null) charset = Charset.defaultCharset().toString();
 
         // scrape content
-        final ContentScraper scraper = new ContentScraper(new MultiProtocolURI("http://localhost"));
+        final ContentScraper scraper = new ContentScraper(new MultiProtocolURI("http://localhost"), maxLinks);
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         writer.close();

@@ -492,7 +492,7 @@ public final class HTTPDFileHandler {
                             aBuffer.append("    <li><a href=\"" + path + element + "/\">" + element + "/</a><br/></li>\n");
                         } else {
                             if (element.endsWith("html") || (element.endsWith("htm"))) {
-                                scraper = ContentScraper.parseResource(f);
+                                scraper = ContentScraper.parseResource(f, 10000);
                                 headline = scraper.getTitle();
                                 author = scraper.getAuthor();
                                 publisher = scraper.getPublisher();
@@ -1055,7 +1055,7 @@ public final class HTTPDFileHandler {
                                 // save position
                                 fis.mark(1000);
                                 // scrape document to look up charset
-                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis, "UTF-8", new DigestURI("http://localhost"), null, false);
+                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis, "UTF-8", new DigestURI("http://localhost"), null, false, 10);
                                 final String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
                                 htmlFilter.close();
                                 if (charset != null) mimeType = mimeType + "; charset="+charset;
