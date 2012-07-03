@@ -28,9 +28,11 @@ package net.yacy.search.query;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -521,17 +523,16 @@ public final class SearchEvent
         }
     }
 
-    public class SecondarySearchSuperviser extends Thread
-    {
+    public class SecondarySearchSuperviser extends Thread {
 
         // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
         // this relation contains the information where specific urls can be found in specific peers
-        private final SortedMap<String, SortedMap<String, StringBuilder>> abstractsCache;
+        private final SortedMap<String, SortedMap<String, Set<String>>> abstractsCache;
         private final SortedSet<String> checkedPeers;
         private final Semaphore trigger;
 
         public SecondarySearchSuperviser() {
-            this.abstractsCache = Collections.synchronizedSortedMap(new TreeMap<String, SortedMap<String, StringBuilder>>());
+            this.abstractsCache = Collections.synchronizedSortedMap(new TreeMap<String, SortedMap<String, Set<String>>>());
             this.checkedPeers = Collections.synchronizedSortedSet(new TreeSet<String>());
             this.trigger = new Semaphore(0);
         }
@@ -542,25 +543,24 @@ public final class SearchEvent
          * @param wordhash
          * @param singleAbstract // a mapping from url-hashes to a string of peer-hashes
          */
-        public void addAbstract(final String wordhash, final SortedMap<String, StringBuilder> singleAbstract) {
-            final SortedMap<String, StringBuilder> oldAbstract;
-                oldAbstract = this.abstractsCache.get(wordhash);
-                if ( oldAbstract == null ) {
-                    // new abstracts in the cache
-                    this.abstractsCache.put(wordhash, singleAbstract);
-                    return;
-                }
+        public void addAbstract(final String wordhash, final SortedMap<String, Set<String>> singleAbstract) {
+            final SortedMap<String, Set<String>> oldAbstract = this.abstractsCache.get(wordhash);
+            if ( oldAbstract == null ) {
+                // new abstracts in the cache
+                this.abstractsCache.put(wordhash, singleAbstract);
+                return;
+            }
             // extend the abstracts in the cache: join the single abstracts
             new Thread() {
                 @Override
                 public void run() {
-                    Thread.currentThread().setName("SearchEvent.paddAbstract:" + wordhash);
-                    for ( final Map.Entry<String, StringBuilder> oneref : singleAbstract.entrySet() ) {
+                    Thread.currentThread().setName("SearchEvent.addAbstract:" + wordhash);
+                    for ( final Map.Entry<String, Set<String>> oneref : singleAbstract.entrySet() ) {
                         final String urlhash = oneref.getKey();
-                        final StringBuilder peerlistNew = oneref.getValue();
-                        final StringBuilder peerlistOld = oldAbstract.put(urlhash, peerlistNew);
+                        final Set<String> peerlistNew = oneref.getValue();
+                        final Set<String> peerlistOld = oldAbstract.put(urlhash, peerlistNew);
                         if ( peerlistOld != null ) {
-                            peerlistOld.append(peerlistNew);
+                            peerlistOld.addAll(peerlistNew);
                         }
                     }
                 }
@@ -572,31 +572,20 @@ public final class SearchEvent
             this.trigger.release();
         }
 
-        private String wordsFromPeer(final String peerhash, final StringBuilder urls) {
-            Map.Entry<String, SortedMap<String, StringBuilder>> entry;
-            String word, url, wordlist = "";
-            StringBuilder peerlist;
-            SortedMap<String, StringBuilder> urlPeerlist;
-            int p;
-            boolean hasURL;
-            final Iterator<Map.Entry<String, SortedMap<String, StringBuilder>>> i =
-                this.abstractsCache.entrySet().iterator();
-            while ( i.hasNext() ) {
-                entry = i.next();
+        private Set<String> wordsFromPeer(final String peerhash, final Set<String> urls) {
+            Set<String> wordlist = new HashSet<String>();
+            String word;
+            Set<String> peerlist;
+            SortedMap<String, Set<String>> urlPeerlist; // urlhash:peerlist
+            for ( Map.Entry<String, SortedMap<String, Set<String>>> entry: this.abstractsCache.entrySet()) {
                 word = entry.getKey();
                 urlPeerlist = entry.getValue();
-                hasURL = true;
-                for ( int j = 0; j < urls.length(); j = j + 12 ) {
-                    url = urls.substring(j, j + 12);
+                for (String url: urls) {
                     peerlist = urlPeerlist.get(url);
-                    p = (peerlist == null) ? -1 : peerlist.indexOf(peerhash);
-                    if ( (p < 0) || (p % 12 != 0) ) {
-                        hasURL = false;
+                    if (peerlist != null && peerlist.contains(peerhash)) {
+                        wordlist.add(word);
                         break;
                     }
-                }
-                if ( hasURL ) {
-                    wordlist += word;
                 }
             }
             return wordlist;
@@ -605,36 +594,36 @@ public final class SearchEvent
         @Override
         public void run() {
             try {
-                int t = 0;
-                while ( this.trigger.tryAcquire(10000, TimeUnit.MILLISECONDS) ) {
-                    // a trigger was released
-                    prepareSecondarySearch();
-                    t++;
-                    if ( t > 10 ) {
+                boolean aquired;
+                while ( aquired = this.trigger.tryAcquire(3000, TimeUnit.MILLISECONDS) ) {
+                    if ( !aquired || MemoryControl.shortStatus()) {
                         break;
                     }
+                    // a trigger was released
+                    prepareSecondarySearch();
                 }
             } catch ( final InterruptedException e ) {
                 // the thread was interrupted
                 // do nothing
             }
-            // the time-out was reached
+            // the time-out was reached:
+            // as we will never again prepare another secondary search, we can flush all cached data
+            this.abstractsCache.clear();
+            this.checkedPeers.clear();
         }
 
         private void prepareSecondarySearch() {
-            if ( this.abstractsCache == null
-                || this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size() ) {
+            if ( this.abstractsCache == null || this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size() ) {
                 return; // secondary search not possible (yet)
             }
 
             // catch up index abstracts and join them; then call peers again to submit their urls
-
             /*
             System.out.println("DEBUG-INDEXABSTRACT: " + this.abstractsCache.size() + " word references caught, " + SearchEvent.this.query.queryHashes.size() + " needed");
-            for (final Map.Entry<String, SortedMap<String, StringBuilder>> entry: this.abstractsCache.entrySet()) {
+            for (final Map.Entry<String, SortedMap<String, Set<String>>> entry: this.abstractsCache.entrySet()) {
                 System.out.println("DEBUG-INDEXABSTRACT: hash " + entry.getKey() + ": " + ((SearchEvent.this.query.queryHashes.has(entry.getKey().getBytes()) ? "NEEDED" : "NOT NEEDED") + "; " + entry.getValue().size() + " entries"));
             }
-             */
+            */
 
             // find out if there are enough references for all words that are searched
             if ( this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size() ) {
@@ -642,38 +631,37 @@ public final class SearchEvent
             }
 
             // join all the urlhash:peerlist relations: the resulting map has values with a combined peer-list list
-            final SortedMap<String, StringBuilder> abstractJoin =
-                SetTools.joinConstructive(this.abstractsCache.values(), true);
+            final SortedMap<String, Set<String>> abstractJoin = SetTools.joinConstructive(this.abstractsCache.values(), true);
             if ( abstractJoin.isEmpty() ) {
                 return;
                 // the join result is now a urlhash: peer-list relation
             }
 
             // generate a list of peers that have the urls for the joined search result
-            final SortedMap<String, StringBuilder> secondarySearchURLs = new TreeMap<String, StringBuilder>(); // a (peerhash:urlhash-liststring) mapping
-            String url, peer;
-            StringBuilder urls, peerlist;
+            final SortedMap<String, Set<String>> secondarySearchURLs = new TreeMap<String, Set<String>>(); // a (peerhash:urlhash-liststring) mapping
+            String url;
+            Set<String> urls;
+            Set<String> peerlist;
             final String mypeerhash = SearchEvent.this.peers.mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
-            for ( final Map.Entry<String, StringBuilder> entry : abstractJoin.entrySet() ) {
+            for ( final Map.Entry<String, Set<String>> entry : abstractJoin.entrySet() ) {
                 url = entry.getKey();
                 peerlist = entry.getValue();
                 //System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peerlist);
                 mypeercount = 0;
-                for ( int j = 0; j < peerlist.length(); j += 12 ) {
-                    peer = peerlist.substring(j, j + 12);
+                for (String peer: peerlist) {
                     if ( (peer.equals(mypeerhash)) && (mypeercount++ > 1) ) {
                         continue;
                     }
                     //if (peers.indexOf(peer) < j) continue; // avoid doubles that may appear in the abstractJoin
                     urls = secondarySearchURLs.get(peer);
                     if ( urls == null ) {
-                        urls = new StringBuilder(24);
-                        urls.append(url);
+                        urls = new HashSet<String>();
+                        urls.add(url);
                         secondarySearchURLs.put(peer, urls);
                     } else {
-                        urls.append(url);
+                        urls.add(url);
                     }
                     secondarySearchURLs.put(peer, urls);
                 }
@@ -683,13 +671,12 @@ public final class SearchEvent
             }
 
             // compute words for secondary search and start the secondary searches
-            String words;
+            Set<String> words;
             SearchEvent.this.secondarySearchThreads =
-                new RemoteSearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs
-                    .size()];
+                new RemoteSearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs.size()];
             int c = 0;
-            for ( final Map.Entry<String, StringBuilder> entry : secondarySearchURLs.entrySet() ) {
-                peer = entry.getKey();
+            for ( final Map.Entry<String, Set<String>> entry : secondarySearchURLs.entrySet() ) {
+                String peer = entry.getKey();
                 if ( peer.equals(mypeerhash) ) {
                     continue; // we don't need to ask ourself
                 }
@@ -698,11 +685,10 @@ public final class SearchEvent
                 }
                 urls = entry.getValue();
                 words = wordsFromPeer(peer, urls);
-                if ( words.length() == 0 ) {
+                if ( words.size() == 0 ) {
                     continue; // ???
                 }
-                assert words.length() >= 12 : "words = " + words;
-                //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls + " from words: " + words);
+                Log.logInfo("SearchEvent.SecondarySearchSuperviser", "asking peer " + peer + " for urls: " + urls + " from words: " + words);
                 this.checkedPeers.add(peer);
                 SearchEvent.this.secondarySearchThreads[c++] =
                     RemoteSearch.secondaryRemoteSearch(

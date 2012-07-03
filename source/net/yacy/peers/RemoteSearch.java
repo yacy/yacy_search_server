@@ -26,6 +26,7 @@ package net.yacy.peers;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 
@@ -215,7 +216,7 @@ public class RemoteSearch extends Thread {
     }
 
     public static RemoteSearch secondaryRemoteSearch(
-            final String wordhashes, final String urlhashes,
+            final Set<String> wordhashes, final String urlhashes,
             final long time,
             final Segment indexSegment,
             final SeedDB peers,
@@ -223,7 +224,6 @@ public class RemoteSearch extends Thread {
             final String targethash, final Blacklist blacklist,
             final RankingProfile rankingProfile,
             final Bitfield constraint, final SortedMap<byte[], String> clusterselection) {
-    	assert wordhashes.length() >= 12 : "wordhashes = " + wordhashes;
 
         // check own peer status
         if (peers.mySeed() == null || peers.mySeed().getPublicAddress() == null) { return null; }
@@ -234,8 +234,10 @@ public class RemoteSearch extends Thread {
         final Seed targetPeer = peers.getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(ASCII.getBytes(targetPeer.hash)));
+        StringBuilder whs = new StringBuilder(24);
+        for (String s: wordhashes) whs.append(s);
         final RemoteSearch searchThread = new RemoteSearch(
-                wordhashes, "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, QueryParams.catchall_pattern, new QueryParams.Modifier(""), "", "", "", "all", 20, time, 9999, true, 0, targetPeer,
+                whs.toString(), "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, QueryParams.catchall_pattern, new QueryParams.Modifier(""), "", "", "", "all", 20, time, 9999, true, 0, targetPeer,
                 indexSegment, peers, containerCache, null, blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;
