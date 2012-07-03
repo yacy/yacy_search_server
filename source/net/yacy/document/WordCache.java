@@ -48,10 +48,13 @@ import net.yacy.kelondro.util.MemoryControl;
 public class WordCache {
 
     // common word cache
-    private static final int commonWordsMaxSize = 100000; // maximum size of common word cache
+    private static final int commonWordsMaxSize = (int) (MemoryControl.available() / 30000); // maximum size of common word cache
     private static final int commonWordsMinLength = 5;    // words must have that length at minimum
     private static OrderedScoreMap<StringBuilder> commonWords = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-
+    static {
+    	Log.logConfig("WordCache", "commonWordsMaxSize = " + commonWordsMaxSize);
+    }
+    
     // dictionaries
     private final File dictionaryPath;
     final Map<String, Dictionary> dictionaries;
@@ -62,6 +65,7 @@ public class WordCache {
         private final TreeSet<StringBuilder> tcid; // the dictionary of reverse words
 
         public Dictionary(final File file) throws IOException {
+        	
             this.dict = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
             this.tcid = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
 
