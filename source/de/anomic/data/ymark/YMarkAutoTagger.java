@@ -1,6 +1,5 @@
 package de.anomic.data.ymark;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
@@ -11,12 +10,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser.Failure;
+import net.yacy.document.SentenceReader;
 import net.yacy.document.WordTokenizer;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
@@ -100,7 +99,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		buffer.append(document.dc_title().toLowerCase());
 		buffer.append(document.dc_description().toLowerCase());
 		buffer.append(document.dc_subject(' ').toLowerCase());
-		final WordTokenizer tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(buffer.toString())), LibraryProvider.dymLib);
+		final WordTokenizer tokens = new WordTokenizer(new SentenceReader(buffer.toString()), LibraryProvider.dymLib);
 		try {
 			int score = 0;
 
@@ -177,7 +176,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 	private static TreeMap<String, YMarkTag> getPhrases(final Document document, final int size) {
 		final TreeMap<String, YMarkTag> phrases = new TreeMap<String, YMarkTag>();
 		final StringBuilder phrase = new StringBuilder(128);
-		final WordTokenizer tokens = new WordTokenizer(document.getText(), LibraryProvider.dymLib);
+		final WordTokenizer tokens = new WordTokenizer(new SentenceReader(document.getTextString()), LibraryProvider.dymLib);
 		try {
 			StringBuilder token;
 			int count = 0;

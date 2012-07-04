@@ -250,7 +250,7 @@ public class pdfParser extends AbstractParser implements Parser {
                     System.out.println("\tParsed text with " + document.getTextLength() + " chars of text and " + document.getAnchors().size() + " anchors");
                     try {
                         // write file
-                        FileUtils.copy(document.getText(), new File("parsedPdf.txt"));
+                        FileUtils.copy(document.getTextStream(), new File("parsedPdf.txt"));
                     } catch (final IOException e) {
                         System.err.println("error saving parsed document");
                         Log.logException(e);

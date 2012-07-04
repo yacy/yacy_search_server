@@ -60,28 +60,24 @@ public class csvParser extends AbstractParser implements Parser {
         for (final String[] row: table) {
             sb.append(concatRow(row)).append(' ');
         }
-        try {
-            return new Document[]{new Document(
-                    location,
-                    mimeType,
-                    charset,
-                    this,
-                    null,
-                    null,
-                    concatRow(table.get(0)),
-                    "",
-                    "",
-                    null,
-                    null,
-                    0.0f, 0.0f,
-                    sb.toString().getBytes(charset),
-                    null,
-                    null,
-                    null,
-                    false)};
-        } catch (UnsupportedEncodingException e) {
-            throw new Parser.Failure("error in csvParser, getBytes: " + e.getMessage(), location);
-        }
+        return new Document[]{new Document(
+		        location,
+		        mimeType,
+		        charset,
+		        this,
+		        null,
+		        null,
+		        concatRow(table.get(0)),
+		        "",
+		        "",
+		        null,
+		        null,
+		        0.0f, 0.0f,
+		        sb.toString(),
+		        null,
+		        null,
+		        null,
+		        false)};
     }
 
     private String concatRow(String[] columns) {

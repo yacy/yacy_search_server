@@ -81,7 +81,7 @@ public class AugmentParser extends AbstractParser implements Parser {
 
 			all = "yacylatest";
 			newDoc = new Document(url, mimeType, charset, null, null, null, "", "",
-					"", null, "", 0, 0, all.getBytes(), null, null, null, false);
+					"", null, "", 0, 0, all, null, null, null, false);
 		}
 
 		return newDoc;
@@ -94,7 +94,7 @@ public class AugmentParser extends AbstractParser implements Parser {
 		String all = "";
 
 		Document newDoc = new Document(url, mimeType, charset, null, null, null, "", "",
-				"", null, "", 0, 0, all.getBytes(), null, null, null, false);
+				"", null, "", 0, 0, all, null, null, null, false);
 
 
 		Iterator<net.yacy.kelondro.blob.Tables.Row> it;

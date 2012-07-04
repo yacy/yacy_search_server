@@ -28,7 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
@@ -94,28 +93,24 @@ public class torrentParser extends AbstractParser implements Parser {
             if (nameo != null) title = UTF8.String(nameo.getString());
         }
         if (title == null || title.length() == 0) title = MultiProtocolURI.unescape(location.getFileName());
-        try {
-            return new Document[]{new Document(
-                    location,
-                    mimeType,
-                    charset,
-                    this,
-                    null,
-                    null,
-                    title, // title
-                    comment, // author
-                    location.getHost(),
-                    null,
-                    null,
-                    0.0f, 0.0f,
-                    filenames.toString().getBytes(charset),
-                    null,
-                    null,
-                    null,
-                    false)};
-        } catch (UnsupportedEncodingException e) {
-            throw new Parser.Failure("error in torrentParser, getBytes: " + e.getMessage(), location);
-        }
+        return new Document[]{new Document(
+		        location,
+		        mimeType,
+		        charset,
+		        this,
+		        null,
+		        null,
+		        title, // title
+		        comment, // author
+		        location.getHost(),
+		        null,
+		        null,
+		        0.0f, 0.0f,
+		        filenames.toString(),
+		        null,
+		        null,
+		        null,
+		        false)};
     }
 
     public static void main(String[] args) {

@@ -24,7 +24,6 @@
 
 package net.yacy.search.snippet;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,12 +35,12 @@ import java.util.SortedMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.SentenceReader;
 import net.yacy.document.SnippetExtractor;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -183,7 +182,13 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // try the solr text first
             if (solrText != null) {
                 // compute sentences from solr query
-                sentences = Document.getSentences(pre, new ByteArrayInputStream(UTF8.getBytes(solrText)));
+                final SentenceReader sr = new SentenceReader(solrText);
+                sr.pre(pre);
+                sentences = new ArrayList<StringBuilder>();
+                while (sr.hasNext()) {
+                    sentences.add(sr.next());
+                }
+                
                 if (sentences != null) {
                     try {
                         final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);

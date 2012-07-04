@@ -65,9 +65,6 @@ public class genericParser extends AbstractParser implements Parser {
                 null,
                 null,
                 false)};
-        for (final Document d: docs) {
-            assert d.getText() != null : "mimeType = " + mimeType;
-        } // verify docs
         return docs;
     }
 }

@@ -27,7 +27,6 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
@@ -47,6 +46,7 @@ import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
+import net.yacy.document.SentenceReader;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
@@ -232,7 +232,7 @@ public class ViewFile {
             }
 
             if (viewMode.equals("parsed")) {
-                final String content = UTF8.String(document.getTextBytes());
+                final String content = document.getTextString();
                 // content = wikiCode.replaceHTML(content); // added by Marc Nause
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
                 prop.put("viewMode_title", document.dc_title());
@@ -284,7 +284,7 @@ public class ViewFile {
                     for (final StringBuilder s: sentences) {
                         sentence = s.toString();
                         Enumeration<StringBuilder> tokens = null;
-                        tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), LibraryProvider.dymLib);
+                        tokens = new WordTokenizer(new SentenceReader(sentence), LibraryProvider.dymLib);
                         while (tokens.hasMoreElements()) {
                             token = tokens.nextElement();
                             if (token.length() > 0) {

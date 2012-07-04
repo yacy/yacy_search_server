@@ -58,7 +58,7 @@ public class rdfParser extends AbstractParser implements Parser {
 
         String all = "rdfdatasource";
 		doc = new Document(url, mimeType, charset, null, null, null, "", "",
-					"", null, "", 0, 0, all.getBytes(), null, null, null, false);
+					"", null, "", 0, 0, all, null, null, null, false);
 
         docs.add(doc);
 

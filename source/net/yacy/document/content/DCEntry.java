@@ -36,11 +36,9 @@ import java.util.Locale;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-
 
 public class DCEntry extends TreeMap<String, String> {
 
@@ -277,7 +275,7 @@ public class DCEntry extends TreeMap<String, String> {
             null,
             "",
             getLon(), getLat(),
-            UTF8.getBytes(getDescription()),
+            getDescription(),
             null,
             null,
             null,

@@ -626,12 +626,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return false;
     }
 
-    public byte[] getText() {
+    public String getText() {
         try {
-            return this.content.getBytes();
+            return this.content.toString();
         } catch (final OutOfMemoryError e) {
             Log.logException(e);
-            return new byte[0];
+            return "";
         }
     }
 

@@ -29,7 +29,6 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -115,7 +114,7 @@ public class vsdParser extends AbstractParser implements Parser {
                     null,         // an array of section headlines
                     abstrct,      // an abstract
                     0.0f, 0.0f,
-                    UTF8.getBytes(contents),     // the parsed document text
+                    contents,     // the parsed document text
                     null,         // a map of extracted anchors
                     null,
                     null,         // a treeset of image URLs

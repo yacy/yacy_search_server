@@ -28,13 +28,10 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
-
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
 public class docParser extends AbstractParser implements Parser {
@@ -99,7 +96,7 @@ public class docParser extends AbstractParser implements Parser {
                   null,
                   null,
                   0.0f, 0.0f,
-                  UTF8.getBytes(contents.toString()),
+                  contents.toString(),
                   null,
                   null,
                   null,

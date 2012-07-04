@@ -43,7 +43,6 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -206,7 +205,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              new String[]{}, // sections
              description == null ? "" : description, // description
              0.0f, 0.0f, // TODO parse location
-             UTF8.getBytes(infoString), // content text
+             infoString, // content text
              anchors, // anchors
              null,
              images,

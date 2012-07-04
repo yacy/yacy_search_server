@@ -178,8 +178,7 @@ public final class TextParser {
         } finally {
             if (sourceStream != null) try { sourceStream.close(); } catch (final Exception ex) {}
         }
-        for (final Document d: docs) { assert d.getText() != null; } // verify docs
-
+        
         return docs;
     }
 
@@ -261,7 +260,6 @@ public final class TextParser {
         if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
         try {
             final Document[] docs = parser.parse(location, mimeType, documentCharset, sourceStream);
-            for (final Document d: docs) { assert d != null && d.getText() != null; } // verify docs
             return docs;
         } catch (final Exception e) {
             throw new Parser.Failure("parser failed: " + parser.getName(), location);
@@ -324,7 +322,7 @@ public final class TextParser {
                 throw new Parser.Failure("All parser failed: " + failedParsers, location);
             }
         }
-        for (final Document d: docs) { assert d.getText() != null : "mimeType = " + mimeType; } // verify docs
+        for (final Document d: docs) { assert d.getTextStream() != null : "mimeType = " + mimeType; } // verify docs
 
         return docs;
     }

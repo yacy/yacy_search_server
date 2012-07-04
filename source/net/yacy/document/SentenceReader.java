@@ -24,12 +24,9 @@
 
 package net.yacy.document;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.StringReader;
 import java.util.Iterator;
 
 public class SentenceReader implements Iterator<StringBuilder> {
@@ -37,17 +34,13 @@ public class SentenceReader implements Iterator<StringBuilder> {
     // this enumerates StringBuilder objects
     
     private StringBuilder buffer;
-    private BufferedReader raf;
+    private Reader raf;
     private int counter = 0;
     private boolean pre = false;
-
-    public SentenceReader(final InputStream is) {
-        assert is != null;
-        try {
-            raf = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    
+    public SentenceReader(final String text) {
+    	assert text != null;
+        raf = new StringReader(text);
         buffer = nextElement0();
         counter = 0;
         pre = false;
@@ -144,9 +137,8 @@ public class SentenceReader implements Iterator<StringBuilder> {
     
     public synchronized void close() {
     	try {
-    		raf.close();
-    	} catch(IOException ioe) {
-    		// Ignore IO Exceptions
-    	}
+			raf.close();
+		} catch (IOException e) {
+		}
     }
 }
