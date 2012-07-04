@@ -367,8 +367,7 @@ dc_rights
     }
 
     public List<StringBuilder> getSentences(final boolean pre) {
-        final SentenceReader sr = new SentenceReader(getTextString());
-        sr.pre(pre);
+        final SentenceReader sr = new SentenceReader(getTextString(), pre);
         List<StringBuilder> sentences = new ArrayList<StringBuilder>();
         while (sr.hasNext()) {
             sentences.add(sr.next());

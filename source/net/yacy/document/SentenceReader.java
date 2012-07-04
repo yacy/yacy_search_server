@@ -33,16 +33,19 @@ public class SentenceReader implements Iterator<StringBuilder> {
     private StringBuilder buffer;
     private String text;
     private int pos;
-    private int counter = 0;
     private boolean pre = false;
-    
+
     public SentenceReader(final String text) {
     	assert text != null;
         this.text = text;
         this.pos = 0;
-        this.buffer = nextElement0();
-        this.counter = 0;
         this.pre = false;
+        this.buffer = nextElement0();
+    }
+    
+    public SentenceReader(final String text, final boolean pre) {
+    	this(text);
+        this.pre = pre;
     }
 
     public void pre(final boolean x) {
@@ -71,9 +74,9 @@ public class SentenceReader implements Iterator<StringBuilder> {
                 break;
             }
             c = (char) nextChar;
-            if (pre && ((c == (char) 10) || (c == (char) 13))) break;
+            if (pre && (nextChar == 10 || nextChar == 13)) break;
             if (c < ' ') c = ' ';
-            if ((lc == ' ') && (c == ' ')) continue; // ignore double spaces
+            if (lc == ' ' && c == ' ') continue; // ignore double spaces
             s.append(c);
             if (punctuation(lc) && invisible(c)) break;
             lc = c;
@@ -88,7 +91,10 @@ public class SentenceReader implements Iterator<StringBuilder> {
     }
 
     public final static boolean invisible(final char c) {
-        final int type = Character.getType(c);
+    	// first check average simple case
+    	if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) return false;
+    	// then check more complex case which applies to all character sets
+    	final int type = Character.getType(c);
         return !(type == Character.LOWERCASE_LETTER
                 || type == Character.DECIMAL_DIGIT_NUMBER
                 || type == Character.UPPERCASE_LETTER
@@ -110,14 +116,9 @@ public class SentenceReader implements Iterator<StringBuilder> {
         if (buffer == null) {
             return null;
         }
-        counter = counter + buffer.length() + 1;
         final StringBuilder r = buffer;
         buffer = nextElement0();
         return r;
-    }
-
-    public int count() {
-        return counter;
     }
 
     public void remove() {

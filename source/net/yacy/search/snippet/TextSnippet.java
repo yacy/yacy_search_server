@@ -182,8 +182,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // try the solr text first
             if (solrText != null) {
                 // compute sentences from solr query
-                final SentenceReader sr = new SentenceReader(solrText);
-                sr.pre(pre);
+                final SentenceReader sr = new SentenceReader(solrText, pre);
                 sentences = new ArrayList<StringBuilder>();
                 while (sr.hasNext()) {
                     sentences.add(sr.next());
