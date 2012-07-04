@@ -365,7 +365,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     //  resolve '..'
-    public static final String resolveBackpath(final String path) {
+    private static final String resolveBackpath(final String path) {
         String p = path;
         if (p.length() == 0 || p.charAt(0) != '/') { p = "/" + p; }
         final Matcher qm = patternQuestion.matcher(p); // do not resolve backpaths in the post values
