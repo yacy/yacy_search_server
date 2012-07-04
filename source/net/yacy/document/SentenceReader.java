@@ -24,9 +24,6 @@
 
 package net.yacy.document;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.Iterator;
 
 public class SentenceReader implements Iterator<StringBuilder> {
@@ -34,16 +31,18 @@ public class SentenceReader implements Iterator<StringBuilder> {
     // this enumerates StringBuilder objects
     
     private StringBuilder buffer;
-    private Reader raf;
+    private String text;
+    private int pos;
     private int counter = 0;
     private boolean pre = false;
     
     public SentenceReader(final String text) {
     	assert text != null;
-        raf = new StringReader(text);
-        buffer = nextElement0();
-        counter = 0;
-        pre = false;
+        this.text = text;
+        this.pos = 0;
+        this.buffer = nextElement0();
+        this.counter = 0;
+        this.pre = false;
     }
 
     public void pre(final boolean x) {
@@ -51,31 +50,21 @@ public class SentenceReader implements Iterator<StringBuilder> {
     }
     
     private StringBuilder nextElement0() {
-        try {
-            final StringBuilder s = readSentence(raf, pre);
-            //System.out.println(" SENTENCE='" + s + "'"); // DEBUG 
-            if (s == null) {
-                raf.close();
-                return null;
-            }
-            return s;
-        } catch (final IOException e) {
-            try {
-                raf.close();
-            } catch (final Exception ee) {
-            }
-            return null;
-        }
+        final StringBuilder s = readSentence();
+		//System.out.println(" SENTENCE='" + s + "'"); // DEBUG 
+		if (s == null) return null;
+		return s;
     }
     
-    private static StringBuilder readSentence(final Reader reader, final boolean pre) throws IOException {
+    private StringBuilder readSentence() {
         final StringBuilder s = new StringBuilder(80);
         int nextChar;
         char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
         
         // find sentence end
         while (true) {
-            nextChar = reader.read();
+        	if (pos >= text.length()) return null;
+            nextChar = text.charAt(pos++);
             //System.out.print((char) nextChar); // DEBUG    
             if (nextChar < 0) {
                 if (s.length() == 0) return null;
@@ -136,9 +125,6 @@ public class SentenceReader implements Iterator<StringBuilder> {
     }
     
     public synchronized void close() {
-    	try {
-			raf.close();
-		} catch (IOException e) {
-		}
+    	text = null;
     }
 }
