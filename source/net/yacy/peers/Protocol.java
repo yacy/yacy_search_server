@@ -582,7 +582,6 @@ public final class Protocol
             null);
     }
 
-    @SuppressWarnings("unchecked")
     public static int search(
         final Seed mySeed,
         final String wordhashes,
@@ -672,15 +671,13 @@ public final class Protocol
         // create containers
         final int words = wordhashes.length() / Word.commonHashLength;
         assert words > 0 : "wordhashes = " + wordhashes;
-        final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
+        final List<ReferenceContainer<WordReference>> container = new ArrayList<ReferenceContainer<WordReference>>(words);
         for ( int i = 0; i < words; i++ ) {
             try {
-                container[i] =
-                    ReferenceContainer.emptyContainer(
+                container.add(ReferenceContainer.emptyContainer(
                         Segment.wordReferenceFactory,
-                        ASCII.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1)
-                            * Word.commonHashLength)),
-                        count);
+                        ASCII.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)),
+                        count));
             } catch ( final RowSpaceExceededException e ) {
                 Log.logException(e);
                 return -1;
@@ -774,9 +771,9 @@ public final class Protocol
             }
 
             // add the url entry to the word indexes
-            for ( int m = 0; m < words; m++ ) {
+            for ( final ReferenceContainer<WordReference> c : container ) {
                 try {
-                    container[m].add(entry);
+                    c.add(entry);
                 } catch ( final RowSpaceExceededException e ) {
                     Log.logException(e);
                     break;
@@ -787,7 +784,7 @@ public final class Protocol
         // store remote result to local result container
         // insert one container into the search result buffer
         // one is enough, only the references are used, not the word
-        containerCache.add(container[0], false, target.getName() + "/" + target.hash, result.joincount, true, time);
+        containerCache.add(container.get(0), false, target.getName() + "/" + target.hash, result.joincount, true, time);
         containerCache.addExpectedRemoteReferences(-count);
 
         // insert the containers to the index
@@ -802,7 +799,7 @@ public final class Protocol
         Network.log.logInfo("remote search: peer "
             + target.getName()
             + " sent "
-            + container[0].size()
+            + container.get(0).size()
             + "/"
             + result.joincount
             + " references for "
