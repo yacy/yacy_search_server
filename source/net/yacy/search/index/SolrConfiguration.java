@@ -41,7 +41,6 @@ import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.solr.SolrDoc;
@@ -107,6 +106,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String[] value) {
         if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.length > 0))) solrdoc.addSolr(key, value);
     }
+    
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final List<String> value) {
+        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.size() > 0))) solrdoc.addSolr(key, value);
+    }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final int value) {
         if ((isEmpty() || contains(key.name())) && (!this.lazy || value > 0)) solrdoc.addSolr(key, value);
@@ -162,7 +165,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         addSolr(solrdoc, SolrField.content_type, yacydoc.dc_format());
         addSolr(solrdoc, SolrField.last_modified, header.lastModified());
         addSolr(solrdoc, SolrField.keywords, yacydoc.dc_subject(' '));
-        final String content = UTF8.String(yacydoc.getTextBytes());
+        final String content = yacydoc.getTextString();
         addSolr(solrdoc, SolrField.text_t, content);
         if (isEmpty() || contains(SolrField.wordcount_i.name())) {
             final int contentwc = content.split(" ").length;
@@ -260,22 +263,21 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
             // images
             final Collection<ImageEntry> imagesc = html.getImages().values();
-            final String[] imgtags  = new String[imagesc.size()];
-            final String[] imgprots = new String[imagesc.size()];
-            final String[] imgstubs = new String[imagesc.size()];
-            final String[] imgalts  = new String[imagesc.size()];
-            c = 0;
+            final List<String> imgtags  = new ArrayList<String>(imagesc.size());
+            final List<String> imgprots = new ArrayList<String>(imagesc.size());
+            final List<String> imgstubs = new ArrayList<String>(imagesc.size());
+            final List<String> imgalts  = new ArrayList<String>(imagesc.size());
             for (final ImageEntry ie: imagesc) {
                 final MultiProtocolURI uri = ie.url();
                 inboundLinks.remove(uri);
                 ouboundLinks.remove(uri);
-                imgtags[c] = ie.toString();
-                imgprots[c] = uri.getProtocol();
-                imgstubs[c] = uri.toString().substring(imgprots[c].length() + 3);
-                imgalts[c] = ie.alt();
-                c++;
+                imgtags.add(ie.toString());
+                String protocol = uri.getProtocol();
+                imgprots.add(protocol);
+                imgstubs.add(uri.toString().substring(protocol.length() + 3));
+                imgalts.add(ie.alt());
             }
-            addSolr(solrdoc, SolrField.imagescount_i, imgtags.length);
+            addSolr(solrdoc, SolrField.imagescount_i, imgtags.size());
             if (isEmpty() || contains(SolrField.images_tag_txt.name())) addSolr(solrdoc, SolrField.images_tag_txt, imgtags);
             if (isEmpty() || contains(SolrField.images_protocol_txt.name())) addSolr(solrdoc, SolrField.images_protocol_txt, protocolList2indexedList(imgprots));
             if (isEmpty() || contains(SolrField.images_urlstub_txt.name())) addSolr(solrdoc, SolrField.images_urlstub_txt, imgstubs);
@@ -403,30 +405,31 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         c = 0;
         if (isEmpty() || contains(SolrField.inboundlinkscount_i.name())) addSolr(solrdoc, SolrField.inboundlinkscount_i, inboundLinks.size());
         if (isEmpty() || contains(SolrField.inboundlinksnofollowcount_i.name())) addSolr(solrdoc, SolrField.inboundlinksnofollowcount_i, yacydoc.inboundLinkNofollowCount());
-        final String[] inboundlinksTag = new String[inboundLinks.size()];
-        final String[] inboundlinksURLProtocol = new String[inboundLinks.size()];
-        final String[] inboundlinksURLStub = new String[inboundLinks.size()];
-        final String[] inboundlinksName = new String[inboundLinks.size()];
-        final String[] inboundlinksRel = new String[inboundLinks.size()];
-        final String[] inboundlinksText = new String[inboundLinks.size()];
+        final List<String> inboundlinksTag = new ArrayList<String>(inboundLinks.size());
+        final List<String> inboundlinksURLProtocol = new ArrayList<String>(inboundLinks.size());
+        final List<String> inboundlinksURLStub = new ArrayList<String>(inboundLinks.size());
+        final List<String> inboundlinksName = new ArrayList<String>(inboundLinks.size());
+        final List<String> inboundlinksRel = new ArrayList<String>(inboundLinks.size());
+        final List<String> inboundlinksText = new ArrayList<String>(inboundLinks.size());
         for (final MultiProtocolURI url: inboundLinks) {
             final Properties p = alllinks.get(url);
+            if (p == null) continue;
             final String name = p.getProperty("name", ""); // the name attribute
             final String rel = p.getProperty("rel", "");   // the rel-attribute
             final String text = p.getProperty("text", ""); // the text between the <a></a> tag
             final String urls = url.toNormalform(false, false);
             final int pr = urls.indexOf("://",0);
-            inboundlinksURLProtocol[c] = urls.substring(0, pr);
-            inboundlinksURLStub[c] = urls.substring(pr + 3);
-            inboundlinksName[c] = name.length() > 0 ? name : "";
-            inboundlinksRel[c] = rel.length() > 0 ? rel : "";
-            inboundlinksText[c] = text.length() > 0 ? text : "";
-            inboundlinksTag[c] =
+            inboundlinksURLProtocol.add(urls.substring(0, pr));
+            inboundlinksURLStub.add(urls.substring(pr + 3));
+            inboundlinksName.add(name.length() > 0 ? name : "");
+            inboundlinksRel.add(rel.length() > 0 ? rel : "");
+            inboundlinksText.add(text.length() > 0 ? text : "");
+            inboundlinksTag.add(
                 "<a href=\"" + url.toNormalform(false, false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                 (name.length() > 0 ? " name=\"" + name + "\"" : "") +
                 ">" +
-                ((text.length() > 0) ? text : "") + "</a>";
+                ((text.length() > 0) ? text : "") + "</a>");
             c++;
         }
         if (isEmpty() || contains(SolrField.inboundlinks_tag_txt.name())) addSolr(solrdoc, SolrField.inboundlinks_tag_txt, inboundlinksTag);
@@ -440,30 +443,31 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         c = 0;
         if (isEmpty() || contains(SolrField.outboundlinkscount_i.name())) addSolr(solrdoc, SolrField.outboundlinkscount_i, ouboundLinks.size());
         if (isEmpty() || contains(SolrField.outboundlinksnofollowcount_i.name())) addSolr(solrdoc, SolrField.outboundlinksnofollowcount_i, yacydoc.outboundLinkNofollowCount());
-        final String[] outboundlinksTag = new String[ouboundLinks.size()];
-        final String[] outboundlinksURLProtocol = new String[ouboundLinks.size()];
-        final String[] outboundlinksURLStub = new String[ouboundLinks.size()];
-        final String[] outboundlinksName = new String[ouboundLinks.size()];
-        final String[] outboundlinksRel = new String[ouboundLinks.size()];
-        final String[] outboundlinksText = new String[ouboundLinks.size()];
+        final List<String> outboundlinksTag = new ArrayList<String>(ouboundLinks.size());
+        final List<String> outboundlinksURLProtocol = new ArrayList<String>(ouboundLinks.size());
+        final List<String> outboundlinksURLStub = new ArrayList<String>(ouboundLinks.size());
+        final List<String> outboundlinksName = new ArrayList<String>(ouboundLinks.size());
+        final List<String> outboundlinksRel = new ArrayList<String>(ouboundLinks.size());
+        final List<String> outboundlinksText = new ArrayList<String>(ouboundLinks.size());
         for (final MultiProtocolURI url: ouboundLinks) {
             final Properties p = alllinks.get(url);
+            if (p == null) continue;
             final String name = p.getProperty("name", ""); // the name attribute
             final String rel = p.getProperty("rel", "");   // the rel-attribute
             final String text = p.getProperty("text", ""); // the text between the <a></a> tag
             final String urls = url.toNormalform(false, false);
             final int pr = urls.indexOf("://",0);
-            outboundlinksURLProtocol[c] = urls.substring(0, pr);
-            outboundlinksURLStub[c] = urls.substring(pr + 3);
-            outboundlinksName[c] = name.length() > 0 ? name : "";
-            outboundlinksRel[c] = rel.length() > 0 ? rel : "";
-            outboundlinksText[c] = text.length() > 0 ? text : "";
-            outboundlinksTag[c] =
+            outboundlinksURLProtocol.add(urls.substring(0, pr));
+            outboundlinksURLStub.add(urls.substring(pr + 3));
+            outboundlinksName.add(name.length() > 0 ? name : "");
+            outboundlinksRel.add(rel.length() > 0 ? rel : "");
+            outboundlinksText.add(text.length() > 0 ? text : "");
+            outboundlinksTag.add(
                 "<a href=\"" + url.toNormalform(false, false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                 (name.length() > 0 ? " name=\"" + name + "\"" : "") +
                 ">" +
-                ((text.length() > 0) ? text : "") + "</a>";
+                ((text.length() > 0) ? text : "") + "</a>");
             c++;
         }
         if (isEmpty() || contains(SolrField.outboundlinks_tag_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_tag_txt, outboundlinksTag);
@@ -473,7 +477,6 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (isEmpty() || contains(SolrField.outboundlinks_rel_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_rel_txt, outboundlinksRel);
         if (isEmpty() || contains(SolrField.outboundlinks_relflags_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_relflags_txt, relEval(inboundlinksRel));
         if (isEmpty() || contains(SolrField.outboundlinks_text_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_text_txt, outboundlinksText);
-
 
         // charset
         addSolr(solrdoc, SolrField.charset_s, yacydoc.getCharset());
@@ -488,16 +491,18 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         return solrdoc;
     }
 
-    private static String[] protocolList2indexedList(String[] protocol) {
+    private static List<String> protocolList2indexedList(List<String> protocol) {
         List<String> a = new ArrayList<String>();
-        for (int i = 0; i < protocol.length; i++) {
-            if (!protocol[i].equals("http")) {
+        String p;
+        for (int i = 0; i < protocol.size(); i++) {
+        	p = protocol.get(i);
+            if (!p.equals("http")) {
                 String c = Integer.toString(i);
                 while (c.length() < 3) c = "0" + c;
-                a.add(c + "-" + protocol[i]);
+                a.add(c + "-" + p);
             }
         }
-        return a.toArray(new String[a.size()]);
+        return a;
     }
 
     /**
@@ -507,7 +512,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
      * @param rel
      * @return binary encoded information about rel
      */
-    private static int relEval(final String[] rel) {
+    private static int relEval(final List<String> rel) {
         int i = 0;
         for (final String s: rel) {
             final String s0 = s.toLowerCase().trim();
