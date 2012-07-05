@@ -74,8 +74,9 @@ import de.anomic.data.WorkTables;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class IndexControlRWIs_p
-{
+public class IndexControlRWIs_p {
+
+    private final static String errmsg = "not possible to compute word from hash";
 
     public static serverObjects respond(
         @SuppressWarnings("unused") final RequestHeader header,
@@ -106,7 +107,7 @@ public class IndexControlRWIs_p
         if ( post != null ) {
             final String keystring = post.get("keystring", "").trim();
             byte[] keyhash = post.get("keyhash", "").trim().getBytes();
-            if (keystring.length() > 0 && !keystring.contains("not possible to compute word from hash")) {
+            if (keystring.length() > 0 && !keystring.contains(errmsg)) {
                 keyhash = Word.word2hash(keystring);
             }
             prop.putHTML("keystring", keystring);
@@ -142,7 +143,7 @@ public class IndexControlRWIs_p
 
             if ( post.containsKey("keyhashsearch") ) {
                 if ( keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
-                    prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
+                    prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
                 if ( ranking.filteredCount() == 0 ) {
