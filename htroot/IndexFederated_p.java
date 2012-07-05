@@ -54,7 +54,7 @@ public class IndexFederated_p {
             env.setConfig("federated.service.yacy.indexing.engine", localindex);
 
             // solr
-            final boolean solrWasOn = env.getConfigBool("federated.service.solr.indexing.enabled", true);
+            final boolean solrWasOn = sb.index.getRemoteSolr() != null && env.getConfigBool("federated.service.solr.indexing.enabled", true);
             final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.solrremote");
             env.setConfig("federated.service.solr.indexing.enabled", solrIsOnAfterwards);
             String solrurls = post.get("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr"));
