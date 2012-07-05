@@ -510,8 +510,6 @@ public class Table implements Index, Iterable<Row.Entry> {
             }
         } else {
             // construct the row using the copy in RAM
-            assert cacherow != null;
-            if (cacherow == null) return null;
             assert key.length == this.rowdef.primaryKeyLength;
             System.arraycopy(key, 0, b, 0, key.length);
             System.arraycopy(cacherow.bytes(), 0, b, this.rowdef.primaryKeyLength, this.rowdef.objectsize - this.rowdef.primaryKeyLength);
@@ -1005,8 +1003,6 @@ public class Table implements Index, Iterable<Row.Entry> {
                 }
             } else {
                 // compose from table and key
-                assert cacherow != null;
-                if (cacherow == null) return null;
                 System.arraycopy(k, 0, b, 0, Table.this.rowdef.primaryKeyLength);
                 System.arraycopy(cacherow.bytes(), 0, b, Table.this.rowdef.primaryKeyLength, Table.this.taildef.objectsize);
             }
