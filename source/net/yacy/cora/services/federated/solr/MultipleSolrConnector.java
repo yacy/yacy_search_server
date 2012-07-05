@@ -72,9 +72,18 @@ public class MultipleSolrConnector implements SolrConnector {
 
     @Override
     public void close() {
+        // send termination signal to worker
         for (@SuppressWarnings("unused") AddWorker element : this.worker) {
             try {
                 this.queue.put(POISON_DOC);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        // wait for termination
+        for (AddWorker element : this.worker) {
+            try {
+                element.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
