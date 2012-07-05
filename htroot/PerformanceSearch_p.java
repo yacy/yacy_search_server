@@ -35,7 +35,7 @@ import de.anomic.server.serverSwitch;
 
 public class PerformanceSearch_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch sb) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch sb) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
 

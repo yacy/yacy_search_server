@@ -201,7 +201,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         // rewrite old files (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 1)) {
-            if (!this.array.shrinkOldFiles(this.merger, targetFileSize)) break;
+            if (!this.array.shrinkOldFiles(this.merger)) break;
             donesomething = true;
         }
 

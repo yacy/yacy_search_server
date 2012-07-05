@@ -81,7 +81,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
-            final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
                   byte[]   language,      // (guessed) language of document
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
@@ -174,7 +173,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.posinphrase,
                 this.posofphrase,
                 this.lastModified,
-                System.currentTimeMillis(),
                 this.language,
                 this.type,
                 this.llocal,

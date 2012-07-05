@@ -667,7 +667,6 @@ public class yacysearch {
                             sb.loader.loadDocuments(
                                 sb.loader.request(urlentry.url(), true, false),
                                 CacheStrategy.IFEXIST,
-                                5000,
                                 Integer.MAX_VALUE, BlacklistType.SEARCH);
                     } catch ( final IOException e ) {
                     } catch ( final Parser.Failure e ) {

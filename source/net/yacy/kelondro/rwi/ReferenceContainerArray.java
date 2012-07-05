@@ -435,7 +435,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         return true;
     }
 
-    public boolean shrinkOldFiles(final IODispatcher merger, final long targetFileSize) {
+    public boolean shrinkOldFiles(final IODispatcher merger) {
         final File ff = this.array.unmountOldest();
         if (ff == null) return false;
         Log.logInfo("RICELL-shrink4/rewrite", "unmountOldest()");

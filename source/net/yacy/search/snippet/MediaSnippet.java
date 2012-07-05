@@ -134,7 +134,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return o1.compareTo(o2);
     }
 
-    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
+    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
@@ -142,7 +142,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
         Document document;
         try {
-            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, timeout, Integer.MAX_VALUE, BlacklistType.SEARCH));
+            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, Integer.MAX_VALUE, BlacklistType.SEARCH));
         } catch (final IOException e) {
             Log.logFine("snippet fetch", "load error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();

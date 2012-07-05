@@ -172,7 +172,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return (serverClient.equals("*")) ? true : match(session.userAddress.getHostAddress(), serverClient);
     }
 
-    private static boolean allowYaCyHop(final Session session) {
+    private static boolean allowYaCyHop() {
         return switchboard.getConfigBool("YaCyHop", false);
     }
 
@@ -256,9 +256,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return persistent;
     }
 
-    private boolean handleYaCyHopAuthentication(final RequestHeader header, final HashMap<String, Object> prop, final Session session) {
+    private boolean handleYaCyHopAuthentication(final RequestHeader header, final HashMap<String, Object> prop) {
         // check if the user has allowed that his/her peer is used for hops
-        if (!allowYaCyHop(session)) return false;
+        if (!allowYaCyHop()) return false;
 
         // proxy hops must identify with 4 criteria:
 
@@ -408,7 +408,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 }
             } else {
                 // pass to proxy
-                if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+                if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
                     ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
                     HTTPDProxyHandler.doGet(prop, header, session.out);
                 } else {
@@ -476,7 +476,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 }
             } else {
                 // pass to proxy
-                if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+                if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
                     ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
                     HTTPDProxyHandler.doHead(prop, header, session.out);
                 } else {
@@ -542,7 +542,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 }
             } else {
                 // pass to proxy
-                if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+                if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
                     ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
                     HTTPDProxyHandler.doPost(prop, header, session.out, sessionIn);
                 } else {
@@ -631,7 +631,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
 
         // pass to proxy
-        if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+        if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
             ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
             HTTPDProxyHandler.doConnect(prop, header, session.in, session.out);
         } else {

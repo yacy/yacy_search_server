@@ -124,7 +124,7 @@ public class Interaction {
 
 
 
-public static String GetTableentry(String url, String type, String username, String peer) {
+public static String GetTableentry(String url, String type, String username) {
 
 	final Switchboard sb = Switchboard.getSwitchboard();
 

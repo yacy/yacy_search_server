@@ -492,7 +492,7 @@ public class Crawler_p {
                                     cachePolicy);
                             sb.crawler.putActive(profile.handle().getBytes(), profile);
                             sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, true);
+                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks);
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); // crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);

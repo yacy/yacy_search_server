@@ -181,7 +181,7 @@ public final class CrawlStacker {
             }
         }
     }
-    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks, final boolean replace) {
+    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks) {
         new Thread() {
             @Override
             public void run() {

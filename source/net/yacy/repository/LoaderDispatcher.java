@@ -334,7 +334,7 @@ public final class LoaderDispatcher {
         return entry.getContent();
     }
 
-    public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int timeout, final int maxFileSize, BlacklistType blacklistType) throws IOException, Parser.Failure {
+    public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, BlacklistType blacklistType) throws IOException, Parser.Failure {
 
         // load resource
         final Response response = load(request, cacheStrategy, maxFileSize, blacklistType);
