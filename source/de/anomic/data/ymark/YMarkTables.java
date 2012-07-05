@@ -238,8 +238,8 @@ public class YMarkTables {
     	}
     }
 
-    public void replaceTags(final Iterator<Row> rowIterator, final String bmk_user, final String tagString, final String replaceString) throws IOException, RowSpaceExceededException {        
-    	final HashSet<String> remove = YMarkUtil.keysStringToSet(YMarkUtil.cleanTagsString(tagString.toLowerCase()));       
+    public void replaceTags(final Iterator<Row> rowIterator, final String bmk_user, final String tagString, final String replaceString) throws IOException {
+    	final HashSet<String> remove = YMarkUtil.keysStringToSet(YMarkUtil.cleanTagsString(tagString.toLowerCase()));
         final StringBuilder t = new StringBuilder(200);
     	HashSet<String> tags;
         Row row;

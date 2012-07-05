@@ -589,7 +589,6 @@ public final class Protocol
         final String urlhashes,
         final Pattern prefer,
         final Pattern filter,
-        final Pattern snippet,
         final String modifier,
         final String language,
         final String sitehash,
@@ -635,7 +634,6 @@ public final class Protocol
                     urlhashes,
                     prefer,
                     filter,
-                    snippet,
                     modifier,
                     language,
                     sitehash,
@@ -893,7 +891,6 @@ public final class Protocol
             final String urlhashes,
             final Pattern prefer,
             final Pattern filter,
-            final Pattern snippet,
             final String modifier,
             final String language,
             final String sitehash,
@@ -946,7 +943,6 @@ public final class Protocol
             parts.put("urls", UTF8.StringBody(urlhashes));
             parts.put("prefer", UTF8.StringBody(prefer.pattern()));
             parts.put("filter", UTF8.StringBody(filter.pattern()));
-            parts.put("snippet", UTF8.StringBody(snippet.pattern()));
             parts.put("modifier", UTF8.StringBody(modifier));
             parts.put("language", UTF8.StringBody(language));
             parts.put("sitehash", UTF8.StringBody(sitehash));
@@ -1518,7 +1514,6 @@ public final class Protocol
                             "", // urlhashes,
                             QueryParams.matchnothing_pattern, // prefer,
                             QueryParams.catchall_pattern, // filter,
-                            QueryParams.catchall_pattern, // snippet,
                             "", // modifier
                             "", // language,
                             "", // sitehash,

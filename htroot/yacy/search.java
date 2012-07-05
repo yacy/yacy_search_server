@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
@@ -120,7 +119,6 @@ public final class search {
         final String  modifier = post.get("modifier", "").trim();
         final String  contentdom = post.get("contentdom", "all");
         final String  filter = post.get("filter", ".*"); // a filter on the url
-        final Pattern snippetPattern = Pattern.compile(post.get("snippet", ".*")); // a filter on the snippet
         String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;
         String  authorhash = post.get("authorhash", ""); if (authorhash.length() == 0) authorhash = null;
         String  language = post.get("language", "");
@@ -228,7 +226,6 @@ public final class search {
                     abstractSet,
                     new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0),
                     null,
-                    snippetPattern,
                     null,
                     modifier,
                     maxdist,
@@ -291,7 +288,6 @@ public final class search {
                     queryhashes,
                     excludehashes,
                     null,
-                    snippetPattern,
                     null,
                     modifier,
                     maxdist,

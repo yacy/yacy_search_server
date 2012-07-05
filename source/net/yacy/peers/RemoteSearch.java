@@ -59,7 +59,7 @@ public class RemoteSearch extends Thread {
     private final int count, maxDistance;
     private final long time;
     final private RankingProfile rankingProfile;
-    final private Pattern prefer, filter, snippet;
+    final private Pattern prefer, filter;
     final private QueryParams.Modifier modifier;
     final private String language;
     final private Bitfield constraint;
@@ -70,7 +70,6 @@ public class RemoteSearch extends Thread {
               final String urlhashes, // this is the field that is filled during a secondary search to restrict to specific urls that are to be retrieved
               final Pattern prefer,
               final Pattern filter,
-              final Pattern snippet,
               final QueryParams.Modifier modifier,
               final String language,
               final String sitehash, final String authorhash, final String contentdom,
@@ -92,7 +91,6 @@ public class RemoteSearch extends Thread {
         this.urlhashes = urlhashes;
         this.prefer = prefer;
         this.filter = filter;
-        this.snippet = snippet;
         this.modifier = modifier;
         this.language = language;
         this.sitehash = sitehash;
@@ -121,7 +119,7 @@ public class RemoteSearch extends Thread {
             this.urls = Protocol.search(
                         this.peers.mySeed(),
                         this.wordhashes, this.excludehashes, this.urlhashes,
-                        this.prefer, this.filter, this.snippet, this.modifier.getModifier(),
+                        this.prefer, this.filter, this.modifier.getModifier(),
                         this.language, this.sitehash, this.authorhash, this.contentdom,
                         this.count, this.time, this.maxDistance, this.global, this.partitions,
                         this.targetPeer, this.indexSegment, this.containerCache, this.secondarySearchSuperviser,
@@ -163,7 +161,7 @@ public class RemoteSearch extends Thread {
     public static void primaryRemoteSearches(
             final List<RemoteSearch> searchThreads,
             final String wordhashes, final String excludehashes,
-            final Pattern prefer, final Pattern filter, final Pattern snippet,
+            final Pattern prefer, final Pattern filter,
             final QueryParams.Modifier modifier,
             final String language,
             final String sitehash,
@@ -202,7 +200,7 @@ public class RemoteSearch extends Thread {
             if (targetPeers[i] == null || targetPeers[i].hash == null) continue;
             try {
                 RemoteSearch rs = new RemoteSearch(
-                    wordhashes, excludehashes, "", prefer, filter, snippet, modifier,
+                    wordhashes, excludehashes, "", prefer, filter, modifier,
                     language, sitehash, authorhash, contentdom,
                     count, time, maxDist, true, targets, targetPeers[i],
                     indexSegment, peers, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
@@ -237,7 +235,7 @@ public class RemoteSearch extends Thread {
         StringBuilder whs = new StringBuilder(24);
         for (String s: wordhashes) whs.append(s);
         final RemoteSearch searchThread = new RemoteSearch(
-                whs.toString(), "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, QueryParams.catchall_pattern, new QueryParams.Modifier(""), "", "", "", "all", 20, time, 9999, true, 0, targetPeer,
+                whs.toString(), "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, new QueryParams.Modifier(""), "", "", "", "all", 20, time, 9999, true, 0, targetPeer,
                 indexSegment, peers, containerCache, null, blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;

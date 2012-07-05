@@ -172,7 +172,6 @@ public final class SearchEvent
                             QueryParams.hashSet2hashString(SearchEvent.this.query.excludeHashes),
                             SearchEvent.this.query.prefer,
                             SearchEvent.this.query.urlMask,
-                            SearchEvent.this.query.snippetMatcher,
                             SearchEvent.this.query.modifier,
                             SearchEvent.this.query.targetlang == null ? "" : SearchEvent.this.query.targetlang,
                             SearchEvent.this.query.sitehash == null ? "" : SearchEvent.this.query.sitehash,

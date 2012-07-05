@@ -713,7 +713,6 @@ public class yacysearch {
 
             // do the search
             final HandleSet queryHashes = Word.words2hashesHandles(query[0]);
-            final Pattern snippetPattern = QueryParams.stringSearchPattern(originalquerystring);
 
             // check filters
             try {
@@ -740,7 +739,6 @@ public class yacysearch {
                     queryHashes,
                     Word.words2hashesHandles(query[1]),
                     Word.words2hashesHandles(query[2]),
-                    snippetPattern,
                     tenant,
                     modifier.toString().trim(),
                     maxDistance,

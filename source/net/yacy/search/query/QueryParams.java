@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -108,7 +107,6 @@ public final class QueryParams {
 
     public final String queryString;
     public HandleSet fullqueryHashes, queryHashes, excludeHashes;
-    public Pattern snippetMatcher;
     public final int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
@@ -167,7 +165,6 @@ public final class QueryParams {
     		this.excludeHashes = Word.words2hashesHandles(cq[1]);
     		this.fullqueryHashes = Word.words2hashesHandles(cq[2]);
     	}
-    	this.snippetMatcher = QueryParams.catchall_pattern;
     	this.ranking = ranking;
     	this.tenant = null;
     	this.modifier = new Modifier("");
@@ -210,7 +207,6 @@ public final class QueryParams {
         final String queryString, final HandleSet queryHashes,
         final HandleSet excludeHashes,
         final HandleSet fullqueryHashes,
-        final Pattern snippetMatcher,
         final String tenant,
         final String modifier,
         final int maxDistance, final String prefer, final ContentDomain contentdom,
@@ -237,7 +233,6 @@ public final class QueryParams {
         this.queryHashes = queryHashes;
         this.excludeHashes = excludeHashes;
         this.fullqueryHashes = fullqueryHashes;
-        this.snippetMatcher = snippetMatcher;
         this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
         this.modifier = new Modifier(modifier == null ? "" : modifier);
         this.ranking = ranking;
@@ -607,30 +602,4 @@ public final class QueryParams {
         return sb;
     }
 
-    private static Pattern StringMatchPattern = Pattern.compile(".*?(\".*?\").*");
-    /**
-     * calculate a pattern to match with a string search
-     * @param query
-     * @return
-     */
-    public static Pattern stringSearchPattern(String query) {
-        final StringBuilder p = new StringBuilder(query.length());
-        p.append("(?iu)");
-        int seqc = 0;
-        while (query.length() > 0) {
-            final Matcher m = StringMatchPattern.matcher(query);
-            if (!m.matches()) break;
-            p.append(".*?").append(query.substring(m.start(1) + 1, m.end(1) - 1));
-            query = query.substring(m.end(1));
-            seqc++;
-        }
-        if (seqc == 0) return QueryParams.catchall_pattern;
-        p.append(".*");
-        return Pattern.compile(p.toString());
-    }
-
-    public static void main(final String[] args) {
-        final Pattern p = stringSearchPattern("die \"peer-to-peer Suchmaschine\" ohne Zensur als \"freie Software\" runterladen");
-        System.out.println(p.toString());
-    }
 }

@@ -29,7 +29,6 @@ package net.yacy.search.query;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
@@ -365,7 +364,7 @@ public class SnippetProcess {
                         (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0)) {
                         break;
                     }
-                    worker = new Worker(i, this.query.maxtime, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
+                    worker = new Worker(this.query.maxtime, this.query.snippetCacheStrategy, neededResults);
                     worker.start();
                     this.workerThreads[i] = worker;
                     if (this.rankingProcess.expectMoreRemoteReferences()) {
@@ -387,7 +386,7 @@ public class SnippetProcess {
                         break;
                     }
                     if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) {
-                        worker = new Worker(i, this.query.maxtime, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
+                        worker = new Worker(this.query.maxtime, this.query.snippetCacheStrategy, neededResults);
                         worker.start();
                         this.workerThreads[i] = worker;
                         deployCount--;
@@ -437,14 +436,12 @@ public class SnippetProcess {
         private long lastLifeSign; // when the last time the run()-loop was executed
         private final CacheStrategy cacheStrategy;
         private final int neededResults;
-        private final Pattern snippetPattern;
         private boolean shallrun;
         private final SolrConnector solr;
 
-        public Worker(final int id, final long maxlifetime, final CacheStrategy cacheStrategy, final Pattern snippetPattern, final int neededResults) {
+        public Worker(final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
             this.cacheStrategy = cacheStrategy;
             this.lastLifeSign = System.currentTimeMillis();
-            this.snippetPattern = snippetPattern;
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
             this.shallrun = true;
