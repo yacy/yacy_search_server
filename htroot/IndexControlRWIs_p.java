@@ -270,7 +270,7 @@ public class IndexControlRWIs_p {
 
             if ( post.containsKey("urllist") ) {
                 if ( keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
-                    prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
+                    prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final Bitfield flags = compileFlags(post);
                 final int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
@@ -282,7 +282,7 @@ public class IndexControlRWIs_p {
             if ( post.containsKey("keyhashtransfer") ) {
                 try {
                     if ( keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
-                        prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
+                        prop.put("keystring", "&lt;" + errmsg + "&gt;");
                     }
 
                     // find host & peer
