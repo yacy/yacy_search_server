@@ -68,6 +68,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private static final Set<String> linkTags0 = new HashSet<String>(12,0.99f);
     private static final Set<String> linkTags1 = new HashSet<String>(15,0.99f);
 
+    private static final Pattern LB = Pattern.compile("\n");
+
     public enum TagType {
         singleton, pair;
     }
@@ -167,7 +169,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.frames = new SizeLimitedSet<MultiProtocolURI>(maxLinks);
         this.iframes = new SizeLimitedSet<MultiProtocolURI>(maxLinks);
         this.metas = new SizeLimitedMap<String, String>(maxLinks);
-        this.script = new HashSet<MultiProtocolURI>();
+        this.script = new SizeLimitedSet<MultiProtocolURI>(maxLinks);
         this.title = EMPTY_STRING;
         this.headlines = new ArrayList[6];
         for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
@@ -498,7 +500,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 this.script.add(absolutePath(src));
                 this.evaluationScores.match(Element.scriptpath, src);
             } else {
-                this.evaluationScores.match(Element.scriptcode, text);
+                this.evaluationScores.match(Element.scriptcode, LB.matcher(new String(text)).replaceAll(" "));
             }
         }
 
@@ -509,7 +511,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     @Override
     public void scrapeComment(final char[] comment) {
-        this.evaluationScores.match(Element.comment, comment);
+        this.evaluationScores.match(Element.comment, LB.matcher(new String(comment)).replaceAll(" "));
     }
 
     private String recursiveParse(final char[] inlineHtml) {
