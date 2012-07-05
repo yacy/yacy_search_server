@@ -37,6 +37,7 @@ import java.util.TreeMap;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import de.anomic.data.ListManager;
 import de.anomic.server.serverObjects;
@@ -57,7 +58,7 @@ public class BlacklistImpExp_p {
 
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
-        prop.putHTML("blacklistEngine", Switchboard.urlBlacklist.getEngineInfo());
+        prop.putHTML("blacklistEngine", Blacklist.getEngineInfo());
 
         // if we have not chosen a blacklist until yet we use the first file
         if (blacklistToUse == null && dirlist != null && !dirlist.isEmpty()) {

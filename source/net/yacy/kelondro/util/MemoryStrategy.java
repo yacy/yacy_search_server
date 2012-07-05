@@ -28,23 +28,23 @@ package net.yacy.kelondro.util;
 import net.yacy.kelondro.logging.Log;
 
 public abstract class MemoryStrategy {
-	
+
 	protected final static Log log = new Log("MEMORY");
     protected static long lastGC = 0l;
-    protected static  boolean error = true;
+    protected static boolean error = true;
 	protected static String name;
-    
+
     /**
      * @return if an error has been detected
      */
-	protected final boolean hasError() {
+	protected final static boolean hasError() {
     	return error;
     }
-    
+
     /**
      * @return an identifying name
      */
-    protected final String getName() {
+    protected final static String getName() {
     	return name;
     }
 
@@ -61,17 +61,17 @@ public abstract class MemoryStrategy {
             lastGC = System.currentTimeMillis();
             return true;
         }
-        
+
         if (log.isFinest()) log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
         return false;
     }
-	
+
 	/**
      * memory that is free without increasing of total memory taken from os
      * @return bytes
      */
 	protected abstract long free();
-    
+
     /**
      * memory that is available including increasing total memory up to maximum
      * @return bytes
@@ -83,19 +83,19 @@ public abstract class MemoryStrategy {
      * @return used bytes
      */
 	protected abstract long used();
-	
+
 	/**
 	 * currently allocated memory in the Java virtual machine; may vary over time
 	 * @return bytes
 	 */
 	protected abstract long total();
-    
+
     /**
 	 * maximum memory the Java virtual will allocate machine; may vary over time in some cases
 	 * @return bytes
 	 */
 	protected abstract long maxMemory();
-	
+
 	/**
      * <p>Tries to free a specified amount of bytes.</p>
      * <p>
@@ -116,12 +116,12 @@ public abstract class MemoryStrategy {
      * @return whether enough memory could be freed (or is free) or not
      */
 	protected abstract boolean request(final long size, final boolean force, boolean shortStatus);
-	
+
 	/**
      * @return if Memory seams to be in a proper state
      */
     protected abstract boolean properState();
-	
+
 	/**
      * forced enable properState - StandardMemoryStrategy only
      */

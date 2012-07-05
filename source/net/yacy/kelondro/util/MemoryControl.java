@@ -34,14 +34,14 @@ public class MemoryControl {
     private static MemoryStrategy strategy;
 
     private static MemoryStrategy getStrategy() {
-    	if (strategy == null || strategy.hasError()) {
+    	if (strategy == null || MemoryStrategy.hasError()) {
     		if (!usingStandardStrategy) {
     			strategy = new GenerationMemoryStrategy();
 //    			if (strategy.hasError()) { // perhaps we do have a G1
 //    				strategy = new G1MemoryStrategy();
 //    			}
     	    	// fall back if error detected
-    	    	if (strategy.hasError()) {
+    	    	if (MemoryStrategy.hasError()) {
     	    		usingStandardStrategy = true;
     	    		strategy = new StandardMemoryStrategy();
     	    	}
@@ -63,7 +63,8 @@ public class MemoryControl {
      * @return the name of the used strategy
      */
     public final static String getStrategyName() {
-    	return getStrategy().getName();
+    	getStrategy();
+        return MemoryStrategy.getName();
     }
 
     /**

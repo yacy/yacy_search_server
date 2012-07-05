@@ -398,7 +398,7 @@ public class NewsPool {
         return pc;
     }
 
-    private boolean automaticProcessP(final SeedDB seedDB, final NewsDB.Record record) {
+    private static boolean automaticProcessP(final SeedDB seedDB, final NewsDB.Record record) {
         if (record == null) return false;
         if (record.category() == null) return true;
         final long created = record.created().getTime();
@@ -467,8 +467,9 @@ public class NewsPool {
             case PROCESSED_DB:  return this.processedNews.get(id);
             case OUTGOING_DB:   return this.outgoingNews.get(id);
             case PUBLISHED_DB:  return this.publishedNews.get(id);
+            default:
+            return null;
         }
-        return null;
     }
 
     private NewsQueue switchQueue(final int dbKey) {
@@ -477,8 +478,8 @@ public class NewsPool {
             case PROCESSED_DB:  return this.processedNews;
             case OUTGOING_DB:   return this.outgoingNews;
             case PUBLISHED_DB:  return this.publishedNews;
-        }
-        return null;
+            default: return null;
+            }
     }
 
     public void clear(final int dbKey) {
@@ -488,7 +489,8 @@ public class NewsPool {
             case PROCESSED_DB:  this.processedNews.clear(); break;
             case OUTGOING_DB:   this.outgoingNews.clear(); break;
             case PUBLISHED_DB:  this.publishedNews.clear(); break;
-        }
+            default: return;
+            }
     }
 
     public void moveOff(final int dbKey, final String id) throws IOException, RowSpaceExceededException {
@@ -499,7 +501,8 @@ public class NewsPool {
             case PROCESSED_DB:  moveOff(this.processedNews, null,id); break;
             case OUTGOING_DB:   moveOff(this.outgoingNews, this.publishedNews, id); break;
             case PUBLISHED_DB:  moveOff(this.publishedNews, null, id); break;
-        }
+            default: return;
+            }
     }
 
     private boolean moveOff(final NewsQueue fromqueue, final NewsQueue toqueue, final String id) throws IOException, RowSpaceExceededException {
@@ -527,7 +530,7 @@ public class NewsPool {
         }
     }
 
-    private int moveOffAll(final NewsQueue fromqueue, final NewsQueue toqueue) throws IOException, RowSpaceExceededException {
+    private static int moveOffAll(final NewsQueue fromqueue, final NewsQueue toqueue) throws IOException, RowSpaceExceededException {
         // move off all news from a specific queue to another queue
         final Iterator<NewsDB.Record> i = fromqueue.iterator();
         NewsDB.Record record;

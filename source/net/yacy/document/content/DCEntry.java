@@ -145,7 +145,7 @@ public class DCEntry extends TreeMap<String, String> {
         }
     }
 
-    private String bestU(String[] urls) {
+    private static String bestU(String[] urls) {
         for (String uu: urls) {
             if (uu.startsWith("http://") && (uu.endsWith(".html") || uu.endsWith(".htm") || uu.endsWith(".pdf") || uu.endsWith(".doc") || uu.endsWith(".rss") || uu.endsWith(".xml"))) return uu;
         }
@@ -250,7 +250,7 @@ public class DCEntry extends TreeMap<String, String> {
         return Double.parseDouble(t);
     }
 
-    private String stripCDATA(String s) {
+    private static String stripCDATA(String s) {
         if (s == null) return null;
         s = s.trim();
         if (s.startsWith("<![CDATA[")) s = s.substring(9);

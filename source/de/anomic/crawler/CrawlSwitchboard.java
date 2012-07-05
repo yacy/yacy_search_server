@@ -549,11 +549,11 @@ public final class CrawlSwitchboard
 
     /**
      * Loads crawl profiles from a DB file.
-     * 
+     *
      * @param file DB file
      * @return crawl profile data
      */
-    private MapHeap loadFromDB(final File file) {
+    private static MapHeap loadFromDB(final File file) {
         MapHeap ret;
         try {
             ret = new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');

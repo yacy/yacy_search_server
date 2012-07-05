@@ -109,7 +109,7 @@ public class BlacklistCleaner_p {
                 final Map<String, BlacklistError> illegalEntries = getIllegalEntries(blacklistToUse, Switchboard.urlBlacklist, allowRegex);
                 prop.put(RESULTS + "blList", blacklistToUse);
                 prop.put(RESULTS + "entries", illegalEntries.size());
-                prop.putHTML(RESULTS + "blEngine", Switchboard.urlBlacklist.getEngineInfo());
+                prop.putHTML(RESULTS + "blEngine", Blacklist.getEngineInfo());
                 prop.put(RESULTS + "disabled", (illegalEntries.isEmpty()) ? "1" : "0");
                 if (!illegalEntries.isEmpty()) {
                     prop.put(RESULTS + DISABLED + "entries", illegalEntries.size());
@@ -255,7 +255,7 @@ public class BlacklistCleaner_p {
             }
             legalEntries.add(element);
 
-            err = blEngine.checkError(element, properties);
+            err = Blacklist.checkError(element, properties);
 
             if (err.getInt() > 0) {
                 illegalEntries.put(element, err);

@@ -2868,7 +2868,7 @@ public final class Switchboard extends serverSwitch
         }
     }
 
-    public boolean accessFromLocalhost(final RequestHeader requestHeader) {
+    public static boolean accessFromLocalhost(final RequestHeader requestHeader) {
 
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final String clientIP = requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "");
@@ -3299,7 +3299,7 @@ public final class Switchboard extends serverSwitch
         }.start();
     }
 
-    public int currentPPM() {
+    public static int currentPPM() {
         return EventTracker.countEvents(EventTracker.EClass.INDEX, 20000) * 3;
     }
 

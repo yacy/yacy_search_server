@@ -445,7 +445,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         this.log.logConfig("* terminated");
     }
 
-    public List<Session> getJobList() {
+    public static List<Session> getJobList() {
         final Thread[] threadList = new Thread[sessionThreadGroup.activeCount()];
         serverCore.sessionThreadGroup.enumerate(threadList, false);
         final ArrayList<Session> l = new ArrayList<Session>();
@@ -477,7 +477,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     }
 
     // idle sensor: the thread is idle if there are no sessions running
-    public boolean idle() {
+    public static boolean idle() {
         // idleThreadCheck();
         final Thread[] threadList = new Thread[sessionThreadGroup.activeCount()];
         serverCore.sessionThreadGroup.enumerate(threadList, false);
@@ -1086,7 +1086,8 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
 
             sslsock.addHandshakeCompletedListener(
                     new HandshakeCompletedListener() {
-                       public void handshakeCompleted(
+                       @Override
+                    public void handshakeCompleted(
                           final HandshakeCompletedEvent event) {
                           System.out.println("Handshake finished!");
                           System.out.println(

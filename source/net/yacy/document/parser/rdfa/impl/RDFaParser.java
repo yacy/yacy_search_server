@@ -65,7 +65,7 @@ public class RDFaParser extends AbstractParser implements Parser {
         return htmlDocs;
 	}
 
-	private Document parseRDFa(DigestURI url, String mimeType,
+	private static Document parseRDFa(DigestURI url, String mimeType,
 			String charset, InputStream source) {
 		RDFaTripleImpl triple;
 		IRDFaTriple[] allTriples = null;
@@ -108,7 +108,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 		return htmlDocs;
 	}
 
-	private Document convertAllTriplesToDocument(DigestURI url,
+	private static Document convertAllTriplesToDocument(DigestURI url,
 			String mimeType, String charset, IRDFaTriple[] allTriples) {
 
 		//Set<String> languages = new HashSet<String>(2);
@@ -142,7 +142,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 		return doc;
 	}
 
-	private void addNotEmptyValuesToSet(Set<String> set, String value) {
+	private static void addNotEmptyValuesToSet(Set<String> set, String value) {
 		if (value != null) {
 			set.add(value);
 		}

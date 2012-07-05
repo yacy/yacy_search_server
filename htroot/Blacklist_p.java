@@ -70,7 +70,7 @@ public class Blacklist_p {
 
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
-        prop.putHTML("blacklistEngine", Switchboard.urlBlacklist.getEngineInfo());
+        prop.putHTML("blacklistEngine", Blacklist.getEngineInfo());
 
         // do all post operations
         if (post != null) {

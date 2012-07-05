@@ -609,7 +609,7 @@ public class HTTPClient {
         }
     }
 
-    private byte[] getByteArray(final HttpEntity entity, final int maxBytes) throws IOException {
+    private static byte[] getByteArray(final HttpEntity entity, final int maxBytes) throws IOException {
         final InputStream instream = entity.getContent();
         if (instream == null) {
             return null;
@@ -657,7 +657,7 @@ public class HTTPClient {
     		httpParams.setParameter(HTTP.TARGET_HOST, this.host);
     }
 
-    private void setProxy(final HttpParams httpParams) {
+    private static void setProxy(final HttpParams httpParams) {
     	if (ProxySettings.use)
     		ConnRouteParams.setDefaultProxy(httpParams, ProxySettings.getProxyHost());
     	// TODO find a better way for this

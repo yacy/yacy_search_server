@@ -372,7 +372,7 @@ public class Blacklist {
         return (m1.matcher(host).matches() || m2.matcher(host).matches() || m3.matcher(host).matches());
     }
 
-    public String getEngineInfo() {
+    public static String getEngineInfo() {
         return "Default YaCy Blacklist Engine";
     }
 
@@ -457,7 +457,7 @@ public class Blacklist {
         return matched;
     }
 
-    public BlacklistError checkError(final String element, final Map<String, String> properties) {
+    public static BlacklistError checkError(final String element, final Map<String, String> properties) {
 
         final boolean allowRegex = (properties != null) && properties.get("allowRegex").equalsIgnoreCase("true");
         int slashPos;

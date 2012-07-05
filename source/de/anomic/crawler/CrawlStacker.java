@@ -130,7 +130,7 @@ public final class CrawlStacker {
         clear();
     }
 
-    private boolean prefetchHost(final String host) {
+    private static boolean prefetchHost(final String host) {
         // returns true when the host was known in the dns cache.
         // If not, the host is stacked on the fetch stack and false is returned
         try {

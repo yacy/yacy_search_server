@@ -93,7 +93,7 @@ public class MapColumnIndex implements Serializable {
         }
     }
 
-    private void indexupdate(final byte[] primarykey, final Map<String, Collection<byte[]>> valueIdxMap, final String value) {
+    private static void indexupdate(final byte[] primarykey, final Map<String, Collection<byte[]>> valueIdxMap, final String value) {
         Collection<byte[]> indexes = valueIdxMap.get(value);
         if (indexes == null) {
             // create a new index entry
@@ -120,7 +120,7 @@ public class MapColumnIndex implements Serializable {
         }
     }
 
-    private void indexdelete(final byte[] index, final Map<String, Collection<byte[]>> valueIdxMap) {
+    private static void indexdelete(final byte[] index, final Map<String, Collection<byte[]>> valueIdxMap) {
         Iterator<Map.Entry<String, Collection<byte[]>>> i = valueIdxMap.entrySet().iterator();
         Map.Entry<String, Collection<byte[]>> ref;
         while (i.hasNext()) {

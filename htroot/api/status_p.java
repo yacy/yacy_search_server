@@ -51,7 +51,7 @@ public class status_p {
         prop.put("rejected", "0");
         sb.updateMySeed();
         final int cacheMaxSize = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
-        prop.putNum("ppm", sb.currentPPM());
+        prop.putNum("ppm", Switchboard.currentPPM());
         prop.putNum("qpm", sb.peers.mySeed().getQPM());
         prop.putNum("wordCacheSize", segment.termIndex().getBufferSize());
         prop.putNum("wordCacheMaxSize", cacheMaxSize);

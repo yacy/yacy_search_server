@@ -306,7 +306,7 @@ public final class SeedDB implements AlternativeDomainNames {
         return sizeConnected() <= dhtActivityMagic;
     }
 
-    private synchronized MapDataMining openSeedTable(final File seedDBFile) {
+    private synchronized static MapDataMining openSeedTable(final File seedDBFile) {
         final File parentDir = new File(seedDBFile.getParent());
         if (!parentDir.exists()) {
 			if(!parentDir.mkdirs())
@@ -817,7 +817,7 @@ public final class SeedDB implements AlternativeDomainNames {
         return log;
     }
 
-    private Iterator<String> downloadSeedFile(final DigestURI seedURL) throws IOException {
+    private static Iterator<String> downloadSeedFile(final DigestURI seedURL) throws IOException {
         // Configure http headers
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
@@ -850,7 +850,7 @@ public final class SeedDB implements AlternativeDomainNames {
         }
     }
 
-    private String checkCache(final ArrayList<String> uv, final Iterator<String> check) {
+    private static String checkCache(final ArrayList<String> uv, final Iterator<String> check) {
         if ((check == null) || (uv == null)) {
             if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Local and uploades seed-list are different");
             return "Entry count is different: uv.size() = " + ((uv == null) ? "null" : Integer.toString(uv.size()));

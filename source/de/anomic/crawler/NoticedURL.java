@@ -308,7 +308,7 @@ public class NoticedURL {
             }
     }
 
-    private Request pop(final Balancer balancer, final boolean delay, final CrawlSwitchboard cs, final RobotsTxt robots) throws IOException {
+    private static Request pop(final Balancer balancer, final boolean delay, final CrawlSwitchboard cs, final RobotsTxt robots) throws IOException {
         // this is a filo - pop
         int s;
         Request entry;

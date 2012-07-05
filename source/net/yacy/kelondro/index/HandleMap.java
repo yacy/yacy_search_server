@@ -137,7 +137,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
     	return new int[]{keym, this.rowdef.width(1) - valm};
     }
 
-    private final int eq(final byte[] a, final byte[] b) {
+    private final static int eq(final byte[] a, final byte[] b) {
     	for (int i = 0; i < a.length; i++) {
     		if (a[i] != b[i]) return i;
     	}

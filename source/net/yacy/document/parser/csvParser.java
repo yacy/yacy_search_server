@@ -80,7 +80,7 @@ public class csvParser extends AbstractParser implements Parser {
 		        false)};
     }
 
-    private String concatRow(String[] columns) {
+    private static String concatRow(String[] columns) {
         final StringBuilder sb = new StringBuilder(80);
         for (final String column : columns) {
             if (sb.length() > 0) sb.append(' ');
@@ -90,7 +90,7 @@ public class csvParser extends AbstractParser implements Parser {
         return sb.toString();
     }
 
-    private List<String[]> getTable(String charset, InputStream source) {
+    private static List<String[]> getTable(String charset, InputStream source) {
         final List<String[]> rows = new ArrayList<String[]>();
         BufferedReader reader;
         try {

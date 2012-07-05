@@ -466,7 +466,7 @@ public class serverSwitch
         final List<String> list = new ArrayList<String>();
         final WorkflowThread st = getThread(threadName);
 
-        for ( final Session s : ((serverCore) st).getJobList() ) {
+        for ( final Session s : serverCore.getJobList() ) {
             if ( !s.isAlive() ) {
                 continue;
             }
@@ -483,7 +483,7 @@ public class serverSwitch
         }
         final WorkflowThread st = getThread(threadName);
 
-        for ( final Session s : ((serverCore) st).getJobList() ) {
+        for ( final Session s : serverCore.getJobList() ) {
             if ( (s.isAlive()) && (s.getName().equals(sessionName)) ) {
                 // try to stop session
                 s.setStopped(true);

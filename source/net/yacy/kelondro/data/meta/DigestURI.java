@@ -346,8 +346,9 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
             return 14;
         case 3:
             return 20;
+        default:
+            return 20;
         }
-        return 20;
     }
 
     public static int domLengthNormalized(final byte[] urlHashBytes) {

@@ -75,7 +75,7 @@ public final class Connections_p {
         // waiting for all threads to finish
         int idx = 0, numActiveRunning = 0, numActivePending = 0;
         boolean dark = true;
-        for (final Session s: ((serverCore) httpd).getJobList()) {
+        for (final Session s: serverCore.getJobList()) {
             if (!s.isAlive()) continue;
 
             // get the session runtime

@@ -130,7 +130,7 @@ public class psParser extends AbstractParser implements Parser {
         }
     }
 
-    private void parseUsingJava(final File inputFile, final File outputFile) throws Exception {
+    private static void parseUsingJava(final File inputFile, final File outputFile) throws Exception {
 
         BufferedReader reader = null;
         BufferedWriter writer = null;

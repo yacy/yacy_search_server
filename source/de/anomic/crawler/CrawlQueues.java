@@ -541,7 +541,7 @@ public class CrawlQueues {
      * @param url
      * @return
      */
-    private String urlToString(final DigestURI url) {
+    private static String urlToString(final DigestURI url) {
         return (url == null ? "null" : url.toNormalform(true, false));
     }
 

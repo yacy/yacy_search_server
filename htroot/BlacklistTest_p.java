@@ -34,6 +34,7 @@ import java.net.MalformedURLException;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import de.anomic.data.ListManager;
@@ -49,7 +50,7 @@ public class BlacklistTest_p {
         ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
 
         final serverObjects prop = new serverObjects();
-        prop.putHTML("blacklistEngine", Switchboard.urlBlacklist.getEngineInfo());
+        prop.putHTML("blacklistEngine", Blacklist.getEngineInfo());
 
         // do all post operations
         if(post != null && post.containsKey("testList")) {

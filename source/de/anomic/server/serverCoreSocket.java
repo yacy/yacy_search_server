@@ -1,4 +1,4 @@
-//serverCoreSocket.java 
+//serverCoreSocket.java
 //-------------------------------------
 //part of YACY
 //
@@ -34,19 +34,19 @@ import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 
 public class serverCoreSocket extends Socket {
-    
+
     private PushbackInputStream input = null;
     private Socket sock = null;
     private boolean isSSL = false;
     private String sslType = null;
-    
+
     public serverCoreSocket(final Socket sock) throws IOException {
         this.sock = sock;
-        
+
         // determine the socket type
         detectSSL();
     }
-    
+
     public boolean isSSL() {
         return this.isSSL;
     }
@@ -54,10 +54,10 @@ public class serverCoreSocket extends Socket {
     public String getProtocol() {
         return this.sslType;
     }
-    
+
     private void detectSSL() throws IOException {
-        final InputStream in = getInputStream();    
-        
+        final InputStream in = getInputStream();
+
         // read the first 5 bytes to determine the protocol type
         final byte[] preRead = new byte[5];
         int read, count = 0;
@@ -69,7 +69,7 @@ public class serverCoreSocket extends Socket {
         	((PushbackInputStream) in).unread(preRead,0,count);
         	return;
         }
-        
+
         int idx = 0;
         if ((preRead[0] & 0xFF) == 22) {
             // we have detected the ContentType field.
@@ -96,6 +96,9 @@ public class serverCoreSocket extends Socket {
             case 2:
                 this.sslType = "TLS_1_1";
                 break;
+            default:
+                this.sslType = "SSL_3";
+                break;
             }
             this.isSSL = true;
         //} else {
@@ -103,88 +106,107 @@ public class serverCoreSocket extends Socket {
         }
 
         // unread pre read bytes
-        ((PushbackInputStream) in).unread(preRead);    
+        ((PushbackInputStream) in).unread(preRead);
     }
-    
+
+    @Override
     public InetAddress getInetAddress() {
         return this.sock.getInetAddress();
     }
-    
+
+    @Override
     public InetAddress getLocalAddress() {
         return this.sock.getLocalAddress();
     }
-    
+
+    @Override
     public int getPort() {
         return this.sock.getPort();
     }
-    
+
+    @Override
     public int getLocalPort() {
         return this.sock.getLocalPort();
     }
-    
+
+    @Override
     public SocketAddress getRemoteSocketAddress() {
         return this.sock.getRemoteSocketAddress();
     }
-    
+
+    @Override
     public SocketAddress getLocalSocketAddress() {
         return this.sock.getLocalSocketAddress();
     }
-    
+
+    @Override
     public SocketChannel getChannel() {
         return this.sock.getChannel();
     }
-    
-    
+
+
+    @Override
     public InputStream getInputStream() throws IOException {
         if (this.input == null) {
             this.input = new PushbackInputStream(this.sock.getInputStream(),100);
         }
         return this.input;
     }
-    
+
+    @Override
     public OutputStream getOutputStream() throws IOException {
         return this.sock.getOutputStream();
     }
-    
-    
+
+
+    @Override
     public synchronized void close() throws IOException {
         this.sock.close();
     }
-    
+
+    @Override
     public void shutdownInput() throws IOException {
         this.sock.shutdownInput();
     }
-    
+
+    @Override
     public void shutdownOutput() throws IOException {
         this.sock.shutdownOutput();
     }
-    
+
+    @Override
     public String toString() {
         return this.sock.toString();
     }
-    
+
+    @Override
     public boolean isConnected() {
         return this.sock.isConnected();
     }
-    
+
+    @Override
     public boolean isBound() {
         return this.sock.isBound();
     }
-    
+
+    @Override
     public boolean isClosed() {
         return this.sock.isClosed();
     }
-    
+
+    @Override
     public boolean isInputShutdown() {
         return this.sock.isInputShutdown();
     }
-    
+
+    @Override
     public boolean isOutputShutdown() {
         return this.sock.isOutputShutdown();
-    }    
-    
+    }
+
+    @Override
     public synchronized void setSoTimeout(final int timeout) throws SocketException {
         this.sock.setSoTimeout(timeout);
     }
-    
+
 }

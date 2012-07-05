@@ -222,7 +222,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      * @param prop
      * @return <code>true</code> if a persistent connection was requested or <code>false</code> otherwise
      */
-    private boolean handlePersistentConnection(final RequestHeader header, final HashMap<String, Object> prop) {
+    private static boolean handlePersistentConnection(final RequestHeader header, final HashMap<String, Object> prop) {
 
         if (!keepAliveSupport) {
             prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
@@ -256,7 +256,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return persistent;
     }
 
-    private boolean handleYaCyHopAuthentication(final RequestHeader header, final HashMap<String, Object> prop) {
+    private static boolean handleYaCyHopAuthentication(final RequestHeader header, final HashMap<String, Object> prop) {
         // check if the user has allowed that his/her peer is used for hops
         if (!allowYaCyHop()) return false;
 
@@ -425,7 +425,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
     }
 
-    private void logUnexpectedError(final Exception e, final String address) {
+    private static void logUnexpectedError(final Exception e, final String address) {
         if (e instanceof InterruptedException) {
             log.logInfo("Interruption detected");
         } else {

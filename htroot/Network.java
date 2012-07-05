@@ -122,7 +122,7 @@ public class Network {
                 prop.put("table_my-dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
                 prop.put("table_my-nodestate", seed.getFlagRootNode() ? 1 : 0);
 
-                myppm = sb.currentPPM();
+                myppm = Switchboard.currentPPM();
                 myqph = 60d * sb.averageQPM();
                 prop.put("table_my-version", seed.get(Seed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(Seed.UTC, "-"));

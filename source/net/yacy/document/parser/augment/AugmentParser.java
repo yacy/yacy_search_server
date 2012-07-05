@@ -57,7 +57,7 @@ public class AugmentParser extends AbstractParser implements Parser {
 		return retDocs;
 	}
 
-	private Document analyze (Document alreadyParsedDocument, DigestURI url,
+	private static Document analyze (Document alreadyParsedDocument, DigestURI url,
 			String mimeType, String charset) {
 
 		Document newDoc = new Document(url, mimeType, charset, null, null, null, "", "",

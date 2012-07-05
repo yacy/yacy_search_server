@@ -26,8 +26,8 @@
  *    prior written permission. For written permission, please contact
  *    info@sbbi.net.
  *
- * 5. Products  derived from this software may not be called 
- *    "SuperBonBon Industries", nor may "SBBI" appear in their name, 
+ * 5. Products  derived from this software may not be called
+ *    "SuperBonBon Industries", nor may "SBBI" appear in their name,
  *    without prior written permission of SuperBonBon Industries.
  *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
@@ -42,7 +42,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software  consists of voluntary contributions made by many individuals
- * on behalf of SuperBonBon Industries. For more information on 
+ * on behalf of SuperBonBon Industries. For more information on
  * SuperBonBon Industries, please see <http://www.sbbi.net/>.
  */
 package net.yacy.upnp.impls;
@@ -52,11 +52,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import net.yacy.upnp.Discovery;
 import net.yacy.upnp.devices.UPNPDevice;
@@ -69,8 +65,11 @@ import net.yacy.upnp.messages.UPNPMessageFactory;
 import net.yacy.upnp.messages.UPNPResponseException;
 import net.yacy.upnp.services.UPNPService;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
- * This class can be used to access some funtionalities on the 
+ * This class can be used to access some funtionalities on the
  * InternetGatewayDevice on your network without having to know
  * anything about the required input/output parameters.
  * All device functions are not provided.
@@ -78,16 +77,16 @@ import net.yacy.upnp.services.UPNPService;
  * @version 1.0
  */
 public class InternetGatewayDevice {
-  
+
   private final static Log log = LogFactory.getLog( InternetGatewayDevice.class );
-  
-  private UPNPRootDevice igd;
+
+  private final UPNPRootDevice igd;
   private UPNPMessageFactory msgFactory;
-  
+
   public InternetGatewayDevice( UPNPRootDevice igd ) throws UnsupportedOperationException {
     this( igd, true, true );
   }
-  
+
   private InternetGatewayDevice( UPNPRootDevice igd, boolean WANIPConnection, boolean WANPPPConnection ) throws UnsupportedOperationException {
     this.igd = igd;
     UPNPDevice myIGDWANConnDevice = igd.getChildDevice( "urn:schemas-upnp-org:device:WANConnectionDevice:1" );
@@ -105,11 +104,11 @@ public class InternetGatewayDevice {
     } else if ( ( !WANIPConnection && WANPPPConnection ) && wanPPPSrv == null ) {
       throw new UnsupportedOperationException( "Unable to find any urn:schemas-upnp-org:service:WANPPPConnection:1 service" );
     }
-    
+
     if ( wanIPSrv != null && wanPPPSrv == null ) {
-      msgFactory = UPNPMessageFactory.getNewInstance( wanIPSrv );
+      this.msgFactory = UPNPMessageFactory.getNewInstance( wanIPSrv );
     } else if ( wanPPPSrv != null && wanIPSrv == null ) {
-      msgFactory = UPNPMessageFactory.getNewInstance( wanPPPSrv );
+      this.msgFactory = UPNPMessageFactory.getNewInstance( wanPPPSrv );
     } else {
       // Unable to test the following code since no router implementing both IP and PPP connection on hands..
       /*// discover the active WAN interface using the WANCommonInterfaceConfig specs
@@ -136,34 +135,34 @@ public class InternetGatewayDevice {
               serviceID != null && serviceID.trim().length() > 0 ) {
             for ( Iterator i = igd.getChildDevices().iterator(); i.hasNext(); ) {
               UPNPDevice dv = (UPNPDevice)i.next();
-              
-              if ( deviceContainer.startsWith( dv.getUDN() ) && 
+
+              if ( deviceContainer.startsWith( dv.getUDN() ) &&
                   dv.getDeviceType().indexOf( ":WANConnectionDevice:" ) != -1 ) {
                 myIGDWANConnDevice = dv;
                 break;
               }
             }
-            msgFactory = UPNPMessageFactory.getNewInstance( myIGDWANConnDevice.getServiceByID( serviceID ) );         
+            msgFactory = UPNPMessageFactory.getNewInstance( myIGDWANConnDevice.getServiceByID( serviceID ) );
           }
         }
       }*/
       // Doing a tricky test with external IP address, the unactive interface should return a null value or none
       if ( testWANInterface( wanIPSrv ) ) {
-        msgFactory = UPNPMessageFactory.getNewInstance( wanIPSrv );
+        this.msgFactory = UPNPMessageFactory.getNewInstance( wanIPSrv );
       } else if( testWANInterface( wanPPPSrv ) ) {
-        msgFactory = UPNPMessageFactory.getNewInstance( wanPPPSrv );
+        this.msgFactory = UPNPMessageFactory.getNewInstance( wanPPPSrv );
       }
-      if ( msgFactory == null ) {
+      if ( this.msgFactory == null ) {
         // Nothing found using WANCommonInterfaceConfig! IP by default
         log.warn( "Unable to detect active WANIPConnection, dfaulting to urn:schemas-upnp-org:service:WANIPConnection:1" );
-        msgFactory = UPNPMessageFactory.getNewInstance( wanIPSrv );
+        this.msgFactory = UPNPMessageFactory.getNewInstance( wanIPSrv );
       }
     }
   }
-  
-  private boolean testWANInterface( UPNPService srv ) {
+
+  private static boolean testWANInterface( UPNPService srv ) {
     UPNPMessageFactory tmp = UPNPMessageFactory.getNewInstance( srv );
-    
+
     ActionMessage msg = tmp.getMessage( "GetExternalIPAddress" );
     String ipToParse = null;
     try {
@@ -183,17 +182,17 @@ public class InternetGatewayDevice {
     }
     return false;
   }
-  
+
   /**
    * Retreives the IDG UNPNRootDevice object
    * @return the UNPNRootDevie object bound to this object
    */
   public UPNPRootDevice getIGDRootDevice() {
-    return igd;
+    return this.igd;
   }
-  
+
   /**
-   * Lookup all the IGD (IP or PPP) devices on the network. If a device implements both 
+   * Lookup all the IGD (IP or PPP) devices on the network. If a device implements both
    * IP and PPP, the active service will be used for nat mappings.
    * @param timeout the timeout in ms to listen for devices response, -1 for default value
    * @return an array of devices to play with or null if nothing found.
@@ -202,10 +201,10 @@ public class InternetGatewayDevice {
   public static InternetGatewayDevice[] getDevices( int timeout ) throws IOException {
     return lookupDeviceDevices( timeout, Discovery.DEFAULT_TTL, Discovery.DEFAULT_MX, true, true, null );
   }
-  
+
   /**
    * Lookup all the IGD (IP urn:schemas-upnp-org:service:WANIPConnection:1, or PPP urn:schemas-upnp-org:service:WANPPPConnection:1)
-   * devices for a given network interface. If a device implements both 
+   * devices for a given network interface. If a device implements both
    * IP and PPP, the active service will be used for nat mappings.
    * @param timeout the timeout in ms to listen for devices response, -1 for default value
    * @param ttl the discovery ttl such as {@link net.yacy.upnp.Discovery#DEFAULT_TTL}
@@ -217,7 +216,7 @@ public class InternetGatewayDevice {
   public static InternetGatewayDevice[] getDevices( int timeout, int ttl, int mx, NetworkInterface ni ) throws IOException {
     return lookupDeviceDevices( timeout, ttl, mx, true, true, ni );
   }
-  
+
   /**
    * Lookup all the IGD IP devices on the network (urn:schemas-upnp-org:service:WANIPConnection:1 service)
    * @param timeout the timeout in ms to listen for devices response, -1 for default value
@@ -230,7 +229,7 @@ public class InternetGatewayDevice {
   public static InternetGatewayDevice[] getIPDevices( int timeout ) throws IOException {
     return lookupDeviceDevices( timeout, Discovery.DEFAULT_TTL, Discovery.DEFAULT_MX, true, false, null );
   }
-  
+
   /**
    * Lookup all the IGD PPP devices on the network (urn:schemas-upnp-org:service:WANPPPConnection:1 service)
    * @param timeout the timeout in ms to listen for devices response, -1 for default value
@@ -243,7 +242,7 @@ public class InternetGatewayDevice {
   public static InternetGatewayDevice[] getPPPDevices( int timeout ) throws IOException {
     return lookupDeviceDevices( timeout, Discovery.DEFAULT_TTL, Discovery.DEFAULT_MX, false, true, null );
   }
-  
+
   private static InternetGatewayDevice[] lookupDeviceDevices( int timeout, int ttl, int mx, boolean WANIPConnection, boolean WANPPPConnection, NetworkInterface ni ) throws IOException {
     UPNPRootDevice[] devices = null;
     InternetGatewayDevice[] rtrVal = null;
@@ -255,9 +254,9 @@ public class InternetGatewayDevice {
 
     if ( devices != null ) {
       Set <InternetGatewayDevice> valid = new HashSet<InternetGatewayDevice>();
-      for ( int i = 0; i < devices.length; i++ ) {
+      for (UPNPRootDevice device : devices) {
         try {
-          valid.add( new InternetGatewayDevice( devices[i], WANIPConnection, WANPPPConnection ) );
+          valid.add( new InternetGatewayDevice( device, WANIPConnection, WANPPPConnection ) );
         } catch ( UnsupportedOperationException ex ) {
           // the device is either not IP or PPP
           if ( log.isDebugEnabled() ) log.debug( "UnsupportedOperationException during discovery " + ex.getMessage() );
@@ -268,10 +267,10 @@ public class InternetGatewayDevice {
       }
       rtrVal = new InternetGatewayDevice[valid.size()];
       int i = 0;
-      for ( Iterator<InternetGatewayDevice> itr = valid.iterator(); itr.hasNext(); ) {
-        rtrVal[i++] = itr.next();
+      for (InternetGatewayDevice internetGatewayDevice : valid) {
+        rtrVal[i++] = internetGatewayDevice;
       }
-      
+
     }
     return rtrVal;
   }
@@ -283,7 +282,7 @@ public class InternetGatewayDevice {
    * @throws IOException if some error occurs during communication with the device
    */
   public String getExternalIPAddress() throws UPNPResponseException, IOException {
-    ActionMessage msg = msgFactory.getMessage( "GetExternalIPAddress" );
+    ActionMessage msg = this.msgFactory.getMessage( "GetExternalIPAddress" );
     return msg.service().getOutActionArgumentValue( "NewExternalIPAddress" );
   }
 
@@ -298,7 +297,7 @@ public class InternetGatewayDevice {
    */
   public ActionResponse getGenericPortMappingEntry( int newPortMappingIndex ) throws IOException, UPNPResponseException {
 
-    ActionMessage msg = msgFactory.getMessage( "GetGenericPortMappingEntry" );
+    ActionMessage msg = this.msgFactory.getMessage( "GetGenericPortMappingEntry" );
     msg.setInputParameter( "NewPortMappingIndex", newPortMappingIndex );
 
     try {
@@ -309,7 +308,7 @@ public class InternetGatewayDevice {
       }
       throw ex;
     }
-    
+
   }
 
   /**
@@ -327,8 +326,8 @@ public class InternetGatewayDevice {
     remoteHost = remoteHost == null ? "" : remoteHost;
     checkPortMappingProtocol( protocol );
     checkPortRange( externalPort );
-    
-    ActionMessage msg = msgFactory.getMessage( "GetSpecificPortMappingEntry" );
+
+    ActionMessage msg = this.msgFactory.getMessage( "GetSpecificPortMappingEntry" );
     msg.setInputParameter( "NewRemoteHost", remoteHost )
        .setInputParameter( "NewExternalPort", externalPort )
        .setInputParameter( "NewProtocol", protocol );
@@ -365,7 +364,7 @@ public class InternetGatewayDevice {
    *                               727 ExternalPortOnlySupportsWildcard ExternalPort must be a wildcard and cannot be a specific port value
    */
   public boolean addPortMapping( String description, String remoteHost,
-                                 int internalPort, int externalPort, 
+                                 int internalPort, int externalPort,
                                  String internalClient, int leaseDuration,
                                  String protocol ) throws IOException, UPNPResponseException {
     remoteHost = remoteHost == null ? "" : remoteHost;
@@ -377,7 +376,7 @@ public class InternetGatewayDevice {
     description = description == null ? "" : description;
     if ( leaseDuration < 0 ) throw new IllegalArgumentException( "Invalid leaseDuration (" + leaseDuration + ") value" );
 
-    ActionMessage msg = msgFactory.getMessage( "AddPortMapping" );
+    ActionMessage msg = this.msgFactory.getMessage( "AddPortMapping" );
     msg.setInputParameter( "NewRemoteHost", remoteHost )
        .setInputParameter( "NewExternalPort", externalPort )
        .setInputParameter( "NewProtocol", protocol )
@@ -396,7 +395,7 @@ public class InternetGatewayDevice {
       throw ex;
     }
   }
-  
+
   /**
    * Deletes a port mapping on the IDG device
    * @param remoteHost the host ip for which the mapping was done, null value for a wildcard value
@@ -407,11 +406,11 @@ public class InternetGatewayDevice {
    * @throws UPNPResponseException if the devices returns an error message
    */
   public boolean deletePortMapping( String remoteHost, int externalPort, String protocol ) throws IOException, UPNPResponseException {
-    
+
     remoteHost = remoteHost == null ? "" : remoteHost;
     checkPortMappingProtocol( protocol );
     checkPortRange( externalPort );
-    ActionMessage msg = msgFactory.getMessage( "DeletePortMapping" );
+    ActionMessage msg = this.msgFactory.getMessage( "DeletePortMapping" );
     msg.setInputParameter( "NewRemoteHost", remoteHost )
        .setInputParameter( "NewExternalPort", externalPort )
        .setInputParameter( "NewProtocol", protocol );
@@ -425,7 +424,7 @@ public class InternetGatewayDevice {
       throw ex;
     }
   }
-  
+
   /**
    * Retreives the current number of mapping in the NAT table
    * @return the nat table current number of mappings or null if the device does not allow to query state variables
@@ -433,9 +432,9 @@ public class InternetGatewayDevice {
    * @throws UPNPResponseException if the devices returns an error message with error code other than 404
    */
   public Integer getNatMappingsCount() throws IOException, UPNPResponseException {
-    
+
     Integer rtrval = null;
-    StateVariableMessage natTableSize = msgFactory.getStateVariableMessage( "PortMappingNumberOfEntries" );
+    StateVariableMessage natTableSize = this.msgFactory.getStateVariableMessage( "PortMappingNumberOfEntries" );
     try {
       StateVariableResponse resp = natTableSize.service();
       rtrval = new Integer(  resp.getStateVariableValue() );
@@ -447,7 +446,7 @@ public class InternetGatewayDevice {
     }
     return rtrval;
   }
-  
+
   /**
    * Computes the total entries in avaliable in the nat table size, not that this method is not guaranteed to work
    * with all upnp devices since it is not an generic IGD command
@@ -456,7 +455,7 @@ public class InternetGatewayDevice {
    * @throws UPNPResponseException if the devices returns an error message with error code other than 713 or 402
    */
   public Integer getNatTableSize() throws IOException, UPNPResponseException {
-    
+
     // first let's look at the first index.. some crappy devices do not start with index 0
     // we stop at index 50
     int startIndex = -1;
@@ -493,16 +492,16 @@ public class InternetGatewayDevice {
     }
     return new Integer( size );
   }
-  
-  private void checkPortMappingProtocol( String prot ) throws IllegalArgumentException {
+
+  private static void checkPortMappingProtocol( String prot ) throws IllegalArgumentException {
     if ( prot == null || ( !prot.equals( "TCP" ) && !prot.equals( "UDP" ) ) )
       throw new IllegalArgumentException( "PortMappingProtocol must be either TCP or UDP" );
   }
-  
-  private void checkPortRange( int port ) throws IllegalArgumentException {
+
+  private static void checkPortRange( int port ) throws IllegalArgumentException {
     if ( port < 1 || port > 65535 )
       throw new IllegalArgumentException( "Port range must be between 1 and 65535" );
   }
-  
-  
+
+
 }

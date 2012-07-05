@@ -394,7 +394,7 @@ public final class LoaderDispatcher {
         return Document.getHyperlinks(documents);
     }
 
-    public synchronized void cleanupAccessTimeTable(final long timeout) {
+    public synchronized static void cleanupAccessTimeTable(final long timeout) {
     	final Iterator<Map.Entry<String, Long>> i = accessTime.entrySet().iterator();
         Map.Entry<String, Long> e;
         while (i.hasNext()) {
