@@ -21,7 +21,7 @@ public class YBRFetch_p
 {
 
     public static servletProperties respond(
-        final RequestHeader requestHeader,
+        @SuppressWarnings("unused") final RequestHeader requestHeader,
         final serverObjects post,
         final serverSwitch env) {
         final servletProperties prop = new servletProperties();

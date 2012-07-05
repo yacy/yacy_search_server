@@ -669,7 +669,7 @@ public final class yacy {
                     log,
                     new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                     10000,
-                    (long) Integer.MAX_VALUE, false, false);
+                    Integer.MAX_VALUE, false, false);
             final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.termIndex().referenceContainerIterator("AAAAAAAAAAAA".getBytes(), false, false);
 
             long urlCounter = 0, wordCounter = 0;
@@ -849,7 +849,7 @@ public final class yacy {
                         log,
                         new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                         10000,
-                        (long) Integer.MAX_VALUE, false, false);
+                        Integer.MAX_VALUE, false, false);
                 indexContainerIterator = WordIndex.termIndex().referenceContainerIterator(wordChunkStartHash.getBytes(), false, false);
             }
             int counter = 0;

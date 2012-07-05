@@ -47,7 +47,7 @@ public class CrawlStartScanner_p
     private final static int CONCURRENT_RUNNER = 100;
 
     public static serverObjects respond(
-        final RequestHeader header,
+        @SuppressWarnings("unused") final RequestHeader header,
         final serverObjects post,
         final serverSwitch env) {
 

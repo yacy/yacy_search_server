@@ -34,7 +34,7 @@ import de.anomic.server.serverSwitch;
 
 public class yacyinteractive {
 
-    public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 

@@ -36,7 +36,7 @@ import de.anomic.server.serverSwitch;
 
 public class SearchEventPicture {
 
-    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static RasterPlotter respond(final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final String eventID = header.get("event", SearchEventCache.lastEventID);
         if (eventID == null) return null;

@@ -37,7 +37,7 @@ import de.anomic.server.servletProperties;
 
 public class CacheResource_p {
 
-    public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static Object respond(final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         prop.put("resource", new byte[0]);
 

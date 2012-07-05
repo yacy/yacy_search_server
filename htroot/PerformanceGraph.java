@@ -33,7 +33,7 @@ import de.anomic.server.serverSwitch;
 
 public class PerformanceGraph {
 
-    public static RasterPlotter respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
+    public static RasterPlotter respond(@SuppressWarnings("unused") final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
         if (post == null) post = new serverObjects();

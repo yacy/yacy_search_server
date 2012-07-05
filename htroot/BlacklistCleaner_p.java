@@ -69,7 +69,7 @@ public class BlacklistCleaner_p {
         Blacklist.class
     };
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
 
         // initialize the list manager

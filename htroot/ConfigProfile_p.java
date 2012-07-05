@@ -38,13 +38,12 @@ import java.util.Properties;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class ConfigProfile_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final Properties profile = new Properties();

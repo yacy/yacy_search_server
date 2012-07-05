@@ -9,7 +9,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -30,17 +30,17 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class IndexCreateDomainCrawl_p {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         //Switchboard sb = (Switchboard) env;
         serverObjects prop = new serverObjects();
-        
+
         // define visible variables
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", Math.min(3, env.getConfigLong("crawlingDepth", 0)));
         prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));
-        
+
         int crawlingIfOlder = (int) env.getConfigLong("crawlingIfOlder", -1);
         prop.put("crawlingIfOlderCheck", (crawlingIfOlder == -1) ? "0" : "1");
         prop.put("crawlingIfOlderUnitYearCheck", "0");
@@ -78,18 +78,18 @@ public class IndexCreateDomainCrawl_p {
         prop.put("indexingTextChecked", env.getConfigBool("indexText", false) ? "1" : "0");
         prop.put("indexingMediaChecked", env.getConfigBool("indexMedia", false) ? "1" : "0");
         prop.put("crawlOrderChecked", env.getConfigBool("crawlOrder", false) ? "1" : "0");
-        
+
         long LCbusySleep = env.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 100L);
         int LCppm = (LCbusySleep == 0) ? 1000 : (int) (60000L / LCbusySleep);
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
         prop.put("customPPMdefault", ((LCppm > 10) && (LCppm < 1000)) ? Integer.toString(LCppm) : "");
-        
+
         prop.put("xsstopwChecked", env.getConfigBool("xsstopw", false) ? "1" : "0");
         prop.put("xdstopwChecked", env.getConfigBool("xdstopw", false) ? "1" : "0");
         prop.put("xpstopwChecked", env.getConfigBool("xpstopw", false) ? "1" : "0");
-        
+
         // return rewrite properties
         return prop;
     }

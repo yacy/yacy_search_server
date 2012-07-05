@@ -115,7 +115,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     }
 
     public int speed() {
-        return (int) (1000L * ((long) count()) / runningTime());
+        return (int) (1000L * (count()) / runningTime());
     }
     
     @Override

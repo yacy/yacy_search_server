@@ -39,7 +39,7 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigHTCache_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();

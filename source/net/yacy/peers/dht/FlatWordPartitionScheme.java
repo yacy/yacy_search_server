@@ -121,7 +121,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
                 break;
             }
         }
-        long timek = ((long) count) * 1000L / (System.currentTimeMillis() - start);
+        long timek = (count) * 1000L / (System.currentTimeMillis() - start);
         System.out.println("Result HandleMap: " + timek + " inc per second");
         System.gc();
         long memk = a - MemoryControl.available();
@@ -141,14 +141,14 @@ public class FlatWordPartitionScheme implements PartitionScheme {
             d = hm.get(hash);
             if (d == null) hm.put(hash, 1); else hm.put(hash, d + 1);
         }
-        long timej =  ((long) count) * 1000L / (System.currentTimeMillis() - start);
+        long timej =  (count) * 1000L / (System.currentTimeMillis() - start);
         System.out.println("Result   TreeMap: " + timej + " inc per second");
         System.gc();
         long memj = a - MemoryControl.available();
         System.out.println("Used Memory: " + memj + " bytes");
         System.out.println("x " + hm.get(FlatWordPartitionScheme.positionToHash(0)));
-        System.out.println("Geschwindigkeitsfaktor j/k: " + ((float) (10 * timej / timek) / 10.0) + " - je kleiner desto besser fuer kelondro");
-        System.out.println("Speicherplatzfaktor    j/k: " + ((float) (10 * memj / memk) / 10.0) + " - je groesser desto besser fuer kelondro");
+        System.out.println("Geschwindigkeitsfaktor j/k: " + (10 * timej / timek / 10.0) + " - je kleiner desto besser fuer kelondro");
+        System.out.println("Speicherplatzfaktor    j/k: " + (10 * memj / memk / 10.0) + " - je groesser desto besser fuer kelondro");
         System.exit(0);
     }
 

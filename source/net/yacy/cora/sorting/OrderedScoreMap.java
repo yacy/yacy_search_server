@@ -256,7 +256,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
     	OrderedScoreMap<StringBuilder> w = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
     	Random r = new Random();
     	for (int i = 0; i < 10000; i++) {
-    		w.inc(new StringBuilder("a" + ((char) (((int) 'a') + r.nextInt(26)))));
+    		w.inc(new StringBuilder("a" + ((char) (('a') + r.nextInt(26)))));
     	}
     	for (StringBuilder s: w) System.out.println(s + ":" + w.get(s));
     	System.out.println("--");

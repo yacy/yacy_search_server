@@ -216,7 +216,7 @@ public class Translator {
         return true;
     }
 
-    public static Map<String, String> langMap(final serverSwitch env) {
+    public static Map<String, String> langMap(@SuppressWarnings("unused") final serverSwitch env) {
         final String[] ms = (
             "default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk," +
             "gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky,cn/&#27721;&#35821;/&#28450;&#35486;," +

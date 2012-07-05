@@ -49,7 +49,7 @@ public class WebStructurePicture_p {
 
     private static final double maxlongd = Long.MAX_VALUE;
 
-    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static RasterPlotter respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
         String color_text    = "888888";

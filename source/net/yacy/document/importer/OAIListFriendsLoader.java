@@ -129,7 +129,7 @@ public class OAIListFriendsLoader implements Serializable {
         private int recordCounter;
         private final TreeMap<String, String> map;
 
-        public Parser(final byte[] b) throws IOException {
+        public Parser(final byte[] b) {
             this.map = new TreeMap<String, String>();
             this.recordCounter = 0;
             this.buffer = new StringBuilder();

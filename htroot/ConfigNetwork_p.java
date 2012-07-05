@@ -44,7 +44,7 @@ public class ConfigNetwork_p
 {
 
     public static serverObjects respond(
-        final RequestHeader header,
+        @SuppressWarnings("unused") final RequestHeader header,
         final serverObjects post,
         final serverSwitch env) throws FileNotFoundException, IOException {
 

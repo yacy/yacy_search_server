@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,25 +31,25 @@ import de.anomic.server.serverSwitch;
 
 public class ssitestservlet {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+
         //plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         int delay = 0;
         final long start = System.currentTimeMillis();
-        
+
         if (post != null) {
             delay = post.getInt("delay", 1000);
         }
-        
+
         // make a delay to see how the ssi loads and displays this page
         try {Thread.sleep(delay);} catch (final InterruptedException e) {}
-        
+
         prop.put("delay", delay);
         prop.put("start", start);
         prop.put("stop", System.currentTimeMillis());
-        
+
         return prop;
     }
-    
+
 }

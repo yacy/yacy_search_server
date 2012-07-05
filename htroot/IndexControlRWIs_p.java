@@ -78,7 +78,7 @@ public class IndexControlRWIs_p
 {
 
     public static serverObjects respond(
-        final RequestHeader header,
+        @SuppressWarnings("unused") final RequestHeader header,
         final serverObjects post,
         final serverSwitch env) throws IOException {
         // return variable that accumulates replacements

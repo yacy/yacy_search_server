@@ -1,4 +1,4 @@
-// imagetest.java 
+// imagetest.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -31,22 +31,22 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class imagetest {
-    
-    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static RasterPlotter respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         /*
-        BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB); 
+        BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = bi.createGraphics();
         g.setBackground(Color.white);
         g.clearRect(0, 0, 640, 400);
-        
+
         g.setColor(new Color(200, 200, 0));
         g.drawRect(100, 50, 40, 30);
-        
+
         g.setColor(new Color(0, 0, 200));
         try {
             Class[] pType    = {Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE};
             Object[] pParam = new Integer[]{new Integer(66), new Integer(55), new Integer(80), new Integer(80)};
-            
+
             String com = "drawRect";
             Method m = g.getClass().getMethod(com, pType);
             Object result = m.invoke(g, pParam);
@@ -57,7 +57,7 @@ public class imagetest {
         } catch (InvocationTargetException e) {
             Log.logException(e);
         }
-        
+
         WritableRaster r = bi.getRaster();
         for (int i = 20; i < 100; i++) r.setPixel(i, 30, new int[]{255, 0, 0});
         for (int i = 20; i < 100; i++) r.setPixel(i, 32, new int[]{0, 255, 0});
@@ -112,7 +112,7 @@ public class imagetest {
             PrintTool.arcPrint(img, 550, 400, 100, angle, "ANGLE" + angle + ":" + (char) c);
         }
         return img;
-        
+
     }
-    
+
 }

@@ -4,7 +4,7 @@ import de.anomic.server.serverSwitch;
 
 public final class AugmentedBrowsing_p {
 
-	public static serverObjects respond(final RequestHeader header,
+	public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header,
 			final serverObjects post, final serverSwitch env) {
 		// return variable that accumulates replacements
 		final serverObjects prop = new serverObjects();
@@ -20,7 +20,7 @@ public final class AugmentedBrowsing_p {
 
 				env.setConfig("proxyURL",
 						"on".equals(post.get("urlproxyenabled")) ? true : false);
-				
+
 				env.setConfig("proxyURL.useforresults",
 						"on".equals(post.get("urlproxyuseforresults")) ? true : false);
 
@@ -43,7 +43,7 @@ public final class AugmentedBrowsing_p {
 
 		prop.put("urlproxyenabled_checked",
 				env.getConfigBool("proxyURL", false) ? "1" : "0");
-		
+
 		prop.put("urlproxyuseforresults_checked",
 				env.getConfigBool("proxyURL.useforresults", false) ? "1" : "0");
 

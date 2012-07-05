@@ -13,7 +13,7 @@ import de.anomic.server.serverSwitch;
 
 public class PeerLoadPicture {
 
-    public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static Image respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         int width = 800;
         int height = 600;

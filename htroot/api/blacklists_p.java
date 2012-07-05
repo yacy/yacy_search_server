@@ -5,17 +5,16 @@ import java.util.List;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist.BlacklistType;
-
 import de.anomic.data.ListManager;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class blacklists_p {
-    
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        
+
         ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
         int blacklistCount=0;
@@ -62,10 +61,10 @@ public class blacklists_p {
             }
         }
         prop.put("lists", blacklistCount);
-        
-        
+
+
         // return rewrite properties
         return prop;
     }
-    
+
 }

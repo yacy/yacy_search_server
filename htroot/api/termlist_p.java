@@ -37,7 +37,7 @@ import de.anomic.server.serverSwitch;
 
 public class termlist_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
     	final Log log = new Log("TERMLIST");
         final serverObjects prop = new serverObjects();

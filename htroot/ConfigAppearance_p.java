@@ -54,7 +54,7 @@ public class ConfigAppearance_p {
 
     private final static String SKIN_FILENAME_FILTER = "^.*\\.css$";
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         final String skinPath = new File(env.getDataPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();

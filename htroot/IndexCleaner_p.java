@@ -36,7 +36,7 @@ public class IndexCleaner_p {
     private static MetadataRepository.BlacklistCleaner urldbCleanerThread = null;
     private static Segment.ReferenceCleaner indexCleanerThread = null;
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         prop.put("title", "DbCleanup_p");

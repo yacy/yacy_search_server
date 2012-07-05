@@ -35,28 +35,28 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class IndexCreateParserErrors_p {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         prop.put("rejected", "0");
         int showRejectedCount = 100;
-        
+
         if (post != null) {
-            
+
             if (post.containsKey("clearRejected")) {
                 sb.crawlQueues.errorURL.clearStack();
-            } 
+            }
             if (post.containsKey("moreRejected")) {
                 showRejectedCount = post.getInt("showRejected", 10);
             }
         }
         boolean dark;
-        
+
 
         prop.put("indexing-queue", "0"); //is empty
-        
+
         // failure cases
         if (sb.crawlQueues.errorURL.stackSize() != 0) {
             if (showRejectedCount > sb.crawlQueues.errorURL.stackSize()) showRejectedCount = sb.crawlQueues.errorURL.stackSize();
@@ -70,7 +70,7 @@ public class IndexCreateParserErrors_p {
                 prop.put("rejected_only-latest", "0");
             }
             dark = true;
-            DigestURI url; 
+            DigestURI url;
             byte[] initiatorHash, executorHash;
             Seed initiatorSeed, executorSeed;
             int j=0;
@@ -81,7 +81,7 @@ public class IndexCreateParserErrors_p {
                 if (entry == null) continue;
                 url = entry.url();
                 if (url == null) continue;
-                
+
                 initiatorHash = entry.initiator();
                 executorHash = entry.executor();
                 initiatorSeed = (initiatorHash == null) ? null : sb.peers.getConnected(ASCII.String(initiatorHash));

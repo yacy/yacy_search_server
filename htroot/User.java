@@ -42,7 +42,7 @@ import de.anomic.server.servletProperties;
 
 public class User{
 
-    public static servletProperties respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
+    public static servletProperties respond(final RequestHeader requestHeader, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final Switchboard sb = Switchboard.getSwitchboard();
         UserDB.Entry entry=null;

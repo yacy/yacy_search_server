@@ -6,7 +6,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class YMarks {
-	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+	public static serverObjects respond(final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final UserDB.Entry user = sb.userDB.getUser(header);

@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -30,16 +30,15 @@ import java.util.Iterator;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class PerformanceSearch_p {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch sb) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch sb) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        
+
         final Iterator<EventTracker.Event> events = EventTracker.getHistory(EventTracker.EClass.SEARCH);
         int c = 0;
         if (events != null) {

@@ -44,7 +44,7 @@ import de.anomic.server.serverSwitch;
 public class Banner {
 
     public static RasterPlotter respond(
-        final RequestHeader header,
+        @SuppressWarnings("unused") final RequestHeader header,
         final serverObjects post,
         final serverSwitch env) throws IOException {
         final Switchboard sb = (Switchboard) env;

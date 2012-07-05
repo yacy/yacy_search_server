@@ -9,12 +9,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -34,23 +34,23 @@ public class DocumentReference {
 
 	public MapStore data;
 
-    public void clear() throws IOException {
-    	data.clear();
+    public void clear() {
+    	this.data.clear();
     }
 
     public int size() {
-    	return data.size();
+    	return this.data.size();
     }
 
     public synchronized void close() {
-    	if (data != null) {
-    		data.close();
+    	if (this.data != null) {
+    		this.data.close();
     	}
-    	data = null;
+    	this.data = null;
     }
 
-    public void store(final URIReference entry) throws IOException {
-    	data.put(entry.hash(), entry.toMap());
+    public void store(final URIReference entry) {
+    	this.data.put(entry.hash(), entry.toMap());
     }
 
     public URIReference load(final WeakPriorityBlockingQueue.Element<WordReference> obrwi) {
@@ -73,11 +73,11 @@ public class DocumentReference {
     	return null;
     }
 
-    public CloneableIterator<URIReference> entries() throws IOException {
+    public CloneableIterator<URIReference> entries() {
     	return null;
     }
 
-    public CloneableIterator<URIReference> entries(final boolean up, final String firstHash) throws IOException {
+    public CloneableIterator<URIReference> entries(final boolean up, final String firstHash) {
     	return null;
     }
 

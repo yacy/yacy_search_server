@@ -3,7 +3,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class Table_RobotsTxt_p {
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         return new serverObjects();
     }
 }

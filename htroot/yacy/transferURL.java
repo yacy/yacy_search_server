@@ -48,7 +48,7 @@ import de.anomic.server.serverSwitch;
 
 public final class transferURL {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
         final long start = System.currentTimeMillis();
         long freshdate = 0;
         try {freshdate = GenericFormatter.SHORT_DAY_FORMATTER.parse("20061101").getTime();} catch (final ParseException e1) {}
