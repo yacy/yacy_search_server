@@ -61,7 +61,7 @@ public class IndexImportOAIPMH_p {
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl);
-                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath, "oaipmh-one");
+                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath);
                     final ResumptionToken rt = r.getResumptionToken();
                     prop.put("import-one", 1);
                     prop.put("import-one_count", (rt == null) ? "not available" : Integer.toString(rt.getRecordCounter()));

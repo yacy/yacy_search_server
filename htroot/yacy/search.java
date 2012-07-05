@@ -105,13 +105,10 @@ public final class search {
 
         final String  oseed  = post.get("myseed", ""); // complete seed of the requesting peer
 //      final String  youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
-        final String  key    = post.get("key", "");    // transmission key for response
         final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final String  exclude= post.get("exclude", "");// a string of word hashes that shall not be within the search result
         final String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned
         final String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
-//      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
-//      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
         final int     count  = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 100), post.getInt("count", 10)); // maximum number of wanted results
         final long    maxtime = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000), post.getLong("time", 3000)); // maximum waiting time
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
@@ -131,7 +128,7 @@ public final class search {
         }
         final int partitions = post.getInt("partitions", 30);
         String profile = post.get("profile", ""); // remote profile hand-over
-        if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
+        if (profile.length() > 0) profile = crypt.simpleDecode(profile);
         //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
         Bitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new Bitfield(4, post.get("constraint", "______")) : null;
         if (constraint != null) {
@@ -192,7 +189,7 @@ public final class search {
         // store accessing peer
         Seed remoteSeed;
         try {
-            remoteSeed = Seed.genRemoteSeed(oseed, key, false, client);
+            remoteSeed = Seed.genRemoteSeed(oseed, false, client);
         } catch (final IOException e) {
             Network.log.logInfo("yacy.search: access with bad seed: " + e.getMessage());
             remoteSeed = null;

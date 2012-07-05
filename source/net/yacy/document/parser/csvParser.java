@@ -32,7 +32,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -50,11 +49,12 @@ public class csvParser extends AbstractParser implements Parser {
         this.SUPPORTED_EXTENSIONS.add("csv");
     }
 
+    @Override
     public Document[] parse(DigestURI location, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
         // construct a document using all cells of the document
         // the first row is used as headline
         // all lines are artificially terminated by a '.' to separate them as sentence for the condenser.
-        final List<String[]> table = getTable(location, mimeType, charset, source);
+        final List<String[]> table = getTable(charset, source);
         if (table.isEmpty()) throw new Parser.Failure("document has no lines", location);
         final StringBuilder sb = new StringBuilder();
         for (final String[] row: table) {
@@ -90,7 +90,7 @@ public class csvParser extends AbstractParser implements Parser {
         return sb.toString();
     }
 
-    private List<String[]> getTable(MultiProtocolURI location, String mimeType, String charset, InputStream source) {
+    private List<String[]> getTable(String charset, InputStream source) {
         final List<String[]> rows = new ArrayList<String[]>();
         BufferedReader reader;
         try {

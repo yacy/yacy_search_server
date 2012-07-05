@@ -313,12 +313,12 @@ public final class SeedDB implements AlternativeDomainNames {
 				Log.logWarning("yacySeedDB", "could not create directories for "+ seedDBFile.getParent());
 		}
         try {
-            return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, this);
+            return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields);
         } catch (final Exception e) {
             // try again
             FileUtils.deletedelete(seedDBFile);
             try {
-                return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, this);
+                return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields);
             } catch (final IOException e1) {
                 Log.logException(e1);
                 System.exit(-1);
@@ -870,6 +870,7 @@ public final class SeedDB implements AlternativeDomainNames {
     /**
      * resolve a yacy address
      */
+    @Override
     public String resolve(String host) {
         Seed seed;
         int p;
@@ -983,6 +984,7 @@ public final class SeedDB implements AlternativeDomainNames {
             }
         }
 
+        @Override
         public boolean hasNext() {
             return (this.nextSeed != null);
         }
@@ -1022,6 +1024,7 @@ public final class SeedDB implements AlternativeDomainNames {
             }
         }
 
+        @Override
         public Seed next() {
             final Seed seed = this.nextSeed;
             double version;
@@ -1041,6 +1044,7 @@ public final class SeedDB implements AlternativeDomainNames {
             return seed;
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

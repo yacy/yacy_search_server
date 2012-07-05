@@ -128,7 +128,7 @@ public class Scanner extends Thread {
         return scancache.size();
     }
 
-    public static void scancacheReplace(final Scanner newScanner, final long validTime) {
+    public static void scancacheReplace(final Scanner newScanner) {
         scancache.clear();
         scancache.putAll(newScanner.services());
         //scancacheUpdateTime = System.currentTimeMillis();
@@ -136,7 +136,7 @@ public class Scanner extends Thread {
         scancacheScanrange = newScanner.scanrange;
     }
 
-    public static void scancacheExtend(final Scanner newScanner, final long validTime) {
+    public static void scancacheExtend(final Scanner newScanner) {
         final Iterator<Map.Entry<Service, Access>> i = Scanner.scancache.entrySet().iterator();
         Map.Entry<Service, Access> entry;
         while (i.hasNext()) {

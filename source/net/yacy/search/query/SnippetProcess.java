@@ -575,7 +575,6 @@ public class SnippetProcess {
                     null,
                     ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
                     220,
-                    Integer.MAX_VALUE,
                     !this.query.isLocal());
             return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, dbRetrievalTime, 0); // result without snippet
         }
@@ -592,7 +591,6 @@ public class SnippetProcess {
                     cacheStrategy,
                     ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
                     180,
-                    Integer.MAX_VALUE,
                     !this.query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH", "text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));

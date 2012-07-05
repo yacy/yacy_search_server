@@ -1,4 +1,4 @@
-// cryptbig.java 
+// cryptbig.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -93,7 +93,7 @@ public class cryptbig {
 
     Cipher ecipher;
     Cipher dcipher;
-    
+
     public cryptbig(final String pbe) {
 	// this is possible, but not recommended
 	this(pbe, (pbe + "XXXXXXXX").substring(0, 8));
@@ -110,20 +110,20 @@ public class cryptbig {
 	try {
 	    if (salt.length() > 8) salt = salt.substring(0,8);
 	    if (salt.length() < 8) salt = (salt + "XXXXXXXX").substring(0,8);
-	    
+
 	    // create the PBE key
 	    final SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(method);
 	    final SecretKey key = keyFactory.generateSecret(keySpec);
 
 	    // create parameter spec for PBE
 	    final PBEParameterSpec paramSpec = new PBEParameterSpec(UTF8.getBytes(salt), 1000 /*ITERATIONS*/);
-        
+
 	    // Create a cipher and initialize it for encrypting end decrypting
-	    cryptMethod = method;
-	    ecipher = Cipher.getInstance(cryptMethod);
-	    dcipher = Cipher.getInstance(cryptMethod);
-	    ecipher.init(Cipher.ENCRYPT_MODE, key, paramSpec); // paramSpec only for PBE!
-	    dcipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
+	    this.cryptMethod = method;
+	    this.ecipher = Cipher.getInstance(this.cryptMethod);
+	    this.dcipher = Cipher.getInstance(this.cryptMethod);
+	    this.ecipher.init(Cipher.ENCRYPT_MODE, key, paramSpec); // paramSpec only for PBE!
+	    this.dcipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
 	} catch (final javax.crypto.NoSuchPaddingException e) {
 	} catch (final java.security.InvalidKeyException e) {
 	} catch (final java.security.NoSuchAlgorithmException e) {
@@ -131,7 +131,7 @@ public class cryptbig {
 	} catch (final java.security.InvalidAlgorithmParameterException e) {
 	}
     }
-    
+
     // Encode a string into a new string using utf-8, crypt and b64
     public String encryptString(final String str) {
 	try {
@@ -157,18 +157,18 @@ public class cryptbig {
     public byte[] encryptArray(final byte[] b) {
 	if (b == null) return null;
 	try {
-	    return ecipher.doFinal(b);
+	    return this.ecipher.doFinal(b);
 	} catch (final javax.crypto.BadPaddingException e) {
 	} catch (final IllegalBlockSizeException e) {
 	}
 	return null;
     }
-    
+
     // Decode a string into a new string using b64, crypt and utf-8
     public byte[] decryptArray(final byte[] b) {
 	if (b == null) return null;
 	try {
-	    return dcipher.doFinal(b);
+	    return this.dcipher.doFinal(b);
 	} catch (final javax.crypto.BadPaddingException e) {
 	} catch (final IllegalBlockSizeException e) {
 	}
@@ -179,14 +179,14 @@ public class cryptbig {
     // This method returns the available implementations for a service type
     public static Set<String> listCryptoMethods(final String serviceType) {
         final Set<String> result = new HashSet<String>();
-    
+
         // All providers
         final Provider[] providers = Security.getProviders();
-        for (int i = 0; i < providers.length; i++) {
+        for (Provider provider : providers) {
             // Get services provided by each provider
-            final Set<?> keys = providers[i].keySet();
-            for (final Iterator<?> it = keys.iterator(); it.hasNext(); ) {
-                String key = (String) it.next();
+            final Set<?> keys = provider.keySet();
+            for (Object name : keys) {
+                String key = (String) name;
                 key = key.split(" ")[0];
                 if (key.startsWith(serviceType + ".")) {
                     result.add(key.substring(serviceType.length() + 1));
@@ -218,7 +218,7 @@ public class cryptbig {
 	    }
     }
 
-    public void encryptFile(final String inFileName, final String outFileName, final boolean compress) {
+    public void encryptFile(final String inFileName, final String outFileName) {
 	/*
 	  File-Format of encrypted file:
 	  Filename: b64-of-encryption-of-<encryption-date: YYYYMMddHHmmSSsss> plus extension ".crypt"
@@ -247,7 +247,7 @@ public class cryptbig {
 	    System.out.println("TEST: preserving X-String      : " + X);
 
 	    // start encryption
-	    final InputStream  fin  = new CipherInputStream(new FileInputStream(inFile), ecipher);
+	    final InputStream  fin  = new CipherInputStream(new FileInputStream(inFile), this.ecipher);
 	    final OutputStream fout = new FileOutputStream(outFileName);
 
 	    // write magic and properties of original file
@@ -258,8 +258,8 @@ public class cryptbig {
 	    // - the length of B is BL; BL is then b64-ed to a string C of fixed length 1
 	    // - after the magic String we write C, B and A
 	    try {
-		final String A = UTF8.String(ecipher.doFinal(X.getBytes("UTF8")));
-		final String B = UTF8.String(ecipher.doFinal(Base64Order.standardCoder.encodeLongSB(A.length(), 2).toString().getBytes("UTF8"))); // most probable not longer than 4
+		final String A = UTF8.String(this.ecipher.doFinal(X.getBytes("UTF8")));
+		final String B = UTF8.String(this.ecipher.doFinal(Base64Order.standardCoder.encodeLongSB(A.length(), 2).toString().getBytes("UTF8"))); // most probable not longer than 4
 		final String C = Base64Order.standardCoder.encodeLongSB(B.length(), 1).toString(); // fixed length 1 (6 bits, that should be enough)
 		fout.write(UTF8.getBytes(magicString)); // the magic string, used to identify a 'crypt'-file
 		fout.write(UTF8.getBytes(C));
@@ -280,7 +280,7 @@ public class cryptbig {
 	    System.err.println("ERROR: IO trouble");
 	}
     }
-	
+
     public void decryptFile(final String inFileName, final String outFileName) {
 	InputStream  fin = null;
 	OutputStream fout = null;
@@ -301,9 +301,9 @@ public class cryptbig {
 	    fin.read(C); // the length of the following String, encoded as b64
 	    final byte[] B = new byte[(int) Base64Order.standardCoder.decodeLong(UTF8.String(C))];
 	    fin.read(B); // this is again the length of the following string, as encrypted b64-ed integer
-	    final byte[] A = new byte[(int) Base64Order.standardCoder.decodeLong(UTF8.String(dcipher.doFinal(B)))];
+	    final byte[] A = new byte[(int) Base64Order.standardCoder.decodeLong(UTF8.String(this.dcipher.doFinal(B)))];
 	    fin.read(A);
-	    final String X = UTF8.String(dcipher.doFinal(A));
+	    final String X = UTF8.String(this.dcipher.doFinal(A));
 
 	    System.out.println("TEST: detecting X-String      : " + X);
 
@@ -321,11 +321,11 @@ public class cryptbig {
 	    System.out.println("TEST: detecting inFileName    : " + origFileName);
 
 	    // open the output file
-	    fout = new BufferedOutputStream(new CipherOutputStream(new FileOutputStream(outFileName), dcipher), 4096);
+	    fout = new BufferedOutputStream(new CipherOutputStream(new FileOutputStream(outFileName), this.dcipher), 4096);
 
 	    // read and decrypt the file
 	    copy(fout, fin, 512);
-	    
+
 	    // close the files
 	    fin.close();
 	    fout.close();
@@ -347,7 +347,7 @@ public class cryptbig {
 	    }} catch (final Exception ee) {}
 	}
     }
-	
+
     private static void copy(final OutputStream out, final InputStream in, final int bufferSize) throws IOException {
 	final InputStream  bIn  = new BufferedInputStream(in, bufferSize);
 	final OutputStream bOut = new BufferedOutputStream(out, bufferSize);
@@ -645,7 +645,7 @@ public class cryptbig {
 	    if ((s.length < 3) || (s.length > 4)) {help(); System.exit(-1);}
 	    String target;
 	    if (s.length == 3) target = s[2] + ".crypt"; else target = s[3];
-	    (new cryptbig(s[1])).encryptFile(s[2], target, true /*compress*/);
+	    (new cryptbig(s[1])).encryptFile(s[2], target);
 	    System.exit(0);
 	}
 	if (s[0].equals("-dec")) {

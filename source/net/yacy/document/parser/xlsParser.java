@@ -86,7 +86,7 @@ public class xlsParser extends AbstractParser implements Parser {
          * all extracted information about the parsed document
          */
         public Document[] parse(final DigestURI location, final String mimeType,
-                final String charset, final InputStream source) throws Parser.Failure,
+                @SuppressWarnings("unused") final String charset, final InputStream source) throws Parser.Failure,
                 InterruptedException {
             try {
 

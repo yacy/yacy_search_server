@@ -91,7 +91,7 @@ public final class hello {
         }
         Seed remoteSeed;
         try {
-            remoteSeed = Seed.genRemoteSeed(seed, key, true, ias.getHostAddress());
+            remoteSeed = Seed.genRemoteSeed(seed, true, ias.getHostAddress());
         } catch (final IOException e) {
             Network.log.logInfo("hello/server: bad seed: " + e.getMessage() + ", time_dnsResolve=" + time_dnsResolve);
             prop.put("message", "bad seed: " + e.getMessage());

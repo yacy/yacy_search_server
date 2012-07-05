@@ -131,7 +131,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
     public synchronized NewsDB.Record get(final String id) {
         NewsDB.Record record;
-        final Iterator<NewsDB.Record> i = records(true);
+        final Iterator<NewsDB.Record> i = iterator();
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) return record;
@@ -141,7 +141,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
     public synchronized NewsDB.Record remove(final String id) {
         NewsDB.Record record;
-        final Iterator<NewsDB.Record> i = records(true);
+        final Iterator<NewsDB.Record> i = iterator();
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) {
@@ -174,13 +174,9 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
     @Override
     public Iterator<NewsDB.Record> iterator() {
-        return records(true);
-    }
-
-    public Iterator<NewsDB.Record> records(final boolean up) {
         // iterates yacyNewsRecord-type objects
         if (this.queueStack == null) return new HashSet<NewsDB.Record>().iterator();
-        return new newsIterator(up);
+        return new newsIterator();
     }
 
     private class newsIterator implements Iterator<NewsDB.Record> {
@@ -188,7 +184,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
         Iterator<Row.Entry> stackNodeIterator;
 
-        private newsIterator(final boolean up) {
+        private newsIterator() {
             try {
                 this.stackNodeIterator = NewsQueue.this.queueStack.rows();
             } catch (final IOException e) {
@@ -197,10 +193,12 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
             }
         }
 
+        @Override
         public boolean hasNext() {
             return this.stackNodeIterator != null && this.stackNodeIterator.hasNext();
         }
 
+        @Override
         public NewsDB.Record next() {
             if (this.stackNodeIterator == null) return null;
             Row.Entry row;
@@ -218,6 +216,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
             }
         }
 
+        @Override
         public void remove() {
             if (this.stackNodeIterator != null) this.stackNodeIterator.remove();
         }

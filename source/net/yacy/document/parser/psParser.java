@@ -83,7 +83,7 @@ public class psParser extends AbstractParser implements Parser {
     }
 
 
-    private Document[] parse(final DigestURI location, final String mimeType, final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
+    private Document[] parse(final DigestURI location, final String mimeType, @SuppressWarnings("unused") final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
 
     	File outputFile = null;
         try {

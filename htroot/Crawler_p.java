@@ -634,7 +634,7 @@ public class Crawler_p {
         for (final byte[] h: sb.crawler.getActive()) {
             profile = sb.crawler.getActive(h);
         	if (CrawlProfile.ignoreNames.contains(profile.name())) continue;
-            profile.putProfileEntry("crawlProfilesShow_list_", prop, sb.crawlStacker, true, dark, count, domlistlength);
+            profile.putProfileEntry("crawlProfilesShow_list_", prop, true, dark, count, domlistlength);
             dark = !dark;
             count++;
         }

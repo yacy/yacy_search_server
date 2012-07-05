@@ -299,7 +299,7 @@ public final class Switchboard extends serverSwitch
 
         // UPnP port mapping
         if ( getConfigBool(SwitchboardConstants.UPNP_ENABLED, false) ) {
-            InstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", UPnP.log, 0);
+            InstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", 0);
         }
 
         // init TrayIcon if possible
@@ -461,7 +461,7 @@ public final class Switchboard extends serverSwitch
         // start yacy core
         this.log.logConfig("Starting YaCy Protocol Core");
         this.yc = new Network(this);
-        InstantBusyThread.oneTimeJob(this, "loadSeedLists", Network.log, 0);
+        InstantBusyThread.oneTimeJob(this, "loadSeedLists", 0);
         //final long startedSeedListAquisition = System.currentTimeMillis();
 
         // init a DHT transmission dispatcher
@@ -762,7 +762,7 @@ public final class Switchboard extends serverSwitch
         wikiParser = new WikiCode();
 
         // initializing the resourceObserver
-        InstantBusyThread.oneTimeJob(ResourceObserver.class, "initThread", ResourceObserver.log, 0);
+        InstantBusyThread.oneTimeJob(ResourceObserver.class, "initThread", 0);
 
         // initializing the stackCrawlThread
         this.crawlStacker =
@@ -1453,7 +1453,7 @@ public final class Switchboard extends serverSwitch
     public RankingProfile getRanking() {
         return (getConfig("rankingProfile", "").length() == 0)
             ? new RankingProfile(Classification.ContentDomain.TEXT)
-            : new RankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
+            : new RankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", "")));
     }
 
     /**
@@ -2509,16 +2509,13 @@ public final class Switchboard extends serverSwitch
 
     public indexingQueueEntry webStructureAnalysis(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_STRUCTUREANALYSIS);
-        for ( int i = 0; i < in.documents.length; i++ ) {
+        for (Document document : in.documents) {
             assert this.webStructure != null;
             assert in != null;
             assert in.queueEntry != null;
             assert in.documents != null;
             assert in.queueEntry != null;
-            this.webStructure.generateCitationReference(
-                in.queueEntry.url(),
-                in.documents[i],
-                (in.condenser == null) ? null : in.condenser[i]); // [outlinksSame, outlinksOther]
+            this.webStructure.generateCitationReference(in.queueEntry.url(), document); // [outlinksSame, outlinksOther]
         }
         return in;
     }
@@ -2761,10 +2758,9 @@ public final class Switchboard extends serverSwitch
                             if ( document.indexingDenied() ) {
                                 throw new Parser.Failure("indexing is denied", url);
                             }
-                            final Condenser condenser =
-                                new Condenser(document, true, true, LibraryProvider.dymLib, true);
+                            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, true);
                             ResultImages.registerImages(url, document, true);
-                            Switchboard.this.webStructure.generateCitationReference(url, document, condenser);
+                            Switchboard.this.webStructure.generateCitationReference(url, document);
                             storeDocumentIndex(
                                 response,
                                 document,
@@ -2998,7 +2994,7 @@ public final class Switchboard extends serverSwitch
         return accessSet.tailSet(Long.valueOf(System.currentTimeMillis() - timeInterval)).size();
     }
 
-    public String dhtShallTransfer(final String segment) {
+    public String dhtShallTransfer() {
         final String cautionCause = onlineCaution();
         if ( cautionCause != null ) {
             return "online caution for " + cautionCause + ", dht transmission";
@@ -3047,14 +3043,10 @@ public final class Switchboard extends serverSwitch
     }
 
     public boolean dhtTransferJob() {
-        return dhtTransferJob(getConfig(SwitchboardConstants.SEGMENT_DHTOUT, "default"));
-    }
-
-    public boolean dhtTransferJob(final String segment) {
         if ( this.dhtDispatcher == null ) {
             return false;
         }
-        final String rejectReason = dhtShallTransfer(segment);
+        final String rejectReason = dhtShallTransfer();
         if ( rejectReason != null ) {
             if ( this.log.isFine() ) {
                 this.log.logFine(rejectReason);
@@ -3429,7 +3421,7 @@ public final class Switchboard extends serverSwitch
                         int lc = 0;
                         while ( enu.hasNext() ) {
                             try {
-                                Seed ys = Seed.genRemoteSeed(enu.next(), null, false, null);
+                                Seed ys = Seed.genRemoteSeed(enu.next(), false, null);
                                 if ( (ys != null)
                                     && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
                                     final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);

@@ -218,7 +218,7 @@ public class MergeIterator<E> implements CloneableIterator<E> {
 
     // do not remove the following method, it is not reference anywhere directly but indirectly using reflection
     // please see initialization of simpleMerge above
-    public static Object mergeEqualByReplace(final Object a, final Object b) {
+    public static Object mergeEqualByReplace(final Object a, @SuppressWarnings("unused") final Object b) {
         return a;
     }
 }

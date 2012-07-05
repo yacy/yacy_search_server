@@ -81,7 +81,7 @@ public class crypt {
     }
     }
 
-    public static String simpleDecode(final String encoded, final String key) {
+    public static String simpleDecode(final String encoded) {
         if (encoded == null || encoded.length() < 3) {
             return null;
         }
@@ -111,7 +111,7 @@ public class crypt {
     public static void main(final String[] args) {
         final String teststring="1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         System.out.println("Teststring   = " + teststring);
-        System.out.println("enc-b result = " + simpleDecode(simpleEncode(teststring, null, 'b'), null));
-        System.out.println("enc-z result = " + simpleDecode(simpleEncode(teststring, null, 'z'), null));
+        System.out.println("enc-b result = " + simpleDecode(simpleEncode(teststring, null, 'b')));
+        System.out.println("enc-z result = " + simpleDecode(simpleEncode(teststring, null, 'z')));
     }
 }

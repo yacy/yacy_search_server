@@ -516,7 +516,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public void putProfileEntry(
     		final String CRAWL_PROFILE_PREFIX,
             final serverObjects prop,
-            final CrawlStacker crawlStacker,
             final boolean active,
             final boolean dark,
             final int count,

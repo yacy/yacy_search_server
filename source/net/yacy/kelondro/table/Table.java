@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -639,10 +638,6 @@ public class Table implements Index, Iterable<Row.Entry> {
             assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
             return false;
         }
-    }
-
-    public Entry put(final Entry row, final Date entryDate) throws IOException, RowSpaceExceededException {
-        return replace(row);
     }
 
     /**

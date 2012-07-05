@@ -108,10 +108,10 @@ public class Browser {
                 try {
                     openBrowserJava(url);
                 } catch (Exception ee) {
-                    logBrowserFail(url, ee);
+                    logBrowserFail(url);
                 }
             } else {
-                logBrowserFail(url, e);
+                logBrowserFail(url);
             }
         }
     }
@@ -160,7 +160,7 @@ public class Browser {
         }
     }
 
-    private static void logBrowserFail(final String url, Throwable e) {
+    private static void logBrowserFail(final String url) {
         //if (e != null) Log.logException(e);
         Log.logInfo("Browser", "please start your browser and open the following location: " + url);
     }

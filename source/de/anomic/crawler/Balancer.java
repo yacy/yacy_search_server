@@ -282,10 +282,10 @@ public class Balancer {
      */
     public long getDomainSleepTime(final CrawlSwitchboard cs, final RobotsTxt robots, Request crawlEntry) {
         final CrawlProfile profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
-        return getDomainSleepTime(cs, robots, profileEntry, crawlEntry.url());
+        return getDomainSleepTime(robots, profileEntry, crawlEntry.url());
     }
 
-    private long getDomainSleepTime(final CrawlSwitchboard cs, final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURI crawlURL) {
+    private long getDomainSleepTime(final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURI crawlURL) {
         if (profileEntry == null) {
             return 0;
         }
@@ -409,7 +409,7 @@ public class Balancer {
 		        	return null;
 		        }
 		        // depending on the caching policy we need sleep time to avoid DoS-like situations
-		        sleeptime = getDomainSleepTime(cs, robots, profileEntry, crawlEntry.url());
+		        sleeptime = getDomainSleepTime(robots, profileEntry, crawlEntry.url());
 
 		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + ASCII.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + ASCII.String(rowEntry.getPrimaryKeyBytes());
 		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + ASCII.String(nexthash) + ", crawlEntry.url().hash() = " + ASCII.String(crawlEntry.url().hash());

@@ -112,9 +112,6 @@ public class FilterEngine {
     	this.hostpaths_notmatchable.remove(host);
     }
 
-    public void remove(final String listType, final String host, final String path) {
-    }
-
     public boolean isListed(final DigestURI url, final EnumSet<listTypes> type) {
     	// trival anwser
     	if (url.getHost() == null)
@@ -126,7 +123,7 @@ public class FilterEngine {
     		return e.containsAll(type);
     	}
         // Cache Miss
-        return isListed(url.getHost().toLowerCase(), url.getFile(), type);
+        return isListed(url.getHost().toLowerCase(), url.getFile());
     }
 
     public static boolean isMatchable (final String host) {
@@ -144,7 +141,7 @@ public class FilterEngine {
        return false;
     }
 
-    public boolean isListed(final String host, String path, final EnumSet<listTypes> type) {
+    public boolean isListed(final String host, String path) {
         if (host == null) throw new NullPointerException();
         if (path == null) throw new NullPointerException();
 

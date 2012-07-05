@@ -44,7 +44,7 @@ public class OAIPMHLoader {
     private final DigestURI source;
     private final ResumptionToken resumptionToken;
 
-    public OAIPMHLoader(final LoaderDispatcher loader, final DigestURI source, final File targetDir, final String filePrefix) throws IOException {
+    public OAIPMHLoader(final LoaderDispatcher loader, final DigestURI source, final File targetDir) throws IOException {
         this.source = source;
 
         // load the file from the net

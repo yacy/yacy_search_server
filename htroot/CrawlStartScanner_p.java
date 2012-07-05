@@ -93,21 +93,11 @@ public class CrawlStartScanner_p
         if ( post != null ) {
             int repeat_time = 0;
             String repeat_unit = "seldays";
-            long validTime = 0;
 
             // check scheduler
             if ( post.get("rescan", "").equals("scheduler") ) {
                 repeat_time = post.getInt("repeat_time", -1);
                 repeat_unit = post.get("repeat_unit", "selminutes"); // selminutes, selhours, seldays
-                if ( repeat_unit.equals("selminutes") ) {
-                    validTime = repeat_time * 60 * 1000;
-                }
-                if ( repeat_unit.equals("selhours") ) {
-                    validTime = repeat_time * 60 * 60 * 1000;
-                }
-                if ( repeat_unit.equals("seldays") ) {
-                    validTime = repeat_time * 24 * 60 * 60 * 1000;
-                }
             }
 
             final boolean bigrange = post.get("subnet", "24").equals("16");
@@ -151,9 +141,9 @@ public class CrawlStartScanner_p
                 scanner.terminate();
                 if ( "on".equals(post.get("accumulatescancache", ""))
                     && !"scheduler".equals(post.get("rescan", "")) ) {
-                    Scanner.scancacheExtend(scanner, validTime);
+                    Scanner.scancacheExtend(scanner);
                 } else {
-                    Scanner.scancacheReplace(scanner, validTime);
+                    Scanner.scancacheReplace(scanner);
                 }
             }
 
@@ -175,9 +165,9 @@ public class CrawlStartScanner_p
                 scanner.terminate();
                 if ( "on".equals(post.get("accumulatescancache", ""))
                     && !"scheduler".equals(post.get("rescan", "")) ) {
-                    Scanner.scancacheExtend(scanner, validTime);
+                    Scanner.scancacheExtend(scanner);
                 } else {
-                    Scanner.scancacheReplace(scanner, validTime);
+                    Scanner.scancacheReplace(scanner);
                 }
             }
 

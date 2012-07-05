@@ -225,17 +225,17 @@ public class URIMetadataRow implements URIMetadata {
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         DigestURI url;
         try {
-            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", ""), null), ASCII.getBytes(prop.getProperty("hash")));
+            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", "")));
         } catch (final MalformedURLException e) {
             url = null;
         }
-        String descr = crypt.simpleDecode(prop.getProperty("descr", ""), null); if (descr == null) descr = "";
-        String dc_creator = crypt.simpleDecode(prop.getProperty("author", ""), null); if (dc_creator == null) dc_creator = "";
-        String tags = crypt.simpleDecode(prop.getProperty("tags", ""), null); if (tags == null) tags = "";
+        String descr = crypt.simpleDecode(prop.getProperty("descr", "")); if (descr == null) descr = "";
+        String dc_creator = crypt.simpleDecode(prop.getProperty("author", "")); if (dc_creator == null) dc_creator = "";
+        String tags = crypt.simpleDecode(prop.getProperty("tags", "")); if (tags == null) tags = "";
         tags = Tagging.cleanTagFromAutotagging(tags);
-        String dc_publisher = crypt.simpleDecode(prop.getProperty("publisher", ""), null); if (dc_publisher == null) dc_publisher = "";
-        String lons = crypt.simpleDecode(prop.getProperty("lon", "0.0"), null); if (lons == null) lons = "0.0";
-        String lats = crypt.simpleDecode(prop.getProperty("lat", "0.0"), null); if (lats == null) lats = "0.0";
+        String dc_publisher = crypt.simpleDecode(prop.getProperty("publisher", "")); if (dc_publisher == null) dc_publisher = "";
+        String lons = crypt.simpleDecode(prop.getProperty("lon", "0.0")); if (lons == null) lons = "0.0";
+        String lats = crypt.simpleDecode(prop.getProperty("lat", "0.0")); if (lats == null) lats = "0.0";
 
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash()); // FIXME potential null pointer access
@@ -274,7 +274,7 @@ public class URIMetadataRow implements URIMetadata {
         this.entry.setCol(col_laudio, Integer.parseInt(prop.getProperty("laudio", "0")));
         this.entry.setCol(col_lvideo, Integer.parseInt(prop.getProperty("lvideo", "0")));
         this.entry.setCol(col_lapp, Integer.parseInt(prop.getProperty("lapp", "0")));
-        this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""), null);
+        this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""));
         this.word = null;
         if (prop.containsKey("word")) throw new kelondroException("old database structure is not supported");
         if (prop.containsKey("wi")) {

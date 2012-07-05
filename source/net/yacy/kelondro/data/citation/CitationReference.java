@@ -172,7 +172,7 @@ public class CitationReference implements Reference, Serializable {
         throw new UnsupportedOperationException();
     }
 
-    public int position(int p) {
+    public int position(@SuppressWarnings("unused") int p) {
         throw new UnsupportedOperationException();
     }
 

@@ -88,7 +88,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
     	return parser;
     }
 
-    private Document[] parse(final DigestURI location, final String mimeType, final String charset, final File dest) throws Parser.Failure, InterruptedException {
+    private Document[] parse(final DigestURI location, final String mimeType, @SuppressWarnings("unused") final String charset, final File dest) throws Parser.Failure, InterruptedException {
 
         CharBuffer writer = null;
         try {

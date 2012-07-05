@@ -34,7 +34,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -271,14 +270,6 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         throw new UnsupportedOperationException();
     }
 
-    public synchronized void addUnique(final Row.Entry row, final Date entryDate) {
-        throw new UnsupportedOperationException();
-    }
-
-    public synchronized void addUnique(final List<Row.Entry> rows) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public Row.Entry remove(final byte[] key) throws IOException {
         PreparedStatement sqlStatement = null;
@@ -350,11 +341,6 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
     }
 
     public int columns() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public int columnSize(final int column) {
         // TODO Auto-generated method stub
         return 0;
     }

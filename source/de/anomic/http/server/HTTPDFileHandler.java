@@ -551,7 +551,7 @@ public final class HTTPDFileHandler {
                 final UserDB.Entry user = sb.userDB.getUser(requestHeader);
                 final boolean user_may_see_proxyurl = Domains.matchesList(clientIP, urlProxyAccess) || (user!=null && user.hasRight(UserDB.AccessRight.PROXY_RIGHT));
             	if (sb.getConfigBool("proxyURL", false) && user_may_see_proxyurl) {
-            		doURLProxy(args, conProp, requestHeader, out);
+            		doURLProxy(conProp, requestHeader, out);
             		return;
             	}
                 HTTPDemon.sendRespondError(conProp,out,3,403,"Access denied",null,null);
@@ -1428,7 +1428,7 @@ public final class HTTPDFileHandler {
      * not in separete servlet, because we need access to binary outstream
      * @throws IOException
      */
-    private static void doURLProxy(final serverObjects args, final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream out) throws IOException {
+    private static void doURLProxy(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream out) throws IOException {
         final String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
 		URL proxyurl = null;
 		String action = "";

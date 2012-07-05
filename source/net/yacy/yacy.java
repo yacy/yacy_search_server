@@ -913,7 +913,7 @@ public final class yacy {
             final String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (final String dbFileName : dbFileNames) {
                 final File dbFile = new File(yacyDBPath,dbFileName);
-                final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, SeedDB.sortFields, SeedDB.longaccFields, SeedDB.doubleaccFields, null);
+                final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, SeedDB.sortFields, SeedDB.longaccFields, SeedDB.doubleaccFields);
 
                 Iterator<Map.Entry<byte[], Map<String, String>>> it;
                 it = db.entries(true, false);
@@ -1059,6 +1059,7 @@ class shutdownHookThread extends Thread {
         this.mainThread = mainThread;
     }
 
+    @Override
     public void run() {
         try {
             if (!this.sb.isTerminated()) {

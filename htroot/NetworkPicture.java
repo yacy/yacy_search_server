@@ -126,7 +126,6 @@ public class NetworkPicture
         buffer =
             new EncodedImage(NetworkGraph.getNetworkPicture(
                 sb.peers,
-                10000,
                 width,
                 height,
                 passiveLimit,

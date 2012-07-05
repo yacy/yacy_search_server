@@ -67,13 +67,10 @@ public final class crawlReceipt {
         // request values
         final String iam        = post.get("iam", "");      // seed hash of requester
         final String youare     = post.get("youare", "");    // seed hash of the target peer, needed for network stability
-        //String process    = post.get("process", "");  // process type
-        final String key        = post.get("key", "");      // transmission key
-        //String receivedUrlhash    = post.get("urlhash", "");  // the url hash that has been crawled
         final String result     = post.get("result", "");   // the result; either "ok" or "fail"
         final String reason     = post.get("reason", "");   // the reason for that result
         //String words      = post.get("wordh", "");    // priority word hashes
-        final String propStr    = crypt.simpleDecode(post.get("lurlEntry", ""), key);
+        final String propStr    = crypt.simpleDecode(post.get("lurlEntry", ""));
 
         /*
          the result can have one of the following values:

@@ -160,7 +160,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         }
     }
 
-    public static BusyThread oneTimeJob(final Object env, final String jobExec, final Log log, final long startupDelay) {
+    public static BusyThread oneTimeJob(final Object env, final String jobExec, final long startupDelay) {
         // start the job and execute it once as background process
         final BusyThread thread = new InstantBusyThread(
                 env, jobExec, null, null, Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE);
@@ -173,9 +173,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     }
 
     public static WorkflowThread oneTimeJob(final Runnable thread, final long startupDelay) {
-        final Log log = new Log(thread.getClass().getName() + "/run");
-        log.setLevel(java.util.logging.Level.INFO);
-        return oneTimeJob(thread, "run", log, startupDelay);
+        return oneTimeJob(thread, "run", startupDelay);
     }
 
     public static WorkflowThread oneTimeJob(final Runnable thread, final long startupDelay, final int maxJobs) {

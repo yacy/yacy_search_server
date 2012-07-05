@@ -151,7 +151,6 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             final CacheStrategy cacheStrategy,
             final boolean pre,
             final int snippetMaxLength,
-            final int maxDocLen,
             final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final DigestURI url = row.url();

@@ -228,7 +228,7 @@ public final class TextParser {
         // then we use only one stream-oriented parser.
         if (idioms.size() == 1 || contentLength > Integer.MAX_VALUE) {
             // use a specific stream-oriented parser
-            return parseSource(location, mimeType, idioms.iterator().next(), charset, contentLength, sourceStream);
+            return parseSource(location, mimeType, idioms.iterator().next(), charset, sourceStream);
         }
 
         // in case that we know more parsers we first transform the content into a byte[] and use that as base
@@ -249,7 +249,6 @@ public final class TextParser {
             final String mimeType,
             final Parser parser,
             final String charset,
-            final long contentLength,
             final InputStream sourceStream
         ) throws Parser.Failure {
         if (log.isFine()) log.logFine("Parsing '" + location + "' from stream");

@@ -44,7 +44,7 @@ public class CrawlMonitorRemoteStart {
         boolean dark = true;
 
         // create other peer crawl table using YaCyNews
-        Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB, true);
+        Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB);
         int showedCrawl = 0;
         NewsDB.Record record;
         Seed peer;
@@ -74,7 +74,7 @@ public class CrawlMonitorRemoteStart {
         prop.put("otherCrawlStartInProgress", showedCrawl);
 
         // finished remote crawls
-        recordIterator = sb.peers.newsPool.recordIterator(NewsPool.PROCESSED_DB, true);
+        recordIterator = sb.peers.newsPool.recordIterator(NewsPool.PROCESSED_DB);
         showedCrawl = 0;
         while (recordIterator.hasNext()) {
             record = recordIterator.next();

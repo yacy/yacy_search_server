@@ -169,7 +169,7 @@ public class CrawlProfileEditor_p {
         // put active crawls into list
         for (final byte[] h: sb.crawler.getActive()) {
             profile = sb.crawler.getActive(h);
-            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, sb.crawlStacker, true, dark, count, domlistlength);
+            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, true, dark, count, domlistlength);
             dark = !dark;
             count++;
         }
@@ -177,7 +177,7 @@ public class CrawlProfileEditor_p {
         boolean existPassiveCrawls = false;
         for (final byte[] h: sb.crawler.getPassive()) {
             profile = sb.crawler.getPassive(h);
-            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, sb.crawlStacker, false, dark, count, domlistlength);
+            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, false, dark, count, domlistlength);
             dark = !dark;
             count++;
             existPassiveCrawls = true;

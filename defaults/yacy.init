@@ -996,17 +996,6 @@ content.phpbb3.dbpw = joshua
 content.phpbb3.ppf = 1000
 content.phpbb3.dumpfile =
 
-# segment assignment for index storage processes in YaCy:
-# each process can store its index result in it's own index segment
-segment.process.receipts_tmp = default
-segment.process.queries_tmp = default
-segment.process.dhtin_tmp = default
-segment.process.dhtout_tmp = default
-segment.process.proxy_tmp = default
-segment.process.localcrawling_tmp = default
-segment.process.remotecrawling_tmp = default
-segment.process.default_tmp = default
-
 # search engine teaser: an about box in search results
 # this is only shown, if the about.body is filled
 about.headline =

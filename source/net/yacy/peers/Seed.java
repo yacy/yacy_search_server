@@ -956,7 +956,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     public static Seed genRemoteSeed(
         final String seedStr,
-        final String key,
         final boolean ownSeed,
         final String patchIP) throws IOException {
         // this method is used to convert the external representation of a seed into a seed object
@@ -969,7 +968,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( seedStr.length() == 0 ) {
             throw new IOException("seedStr.length() == 0");
         }
-        final String seed = crypt.simpleDecode(seedStr, key);
+        final String seed = crypt.simpleDecode(seedStr);
         if ( seed == null ) {
             throw new IOException("seed == null");
         }
@@ -1107,7 +1106,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final char[] b = new char[(int) f.length()];
         fr.read(b, 0, b.length);
         fr.close();
-        final Seed mySeed = genRemoteSeed(new String(b), null, true, null);
+        final Seed mySeed = genRemoteSeed(new String(b), true, null);
         assert mySeed != null; // in case of an error, an IOException is thrown
         mySeed.dna.put(Seed.IP, ""); // set own IP as unknown
         return mySeed;

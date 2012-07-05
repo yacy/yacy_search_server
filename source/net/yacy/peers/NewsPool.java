@@ -284,10 +284,10 @@ public class NewsPool {
         this.processedNews.close();
     }
 
-    public Iterator<NewsDB.Record> recordIterator(final int dbKey, final boolean up) {
+    public Iterator<NewsDB.Record> recordIterator(final int dbKey) {
         // returns an iterator of yacyNewsRecord-type objects
         final NewsQueue queue = switchQueue(dbKey);
-        return queue.records(up);
+        return queue.iterator();
     }
 
     public NewsDB.Record parseExternal(final String external) {
@@ -373,7 +373,7 @@ public class NewsPool {
         NewsDB.Record record;
         int pc = 0;
         synchronized (this.incomingNews) {
-            final Iterator<NewsDB.Record> i = this.incomingNews.records(true);
+            final Iterator<NewsDB.Record> i = this.incomingNews.iterator();
             final Set<String> removeIDs = new HashSet<String>();
             // this loop should not run too long! This may happen if the incoming news are long and not deleted after processing
             final long start = System.currentTimeMillis();
@@ -435,7 +435,7 @@ public class NewsPool {
         final NewsQueue queue = switchQueue(dbKey);
         NewsDB.Record record;
         String s;
-        final Iterator<NewsDB.Record> i = queue.records(true);
+        final Iterator<NewsDB.Record> i = queue.iterator();
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.category().equals(category))) {
@@ -449,7 +449,7 @@ public class NewsPool {
     public synchronized NewsDB.Record getByOriginator(final int dbKey, final String category, final String originatorHash) {
         final NewsQueue queue = switchQueue(dbKey);
         NewsDB.Record record;
-        final Iterator<NewsDB.Record> i = queue.records(true);
+        final Iterator<NewsDB.Record> i = queue.iterator();
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) &&
@@ -529,7 +529,7 @@ public class NewsPool {
 
     private int moveOffAll(final NewsQueue fromqueue, final NewsQueue toqueue) throws IOException, RowSpaceExceededException {
         // move off all news from a specific queue to another queue
-        final Iterator<NewsDB.Record> i = fromqueue.records(true);
+        final Iterator<NewsDB.Record> i = fromqueue.iterator();
         NewsDB.Record record;
         if (toqueue == null) return 0;
         int c = 0;

@@ -50,11 +50,10 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
     private final Row.EntryComparator entryComparator;
     //private final int spread;
 
-    public RAMIndex(final String name, final Row rowdef, final int expectedspace) {
+    public RAMIndex(final String name, final Row rowdef) {
         this.name = name;
         this.rowdef = rowdef;
         this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
-        //this.spread = Math.max(10, expectedspace / 3000);
         reset();
         objectTracker.put(name, this);
     }

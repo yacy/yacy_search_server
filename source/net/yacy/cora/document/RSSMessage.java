@@ -148,7 +148,6 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     @Override
     public int compareTo(final RSSMessage o) {
-        if (!(o instanceof RSSMessage)) return 1;
         return getLink().compareTo(o.getLink());
     }
 

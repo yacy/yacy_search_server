@@ -66,8 +66,7 @@ public class MapDataMining extends MapHeap {
             final int cachesize,
             final String[] sortfields,
             final String[] longaccfields,
-            final String[] floataccfields,
-            final Object externalHandler) throws IOException {
+            final String[] floataccfields) throws IOException {
         super(heapFile, keylength, ordering, buffermax, cachesize, ' ');
 
         // create fast ordering clusters and acc fields
@@ -423,7 +422,7 @@ public class MapDataMining extends MapHeap {
         try {
             File f = new File("/tmp/MapDataMinig.test.db");
             f.delete();
-            final MapDataMining db = new MapDataMining(f, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, new String[] {"X"}, new String[] {"X"}, new String[] {}, null);
+            final MapDataMining db = new MapDataMining(f, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, new String[] {"X"}, new String[] {"X"}, new String[] {});
             final Map<String, String> m1 = new HashMap<String, String>();
             long t = System.currentTimeMillis();
             m1.put("X", Long.toString(t));

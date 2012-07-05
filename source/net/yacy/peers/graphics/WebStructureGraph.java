@@ -47,7 +47,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
-import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
@@ -153,10 +152,7 @@ public class WebStructureGraph
         }
     }
 
-    public void generateCitationReference(
-        final DigestURI url,
-        final Document document,
-        final Condenser condenser) {
+    public void generateCitationReference(final DigestURI url, final Document document) {
         // generate citation reference
         final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
         final Iterator<MultiProtocolURI> it = hl.keySet().iterator();

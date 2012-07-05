@@ -241,7 +241,7 @@ public final class Protocol
                         return -1;
                     }
                     final String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
-                    otherPeer = Seed.genRemoteSeed(seed, salt, false, host);
+                    otherPeer = Seed.genRemoteSeed(seed, false, host);
                     if ( !otherPeer.hash.equals(otherHash) ) {
                         Network.log.logInfo("yacyClient.hello: consistency error: otherPeer.hash = "
                             + otherPeer.hash
@@ -354,9 +354,9 @@ public final class Protocol
                             return -1;
                         }
                         final String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
-                        s = Seed.genRemoteSeed(seedStr, salt, false, host);
+                        s = Seed.genRemoteSeed(seedStr, false, host);
                     } else {
-                        s = Seed.genRemoteSeed(seedStr, salt, false, null);
+                        s = Seed.genRemoteSeed(seedStr, false, null);
                     }
                     if ( peerActions.peerArrival(s, (i == 1)) ) {
                         count++;
@@ -397,7 +397,7 @@ public final class Protocol
                 return null;
             }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return Seed.genRemoteSeed(result.get("response"), salt, false, target.getIP());
+            return Seed.genRemoteSeed(result.get("response"), false, target.getIP());
         } catch ( final Exception e ) {
             Network.log.logWarning("yacyClient.querySeed error:" + e.getMessage());
             return null;

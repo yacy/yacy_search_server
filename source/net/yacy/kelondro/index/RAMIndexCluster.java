@@ -113,7 +113,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         if (r == null) synchronized (this.cluster) {
             r = this.cluster[i];
             if (r == null) {
-                r = new RAMIndex(this.name + "." + i, this.rowdef, 0);
+                r = new RAMIndex(this.name + "." + i, this.rowdef);
                 this.cluster[i] = r;
             }
         }

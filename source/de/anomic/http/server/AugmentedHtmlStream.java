@@ -53,7 +53,7 @@ public class AugmentedHtmlStream extends FilterOutputStream {
         if (this.urls.contains("currentyacypeer/")) {
             return data;
         }
-        return AugmentHtmlStream.process (data, this.charset, this.url, this.requestHeader);
+        return AugmentHtmlStream.process(data, this.url, this.requestHeader);
     }
 
 	public static boolean supportsMime(String mime) {
