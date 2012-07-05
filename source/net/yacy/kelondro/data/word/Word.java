@@ -152,7 +152,7 @@ public class Word {
 
     public static final byte[] hash2private(final byte[] hash, byte privateType) {
         byte[] p = new byte[commonHashLength];
-        p[0] = highByte; p[1] = highByte; p[2] = highByte; ; p[3] = highByte; ; p[4] = highByte; p[5] = privateType;
+        p[0] = highByte; p[1] = highByte; p[2] = highByte; p[3] = highByte; p[4] = highByte; p[5] = privateType;
         System.arraycopy(hash, 0, p, 6, commonHashLength - 6); // 36 bits left for private hashes should be enough
         return p;
     }

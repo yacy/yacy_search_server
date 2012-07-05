@@ -34,7 +34,7 @@ public class FilterEngine {
     public static final int ERR_DOUBLE_OCCURANCE = 6;
     public static final int ERR_HOST_REGEX = 7;
 
-    protected enum listTypes { type1 };
+    protected enum listTypes { type1 }
 
     protected class FilterEntry implements Comparable<FilterEntry> {
         public String path;

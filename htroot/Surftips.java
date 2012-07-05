@@ -138,7 +138,7 @@ public class Surftips {
                 try{
                 	if(Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS ,new DigestURI(url)))
                 		continue;
-                }catch(final MalformedURLException e){continue;};
+                }catch(final MalformedURLException e){continue;}
                 title = row.getColUTF8(1);
                 description = row.getColUTF8(2);
                 if ((url == null) || (title == null) || (description == null)) continue;

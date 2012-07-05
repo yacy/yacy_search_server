@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -52,8 +52,8 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
     private final StringBuilder folderstring;
     private YMarkEntry bmk;
     private final XMLReader xmlReader;
-    
-    // Statics        
+
+    // Statics
     public static enum XBEL {
 		NOTHING			(""),
 		XBEL			("<xbel"),
@@ -65,10 +65,10 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 		ALIAS			("<alias"),
 		INFO			("<info"),
 		METADATA		("<metadata");
-		
-        private static StringBuilder buffer = new StringBuilder(25);;
+
+        private static StringBuilder buffer = new StringBuilder(25);
 		private String tag;
-		
+
 		private XBEL(String t) {
 			this.tag = t;
 		}
@@ -77,9 +77,9 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 		}
 		public String endTag(boolean empty) {
 			buffer.setLength(0);
-			buffer.append(tag);
+			buffer.append(this.tag);
 			if(empty) {
-				buffer.append('/');			
+				buffer.append('/');
 			} else {
 				buffer.insert(1, '/');
 			}
@@ -88,7 +88,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 		}
 		public String startTag(boolean att) {
 			buffer.setLength(0);
-			buffer.append(tag);
+			buffer.append(this.tag);
 			if(!att)
 				buffer.append('>');
 			return buffer.toString();
@@ -100,12 +100,12 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 	private final HashSet<YMarkEntry> aliasRef;
     private final StringBuilder buffer;
     private final StringBuilder folder;
-		
+
     private YMarkEntry ref;
     private XBEL outer_state;                   // BOOKMARK, FOLDER, NOTHING
     private XBEL inner_state;                   // DESC, TITLE, INFO, ALIAS, (METADATA), NOTHING
     private boolean parse_value;
-    
+
     public YMarkXBELImporter (final Reader bmk_file, final int queueSize, final String root) throws SAXException {
         this.bookmarks = new ArrayBlockingQueue<YMarkEntry>(queueSize);
         this.bmk_file = bmk_file;
@@ -119,19 +119,20 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         this.xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
         this.xmlReader.setFeature("http://xml.org/sax/features/namespaces", false);
         this.xmlReader.setFeature("http://xml.org/sax/features/validation", false);
-        
+
         this.bmkRef = new HashMap<String,YMarkEntry>();
         this.aliasRef = new HashSet<YMarkEntry>();
         this.buffer = new StringBuilder();
         this.folder = new StringBuilder(YMarkTables.BUFFER_LENGTH);
         this.folder.append(this.RootFolder);
     }
-    
+
+    @Override
     public void run() {
     	try {
         	this.xmlReader.parse(new InputSource(this.bmk_file));
         } catch (SAXParseException e) {
-            Log.logException(e);	
+            Log.logException(e);
         } catch (SAXException e) {
             Log.logException(e);
         } catch (IOException e) {
@@ -145,7 +146,8 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 			}
         }
     }
-    
+
+    @Override
     public void endDocument() throws SAXException {
     	// put alias references in the bookmark queue to ensure that folders get updated
     	// we do that at endDocument to ensure all referenced bookmarks already exist
@@ -153,15 +155,16 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
     	this.aliasRef.clear();
     	this.bmkRef.clear();
     }
-    
+
+    @Override
     public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
         YMarkDate date = new YMarkDate();
         if (tag == null) return;
-        tag = tag.toLowerCase();              
+        tag = tag.toLowerCase();
         if (XBEL.BOOKMARK.tag().equals(tag)) {
-            this.bmk = new YMarkEntry();            
+            this.bmk = new YMarkEntry();
             this.bmk.put(YMarkEntry.BOOKMARK.URL.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.URL.xbel_attrb()));
-            //TODO: include a dynamic loop over all annotation tags 
+            //TODO: include a dynamic loop over all annotation tags
             this.bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.TAGS.xbel_attrb()));
             this.bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.PUBLIC.xbel_attrb()));
             this.bmk.put(YMarkEntry.BOOKMARK.VISITS.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.VISITS.xbel_attrb()));
@@ -186,7 +189,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
             UpdateBmkRef(atts.getValue(uri, YMarkEntry.BOOKMARKS_ID), true);
             this.outer_state = XBEL.BOOKMARK;
             this.inner_state = XBEL.NOTHING;
-            this.parse_value = false;            
+            this.parse_value = false;
         } else if(XBEL.FOLDER.tag().equals(tag)) {
         	this.outer_state = XBEL.FOLDER;
         	this.inner_state = XBEL.NOTHING;
@@ -200,14 +203,14 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         	this.inner_state = XBEL.INFO;
         	this.parse_value = false;
         } else if (XBEL.METADATA.tag().equals(tag)) {
-        	// Support for old YaCy BookmarksDB XBEL Metadata (non valid XBEL)        	
+        	// Support for old YaCy BookmarksDB XBEL Metadata (non valid XBEL)
         	if(this.outer_state == XBEL.BOOKMARK) {
         		final boolean isMozillaShortcutURL = atts.getValue(uri, "owner").equals("Mozilla") && !atts.getValue(uri, "ShortcutURL").isEmpty();
         		final boolean isYacyPublic = atts.getValue(uri, "owner").equals("YaCy") && !atts.getValue(uri, "public").isEmpty();
         		if(isMozillaShortcutURL)
         			this.bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(atts.getValue(uri, "ShortcutURL")));
         		if(isYacyPublic)
-        			this.bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), atts.getValue(uri, "public"));        			
+        			this.bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), atts.getValue(uri, "public"));
         	}
         } else if (XBEL.ALIAS.tag().equals(tag)) {
         	final String r = atts.getValue(uri, YMarkEntry.BOOKMARKS_REF);
@@ -221,16 +224,17 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         }
     }
 
+    @Override
     public void endElement(final String uri, final String name, String tag) {
         if (tag == null) return;
         tag = tag.toLowerCase();
         if(XBEL.BOOKMARK.tag().equals(tag)) {
 			// write bookmark
-        	if (!this.bmk.isEmpty()) {				
+        	if (!this.bmk.isEmpty()) {
         		this.bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), this.folder.toString());
         		try {
 					this.bookmarks.put(this.bmk);
-					bmk = new YMarkEntry();
+					this.bmk = new YMarkEntry();
 				} catch (InterruptedException e) {
 					Log.logException(e);
 				}
@@ -240,7 +244,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         	// go up one folder
             //TODO: get rid of .toString.equals()
         	if(!this.folder.toString().equals(this.RootFolder)) {
-        		folder.setLength(folder.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
+        		this.folder.setLength(this.folder.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
         	}
         	this.outer_state = XBEL.FOLDER;
         } else if (XBEL.INFO.tag().equals(tag)) {
@@ -250,24 +254,25 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         }
     }
 
+    @Override
     public void characters(final char ch[], final int start, final int length) {
-        if (parse_value) {
-        	buffer.append(ch, start, length);      	        	
-        	switch(outer_state) {
+        if (this.parse_value) {
+        	this.buffer.append(ch, start, length);
+        	switch(this.outer_state) {
             	case BOOKMARK:
-            		switch(inner_state) {
-            			case DESC:            				
-            				this.bmk.put(YMarkEntry.BOOKMARK.DESC.key(), buffer.toString().trim());
+            		switch(this.inner_state) {
+            			case DESC:
+            				this.bmk.put(YMarkEntry.BOOKMARK.DESC.key(), this.buffer.toString().trim());
             				break;
             			case TITLE:
-            				this.bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), buffer.toString().trim());
+            				this.bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), this.buffer.toString().trim());
             				break;
             			default:
-            				break;		
+            				break;
             		}
             		break;
             	case FOLDER:
-            		switch(inner_state) {
+            		switch(this.inner_state) {
 	        			case DESC:
 	        				break;
 	        			case TITLE:
@@ -275,7 +280,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 	        				this.folder.append(this.buffer);
 	        				break;
 	        			default:
-	        				break;		
+	        				break;
             		}
             		break;
             	default:
@@ -294,10 +299,10 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
             return null;
         }
     }
-    
+
     private void UpdateBmkRef(final String id, final boolean url) {
     	this.folderstring.setLength(0);
-    	
+
     	if(this.bmkRef.containsKey(id)) {
         	this.folderstring.append(this.bmkRef.get(id).get(YMarkEntry.BOOKMARK.FOLDERS.key()));
         	this.folderstring.append(',');
@@ -309,6 +314,6 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         if(url)
         	this.ref.put(YMarkEntry.BOOKMARK.URL.key(), this.bmk.get(YMarkEntry.BOOKMARK.URL.key()));
         this.ref.put(YMarkEntry.BOOKMARK.FOLDERS.key(), this.folderstring.toString());
-        this.bmkRef.put(id, ref);
+        this.bmkRef.put(id, this.ref);
     }
 }

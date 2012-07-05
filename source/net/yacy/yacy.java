@@ -216,7 +216,7 @@ public final class yacy {
             try {
             	channel = new RandomAccessFile(f,"rw").getChannel();
             	lock = channel.tryLock(); // lock yacy.running
-            } catch (final Exception e) { };
+            } catch (final Exception e) { }
 
             final String oldconf = "DATA/SETTINGS/httpProxy.conf".replace("/", File.separator);
             final String newconf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);

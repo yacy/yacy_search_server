@@ -46,7 +46,7 @@ public class RSSReader extends DefaultHandler {
     private final RSSFeed theChannel;
     private Type type;
 
-    public enum Type { rss, atom, rdf, none };
+    public enum Type { rss, atom, rdf, none }
 
     private RSSReader(final int maxsize) {
         this.theChannel = new RSSFeed(maxsize);
@@ -57,7 +57,7 @@ public class RSSReader extends DefaultHandler {
         this.parsingItem = false;
         this.type = Type.none;
     }
-    
+
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
     private static SAXParser getParser() throws SAXException {
     	SAXParser parser = tlSax.get();
@@ -71,7 +71,7 @@ public class RSSReader extends DefaultHandler {
     	}
     	return parser;
     }
-    
+
     public RSSReader(final int maxsize, InputStream stream, final Type type) throws IOException {
         this(maxsize);
         this.type = type;
