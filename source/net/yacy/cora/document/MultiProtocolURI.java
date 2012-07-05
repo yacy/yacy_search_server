@@ -135,6 +135,10 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         url = url.trim();
         url = UTF8.decodeURL(url); // normalization here
         //url = patternSpace.matcher(url).replaceAll(" ");
+        if (url.startsWith("//")) {
+            // patch for urls starting with "//" which can be found in the wild
+            url = "http:" + url;
+        }
         if (url.startsWith("\\\\")) {
             url = "smb://" + patternBackSlash.matcher(url.substring(2)).replaceAll("/");
         }
@@ -271,7 +275,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return this.contentDomain;
     }
 
-    public static MultiProtocolURI newURL(final String baseURL, final String relPath) throws MalformedURLException {
+    public static MultiProtocolURI newURL(final String baseURL, String relPath) throws MalformedURLException {
+        if (relPath.startsWith("//")) {
+            // patch for urls starting with "//" which can be found in the wild
+            relPath = "http:" + relPath;
+        }
         if ((baseURL == null) ||
             isHTTP(relPath) ||
             isHTTPS(relPath) ||
@@ -284,7 +292,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return new MultiProtocolURI(new MultiProtocolURI(baseURL), relPath);
     }
 
-    public static MultiProtocolURI newURL(final MultiProtocolURI baseURL, final String relPath) throws MalformedURLException {
+    public static MultiProtocolURI newURL(final MultiProtocolURI baseURL, String relPath) throws MalformedURLException {
+        if (relPath.startsWith("//")) {
+            // patch for urls starting with "//" which can be found in the wild
+            relPath = (baseURL == null) ? "http:" + relPath : baseURL.getProtocol() + ":" + relPath;
+        }
         if ((baseURL == null) ||
             isHTTP(relPath) ||
             isHTTPS(relPath) ||
