@@ -223,9 +223,8 @@ public class MediawikiImporter extends Thread implements Importer {
                             }
                             sb = new StringBuilder(200);
                             continue;
-                        } else {
-                            sb.append(t.substring(q + 1));
                         }
+                        sb.append(t.substring(q + 1));
                     }
                     continue;
                 }

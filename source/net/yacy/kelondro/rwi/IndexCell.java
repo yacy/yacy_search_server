@@ -180,25 +180,29 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         // first try to merge small files that match
         int term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 3 || this.array.entries() >= 50)) {
-            if (!this.array.shrinkBestSmallFiles(this.merger, targetFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkBestSmallFiles(this.merger, targetFileSize)) break;
+            donesomething = true;
         }
 
         // then try to merge simply any small file
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 2)) {
-            if (!this.array.shrinkAnySmallFiles(this.merger, targetFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkAnySmallFiles(this.merger, targetFileSize)) break;
+            donesomething = true;
         }
 
         // if there is no small file, then merge matching files up to limit
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 1)) {
-            if (!this.array.shrinkUpToMaxSizeFiles(this.merger, maxFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkUpToMaxSizeFiles(this.merger, maxFileSize)) break;
+            donesomething = true;
         }
 
         // rewrite old files (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 1)) {
-            if (!this.array.shrinkOldFiles(this.merger, targetFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkOldFiles(this.merger, targetFileSize)) break;
+            donesomething = true;
         }
 
         return donesomething;

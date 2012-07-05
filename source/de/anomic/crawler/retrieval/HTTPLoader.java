@@ -176,11 +176,10 @@ public final class HTTPLoader {
                     // retry crawling with new url
                     request.redirectURL(redirectionUrl);
                     return load(request, retryCount - 1, maxFileSize, blacklistType);
-    	    } else {
-    	        // we don't want to follow redirects
-                this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
-                throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
     	    }
+            // we don't want to follow redirects
+            this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
+            throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
         } else if (responseBody == null) {
     	    // no response, reject file
             this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", statusCode);

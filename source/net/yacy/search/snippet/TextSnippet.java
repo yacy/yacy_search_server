@@ -187,7 +187,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 while (sr.hasNext()) {
                     sentences.add(sr.next());
                 }
-                
+
                 if (sentences != null) {
                     try {
                         final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
@@ -231,17 +231,16 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 if (sentences == null) {
                     init(url.hash(), null, ResultClass.SOURCE_METADATA, null);
                     return;
-                } else {
-                    // use the first lines from the text as snippet
-                    final StringBuilder s = new StringBuilder(snippetMaxLength);
-                    for (final StringBuilder t: sentences) {
-                        s.append(t).append(' ');
-                        if (s.length() >= snippetMaxLength / 4 * 3) break;
-                    }
-                    if (s.length() > snippetMaxLength) { s.setLength(snippetMaxLength); s.trimToSize(); }
-                    init(url.hash(), s.length() > 0 ? s.toString() : this.line, ResultClass.SOURCE_METADATA, null);
-                    return;
                 }
+                // use the first lines from the text as snippet
+                final StringBuilder s = new StringBuilder(snippetMaxLength);
+                for (final StringBuilder t: sentences) {
+                    s.append(t).append(' ');
+                    if (s.length() >= snippetMaxLength / 4 * 3) break;
+                }
+                if (s.length() > snippetMaxLength) { s.setLength(snippetMaxLength); s.trimToSize(); }
+                init(url.hash(), s.length() > 0 ? s.toString() : this.line, ResultClass.SOURCE_METADATA, null);
+                return;
             }
 
             // try to load the resource from the cache

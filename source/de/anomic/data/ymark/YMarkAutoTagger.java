@@ -215,10 +215,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 
 	public static String autoTag(final String url, final LoaderDispatcher loader, final int max, final TreeMap<String, YMarkTag> tags) {
 		final Document document = loadDocument(url, loader);
-		if (document != null)
-			return autoTag(document, max, tags);
-		else
-			return "/IOExceptions";
+		return (document != null) ? autoTag(document, max, tags) : "/IOExceptions";
 	}
 
 	public static boolean isDigitSpace(String str) {

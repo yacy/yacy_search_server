@@ -295,11 +295,10 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     private static final String hosthash5(final String protocol, final String host, final int port) {
         if (host == null) {
             return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(protocol)).substring(0, 5);
-        } else {
-            final StringBuilder sb = new StringBuilder(host.length() + 15);
-            sb.append(protocol).append(':').append(host).append(':').append(Integer.toString(port));
-            return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).substring(0, 5);
         }
+        final StringBuilder sb = new StringBuilder(host.length() + 15);
+        sb.append(protocol).append(':').append(host).append(':').append(Integer.toString(port));
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).substring(0, 5);
     }
 
     /**

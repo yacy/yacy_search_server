@@ -232,9 +232,8 @@ public final class LoaderDispatcher {
                 if (response.isFreshForProxy()) {
                     this.log.logInfo("cache hit/fresh for: " + url.toNormalform(true, false));
                     return response;
-                } else {
-                    this.log.logInfo("cache hit/stale for: " + url.toNormalform(true, false));
                 }
+                this.log.logInfo("cache hit/stale for: " + url.toNormalform(true, false));
             } else if (cachedResponse != null) {
                 this.log.logWarning("HTCACHE contained response header, but not content for url " + url.toNormalform(true, false));
             } else if (content != null) {

@@ -363,11 +363,10 @@ public class PeerSelection {
                 // take my own seed hash instead the enumeration result
                 this.alsoMyOwn = false;
                 return this.seedDB.mySeed();
-            } else {
-                final Seed next = this.nextSeed;
-                this.nextSeed = nextInternal();
-                return next;
             }
+            final Seed next = this.nextSeed;
+            this.nextSeed = nextInternal();
+            return next;
         }
 
         @Override

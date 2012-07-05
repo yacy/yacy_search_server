@@ -88,10 +88,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         if (this.jobCountMethod == null) return Integer.MAX_VALUE;
         try {
             final Object result = this.jobCountMethod.invoke(this.environment);
-            if (result instanceof Integer)
-                return ((Integer) result).intValue();
-            else
-                return -1;
+            return (result instanceof Integer) ? ((Integer) result).intValue() : -1;
         } catch (final IllegalAccessException e) {
             return -1;
         } catch (final IllegalArgumentException e) {

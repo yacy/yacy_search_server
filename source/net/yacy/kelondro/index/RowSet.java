@@ -175,12 +175,11 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
             if (index < 0) {
                 super.addUnique(entry);
                 return true;
-            } else {
-                final int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
-                set(index, entry);       // this may alter the sortBound, which we will revert in the next step
-                this.sortBound = sb;     // revert a sortBound altering
-                return false;
             }
+            final int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
+            set(index, entry);       // this may alter the sortBound, which we will revert in the next step
+            this.sortBound = sb;     // revert a sortBound altering
+            return false;
         }
     }
 
@@ -245,10 +244,9 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
             index = find(a, 0);
             if (index < 0) {
                 return exists;
-            } else {
-                exists = true;
-                super.removeRow(index, true); // keep order of collection!
             }
+            exists = true;
+            super.removeRow(index, true); // keep order of collection!
         }
     }
 
@@ -277,10 +275,9 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
             index = find(a, 0);
             if (index < 0) {
                 return entry;
-            } else {
-                entry = super.get(index, true);
-                super.removeRow(index, true); // keep order of collection!
             }
+            entry = super.get(index, true);
+            super.removeRow(index, true); // keep order of collection!
         }
     }
 
@@ -393,11 +390,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         public final boolean hasNext() {
         	if (this.p < 0) return false;
         	if (this.p >= size()) return false;
-            if (this.up) {
-                return this.p < this.bound;
-            } else {
-                return this.p >= 0;
-            }
+            return (this.up) ? this.p < this.bound : this.p >= 0;
         }
 
         @Override
@@ -464,11 +457,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         public final boolean hasNext() {
         	if (this.p < 0) return false;
         	if (this.p >= size()) return false;
-            if (this.up) {
-                return this.p < this.bound;
-            } else {
-                return this.p >= 0;
-            }
+            return (this.up) ? this.p < this.bound : this.p >= 0;
         }
 
         @Override

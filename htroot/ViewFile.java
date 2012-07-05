@@ -154,9 +154,8 @@ public class ViewFile {
             prop.put("viewMode", VIEW_MODE_NO_TEXT);
             prop.put("url", "");
             return prop;
-        } else {
-            prop.put("url", url.toNormalform(false, true));
         }
+        prop.put("url", url.toNormalform(false, true));
 
         // loading the resource content as byte array
         prop.put("error_incache", Cache.has(url.hash()) ? 1 : 0);

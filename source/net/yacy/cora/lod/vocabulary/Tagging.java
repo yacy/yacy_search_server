@@ -328,9 +328,8 @@ public class Tagging {
                 }
                 if (pl[0].equals(term)) {
                     continue vocloop;
-                } else {
-                    w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
                 }
+                w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
             }
         } catch (InterruptedException e) {
         }

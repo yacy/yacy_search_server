@@ -9,7 +9,7 @@
 // $LastChangedBy: apfelmaennchen $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -34,21 +34,21 @@ import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 
 public class YMarkDate {
-    
+
 	private long date;
-	
+
 	public YMarkDate() {
-		this.date = System.currentTimeMillis();		
+		this.date = System.currentTimeMillis();
 	}
-	
+
 	public YMarkDate(final byte[] date) {
 		this.set(date);
 	}
-	
+
 	public YMarkDate(final Date date) {
 		this.date = date.getTime();
 	}
-	
+
 	public long parseISO8601(final String s) throws ParseException {
     	if(s == null || s.length() < 1) {
     		throw new ParseException("parseISO8601 - empty string, nothing to parse", 0);
@@ -58,7 +58,7 @@ public class YMarkDate {
     	if(s.length()==10)
     		dateformat = new SimpleDateFormat("yyyy-MM-dd");
     	else {
-    		dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz"); 
+    		dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
 	        if(date.charAt(date.length()-1) == 'Z') {
 	        	date.deleteCharAt(date.length()-1);
 	        	date.append("GMT-00:00");
@@ -69,41 +69,38 @@ public class YMarkDate {
     	this.date = dateformat.parse(date.toString()).getTime();
         return this.date;
     }
-    
+
     public String toISO8601() {
-    	if(this.date == 0) {
-    	    return YMarkEntry.BOOKMARK.DATE_MODIFIED.deflt();
-    	} else {
-    	    return ISO8601(new Date(this.date));   
-    	}	
+    	return (this.date == 0) ? YMarkEntry.BOOKMARK.DATE_MODIFIED.deflt() : ISO8601(new Date(this.date));
     }
-    
+
     public static String ISO8601(final Date date) {
-    	return ISO8601Formatter.FORMATTER.format(date); 
+    	return ISO8601Formatter.FORMATTER.format(date);
     }
-    
+
     public byte[] toBytes() {
 		return String.valueOf(this.date).getBytes();
     }
-    
+
+    @Override
     public String toString() {
     	return String.valueOf(this.date);
     }
-    
+
     public long get() {
     	return this.date;
     }
-    
+
     public void set(long date) {
     	this.date = date;
     }
-    
+
     public void set(byte[] date) {
         final String s = UTF8.String(date);
         if(!s.isEmpty()) {
-            this.date = Long.parseLong(s);  
+            this.date = Long.parseLong(s);
         } else {
-            this.date = 0;    
+            this.date = 0;
         }
     }
 }

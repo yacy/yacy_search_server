@@ -423,9 +423,8 @@ public class FTPClient {
                 // appropriate error message
                 if (isFolder(path)) {
                     throw new IOException(reply2);
-                } else {
-                    throw new IOException(reply1);
                 }
+                throw new IOException(reply1);
             }
         }
     }
@@ -2316,9 +2315,8 @@ public class FTPClient {
             /*reply =*/ receive();
             // boolean success = !isNotPositiveCompletion(reply);
             return os.toByteArray();
-        } else {
-            throw new IOException(reply);
         }
+        throw new IOException(reply);
     }
 
 

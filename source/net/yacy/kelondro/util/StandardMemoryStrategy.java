@@ -176,11 +176,10 @@ public class StandardMemoryStrategy extends MemoryStrategy {
             }
             checkProper(avail);
             return avail >= size;
-        } else {
-            if (log.isFine()) log.logFine("former GCs indicate to not be able to free enough memory (requested/available/average: "
-                    + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
-            return false;
         }
+        if (log.isFine()) log.logFine("former GCs indicate to not be able to free enough memory (requested/available/average: "
+                + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
+        return false;
     }
 
     /**

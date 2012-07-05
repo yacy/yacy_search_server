@@ -124,10 +124,9 @@ public class FilterEngine {
     		// Cache Hit
     		final EnumSet<listTypes> e = this.cachedUrlHashs.get(url);
     		return e.containsAll(type);
-    	} else {
-    		// Cache Miss
-    		return isListed(url.getHost().toLowerCase(), url.getFile(), type);
     	}
+        // Cache Miss
+        return isListed(url.getHost().toLowerCase(), url.getFile(), type);
     }
 
     public static boolean isMatchable (final String host) {

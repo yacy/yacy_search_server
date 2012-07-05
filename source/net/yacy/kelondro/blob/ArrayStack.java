@@ -910,22 +910,21 @@ public class ArrayStack implements BLOB {
             }
             Log.logInfo("BLOBArray", "rewrite of " + f1.getName() + " into " + resultFile);
             return resultFile;
-        } else {
-            Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
-            final File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, newFile, writeBuffer);
-            if (resultFile == null) {
-                Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
-                return null;
-            }
-            try {
-                mountBLOB(resultFile, false);
-            } catch (final IOException e) {
-                Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " successfull, but read failed. resultFile = " + resultFile);
-                return null;
-            }
-            Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
-            return resultFile;
         }
+        Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
+        final File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, newFile, writeBuffer);
+        if (resultFile == null) {
+            Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
+            return null;
+        }
+        try {
+            mountBLOB(resultFile, false);
+        } catch (final IOException e) {
+            Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " successfull, but read failed. resultFile = " + resultFile);
+            return null;
+        }
+        Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
+        return resultFile;
     }
 
     private static <ReferenceType extends Reference> File mergeWorker(

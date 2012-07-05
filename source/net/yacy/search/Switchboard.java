@@ -1398,9 +1398,8 @@ public final class Switchboard extends serverSwitch
         if ( clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER) ) {
             // check if we got the request from a peer in the public cluster
             return this.clusterhashes.containsKey(ASCII.getBytes(peer));
-        } else {
-            return false;
         }
+        return false;
     }
 
     public boolean isInMyCluster(final Seed seed) {
@@ -1417,9 +1416,8 @@ public final class Switchboard extends serverSwitch
         if ( clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER) ) {
             // check if we got the request from a peer in the public cluster
             return this.clusterhashes.containsKey(ASCII.getBytes(seed.hash));
-        } else {
-            return false;
         }
+        return false;
     }
 
     public String urlExists(final byte[] hash) {
@@ -1712,40 +1710,39 @@ public final class Switchboard extends serverSwitch
                 if (zis != null) try {zis.close();} catch (IOException e) {}
             }
             return moved;
-        } else {
-            try {
-                InputStream is = new BufferedInputStream(new FileInputStream(infile));
-                if ( s.endsWith(".gz") ) {
-                    is = new GZIPInputStream(is);
-                }
-                processSurrogate(is, infile.getName());
-            } catch ( final IOException e ) {
-                Log.logException(e);
-            } finally {
-                moved = infile.renameTo(outfile);
-                if ( moved ) {
-                    // check if this file is already compressed, if not, compress now
-                    if ( !outfile.getName().endsWith(".gz") ) {
-                        final String gzname = outfile.getName() + ".gz";
-                        final File gzfile = new File(outfile.getParentFile(), gzname);
-                        try {
-                            final OutputStream os =
-                                new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile)));
-                            FileUtils.copy(new BufferedInputStream(new FileInputStream(outfile)), os);
-                            os.close();
-                            if ( gzfile.exists() ) {
-                                FileUtils.deletedelete(outfile);
-                            }
-                        } catch ( final FileNotFoundException e ) {
-                            Log.logException(e);
-                        } catch ( final IOException e ) {
-                            Log.logException(e);
+        }
+        try {
+            InputStream is = new BufferedInputStream(new FileInputStream(infile));
+            if ( s.endsWith(".gz") ) {
+                is = new GZIPInputStream(is);
+            }
+            processSurrogate(is, infile.getName());
+        } catch ( final IOException e ) {
+            Log.logException(e);
+        } finally {
+            moved = infile.renameTo(outfile);
+            if ( moved ) {
+                // check if this file is already compressed, if not, compress now
+                if ( !outfile.getName().endsWith(".gz") ) {
+                    final String gzname = outfile.getName() + ".gz";
+                    final File gzfile = new File(outfile.getParentFile(), gzname);
+                    try {
+                        final OutputStream os =
+                            new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile)));
+                        FileUtils.copy(new BufferedInputStream(new FileInputStream(outfile)), os);
+                        os.close();
+                        if ( gzfile.exists() ) {
+                            FileUtils.deletedelete(outfile);
                         }
+                    } catch ( final FileNotFoundException e ) {
+                        Log.logException(e);
+                    } catch ( final IOException e ) {
+                        Log.logException(e);
                     }
                 }
             }
-            return moved;
         }
+        return moved;
     }
 
     public void processSurrogate(final InputStream is, final String name) throws IOException {

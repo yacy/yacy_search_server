@@ -54,7 +54,7 @@ public class WordCache {
     static {
     	Log.logConfig("WordCache", "commonWordsMaxSize = " + commonWordsMaxSize);
     }
-    
+
     // dictionaries
     private final File dictionaryPath;
     final Map<String, Dictionary> dictionaries;
@@ -65,7 +65,7 @@ public class WordCache {
         private final TreeSet<StringBuilder> tcid; // the dictionary of reverse words
 
         public Dictionary(final File file) throws IOException {
-        	
+
             this.dict = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
             this.tcid = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
 
@@ -144,18 +144,16 @@ public class WordCache {
             for (final StringBuilder r: t) {
                 if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) {
                     return true;
-                } else {
-                    break;
                 }
+                break;
             }
             string = reverse(string);
             t = this.tcid.tailSet(string);
             for (final StringBuilder r: t) {
                 if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) {
                     return true;
-                } else {
-                    break;
                 }
+                break;
             }
             return false;
         }

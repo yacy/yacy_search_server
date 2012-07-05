@@ -647,18 +647,12 @@ public class serverSwitch
             }
             if ( file != null && file.exists() ) {
                 return new FileReader(file);
-            } else {
-                throw new FileNotFoundException();
             }
-        } else {
-            final File f =
-                (uri.length() > 0 && uri.startsWith("/")) ? new File(uri) : new File(rootPath, uri);
-            if ( f.exists() ) {
-                return new FileReader(f);
-            } else {
-                throw new FileNotFoundException(f.toString());
-            }
+            throw new FileNotFoundException();
         }
+        final File f = (uri.length() > 0 && uri.startsWith("/")) ? new File(uri) : new File(rootPath, uri);
+        if (f.exists()) return new FileReader(f);
+        throw new FileNotFoundException(f.toString());
     }
 
     private static Random pwGenerator = new Random();

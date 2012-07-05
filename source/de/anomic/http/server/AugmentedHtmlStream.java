@@ -52,9 +52,8 @@ public class AugmentedHtmlStream extends FilterOutputStream {
     public StringBuffer process(StringBuffer data) {
         if (this.urls.contains("currentyacypeer/")) {
             return data;
-        } else {
-            return AugmentHtmlStream.process (data, this.charset, this.url, this.requestHeader);
         }
+        return AugmentHtmlStream.process (data, this.charset, this.url, this.requestHeader);
     }
 
 	public static boolean supportsMime(String mime) {

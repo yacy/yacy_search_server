@@ -401,11 +401,9 @@ public class AugmentHtmlStream {
 
 
         if (augmented) {
-
             return (new StringBuffer (Doc));
-        } else {
-            return (data);
         }
+        return (data);
     }
 
 }

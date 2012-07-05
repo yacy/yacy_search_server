@@ -620,10 +620,8 @@ public class SnippetProcess {
                 Log.logInfo("SEARCH", "sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
-        } else {
-            return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, 0); // result without snippet
         }
-        // finished, no more actions possible here
+        return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, 0); // result without snippet
     }
 
     /**

@@ -446,9 +446,8 @@ public final class CrawlStacker {
                 if (dbocc.equals("errors")) {
                     final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
                     return "double in: errors (" + errorEntry.anycause() + ")";
-                } else {
-                    return "double in: " + dbocc;
                 }
+                return "double in: " + dbocc;
             }
         } else {
             final boolean recrawl = profile.recrawlIfOlder() > oldEntry.loaddate().getTime();
@@ -459,15 +458,13 @@ public final class CrawlStacker {
             } else {
                 if (dbocc == null) {
                     return "double in: LURL-DB";
-                } else {
-                    if (this.log.isInfo()) this.log.logInfo("URL '" + urlstring + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
-                    if (dbocc.equals("errors")) {
-                        final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
-                        return "double in: errors (" + errorEntry.anycause() + ")";
-                    } else {
-                        return "double in: " + dbocc;
-                    }
                 }
+                if (this.log.isInfo()) this.log.logInfo("URL '" + urlstring + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
+                if (dbocc.equals("errors")) {
+                    final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
+                    return "double in: errors (" + errorEntry.anycause() + ")";
+                }
+                return "double in: " + dbocc;
             }
         }
 

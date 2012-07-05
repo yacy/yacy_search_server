@@ -178,7 +178,7 @@ public final class TextParser {
         } finally {
             if (sourceStream != null) try { sourceStream.close(); } catch (final Exception ex) {}
         }
-        
+
         return docs;
     }
 
@@ -313,14 +313,13 @@ public final class TextParser {
                 final String errorMsg = "Parsing content with file extension '" + location.getFileExtension() + "' and mimetype '" + mimeType + "' failed.";
                 //log.logWarning("Unable to parse '" + location + "'. " + errorMsg);
                 throw new Parser.Failure(errorMsg, location);
-            } else {
-                String failedParsers = "";
-                for (final Map.Entry<Parser, Parser.Failure> error: failedParser.entrySet()) {
-                    log.logWarning("tried parser '" + error.getKey().getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + error.getValue().getMessage(), error.getValue());
-                    failedParsers += error.getKey().getName() + " ";
-                }
-                throw new Parser.Failure("All parser failed: " + failedParsers, location);
             }
+            String failedParsers = "";
+            for (final Map.Entry<Parser, Parser.Failure> error: failedParser.entrySet()) {
+                log.logWarning("tried parser '" + error.getKey().getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + error.getValue().getMessage(), error.getValue());
+                failedParsers += error.getKey().getName() + " ";
+            }
+            throw new Parser.Failure("All parser failed: " + failedParsers, location);
         }
         for (final Document d: docs) { assert d.getTextStream() != null : "mimeType = " + mimeType; } // verify docs
 

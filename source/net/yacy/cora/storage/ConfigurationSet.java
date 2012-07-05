@@ -79,39 +79,38 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
                     // is comment line - do nothing
                     if (s.startsWith("##")) comment = s.substring(2);
                     continue;
+                }
+                if (s.startsWith("#")) {
+                    enabled = false ;
+                    s = s.substring (1).trim();
                 } else {
-                    if (s.startsWith("#")) {
-                        enabled = false ;
-                        s = s.substring (1).trim();
-                    } else {
-                        enabled = true;
-                    }
-                    if (s.contains("#")) {
-                        // second # = text afterwards is a comment
-                        i = s.indexOf("#");
-                        comment = s.substring(i+1);
-                        s = s.substring(0,i).trim();
-                    } else {
-                       // comment = null;
-                    }
-                    if (s.contains("=")) {
-                        i = s.indexOf("=");
-                        key = s.substring(0,i).trim();
-                        value = s.substring(i+1).trim();
-                        if (value.isEmpty()) value = null;
+                    enabled = true;
+                }
+                if (s.contains("#")) {
+                    // second # = text afterwards is a comment
+                    i = s.indexOf("#");
+                    comment = s.substring(i+1);
+                    s = s.substring(0,i).trim();
+                } else {
+                   // comment = null;
+                }
+                if (s.contains("=")) {
+                    i = s.indexOf("=");
+                    key = s.substring(0,i).trim();
+                    value = s.substring(i+1).trim();
+                    if (value.isEmpty()) value = null;
 
-                    } else {
-                        key = s.trim();
-                        value = null;
+                } else {
+                    key = s.trim();
+                    value = null;
+                }
+                if (!key.isEmpty()) {
+                    Entry entry = new Entry(key, value, enabled);
+                    if (comment != null) {
+                        entry.setComment(comment);
+                        comment = null;
                     }
-                    if (!key.isEmpty()) {
-                        Entry entry = new Entry(key, value, enabled);
-                        if (comment != null) {
-                            entry.setComment(comment);
-                            comment = null;
-                        }
-                        this.put(key, entry);
-                    }
+                    this.put(key, entry);
                 }
             }
         } catch (final IOException e) {
@@ -221,33 +220,32 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
                     // is comment line - write as is
                     writer.write(sorig + "\n");
                     continue;
+                }
+                if (sorig.startsWith("#")) {
+                    s = sorig.substring (1).trim();
                 } else {
-                    if (sorig.startsWith("#")) {
-                        s = sorig.substring (1).trim();
-                    } else {
-                        s = sorig;
-                    }
-                    if (s.contains("#")) {
-                        // second # = is a line comment
-                        i = s.indexOf("#");
-                        s = s.substring(0,i).trim();
-                    }
-                    if (s.contains("=")) {
-                        i = s.indexOf("=");
-                        key = s.substring(0,i).trim();
-                    } else {
-                        key = s.trim();
-                    }
-                    if (!key.isEmpty()) {
-                        Entry e = this.get(key);
-                        if (e != null) {
-                            writer.write (e.toString());
-                            tclone.remove(key); // remove written entries from clone
-                        } else {writer.write(sorig); }
-                        writer.write("\n");
-                    } else {
-                        writer.write(sorig+"\n");
-                    }
+                    s = sorig;
+                }
+                if (s.contains("#")) {
+                    // second # = is a line comment
+                    i = s.indexOf("#");
+                    s = s.substring(0,i).trim();
+                }
+                if (s.contains("=")) {
+                    i = s.indexOf("=");
+                    key = s.substring(0,i).trim();
+                } else {
+                    key = s.trim();
+                }
+                if (!key.isEmpty()) {
+                    Entry e = this.get(key);
+                    if (e != null) {
+                        writer.write (e.toString());
+                        tclone.remove(key); // remove written entries from clone
+                    } else {writer.write(sorig); }
+                    writer.write("\n");
+                } else {
+                    writer.write(sorig+"\n");
                 }
             }
             reader.close();

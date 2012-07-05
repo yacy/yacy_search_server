@@ -55,6 +55,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @param s
      * @param v
      */
+    @Override
     public final synchronized void insert(final K s, final V v) {
         if (this.levelB.containsKey(s)) {
         	this.levelB.put(s, v);
@@ -71,6 +72,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @param s
      * @param v
      */
+    @Override
     public void insertIfAbsent(final K s, final V v) {
         if (this.levelB.containsKey(s)) {
             return;
@@ -98,6 +100,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @param v
      * @return the value before inserting the new value
      */
+    @Override
     public V putIfAbsent(final K s, final V v) {
         synchronized (this) {
             V o = this.levelB.get(s);
@@ -115,16 +118,16 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @param s
      * @param v
      */
+    @Override
     public final synchronized V put(final K s, final V v) {
         if (this.levelB.containsKey(s)) {
             final V r = this.levelB.put(s, v);
             assert (this.levelB.size() <= this.cacheSize); // the cache should shrink automatically
             return r;
-        } else {
-            final V r = this.levelA.put(s, v);
-            assert (this.levelA.size() <= this.cacheSize); // the cache should shrink automatically
-            return r;
         }
+        final V r = this.levelA.put(s, v);
+        assert (this.levelA.size() <= this.cacheSize); // the cache should shrink automatically
+        return r;
     }
 
     /**
@@ -158,6 +161,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @param value
      * @return the keys that have the given value
      */
+    @Override
     public Collection<K> getKeys(final V value) {
         final ArrayList<K> keys = new ArrayList<K>();
         synchronized (this.levelB) {
@@ -218,6 +222,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
     /**
      * iterator implements the Iterable interface
      */
+    @Override
     public final Iterator<Map.Entry<K, V>> iterator() {
         return entrySet().iterator();
     }

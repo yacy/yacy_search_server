@@ -334,19 +334,18 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 // return value
                 return map;
             }
-        } else {
-            byte[] b;
-            synchronized (this) {
-                map = this.cache.get(key);
-                if (map != null) return map;
-                b = this.blob.get(key);
-            }
-            if (b == null) return null;
-            try {
-                return bytes2map(b);
-            } catch (final RowSpaceExceededException e) {
-                throw new IOException(e.getMessage());
-            }
+        }
+        byte[] b = null;
+        synchronized (this) {
+            map = this.cache.get(key);
+            if (map != null) return map;
+            b = this.blob.get(key);
+        }
+        if (b == null) return null;
+        try {
+            return bytes2map(b);
+        } catch (final RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
         }
     }
 

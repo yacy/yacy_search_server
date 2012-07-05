@@ -95,6 +95,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         this.hasnotDelete = 0;
     }
 
+    @Override
     public long mem() {
         return this.index.mem() + this.readHitCache.mem() + this.readMissCache.mem();
     }
@@ -119,10 +120,12 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return this.missLimit;
     }
 
+    @Override
     public byte[] smallestKey() {
         return this.index.smallestKey();
     }
 
+    @Override
     public byte[] largestKey() {
         return this.index.largestKey();
     }
@@ -234,21 +237,22 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         if (this.readHitCache != null) this.readHitCache.clear();
     }
 
+    @Override
     public final synchronized void close() {
         this.index.close();
         this.readHitCache = null;
         this.readMissCache = null;
     }
 
+    @Override
     public final synchronized boolean has(final byte[] key) {
         // first look into the miss cache
         if (this.readMissCache != null) {
             if (this.readMissCache.has(key)) {
                 this.hasnotHit++;
                 return false;
-            } else {
-                this.hasnotMiss++;
             }
+            this.hasnotMiss++;
         }
 
         // then try the hit cache and the buffers
@@ -256,24 +260,23 @@ public final class Cache implements Index, Iterable<Row.Entry> {
             if (this.readHitCache.has(key)) {
                 this.readHit++;
                 return true;
-            } else {
-                this.readMiss++;
             }
+            this.readMiss++;
         }
 
         // finally ask the back-end index
         return this.index.has(key);
     }
 
+    @Override
     public final synchronized Row.Entry get(final byte[] key, final boolean cachecopy) throws IOException {
         // first look into the miss cache
         if (this.readMissCache != null) {
             if (this.readMissCache.has(key)) {
                 this.hasnotHit++;
                 return null;
-            } else {
-                this.hasnotMiss++;
             }
+            this.hasnotMiss++;
         }
 
         Row.Entry entry = null;
@@ -310,6 +313,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return entry;
     }
 
+    @Override
     public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
         Row.Entry entry;
@@ -320,6 +324,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return map;
     }
 
+    @Override
     public final synchronized boolean put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert (row != null);
         assert (row.columns() == row().columns());
@@ -353,6 +358,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return c;
     }
 
+    @Override
     public final synchronized Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert (row != null);
         assert (row.columns() == row().columns());
@@ -402,6 +408,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return entry;
     }
 
+    @Override
     public final synchronized void addUnique(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert (row != null);
         assert (row.columns() == row().columns());
@@ -482,11 +489,13 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public final synchronized List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         return this.index.removeDoubles();
         // todo: remove reported entries from the cache!!!
     }
 
+    @Override
     public final synchronized boolean delete(final byte[] key) throws IOException {
         checkMissSpace();
 
@@ -518,6 +527,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return this.index.delete(key);
     }
 
+    @Override
     public final synchronized Row.Entry remove(final byte[] key) throws IOException {
         checkMissSpace();
 
@@ -549,6 +559,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return this.index.remove(key);
     }
 
+    @Override
     public final synchronized Row.Entry removeOne() throws IOException {
 
         checkMissSpace();
@@ -568,22 +579,27 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return entry;
     }
 
+    @Override
     public synchronized List<Row.Entry> top(final int count) throws IOException {
         return this.index.top(count);
     }
 
+    @Override
     public final synchronized Row row() {
         return this.index.row();
     }
 
+    @Override
     public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return this.index.keys(up, firstKey);
     }
 
+    @Override
     public final synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         return this.index.rows(up, firstKey);
     }
 
+    @Override
     public final Iterator<Entry> iterator() {
         try {
             return rows();
@@ -592,27 +608,33 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         }
     }
 
+    @Override
     public final synchronized CloneableIterator<Row.Entry> rows() throws IOException {
         return this.index.rows();
     }
 
+    @Override
     public final int size() {
         return this.index.size();
     }
 
+    @Override
     public final boolean isEmpty() {
         return this.index.isEmpty();
     }
 
+    @Override
     public final String filename() {
         return this.index.filename();
     }
 
+    @Override
     public final void clear() throws IOException {
         this.index.clear();
         init();
     }
 
+    @Override
     public final void deleteOnExit() {
         this.index.deleteOnExit();
     }

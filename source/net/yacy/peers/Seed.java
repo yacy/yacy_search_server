@@ -1092,11 +1092,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final String b = crypt.simpleEncode(r, key, 'b');
         // the compressed string may be longer that the uncompressed if there is too much overhead for compression meta-info
         // take simply that string that is shorter
-        if ( b.length() < z.length() ) {
-            return b;
-        } else {
-            return z;
-        }
+        return ( b.length() < z.length() ) ? b : z;
     }
 
     public final void save(final File f) throws IOException {

@@ -26,37 +26,34 @@ public class ynetSearch {
                 	prop.authenticationRequired();
     			}
     			return prop;
-    		} else {
-    			InputStream is = null;
-    			try {
-    			    String searchaddress = post.get("url");
-    			    if (!searchaddress.startsWith("http://")) {
-    			        // a relative path .. this addresses the local peer
-    			        searchaddress = "http://" + switchboard.peers.mySeed().getPublicAddress() + ((searchaddress.length() > 0 && searchaddress.charAt(0) == '/') ? "" : "/") + searchaddress;
-    			    }
-    			    post.remove("url");
-    			    post.remove("login");
-    			    final Iterator <Map.Entry<String, String>> it = post.entrySet().iterator();
-    			    String s = searchaddress;
-    			    Map.Entry<String, String> k;
-    			    while(it.hasNext()) {
-    			    	k = it.next();
-    			    	s = s + "&" + k.getKey() + "=" + k.getValue();
-    			    }
-    				// final String s = searchaddress+"&query="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");
-    				final URL url = new URL(s);
-    				is = url.openStream();
-    				final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();
-    				prop.put("http", httpout);
-    			}
-    			catch ( final Exception e ) {
-    				prop.put("url", "error!");
-    			}
-    			finally {
-    				if ( is != null )
-    					try { is.close(); } catch ( final IOException e ) { }
-    			}
     		}
+            InputStream is = null;
+            try {
+                String searchaddress = post.get("url");
+                if (!searchaddress.startsWith("http://")) {
+                    // a relative path .. this addresses the local peer
+                    searchaddress = "http://" + switchboard.peers.mySeed().getPublicAddress() + ((searchaddress.length() > 0 && searchaddress.charAt(0) == '/') ? "" : "/") + searchaddress;
+                }
+                post.remove("url");
+                post.remove("login");
+                final Iterator <Map.Entry<String, String>> it = post.entrySet().iterator();
+                String s = searchaddress;
+                Map.Entry<String, String> k;
+                while(it.hasNext()) {
+                	k = it.next();
+                	s = s + "&" + k.getKey() + "=" + k.getValue();
+                }
+            	// final String s = searchaddress+"&query="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");
+            	final URL url = new URL(s);
+            	is = url.openStream();
+            	final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();
+            	prop.put("http", httpout);
+            } catch ( final Exception e ) {
+            	prop.put("url", "error!");
+            } finally {
+            	if ( is != null )
+            		try { is.close(); } catch ( final IOException e ) { }
+            }
     	}
     	return prop;
 	}

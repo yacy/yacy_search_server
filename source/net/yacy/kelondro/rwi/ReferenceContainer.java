@@ -405,10 +405,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
 
         // start most efficient method
         if (stepsEnum > stepsTest) {
-            if (i1.size() < i2.size())
-                return joinConstructiveByTest(factory, i1, i2, maxDistance);
-            else
-                return joinConstructiveByTest(factory, i2, i1, maxDistance);
+            if (i1.size() < i2.size()) return joinConstructiveByTest(factory, i1, i2, maxDistance);
+            return joinConstructiveByTest(factory, i2, i1, maxDistance);
         }
         return joinConstructiveByEnumeration(factory, i1, i2, maxDistance);
     }

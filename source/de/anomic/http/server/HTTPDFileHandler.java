@@ -554,9 +554,7 @@ public final class HTTPDFileHandler {
             		doURLProxy(args, conProp, requestHeader, out);
             		return;
             	}
-            	else {
-        			HTTPDemon.sendRespondError(conProp,out,3,403,"Access denied",null,null);
-            	}
+                HTTPDemon.sendRespondError(conProp,out,3,403,"Access denied",null,null);
             }
 
             // track all files that had been accessed so far

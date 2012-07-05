@@ -147,10 +147,10 @@ public class ByteArray {
             result -= digit;
         }
         if (negative) {
-            if (i > 1) return result; else throw new NumberFormatException(UTF8.String(s));
-        } else {
-            return -result;
+            if (i > 1) return result;
+            throw new NumberFormatException(UTF8.String(s));
         }
+        return -result;
     }
 
     public static void main(String[] args) {
