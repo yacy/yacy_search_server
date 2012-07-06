@@ -80,7 +80,7 @@ public final class TransformerWriter extends Writer {
             final Transformer transformer,
             final boolean passbyIfBinarySuspect
     ) {
-    	this(outStream, charSet, scraper, transformer, passbyIfBinarySuspect, 4096);
+    	this(outStream, charSet, scraper, transformer, passbyIfBinarySuspect, 64);
     }
 
     public TransformerWriter(

@@ -570,24 +570,11 @@ public final class HTTPDFileHandler {
             if ((targetClass != null) && (path.endsWith("png"))) {
                 // call an image-servlet to produce an on-the-fly - generated image
                 Object img = null;
-                try {
-                    requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
-                    requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
-                    requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "png");
-                    // in case that there are no args given, args = null or empty hashmap
-                    img = invokeServlet(targetClass, requestHeader, args);
-                } catch (final InvocationTargetException e) {
-                    theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
-                    e.getMessage() +
-                    " target exception at " + targetClass + ": " +
-                    e.getTargetException().toString() + ":" +
-                    e.getTargetException().getMessage() +
-                    "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
-                    Log.logException(e);
-                    Log.logException(e.getCause());
-                    Log.logException(e.getTargetException());
-                    targetClass = null;
-                }
+                requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+                requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
+                requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "png");
+                // in case that there are no args given, args = null or empty hashmap
+                img = invokeServlet(targetClass, requestHeader, args);
                 if (img == null) {
                     // error with image generation; send file-not-found
                     HTTPDemon.sendRespondError(conProp, out, 3, 404, "File not Found", null, null);
@@ -928,68 +915,56 @@ public final class HTTPDFileHandler {
                     // call rewrite-class
 
                     if (targetClass != null) {
-                        // CGI-class: call the class to create a property for rewriting
-                        try {
-                            requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
-                            requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
-                            final int ep = path.lastIndexOf(".");
-                            requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, path.substring(ep + 1));
-                            // in case that there are no args given, args = null or empty hashmap
-                            final Object tmp = invokeServlet(targetClass, requestHeader, args);
-                            if (tmp == null) {
-                                // if no args given, then tp will be an empty Hashtable object (not null)
-                                templatePatterns = new servletProperties();
-                            } else if (tmp instanceof servletProperties) {
-                                templatePatterns = (servletProperties) tmp;
-                            } else {
-                                templatePatterns = new servletProperties((serverObjects) tmp);
-                            }
-                            // check if the servlets requests authentication
-                            if (templatePatterns.containsKey(serverObjects.ACTION_AUTHENTICATE)) {
-                                // handle brute-force protection
-                                if (realmProp != null) {
-                                    Log.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                                    final Integer attempts = serverCore.bfHost.get(clientIP);
-                                    if (attempts == null)
-                                        serverCore.bfHost.put(clientIP, Integer.valueOf(1));
-                                    else
-                                        serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
-                                }
-                                // send authentication request to browser
-                                final ResponseHeader headers = getDefaultHeaders(path);
-                                headers.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"" + templatePatterns.get(serverObjects.ACTION_AUTHENTICATE, "") + "\"");
-                                HTTPDemon.sendRespondHeader(conProp,out,httpVersion,401,headers);
-                                return;
-                            } else if (templatePatterns.containsKey(serverObjects.ACTION_LOCATION)) {
-                                String location = templatePatterns.get(serverObjects.ACTION_LOCATION, "");
-                                if (location.length() == 0) location = path;
-
-                                final ResponseHeader headers = getDefaultHeaders(path);
-                                headers.setAdditionalHeaderProperties(templatePatterns.getOutgoingHeader().getAdditionalHeaderProperties()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
-                                headers.put(HeaderFramework.LOCATION,location);
-                                HTTPDemon.sendRespondHeader(conProp,out,httpVersion,302,headers);
-                                return;
-                            }
-                            // add the application version, the uptime and the client name to every rewrite table
-                            templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
-                            templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
-                            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
-                            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((Switchboard) switchboard).peers.myID());
-                            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
-                            final Seed myPeer = sb.peers.mySeed();
-                            templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
-                            templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
-                            //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
-                        } catch (final InvocationTargetException e) {
-                            if (e.getCause() instanceof InterruptedException) {
-                                throw new InterruptedException(e.getCause().getMessage());
-                            }
-                            Log.logException(e);
-                            Log.logException(e.getCause());
-                            Log.logException(e.getTargetException());
-                            targetClass = null;
-                            throw e;
+                        requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+                        requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
+                        final int ep = path.lastIndexOf(".");
+                        requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, path.substring(ep + 1));
+                        // in case that there are no args given, args = null or empty hashmap
+                        final Object tmp = invokeServlet(targetClass, requestHeader, args);
+                        if (tmp == null) {
+                            // if no args given, then tp will be an empty Hashtable object (not null)
+                            templatePatterns = new servletProperties();
+                        } else if (tmp instanceof servletProperties) {
+                            templatePatterns = (servletProperties) tmp;
+                        } else {
+                            templatePatterns = new servletProperties((serverObjects) tmp);
                         }
+                        // check if the servlets requests authentication
+                        if (templatePatterns.containsKey(serverObjects.ACTION_AUTHENTICATE)) {
+                            // handle brute-force protection
+                            if (realmProp != null) {
+                                Log.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
+                                final Integer attempts = serverCore.bfHost.get(clientIP);
+                                if (attempts == null)
+                                    serverCore.bfHost.put(clientIP, Integer.valueOf(1));
+                                else
+                                    serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
+                            }
+                            // send authentication request to browser
+                            final ResponseHeader headers = getDefaultHeaders(path);
+                            headers.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"" + templatePatterns.get(serverObjects.ACTION_AUTHENTICATE, "") + "\"");
+                            HTTPDemon.sendRespondHeader(conProp,out,httpVersion,401,headers);
+                            return;
+                        } else if (templatePatterns.containsKey(serverObjects.ACTION_LOCATION)) {
+                            String location = templatePatterns.get(serverObjects.ACTION_LOCATION, "");
+                            if (location.length() == 0) location = path;
+
+                            final ResponseHeader headers = getDefaultHeaders(path);
+                            headers.setAdditionalHeaderProperties(templatePatterns.getOutgoingHeader().getAdditionalHeaderProperties()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
+                            headers.put(HeaderFramework.LOCATION,location);
+                            HTTPDemon.sendRespondHeader(conProp,out,httpVersion,302,headers);
+                            return;
+                        }
+                        // add the application version, the uptime and the client name to every rewrite table
+                        templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
+                        templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
+                        templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
+                        templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((Switchboard) switchboard).peers.myID());
+                        templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
+                        final Seed myPeer = sb.peers.mySeed();
+                        templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
+                        templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
+                        //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         nocache = true;
                     }
 
@@ -1390,11 +1365,17 @@ public final class HTTPDFileHandler {
         return m;
     }
 
-    private static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    private static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) {
         try {
             return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
-        } catch (final OutOfMemoryError e) {
+        } catch (final Throwable e) {
+            theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
+                            e.getMessage() +
+                            " target exception at " + targetClass + ": " +
+                            "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
             Log.logException(e);
+            Log.logException(e.getCause());
+            if (e instanceof InvocationTargetException) Log.logException(((InvocationTargetException) e).getTargetException());
             return null;
         }
     }
