@@ -297,6 +297,16 @@ public final class Cache {
         }
     }
 
+    public static boolean hasContent(final byte[] hash) {
+        // load the url as resource from the cache
+        try {
+            return fileDB.containsKey(hash);
+        } catch (final OutOfMemoryError e) {
+            Log.logException(e);
+            return false;
+        }
+    }
+
     /**
      * removed response header and cached content from the database
      * @param url

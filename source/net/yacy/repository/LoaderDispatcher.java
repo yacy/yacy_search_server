@@ -201,8 +201,7 @@ public final class LoaderDispatcher {
             // now see if there is a cache entry
 
             final ResponseHeader cachedResponse = (url.isLocal()) ? null : Cache.getResponseHeader(url.hash());
-            final byte[] content = (cachedResponse == null) ? null : Cache.getContent(url.hash());
-            if (cachedResponse != null && content != null) {
+            if (cachedResponse != null && Cache.hasContent(url.hash())) {
                 // yes we have the content
 
                 // create request header values and a response object because we need that
@@ -218,26 +217,32 @@ public final class LoaderDispatcher {
                         cachedResponse,
                         crawlProfile,
                         true,
-                        content);
+                        null);
 
                 // check which caching strategy shall be used
                 if (cacheStrategy == CacheStrategy.IFEXIST || cacheStrategy == CacheStrategy.CACHEONLY) {
                     // well, just take the cache and don't care about freshness of the content
-                    this.log.logInfo("cache hit/useall for: " + url.toNormalform(true, false));
-                    return response;
+                    final byte[] content = Cache.getContent(url.hash());
+                    if (content != null) {
+                        this.log.logInfo("cache hit/useall for: " + url.toNormalform(true, false));
+                        response.setContent(content);
+                        return response;
+                    }
                 }
 
                 // now the cacheStrategy must be CACHE_STRATEGY_IFFRESH, that means we should do a proxy freshness test
                 assert cacheStrategy == CacheStrategy.IFFRESH : "cacheStrategy = " + cacheStrategy;
                 if (response.isFreshForProxy()) {
-                    this.log.logInfo("cache hit/fresh for: " + url.toNormalform(true, false));
-                    return response;
+                    final byte[] content = Cache.getContent(url.hash());
+                    if (content != null) {
+                        this.log.logInfo("cache hit/fresh for: " + url.toNormalform(true, false));
+                        response.setContent(content);
+                        return response;
+                    }
                 }
                 this.log.logInfo("cache hit/stale for: " + url.toNormalform(true, false));
             } else if (cachedResponse != null) {
                 this.log.logWarning("HTCACHE contained response header, but not content for url " + url.toNormalform(true, false));
-            } else if (content != null) {
-                this.log.logWarning("HTCACHE contained content, but not response header for url " + url.toNormalform(true, false));
             }
         }
 
