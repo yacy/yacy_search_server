@@ -30,6 +30,7 @@ import java.util.Date;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.document.parser.sitemapParser;
+import net.yacy.document.parser.sitemapParser.URLEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
@@ -56,7 +57,11 @@ public class SitemapImporter extends Thread {
         try {
             logger.logInfo("Start parsing sitemap file " + this.siteMapURL);
             sitemapParser.SitemapReader parser = sitemapParser.parse(this.siteMapURL);
-            for (sitemapParser.URLEntry entry: parser) process(entry);
+            parser.start();
+            URLEntry item;
+            while ((item = parser.take()) != sitemapParser.POISON_URLEntry) {
+                process(item);
+            }
         } catch (final Exception e) {
             logger.logWarning("Unable to parse sitemap file " + this.siteMapURL, e);
         }
