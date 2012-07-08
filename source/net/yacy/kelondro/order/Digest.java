@@ -56,10 +56,11 @@ public class Digest {
 
 	public static BlockingQueue<MessageDigest> digestPool = new LinkedBlockingDeque<MessageDigest>();
 
-    private static final int md5CacheSize = Math.max(100000, Math.min(1000000, (int) (MemoryControl.available() / 40000L)));
+    private static final int md5CacheSize = Math.max(1000, Math.min(1000000, (int) (MemoryControl.available() / 50000L)));
     private static ARC<String, byte[]> md5Cache = null;
     static {
         try {
+            Log.logInfo("Digest", "creating hash cache of size " + md5CacheSize);
             md5Cache = new ConcurrentARC<String, byte[]>(md5CacheSize, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
         } catch (final OutOfMemoryError e) {
             md5Cache = new ConcurrentARC<String, byte[]>(1000, Math.max(2, Runtime.getRuntime().availableProcessors()));
