@@ -356,7 +356,8 @@ public final class CrawlStacker {
             entry.url().getContentDomain() == ContentDomain.APP  ||
             entry.url().getContentDomain() == ContentDomain.IMAGE  ||
             entry.url().getContentDomain() == ContentDomain.AUDIO  ||
-            entry.url().getContentDomain() == ContentDomain.VIDEO ) {
+            entry.url().getContentDomain() == ContentDomain.VIDEO ||
+            entry.url().getContentDomain() == ContentDomain.CTRL) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
             //if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;
