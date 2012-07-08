@@ -3425,7 +3425,7 @@ public final class Switchboard extends serverSwitch
                                 if ( (ys != null)
                                     && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
                                     final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
-                                    if ( lastseen < 240 ) {
+                                    if ( lastseen < 60 ) {
                                         if ( peers.peerActions.connectPeer(ys, false) ) {
                                             lc++;
                                         }
