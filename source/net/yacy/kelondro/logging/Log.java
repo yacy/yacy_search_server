@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.FileHandler;
@@ -411,8 +412,7 @@ public final class Log {
                     exceptionLog.logSevere(msg + "\n" + baos.toString(), e);
                     Log.logException(e);
                     Log.logException(e.getCause());
-                    //System.err.print("Exception in thread \"" + t.getName() + "\" ");
-                    //e.printStackTrace(System.err);
+                    if (e instanceof InvocationTargetException) Log.logException(((InvocationTargetException) e).getTargetException());
                 }
             });
         } finally {
