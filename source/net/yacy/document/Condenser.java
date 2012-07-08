@@ -127,6 +127,8 @@ public final class Condenser {
 
         this.languageIdentificator = new Identificator();
 
+        // add the URL components to the word list
+        insertTextToWords(new SentenceReader(document.dc_source().toTokens()), 0, WordReferenceRow.flag_app_dc_identifier, this.RESULT_FLAGS, false, meaningLib);
 
         Map.Entry<MultiProtocolURI, String> entry;
         if (indexText) {
@@ -174,9 +176,6 @@ public final class Condenser {
             this.RESULT_NUMB_SENTENCES = 0;
             this.RESULT_DIFF_SENTENCES = 0;
         }
-
-        // add the URL components to the word list
-        insertTextToWords(new SentenceReader(document.dc_source().toNormalform(false, true)), 0, WordReferenceRow.flag_app_dc_identifier, this.RESULT_FLAGS, false, meaningLib);
 
         if (indexMedia) {
             // add anchor descriptions: here, we also add the url components
@@ -311,7 +310,7 @@ public final class Condenser {
         boolean comb_indexof = false, last_last = false, last_index = false;
         final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
         if (LibraryProvider.autotagging.size() == 0) doAutotagging = false;
-        
+
         // read source
         final WordTokenizer wordenum = new WordTokenizer(new SentenceReader(text), meaningLib);
         try {

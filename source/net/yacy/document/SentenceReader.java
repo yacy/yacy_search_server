@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -26,10 +26,10 @@ package net.yacy.document;
 
 import java.util.Iterator;
 
-public class SentenceReader implements Iterator<StringBuilder> {
+public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringBuilder> {
     // read sentences from a given input stream
     // this enumerates StringBuilder objects
-    
+
     private StringBuilder buffer;
     private String text;
     private int pos;
@@ -42,7 +42,7 @@ public class SentenceReader implements Iterator<StringBuilder> {
         this.pre = false;
         this.buffer = nextElement0();
     }
-    
+
     public SentenceReader(final String text, final boolean pre) {
     	this(text);
         this.pre = pre;
@@ -51,38 +51,37 @@ public class SentenceReader implements Iterator<StringBuilder> {
     public void pre(final boolean x) {
         this.pre = x;
     }
-    
+
     private StringBuilder nextElement0() {
         final StringBuilder s = readSentence();
-		//System.out.println(" SENTENCE='" + s + "'"); // DEBUG 
+		//System.out.println(" SENTENCE='" + s + "'"); // DEBUG
 		if (s == null) return null;
 		return s;
     }
-    
+
     private StringBuilder readSentence() {
         final StringBuilder s = new StringBuilder(80);
         int nextChar;
         char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
-        
+
         // find sentence end
         while (true) {
-        	if (pos >= text.length()) return null;
-            nextChar = text.charAt(pos++);
-            //System.out.print((char) nextChar); // DEBUG    
+        	if (this.pos >= this.text.length()) break;
+            nextChar = this.text.charAt(this.pos++);
+            //System.out.print((char) nextChar); // DEBUG
             if (nextChar < 0) {
-                if (s.length() == 0) return null;
                 break;
             }
             c = (char) nextChar;
-            if (pre && (nextChar == 10 || nextChar == 13)) break;
+            if (this.pre && (nextChar == 10 || nextChar == 13)) break;
             if (c < ' ') c = ' ';
             if (lc == ' ' && c == ' ') continue; // ignore double spaces
             s.append(c);
             if (punctuation(lc) && invisible(c)) break;
             lc = c;
         }
-        
-        if (s.length() == 0) return s;
+
+        if (s.length() == 0) return null;
         if (s.charAt(s.length() - 1) == ' ') {
             s.trimToSize();
             s.deleteCharAt(s.length() - 1);
@@ -103,29 +102,45 @@ public class SentenceReader implements Iterator<StringBuilder> {
                 || type == Character.TITLECASE_LETTER
                 || punctuation(c));
     }
-    
+
     public final static boolean punctuation(final char c) {
         return c == '.' || c == '!' || c == '?';
     }
-    
+
+    @Override
     public boolean hasNext() {
-        return buffer != null;
+        return this.buffer != null;
     }
 
+    @Override
     public StringBuilder next() {
-        if (buffer == null) {
+        if (this.buffer == null) {
             return null;
         }
-        final StringBuilder r = buffer;
-        buffer = nextElement0();
+        final StringBuilder r = this.buffer;
+        this.buffer = nextElement0();
         return r;
     }
 
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }
-    
+
+    @Override
+    public Iterator<StringBuilder> iterator() {
+        return this;
+    }
+
     public synchronized void close() {
-    	text = null;
+    	this.text = null;
+    }
+
+    public static void main(String[] args) {
+        String s = "a b ccc d";
+        SentenceReader sr = new SentenceReader(s);
+        for (StringBuilder a: sr) {
+            System.out.println(a);
+        }
     }
 }
