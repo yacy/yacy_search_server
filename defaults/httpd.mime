@@ -122,6 +122,7 @@ vsd     = application/x-visio
 vst     = application/x-visio
 vss     = application/vnd.visio
 wav     = audio/x-wav
+webm    = video/webm
 wmv     = video/x-ms-wmv
 xhtml   = text/xhtml+xml
 xla     = application/msexcel
