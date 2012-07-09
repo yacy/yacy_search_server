@@ -218,7 +218,7 @@ public class yacysearchitem {
             prop.putHTML("content_former", theQuery.queryString);
             prop.putHTML("content_showPictures_former", theQuery.queryString);
             final TextSnippet snippet = result.textSnippet();
-            final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes);
+            final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.query_all_hashes);
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);

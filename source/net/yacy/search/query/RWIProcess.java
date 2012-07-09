@@ -203,8 +203,8 @@ public final class RWIProcess extends Thread
                     .getSegment()
                     .termIndex()
                     .query(
-                        this.query.queryHashes,
-                        this.query.excludeHashes,
+                        this.query.query_include_hashes,
+                        this.query.query_exclude_hashes,
                         null,
                         Segment.wordReferenceFactory,
                         this.query.maxDistance);
@@ -676,10 +676,10 @@ public final class RWIProcess extends Thread
             final String pagetitle = page.dc_title().toLowerCase();
 
             // check exclusion
-            if ( this.query.excludeHashes != null && !this.query.excludeHashes.isEmpty() &&
-                ((QueryParams.anymatch(pagetitle, this.query.excludeHashes))
-                || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.excludeHashes))
-                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.excludeHashes)))) {
+            if ( this.query.query_exclude_hashes != null && !this.query.query_exclude_hashes.isEmpty() &&
+                ((QueryParams.anymatch(pagetitle, this.query.query_exclude_hashes))
+                || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.query_exclude_hashes))
+                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.query_exclude_hashes)))) {
                 this.sortout++;
                 continue;
             }
@@ -688,7 +688,7 @@ public final class RWIProcess extends Thread
             if ( (this.query.constraint != null)
                 && (this.query.constraint.get(Condenser.flag_cat_indexof))
                 && (!(pagetitle.startsWith("index of"))) ) {
-                final Iterator<byte[]> wi = this.query.queryHashes.iterator();
+                final Iterator<byte[]> wi = this.query.query_include_hashes.iterator();
                 while ( wi.hasNext() ) {
                     this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                 }
@@ -964,7 +964,7 @@ public final class RWIProcess extends Thread
             if ( word.length() > 2
                 && "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off"
                     .indexOf(word) < 0
-                && !this.query.queryHashes.has(Word.word2hash(word))
+                && !this.query.query_include_hashes.has(Word.word2hash(word))
                 && lettermatch.matcher(word).matches()
                 && !Switchboard.badwords.contains(word)
                 && !Switchboard.stopwords.contains(word) ) {

@@ -789,7 +789,7 @@ public class yacysearch {
                 "INIT WORD SEARCH: "
                     + theQuery.queryString
                     + ":"
-                    + QueryParams.hashSet2hashString(theQuery.queryHashes)
+                    + QueryParams.hashSet2hashString(theQuery.query_include_hashes)
                     + " - "
                     + theQuery.neededResults()
                     + " links to be computed, "

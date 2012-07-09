@@ -156,7 +156,7 @@ public class NetworkGraph {
 
         // draw in the search target
         final QueryParams query = event.getQuery();
-        final Iterator<byte[]> i = query.queryHashes.iterator();
+        final Iterator<byte[]> i = query.query_include_hashes.iterator();
         eventPicture.setColor(RasterPlotter.GREY);
         while (i.hasNext()) {
             final long[] positions = seedDB.scheme.dhtPositions(i.next());

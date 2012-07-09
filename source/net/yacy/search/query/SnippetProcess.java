@@ -115,12 +115,12 @@ public class SnippetProcess {
         // only with the query minus the stopwords which had not been used for the search
         HandleSet filtered;
         try {
-            filtered = HandleSet.joinConstructive(query.queryHashes, Switchboard.stopwordHashes);
+            filtered = HandleSet.joinConstructive(query.query_include_hashes, Switchboard.stopwordHashes);
         } catch (final RowSpaceExceededException e) {
             Log.logException(e);
-            filtered = new HandleSet(query.queryHashes.row().primaryKeyLength, query.queryHashes.comparator(), 0);
+            filtered = new HandleSet(query.query_include_hashes.row().primaryKeyLength, query.query_include_hashes.comparator(), 0);
         }
-        this.snippetFetchWordHashes = query.queryHashes.clone();
+        this.snippetFetchWordHashes = query.query_include_hashes.clone();
         if (filtered != null && !filtered.isEmpty()) {
             this.snippetFetchWordHashes.excludeDestructive(Switchboard.stopwordHashes);
         }
@@ -333,7 +333,7 @@ public class SnippetProcess {
         // apply query-in-result matching
         final HandleSet urlcomph = Word.words2hashesHandles(urlcomps);
         final HandleSet descrcomph = Word.words2hashesHandles(descrcomps);
-        final Iterator<byte[]> shi = this.query.queryHashes.iterator();
+        final Iterator<byte[]> shi = this.query.query_include_hashes.iterator();
         byte[] queryhash;
         while (shi.hasNext()) {
             queryhash = shi.next();
@@ -572,6 +572,7 @@ public class SnippetProcess {
                     solrText,
                     page,
                     this.snippetFetchWordHashes,
+                    //this.query.queryString,
                     null,
                     ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
                     220,
@@ -610,7 +611,7 @@ public class SnippetProcess {
             	}
                 final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
                 if (this.deleteIfSnippetFail) {
-                    this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.queryHashes, reason);
+                    this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.query_include_hashes, reason);
                 }
                 Log.logInfo("SEARCH", "sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
                 return null;

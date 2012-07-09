@@ -106,7 +106,8 @@ public final class QueryParams {
     public static final Pattern matchnothing_pattern = Pattern.compile("");
 
     public final String queryString;
-    public HandleSet fullqueryHashes, queryHashes, excludeHashes;
+    public HandleSet query_include_hashes, query_exclude_hashes, query_all_hashes;
+    public Collection<String> query_include_words, query_exclude_words, query_all_words = new ArrayList<String>();
     public final int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
@@ -151,19 +152,19 @@ public final class QueryParams {
         byte[] queryHash;
     	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryHash = UTF8.getBytes(queryString)))) {
             this.queryString = null;
-            this.queryHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            this.excludeHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            this.query_include_hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            this.query_exclude_hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {
-                this.queryHashes.put(queryHash);
+                this.query_include_hashes.put(queryHash);
             } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }
     	} else {
     		this.queryString = queryString;
     		final Collection<String>[] cq = cleanQuery(queryString);
-    		this.queryHashes = Word.words2hashesHandles(cq[0]);
-    		this.excludeHashes = Word.words2hashesHandles(cq[1]);
-    		this.fullqueryHashes = Word.words2hashesHandles(cq[2]);
+    		this.query_include_hashes = Word.words2hashesHandles(cq[0]);
+    		this.query_exclude_hashes = Word.words2hashesHandles(cq[1]);
+    		this.query_all_hashes = Word.words2hashesHandles(cq[2]);
     	}
     	this.ranking = ranking;
     	this.tenant = null;
@@ -204,7 +205,8 @@ public final class QueryParams {
     }
 
     public QueryParams(
-        final String queryString, final HandleSet queryHashes,
+        final String queryString,
+        final HandleSet queryHashes,
         final HandleSet excludeHashes,
         final HandleSet fullqueryHashes,
         final String tenant,
@@ -230,9 +232,9 @@ public final class QueryParams {
         final double lat, final double lon, final double radius) {
 
         this.queryString = queryString;
-        this.queryHashes = queryHashes;
-        this.excludeHashes = excludeHashes;
-        this.fullqueryHashes = fullqueryHashes;
+        this.query_include_hashes = queryHashes;
+        this.query_exclude_hashes = excludeHashes;
+        this.query_all_hashes = fullqueryHashes;
         this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
         this.modifier = new Modifier(modifier == null ? "" : modifier);
         this.ranking = ranking;
@@ -368,8 +370,8 @@ public final class QueryParams {
     public final boolean matchesText(final String text) {
         boolean ret = false;
         final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
-        if (!SetTools.anymatch(wordhashes, this.excludeHashes)) {
-            ret = SetTools.totalInclusion(this.queryHashes, wordhashes);
+        if (!SetTools.anymatch(wordhashes, this.query_exclude_hashes)) {
+            ret = SetTools.totalInclusion(this.query_include_hashes, wordhashes);
         }
         return ret;
     }
@@ -384,12 +386,11 @@ public final class QueryParams {
 
     private static String seps = "'.,/&_"; static {seps += '"';}
 
-    @SuppressWarnings("unchecked")
     public static Collection<String>[] cleanQuery(String querystring) {
         // returns three sets: a query set, a exclude set and a full query set
-        final Collection<String> query = new ArrayList<String>();
-        final Collection<String> exclude = new ArrayList<String>();
-        final Collection<String> fullquery = new ArrayList<String>();
+        final Collection<String> query_include_words = new ArrayList<String>();
+        final Collection<String> query_exclude_words = new ArrayList<String>();
+        final Collection<String> query_all_words = new ArrayList<String>();
 
         if ((querystring != null) && (!querystring.isEmpty())) {
 
@@ -409,22 +410,22 @@ public final class QueryParams {
             for (String quer : queries) {
                 if (quer.startsWith("-")) {
                     String x = quer.substring(1);
-                    if (!exclude.contains(x)) exclude.add(x);
+                    if (!query_exclude_words.contains(x)) query_exclude_words.add(x);
                 } else {
                     while ((c = quer.indexOf('-')) >= 0) {
                         s = quer.substring(0, c);
                         l = s.length();
-                        if (l >= Condenser.wordminsize && !query.contains(s)) {query.add(s);}
-                        if (l > 0 && !fullquery.contains(s)) {fullquery.add(s);}
+                        if (l >= Condenser.wordminsize && !query_include_words.contains(s)) {query_include_words.add(s);}
+                        if (l > 0 && !query_all_words.contains(s)) {query_all_words.add(s);}
                         quer = quer.substring(c + 1);
                     }
                     l = quer.length();
-                    if (l >= Condenser.wordminsize && !query.contains(quer)) {query.add(quer);}
-                    if (l > 0 && !fullquery.contains(quer)) {fullquery.add(quer);}
+                    if (l >= Condenser.wordminsize && !query_include_words.contains(quer)) {query_include_words.add(quer);}
+                    if (l > 0 && !query_all_words.contains(quer)) {query_all_words.add(quer);}
                 }
             }
         }
-        return new Collection[]{query, exclude, fullquery};
+        return new Collection[]{query_include_words, query_exclude_words, query_all_words};
     }
 
     public String queryString(final boolean encodeHTML) {
@@ -454,7 +455,7 @@ public final class QueryParams {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
     	final HandleSet blues = Word.words2hashesHandles(blueList);
-    	for (final byte[] b: blues) this.queryHashes.remove(b);
+    	for (final byte[] b: blues) this.query_include_hashes.remove(b);
     }
 
 
@@ -494,13 +495,13 @@ public final class QueryParams {
             // generate a string that identifies a search so results can be re-used in a cache
             final StringBuilder context = new StringBuilder(180);
             if (anonymized) {
-                context.append(anonymizedQueryHashes(this.queryHashes));
+                context.append(anonymizedQueryHashes(this.query_include_hashes));
                 context.append('-');
-                context.append(anonymizedQueryHashes(this.excludeHashes));
+                context.append(anonymizedQueryHashes(this.query_exclude_hashes));
             } else {
-                context.append(hashSet2hashString(this.queryHashes));
+                context.append(hashSet2hashString(this.query_include_hashes));
                 context.append('-');
-                context.append(hashSet2hashString(this.excludeHashes));
+                context.append(hashSet2hashString(this.query_exclude_hashes));
             }
             //context.append(asterisk);
             //context.append(this.domType);

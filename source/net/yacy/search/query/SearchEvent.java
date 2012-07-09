@@ -125,7 +125,7 @@ public final class SearchEvent
         this.workTables = workTables;
         this.query = query;
         this.secondarySearchSuperviser =
-            (this.query.queryHashes.size() > 1) ? new SecondarySearchSuperviser() : null; // generate abstracts only for combined searches
+            (this.query.query_include_hashes.size() > 1) ? new SecondarySearchSuperviser() : null; // generate abstracts only for combined searches
         if ( this.secondarySearchSuperviser != null ) {
             this.secondarySearchSuperviser.start();
         }
@@ -155,7 +155,7 @@ public final class SearchEvent
         if ( remote ) {
             // start global searches
             final long timer = System.currentTimeMillis();
-            if (this.query.queryHashes.isEmpty()) {
+            if (this.query.query_include_hashes.isEmpty()) {
                 this.primarySearchThreadsL = null;
             } else {
                 this.primarySearchThreadsL = new ArrayList<RemoteSearch>();
@@ -168,8 +168,8 @@ public final class SearchEvent
                         Thread.currentThread().setName("SearchEvent.primaryRemoteSearches");
                         RemoteSearch.primaryRemoteSearches(
                             SearchEvent.this.primarySearchThreadsL,
-                            QueryParams.hashSet2hashString(SearchEvent.this.query.queryHashes),
-                            QueryParams.hashSet2hashString(SearchEvent.this.query.excludeHashes),
+                            QueryParams.hashSet2hashString(SearchEvent.this.query.query_include_hashes),
+                            QueryParams.hashSet2hashString(SearchEvent.this.query.query_exclude_hashes),
                             SearchEvent.this.query.prefer,
                             SearchEvent.this.query.urlMask,
                             SearchEvent.this.query.modifier,
@@ -612,7 +612,7 @@ public final class SearchEvent
         }
 
         private void prepareSecondarySearch() {
-            if ( this.abstractsCache == null || this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size() ) {
+            if ( this.abstractsCache == null || this.abstractsCache.size() != SearchEvent.this.query.query_include_hashes.size() ) {
                 return; // secondary search not possible (yet)
             }
 
@@ -625,7 +625,7 @@ public final class SearchEvent
             */
 
             // find out if there are enough references for all words that are searched
-            if ( this.abstractsCache.size() != SearchEvent.this.query.queryHashes.size() ) {
+            if ( this.abstractsCache.size() != SearchEvent.this.query.query_include_hashes.size() ) {
                 return;
             }
 
