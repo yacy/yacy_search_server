@@ -182,10 +182,10 @@ public class RSSReader extends DefaultHandler {
             }
             this.item = new RSSMessage();
             this.parsingItem = true;
-        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag)) {
+        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("text"))) {
             final String url = atts.getValue("href");
             if (url != null && url.length() > 0) this.item.setValue("link", url);
-        } else if ("image".equals(tag)) {
+        } else if ("image".equals(tag) || (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("image")))) {
             this.parsingImage = true;
         }
     }
