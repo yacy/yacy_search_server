@@ -861,7 +861,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public String toNormalform(final boolean excludeReference, final boolean stripAmp, final boolean removeSessionID) {
         String result = toNormalform0(excludeReference, removeSessionID);
         if (stripAmp) {
-            result = ampPattern.matcher(result).replaceAll("&");
+            Matcher matcher = ampPattern.matcher(result);
+            while (matcher.find()) {
+                result = matcher.replaceAll("&");
+                matcher.reset(result);
+            }
         }
         return result;
     }
@@ -2066,12 +2070,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         if (p > 0) normalizedURL = normalizedURL.substring(p + 2);
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
-
+/*
     public static void main(final String[] args) {
         for (final String s: args) System.out.println(toTokens(s));
     }
-
-    /*
+*/
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
           new String[]{null, "C:WINDOWS\\CMD0.EXE"},
@@ -2118,7 +2121,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
           new String[]{null, "smb://localhost/repository/"},
           new String[]{null, "\\\\localhost\\"}, // Windows-like notion of smb shares
           new String[]{null, "\\\\localhost\\repository"},
-          new String[]{null, "\\\\localhost\\repository\\"}
+          new String[]{null, "\\\\localhost\\repository\\"},
+          new String[]{null, "http://test.net/test1.htm?s=multiple&amp;a=amp&amp;b=in&amp;c=url"},
+          new String[]{null, "http://test.net/test2.htm?s=multiple&amp;amp;amp;amp;a=amp"}
           };
         //MultiProtocolURI.initSessionIDNames(FileUtils.loadList(new File("defaults/sessionid.names")));
         String environment, url;
@@ -2158,6 +2163,5 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             }
         }
     }
-    */
 
 }
