@@ -81,8 +81,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             this.height = NumberTools.parseIntDecSubstring(attr, p + 3);
         }
         this.ranking = ranking; // the smaller the better! small values should be shown first
-        if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
-        if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
+        if ((this.name == null) || (this.name.isEmpty())) this.name = "_";
+        if ((this.attr == null) || (this.attr.isEmpty())) this.attr = "_";
     }
 
     public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final int width, final int height, final long ranking, final DigestURI source) {
@@ -96,8 +96,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         this.width = width;
         this.height = height;
         this.ranking = ranking; // the smaller the better! small values should be shown first
-        if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
-        if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
+        if ((this.name == null) || (this.name.isEmpty())) this.name = "_";
+        if ((this.attr == null) || (this.attr.isEmpty())) this.attr = "_";
     }
 
     private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful

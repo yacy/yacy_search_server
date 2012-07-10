@@ -104,7 +104,7 @@ public class csvParser extends AbstractParser implements Parser {
         try {
             while ((row = reader.readLine()) != null) {
                 row = row.trim();
-                if (row.length() == 0) continue;
+                if (row.isEmpty()) continue;
                 if (separator == null) {
                     // try comma, semicolon and tab; take that one that results with more columns
                     final String[] colc = row.split(",");

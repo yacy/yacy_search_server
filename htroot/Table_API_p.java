@@ -254,7 +254,7 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_dateNextExec", date_next_exec == null ? "-" : DateFormat.getDateTimeInstance().format(date_next_exec));
                 prop.put("showtable_list_" + count + "_selectedMinutes", unit.equals("minutes") ? 1 : 0);
                 prop.put("showtable_list_" + count + "_selectedHours", unit.equals("hours") ? 1 : 0);
-                prop.put("showtable_list_" + count + "_selectedDays", (unit.length() == 0 || unit.equals("days")) ? 1 : 0);
+                prop.put("showtable_list_" + count + "_selectedDays", (unit.isEmpty() || unit.equals("days")) ? 1 : 0);
                 prop.put("showtable_list_" + count + "_repeatTime", time);
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
                 prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));

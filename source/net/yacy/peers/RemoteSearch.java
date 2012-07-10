@@ -84,7 +84,7 @@ public class RemoteSearch extends Thread {
               final RankingProfile rankingProfile,
               final Bitfield constraint) {
         super(ysThreadGroup, "yacySearch_" + targetPeer.getName());
-        //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
+        //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.isEmpty()) ? "(primary)" : "(secondary)"));
         assert wordhashes.length() >= 12;
         this.wordhashes = wordhashes;
         this.excludehashes = excludehashes;

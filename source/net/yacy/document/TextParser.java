@@ -408,13 +408,13 @@ public final class TextParser {
      * @return an error if the extension is not supported, null otherwise
      */
     public static String supportsExtension(final String ext) {
-        if (ext == null || ext.length() == 0) return null;
+        if (ext == null || ext.isEmpty()) return null;
         if (denyExtensionx.containsKey(ext)) return "file extension '" + ext + "' is denied (2)";
         final String mimeType = ext2mime.get(ext);
         if (mimeType == null) return "no parser available";
         final Set<Parser> idiom = mime2parser.get(mimeType);
         assert idiom != null;
-        if (idiom == null || idiom.size() == 0) return "no parser available (internal error!)";
+        if (idiom == null || idiom.isEmpty()) return "no parser available (internal error!)";
         return null;
     }
 
@@ -455,13 +455,13 @@ public final class TextParser {
     public static String getDenyMime() {
         String s = "";
         for (final String d: denyMime.keySet()) s += d + ",";
-        if (s.length() > 0) s = s.substring(0, s.length() - 1);
+        if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
         return s;
     }
 
     public static void grantMime(final String mime, final boolean grant) {
         final String n = normalizeMimeType(mime);
-        if (n == null || n.length() == 0) return;
+        if (n == null || n.isEmpty()) return;
         if (grant) denyMime.remove(n); else denyMime.put(n, v);
     }
 
@@ -478,7 +478,7 @@ public final class TextParser {
     }
 
     public static void grantExtension(final String ext, final boolean grant) {
-        if (ext == null || ext.length() == 0) return;
+        if (ext == null || ext.isEmpty()) return;
         if (grant) denyExtensionx.remove(ext); else denyExtensionx.put(ext, v);
     }
 

@@ -71,7 +71,7 @@ public class dbtest {
 
         public boolean isValid() {
             final String s = UTF8.String(this.value).trim();
-            if (s.length() == 0) return false;
+            if (s.isEmpty()) return false;
             final long source = Long.parseLong(s);
             return ByteBuffer.equals(this.key, randomHash(source, source));
         }

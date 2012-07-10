@@ -349,7 +349,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public String[] countryMustMatchList() {
         String countryMustMatch = get(FILTER_COUNTRY_MUSTMATCH);
         if (countryMustMatch == null) countryMustMatch = "";
-        if (countryMustMatch.length() == 0) return new String[0];
+        if (countryMustMatch.isEmpty()) return new String[0];
         String[] list = countryMustMatch.split(",");
         if (list.length == 1 && list.length == 0) list = new String[0];
         return list;

@@ -782,7 +782,7 @@ public class Response {
     public byte[] referrerHash() {
         if (this.requestHeader == null) return null;
         final String u = this.requestHeader.get(RequestHeader.REFERER, "");
-        if (u == null || u.length() == 0) return null;
+        if (u == null || u.isEmpty()) return null;
         try {
             return new DigestURI(u).hash();
         } catch (final Exception e) {

@@ -548,12 +548,12 @@ public class URIMetadataNode /*extends URIReferenceNode implements URIMetadata*/
         public String  dc_publisher() { return this.dc_publisher; }
         public String  dc_subject()   { return this.dc_subject; }
         public float lat() {
-            if (this.latlon == null || this.latlon.length() == 0) return 0.0f;
+            if (this.latlon == null || this.latlon.isEmpty()) return 0.0f;
             final int p = this.latlon.indexOf(',');
             return p < 0 ? 0.0f : Float.parseFloat(this.latlon.substring(0, p));
         }
         public float lon() {
-            if (this.latlon == null || this.latlon.length() == 0) return 0.0f;
+            if (this.latlon == null || this.latlon.isEmpty()) return 0.0f;
             final int p = this.latlon.indexOf(',');
             return p < 0 ? 0.0f : Float.parseFloat(this.latlon.substring(p + 1));
         }

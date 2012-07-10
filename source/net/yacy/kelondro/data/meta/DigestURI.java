@@ -86,7 +86,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         for (String h: hs) {
             if (h == null) continue;
             h = h.trim();
-            if (h.length() == 0) continue;
+            if (h.isEmpty()) continue;
             h = hosthash(h);
             if (h == null || h.length() != 6) continue;
             sb.append(h);
@@ -95,7 +95,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     }
 
     public static Set<String> hosthashess(String hosthashes) {
-        if (hosthashes == null || hosthashes.length() == 0) return null;
+        if (hosthashes == null || hosthashes.isEmpty()) return null;
         HashSet<String> h = new HashSet<String>();
         assert hosthashes.length() % 6 == 0;
         for (int i = 0; i < hosthashes.length(); i = i + 6) {
@@ -222,7 +222,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         // find rootpath
         int rootpathStart = 0;
         int rootpathEnd = this.path.length() - 1;
-        if (this.path.length() > 0 && this.path.charAt(0) == '/')
+        if (!this.path.isEmpty() && this.path.charAt(0) == '/')
             rootpathStart = 1;
         if (this.path.endsWith("/"))
             rootpathEnd = this.path.length() - 2;

@@ -92,7 +92,7 @@ public class torrentParser extends AbstractParser implements Parser {
             final BObject nameo = info.get("name");
             if (nameo != null) title = UTF8.String(nameo.getString());
         }
-        if (title == null || title.length() == 0) title = MultiProtocolURI.unescape(location.getFileName());
+        if (title == null || title.isEmpty()) title = MultiProtocolURI.unescape(location.getFileName());
         return new Document[]{new Document(
 		        location,
 		        mimeType,

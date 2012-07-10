@@ -83,7 +83,7 @@ public class table_p {
         final String counts = post.get("count", null);
         int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
         final String pattern = post.get("search", "");
-        final Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
+        final Pattern matcher = (pattern.isEmpty() || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
 
 
         if (post.containsKey("deleterows")) {
@@ -105,7 +105,7 @@ public class table_p {
                 }
             }
             try {
-                if (pk == null || pk.length() == 0) {
+                if (pk == null || pk.isEmpty()) {
                     sb.tables.insert(table, map);
                 } else {
                     sb.tables.update(table, pk.getBytes(), map);

@@ -1008,7 +1008,7 @@ public final class Switchboard extends serverSwitch
         // load network configuration into settings
         String networkUnitDefinition =
             getConfig("network.unit.definition", "defaults/yacy.network.freeworld.unit");
-        if (networkUnitDefinition.length() == 0) networkUnitDefinition = "defaults/yacy.network.freeworld.unit"; // patch for a strange failure case where the path was overwritten by empty string
+        if (networkUnitDefinition.isEmpty()) networkUnitDefinition = "defaults/yacy.network.freeworld.unit"; // patch for a strange failure case where the path was overwritten by empty string
 
         // patch old values
         if ( networkUnitDefinition.equals("yacy.network.unit") ) {
@@ -1451,7 +1451,7 @@ public final class Switchboard extends serverSwitch
     }
 
     public RankingProfile getRanking() {
-        return (getConfig("rankingProfile", "").length() == 0)
+        return (getConfig("rankingProfile", "").isEmpty())
             ? new RankingProfile(Classification.ContentDomain.TEXT)
             : new RankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", "")));
     }
@@ -1902,7 +1902,7 @@ public final class Switchboard extends serverSwitch
 
             // set a random password if no password is configured
             if ( getConfigBool("adminAccountForLocalhost", false)
-                && getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0 ) {
+                && getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() ) {
                 // make a 'random' password
                 setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + this.genRandomPassword());
                 setConfig("adminAccount", "");
@@ -2876,7 +2876,7 @@ public final class Switchboard extends serverSwitch
             return false;
         }
         final String refererHost = requestHeader.refererHost();
-        return refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost);
+        return refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost);
     }
 
     /**
@@ -2895,7 +2895,7 @@ public final class Switchboard extends serverSwitch
 
         // authorization in case that there is no account stored
         final String adminAccountBase64MD5 = getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
-        if ( adminAccountBase64MD5.length() == 0 ) {
+        if ( adminAccountBase64MD5.isEmpty() ) {
             return 2; // no password stored; this should not happen for older peers
         }
 
@@ -2925,7 +2925,7 @@ public final class Switchboard extends serverSwitch
         }
 
         // authorization with admin keyword in configuration
-        if ( realmValue == null || realmValue.length() == 0 ) {
+        if ( realmValue == null || realmValue.isEmpty() ) {
             return 1;
         }
         if ( adminAccountBase64MD5.equals(Digest.encodeMD5Hex(realmValue)) ) {
@@ -3366,7 +3366,7 @@ public final class Switchboard extends serverSwitch
                 break;
             }
             seedListFileURL = sb.getConfig("network.unit.bootstrap.seedlist" + c, "");
-            if ( seedListFileURL.length() == 0 ) {
+            if ( seedListFileURL.isEmpty() ) {
                 break;
             }
             c++;

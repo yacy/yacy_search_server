@@ -210,7 +210,7 @@ public class RankingProfile {
 
     public Map<String, String> preToExternalMap(final String prefix) {
         final Map<String, String> ext = new LinkedHashMap<String, String>(40);
-        if (prefix.length() == 0) {
+        if (prefix.isEmpty()) {
             ext.put(APPEMPH, Integer.toString(this.coeff_appemph));
             ext.put(APPURL, Integer.toString(this.coeff_appurl));
             ext.put(APP_DC_CREATOR, Integer.toString(this.coeff_app_dc_creator));
@@ -276,7 +276,7 @@ public class RankingProfile {
 
     public Map<String, String> postToExternalMap(final String prefix) {
     	final Map<String, String> ext = new LinkedHashMap<String, String>();
-        if (prefix.length() == 0) {
+        if (prefix.isEmpty()) {
             ext.put(URLCOMPINTOPLIST, Integer.toString(this.coeff_urlcompintoplist));
             ext.put(DESCRCOMPINTOPLIST, Integer.toString(this.coeff_descrcompintoplist));
             ext.put(PREFER, Integer.toString(this.coeff_prefer));

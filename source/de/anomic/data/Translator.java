@@ -90,7 +90,7 @@ public class Translator {
         String forFile = "";
 
         for (final String line : list){
-            if (line.length() == 0 || line.charAt(0) != '#'){
+            if (line.isEmpty() || line.charAt(0) != '#'){
                 final String[] split = line.split("==", 2);
                 if (split.length == 2) {
                     translationList.put(split[0], split[1]);

@@ -697,7 +697,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // the String argsString is supposed to be constructed as
         // <key1>=<value1>'&'<key2>=<value2>'&'<key3>=<value3>
         // the calling function must strip off a possible leading '?' char
-        if (argsString.length() == 0) return 0;
+        if (argsString.isEmpty()) return 0;
         argsString = argsString + "&"; // for technical reasons
         int sep;
         int eqp;
@@ -1329,7 +1329,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public static boolean shallTransportZipped(final String path) {
-        if ((path == null) || (path.length() == 0)) return true;
+        if ((path == null) || (path.isEmpty())) return true;
 
         int pos;
         if ((pos = path.lastIndexOf('.')) != -1) {
@@ -1339,7 +1339,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public static boolean isThisSeedIP(final String hostName) {
-        if ((hostName == null) || (hostName.length() == 0)) return false;
+        if ((hostName == null) || (hostName.isEmpty())) return false;
 
         // getting ip address and port of this seed
         if (getAlternativeResolver() == null) return false;
@@ -1354,7 +1354,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public static boolean isThisHostName(final String hostName) {
-        if ((hostName == null) || (hostName.length() == 0)) return false;
+        if ((hostName == null) || (hostName.isEmpty())) return false;
 
         try {
             final int idx = hostName.indexOf(':');
@@ -1407,7 +1407,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         int p;
         String line;
         while ((line = theSession.readLineAsString()) != null) {
-            if (line.length() == 0) break; // this separates the header of the HTTP request from the body
+            if (line.isEmpty()) break; // this separates the header of the HTTP request from the body
             // parse the header line: a property separated with the ':' sign
             if ((p = line.indexOf(':')) >= 0) {
                 // store a property

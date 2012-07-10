@@ -444,7 +444,7 @@ public class cryptbig {
     public static String oneWayEncryption(final String key) {
 	final cryptbig crypter = new cryptbig(key);
 	String e = crypter.encryptString(key);
-	if (e.length() == 0) e = "0XXXX";
+	if (e.isEmpty()) e = "0XXXX";
 	if (e.length() % 2 != 0) e += "X";
 	while (e.length() < 32) e = e + e;
 	final char[] r = new char[16];

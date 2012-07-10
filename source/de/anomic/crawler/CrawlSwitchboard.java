@@ -81,7 +81,7 @@ public final class CrawlSwitchboard
 
         log.logInfo("Initializing Word Index for the network '" + networkName + "'.");
 
-        if ( networkName == null || networkName.length() == 0 ) {
+        if ( networkName == null || networkName.isEmpty() ) {
             log.logSevere("no network name given - shutting down");
             System.exit(0);
         }

@@ -148,11 +148,11 @@ public class ooxmlParser extends AbstractParser implements Parser {
 
             // make the languages set
             final Set<String> languages = new HashSet<String>(1);
-            if (docLanguage != null && docLanguage.length() == 0)
+            if (docLanguage != null && docLanguage.isEmpty())
         	languages.add(docLanguage);
 
             // if there is no title availabe we generate one
-            if ((docLongTitle == null || docLongTitle.length() == 0) && (docShortTitle != null)) {
+            if ((docLongTitle == null || docLongTitle.isEmpty()) && (docShortTitle != null)) {
                     docLongTitle = docShortTitle;
             }
 

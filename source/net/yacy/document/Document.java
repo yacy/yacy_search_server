@@ -230,7 +230,7 @@ dc_rights
                 sb.append(',').append(s.getObject());
                 String objectlink = vocabulary.getObjectlink(s.getObject());
                 if ((objectspace != null && objectspace.length() > 0) || (objectlink != null && objectlink.length() > 0)) {
-                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectlink == null || objectlink.length() == 0 ? objectspace + s.getObject() + "#" + s.getObject() : objectlink + "#" + s.getObject());
+                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectlink == null || objectlink.isEmpty() ? objectspace + s.getObject() + "#" + s.getObject() : objectlink + "#" + s.getObject());
                 }
             }
             // put to triplestore
@@ -246,7 +246,7 @@ dc_rights
         for (int i = 0; i < this.keywords.size(); i++) {
             if (this.keywords.get(i) == null) continue;
             s = (this.keywords.get(i)).trim();
-            if (s.length() > 0) hs.add(s);
+            if (!s.isEmpty()) hs.add(s);
         }
         final String[] t = new String[hs.size()];
         int i = 0;
@@ -892,7 +892,7 @@ dc_rights
     }
 
     private static final String description(Document d, String tagname) {
-        if (tagname == null || tagname.length() == 0) {
+        if (tagname == null || tagname.isEmpty()) {
             tagname = d.source.toTokens();
         }
         StringBuilder sb = new StringBuilder(60);

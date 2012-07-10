@@ -74,7 +74,7 @@ public class ConfigAccounts_p {
             	sb.setConfig("adminAccountForLocalhost", true);
             	// if an localhost access is configured, check if a local password is given
             	// if not, set a random password
-            	if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+            	if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty()) {
             		// make a 'random' password
             		env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + sb.genRandomPassword());
             		env.setConfig("adminAccount", "");
@@ -88,7 +88,7 @@ public class ConfigAccounts_p {
             }
         }
 
-        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0 && !env.getConfigBool("adminAccountForLocalhost", false)) {
+        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() && !env.getConfigBool("adminAccountForLocalhost", false)) {
             prop.put("passwordNotSetWarning", 1);
         }
 

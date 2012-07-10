@@ -348,7 +348,7 @@ public class ViewFile {
 
     private static final String[] wordArray(String words) {
         String[] w = new String[0];
-        if (words == null || words.length() == 0) return w;
+        if (words == null || words.isEmpty()) return w;
         if (words.length() > 1 && words.charAt(0) == '[' && words.charAt(words.length() - 1) == ']') {
             words = words.substring(1, words.length() - 1);
         }

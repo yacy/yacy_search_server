@@ -54,7 +54,7 @@ public class ReverseMapIterator <E, F> implements Iterator<Map.Entry<E, F>> {
     }
     
     public boolean hasNext() {
-        return a.size() > 0;
+        return !a.isEmpty();
     }
 
     public Map.Entry<E, F> next() {

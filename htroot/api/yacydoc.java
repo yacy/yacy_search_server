@@ -85,9 +85,9 @@ public class yacydoc {
 
         final String urlstring = post.get("url", "").trim();
         String urlhash = post.get("urlhash", "").trim();
-        if (urlstring.length() == 0 && urlhash.length() == 0) return prop;
+        if (urlstring.isEmpty() && urlhash.isEmpty()) return prop;
 
-        if (urlstring.length() > 0 && urlhash.length() == 0) {
+        if (urlstring.length() > 0 && urlhash.isEmpty()) {
             try {
                 final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
@@ -95,7 +95,7 @@ public class yacydoc {
                 Log.logException(e);
             }
         }
-        if (urlhash == null || urlhash.length() == 0) return prop;
+        if (urlhash == null || urlhash.isEmpty()) return prop;
 
         final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes());
         if (entry == null) return prop;

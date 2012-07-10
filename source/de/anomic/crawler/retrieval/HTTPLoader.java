@@ -143,7 +143,7 @@ public final class HTTPLoader {
             String redirectionUrlString = responseHeader.get(HeaderFramework.LOCATION);
             redirectionUrlString = redirectionUrlString == null ? "" : redirectionUrlString.trim();
 
-            if (redirectionUrlString.length() == 0) {
+            if (redirectionUrlString.isEmpty()) {
                 this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusCode);
                 throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
             }
@@ -283,7 +283,7 @@ public final class HTTPLoader {
                 	String redirectionUrlString = header.get(HeaderFramework.LOCATION);
                     redirectionUrlString = redirectionUrlString.trim();
 
-                    if (redirectionUrlString.length() == 0) {
+                    if (redirectionUrlString.isEmpty()) {
                         throw new IOException("CRAWLER Redirection of URL=" + request.url().toString() + " aborted. Location header is empty.");
                     }
 

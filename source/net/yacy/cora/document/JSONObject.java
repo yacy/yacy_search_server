@@ -1107,7 +1107,7 @@ public class JSONObject {
      * @return  A String correctly formatted for insertion in a JSON text.
      */
     public static String quote(String string) {
-        if (string == null || string.length() == 0) {
+        if (string == null || string.isEmpty()) {
             return "\"\"";
         }
 

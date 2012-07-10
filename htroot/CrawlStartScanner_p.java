@@ -69,7 +69,7 @@ public class CrawlStartScanner_p
         final Set<InetAddress> ips = Domains.myIntranetIPs();
         prop.put("intranethosts", ips.toString());
         prop.put("intranetHint", sb.isIntranetMode() ? 0 : 1);
-        if ( hosts.length() == 0 ) {
+        if ( hosts.isEmpty() ) {
             InetAddress ip;
             if ( sb.isIntranetMode() ) {
                 if ( ips.size() > 0 ) {

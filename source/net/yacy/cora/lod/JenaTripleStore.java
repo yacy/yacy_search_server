@@ -115,7 +115,7 @@ public class JenaTripleStore {
 	public static void saveFile(String filename, Model model) {
         File f = new File(filename);
         File ftmp = new File(filename + "." + System.currentTimeMillis());
-	    if (model.size() == 0 && !f.exists()) {
+	    if (model.isEmpty() && !f.exists()) {
 	        // we don't store zero-size models if they did not exist before
 	        Log.logInfo("TRIPLESTORE", "NOT saving triplestore with " + model.size() + " triples to " + filename);
 	        return;

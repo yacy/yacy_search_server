@@ -282,11 +282,11 @@ public class Blacklist {
             throw new IllegalArgumentException("path may not be null");
         }
 
-        final String p = (path.length() > 0 && path.charAt(0) == '/') ? path.substring(1) : path;
+        final String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
         final Map<String, List<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
         // avoid PatternSyntaxException e
-        final String h = ((!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+        final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
 
         List<Pattern> hostList;
         if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
@@ -316,7 +316,7 @@ public class Blacklist {
             final Map<String, List<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
             // avoid PatternSyntaxException e
-            final String h = ((!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+            final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
 
             final List<Pattern> hostList = blacklistMap.get(h);
             if (hostList != null) {
@@ -382,7 +382,7 @@ public class Blacklist {
         // getting the proper blacklist
         final Map<String, List<Pattern>> blacklistMapMatched = getBlacklistMap(blacklistType, true);
 
-        final String p = (path.length() > 0 && path.charAt(0) == '/') ? path.substring(1) : path;
+        final String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
 
         List<Pattern> app;
         boolean matched = false;
@@ -478,7 +478,7 @@ public class Blacklist {
             }
 
             // in host-part only full sub-domains may be wildcards
-            if (host.length() > 0 && i > -1) {
+            if (!host.isEmpty() && i > -1) {
                 if (!(i == 0 || i == host.length() - 1)) {
                     return BlacklistError.WILDCARD_BEGIN_OR_END;
                 }

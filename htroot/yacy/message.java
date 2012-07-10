@@ -107,7 +107,7 @@ public final class message {
         if (process.equals("post")) {
             // post: post message to message board
             final String otherSeedString = post.get("myseed", "");
-            if (otherSeedString.length() == 0) {
+            if (otherSeedString.isEmpty()) {
                 prop.put("response", "-1"); // request rejected
                 return prop;
             }
@@ -128,7 +128,7 @@ public final class message {
             }
             message = message.trim();
             subject = subject.trim();
-            if (subject.length() == 0 || message.length() == 0) {
+            if (subject.isEmpty() || message.isEmpty()) {
                 prop.put("response", "-1"); // don't accept empty messages
                 return prop;
             }

@@ -66,7 +66,7 @@ public class Tables_p {
         final String counts = post.get("count", null);
         int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
         final String pattern = post.get("search", "");
-        final Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
+        final Pattern matcher = (pattern.isEmpty() || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
         prop.put("pattern", pattern);
 
         // apply deletion requests

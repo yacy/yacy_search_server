@@ -100,7 +100,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     private static final String removeByteOrderMark(final String s) {
-        if (s == null || s.length() == 0) return s;
+        if (s == null || s.isEmpty()) return s;
         if (s.charAt(0) == BOM) return s.substring(1);
         return s;
     }

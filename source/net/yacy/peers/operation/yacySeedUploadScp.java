@@ -63,15 +63,15 @@ public class yacySeedUploadScp implements yacySeedUploader {
             final String  seedScpPassword = sb.getConfig(CONFIG_SCP_PASSWORD,null);
             final String  seedScpPath = sb.getConfig(CONFIG_SCP_PATH,null);
 
-            if (seedScpServer == null || seedScpServer.length() == 0)
+            if (seedScpServer == null || seedScpServer.isEmpty())
                 throw new Exception("Seed SCP upload settings not configured properly. Servername must not be null or empty.");
-            else if (seedScpAccount == null || seedScpAccount.length() == 0)
+            else if (seedScpAccount == null || seedScpAccount.isEmpty())
                 throw new Exception("Seed SCP upload settings not configured properly. Username must not be null or empty.");
-            else if (seedScpPassword == null || seedScpPassword.length() == 0)
+            else if (seedScpPassword == null || seedScpPassword.isEmpty())
                 throw new Exception("Seed SCP upload settings not configured properly. Password must not be null or empty.");
-            else if (seedScpPath == null || seedScpPath.length() == 0)
+            else if (seedScpPath == null || seedScpPath.isEmpty())
                 throw new Exception("Seed SCP upload settings not configured properly. File path must not be null or empty.");
-            else if (seedScpServerPort == null || seedScpServerPort.length() == 0)
+            else if (seedScpServerPort == null || seedScpServerPort.isEmpty())
             throw new Exception("Seed SCP upload settings not configured properly. Server port must not be null or empty.");
             int port = 22;
             try {

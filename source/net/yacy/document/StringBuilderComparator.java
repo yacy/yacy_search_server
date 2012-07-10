@@ -125,7 +125,7 @@ public class StringBuilderComparator implements Comparator<StringBuilder> {
         list.add(sb.substring(off, sb.length()));
 
         int resultSize = list.size();
-        while (resultSize > 0 && list.get(resultSize - 1).length() == 0) resultSize--;
+        while (resultSize > 0 && list.get(resultSize - 1).isEmpty()) resultSize--;
         final StringBuilder[] result = new StringBuilder[resultSize];
         for (int i = 0; i < resultSize; i++) result[i] = new StringBuilder(list.get(i));
         return result;

@@ -429,7 +429,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", "");
                             } else {
                                 final String peertags = MapTools.set2string(seed.getPeerTags(), ",", false);
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.length() == 0)) ? "no tags given" : ("tags = " + peertags));
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.isEmpty())) ? "no tags given" : ("tags = " + peertags));
                             }
                             String[] yv = yacyVersion.combined2prettyVersion(seed.get(Seed.VERSION, "0.1"), shortname);
                             prop.putHTML(STR_TABLE_LIST + conCount + "_version", yv[0] + "/" + yv[1]);

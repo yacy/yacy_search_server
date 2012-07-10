@@ -68,7 +68,7 @@ public final class Column implements Cloneable, Serializable {
 
         // cut quotes etc.
         celldef = celldef.trim();
-        if (celldef.length() > 0 && celldef.charAt(0) == '<') celldef = celldef.substring(1);
+        if (!celldef.isEmpty() && celldef.charAt(0) == '<') celldef = celldef.substring(1);
         if (celldef.endsWith(">")) celldef = celldef.substring(0, celldef.length() - 1);
 
         // parse type definition
@@ -166,7 +166,7 @@ public final class Column implements Cloneable, Serializable {
            ) throw new kelondroException("kelondroColumn - cell width " + this.cellwidth + " not appropriate for type " + typename);
         */
         // parse/check encoder type
-        if (celldef.length() > 0 && celldef.charAt(0) == '{') {
+        if (!celldef.isEmpty() && celldef.charAt(0) == '{') {
             p = celldef.indexOf('}');
             final String expf = celldef.substring(1, p);
             celldef = celldef.substring(p + 1).trim();
@@ -188,7 +188,7 @@ public final class Column implements Cloneable, Serializable {
         assert (this.celltype != celltype_cardinal) || (this.encoder == encoder_b64e) || (this.encoder == encoder_b256);
 
         // parse/check description
-        if (celldef.length() > 0 && celldef.charAt(0) == '"') {
+        if (!celldef.isEmpty() && celldef.charAt(0) == '"') {
             p = celldef.indexOf('"', 1);
             this.description = celldef.substring(1, p);
             //unused: celldef = celldef.substring(p + 1).trim();

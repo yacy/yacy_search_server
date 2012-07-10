@@ -379,7 +379,7 @@ public class ChunkedInputStream extends InputStream {
             throw new IllegalArgumentException("Parameter may not be null");
         }
 
-        if (charset == null || charset.length() == 0) {
+        if (charset == null || charset.isEmpty()) {
             throw new IllegalArgumentException("charset may not be null or empty");
         }
 

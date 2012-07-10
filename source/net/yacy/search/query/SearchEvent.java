@@ -684,7 +684,7 @@ public final class SearchEvent
                 }
                 urls = entry.getValue();
                 words = wordsFromPeer(peer, urls);
-                if ( words.size() == 0 ) {
+                if ( words.isEmpty() ) {
                     continue; // ???
                 }
                 Log.logInfo("SearchEvent.SecondarySearchSuperviser", "asking peer " + peer + " for urls: " + urls + " from words: " + words);

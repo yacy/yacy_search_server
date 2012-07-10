@@ -279,7 +279,7 @@ public class ConfigNetwork_p
                 output.append(",").append(element);
             }
         }
-        if ( input.length() == 0 ) {
+        if ( input.isEmpty() ) {
             return input;
         }
         return output.delete(0, 1).toString();

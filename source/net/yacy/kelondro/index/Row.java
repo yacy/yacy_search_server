@@ -286,7 +286,7 @@ public final class Row implements Serializable {
 
         public Entry(String external, final boolean decimalCardinal) {
             // parse external form
-            if (external.length() > 0 && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
+            if (!external.isEmpty() && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
             //final String[] elts = commaPattern.split(external);
             final StringTokenizer st = new StringTokenizer(external, ",");
             if (Row.this.nickref == null) genNickRef();

@@ -369,7 +369,7 @@ public class Tables implements Iterable<String> {
         public RowIterator(final String table, final String whereColumn, final Pattern wherePattern) throws IOException {
             this.whereColumn = whereColumn;
             this.whereValue = null;
-            this.wherePattern = wherePattern == null || wherePattern.toString().length() == 0 ? null : wherePattern;
+            this.wherePattern = wherePattern == null || wherePattern.toString().isEmpty() ? null : wherePattern;
             final BEncodedHeap heap = getHeap(table);
             this.i = heap.iterator();
         }
@@ -384,7 +384,7 @@ public class Tables implements Iterable<String> {
         public RowIterator(final String table, final Pattern pattern) throws IOException {
             this.whereColumn = null;
             this.whereValue = null;
-            this.wherePattern = pattern == null || pattern.toString().length() == 0 ? null : pattern;
+            this.wherePattern = pattern == null || pattern.toString().isEmpty() ? null : pattern;
             final BEncodedHeap heap = getHeap(table);
             this.i = heap.iterator();
         }

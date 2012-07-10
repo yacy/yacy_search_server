@@ -78,7 +78,7 @@ public class WordCache {
             StringBuilder sb;
             try {
                 while ((l = reader.readLine()) != null) {
-                    if (l.length() == 0 || l.charAt(0) == '#') {
+                    if (l.isEmpty() || l.charAt(0) == '#') {
                         continue;
                     }
                     l = l.trim().toLowerCase();

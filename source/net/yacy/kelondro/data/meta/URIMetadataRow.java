@@ -264,7 +264,7 @@ public class URIMetadataRow implements URIMetadata {
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
         final String dt = prop.getProperty("dt", "t");
-        this.entry.setCol(col_dt, dt.length() > 0 ? new byte[]{(byte) dt.charAt(0)} : new byte[]{(byte) 't'});
+        this.entry.setCol(col_dt, dt.isEmpty() ? new byte[]{(byte) 't'} : new byte[]{(byte) dt.charAt(0)});
         final String flags = prop.getProperty("flags", "AAAAAA");
         this.entry.setCol(col_flags, (flags.length() > 6) ? QueryParams.empty_constraint.bytes() : (new Bitfield(4, flags)).bytes());
         this.entry.setCol(col_lang, UTF8.getBytes(prop.getProperty("lang", "uk")));
@@ -285,7 +285,7 @@ public class URIMetadataRow implements URIMetadata {
     }
 
     public static URIMetadataRow importEntry(final String propStr) {
-        if (propStr == null || (propStr.length() > 0 && propStr.charAt(0) != '{') || !propStr.endsWith("}")) {
+        if (propStr == null || (!propStr.isEmpty() && propStr.charAt(0) != '{') || !propStr.endsWith("}")) {
             return null;
         }
         try {
@@ -670,12 +670,12 @@ public class URIMetadataRow implements URIMetadata {
         public String  dc_publisher() { return this.dc_publisher; }
         public String  dc_subject()   { return this.dc_subject; }
         public double lat() {
-            if (this.latlon == null || this.latlon.length() == 0) return 0.0d;
+            if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
             return p < 0 ? 0.0f : Double.parseDouble(this.latlon.substring(0, p));
         }
         public double lon() {
-            if (this.latlon == null || this.latlon.length() == 0) return 0.0d;
+            if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
             return p < 0 ? 0.0f : Double.parseDouble(this.latlon.substring(p + 1));
         }

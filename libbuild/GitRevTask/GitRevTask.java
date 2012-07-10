@@ -34,11 +34,11 @@ public class GitRevTask extends org.apache.tools.ant.Task {
     }
 	
 	public void execute() {
-		if (this.revprop==null || this.revprop.length() == 0) {
+		if (this.revprop==null || this.revprop.isEmpty()) {
             log("git entries file name revprop was not set properly",Project.MSG_ERR);
             return;
         }
-		if (this.dateprop==null || this.dateprop.length() == 0) {
+		if (this.dateprop==null || this.dateprop.isEmpty()) {
             log("git entries file name dateprop was not set properly",Project.MSG_ERR);
             return;
         }

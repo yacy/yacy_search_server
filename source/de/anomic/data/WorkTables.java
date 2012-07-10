@@ -167,7 +167,7 @@ public class WorkTables extends Tables {
             // this api call has already been stored somewhere.
             return recordAPICall(post, servletName, type, comment);
         }
-        if (time < 0 || unit == null || unit.length() == 0 || "minutes,hours,days".indexOf(unit) < 0) {
+        if (time < 0 || unit == null || unit.isEmpty() || "minutes,hours,days".indexOf(unit) < 0) {
             time = 0; unit = "";
         } else {
             if (unit.equals("minutes") && time < 10) time = 10;

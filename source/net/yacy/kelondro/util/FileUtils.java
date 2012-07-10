@@ -637,7 +637,7 @@ public final class FileUtils
         while ( li.hasNext() ) {
             int pos = 0;
             line = li.next().trim();
-            if ( line.length() > 0 && line.charAt(0) == '#' ) {
+            if ( !line.isEmpty() && line.charAt(0) == '#' ) {
                 continue; // exclude comments
             }
             do {
@@ -751,7 +751,7 @@ public final class FileUtils
             // Read the List
             String line = "";
             while ( (line = br.readLine()) != null ) {
-                if ( line.length() == 0 ) {
+                if ( line.isEmpty() ) {
                     continue;
                 }
                 if ( line.charAt(0) != '#' || withcomments ) {
@@ -899,7 +899,7 @@ public final class FileUtils
             if (this.reader != null) try {
                 while ( (this.nextLine = this.reader.readLine()) != null ) {
                     this.nextLine = this.nextLine.trim();
-                    if ( this.nextLine.length() > 0 ) {
+                    if ( !this.nextLine.isEmpty() ) {
                         break;
                     }
                 }
@@ -1003,7 +1003,7 @@ public final class FileUtils
         final File tempFile =
             File.createTempFile(
                 parserClassName + "_" + ((idx > -1) ? fileName.substring(0, idx) : fileName),
-                (fileExt.length() > 0) ? "." + fileExt : fileExt);
+                (!fileExt.isEmpty()) ? "." + fileExt : fileExt);
         return tempFile;
     }
 

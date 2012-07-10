@@ -92,11 +92,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value) {
-        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.length() > 0))) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value, final float boost) {
-        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.length() > 0))) solrdoc.addSolr(key, value, boost);
+        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value, boost);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final Date value) {
@@ -225,9 +225,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 if (robots_meta.indexOf("nofollow",0) >= 0) b += 8; // set bit 3
             }
             String x_robots_tag = header.get(HeaderFramework.X_ROBOTS_TAG, "");
-            if (x_robots_tag.length() == 0) x_robots_tag = header.get(HeaderFramework.X_ROBOTS, "");
-            // this tag may have values: noarchive, nosnippet, noindex, unavailable_after
-            if (x_robots_tag.length() > 0) {
+            if (x_robots_tag.isEmpty()) {
+            	x_robots_tag = header.get(HeaderFramework.X_ROBOTS, "");
+            } else {
+                // this tag may have values: noarchive, nosnippet, noindex, unavailable_after
                 if (x_robots_tag.indexOf("noarchive",0) >= 0) b += 256;         // set bit 8
                 if (x_robots_tag.indexOf("nosnippet",0) >= 0) b += 512;         // set bit 9
                 if (x_robots_tag.indexOf("noindex",0) >= 0) b += 1024;          // set bit 10

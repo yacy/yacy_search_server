@@ -179,7 +179,7 @@ public class DidYouMean {
         }
 
         // finished
-        if (countSorted.size() == 0) {
+        if (countSorted.isEmpty()) {
             Log.logInfo("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (2); execution time: "
                     + (System.currentTimeMillis() - startTime) + "ms");
                 return preSorted;

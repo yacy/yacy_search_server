@@ -101,7 +101,7 @@ public class Classification {
     }
 
     private static void addSet(Set<String> set, final String extString) {
-        if ((extString == null) || (extString.length() == 0)) return;
+        if ((extString == null) || (extString.isEmpty())) return;
         for (String s: extString.split(",")) set.add(s.toLowerCase().trim());
     }
 

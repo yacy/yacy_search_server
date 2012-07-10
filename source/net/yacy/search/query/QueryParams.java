@@ -235,7 +235,7 @@ public final class QueryParams {
         this.query_include_hashes = queryHashes;
         this.query_exclude_hashes = excludeHashes;
         this.query_all_hashes = fullqueryHashes;
-        this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
+        this.tenant = (tenant != null && tenant.isEmpty()) ? null : tenant;
         this.modifier = new Modifier(modifier == null ? "" : modifier);
         this.ranking = ranking;
         this.maxDistance = maxDistance;
@@ -264,7 +264,7 @@ public final class QueryParams {
         this.constraint = constraint;
         this.allofconstraint = allofconstraint;
         this.sitehash = site; assert site == null || site.length() == 6;
-        this.siteexcludes = siteexcludes != null && siteexcludes.size() == 0 ? null: siteexcludes;
+        this.siteexcludes = siteexcludes != null && siteexcludes.isEmpty() ? null: siteexcludes;
         this.authorhash = authorhash; assert authorhash == null || !authorhash.isEmpty();
         this.snippetCacheStrategy = snippetCacheStrategy;
         this.host = host;

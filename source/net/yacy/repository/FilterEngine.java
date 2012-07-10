@@ -81,7 +81,7 @@ public class FilterEngine {
             final String path = entry.substring(pos + 1).trim();
 
             // avoid PatternSyntaxException e
-            if (!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*')
+            if (!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*')
             	host = "." + host;
 
             if(isMatchable(host)) {

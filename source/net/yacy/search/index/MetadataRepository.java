@@ -595,8 +595,8 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
                             pw.println("<item>");
                             pw.println("<title>" + CharacterCoding.unicode2xml(entry.dc_title(), true) + "</title>");
                             pw.println("<link>" + MultiProtocolURI.escape(url) + "</link>");
-                            if (entry.dc_creator().length() > 0) pw.println("<author>" + CharacterCoding.unicode2xml(entry.dc_creator(), true) + "</author>");
-                            if (entry.dc_subject().length() > 0) pw.println("<description>" + CharacterCoding.unicode2xml(entry.dc_subject(), true) + "</description>");
+                            if (!entry.dc_creator().isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(entry.dc_creator(), true) + "</author>");
+                            if (!entry.dc_subject().isEmpty()) pw.println("<description>" + CharacterCoding.unicode2xml(entry.dc_subject(), true) + "</description>");
                             pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
                             pw.println("<yacy:size>" + entry.size() + "</yacy:size>");
                             pw.println("<guid isPermaLink=\"false\">" + ASCII.String(entry.hash()) + "</guid>");

@@ -143,7 +143,7 @@ public class IndexControlRWIs_p {
             }
 
             if ( post.containsKey("keyhashsearch") ) {
-                if ( keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
@@ -270,7 +270,7 @@ public class IndexControlRWIs_p {
             }
 
             if ( post.containsKey("urllist") ) {
-                if ( keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final Bitfield flags = compileFlags(post);
@@ -282,7 +282,7 @@ public class IndexControlRWIs_p {
             // transfer to other peer
             if ( post.containsKey("keyhashtransfer") ) {
                 try {
-                    if ( keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                    if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
                         prop.put("keystring", "&lt;" + errmsg + "&gt;");
                     }
 
@@ -645,7 +645,7 @@ public class IndexControlRWIs_p {
             return null;
         }
         if ( post.get("flags") != null ) {
-            if ( post.get("flags", "").length() == 0 ) {
+            if ( post.get("flags", "").isEmpty() ) {
                 return null;
             }
             return new Bitfield(4, post.get("flags"));

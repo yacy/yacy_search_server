@@ -93,7 +93,7 @@ public class WebStructurePicture_p {
         final long timeout = (time < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + (time * 8 / 10);
 
         // find start point
-        if ((host == null) || (host.length() == 0) || (host.equals("auto"))) {
+        if ((host == null) || (host.isEmpty()) || (host.equals("auto"))) {
             // find domain with most references
             host = sb.webStructure.hostWithMaxReferences();
         }

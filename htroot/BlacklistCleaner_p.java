@@ -86,7 +86,7 @@ public class BlacklistCleaner_p {
 
             if (post.containsKey("listNames")) {
                 blacklistToUse = post.get("listNames");
-                if (blacklistToUse.length() == 0 || !ListManager.listSetContains("listManager.listsPath", blacklistToUse)) {
+                if (blacklistToUse.isEmpty() || !ListManager.listSetContains("listManager.listsPath", blacklistToUse)) {
                     prop.put("results", "2");
 
                 }

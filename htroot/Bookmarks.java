@@ -181,7 +181,7 @@ public class Bookmarks {
                 prop.put("mode", "2");
                 prop.put("display", "1");
                 display = 1;
-                if (urlHash.length() == 0) {
+                if (urlHash.isEmpty()) {
                     prop.put("mode_edit", "0"); // create mode
                     prop.putHTML("mode_title", post.get("title"));
                     prop.putHTML("mode_description", post.get("description"));

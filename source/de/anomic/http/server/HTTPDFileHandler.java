@@ -312,24 +312,24 @@ public final class HTTPDFileHandler {
             // -2- a password is not configured; or
             final String adminAccountBase64MD5 = switchboard.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
             if (!accessGranted) {
-                accessGranted = adminAccountBase64MD5.length() == 0;
+                accessGranted = adminAccountBase64MD5.isEmpty();
             }
 
             // -3- access from localhost is granted and access comes from localhost; or
             final String refererHost = requestHeader.refererHost();
             if (!accessGranted) {
                 final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
-                final boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+                final boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost));
                 accessGranted = adminAccountForLocalhost && accessFromLocalhost;
             }
 
             // -4- a password is configured and access comes from localhost
             //     and the realm-value of a http-authentify String is equal to the stored base64MD5; or
             String realmProp = requestHeader.get(RequestHeader.AUTHORIZATION);
-            if (realmProp != null && realmProp.length() == 0) realmProp = null;
+            if (realmProp != null && realmProp.isEmpty()) realmProp = null;
             final String realmValue = realmProp == null ? null : realmProp.substring(6);
             if (!accessGranted) {
-                final boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+                final boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost));
                 accessGranted = accessFromLocalhost && realmValue != null && realmProp.length() > 6 && (adminAccountBase64MD5.equals(realmValue));
                 Log.logInfo("HTTPDFileHandler", "access from localhost blocked, clientIP=" + clientIP);
             }
@@ -947,7 +947,7 @@ public final class HTTPDFileHandler {
                             return;
                         } else if (templatePatterns.containsKey(serverObjects.ACTION_LOCATION)) {
                             String location = templatePatterns.get(serverObjects.ACTION_LOCATION, "");
-                            if (location.length() == 0) location = path;
+                            if (location.isEmpty()) location = path;
 
                             final ResponseHeader headers = getDefaultHeaders(path);
                             headers.setAdditionalHeaderProperties(templatePatterns.getOutgoingHeader().getAdditionalHeaderProperties()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
@@ -1279,7 +1279,7 @@ public final class HTTPDFileHandler {
     }
 
     private static final String appendPath(final String proplist, final String path) {
-        if (proplist.length() == 0) return path;
+        if (proplist.isEmpty()) return path;
         if (proplist.indexOf(path) >= 0) return proplist;
         return proplist + "," + path;
     }

@@ -213,7 +213,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     @Override
     public String getGuid() {
         String guid = Token.guid.valueFrom(this.map, "");
-        if ((guid.length() == 0 || guid.startsWith(artificialGuidPrefix)) &&
+        if ((guid.isEmpty() || guid.startsWith(artificialGuidPrefix)) &&
             (this.map.containsKey("title") || this.map.containsKey("description") || this.map.containsKey("link"))) {
             guid = calculatedGuidPrefix + Integer.toHexString(getTitle().hashCode() + getDescription().hashCode() + getLink().hashCode());
             this.map.put("guid", guid);
@@ -233,7 +233,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     @Override
     public long getSize() {
         final String size = Token.size.valueFrom(this.map, "-1");
-        return (size == null || size.length() == 0) ? -1 : Long.parseLong(size);
+        return (size == null || size.isEmpty()) ? -1 : Long.parseLong(size);
     }
 
     public String getFulltext() {

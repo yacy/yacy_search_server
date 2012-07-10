@@ -98,7 +98,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         int score;
         Long key;
         synchronized (this) {
-            while (this.pam.size() > 0) {
+            while (!this.pam.isEmpty()) {
                 // find and remove objects where their score is smaller than the demanded minimum score
                 key = this.pam.firstKey();
                 if (key == null) break;
@@ -140,7 +140,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         if (o instanceof byte[]) s = UTF8.String((byte[]) o);
 
         // this can be used to calculate a score from a string
-        if (s == null || s.length() == 0 || s.charAt(0) == '-') return 0;
+        if (s == null || s.isEmpty() || s.charAt(0) == '-') return 0;
         try {
             long l = 0;
             if (s.length() == shortDateFormatString.length()) {

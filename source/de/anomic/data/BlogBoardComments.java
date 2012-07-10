@@ -320,7 +320,7 @@ public class BlogBoardComments {
             return author_byte;
         }
         private void setIp(String ip) {
-            if ((ip == null) || (ip.length() == 0))
+            if ((ip == null) || (ip.isEmpty()))
                 ip = "";
             this.record.put("ip", ip);
         }

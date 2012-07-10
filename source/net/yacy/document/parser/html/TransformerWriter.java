@@ -411,7 +411,7 @@ public final class TransformerWriter extends Writer {
                     this.buffer.reset();
                 }
             } else {
-                if (this.buffer.length() == 0) {
+                if (this.buffer.isEmpty()) {
                     if (c == rb) {
                         // very strange error case; we just let it pass
                         if (this.out != null) this.out.write(c);

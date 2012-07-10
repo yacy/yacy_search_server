@@ -205,7 +205,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             removeMatchingHashes(row.dc_subject(), remainingHashes);
             removeMatchingHashes(row.url().toNormalform(true, true).replace('-', ' '), remainingHashes);
 
-            if (remainingHashes.size() == 0) {
+            if (remainingHashes.isEmpty()) {
                 // the snippet is fully inside the metadata!
 
                 if (de.anomic.crawler.Cache.has(url.hash())) {
@@ -308,11 +308,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         //String imageline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
 
         snippetLine = "";
-        //if (audioline != null) line += (line.length() == 0) ? audioline : "<br />" + audioline;
-        //if (videoline != null) line += (line.length() == 0) ? videoline : "<br />" + videoline;
-        //if (appline   != null) line += (line.length() == 0) ? appline   : "<br />" + appline;
-        //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
-        if (textline  != null) snippetLine += (snippetLine.length() == 0) ? textline  : "<br />" + textline;
+        //if (audioline != null) line += (line.isEmpty()) ? audioline : "<br />" + audioline;
+        //if (videoline != null) line += (line.isEmpty()) ? videoline : "<br />" + videoline;
+        //if (appline   != null) line += (line.isEmpty()) ? appline   : "<br />" + appline;
+        //if (hrefline  != null) line += (line.isEmpty()) ? hrefline  : "<br />" + hrefline;
+        if (textline  != null) snippetLine += (snippetLine.isEmpty()) ? textline  : "<br />" + textline;
 
         if (snippetLine == null || !remainingHashes.isEmpty()) {
             init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");

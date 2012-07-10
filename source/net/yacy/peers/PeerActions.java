@@ -226,7 +226,7 @@ public class PeerActions {
     private void processPeerArrival(final Seed peer) {
         final String recordString = peer.get("news", null);
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
-        if ((recordString == null) || (recordString.length() == 0)) return;
+        if ((recordString == null) || (recordString.isEmpty())) return;
         final String decodedString = de.anomic.tools.crypt.simpleDecode(recordString);
         final NewsDB.Record record = this.newsPool.parseExternal(decodedString);
         if (record != null) {

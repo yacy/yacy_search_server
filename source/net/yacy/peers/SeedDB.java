@@ -246,7 +246,7 @@ public final class SeedDB implements AlternativeDomainNames {
             if (sizeConnected() == 0) try {Thread.sleep(5000);} catch (final InterruptedException e) {} // wait for init
             initMySeed();
             // check if my seed has an IP assigned
-            if (myIP() == null || myIP().length() == 0) {
+            if (myIP() == null || myIP().isEmpty()) {
                 this.mySeed.setIP(Domains.myPublicLocalIP().getHostAddress());
             }
         }
@@ -376,7 +376,7 @@ public final class SeedDB implements AlternativeDomainNames {
     	// address has therefore the form
     	// address    ::= (<peername>'.yacy'|<peerhexhash>'.yacyh'){'='<ip>{':'<port}}
     	// clusterdef ::= {address}{','address}*
-    	final String[] addresses = (clusterdefinition.length() == 0) ? new String[0] : clusterdefinition.split(",");
+    	final String[] addresses = (clusterdefinition.isEmpty()) ? new String[0] : clusterdefinition.split(",");
     	final TreeMap<byte[], String> clustermap = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
     	Seed seed;
     	String hash, yacydom, ipport;
@@ -557,7 +557,7 @@ public final class SeedDB implements AlternativeDomainNames {
     }
 
     private Seed get(final String hash, final MapDataMining database) {
-        if (hash == null || hash.length() == 0) return null;
+        if (hash == null || hash.isEmpty()) return null;
         if ((this.mySeed != null) && (hash.equals(this.mySeed.hash))) return this.mySeed;
         final ConcurrentHashMap<String, String> entry = new ConcurrentHashMap<String, String>();
         try {

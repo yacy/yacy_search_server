@@ -567,7 +567,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
         // take description tag
         s = getDescription();
-        if (s.length() > 0) return s;
+        if (!s.isEmpty()) return s;
 
         // extract headline from file name
         return MultiProtocolURI.unescape(this.root.getFileName());
@@ -763,7 +763,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         String s = this.metas.get("keywords");
         if (s == null) s = this.metas.get("dc.description");
         if (s == null) s = EMPTY_STRING;
-        if (s.length() == 0) {
+        if (s.isEmpty()) {
             return new String[0];
         }
         if (s.contains(",")) return commaSepPattern.split(s);

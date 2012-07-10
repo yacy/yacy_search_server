@@ -73,7 +73,7 @@ public class WatchWebStructure_p {
 
         // find start point
         if (host == null ||
-            host.length() == 0 ||
+            host.isEmpty() ||
             host.equals("auto")
             // || sb.webStructure.referencesCount(DigestURI.hosthash6(host)) == 0
             ) {

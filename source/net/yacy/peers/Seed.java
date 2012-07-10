@@ -306,7 +306,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public final String getIP() {
         final String ip = get(Seed.IP, Domains.LOCALHOST);
-        return (ip == null || ip.length() == 0) ? Domains.LOCALHOST : ip;
+        return (ip == null || ip.isEmpty()) ? Domains.LOCALHOST : ip;
     }
 
     /**
@@ -965,15 +965,15 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( seedStr == null ) {
             throw new IOException("seedStr == null");
         }
-        if ( seedStr.length() == 0 ) {
-            throw new IOException("seedStr.length() == 0");
+        if ( seedStr.isEmpty() ) {
+            throw new IOException("seedStr.isEmpty()");
         }
         final String seed = crypt.simpleDecode(seedStr);
         if ( seed == null ) {
             throw new IOException("seed == null");
         }
-        if ( seed.length() == 0 ) {
-            throw new IOException("seed.length() == 0");
+        if ( seed.isEmpty() ) {
+            throw new IOException("seed.isEmpty()");
         }
 
         // extract hash
@@ -1040,7 +1040,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
         // seedURL
         final String seedURL = this.dna.get(SEEDLISTURL);
-        if ( seedURL != null && seedURL.length() > 0 ) {
+        if ( seedURL != null && !seedURL.isEmpty() ) {
             if ( !seedURL.startsWith("http://") && !seedURL.startsWith("https://") ) {
                 return "wrong protocol for seedURL";
             }
@@ -1062,7 +1062,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( ipString == null ) {
             return ipString + " -> IP is null";
         }
-        if ( ipString.length() > 0 && ipString.length() < 8 ) {
+        if ( !ipString.isEmpty() && ipString.length() < 8 ) {
             return ipString + " -> IP is too short: ";
         }
         if ( Switchboard.getSwitchboard().isAllIPMode() ) {

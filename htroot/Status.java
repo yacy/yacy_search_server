@@ -129,7 +129,7 @@ public class Status
         }
 
         // password protection
-        if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0)
+        if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty())
             && (!sb.getConfigBool("adminAccountForLocalhost", false)) ) {
             prop.put("protection", "0"); // not protected
             prop.put("urgentSetPassword", "1");
@@ -194,7 +194,7 @@ public class Status
         prop.put("host", hostIP != null ? hostIP.getHostAddress() : "Unkown IP");
 
         // ssl support
-        prop.put("sslSupport", sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
+        prop.put("sslSupport", sb.getConfig("keyStore", "").isEmpty() ? "0" : "1");
 
         if ( sb.getConfigBool("remoteProxyUse", false) ) {
             prop.put("remoteProxy", "1");

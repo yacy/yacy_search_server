@@ -48,7 +48,7 @@ public class blacklists_p {
 
                 	count=0;
                 	for (final String entry : list){
-                	    if (entry.length() == 0) continue;
+                	    if (entry.isEmpty()) continue;
                 	    if (entry.charAt(0) == '#') continue;
 
                 	    prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", entry);

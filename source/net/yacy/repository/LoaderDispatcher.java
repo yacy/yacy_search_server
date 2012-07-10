@@ -92,7 +92,7 @@ public final class LoaderDispatcher {
     }
 
     public boolean isSupportedProtocol(final String protocol) {
-        if ((protocol == null) || (protocol.length() == 0)) return false;
+        if ((protocol == null) || (protocol.isEmpty())) return false;
         return this.supportedProtocols.contains(protocol.trim().toLowerCase());
     }
 

@@ -1206,7 +1206,7 @@ public final class Protocol
                     targetSeed.hash));
 
         uhss = uhss.trim();
-        if ( uhss.length() == 0 || uhss.equals(",") ) {
+        if ( uhss.isEmpty() || uhss.equals(",") ) {
             return null;
         } // all url's known, we are ready here
 
@@ -1595,7 +1595,7 @@ public final class Protocol
         }
         final String authenticationMethod =
             env.getConfig("network.unit.protocol.request.authentication.method", "");
-        if ( authenticationMethod.length() == 0 ) {
+        if ( authenticationMethod.isEmpty() ) {
             return false;
         }
         if ( authenticationMethod.equals("salted-magic-sim") ) {

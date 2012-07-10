@@ -131,7 +131,7 @@ public class ResumptionToken extends TreeMap<String, String> {
 
         final String token = getToken();
         if (token == null) throw new IOException("end of resumption reached - token == null");
-        if (token.length() == 0) throw new IOException("end of resumption reached - token.length() == 0");
+        if (token.isEmpty()) throw new IOException("end of resumption reached - token.isEmpty()");
         final String url = truncatedURL(this.source);
 
         // encoded state

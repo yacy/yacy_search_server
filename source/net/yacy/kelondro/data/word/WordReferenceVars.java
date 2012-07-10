@@ -101,7 +101,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.lother = outlinksOther;
         this.phrasesintext = phrasecount;
         this.positions = new LinkedBlockingQueue<Integer>();
-        if (ps.size() > 0) for (final Integer i: ps) this.positions.add(i);
+        if (!ps.isEmpty()) for (final Integer i: ps) this.positions.add(i);
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
         this.urlcomps = urlComps;
@@ -124,7 +124,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.lother = e.lother();
         this.phrasesintext = e.phrasesintext();
         this.positions = new LinkedBlockingQueue<Integer>();
-        if (e.positions().size() > 0) for (final Integer i: e.positions()) this.positions.add(i);
+        if (!e.positions().isEmpty()) for (final Integer i: e.positions()) this.positions.add(i);
         this.posinphrase = e.posinphrase();
         this.posofphrase = e.posofphrase();
         this.urlcomps = e.urlcomps();

@@ -82,7 +82,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         for (String s: idNames) {
             if (s == null) continue;
             s = s.trim();
-            if (s.length() > 0) sessionIDnames.put(s, PRESENT);
+            if (!s.isEmpty()) sessionIDnames.put(s, PRESENT);
         }
     }
 
@@ -379,7 +379,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     //  resolve '..'
     private static final String resolveBackpath(final String path) {
         String p = path;
-        if (p.length() == 0 || p.charAt(0) != '/') { p = "/" + p; }
+        if (p.isEmpty() || p.charAt(0) != '/') { p = "/" + p; }
         final Matcher qm = patternQuestion.matcher(p); // do not resolve backpaths in the post values
         final int end = qm.find() ? qm.start() : p.length();
         final Matcher matcher = backPathPattern.matcher(p);
@@ -824,7 +824,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     public static Map<String, Object> parseCamelCase(String s) {
         final Map<String, Object> token = new LinkedHashMap<String, Object>();
-        if (s.length() == 0) return token;
+        if (s.isEmpty()) return token;
         int p = 0;
         CharType type = charType(s.charAt(0)), nct = type;
         while (p < s.length()) {

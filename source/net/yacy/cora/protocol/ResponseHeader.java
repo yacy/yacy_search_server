@@ -99,7 +99,7 @@ public class ResponseHeader extends HeaderFramework {
 
     public static Object[] parseResponseLine(final String respLine) {
 
-        if ((respLine == null) || (respLine.length() == 0)) {
+        if ((respLine == null) || (respLine.isEmpty())) {
             return new Object[]{"HTTP/1.0",Integer.valueOf(500),"status line parse error"};
         }
 

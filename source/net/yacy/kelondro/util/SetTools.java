@@ -485,7 +485,7 @@ public final class SetTools {
             int pos;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if ((line.length() > 0 && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0))
+                if ((!line.isEmpty() && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0))
                     map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
             }
         } catch (final IOException e) {
@@ -504,7 +504,7 @@ public final class SetTools {
             int pos;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if ((line.length() > 0 && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0)) {
+                if ((!line.isEmpty() && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0)) {
                     key = line.substring(0, pos).trim().toLowerCase();
                     value = line.substring(pos + sep.length()).trim();
                     if (!map.containsKey(key)) map.put(key, new ArrayList<String>());
@@ -528,7 +528,7 @@ public final class SetTools {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.length() > 0 && line.charAt(0) != '#') list.add(line.trim().toLowerCase());
+                if (!line.isEmpty() && line.charAt(0) != '#') list.add(line.trim().toLowerCase());
             }
             br.close();
         } catch (final IOException e) {

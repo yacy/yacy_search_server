@@ -108,7 +108,7 @@ public class Blog {
         if ("anonymous".equals(strAuthor)) {
             strAuthor = sb.blogDB.guessAuthor(ip);
 
-            if (strAuthor == null || strAuthor.length() == 0) {
+            if (strAuthor == null || strAuthor.isEmpty()) {
                 if (sb.peers.mySeed() == null) {
                     strAuthor = "anonymous";
                 } else {

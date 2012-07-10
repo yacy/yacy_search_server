@@ -474,7 +474,7 @@ public class BlogBoard {
 
         private void setIp(final String ip) {
             String ret = ip;
-            if ((ret == null) || (ret.length() == 0))
+            if ((ret == null) || (ret.isEmpty()))
                 ret = "";
             this.record.put("ip", ret);
         }

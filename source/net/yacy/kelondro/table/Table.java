@@ -1031,7 +1031,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     private static String[] permutations(final String source) {
-        if (source.length() == 0) return new String[0];
+        if (source.isEmpty()) return new String[0];
         if (source.length() == 1) return new String[]{source};
         final char c = source.charAt(0);
         final String[] recres = permutations(source.substring(1));

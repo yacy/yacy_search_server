@@ -115,7 +115,7 @@ public class URLAnalysis {
         private void update(final String[] s) {
             Integer c;
             for (final String t: s) {
-                if (t.length() == 0) continue;
+                if (t.isEmpty()) continue;
                 c = this.out.get(t);
                 this.out.put(t, (c == null) ? 1 : c.intValue() + 1);
             }

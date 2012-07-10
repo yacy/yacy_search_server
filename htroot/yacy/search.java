@@ -116,10 +116,10 @@ public final class search {
         final String  modifier = post.get("modifier", "").trim();
         final String  contentdom = post.get("contentdom", "all");
         final String  filter = post.get("filter", ".*"); // a filter on the url
-        String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;
-        String  authorhash = post.get("authorhash", ""); if (authorhash.length() == 0) authorhash = null;
+        String  sitehash = post.get("sitehash", ""); if (sitehash.isEmpty()) sitehash = null;
+        String  authorhash = post.get("authorhash", ""); if (authorhash.isEmpty()) authorhash = null;
         String  language = post.get("language", "");
-        if (language == null || language.length() == 0 || !ISO639.exists(language)) {
+        if (language == null || language.isEmpty() || !ISO639.exists(language)) {
             // take language from the user agent
             String agent = header.get("User-Agent");
             if (agent == null) agent = System.getProperty("user.language");
@@ -184,7 +184,7 @@ public final class search {
         sb.intermissionAllThreads(100);
 
         EventTracker.delete(EventTracker.EClass.SEARCH);
-        final HandleSet abstractSet = (abstracts.length() == 0 || abstracts.equals("auto")) ? null : QueryParams.hashes2Set(abstracts);
+        final HandleSet abstractSet = (abstracts.isEmpty() || abstracts.equals("auto")) ? null : QueryParams.hashes2Set(abstracts);
 
         // store accessing peer
         Seed remoteSeed;
@@ -202,11 +202,11 @@ public final class search {
 
         // prepare search
         final HandleSet queryhashes = QueryParams.hashes2Set(query);
-        final HandleSet excludehashes = (exclude.length() == 0) ? new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0) : QueryParams.hashes2Set(exclude);
+        final HandleSet excludehashes = (exclude.isEmpty()) ? new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0) : QueryParams.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
 
     	// prepare a search profile
-        final RankingProfile rankingProfile = (profile.length() == 0) ? new RankingProfile(Classification.ContentDomain.contentdomParser(contentdom)) : new RankingProfile("", profile);
+        final RankingProfile rankingProfile = (profile.isEmpty()) ? new RankingProfile(Classification.ContentDomain.contentdomParser(contentdom)) : new RankingProfile("", profile);
 
         // prepare an abstract result
         final StringBuilder indexabstract = new StringBuilder(6000);
@@ -215,7 +215,7 @@ public final class search {
         QueryParams theQuery = null;
         SearchEvent theSearch = null;
         ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> accu = null;
-        if (query.length() == 0 && abstractSet != null) {
+        if (query.isEmpty() && abstractSet != null) {
             // this is _not_ a normal search, only a request for index abstracts
             final Segment indexSegment = sb.index;
             theQuery = new QueryParams(
@@ -324,7 +324,7 @@ public final class search {
             if (joincount != 0) {
                 accu = theSearch.result().completeResults(maxtime);
             }
-            if (joincount <= 0 || abstracts.length() == 0) {
+            if (joincount <= 0 || abstracts.isEmpty()) {
                 prop.put("indexcount", "");
             } else {
                 // attach information about index abstracts
@@ -350,7 +350,7 @@ public final class search {
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
-                if ((theSearch.getAbstractsMaxCountHash() == null) || (urls.length() != 0) || (queryhashes.size() <= 1) || (abstracts.length() == 0)) {
+                if ((theSearch.getAbstractsMaxCountHash() == null) || (urls.length() != 0) || (queryhashes.size() <= 1) || (abstracts.isEmpty())) {
                     prop.put("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position

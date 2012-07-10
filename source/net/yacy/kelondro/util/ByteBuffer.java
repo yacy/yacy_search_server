@@ -131,6 +131,10 @@ public final class ByteBuffer extends OutputStream {
     public int length() {
         return this.length;
     }
+    
+    public boolean isEmpty() {
+        return this.length == 0;
+    }
 
     private void grow() {
         int newsize = this.buffer.length * 2 + 1;

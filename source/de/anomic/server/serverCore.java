@@ -714,7 +714,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                     try {
                         // if we can not determine the proper command string we try to call function emptyRequest
                         // of the commandObject
-                        if (this.request.trim().length() == 0) this.request = "EMPTY";
+                        if (this.request.trim().isEmpty()) this.request = "EMPTY";
 
                         parameter = new Object[2];
 
@@ -1006,7 +1006,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 final PKCS12Tool pkcsTool = new PKCS12Tool(pkcs12ImportFile,pkcs12ImportPwd);
 
                 // creating a new keystore file
-                if (keyStoreFileName.length() == 0) {
+                if (keyStoreFileName.isEmpty()) {
                     // using the default keystore name
                     keyStoreFileName = "DATA/SETTINGS/myPeerKeystore";
 
@@ -1034,7 +1034,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             } catch (final Exception e) {
                 this.log.logSevere("Unable to import certificate from import file '" + pkcs12ImportFile + "'.",e);
             }
-        } else if (keyStoreFileName.length() == 0) return null;
+        } else if (keyStoreFileName.isEmpty()) return null;
 
 
         // get the ssl context

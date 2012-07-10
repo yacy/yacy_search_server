@@ -110,7 +110,7 @@ public class FTPLoader {
                 }
             }
 
-            if (file.length() == 0) {
+            if (file.isEmpty()) {
                 // directory -> get list of files
                 final RequestHeader requestHeader = new RequestHeader();
                 if (request.referrerhash() != null) {

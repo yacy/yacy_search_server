@@ -81,7 +81,7 @@ public class Load_RSS_p {
                 row = plainIterator.next();
                 if (row == null) continue;
                 messageurl = row.get("url", "");
-                if (messageurl.length() == 0) continue;
+                if (messageurl.isEmpty()) continue;
                 final byte[] api_pk = row.get("api_pk");
                 final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
                 if (r == null || !r.get("comment", "").matches(".*" + Pattern.quote(messageurl) + ".*")) {
@@ -123,7 +123,7 @@ public class Load_RSS_p {
                 row = plainIterator.next();
                 if (row == null) continue;
                 messageurl = row.get("url", "");
-                if (messageurl.length() == 0) continue;
+                if (messageurl.isEmpty()) continue;
                 final byte[] api_pk = row.get("api_pk");
                 final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
                 if (r != null && r.get("comment", "").matches(".*" + Pattern.quote(messageurl) + ".*")) {
@@ -189,7 +189,7 @@ public class Load_RSS_p {
                     row = plainIterator.next();
                     if (row == null) continue;
                     messageurl = row.get("url", "");
-                    if (messageurl.length() == 0) continue;
+                    if (messageurl.isEmpty()) continue;
                     // get referrer
                     final DigestURI referrer = sb.getURL(row.get("referrer", "").getBytes());
                     // check if feed is registered in scheduler
@@ -300,7 +300,7 @@ public class Load_RSS_p {
             final RSSMessage channel = feed.getChannel();
             prop.putHTML("showitems_title", channel == null ? "" : channel.getTitle());
             String author = channel == null ? "" : channel.getAuthor();
-            if (author == null || author.length() == 0) author = channel == null ? "" : channel.getCopyright();
+            if (author == null || author.isEmpty()) author = channel == null ? "" : channel.getCopyright();
             Date pubDate = channel == null ? null : channel.getPubDate();
             prop.putHTML("showitems_author", author == null ? "" : author);
             prop.putHTML("showitems_description", channel == null ? "" : channel.getDescription());

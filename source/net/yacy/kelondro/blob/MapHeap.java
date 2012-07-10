@@ -130,7 +130,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         while ((line = br.readLine()) != null) { // very slow readLine????
             line = line.trim();
             if (line.equals("# EOF")) return map;
-            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
+            if ((line.isEmpty()) || (line.charAt(0) == '#')) continue;
             pos = line.indexOf('=');
             if (pos < 0) continue;
             map.put(line.substring(0, pos), line.substring(pos + 1));

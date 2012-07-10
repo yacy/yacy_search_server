@@ -127,7 +127,7 @@ public class Tagging {
             String term, v;
             String[] tags;
         	vocloop: for (Map.Entry<String, SOTuple> e: table.entrySet()) {
-			    if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().length() == 0) {
+			    if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().isEmpty()) {
 			        term = normalizeKey(e.getKey());
 			        v = normalizeTerm(e.getKey());
 			        this.synonym2term.put(v, term);
@@ -140,10 +140,10 @@ public class Tagging {
 			    Set<String> synonyms = new HashSet<String>();
 			    synonyms.add(term);
 			    tagloop: for (String synonym: tags) {
-			        if (synonym.length() == 0) continue tagloop;
+			        if (synonym.isEmpty()) continue tagloop;
 				    synonyms.add(synonym);
 			    	synonym = normalizeTerm(synonym);
-			        if (synonym.length() == 0) continue tagloop;
+			        if (synonym.isEmpty()) continue tagloop;
 				    synonyms.add(synonym);
 			        this.synonym2term.put(synonym, term);
 			        this.term2synonym.put(term, synonym);
@@ -163,7 +163,7 @@ public class Tagging {
 	        for (Map.Entry<String, SOTuple> e: table.entrySet()) {
 	            String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
 	            String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
-	            w.write(e.getKey() + (s == null || s.length() == 0 ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.length() == 0 || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
+	            w.write(e.getKey() + (s == null || s.isEmpty() ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.isEmpty() || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
 	        }
 	        w.close();
 	        init();
@@ -180,7 +180,7 @@ public class Tagging {
             this.synonym2term.put(syn, loc);
             this.term2synonym.put(loc, syn);
             geo = location.find(loc, true);
-            if (geo.size() > 0) {
+            if (!geo.isEmpty()) {
                 g = geo.iterator().next();
                 this.term2objectlink.put(loc, "http://www.openstreetmap.org/?lat=" + g.lat() + "&lon=" + g.lon() + "&zoom=16");
             }
@@ -249,10 +249,10 @@ public class Tagging {
                 Set<String> synonyms = new HashSet<String>();
                 synonyms.add(term);
                 tagloop: for (String synonym: tags) {
-                    if (synonym.length() == 0) continue tagloop;
+                    if (synonym.isEmpty()) continue tagloop;
                     synonyms.add(synonym);
                     synonym = normalizeTerm(synonym);
-                    if (synonym.length() == 0) continue tagloop;
+                    if (synonym.isEmpty()) continue tagloop;
                     synonyms.add(synonym);
                     this.synonym2term.put(synonym, term);
                     this.term2synonym.put(term, synonym);
@@ -295,14 +295,14 @@ public class Tagging {
                     continue vocloop;
                 }
                 if (pl[0].equals(term)) {
-                    w.write(term + (synonyms == null || synonyms.length() == 0 ? "" : ":" + synonyms) + (objectlink == null || objectlink.length() == 0 || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
+                    w.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
                     written = true;
                 } else {
-                    w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                    w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
                 }
             }
             if (!written) {
-                w.write(term + (synonyms == null || synonyms.length() == 0 ? "" : ":" + synonyms) + (objectlink == null || objectlink.length() == 0 || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
+                w.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
             }
         } catch (InterruptedException e) {
         }
@@ -329,7 +329,7 @@ public class Tagging {
                 if (pl[0].equals(term)) {
                     continue vocloop;
                 }
-                w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
             }
         } catch (InterruptedException e) {
         }
@@ -367,7 +367,7 @@ public class Tagging {
                 if (pl == null) {
                     continue vocloop;
                 }
-                w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
             }
         } catch (InterruptedException e) {
         }
@@ -431,7 +431,7 @@ public class Tagging {
                 if (pl == null) {
                     continue vocloop;
                 }
-                map.put(pl[0], new SOTuple(pl[1] == null || pl[1].length() == 0 ? "" : pl[1], pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : pl[2]));
+                map.put(pl[0], new SOTuple(pl[1] == null || pl[1].isEmpty() ? "" : pl[1], pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : pl[2]));
             }
         } catch (InterruptedException e) {
         }
@@ -446,7 +446,7 @@ public class Tagging {
             c = line.substring(p + 1);
             line = line.substring(0, p).trim();
         }
-        if (line.length() == 0) {
+        if (line.isEmpty()) {
             return null;
         }
         p = line.indexOf(':');
@@ -600,7 +600,7 @@ public class Tagging {
     }
 
     public static String cleanTagFromAutotagging(final String tagString) {
-        if (tagString == null || tagString.length() == 0) return "";
+        if (tagString == null || tagString.isEmpty()) return "";
         String[] tags = PATTERN_SP.split(tagString);
         StringBuilder sb = new StringBuilder(tagString.length());
         for (String tag : tags) {

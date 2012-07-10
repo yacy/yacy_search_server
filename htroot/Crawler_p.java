@@ -147,7 +147,7 @@ public class Crawler_p {
                 // remove crawlingFileContent before we record the call
                 String crawlingFileName = post.get("crawlingFile");
                 final File crawlingFile;
-                if (crawlingFileName == null || crawlingFileName.length() == 0) {
+                if (crawlingFileName == null || crawlingFileName.isEmpty()) {
                     crawlingFile = null;
                 } else {
                     if (crawlingFileName.startsWith("file://")) crawlingFileName = crawlingFileName.substring(7);

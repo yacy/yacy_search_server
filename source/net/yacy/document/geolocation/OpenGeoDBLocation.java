@@ -189,6 +189,11 @@ public class OpenGeoDBLocation implements Locations
         return this.id2loc.size();
     }
 
+	@Override
+	public boolean isEmpty() {
+		return this.id2loc.isEmpty();
+	}
+
     /**
      * check database tables against occurrences of this entity the anyname - String may be one of: - name of
      * a town, villa, region etc - zip code - telephone prefix - kfz sign
@@ -262,7 +267,7 @@ public class OpenGeoDBLocation implements Locations
     public Set<String> recommend(final String s) {
         final Set<String> a = new HashSet<String>();
         final StringBuilder an = new StringBuilder(s);
-        if ( s.length() == 0 ) {
+        if ( s.isEmpty() ) {
             return a;
         }
         final SortedMap<StringBuilder, List<Integer>> t = this.name2ids.tailMap(an);

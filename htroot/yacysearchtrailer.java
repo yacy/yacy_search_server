@@ -338,7 +338,7 @@ public class yacysearchtrailer {
         // about box
         final String aboutBody = env.getConfig("about.body", "");
         final String aboutHeadline = env.getConfig("about.headline", "");
-        if ((aboutBody.length() == 0 && aboutHeadline.length() == 0) ||
+        if ((aboutBody.isEmpty() && aboutHeadline.isEmpty()) ||
             theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount() == 0) {
             prop.put("nav-about", 0);
         } else {
@@ -349,7 +349,7 @@ public class yacysearchtrailer {
 
         // category: location search
         // show only if there is a location database present and if there had been any search results
-        if (LibraryProvider.geoLoc.size() == 0 ||
+        if (LibraryProvider.geoLoc.isEmpty() ||
             theSearch.getRankingResult().getLocalIndexCount() == 0) {
             prop.put("cat-location", 0);
         } else {

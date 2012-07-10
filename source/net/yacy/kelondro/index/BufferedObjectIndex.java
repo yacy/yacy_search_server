@@ -71,7 +71,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     }
 
     private final void flushBuffer() throws IOException, RowSpaceExceededException {
-        if (this.buffer.size() > 0) {
+        if (!this.buffer.isEmpty()) {
             for (final Row.Entry e: this.buffer) {
                 this.backend.put(e);
             }

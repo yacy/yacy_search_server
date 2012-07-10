@@ -119,7 +119,7 @@ public class Blacklist_p {
             }
             if (post.containsKey("selectList")) {
                 blacklistToUse = post.get("selectedListName");
-                if (blacklistToUse != null && blacklistToUse.length() == 0) {
+                if (blacklistToUse != null && blacklistToUse.isEmpty()) {
                     blacklistToUse = null;
                 }
             }
@@ -129,7 +129,7 @@ public class Blacklist_p {
                  * =========================================================== */
 
                 blacklistToUse = post.get("newListName", "").trim();
-                if (blacklistToUse.length() == 0) {
+                if (blacklistToUse.isEmpty()) {
                     prop.put("LOCATION","");
                     return prop;
                 }
@@ -176,7 +176,7 @@ public class Blacklist_p {
                  * =========================================================== */
 
                 blacklistToUse = post.get("selectedListName");
-                if (blacklistToUse == null || blacklistToUse.length() == 0) {
+                if (blacklistToUse == null || blacklistToUse.isEmpty()) {
                     prop.put("LOCATION","");
                     return prop;
                 }
@@ -204,7 +204,7 @@ public class Blacklist_p {
                  * =========================================================== */
 
                 blacklistToUse = post.get("selectedListName", "").trim();
-                if (blacklistToUse == null || blacklistToUse.length() == 0) {
+                if (blacklistToUse == null || blacklistToUse.isEmpty()) {
                     prop.put("LOCATION", "");
                     return prop;
                 }
@@ -227,7 +227,7 @@ public class Blacklist_p {
                  * =========================================================== */
 
                 blacklistToUse = post.get("selectedListName", "").trim();
-                if (blacklistToUse == null || blacklistToUse.length() == 0) {
+                if (blacklistToUse == null || blacklistToUse.isEmpty()) {
                     prop.put("LOCATION", "");
                     return prop;
                 }
@@ -411,7 +411,7 @@ public class Blacklist_p {
             for (int j = offset; j < to; ++j){
                 final String nextEntry = sortedlist[j];
 
-                if (nextEntry.length() == 0) continue;
+                if (nextEntry.isEmpty()) continue;
                 if (nextEntry.charAt(0) == '#') continue;
                 prop.put(DISABLED + EDIT + "Itemlist_" + entryCount + "_dark", dark ? "1" : "0");
                 dark = !dark;
@@ -535,11 +535,11 @@ public class Blacklist_p {
             final RequestHeader header,
             final BlacklistType[] supportedBlacklistTypes) {
 
-        if (blacklistToUse == null || blacklistToUse.length() == 0) {
+        if (blacklistToUse == null || blacklistToUse.isEmpty()) {
             return "";
         }
 
-        if (newEntry == null || newEntry.length() == 0) {
+        if (newEntry == null || newEntry.isEmpty()) {
             return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
         }
 
@@ -563,11 +563,11 @@ public class Blacklist_p {
             final RequestHeader header,
             final BlacklistType[] supportedBlacklistTypes) {
 
-        if (blacklistToUse == null || blacklistToUse.length() == 0) {
+        if (blacklistToUse == null || blacklistToUse.isEmpty()) {
             return "";
         }
 
-        if (oldEntry == null || oldEntry.length() == 0) {
+        if (oldEntry == null || oldEntry.isEmpty()) {
             return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
         }
 

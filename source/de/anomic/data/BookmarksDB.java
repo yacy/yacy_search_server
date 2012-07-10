@@ -124,7 +124,7 @@ public class BookmarksDB {
     // -----------------------------------------------------------
 
     public Bookmark createBookmark(final String url, final String user){
-        if (url == null || url.length() == 0) return null;
+        if (url == null || url.isEmpty()) return null;
         Bookmark bk;
         try {
             bk = new Bookmark(url);

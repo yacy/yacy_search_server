@@ -311,7 +311,7 @@ public class ArrayStack implements BLOB {
     }
 
     public synchronized File unmountOldest() {
-        if (this.blobs.size() == 0) return null;
+        if (this.blobs.isEmpty()) return null;
         if (System.currentTimeMillis() - this.blobs.get(0).creation.getTime() < this.fileAgeLimit) return null;
         final File f = this.blobs.get(0).location;
         unmountBLOB(f, false);
@@ -557,7 +557,7 @@ public class ArrayStack implements BLOB {
      * @return the blobItem that holds the key or null if no blobItem is found
      */
     private blobItem keeperOf(final byte[] key) {
-        if (this.blobs.size() == 0) return null;
+        if (this.blobs.isEmpty()) return null;
         if (this.blobs.size() == 1) {
             final blobItem bi = this.blobs.get(0);
             if (bi.blob.containsKey(key)) return bi;
@@ -628,7 +628,7 @@ public class ArrayStack implements BLOB {
      */
     @Override
     public byte[] get(final byte[] key) throws IOException, RowSpaceExceededException {
-        if (this.blobs == null || this.blobs.size() == 0) return null;
+        if (this.blobs == null || this.blobs.isEmpty()) return null;
         if (this.blobs.size() == 1) {
             final blobItem bi = this.blobs.get(0);
             return bi.blob.get(key);
@@ -835,7 +835,7 @@ public class ArrayStack implements BLOB {
     @Override
     public synchronized void delete(final byte[] key) throws IOException {
         final long m = mem();
-        if (this.blobs.size() == 0) {
+        if (this.blobs.isEmpty()) {
             // do nothing
         } else if (this.blobs.size() == 1) {
             final blobItem bi = this.blobs.get(0);

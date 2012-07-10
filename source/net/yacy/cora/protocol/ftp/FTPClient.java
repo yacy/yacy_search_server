@@ -143,7 +143,7 @@ public class FTPClient {
     }
 
     public boolean exec(String command, final boolean promptIt) {
-        if ((command == null) || (command.length() == 0)) {
+        if ((command == null) || (command.isEmpty())) {
             return true;
         }
         int pos;
@@ -205,7 +205,7 @@ public class FTPClient {
 
     private String[] line2args(final String line) {
         // parse the command line
-        if ((line == null) || (line.length() == 0)) {
+        if ((line == null) || (line.isEmpty())) {
             return null;
         }
         // pre-parse
@@ -2693,7 +2693,7 @@ public class FTPClient {
                 c.exec("lcd \"" + localFile.getParent() + "\"", false);
                 localFile = new File(localFile.getName());
             }
-            c.exec("put " + localFile.toString() + ((remoteName.length() == 0) ? "" : (" " + remoteName)), false);
+            c.exec("put " + localFile.toString() + ((remoteName.isEmpty()) ? "" : (" " + remoteName)), false);
             c.exec("close", false);
             c.exec("exit", false);
 
@@ -2719,7 +2719,7 @@ public class FTPClient {
     public static void get(final String host, String remoteFile, final File localPath, final String account, final String password) {
         try {
             final FTPClient c = new FTPClient();
-            if (remoteFile.length() == 0) {
+            if (remoteFile.isEmpty()) {
                 remoteFile = "/";
             }
             c.exec("open " + host, false);

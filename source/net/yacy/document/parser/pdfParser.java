@@ -115,7 +115,7 @@ public class pdfParser extends AbstractParser implements Parser {
             docSubject = info.getSubject();
             docAuthor = info.getAuthor();
             docPublisher = info.getProducer();
-            if (docPublisher == null || docPublisher.length() == 0) docPublisher = info.getCreator();
+            if (docPublisher == null || docPublisher.isEmpty()) docPublisher = info.getCreator();
             docKeywordStr = info.getKeywords();
             // unused:
             // info.getTrapped());
@@ -123,7 +123,7 @@ public class pdfParser extends AbstractParser implements Parser {
             // info.getModificationDate();
         }
 
-        if (docTitle == null || docTitle.length() == 0) {
+        if (docTitle == null || docTitle.isEmpty()) {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
         }
         final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);

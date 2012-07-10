@@ -497,7 +497,7 @@ public class SnippetProcess {
                     if (this.solr != null) {
                         SolrDocument sd = null;
                         final SolrDocumentList sdl = this.solr.get(SolrField.id.getSolrFieldName()+ ":" + ASCII.String(page.hash()), 0, 1);
-                        if (sdl.size() > 0) {
+                        if (!sdl.isEmpty()) {
                             sd = sdl.get(0);
                         }
                         if (sd != null) {

@@ -309,7 +309,7 @@ public final class Condenser {
         int wordInSentenceCounter = 1;
         boolean comb_indexof = false, last_last = false, last_index = false;
         final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
-        if (LibraryProvider.autotagging.size() == 0) doAutotagging = false;
+        if (LibraryProvider.autotagging.isEmpty()) doAutotagging = false;
 
         // read source
         final WordTokenizer wordenum = new WordTokenizer(new SentenceReader(text), meaningLib);

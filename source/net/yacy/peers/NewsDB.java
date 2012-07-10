@@ -324,7 +324,7 @@ public class NewsDB {
 
         public String attribute(final String key, final String dflt) {
             final String s = this.attributes.get(key);
-            if ((s == null) || (s.length() == 0)) return dflt;
+            if ((s == null) || (s.isEmpty())) return dflt;
             return s;
         }
     }

@@ -59,7 +59,7 @@ public class MessageSend_p {
         String subject = post.get("subject", "");
         String message = post.get("message", "");
 
-        if ((message.length() == 0) || (post.containsKey("preview"))) {
+        if ((message.isEmpty()) || (post.containsKey("preview"))) {
             if (post.containsKey("preview")) {
                 prop.put("mode", "1");
             } else {

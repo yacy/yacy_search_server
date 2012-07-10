@@ -570,7 +570,7 @@ public class Domains {
      * @return the hosts InetAddress or null if the address cannot be resolved
      */
     public static InetAddress dnsResolve(final String host0) {
-        if (host0 == null || host0.length() == 0) return null;
+        if (host0 == null || host0.isEmpty()) return null;
         final String host = host0.toLowerCase().trim();
         // try to simply parse the address
         InetAddress ip = parseInetAddress(host);
@@ -856,7 +856,7 @@ public class Domains {
     }
 
     public static boolean isThisHostIP(final String hostName) {
-        if ((hostName == null) || (hostName.length() == 0)) return false;
+        if ((hostName == null) || (hostName.isEmpty())) return false;
 
         boolean isThisHostIP = false;
         try {
@@ -934,7 +934,7 @@ public class Domains {
 
         if (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
             host == null ||
-            host.length() == 0) return true;
+            host.isEmpty()) return true;
 
         // FIXME IPv4 only
         // check local ip addresses

@@ -106,8 +106,8 @@ public class MessageBoard {
 	    if (key.length() > categoryLength) key = key.substring(0, categoryLength);
 	    while (key.length() < categoryLength) key += "_";
 	    key += dateString() + snString();
-	    record.put("author", ((authorName == null) || (authorName.length() == 0)) ? authorName : "anonymous");
-	    record.put("recipient", ((recName == null) || (recName.length() == 0)) ? recName : "anonymous");
+	    record.put("author", ((authorName == null) || (authorName.isEmpty())) ? authorName : "anonymous");
+	    record.put("recipient", ((recName == null) || (recName.isEmpty())) ? recName : "anonymous");
 	    record.put("ahash", (authorHash == null) ? authorHash : "");
 	    record.put("rhash", (recHash == null) ? recHash : "");
 	    record.put("subject", (subject == null) ? subject : "");

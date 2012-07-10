@@ -271,7 +271,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 
         @Override
         public boolean hasNext() {
-            if (this.rot) return this.cachecopy.size() > 0;
+            if (this.rot) return !this.cachecopy.isEmpty();
             return this.p < this.cachecopy.size();
         }
 
@@ -366,7 +366,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 
         @Override
         public boolean hasNext() {
-            if (this.rot) return this.cachecounts.size() > 0;
+            if (this.rot) return !this.cachecounts.isEmpty();
             return this.p < this.cachecounts.size();
         }
 

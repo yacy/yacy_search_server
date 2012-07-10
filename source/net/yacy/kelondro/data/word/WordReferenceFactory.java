@@ -129,11 +129,11 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference>, Se
         String dom, url;
         Set<String> peers;
         StringBuilder urlsb;
-        while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
+        while (ci.length() >= 13 && ci.byteAt(6) == ':') {
             assert ci.length() >= 6 : "ci.length() = " + ci.length();
             dom = ci.toStringBuilder(0, 6, 6).toString();
             ci.trim(7);
-            while ((ci.length() > 0) && (ci.byteAt(0) != ',')) {
+            while (!ci.isEmpty() && ci.byteAt(0) != ',') {
                 assert ci.length() >= 6 : "ci.length() = " + ci.length();
                 urlsb = ci.toStringBuilder(0, 6, 12);
                 urlsb.append(dom);

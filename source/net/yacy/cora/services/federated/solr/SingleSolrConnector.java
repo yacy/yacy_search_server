@@ -65,7 +65,7 @@ public class SingleSolrConnector extends AbstractSolrConnector implements SolrCo
         this.port = u.getPort();
         this.solrpath = u.getPath();
         final String userinfo = u.getUserInfo();
-        if (userinfo == null || userinfo.length() == 0) {
+        if (userinfo == null || userinfo.isEmpty()) {
             this.solraccount = ""; this.solrpw = "";
         } else {
             final int p = userinfo.indexOf(':');

@@ -89,7 +89,7 @@ public class vcfParser extends AbstractParser implements Parser {
                 }
 
                 if (line == null) break;
-                else if (line.length() == 0) continue;
+                else if (line.isEmpty()) continue;
 
                 lineNr++;
                 final int pos = line.indexOf(':',0);

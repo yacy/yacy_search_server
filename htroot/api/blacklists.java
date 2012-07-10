@@ -31,7 +31,7 @@ public class blacklists {
                         int count=0;
                         for (final String entry : list){
 
-                            if (entry.length() == 0) {
+                            if (entry.isEmpty()) {
                                 continue;
                             }
                             if (entry.charAt(0) == '#') {

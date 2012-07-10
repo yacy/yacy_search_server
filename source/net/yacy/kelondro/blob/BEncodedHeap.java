@@ -233,7 +233,7 @@ public class BEncodedHeap implements MapStore {
      */
     @Override
     public boolean isEmpty() {
-        return this.table.size() == 0;
+        return this.table.isEmpty();
     }
 
     /**
@@ -646,7 +646,7 @@ public class BEncodedHeap implements MapStore {
      * @return a list of column names
      */
     public ArrayList<String> columns() {
-        if ( this.columnames.size() == 0 ) {
+        if ( this.columnames.isEmpty() ) {
             for ( final Map.Entry<byte[], Map<String, byte[]>> row : this ) {
                 this.columnames.addAll(row.getValue().keySet());
             }

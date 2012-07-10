@@ -370,7 +370,7 @@ public final class RWIProcess extends Thread
                 // check vocabulary constraint
                 String subject = YaCyMetadata.hashURI(iEntry.urlhash());
                 Resource resource = JenaTripleStore.getResource(subject);
-                if (this.query.metatags != null && this.query.metatags.size() > 0) {
+                if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
                     // all metatags must appear in the tags list
                     for (Tagging.Metatag metatag: this.query.metatags) {
                         Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, metatag.getPredicate());
@@ -509,7 +509,7 @@ public final class RWIProcess extends Thread
             while ( ((!feedingIsFinished() && this.addRunning) || this.stack.sizeQueue() > 0) &&
                    (this.query.itemsPerPage < 1 ||
                     loops++ < this.query.itemsPerPage ||
-                    (loops > 1000 && this.doubleDomCache.size() > 0)) ) {
+                    (loops > 1000 && !this.doubleDomCache.isEmpty())) ) {
                 if ( waitingtime <= 0 ) {
                     rwi = this.addRunning ? this.stack.poll(waitingtime) : this.stack.poll();
                 } else {

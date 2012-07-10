@@ -132,8 +132,8 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         // FIXME: This method returns an incorrect date, check callers!
         // ex: de.anomic.server.serverDate.parseShortSecond("20070101120000", "+0200").toGMTString()
         // => 1 Jan 2007 13:00:00 GMT
-        if (timeString == null || timeString.length() == 0) { return new Date(); }
-        if (UTCOffset == null || UTCOffset.length() == 0) { return new Date(); }
+        if (timeString == null || timeString.isEmpty()) { return new Date(); }
+        if (UTCOffset == null || UTCOffset.isEmpty()) { return new Date(); }
         try {
             return new Date(this.dateFormat.parse(timeString).getTime() - UTCDiff() + UTCDiff(UTCOffset));
         } catch (final Throwable e) {
