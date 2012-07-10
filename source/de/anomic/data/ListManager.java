@@ -207,7 +207,6 @@ public class ListManager {
             blacklistFiles.add(blFile);
         }
 
-        Switchboard.urlBlacklist.clear();
         Switchboard.urlBlacklist.loadList(
                 blacklistFiles.toArray(new BlacklistFile[blacklistFiles.size()]),
                 "/");

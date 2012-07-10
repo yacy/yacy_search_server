@@ -216,7 +216,8 @@ public class Blacklist_p {
                         ListManager.removeFromListSet(supportedBlacklistType + ".BlackLists",blacklistToUse);
                     }
                 }
-
+                
+                Switchboard.urlBlacklist.clear();
                 ListManager.reloadBlacklists();
 
             } else if (post.containsKey("shareList")) {
@@ -256,6 +257,8 @@ public class Blacklist_p {
                         }
                     }
                 }
+
+                Switchboard.urlBlacklist.clear();
                 ListManager.reloadBlacklists();
 
             } else if (post.containsKey("addBlacklistEntry")) {
@@ -275,6 +278,8 @@ public class Blacklist_p {
                     prop.put("LOCATION", temp);
                     return prop;
                 }
+
+                Switchboard.urlBlacklist.clear();
                 ListManager.reloadBlacklists();
 
             } else if ("moveBlacklistEntry".equals(action)) {
@@ -307,6 +312,8 @@ public class Blacklist_p {
                         }
                     }
                 }
+
+                Switchboard.urlBlacklist.clear();
                 ListManager.reloadBlacklists();
 
             } else if ("editBlacklistEntry".equals(action)) {
@@ -346,6 +353,8 @@ public class Blacklist_p {
                             }
                         }
                     }
+
+                    Switchboard.urlBlacklist.clear();
                     ListManager.reloadBlacklists();
                     prop.putHTML(DISABLED + EDIT + "currentBlacklist", blacklistToUse);
 
