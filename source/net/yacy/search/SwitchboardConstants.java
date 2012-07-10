@@ -287,10 +287,17 @@ public final class SwitchboardConstants {
 
     public static final String REMOTESEARCH_MAXCOUNT_DEFAULT    = "network.unit.remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_DEFAULT     = "network.unit.remotesearch.maxtime";
-
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_USER        = "remotesearch.maxtime";
 
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED = "federated.service.solr.indexing.enabled";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL = "federated.service.solr.indexing.url";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS = "federated.service.solr.indexing.commitWithinMs";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING = "federated.service.solr.indexing.sharding";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE = "federated.service.solr.indexing.schemefile";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY = "federated.service.solr.indexing.lazy";
+    public static final String FEDERATED_SERVICE_YACY_INDEXING_ENGINE = "federated.service.yacy.indexing.engine";
+    
     /**
      * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>
      * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>

@@ -386,7 +386,8 @@ public final class QueryParams {
 
     private static String seps = "'.,/&_"; static {seps += '"';}
 
-    public static Collection<String>[] cleanQuery(String querystring) {
+    @SuppressWarnings("unchecked")
+	public static Collection<String>[] cleanQuery(String querystring) {
         // returns three sets: a query set, a exclude set and a full query set
         final Collection<String> query_include_words = new ArrayList<String>();
         final Collection<String> query_exclude_words = new ArrayList<String>();

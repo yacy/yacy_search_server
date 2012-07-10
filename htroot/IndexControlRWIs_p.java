@@ -61,6 +61,7 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.RWIProcess;
@@ -92,7 +93,7 @@ public class IndexControlRWIs_p {
         prop.put("result", "");
         prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
         prop.put("cleanup_solr", sb.index.getRemoteSolr() == null
-            || !sb.getConfigBool("federated.service.solr.indexing.enabled", false) ? 0 : 1);
+            || !sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 0 : 1);
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
@@ -158,7 +159,7 @@ public class IndexControlRWIs_p {
                     segment.clear();
                 }
                 if ( post.get("deleteSolr", "").equals("on")
-                    && sb.getConfigBool("federated.service.solr.indexing.enabled", false) ) {
+                    && sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ) {
                     try {
                         sb.index.getRemoteSolr().clear();
                     } catch ( final Exception e ) {

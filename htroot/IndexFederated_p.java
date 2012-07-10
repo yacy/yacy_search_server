@@ -37,6 +37,7 @@ import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.SolrField;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -51,14 +52,14 @@ public class IndexFederated_p {
         if (post != null && post.containsKey("set")) {
             // yacy
             String localindex = post.get("yacy.indexing", "off");
-            env.setConfig("federated.service.yacy.indexing.engine", localindex);
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, localindex);
 
             // solr
-            final boolean solrWasOn = sb.index.getRemoteSolr() != null && env.getConfigBool("federated.service.solr.indexing.enabled", true);
+            final boolean solrWasOn = sb.index.getRemoteSolr() != null && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
             final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.solrremote");
-            env.setConfig("federated.service.solr.indexing.enabled", solrIsOnAfterwards);
-            String solrurls = post.get("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr"));
-            int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000));
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrIsOnAfterwards);
+            String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
+            int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
             boolean lazy = post.getBoolean("solr.indexing.lazy");
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
             final StringBuilder s = new StringBuilder();
@@ -76,12 +77,12 @@ public class IndexFederated_p {
                 s.setLength(s.length() - 1);
             }
             solrurls = s.toString().trim();
-            env.setConfig("federated.service.solr.indexing.url", solrurls);
-            env.setConfig("federated.service.solr.indexing.commitWithinMs", commitWithinMs);
-            env.setConfig("federated.service.solr.indexing.lazy", lazy);
-            env.setConfig("federated.service.solr.indexing.sharding", post.get("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5")));
-            final String schemename = post.get("solr.indexing.schemefile", env.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list"));
-            env.setConfig("federated.service.solr.indexing.schemefile", schemename);
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, solrurls);
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, commitWithinMs);
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, lazy);
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, post.get("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5")));
+            final String schemename = post.get("solr.indexing.schemefile", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list"));
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, schemename);
 
             if (solrWasOn) {
                 // switch off
@@ -91,7 +92,7 @@ public class IndexFederated_p {
 
             if (solrIsOnAfterwards) {
                 // switch on
-                final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
+                final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
                 try {
                     if (usesolr) {
                         SolrConnector solr = new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true);
@@ -154,7 +155,7 @@ public class IndexFederated_p {
         }
 
         // write scheme
-        final String schemename = sb.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
+        final String schemename = sb.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list");
 
         int c = 0;
         boolean dark = false;
@@ -183,14 +184,14 @@ public class IndexFederated_p {
         // fill attribute fields
         // allowed values are: classic, solr, off
         // federated.service.yacy.indexing.engine = classic
-        prop.put("yacy.indexing.engine.classic.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("classic") ? 1 : 0);
-        prop.put("yacy.indexing.engine.solr.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("solr") ? 1 : 0);
-        prop.put("yacy.indexing.engine.off.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("off") ? 1 : 0);
-        prop.put("solr.indexing.solrremote.checked", env.getConfigBool("federated.service.solr.indexing.enabled", false) ? 1 : 0);
-        prop.put("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr").replace(",", "\n"));
-        prop.put("solr.indexing.commitWithinMs", env.getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000));
-        prop.put("solr.indexing.lazy.checked", env.getConfigBool("federated.service.solr.indexing.lazy", true) ? 1 : 0);
-        prop.put("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5"));
+        prop.put("yacy.indexing.engine.classic.checked", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("classic") ? 1 : 0);
+        prop.put("yacy.indexing.engine.solr.checked", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("solr") ? 1 : 0);
+        prop.put("yacy.indexing.engine.off.checked", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("off") ? 1 : 0);
+        prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
+        prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
+        prop.put("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
+        prop.put("solr.indexing.lazy.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true) ? 1 : 0);
+        prop.put("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5"));
         prop.put("solr.indexing.schemefile", schemename);
 
         // return rewrite properties

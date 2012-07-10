@@ -394,12 +394,12 @@ public final class Switchboard extends serverSwitch
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
         final String schemename =
-            getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
+            getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list");
         final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/" + schemename);
         if ( !solrWorkProfile.exists() ) {
             Files.copy(solrBackupProfile, solrWorkProfile);
         }
-        final boolean solrlazy = getConfigBool("federated.service.solr.indexing.lazy", true);
+        final boolean solrlazy = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true);
         final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile, solrlazy);
         this.solrScheme = new SolrConfiguration(solrWorkProfile, solrlazy);
 
@@ -408,9 +408,9 @@ public final class Switchboard extends serverSwitch
         this.solrScheme.fill(backupScheme, true);
 
         // set up the solr interface
-        final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
-        final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
-        int commitWithinMs = getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000);
+        final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
+        final boolean usesolr = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
+        int commitWithinMs = getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
 
         if (usesolr && solrurls != null && solrurls.length() > 0) {
             try {
@@ -2413,8 +2413,8 @@ public final class Switchboard extends serverSwitch
             return new indexingQueueEntry(in.queueEntry, in.documents, null);
         }
 
-        boolean localSolr = this.index.getLocalSolr() != null && getConfig("federated.service.yacy.indexing.engine", "classic").equals("solr");
-        boolean remoteSolr = this.index.getRemoteSolr() != null && getConfigBool("federated.service.solr.indexing.enabled", false);
+        boolean localSolr = this.index.getLocalSolr() != null && getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("solr");
+        boolean remoteSolr = this.index.getRemoteSolr() != null && getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false);
         if (localSolr || remoteSolr) {
             // send the documents to solr
             for ( final Document doc : in.documents ) {
@@ -2452,7 +2452,7 @@ public final class Switchboard extends serverSwitch
         }
 
         // check if we should accept the document for our index
-        if (!getConfig("federated.service.yacy.indexing.engine", "classic").equals("classic")) {
+        if (!getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("classic")) {
             if ( this.log.isInfo() ) {
                 this.log.logInfo("Not Condensed Resource '"
                     + in.queueEntry.url().toNormalform(false, true)
