@@ -31,8 +31,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -329,7 +329,7 @@ public final class Log {
     }
 
     protected final static logEntry poison = new logEntry();
-    protected final static BlockingQueue<logEntry> logQueue = new LinkedBlockingQueue<logEntry>();
+    protected final static BlockingQueue<logEntry> logQueue = new ArrayBlockingQueue<logEntry>(300);
     private   final static logRunner logRunnerThread = new logRunner();
 
     static {
