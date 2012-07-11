@@ -466,7 +466,13 @@ public class Crawler_p {
 
                             // get links and generate filter
                             final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
-                            if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
+                            if (newcrawlingdepth > 0) {
+                                if (fullDomain) {
+                                    newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
+                                } else if (subPath) {
+                                    newcrawlingMustMatch = subpathFilter(hyperlinks.keySet());
+                                }
+                            }
 
                             final DigestURI crawlURL = new DigestURI("file://" + crawlingFile.toString());
                             final CrawlProfile profile = new CrawlProfile(
@@ -675,6 +681,18 @@ public class Crawler_p {
             if (!uri.getHost().startsWith("www.")) {
                 filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://www.").append(uri.getHost()).append(".*").toString());
             }
+        }
+        for (final String element : filterSet) {
+            filter.append('|').append(element);
+        }
+        return filter.length() > 0 ? filter.substring(1) : "";
+    }
+
+    private static String subpathFilter(final Set<MultiProtocolURI> uris) {
+        final StringBuilder filter = new StringBuilder();
+        final Set<String> filterSet = new HashSet<String>();
+        for (final MultiProtocolURI uri: uris) {
+            filterSet.add(new StringBuilder().append(uri.toNormalform(true, false)).append(".*").toString());
         }
         for (final String element : filterSet) {
             filter.append('|').append(element);
