@@ -93,9 +93,9 @@ public class mmParser extends AbstractParser implements Parser {
             content = UTF8.getBytes(sb.toString());
 
         } catch (SAXException ex) {
-            this.log.logWarning(ex.getMessage());
+            AbstractParser.log.logWarning(ex.getMessage());
         } catch (IOException ex) {
-            this.log.logWarning(ex.getMessage());
+            AbstractParser.log.logWarning(ex.getMessage());
         }
 
         return new Document[]{new Document(

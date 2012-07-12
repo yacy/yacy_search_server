@@ -75,15 +75,14 @@ public class sevenzipParser extends AbstractParser implements Parser {
                 null,
                 false);
         Handler archive;
-        super.log.logFine("opening 7zip archive...");
+        AbstractParser.log.logFine("opening 7zip archive...");
         try {
             archive = new Handler(source);
         } catch (final IOException e) {
             throw new Parser.Failure("error opening 7zip archive: " + e.getMessage(), location);
         }
-        final SZParserExtractCallback aec = new SZParserExtractCallback(super.log, archive,
-                doc, location.getFile());
-        super.log.logFine("processing archive contents...");
+        final SZParserExtractCallback aec = new SZParserExtractCallback(AbstractParser.log, archive, doc, location.getFile());
+        AbstractParser.log.logFine("processing archive contents...");
         try {
             archive.Extract(null, -1, 0, aec);
             return doc;

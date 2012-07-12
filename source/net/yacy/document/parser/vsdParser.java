@@ -124,13 +124,13 @@ public class vsdParser extends AbstractParser implements Parser {
 
             // if an unexpected error occures just log the error and raise a new ParserException
             final String errorMsg = "Unable to parse the vsd document '" + location + "':" + e.getMessage();
-            this.log.logSevere(errorMsg);
+            AbstractParser.log.logSevere(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         } finally {
             if (theDoc == null) {
                 // if an unexpected error occures just log the error and raise a new Parser.Failure
                 final String errorMsg = "Unable to parse the vsd document '" + location + "': possibly out of memory";
-                this.log.logSevere(errorMsg);
+                AbstractParser.log.logSevere(errorMsg);
                 throw new Parser.Failure(errorMsg, location);
             }
         }

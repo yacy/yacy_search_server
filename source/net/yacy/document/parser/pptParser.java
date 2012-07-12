@@ -108,7 +108,7 @@ public class pptParser extends AbstractParser implements Parser {
              */
             Log.logException(e);
             final String errorMsg = "Unable to parse the ppt document '" + location + "':" + e.getMessage();
-            this.log.logSevere(errorMsg);
+            AbstractParser.log.logSevere(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
     }

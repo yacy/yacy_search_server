@@ -198,7 +198,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     }
 
                 } else {
-                    if (this.log.isFinest()) this.log.logFinest("Invalid data in vcf file" +
+                    if (AbstractParser.log.isFinest()) AbstractParser.log.logFinest("Invalid data in vcf file" +
                                              "\n\tURL: " + url +
                                              "\n\tLine: " + line +
                                              "\n\tLine-Nr: " + lineNr);

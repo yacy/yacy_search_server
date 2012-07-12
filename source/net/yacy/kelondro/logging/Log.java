@@ -31,8 +31,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -344,14 +347,21 @@ public final class Log {
         @Override
         public void run() {
             logEntry entry;
+            Map<String, Logger> loggerCache = new HashMap<String, Logger>();
+            //Map<String, AtomicInteger> loggerCounter = new HashMap<String, AtomicInteger>();
             try {
                 while ((entry = logQueue.take()) != poison) {
                     if (entry.logger == null) {
                         assert entry.loggername != null;
+                        //AtomicInteger i = loggerCounter.get(entry.loggername);
+                        //if (i == null) {i = new AtomicInteger(0); loggerCounter.put(entry.loggername, i);}
+                        //i.incrementAndGet();
+                        Logger l = loggerCache.get(entry.loggername);
+                        if (l == null) {l = Logger.getLogger(entry.loggername); loggerCache.put(entry.loggername, l);}
                         if (entry.thrown == null) {
-                            Logger.getLogger(entry.loggername).log(entry.level, entry.message);
+                            l.log(entry.level, entry.message);
                         } else {
-                            Logger.getLogger(entry.loggername).log(entry.level, entry.message, entry.thrown);
+                            l.log(entry.level, entry.message, entry.thrown);
                         }
                     } else {
                         assert entry.loggername == null;
@@ -365,7 +375,7 @@ public final class Log {
             } catch (final InterruptedException e) {
                 Log.logException(e);
             }
-
+            //Logger.getLogger("Log").log(Level.INFO, "closing logRunner with cached loggers: " + loggerCounter.entrySet().toString());
         }
     }
 
