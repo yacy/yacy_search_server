@@ -787,15 +787,15 @@ public final class SeedDB implements AlternativeDomainNames {
             // create a seed file which for uploading ...
             seedFile = File.createTempFile("seedFile",".txt", seedDB.myOwnSeedFile.getParentFile());
             seedFile.deleteOnExit();
-            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
+            if (Network.log.isFine()) Network.log.logFine("SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             final ArrayList<String> uv = storeSeedList(seedFile, true);
 
             // uploading the seed file
-            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
+            if (Network.log.isFine()) Network.log.logFine("SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
             log = uploader.uploadSeedFile(sb, seedFile);
 
             // test download
-            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
+            if (Network.log.isFine()) Network.log.logFine("SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
             final Iterator<String> check = downloadSeedFile(seedURL);
 
             // Comparing if local copy and uploaded copy are equal
@@ -852,11 +852,11 @@ public final class SeedDB implements AlternativeDomainNames {
 
     private static String checkCache(final ArrayList<String> uv, final Iterator<String> check) {
         if ((check == null) || (uv == null)) {
-            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Local and uploades seed-list are different");
+            if (Network.log.isFine()) Network.log.logFine("SaveSeedList: Local and uploades seed-list are different");
             return "Entry count is different: uv.size() = " + ((uv == null) ? "null" : Integer.toString(uv.size()));
         }
 
-        if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Comparing local and uploades seed-list entries ...");
+        if (Network.log.isFine()) Network.log.logFine("SaveSeedList: Comparing local and uploades seed-list entries ...");
         int i = 0;
         while (check.hasNext() && i < uv.size()) {
         	if (!((uv.get(i)).equals(check.next()))) return "Element at position " + i + " is different.";

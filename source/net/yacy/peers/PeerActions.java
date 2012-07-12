@@ -240,7 +240,7 @@ public class PeerActions {
             try {
                 synchronized (this.newsPool) {this.newsPool.enqueueIncomingNews(record);}
             } catch (final Exception e) {
-                Log.logSevere("YACY", "processPeerArrival", e);
+                Network.log.logSevere("processPeerArrival", e);
             }
         }
     }

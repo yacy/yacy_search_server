@@ -66,6 +66,8 @@ import de.anomic.data.WorkTables;
 
 public class SnippetProcess {
 
+	public static Log log = new Log("SEARCH");
+	
     private final static int SNIPPET_WORKER_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
 
     // input values
@@ -594,7 +596,7 @@ public class SnippetProcess {
                     180,
                     !this.query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH", "text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            log.logInfo("text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
 
             if (!snippet.getErrorCode().fail()) {
                 // we loaded the file and found the snippet
@@ -613,7 +615,7 @@ public class SnippetProcess {
                 if (this.deleteIfSnippetFail) {
                     this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.query_include_hashes, reason);
                 }
-                Log.logInfo("SEARCH", "sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
+                log.logInfo("sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
         }

@@ -78,6 +78,7 @@ import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.ranking.RankingProfile;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.UserDB;
@@ -717,7 +718,7 @@ public class yacysearch {
             try {
                 Pattern.compile(urlmask);
             } catch ( final PatternSyntaxException ex ) {
-                Log.logWarning("SEARCH", "Illegal URL mask, not a valid regex: " + urlmask);
+                SnippetProcess.log.logWarning("Illegal URL mask, not a valid regex: " + urlmask);
                 prop.put("urlmaskerror", 1);
                 prop.putHTML("urlmaskerror_urlmask", urlmask);
                 urlmask = ".*";
@@ -726,7 +727,7 @@ public class yacysearch {
             try {
                 Pattern.compile(prefermask);
             } catch ( final PatternSyntaxException ex ) {
-                Log.logWarning("SEARCH", "Illegal prefer mask, not a valid regex: " + prefermask);
+            	SnippetProcess.log.logWarning("Illegal prefer mask, not a valid regex: " + prefermask);
                 prop.put("prefermaskerror", 1);
                 prop.putHTML("prefermaskerror_prefermask", prefermask);
                 prefermask = "";
