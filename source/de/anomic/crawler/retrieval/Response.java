@@ -175,7 +175,7 @@ public class Response {
         this.requestHeader = new RequestHeader();
         this.responseHeader = new ResponseHeader(200);
         this.responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain"); // tell parser how to handle the content
-        if (request.size() > 0) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
+        if (!request.isEmpty()) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
         this.content = request.name().length() > 0 ? request.name().getBytes() : request.url().toTokens().getBytes();

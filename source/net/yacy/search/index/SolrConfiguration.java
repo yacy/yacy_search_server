@@ -108,7 +108,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     }
     
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final List<String> value) {
-        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.size() > 0))) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final int value) {

@@ -127,7 +127,7 @@ public class IndexImportOAIPMH_p {
 
                 // start jobs for the sources
                 DigestURI url = null;
-                while (sourceList.size() > 0) {
+                while (!sourceList.isEmpty()) {
                     final String oaipmhurl = sourceList.remove(r.nextInt(sourceList.size()));
                     try {
                         url = new DigestURI(oaipmhurl);

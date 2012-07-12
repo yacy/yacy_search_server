@@ -72,7 +72,7 @@ public class CrawlStartScanner_p
         if ( hosts.isEmpty() ) {
             InetAddress ip;
             if ( sb.isIntranetMode() ) {
-                if ( ips.size() > 0 ) {
+                if ( !ips.isEmpty() ) {
                     ip = ips.iterator().next();
                 } else {
                     ip = Domains.dnsResolve("192.168.0.1");

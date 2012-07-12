@@ -125,11 +125,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             final long t = System.currentTimeMillis();
             if ((IndexCell.this.ram.size() >= IndexCell.this.maxRamEntries ||
                 (IndexCell.this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)) ||
-                (IndexCell.this.ram.size() > 0 && IndexCell.this.lastDump + dumpCycle < t))) {
+                (!IndexCell.this.ram.isEmpty() && IndexCell.this.lastDump + dumpCycle < t))) {
                 synchronized (IndexCell.this.merger) {
                     if (IndexCell.this.ram.size() >= IndexCell.this.maxRamEntries ||
                         (IndexCell.this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)) ||
-                        (IndexCell.this.ram.size() > 0 && IndexCell.this.lastDump + dumpCycle < t)) try {
+                        (!IndexCell.this.ram.isEmpty() && IndexCell.this.lastDump + dumpCycle < t)) try {
                             IndexCell.this.lastDump = System.currentTimeMillis();
                         // removed delayed
                         try {removeDelayed();} catch (final IOException e) {}

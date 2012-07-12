@@ -504,7 +504,7 @@ public class Balancer {
 
     	// best case would be, if we have some zeroWaitingCandidates,
     	// then we select that one with the largest stack
-    	if (zeroWaitingCandidates.size() > 0) {
+    	if (!zeroWaitingCandidates.isEmpty()) {
     	    int largestStack = -1;
     	    String largestStackHost = null;
     	    byte[] largestStackHash = null;
@@ -550,7 +550,7 @@ public class Balancer {
                 break;
             }
             count++;
-            if (this.domainStacks.size() > 0 && count > 120 * this.domainStacks.size()) break;
+            if (!this.domainStacks.isEmpty() && count > 120 * this.domainStacks.size()) break;
     	}
     	Log.logInfo("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + this.domainStacks.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
         this.domStackInitSize = this.domainStacks.size();

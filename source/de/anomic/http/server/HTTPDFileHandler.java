@@ -559,7 +559,7 @@ public final class HTTPDFileHandler {
 
             // track all files that had been accessed so far
             if (targetFile != null && targetFile.exists()) {
-                if (args != null && args.size() > 0) sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), path));
+                if (args != null && !args.isEmpty()) sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), path));
             }
 
             //File targetClass = rewriteClassFile(targetFile);

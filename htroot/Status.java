@@ -72,7 +72,7 @@ public class Status
             post.remove("noforward");
         }
 
-        if ( post != null && post.size() > 0 ) {
+        if ( post != null && !post.isEmpty() ) {
             if ( sb.adminAuthenticated(header) < 2 ) {
             	prop.authenticationRequired();
                 return prop;

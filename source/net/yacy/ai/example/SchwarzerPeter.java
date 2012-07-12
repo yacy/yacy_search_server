@@ -59,7 +59,7 @@ public class SchwarzerPeter {
         List<Karte> stapel0 = new ArrayList<Karte>();
         for (Karte karte: alleKarten) stapel0.add(karte);
         List<Karte> stapel1 = new ArrayList<Karte>();
-        while (stapel0.size() > 0) stapel1.add(stapel0.remove(r.nextInt(stapel0.size())));
+        while (!stapel0.isEmpty()) stapel1.add(stapel0.remove(r.nextInt(stapel0.size())));
         return stapel1;
     }
 
@@ -161,7 +161,7 @@ return true;
             this.haende = new Hand[spieler.spieleranzahl];
             for (int i = 0; i < spieler.spieleranzahl; i++) this.haende[i] = new Hand(Strategy.nichtsortieren_linksziehen);
             List<Karte> geben = neuerStapel(r);
-            while (geben.size() > 0) {
+            while (!geben.isEmpty()) {
                 this.haende[spieler.spielernummer].annehmen(r, geben.remove(0));
                 spieler = spieler.nextRole();
             }

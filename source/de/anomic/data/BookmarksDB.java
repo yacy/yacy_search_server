@@ -259,10 +259,10 @@ public class BookmarksDB {
      */
     public void putTag(final Tag tag){
     	if (tag == null) return;
-        if (tag.size() > 0) {
-            this.tags.put(tag.getTagHash(), tag);
-        } else {
+        if (tag.isEmpty()) {
             this.tags.remove(tag.getTagHash());
+        } else {
+            this.tags.put(tag.getTagHash(), tag);
         }
     }
 
@@ -460,6 +460,10 @@ public class BookmarksDB {
 
         public int size(){
             return this.urlHashes.size();
+        }
+
+        public boolean isEmpty() {
+            return this.urlHashes.isEmpty();
         }
     }
 
