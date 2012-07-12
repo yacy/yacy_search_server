@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -239,19 +238,20 @@ public final class Log {
     }
 
     private final static void enQueueLog(final Logger logger, final Level level, final String message, final Throwable thrown) {
-        if (thrown == null) return;
+        if (!logger.isLoggable(level)) return;
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
-            logger.log(level, message, thrown);
+            if (thrown == null) logger.log(level, message); else  logger.log(level, message, thrown);
         } else {
             try {
-                logQueue.put(new logEntry(logger, level, message, thrown));
+            	if (thrown == null) logQueue.put(new logEntry(logger, level, message)); else logQueue.put(new logEntry(logger, level, message, thrown));
             } catch (final InterruptedException e) {
-                logger.log(level, message, thrown);
+            	if (thrown == null) logger.log(level, message); else  logger.log(level, message, thrown);
             }
         }
     }
 
     private final static void enQueueLog(final Logger logger, final Level level, final String message) {
+        if (!logger.isLoggable(level)) return;
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             logger.log(level, message);
         } else {
@@ -264,14 +264,13 @@ public final class Log {
     }
 
     private final static void enQueueLog(final String loggername, final Level level, final String message, final Throwable thrown) {
-        if (thrown == null) return;
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
-            Logger.getLogger(loggername).log(level, message, thrown);
+        	if (thrown == null) Logger.getLogger(loggername).log(level, message); else Logger.getLogger(loggername).log(level, message, thrown);
         } else {
             try {
-                logQueue.put(new logEntry(loggername, level, message, thrown));
+            	if (thrown == null) logQueue.put(new logEntry(loggername, level, message)); else logQueue.put(new logEntry(loggername, level, message, thrown));
             } catch (final InterruptedException e) {
-                Logger.getLogger(loggername).log(level, message, thrown);
+            	if (thrown == null) Logger.getLogger(loggername).log(level, message); else Logger.getLogger(loggername).log(level, message, thrown);
             }
         }
     }
