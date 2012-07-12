@@ -167,7 +167,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         final Entry entry = new Entry(bentry, executor, workdate, workcount, reason);
         put(entry);
         this.stack.add(entry.hash());
-        Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + reason);
+        if (!reason.startsWith("double")) Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + reason);
         if (this.solrConnector != null && failCategory.store) {
             // send the error to solr
             try {

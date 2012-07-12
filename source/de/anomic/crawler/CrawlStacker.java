@@ -443,7 +443,6 @@ public final class CrawlStacker {
         if (oldEntry == null) {
             if (dbocc != null) {
                 // do double-check
-                if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is double registered in '" + dbocc + "'.");
                 if (dbocc.equals("errors")) {
                     final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
                     return "double in: errors (" + errorEntry.anycause() + ")";
