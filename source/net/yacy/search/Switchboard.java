@@ -292,7 +292,7 @@ public final class Switchboard extends serverSwitch
         sb = this;
 
         // set loglevel and log
-        setLog(new Log("YACY_SEARCH"));
+        setLog(new Log("SWITCHBOARD"));
 
         // set default peer name
         Seed.ANON_PREFIX = getConfig("peernameprefix", "_anon");
@@ -1661,10 +1661,6 @@ public final class Switchboard extends serverSwitch
         }
 
         // put document into the concurrent processing queue
-        if ( this.log.isFinest() ) {
-            this.log.logFinest("deQueue: passing to indexing queue: "
-                + response.url().toNormalform(true, false));
-        }
         try {
             this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(
                 response,
@@ -2249,11 +2245,6 @@ public final class Switchboard extends serverSwitch
     public indexingQueueEntry parseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_PARSING);
 
-        // debug
-        if ( this.log.isFinest() ) {
-            this.log.logFinest("PARSE " + in.queueEntry);
-        }
-
         Document[] documents = null;
         try {
             documents = parseDocument(in.queueEntry);
@@ -2487,9 +2478,6 @@ public final class Switchboard extends serverSwitch
         }
         in.documents = doclist.toArray(new Document[doclist.size()]);
         final Condenser[] condenser = new Condenser[in.documents.length];
-        if ( this.log.isFine() ) {
-            this.log.logFine("Condensing for '" + in.queueEntry.url().toNormalform(false, true) + "'");
-        }
         for ( int i = 0; i < in.documents.length; i++ ) {
             condenser[i] =
                 new Condenser(in.documents[i], in.queueEntry.profile().indexText(), in.queueEntry
