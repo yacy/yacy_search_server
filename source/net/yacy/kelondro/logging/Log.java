@@ -288,37 +288,37 @@ public final class Log {
     }
 
     protected final static class logEntry {
-        public final Logger logger;
-        public final String loggername;
         public final Level level;
         public final String message;
-        public final Throwable thrown;
+        public Logger logger;
+        public String loggername;
+        public Throwable thrown;
+        private logEntry(final Level level, final String message) {
+            this.level = level;
+            this.message = message == null || message.length() <= 120 ? message : message.substring(0, 120);
+        }
         public logEntry(final Logger logger, final Level level, final String message, final Throwable thrown) {
+            this(level, message);
             this.logger = logger;
             this.loggername = null;
-            this.level = level;
-            this.message = message;
             this.thrown = thrown;
         }
         public logEntry(final Logger logger, final Level level, final String message) {
+            this(level, message);
             this.logger = logger;
             this.loggername = null;
-            this.level = level;
-            this.message = message;
             this.thrown = null;
         }
         public logEntry(final String loggername, final Level level, final String message, final Throwable thrown) {
+            this(level, message);
             this.logger = null;
             this.loggername = loggername;
-            this.level = level;
-            this.message = message;
             this.thrown = thrown;
         }
         public logEntry(final String loggername, final Level level, final String message) {
+            this(level, message);
             this.logger = null;
             this.loggername = loggername;
-            this.level = level;
-            this.message = message;
             this.thrown = null;
         }
         public logEntry() {

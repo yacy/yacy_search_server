@@ -158,7 +158,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             url = "http://" + url;
             p = 4;
         }
-        this.protocol = url.substring(0, p).toLowerCase().trim();
+        this.protocol = url.substring(0, p).toLowerCase().trim().intern();
         if (url.length() < p + 4) throw new MalformedURLException("URL not parseable: '" + url + "'");
         if (!this.protocol.equals("file") && url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
@@ -166,20 +166,20 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
-                    this.host = url.substring(p + 3);
+                    this.host = url.substring(p + 3).intern();
                     this.userInfo = null;
                 } else {
-                    this.host = url.substring(r + 1);
+                    this.host = url.substring(r + 1).intern();
                     this.userInfo = url.substring(p + 3, r);
                 }
                 this.path = "/";
             } else {
-                this.host = url.substring(p + 3, q).trim();
+                this.host = url.substring(p + 3, q).trim().intern();
                 if ((r = this.host.indexOf('@')) < 0) {
                     this.userInfo = null;
                 } else {
                     this.userInfo = this.host.substring(0, r);
-                    this.host = this.host.substring(r + 1);
+                    this.host = this.host.substring(r + 1).intern();
                 }
                 this.path = url.substring(q);
             }
@@ -2129,9 +2129,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         String environment, url;
         MultiProtocolURI aURL, aURL1;
         java.net.URL jURL;
-        for (int i = 0; i < test.length; i++) {
-            environment = test[i][0];
-            url = test[i][1];
+        for (String[] element : test) {
+            environment = element[0];
+            url = element[1];
             try {aURL = MultiProtocolURI.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}

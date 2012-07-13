@@ -49,6 +49,8 @@ import net.yacy.kelondro.util.ByteBuffer;
 
 public class RasterPlotter {
 
+    public final Log log = new Log("RasterPlotter");
+
     public static final double PI180 = Math.PI / 180.0d;
 
     // colors regarding RGB Color Model
@@ -217,7 +219,7 @@ public class RasterPlotter {
             this.grid.setPixel(x, y, c);
         }
         } catch (ArrayIndexOutOfBoundsException e) {
-            Log.logWarning("RasterPlotter", e.getMessage() + ": x = " + x + ", y = " + y);
+            this.log.logWarning(e.getMessage() + ": x = " + x + ", y = " + y);
         } // may appear when pixel coordinate is out of bounds
     }
 

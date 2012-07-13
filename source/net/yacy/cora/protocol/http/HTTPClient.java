@@ -598,6 +598,7 @@ public class HTTPClient {
 	        assert !hrequest.expectContinue();
 	    }
 
+	    Thread.currentThread().setName("HTTPClient-" + httpUriRequest.getURI().getHost());
 	    try {
 	        final long time = System.currentTimeMillis();
             this.httpResponse = httpClient.execute(httpUriRequest, httpContext);

@@ -267,12 +267,11 @@ public class RobotsTxt {
     private static final int DOWNLOAD_MODDATE = 3;
 
     static final String getHostPort(final MultiProtocolURI theURL) {
-        String urlHostPort = null;
         final int port = getPort(theURL);
-        urlHostPort = theURL.getHost() + ":" + port;
-        urlHostPort = urlHostPort.toLowerCase().intern();
-
-        return urlHostPort;
+        String host = theURL.getHost();
+        StringBuilder sb = new StringBuilder(host.length() + 6);
+        sb.append(host).append(':').append(Integer.toString(port));
+        return sb.toString();
     }
 
     private static final int getPort(final MultiProtocolURI theURL) {

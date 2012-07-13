@@ -58,7 +58,7 @@ public class HeapReader {
     //public final static long keepFreeMem = 20 * 1024 * 1024;
 
 	private final static Log log = new Log("HeapReader");
-	
+
     // input values
     protected int                keylength;  // the length of the primary key
     protected File               heapFile;   // the file of the heap
@@ -731,7 +731,7 @@ public class HeapReader {
         public entries(final File blobFile, final int keylen) throws IOException {
             if (!(blobFile.exists())) throw new IOException("file " + blobFile + " does not exist");
             try {
-                this.is = new DataInputStream(new BufferedInputStream(new FileInputStream(blobFile), 8*1024*1024));
+                this.is = new DataInputStream(new BufferedInputStream(new FileInputStream(blobFile), 256 * 1024));
             } catch (OutOfMemoryError e) {
                 this.is = new DataInputStream(new FileInputStream(blobFile));
             }
@@ -810,6 +810,7 @@ public class HeapReader {
             }
         }
 
+        @Override
         public synchronized void close() {
             if (this.is != null) try { this.is.close(); } catch (final IOException e) {Log.logException(e);}
             this.is = null;

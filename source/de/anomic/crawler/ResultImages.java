@@ -28,11 +28,11 @@ package de.anomic.crawler;
 
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.storage.SizeLimitedSet;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -52,7 +52,7 @@ public class ResultImages {
     // we also check all links for a double-check so we don't get the same image more than once in any queue
     // image links may appear double here even if the pages where the image links are embedded already are checked for double-occurrence:
     // the same images may be linked from different pages
-    private static final ConcurrentMap<MultiProtocolURI, Long> doubleCheck = new ConcurrentHashMap<MultiProtocolURI, Long>(); // (url, time) when the url appeared first
+    private static final Set<String> doubleCheck = new SizeLimitedSet<String>(10000);
 
     public static void registerImages(final DigestURI source, final Document document, final boolean privateEntry) {
         if (document == null) return;
@@ -65,8 +65,9 @@ public class ResultImages {
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
             if (image == null || image.url() == null) continue;
-            if (doubleCheck.containsKey(image.url())) continue;
-            doubleCheck.put(image.url(), System.currentTimeMillis());
+            String url = image.url().toNormalform(true, false);
+            if (doubleCheck.contains(url)) continue;
+            doubleCheck.add(url);
 
             final String name = image.url().getFile();
             boolean good = false;

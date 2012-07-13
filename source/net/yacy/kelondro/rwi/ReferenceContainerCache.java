@@ -59,6 +59,8 @@ import net.yacy.kelondro.util.FileUtils;
  */
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
+    public static final Log log = new Log("ReferenceContainerCache");
+
     private final int termSize;
     private final ByteOrder termOrder;
     private final ContainerOrder<ReferenceType> containerOrder;
@@ -117,7 +119,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void dump(final File heapFile, final int writeBuffer, final boolean destructive) {
         assert this.cache != null;
         if (this.cache == null) return;
-        Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + this.cache.size() + " rwi's");
+        log.logInfo("creating rwi heap dump '" + heapFile.getName() + "', " + this.cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
         final File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".prt");
         HeapWriter dump;
@@ -162,9 +164,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         try {
             dump.close(true);
-            Log.logInfo("indexContainerRAMHeap", "finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
+            log.logInfo("finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
         } catch (final IOException e) {
-            Log.logSevere("indexContainerRAMHeap", "failed rwi heap dump: " + e.getMessage(), e);
+            log.logSevere("failed rwi heap dump: " + e.getMessage(), e);
         } finally {
             dump = null;
         }

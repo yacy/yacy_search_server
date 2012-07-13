@@ -56,13 +56,15 @@ public class Word {
      */
     public static final int commonHashLength = 12;
 
-    private static final int hashCacheSize = Math.max(100000, Math.min(1000000, (int) (MemoryControl.available() / 40000L)));
+    private static final int hashCacheSize = Math.max(20000, Math.min(200000, (int) (MemoryControl.available() / 40000L)));
     private static ARC<String, byte[]> hashCache = null;
     static {
         try {
             hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()));
+            Log.logInfo("Word", "hashCache.size = " + hashCacheSize);
         } catch (final OutOfMemoryError e) {
             hashCache = new ConcurrentARC<String, byte[]>(1000, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
+            Log.logInfo("Word", "hashCache.size = " + 1000);
         }
     }
     /*

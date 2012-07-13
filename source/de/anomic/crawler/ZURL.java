@@ -55,6 +55,8 @@ import de.anomic.crawler.retrieval.Request;
 
 public class ZURL implements Iterable<ZURL.Entry> {
 
+    public static Log log = new Log("REJECTED");
+
     private static final int EcoFSBufferSize = 2000;
     private static final int maxStackSize    = 1000;
 
@@ -167,7 +169,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         final Entry entry = new Entry(bentry, executor, workdate, workcount, reason);
         put(entry);
         this.stack.add(entry.hash());
-        if (!reason.startsWith("double")) Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + reason);
+        if (!reason.startsWith("double")) log.logInfo(bentry.url().toNormalform(false, false) + " - " + reason);
         if (this.solrConnector != null && failCategory.store) {
             // send the error to solr
             try {

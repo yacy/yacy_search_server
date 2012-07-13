@@ -143,7 +143,7 @@ public class yacydoc {
             references += r.toString()+",";
         }
 
-        Log.logInfo ("TRIPLESTORE", references);
+        JenaTripleStore.log.logInfo(references);
 
         prop.put("taglinks", references);
 
