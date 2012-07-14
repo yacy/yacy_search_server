@@ -458,7 +458,7 @@ public class Balancer {
     	byte[] besturlhash = null;
     	String besthost = null;
     	Map<String, byte[]> zeroWaitingCandidates = new HashMap<String, byte[]>();
-    	while (i.hasNext()) {
+    	while (i.hasNext() && zeroWaitingCandidates.size() < 10) {
             entry = i.next();
 
             // clean up empty entries
