@@ -295,7 +295,7 @@ public final class Log {
         public Throwable thrown;
         private logEntry(final Level level, final String message) {
             this.level = level;
-            this.message = message == null || message.length() <= 120 ? message : message.substring(0, 120);
+            this.message = message == null || message.length() <= 512 ? message : message.substring(0, 512);
         }
         public logEntry(final Logger logger, final Level level, final String message, final Throwable thrown) {
             this(level, message);
