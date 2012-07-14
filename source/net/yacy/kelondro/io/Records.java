@@ -176,10 +176,9 @@ public final class Records {
      * @return the index offset inside the buffer or -1 if the index is not in the buffer
      * @throws IOException
      */
-    private final int inBuffer(final long index) throws IOException {
-        final long fs = filesize();
-        if (index >= fs && index < fs + this.buffercount) {
-            return (int) (index - fs);
+    private final int inBuffer(final long index, final long filesize) throws IOException {
+        if (index >= filesize && index < filesize + this.buffercount) {
+            return (int) (index - filesize);
         }
         return -1;
     }
@@ -218,9 +217,11 @@ public final class Records {
      */
     public final synchronized void get(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
-        if (index >= size()) throw new IndexOutOfBoundsException("kelondroEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
+        final long filesize = filesize();
+        final long s = filesize + this.buffercount;
+         if (index >= s) throw new IndexOutOfBoundsException("kelondroEcoFS.get(" + index + ") outside bounds (" + s + ")");
         // check if index is inside of cache
-        final int q = inBuffer(index);
+        final int q = inBuffer(index, filesize);
         if (q < 0) {
             // copy records from file to given buffer
             this.raf.seek(this.recordsize * index);
@@ -233,8 +234,9 @@ public final class Records {
 
     public final synchronized void put(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
-        final long s = filesize() + this.buffercount;
-        if (index > s) throw new IndexOutOfBoundsException("kelondroEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
+        long filesize = filesize();
+        final long s = filesize + this.buffercount;
+        if (index > s) throw new IndexOutOfBoundsException("kelondroEcoFS.put(" + index + ") outside bounds (" + s + ")");
 
         // check if this is an empty entry
         if (isClean(b , start, this.recordsize)) {
@@ -243,7 +245,7 @@ public final class Records {
         }
 
         // check if index is inside of cache
-        final int q = inBuffer(index);
+        final int q = inBuffer(index, filesize);
         if (q >= 0) {
             // write entry to the buffer
             System.arraycopy(b, start, this.buffer, q * this.recordsize, this.recordsize);
@@ -275,8 +277,6 @@ public final class Records {
     }
 
     public final synchronized void add(final byte[] b, final int start) throws IOException {
-        // index == size() == filesize() + (long) this.buffercount
-
         assert b.length - start >= this.recordsize;
 
         // check if this is an empty entry
@@ -311,17 +311,19 @@ public final class Records {
     }
 
     private final boolean isClean(final long index) throws IOException {
-         assert index < size();
-         // check if index is inside of buffer
-         final int q = inBuffer(index);
-         if (q >= 0) {
-             // check entry from the buffer
-             return isClean(this.buffer, q * this.recordsize, this.recordsize);
-         }
-         byte[] b = new byte[this.recordsize];
-         this.raf.seek(index * this.recordsize);
-         this.raf.readFully(b, 0, this.recordsize);
-         return isClean(b, 0, this.recordsize);
+        long filesize = filesize();
+        long size = filesize + this.buffercount;
+        assert index < size;
+        // check if index is inside of buffer
+        final int q = inBuffer(index, filesize);
+        if (q >= 0) {
+            // check entry from the buffer
+            return isClean(this.buffer, q * this.recordsize, this.recordsize);
+        }
+        byte[] b = new byte[this.recordsize];
+        this.raf.seek(index * this.recordsize);
+        this.raf.readFully(b, 0, this.recordsize);
+        return isClean(b, 0, this.recordsize);
     }
 
     /**
@@ -330,7 +332,8 @@ public final class Records {
      * @throws IOException
      */
     private final void clean(final long index) throws IOException {
-        final long s = size();
+        long filesize = filesize();
+        final long s = filesize + this.buffercount;
         if (index >= s) throw new IndexOutOfBoundsException("kelondroEcoFS.clean(" + index + ") outside bounds (" + s + ")");
         if (index == s - 1) {
             cleanLast();
@@ -338,7 +341,7 @@ public final class Records {
         }
 
         // check if index is inside of cache
-        final int q = inBuffer(index);
+        final int q = inBuffer(index, filesize);
         if (q >= 0) {
             // write zero to the buffer
             System.arraycopy(this.zero, 0, this.buffer, q * this.recordsize, this.recordsize);
