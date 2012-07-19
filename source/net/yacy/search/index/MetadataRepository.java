@@ -63,6 +63,9 @@ import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.solr.EmbeddedSolrConnector;
+
+import org.apache.lucene.util.Version;
+
 import de.anomic.crawler.CrawlStacker;
 
 public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
@@ -98,8 +101,15 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
     public void connectLocalSolr() throws IOException {
         File solrLocation = this.location;
         if (solrLocation.getName().equals("default")) solrLocation = solrLocation.getParentFile();
-        solrLocation = new File(solrLocation, "solr");
-        this.localSolr = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath,"defaults"), "solr"));
+        String solrPath = "solr_36";
+        solrLocation = new File(solrLocation, solrPath); // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+        EmbeddedSolrConnector solr = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"));
+        Version luceneVersion = solr.getConfig().getLuceneVersion("luceneMatchVersion");
+        String lvn = luceneVersion.name();
+        int p = lvn.indexOf('_');
+        assert solrPath.endsWith(lvn.substring(p)) : "luceneVersion = " + lvn + ", solrPath = " + solrPath + ", p = " + p;
+        Log.logInfo("MetadataRepository", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn);
+        this.localSolr = solr;
     }
 
     public SolrConnector getLocalSolr() {

@@ -536,7 +536,7 @@ public final class HTTPDFileHandler {
             } else {
                     //XXX: you cannot share a .png/.gif file with a name like a class in htroot.
                     if ( !(targetFile.exists()) &&
-                            !((path.endsWith("png")||path.endsWith("gif") ||
+                            !((path.endsWith("png")||path.endsWith("gif") || path.indexOf('.') < 0 ||
                             matchesSuffix(path, switchboard.getConfig("cgi.suffixes", null)) ||
                             path.endsWith(".stream")) &&
                             targetClass!=null ) ){
@@ -574,7 +574,7 @@ public final class HTTPDFileHandler {
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "png");
                 // in case that there are no args given, args = null or empty hashmap
-                img = invokeServlet(targetClass, requestHeader, args);
+                img = invokeServlet(targetClass, requestHeader, args, null);
                 if (img == null) {
                     // error with image generation; send file-not-found
                     HTTPDemon.sendRespondError(conProp, out, 3, 404, "File not Found", null, null);
@@ -867,18 +867,18 @@ public final class HTTPDFileHandler {
                         }
                     }
                 }
-            } else if ((targetClass != null) && (path.endsWith(".stream"))) {
+            } else if (targetClass != null && (path.endsWith(".stream") || path.indexOf('.') < 0)) {
                 // call rewrite-class
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
-                requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "stream");
+                requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, path.endsWith(".stream") ? "stream" : "");
                 //requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
                 //requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
-
-                HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null);
-
-                // in case that there are no args given, args = null or empty hashmap
-                /* servletProperties tp = (servlerObjects) */ invokeServlet(targetClass, requestHeader, args);
+                ResponseHeader header = new ResponseHeader(200);
+                header.put(HeaderFramework.CONTENT_TYPE, "text/xml"); // this is a hack; the actual content type should be given by the servlet, but there is no handover process for that at this time
+                conProp.remove(HeaderFramework.CONNECTION_PROP_PERSISTENT);
+                HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, header);
+                invokeServlet(targetClass, requestHeader, args, out);
                 forceConnectionClose(conProp);
                 return;
             } else if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
@@ -920,7 +920,7 @@ public final class HTTPDFileHandler {
                         final int ep = path.lastIndexOf(".");
                         requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, path.substring(ep + 1));
                         // in case that there are no args given, args = null or empty hashmap
-                        final Object tmp = invokeServlet(targetClass, requestHeader, args);
+                        final Object tmp = invokeServlet(targetClass, requestHeader, args, null);
                         if (tmp == null) {
                             // if no args given, then tp will be an empty Hashtable object (not null)
                             templatePatterns = new servletProperties();
@@ -1313,9 +1313,7 @@ public final class HTTPDFileHandler {
         try {
             String f = template.getCanonicalPath();
             final int p = f.lastIndexOf('.');
-            if (p < 0) return null;
-            f = f.substring(0, p) + ".class";
-            //System.out.println("constructed class path " + f);
+            f = p < 0 ? f + ".class" : f.substring(0, p) + ".class";
             final File cf = new File(f);
             if (cf.exists()) return cf;
             return null;
@@ -1341,11 +1339,20 @@ public final class HTTPDFileHandler {
             }
 
             final Class<?> c = provider.loadClass(classFile);
-            final Class<?>[] params = new Class[] {
+            Class<?>[] params = new Class[] {
                     RequestHeader.class,
                     serverObjects.class,
                     serverSwitch.class };
-            m = c.getMethod("respond", params);
+            try {
+                m = c.getMethod("respond", params);
+            } catch (NoSuchMethodException e) {
+                params = new Class[] {
+                    RequestHeader.class,
+                    serverObjects.class,
+                    serverSwitch.class,
+                    OutputStream.class};
+                m = c.getMethod("respond", params);
+            }
 
             if (MemoryControl.shortStatus()) {
                 templateMethodCache.clear();
@@ -1365,9 +1372,12 @@ public final class HTTPDFileHandler {
         return m;
     }
 
-    private static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) {
+    private static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args, final OutputStream os) {
         try {
-            return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
+            if (os == null) {
+                return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
+            }
+            return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard, os});
         } catch (final Throwable e) {
             theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                             e.getMessage() +

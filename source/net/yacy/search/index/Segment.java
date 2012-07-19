@@ -139,7 +139,7 @@ public class Segment {
 
         // create LURL-db
         this.urlMetadata = new MetadataRepository(segmentPath, "text.urlmd", useTailCache, exceed134217727);
-        //this.connectLocalSolr();
+        this.connectLocalSolr();
     }
 
     public long URLCount() {

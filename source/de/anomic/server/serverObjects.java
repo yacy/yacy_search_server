@@ -63,6 +63,9 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.Switchboard;
 
+import org.apache.solr.common.params.MultiMapSolrParams;
+import org.apache.solr.common.params.SolrParams;
+
 
 public class serverObjects extends HashMap<String, String> implements Cloneable {
 
@@ -462,6 +465,15 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         }
         param.setLength(param.length() - 1);
         return param.toString();
+    }
+
+    public SolrParams toSolrParams() {
+        Map<String,String[]> m = new HashMap<String, String[]>();
+        for (Map.Entry<String, String> e: this.entrySet()) {
+            m.put(e.getKey(), new String[]{e.getValue()});
+        }
+        final SolrParams solrParams = new MultiMapSolrParams(m);
+        return solrParams;
     }
 
     public static void main(final String[] args) {
