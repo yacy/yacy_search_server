@@ -113,11 +113,11 @@ public class IndexFederated_p {
                         solr.setCommitWithinMs(commitWithinMs);
                         sb.index.connectRemoteSolr(solr);
                     } else {
-                        sb.index.connectRemoteSolr(null);
+                        sb.index.disconnectRemoteSolr();
                     }
                 } catch (final IOException e) {
                     Log.logException(e);
-                    sb.index.connectRemoteSolr(null);
+                    sb.index.disconnectRemoteSolr();
                 }
             }
 

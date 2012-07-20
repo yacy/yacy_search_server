@@ -2408,8 +2408,8 @@ public final class Switchboard extends serverSwitch
             return new indexingQueueEntry(in.queueEntry, in.documents, null);
         }
 
-        boolean localSolr = this.index.getLocalSolr() != null && getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("solr");
-        boolean remoteSolr = this.index.getRemoteSolr() != null && getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false);
+        boolean localSolr = this.index.getLocalSolr() != null;
+        boolean remoteSolr = this.index.getRemoteSolr() != null;
         if (localSolr || remoteSolr) {
             // send the documents to solr
             for ( final Document doc : in.documents ) {
