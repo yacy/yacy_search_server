@@ -98,6 +98,12 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         this.remoteSolr = solr;
     }
 
+    public void disconnectRemoteSolr() {
+    	if (this.remoteSolr == null) return;
+        this.remoteSolr.close();
+        this.remoteSolr = null;
+    }
+
     public void connectLocalSolr() throws IOException {
         File solrLocation = this.location;
         if (solrLocation.getName().equals("default")) solrLocation = solrLocation.getParentFile();
@@ -112,6 +118,12 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         this.localSolr = solr;
     }
 
+    public void disconnectLocalSolr() {
+        if (this.localSolr == null) return;
+        this.localSolr.close();
+        this.localSolr = null;
+    }
+    
     public SolrConnector getLocalSolr() {
         return this.localSolr;
     }
@@ -147,8 +159,14 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
             this.urlIndexFile.close();
             this.urlIndexFile = null;
         }
-        if (this.localSolr != null) this.localSolr.close();
-        if (this.remoteSolr != null) this.remoteSolr.close();
+        if (this.localSolr != null) {
+        	this.localSolr.close();
+        	this.localSolr = null;
+        }
+        if (this.remoteSolr != null) {
+        	this.remoteSolr.close();
+        	this.remoteSolr = null;
+        }
     }
 
     public int writeCacheSize() {

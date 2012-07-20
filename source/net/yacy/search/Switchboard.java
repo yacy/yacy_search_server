@@ -382,6 +382,7 @@ public final class Switchboard extends serverSwitch
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
+        final boolean solrLocal = this.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "off").equals("solr");
         this.index =
             new Segment(
                 this.log,
@@ -389,7 +390,8 @@ public final class Switchboard extends serverSwitch
                 wordCacheMaxCount,
                 fileSizeMax,
                 this.useTailCache,
-                this.exceed134217727);
+                this.exceed134217727,
+                solrLocal);
 
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
@@ -1179,6 +1181,7 @@ public final class Switchboard extends serverSwitch
             setConfig("heuristic.site", false);
             setConfig("heuristic.blekko", false);
 
+            final boolean solrLocal = this.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "off").equals("solr");
             // relocate
             this.peers.relocate(
                 this.networkRoot,
@@ -1193,7 +1196,8 @@ public final class Switchboard extends serverSwitch
                     wordCacheMaxCount,
                     fileSizeMax,
                     this.useTailCache,
-                    this.exceed134217727);
+                    this.exceed134217727,
+                    solrLocal);
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
 
             // create a crawler

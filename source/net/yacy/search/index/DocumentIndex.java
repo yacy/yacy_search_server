@@ -74,7 +74,7 @@ public class DocumentIndex extends Segment
 
     public DocumentIndex(final File segmentPath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(new Log("DocumentIndex"), segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
+        super(new Log("DocumentIndex"), segmentPath, cachesize, targetFileSize * 4 - 1, false, false, true);
         final int cores = Runtime.getRuntime().availableProcessors() + 1;
         this.callback = callback;
         this.queue = new LinkedBlockingQueue<DigestURI>(cores * 300);

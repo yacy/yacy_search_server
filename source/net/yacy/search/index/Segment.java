@@ -108,7 +108,8 @@ public class Segment {
             final int entityCacheMaxSize,
             final long maxFileSize,
             final boolean useTailCache,
-            final boolean exceed134217727) throws IOException {
+            final boolean exceed134217727,
+            final boolean connectLocalSolr) throws IOException {
 
         log.logInfo("Initializing Segment '" + segmentPath + ".");
 
@@ -139,7 +140,7 @@ public class Segment {
 
         // create LURL-db
         this.urlMetadata = new MetadataRepository(segmentPath, "text.urlmd", useTailCache, exceed134217727);
-        this.connectLocalSolr();
+        if (connectLocalSolr) this.connectLocalSolr();
     }
 
     public long URLCount() {
@@ -157,9 +158,17 @@ public class Segment {
     public void connectRemoteSolr(final SolrConnector solr) {
         this.urlMetadata.connectRemoteSolr(solr);
     }
+    
+    public void disconnectRemoteSolr() {
+        this.urlMetadata.disconnectRemoteSolr();
+    }
 
     public void connectLocalSolr() throws IOException {
         this.urlMetadata.connectLocalSolr();
+    }
+
+    public void disconnectLocalSolr() {
+        this.urlMetadata.disconnectLocalSolr();
     }
 
     public SolrConnector getRemoteSolr() {
