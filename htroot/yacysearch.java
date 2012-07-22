@@ -949,7 +949,7 @@ public class yacysearch {
                     % theSearch.getQuery().itemsPerPage : startRecord + theSearch.getQuery().itemsPerPage,
                 true));
             prop.put("num-results_itemsPerPage", itemsPerPage);
-            prop.put("num-results_totalcount", Formatter.number(indexcount, true));
+            prop.put("num-results_totalcount", indexcount);
             prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch)
                 ? "1"
                 : "0");
