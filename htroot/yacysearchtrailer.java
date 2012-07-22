@@ -359,7 +359,7 @@ public class yacysearchtrailer {
         }
 
         final int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
-        prop.put("num-results_totalcount", Formatter.number(indexcount, true));
+        prop.put("num-results_totalcount", indexcount);
 
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.FINALIZATION, "bottomline", 0, 0), false);
 
