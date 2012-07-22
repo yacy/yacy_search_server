@@ -51,7 +51,7 @@ import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 
@@ -112,7 +112,7 @@ public class ViewFile {
 
         // get the url hash from which the content should be loaded
         String urlHash = post.get("urlHash", "");
-        URIMetadataRow urlEntry = null;
+        URIMetadata urlEntry = null;
         // get the urlEntry that belongs to the url hash
         if (urlHash.length() > 0 && (urlEntry = indexSegment.urlMetadata().load(ASCII.getBytes(urlHash))) != null) {
             // get the url that belongs to the entry

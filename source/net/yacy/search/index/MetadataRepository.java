@@ -49,6 +49,7 @@ import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Cache;
@@ -65,37 +66,38 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.lucene.util.Version;
-
 import de.anomic.crawler.CrawlStacker;
 
 public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
 
     // class objects
-    protected     Index               urlIndexFile;
+	private final File                location;
+    private       Index               urlIndexFile;
     private       Export              exportthread; // will have a export thread assigned if exporter is running
-    private final File                location;
-    private final String              tablename;
+    private       String              tablename;
     private       ArrayList<HostStat> statsDump;
     private       SolrConnector       localSolr, remoteSolr;
 
-    public MetadataRepository(
-            final File path,
-            final String tablename,
-            final boolean useTailCache,
-            final boolean exceed134217727) {
+    public MetadataRepository(final File path) {
         this.location = path;
-        this.tablename = tablename;
-        Index backupIndex = null;
-        backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
-        this.urlIndexFile = backupIndex; //new Cache(backupIndex, 20000000, 20000000);
+        this.tablename = null;
+        this.urlIndexFile = null;
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
         this.remoteSolr = null;
         this.localSolr = null;
     }
+    
+    public void connectUrlDb(final String tablename, final boolean useTailCache, final boolean exceed134217727) {
+    	if (this.urlIndexFile != null) return;
+        this.tablename = tablename;
+    	this.urlIndexFile = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
+    }
 
-    public void connectRemoteSolr(final SolrConnector solr) {
-        this.remoteSolr = solr;
+    public void disconnectUrlDb() {
+    	if (this.urlIndexFile == null) return;
+    	this.urlIndexFile.close();
+    	this.urlIndexFile = null;
     }
 
     public void connectLocalSolr() throws IOException {
@@ -112,6 +114,22 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         this.localSolr = solr;
     }
 
+    public void disconnectLocalSolr() {
+        if (this.localSolr == null) return;
+        this.localSolr.close();
+        this.localSolr = null;
+    }
+
+    public void connectRemoteSolr(final SolrConnector solr) {
+        this.remoteSolr = solr;
+    }
+
+    public void disconnectRemoteSolr() {
+    	if (this.remoteSolr == null) return;
+        this.remoteSolr.close();
+        this.remoteSolr = null;
+    }
+    
     public SolrConnector getLocalSolr() {
         return this.localSolr;
     }
@@ -121,7 +139,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
     }
 
     public void clearCache() {
-        if (this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
+        if (this.urlIndexFile != null && this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
         if (this.statsDump != null) this.statsDump.clear();
         this.statsDump = null;
     }
@@ -130,15 +148,22 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         if (this.exportthread != null) this.exportthread.interrupt();
         if (this.urlIndexFile == null) {
             SplitTable.delete(this.location, this.tablename);
-            this.urlIndexFile = new SplitTable(this.location, this.tablename, URIMetadataRow.rowdef, false, false);
         } else {
             this.urlIndexFile.clear();
         }
+        if (this.localSolr != null) {
+        	this.localSolr.clear();
+        }
+        // the remote solr is not cleared here because that shall be done separately
         this.statsDump = null;
     }
 
     public int size() {
-        return this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
+        int size = 0;
+        size += this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
+        size += this.localSolr == null ? 0 : this.localSolr.getSize();
+        size += this.remoteSolr == null ? 0 : this.remoteSolr.getSize();
+        return size;
     }
 
     public void close() {
@@ -147,13 +172,19 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
             this.urlIndexFile.close();
             this.urlIndexFile = null;
         }
-        if (this.localSolr != null) this.localSolr.close();
-        if (this.remoteSolr != null) this.remoteSolr.close();
+        if (this.localSolr != null) {
+        	this.localSolr.close();
+        	this.localSolr = null;
+        }
+        if (this.remoteSolr != null) {
+        	this.remoteSolr.close();
+        	this.remoteSolr = null;
+        }
     }
 
     public int writeCacheSize() {
-        if (this.urlIndexFile instanceof SplitTable) return ((SplitTable) this.urlIndexFile).writeBufferSize();
-        if (this.urlIndexFile instanceof Cache) return ((Cache) this.urlIndexFile).writeBufferSize();
+        if (this.urlIndexFile != null && this.urlIndexFile instanceof SplitTable) return ((SplitTable) this.urlIndexFile).writeBufferSize();
+        if (this.urlIndexFile != null && this.urlIndexFile instanceof Cache) return ((Cache) this.urlIndexFile).writeBufferSize();
         return 0;
     }
 
@@ -163,59 +194,69 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
      * @param obrwi
      * @return
      */
-    public URIMetadataRow load(final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi) {
-        if (this.urlIndexFile == null) return null;
+    public URIMetadata load(final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi) {
         if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
         final byte[] urlHash = obrwi.getElement().urlhash();
         if (urlHash == null) return null;
-        try {
+        if (this.urlIndexFile != null) try {
             final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
             if (entry == null) return null;
             return new URIMetadataRow(entry, obrwi.getElement(), obrwi.getWeight());
         } catch (final IOException e) {
-            return null;
+            Log.logException(e);
         }
+        /*
+        if (this.localSolr != null) {
+        	try {
+				SolrDocument doc = this.localSolr.get(ASCII.String(urlHash));
+			} catch (IOException e) {
+	            Log.logException(e);
+			}
+        }
+        */
+        return null;
     }
 
-    public URIMetadataRow load(final byte[] urlHash) {
-        if (this.urlIndexFile == null) return null;
+    public URIMetadata load(final byte[] urlHash) {
         if (urlHash == null) return null;
-        try {
+        if (this.urlIndexFile != null) try {
             final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
             if (entry == null) return null;
             return new URIMetadataRow(entry, null, 0);
         } catch (final IOException e) {
             return null;
         }
+        return null;
     }
 
-    public void store(final URIMetadataRow entry) throws IOException {
+    public void store(final URIMetadata entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
-        URIMetadataRow oldEntry;
-        if (this.urlIndexFile == null) return; // case may happen during shutdown or startup
-        try {
-            final Row.Entry oe = this.urlIndexFile.get(entry.hash(), false);
-            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
-        } catch (final Exception e) {
-            Log.logException(e);
-            oldEntry = null;
+        if (this.urlIndexFile != null && entry instanceof URIMetadataRow) {
+            URIMetadata oldEntry = null;
+	        try {
+	            final Row.Entry oe = this.urlIndexFile.get(entry.hash(), false);
+	            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
+	        } catch (final Exception e) {
+	            Log.logException(e);
+	            oldEntry = null;
+	        }
+	        if (oldEntry != null && entry.isOlder(oldEntry)) {
+	            // the fetched oldEntry is better, so return its properties instead of the new ones
+	            // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
+	            // this.url = oldEntry.url; // unnecessary, should be the same
+	            // doesn't make sense, since no return value:
+	            //entry = oldEntry;
+	            return; // this did not need to be stored, but is updated
+	        }
+	
+	        try {
+	            this.urlIndexFile.put(((URIMetadataRow) entry).toRowEntry());
+	        } catch (final RowSpaceExceededException e) {
+	            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
+	        }
+	        this.statsDump = null;
+	        if (MemoryControl.shortStatus()) clearCache();
         }
-        if (oldEntry != null && entry.isOlder(oldEntry)) {
-            // the fetched oldEntry is better, so return its properties instead of the new ones
-            // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
-            // this.url = oldEntry.url; // unnecessary, should be the same
-            // doesn't make sense, since no return value:
-            //entry = oldEntry;
-            return; // this did not need to be stored, but is updated
-        }
-
-        try {
-            this.urlIndexFile.put(entry.toRowEntry());
-        } catch (final RowSpaceExceededException e) {
-            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
-        }
-        this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache() ;
     }
 
     public boolean remove(final byte[] urlHash) {
@@ -233,13 +274,14 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
                 Log.logException(e);
             }
         }
-        try {
+        if (this.urlIndexFile != null) try {
             final Row.Entry r = this.urlIndexFile.remove(urlHash);
             if (r != null) this.statsDump = null;
             return r != null;
         } catch (final IOException e) {
             return false;
         }
+        return false;
     }
 
     public boolean exists(final byte[] urlHash) {
@@ -279,17 +321,17 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         return keys(true, null);
     }
 
-    public CloneableIterator<URIMetadataRow> entries() throws IOException {
+    public CloneableIterator<URIMetadata> entries() throws IOException {
         // enumerates entry elements
         return new kiter();
     }
 
-    public CloneableIterator<URIMetadataRow> entries(final boolean up, final String firstHash) throws IOException {
+    public CloneableIterator<URIMetadata> entries(final boolean up, final String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
 
-    public class kiter implements CloneableIterator<URIMetadataRow> {
+    public class kiter implements CloneableIterator<URIMetadata> {
         // enumerates entry elements
         private final CloneableIterator<Row.Entry> iter;
         private final boolean error;
@@ -324,7 +366,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         }
 
         @Override
-        public final URIMetadataRow next() {
+        public final URIMetadata next() {
             Row.Entry e = null;
             if (this.iter == null) { return null; }
             if (this.iter.hasNext()) { e = this.iter.next(); }
@@ -354,7 +396,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         final Log log = new Log("URLDBCLEANUP");
         final HashSet<String> damagedURLS = new HashSet<String>();
         try {
-            final Iterator<URIMetadataRow> eiter = entries(true, null);
+            final Iterator<URIMetadata> eiter = entries(true, null);
             int iteratorCount = 0;
             while (eiter.hasNext()) try {
                 eiter.next();
@@ -438,7 +480,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         public void run() {
             try {
                 Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                final Iterator<URIMetadataRow> eiter = entries(true, null);
+                final Iterator<URIMetadata> eiter = entries(true, null);
                 while (eiter.hasNext() && this.run) {
                     synchronized (this) {
                         if (this.pause) {
@@ -451,7 +493,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
                             }
                         }
                     }
-                    final URIMetadataRow entry = eiter.next();
+                    final URIMetadata entry = eiter.next();
                     if (entry == null) {
                         if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "entry == null");
                     } else if (entry.hash() == null) {
@@ -587,8 +629,8 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
                         this.count++;
                     }
                 } else {
-                    final Iterator<URIMetadataRow> i = entries(); // iterates indexURLEntry objects
-                    URIMetadataRow entry;
+                    final Iterator<URIMetadata> i = entries(); // iterates indexURLEntry objects
+                    URIMetadata entry;
                     String url;
                     while (i.hasNext()) {
                         entry = i.next();
@@ -686,7 +728,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         // collect hashes from all domains
 
         // fetch urls from the database to determine the host in clear text
-        URIMetadataRow urlref;
+        URIMetadata urlref;
         if (count < 0 || count > domainSamples.size()) count = domainSamples.size();
         this.statsDump = new ArrayList<HostStat>();
         final TreeSet<String> set = new TreeSet<String>();
@@ -723,7 +765,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
      */
     public Map<String, HostStat> domainHashResolver(final Map<String, URLHashCounter> domainSamples) {
         final HashMap<String, HostStat> hostMap = new HashMap<String, HostStat>();
-        URIMetadataRow urlref;
+        URIMetadata urlref;
 
         final ScoreMap<String> hosthashScore = new ConcurrentScoreMap<String>();
         for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
@@ -744,7 +786,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
 
         // fetch urls from the database to determine the host in clear text
         final Iterator<String> j = domainScore.keys(false); // iterate urlhash-examples in reverse order (biggest first)
-        URIMetadataRow urlref;
+        URIMetadata urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || domainScore.sizeSmaller(count)) count = domainScore.size();

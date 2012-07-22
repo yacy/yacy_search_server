@@ -111,6 +111,7 @@ import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Tray;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
@@ -382,6 +383,7 @@ public final class Switchboard extends serverSwitch
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
+        final boolean solrLocal = this.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "off").equals("solr");
         this.index =
             new Segment(
                 this.log,
@@ -389,8 +391,13 @@ public final class Switchboard extends serverSwitch
                 wordCacheMaxCount,
                 fileSizeMax,
                 this.useTailCache,
-                this.exceed134217727);
-
+                this.exceed134217727,
+                solrLocal,
+        		true,  // useCitationIndex
+        		true,  // useRWI
+        		true   // useMetadata
+                );
+		
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
         final String schemename =
@@ -1179,6 +1186,7 @@ public final class Switchboard extends serverSwitch
             setConfig("heuristic.site", false);
             setConfig("heuristic.blekko", false);
 
+            final boolean solrLocal = this.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "off").equals("solr");
             // relocate
             this.peers.relocate(
                 this.networkRoot,
@@ -1193,7 +1201,12 @@ public final class Switchboard extends serverSwitch
                     wordCacheMaxCount,
                     fileSizeMax,
                     this.useTailCache,
-                    this.exceed134217727);
+                    this.exceed134217727,
+                    solrLocal,
+            		true,  // useCitationIndex
+            		true,  // useRWI
+            		true   // useMetadata
+            		);
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
 
             // create a crawler
@@ -1443,7 +1456,7 @@ public final class Switchboard extends serverSwitch
         if ( urlhash.length == 0 ) {
             return null;
         }
-        final URIMetadataRow le = this.index.urlMetadata().load(urlhash);
+        final URIMetadata le = this.index.urlMetadata().load(urlhash);
         if ( le != null ) {
             return le.url();
         }
@@ -2404,8 +2417,8 @@ public final class Switchboard extends serverSwitch
             return new indexingQueueEntry(in.queueEntry, in.documents, null);
         }
 
-        boolean localSolr = this.index.getLocalSolr() != null && getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("solr");
-        boolean remoteSolr = this.index.getRemoteSolr() != null && getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false);
+        boolean localSolr = this.index.getLocalSolr() != null;
+        boolean remoteSolr = this.index.getRemoteSolr() != null;
         if (localSolr || remoteSolr) {
             // send the documents to solr
             for ( final Document doc : in.documents ) {

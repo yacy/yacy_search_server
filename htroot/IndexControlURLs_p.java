@@ -35,7 +35,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -132,7 +132,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final URIMetadataRow entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
+            final URIMetadata entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -166,7 +166,7 @@ public class IndexControlURLs_p {
                 final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
                 prop.put("urlhash", urlhash);
-                final URIMetadataRow entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
+                final URIMetadata entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
                 if (entry == null) {
                     prop.putHTML("result", "No Entry for URL " + url.toNormalform(true, true));
                     prop.putHTML("urlstring", urlstring);
@@ -184,7 +184,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            final URIMetadataRow entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
+            final URIMetadata entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -199,9 +199,9 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<URIMetadataRow> entryIt = new RotateIterator<URIMetadataRow>(segment.urlMetadata().entries(true, urlhash), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax());
+                final Iterator<URIMetadata> entryIt = new RotateIterator<URIMetadata>(segment.urlMetadata().entries(true, urlhash), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax());
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
-                URIMetadataRow entry;
+                URIMetadata entry;
                 int i = 0, rows = 0, cols = 0;
                 prop.put("urlhashsimilar", "1");
                 while (entryIt.hasNext() && i < 256) {
@@ -303,14 +303,14 @@ public class IndexControlURLs_p {
         return prop;
     }
 
-    private static serverObjects genUrlProfile(final Segment segment, final URIMetadataRow entry, final String urlhash) {
+    private static serverObjects genUrlProfile(final Segment segment, final URIMetadata entry, final String urlhash) {
         final serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
+        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
         if (entry.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

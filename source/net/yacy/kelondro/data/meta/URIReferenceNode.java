@@ -49,6 +49,14 @@ public class URIReferenceNode extends HashMap<String, byte[]> implements URIRefe
 		return this.hash;
 	}
 
+	private String hostHash = null;
+	@Override
+    public String hosthash() {
+        if (this.hostHash != null) return this.hostHash;
+        this.hostHash = ASCII.String(this.hash, 6, 6);
+        return this.hostHash;
+    }
+	
 	@Override
 	public Date moddate() {
 		byte[] x = this.get(MetadataVocabulary.moddate.name());

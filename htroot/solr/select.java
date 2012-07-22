@@ -41,7 +41,7 @@ public class select {
      * @param out
      * @return
      */
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env, final OutputStream out) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env, final OutputStream out) {
 
         // this uses the methods in the jetty servlet environment and can be removed if jetty in implemented
         Switchboard sb = (Switchboard) env;

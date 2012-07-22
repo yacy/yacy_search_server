@@ -47,6 +47,7 @@ import net.yacy.document.Parser;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -88,7 +89,8 @@ public class Segment {
     public static final int  lowcachedivisor =  900;
     public static final long targetFileSize  = 64 * 1024 * 1024; // 256 MB
     public static final int  writeBufferSize = 4 * 1024 * 1024;
-
+    public static final String UrlDbName = "text.urlmd";
+    
     // the reference factory
     public static final ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
     public static final ReferenceFactory<CitationReference> citationReferenceFactory = new CitationReferenceFactory();
@@ -108,14 +110,18 @@ public class Segment {
             final int entityCacheMaxSize,
             final long maxFileSize,
             final boolean useTailCache,
-            final boolean exceed134217727) throws IOException {
+            final boolean exceed134217727,
+            final boolean connectLocalSolr,
+            final boolean useCitationIndex,
+            final boolean useRWI,
+            final boolean useMetadata) throws IOException {
 
         log.logInfo("Initializing Segment '" + segmentPath + ".");
 
         this.log = log;
         this.segmentPath = segmentPath;
 
-        this.termIndex = new IndexCell<WordReference>(
+        this.termIndex = useRWI ? new IndexCell<WordReference>(
                 segmentPath,
                 "text.index",
                 wordReferenceFactory,
@@ -124,9 +130,9 @@ public class Segment {
                 entityCacheMaxSize,
                 targetFileSize,
                 maxFileSize,
-                writeBufferSize);
+                writeBufferSize) : null;
 
-        this.urlCitationIndex = new IndexCell<CitationReference>(
+        this.urlCitationIndex = useCitationIndex ? new IndexCell<CitationReference>(
                 segmentPath,
                 "citation.index",
                 citationReferenceFactory,
@@ -135,11 +141,12 @@ public class Segment {
                 entityCacheMaxSize,
                 targetFileSize,
                 maxFileSize,
-                writeBufferSize);
+                writeBufferSize) : null;
 
         // create LURL-db
-        this.urlMetadata = new MetadataRepository(segmentPath, "text.urlmd", useTailCache, exceed134217727);
-        this.connectLocalSolr();
+        this.urlMetadata = new MetadataRepository(segmentPath);
+        if (useMetadata) this.urlMetadata.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
+        if (connectLocalSolr) this.connectLocalSolr();
     }
 
     public long URLCount() {
@@ -147,19 +154,29 @@ public class Segment {
     }
 
     public long RWICount() {
+    	if (this.termIndex == null) return 0;
         return this.termIndex.sizesMax();
     }
 
     public int RWIBufferCount() {
+    	if (this.termIndex == null) return 0;
         return this.termIndex.getBufferSize();
     }
 
     public void connectRemoteSolr(final SolrConnector solr) {
         this.urlMetadata.connectRemoteSolr(solr);
     }
+    
+    public void disconnectRemoteSolr() {
+        this.urlMetadata.disconnectRemoteSolr();
+    }
 
     public void connectLocalSolr() throws IOException {
         this.urlMetadata.connectLocalSolr();
+    }
+
+    public void disconnectLocalSolr() {
+        this.urlMetadata.disconnectLocalSolr();
     }
 
     public SolrConnector getRemoteSolr() {
@@ -226,7 +243,7 @@ public class Segment {
             }
             @Override
             public DigestURI next() {
-                URIMetadataRow umr = Segment.this.urlMetadata.load(bi.next());
+                URIMetadata umr = Segment.this.urlMetadata.load(bi.next());
                 return umr.url();
             }
             @Override
@@ -251,9 +268,9 @@ public class Segment {
 
     public void clear() {
         try {
-            this.termIndex.clear();
-            this.urlMetadata.clear();
-            this.urlCitationIndex.clear();
+            if (this.termIndex != null) this.termIndex.clear();
+            if (this.urlMetadata != null) this.urlMetadata.clear();
+            if (this.urlCitationIndex != null) this.urlCitationIndex.clear();
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -319,7 +336,7 @@ public class Segment {
             assert (wprop.flags != null);
             ientry.setWord(wprop);
             wordhash = Word.word2hash(word);
-            try {
+            if (this.termIndex != null) try {
                 this.termIndex.add(wordhash, ientry);
             } catch (final Exception e) {
                 Log.logException(e);
@@ -345,7 +362,7 @@ public class Segment {
 
         // assign the catchall word
         ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics
-        try {
+        if (this.termIndex != null) try {
             this.termIndex.add(catchallHash, ientry);
         } catch (final Exception e) {
             Log.logException(e);
@@ -376,9 +393,9 @@ public class Segment {
     }
 
     public synchronized void close() {
-        this.termIndex.close();
-        this.urlMetadata.close();
-        this.urlCitationIndex.close();
+    	if (this.termIndex != null) this.termIndex.close();
+        if (this.urlMetadata != null) this.urlMetadata.close();
+        if (this.urlCitationIndex != null) this.urlCitationIndex.close();
     }
 
     public URIMetadataRow storeDocument(
@@ -532,7 +549,7 @@ public class Segment {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final URIMetadataRow entry = urlMetadata().load(urlhash);
+        final URIMetadata entry = urlMetadata().load(urlhash);
         if (entry == null) return 0;
         if (entry.url() == null) return 0;
 
@@ -603,7 +620,7 @@ public class Segment {
                         entry = new WordReferenceVars(containerIterator.next());
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
-                        final URIMetadataRow ue = Segment.this.urlMetadata.load(entry.urlhash());
+                        final URIMetadata ue = Segment.this.urlMetadata.load(entry.urlhash());
                         if (ue == null) {
                             urlHashs.put(entry.urlhash());
                         } else {

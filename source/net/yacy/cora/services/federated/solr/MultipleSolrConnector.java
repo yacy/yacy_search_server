@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
@@ -111,6 +112,11 @@ public class MultipleSolrConnector implements SolrConnector {
         return this.solr.exists(id);
     }
 
+	@Override
+	public SolrDocument get(String id) throws IOException {
+		return this.solr.get(id);
+	}
+	
     @Override
     public void add(final SolrDoc solrdoc) throws IOException, SolrException {
         try {
@@ -132,8 +138,8 @@ public class MultipleSolrConnector implements SolrConnector {
     }
 
     @Override
-    public SolrDocumentList get(String querystring, int offset, int count) throws IOException {
-        return this.solr.get(querystring, offset, count);
+    public SolrDocumentList query(String querystring, int offset, int count) throws IOException {
+        return this.solr.query(querystring, offset, count);
     }
 
     @Override

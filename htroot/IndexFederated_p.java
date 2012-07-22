@@ -51,13 +51,28 @@ public class IndexFederated_p {
 
         if (post != null && post.containsKey("set")) {
             // yacy
-            String localindex = post.get("yacy.indexing", "off");
+        	String localindex = post.get("yacy.indexing", "off"); // possible values: classic, solr, off
+        	final boolean solrLocalWasOn = sb.index.getLocalSolr() != null && env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "off").equals("solr");
+            final boolean solrLocalIsOnAfterwards = localindex.equals("solr");
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, localindex);
+            
+            if (solrLocalWasOn && !solrLocalIsOnAfterwards) {
+                sb.index.disconnectLocalSolr();
+            }
 
+            if (!solrLocalWasOn && solrLocalIsOnAfterwards) {
+                // switch on
+            	try {
+					sb.index.connectLocalSolr();
+				} catch (IOException e) {
+					Log.logException(e);
+				}
+            }
+            
             // solr
-            final boolean solrWasOn = sb.index.getRemoteSolr() != null && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
-            final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.solrremote");
-            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrIsOnAfterwards);
+            final boolean solrRemoteWasOn = sb.index.getRemoteSolr() != null && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
+            final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote");
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
             String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
             int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
             boolean lazy = post.getBoolean("solr.indexing.lazy");
@@ -84,13 +99,12 @@ public class IndexFederated_p {
             final String schemename = post.get("solr.indexing.schemefile", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list"));
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, schemename);
 
-            if (solrWasOn) {
+            if (solrRemoteWasOn && !solrRemoteIsOnAfterwards) {
                 // switch off
-                sb.index.getRemoteSolr().close();
-                sb.index.connectRemoteSolr(null);
+                sb.index.disconnectRemoteSolr();
             }
 
-            if (solrIsOnAfterwards) {
+            if (!solrRemoteWasOn && solrRemoteIsOnAfterwards) {
                 // switch on
                 final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
                 try {
@@ -99,11 +113,11 @@ public class IndexFederated_p {
                         solr.setCommitWithinMs(commitWithinMs);
                         sb.index.connectRemoteSolr(solr);
                     } else {
-                        sb.index.connectRemoteSolr(null);
+                        sb.index.disconnectRemoteSolr();
                     }
                 } catch (final IOException e) {
                     Log.logException(e);
-                    sb.index.connectRemoteSolr(null);
+                    sb.index.disconnectRemoteSolr();
                 }
             }
 

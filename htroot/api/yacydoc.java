@@ -35,7 +35,7 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
@@ -97,13 +97,13 @@ public class yacydoc {
         }
         if (urlhash == null || urlhash.isEmpty()) return prop;
 
-        final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes());
+        final URIMetadata entry = segment.urlMetadata().load(urlhash.getBytes());
         if (entry == null) return prop;
 
         if (entry.url() == null) {
             return prop;
         }
-        final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
+        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
 
         prop.putXML("dc_title", entry.dc_title());
         prop.putXML("dc_creator", entry.dc_creator());

@@ -77,6 +77,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -1155,7 +1156,7 @@ public final class Protocol
     public static String transferIndex(
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
-        final SortedMap<byte[], URIMetadataRow> urlCache,
+        final SortedMap<byte[], URIMetadata> urlCache,
         final boolean gzipBody,
         final int timeout) {
 
@@ -1216,7 +1217,7 @@ public final class Protocol
         } // all url's known
 
         // extract the urlCache from the result
-        final URIMetadataRow[] urls = new URIMetadataRow[uhs.length];
+        final URIMetadata[] urls = new URIMetadataRow[uhs.length];
         for ( int i = 0; i < uhs.length; i++ ) {
             urls[i] = urlCache.get(ASCII.getBytes(uhs[i]));
             if ( urls[i] == null ) {
@@ -1324,7 +1325,7 @@ public final class Protocol
 
     private static Map<String, String> transferURL(
         final Seed targetSeed,
-        final URIMetadataRow[] urls,
+        final URIMetadata[] urls,
         boolean gzipBody,
         final int timeout) {
         // this post a message to the remote message board
@@ -1346,7 +1347,7 @@ public final class Protocol
         String resource;
         int urlc = 0;
         int urlPayloadSize = 0;
-        for ( final URIMetadataRow url : urls ) {
+        for ( final URIMetadata url : urls ) {
             if ( url != null ) {
                 resource = url.toString();
                 //System.out.println("*** DEBUG resource = " + resource);

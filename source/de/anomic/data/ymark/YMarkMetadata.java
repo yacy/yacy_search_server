@@ -36,7 +36,7 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
 import de.anomic.crawler.retrieval.Response;
@@ -105,7 +105,7 @@ public class YMarkMetadata {
 
 	public EnumMap<METADATA, String> getMetadata() {
 		final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);
-        final URIMetadataRow urlEntry = this.indexSegment.urlMetadata().load(this.uri.hash());
+        final URIMetadata urlEntry = this.indexSegment.urlMetadata().load(this.uri.hash());
         if (urlEntry != null) {
         	metadata.put(METADATA.SIZE, String.valueOf(urlEntry.size()));
         	metadata.put(METADATA.FRESHDATE, ISO8601Formatter.FORMATTER.format(urlEntry.freshdate()));

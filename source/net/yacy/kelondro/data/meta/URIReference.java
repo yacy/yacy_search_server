@@ -36,6 +36,12 @@ public interface URIReference {
     public byte[] hash();
 
     /**
+     * the second half of a uri hash is the host hash
+     * @return
+     */
+    public String hosthash();
+    
+    /**
      * The modification date of the URIReference is given if
      * the record was created first and is defined with the
      * creation date. If the record is modified later, the date shall change.

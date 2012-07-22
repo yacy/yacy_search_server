@@ -42,6 +42,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -61,7 +62,6 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.RWIProcess;
@@ -92,8 +92,7 @@ public class IndexControlRWIs_p {
         prop.put("keyhash", "");
         prop.put("result", "");
         prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
-        prop.put("cleanup_solr", sb.index.getRemoteSolr() == null
-            || !sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 0 : 1);
+        prop.put("cleanup_solr", sb.index.getRemoteSolr() == null ? 0 : 1);
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
@@ -158,8 +157,7 @@ public class IndexControlRWIs_p {
                 if ( post.get("deleteIndex", "").equals("on") ) {
                     segment.clear();
                 }
-                if ( post.get("deleteSolr", "").equals("on")
-                    && sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ) {
+                if ( post.get("deleteRemoteSolr", "").equals("on") && sb.index.getRemoteSolr() != null) {
                     try {
                         sb.index.getRemoteSolr().clear();
                     } catch ( final Exception e ) {
@@ -310,15 +308,15 @@ public class IndexControlRWIs_p {
                         index = segment.termIndex().get(keyhash, null);
                         // built urlCache
                         final Iterator<WordReference> urlIter = index.entries();
-                        final TreeMap<byte[], URIMetadataRow> knownURLs =
-                                new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
+                        final TreeMap<byte[], URIMetadata> knownURLs =
+                                new TreeMap<byte[], URIMetadata>(Base64Order.enhancedCoder);
                         final HandleSet unknownURLEntries =
                                 new HandleSet(
                                 WordReferenceRow.urlEntryRow.primaryKeyLength,
                                 WordReferenceRow.urlEntryRow.objectOrder,
                                 index.size());
                         Reference iEntry;
-                        URIMetadataRow lurl;
+                        URIMetadata lurl;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
                             lurl = segment.urlMetadata().load(iEntry.urlhash());
@@ -416,7 +414,7 @@ public class IndexControlRWIs_p {
                             } catch ( final RowSpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadataRow e = segment.urlMetadata().load(b);
+                            final URIMetadata e = segment.urlMetadata().load(b);
                             segment.urlMetadata().remove(b);
                             if ( e != null ) {
                                 url = e.url();
@@ -451,7 +449,7 @@ public class IndexControlRWIs_p {
                             } catch ( final RowSpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadataRow e = segment.urlMetadata().load(b);
+                            final URIMetadata e = segment.urlMetadata().load(b);
                             segment.urlMetadata().remove(b);
                             if ( e != null ) {
                                 url = e.url();
@@ -517,7 +515,7 @@ public class IndexControlRWIs_p {
             prop.put("genUrlList_lines", maxlines);
             int i = 0;
             DigestURI url;
-            URIMetadataRow entry;
+            URIMetadata entry;
             String us;
             long rn = -1;
             while ( !ranked.isEmpty() && (entry = ranked.takeURL(false, 1000)) != null ) {
