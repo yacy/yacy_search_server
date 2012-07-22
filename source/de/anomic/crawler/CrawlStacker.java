@@ -45,7 +45,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
@@ -439,7 +439,7 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
-        final URIMetadataRow oldEntry = this.indexSegment.urlMetadata().load(url.hash());
+        final URIMetadata oldEntry = this.indexSegment.urlMetadata().load(url.hash());
         if (oldEntry == null) {
             if (dbocc != null) {
                 // do double-check

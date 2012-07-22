@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
@@ -120,6 +121,21 @@ public class RetrySolrConnector implements SolrConnector {
         return false;
     }
 
+	@Override
+	public SolrDocument get(String id) throws IOException {
+		final long t = System.currentTimeMillis() + this.retryMaxTime;
+        Throwable ee = null;
+        while (System.currentTimeMillis() < t) try {
+            return this.solrConnector.get(id);
+        } catch (final Throwable e) {
+            ee = e;
+            try {Thread.sleep(10);} catch (final InterruptedException e1) {}
+            continue;
+        }
+        if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
+        return null;
+	}
+	
     @Override
     public void add(final SolrDoc solrdoc) throws IOException, SolrException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
@@ -141,11 +157,11 @@ public class RetrySolrConnector implements SolrConnector {
     }
 
     @Override
-    public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException {
+    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
-            return this.solrConnector.get(querystring, offset, count);
+            return this.solrConnector.query(querystring, offset, count);
         } catch (final Throwable e) {
             ee = e;
             try {Thread.sleep(10);} catch (final InterruptedException e1) {}

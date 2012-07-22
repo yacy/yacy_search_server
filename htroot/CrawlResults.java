@@ -35,7 +35,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
@@ -178,7 +178,7 @@ public class CrawlResults {
             boolean dark = true;
             String urlstr, urltxt;
             Seed initiatorSeed, executorSeed;
-            URIMetadataRow urle;
+            URIMetadata urle;
 
             int cnt = 0;
             final Iterator<Map.Entry<String, InitExecEntry>> i = ResultURLs.results(tabletype);

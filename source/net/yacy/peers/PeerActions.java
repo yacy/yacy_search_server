@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.peers.operation.yacyVersion;
 

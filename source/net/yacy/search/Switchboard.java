@@ -111,6 +111,7 @@ import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Tray;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
@@ -391,8 +392,12 @@ public final class Switchboard extends serverSwitch
                 fileSizeMax,
                 this.useTailCache,
                 this.exceed134217727,
-                solrLocal);
-
+                solrLocal,
+        		true,  // useCitationIndex
+        		true,  // useRWI
+        		true   // useMetadata
+                );
+		
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
         final String schemename =
@@ -1197,7 +1202,11 @@ public final class Switchboard extends serverSwitch
                     fileSizeMax,
                     this.useTailCache,
                     this.exceed134217727,
-                    solrLocal);
+                    solrLocal,
+            		true,  // useCitationIndex
+            		true,  // useRWI
+            		true   // useMetadata
+            		);
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
 
             // create a crawler
@@ -1447,7 +1456,7 @@ public final class Switchboard extends serverSwitch
         if ( urlhash.length == 0 ) {
             return null;
         }
-        final URIMetadataRow le = this.index.urlMetadata().load(urlhash);
+        final URIMetadata le = this.index.urlMetadata().load(urlhash);
         if ( le != null ) {
             return le.url();
         }

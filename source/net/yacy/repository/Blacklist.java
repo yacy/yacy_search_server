@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -332,7 +333,7 @@ public class Blacklist {
      * @param entry Entry to be checked
      * @return	Whether the given entry is blacklisted
      */
-    public boolean isListed(final BlacklistType blacklistType, final URIMetadataRow entry) {
+    public boolean isListed(final BlacklistType blacklistType, final URIMetadata entry) {
         // Call inner method
         return isListed(blacklistType, entry.url());
     }

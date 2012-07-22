@@ -41,6 +41,7 @@ import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.query.QueryParams;
@@ -74,7 +75,19 @@ public class DocumentIndex extends Segment
 
     public DocumentIndex(final File segmentPath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(new Log("DocumentIndex"), segmentPath, cachesize, targetFileSize * 4 - 1, false, false, true);
+        super(
+        		new Log("DocumentIndex"),
+        		segmentPath,
+        		cachesize,
+        		targetFileSize * 4 - 1,
+        		false, // useTailCache
+        		false, // exceed134217727
+        		true,  // connectLocalSolr
+        		true,  // useCitationIndex
+        		true,  // useRWI
+        		true   // useMetadata
+        	);
+        
         final int cores = Runtime.getRuntime().availableProcessors() + 1;
         this.callback = callback;
         this.queue = new LinkedBlockingQueue<DigestURI>(cores * 300);
@@ -227,7 +240,7 @@ public class DocumentIndex extends Segment
         rankedCache.start();
 
         // search is running; retrieve results
-        URIMetadataRow row;
+        URIMetadata row;
         final ArrayList<DigestURI> files = new ArrayList<DigestURI>();
         while ( (row = rankedCache.takeURL(false, 1000)) != null ) {
             files.add(row.url());

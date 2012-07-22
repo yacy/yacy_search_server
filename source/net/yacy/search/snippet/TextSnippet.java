@@ -45,7 +45,7 @@ import net.yacy.document.SnippetExtractor;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
@@ -146,7 +146,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public TextSnippet(
             final LoaderDispatcher loader,
             final String solrText,
-            final URIMetadataRow row,
+            final URIMetadata row,
             final HandleSet queryhashes,
             final CacheStrategy cacheStrategy,
             final boolean pre,

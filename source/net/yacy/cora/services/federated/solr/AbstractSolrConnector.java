@@ -34,6 +34,7 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -89,7 +90,7 @@ public class AbstractSolrConnector implements SolrConnector {
     @Override
     public long getSize() {
         try {
-            final SolrDocumentList list = get("*:*", 0, 1);
+            final SolrDocumentList list = query("*:*", 0, 1);
             return list.getNumFound();
         } catch (final Throwable e) {
             Log.logException(e);
@@ -132,8 +133,8 @@ public class AbstractSolrConnector implements SolrConnector {
     @Override
     public boolean exists(final String id) throws IOException {
         try {
-            final SolrDocumentList list = get(SolrField.id.getSolrFieldName() + ":" + id, 0, 1);
-            return list.getNumFound() > 0;
+            final SolrDocument doc = get(id);
+            return doc != null;
         } catch (final Throwable e) {
             Log.logException(e);
             return false;
@@ -186,7 +187,7 @@ public class AbstractSolrConnector implements SolrConnector {
      * @throws IOException
      */
     @Override
-    public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException {
+    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
         // construct query
         final SolrQuery query = new SolrQuery();
         query.setQuery(querystring);
@@ -209,8 +210,33 @@ public class AbstractSolrConnector implements SolrConnector {
         } catch (final Throwable e) {
             throw new IOException(e);
         }
+    }
 
-        //return result;
+    /**
+     * get a document from solr by given id
+     * @param id
+     * @return one result or null if no result exists
+     * @throws IOException
+     */
+    @Override
+    public SolrDocument get(final String id) throws IOException {
+        // construct query
+    	StringBuffer sb = new StringBuffer(id.length() + 3);
+    	sb.append(SolrField.id.getSolrFieldName()).append(':').append(id);
+        final SolrQuery query = new SolrQuery();
+        query.setQuery(sb.toString());
+        query.setRows(1);
+        query.setStart(0);
+
+        // query the server
+        try {
+            final QueryResponse rsp = this.server.query( query );
+            final SolrDocumentList docs = rsp.getResults();
+            if (docs.isEmpty()) return null;
+            return docs.get(0);
+        } catch (final Throwable e) {
+            throw new IOException(e);
+        }
     }
 
 }

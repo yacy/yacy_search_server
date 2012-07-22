@@ -1,4 +1,3 @@
-package net.yacy;
 // yacy.java
 // -----------------------
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -23,8 +22,8 @@ package net.yacy;
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+package net.yacy;
 
-//import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -61,7 +60,7 @@ import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.kelondro.blob.MapDataMining;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
@@ -657,11 +656,13 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
 
             // db containing all currently loades urls
-            final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexPrimaryRoot, networkName), "TEXT"), "text.urlmd", false, false);
+            final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexPrimaryRoot, networkName), "TEXT"));
+            currentUrlDB.connectUrlDb(Segment.UrlDbName, false, false);
 
             // db used to hold all neede urls
-            final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(new File(indexRoot2, networkName), "TEXT"), "text.urlmd", false, false);
-
+            final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(new File(indexRoot2, networkName), "TEXT"));
+            minimizedUrlDB.connectUrlDb(Segment.UrlDbName, false, false);
+            
             final int cacheMem = (int)(MemoryControl.maxMemory() - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
 
@@ -669,7 +670,14 @@ public final class yacy {
                     log,
                     new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                     10000,
-                    Integer.MAX_VALUE, false, false, false);
+                    Integer.MAX_VALUE,
+            		false, // useTailCache
+            		false, // exceed134217727
+            		false, // connectLocalSolr
+            		false, // useCitationIndex
+            		true,  // useRWI
+            		true   // useMetadata
+                    );
             final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.termIndex().referenceContainerIterator("AAAAAAAAAAAA".getBytes(), false, false);
 
             long urlCounter = 0, wordCounter = 0;
@@ -689,7 +697,7 @@ public final class yacy {
                         iEntry = wordIdxEntries.next();
                         final byte[] urlHash = iEntry.urlhash();
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            final URIMetadataRow urlEntry = currentUrlDB.load(urlHash);
+                            final URIMetadata urlEntry = currentUrlDB.load(urlHash);
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
@@ -829,7 +837,8 @@ public final class yacy {
         final File root = dataHome;
         final File indexroot = new File(root, "DATA/INDEX");
         try {Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
-        final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexroot, networkName), "TEXT"), "text.urlmd", false, false);
+        final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexroot, networkName), "TEXT"));
+        currentUrlDB.connectUrlDb(Segment.UrlDbName, false, false);
         currentUrlDB.deadlinkCleaner();
         currentUrlDB.close();
     }
@@ -849,7 +858,14 @@ public final class yacy {
                         log,
                         new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                         10000,
-                        Integer.MAX_VALUE, false, false, false);
+                        Integer.MAX_VALUE,
+                		false, // useTailCache
+                		false, // exceed134217727
+                		false, // connectLocalSolr
+                		false, // useCitationIndex
+                		true,  // useRWI
+                		true   // useMetadata
+                        );
                 indexContainerIterator = WordIndex.termIndex().referenceContainerIterator(wordChunkStartHash.getBytes(), false, false);
             }
             int counter = 0;

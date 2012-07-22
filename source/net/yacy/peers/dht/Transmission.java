@@ -32,7 +32,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -90,7 +90,7 @@ public class Transmission {
          */
         private final byte[]                          primaryTarget;
         private final ReferenceContainerCache<WordReference> containers;
-        private final SortedMap<byte[], URIMetadataRow> references;
+        private final SortedMap<byte[], URIMetadata> references;
         private final HandleSet                       badReferences;
         private final List<Seed>             targets;
         private int                             hit, miss;
@@ -106,7 +106,7 @@ public class Transmission {
             super();
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
-            this.references = new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
+            this.references = new TreeMap<byte[], URIMetadata>(Base64Order.enhancedCoder);
             this.badReferences = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.targets    = targets;
             this.hit = 0;
@@ -175,7 +175,7 @@ public class Transmission {
                     notFoundx.add(e.urlhash());
                     continue;
                 }
-                final URIMetadataRow r = Transmission.this.segment.urlMetadata().load(e.urlhash());
+                final URIMetadata r = Transmission.this.segment.urlMetadata().load(e.urlhash());
                 if (r == null) {
                     notFoundx.add(e.urlhash());
                     this.badReferences.put(e.urlhash());

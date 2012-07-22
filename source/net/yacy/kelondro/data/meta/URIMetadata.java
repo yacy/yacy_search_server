@@ -24,8 +24,8 @@ package net.yacy.kelondro.data.meta;
 
 import java.util.Date;
 
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.rwi.Reference;
 
 
 public interface URIMetadata extends URIReference {
@@ -74,10 +74,12 @@ public interface URIMetadata extends URIReference {
 
     public String snippet();
 
-    public Reference word();
+    public WordReference word();
 
     public boolean isOlder(final URIMetadata other);
 
     public String toString(final String snippet);
+
+    public byte[] referrerHash();
 
 }

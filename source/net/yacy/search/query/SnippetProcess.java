@@ -41,7 +41,7 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -454,7 +454,7 @@ public class SnippetProcess {
         public void run() {
 
             // start fetching urls and snippets
-            URIMetadataRow page;
+        	URIMetadata page;
             ResultEntry resultEntry;
             //final int fetchAhead = snippetMode == 0 ? 0 : 10;
             final boolean nav_topics = SnippetProcess.this.query.navigators.equals("all") || SnippetProcess.this.query.navigators.indexOf("topics",0) >= 0;
@@ -498,7 +498,7 @@ public class SnippetProcess {
                     String solrContent = null;
                     if (this.solr != null) {
                         SolrDocument sd = null;
-                        final SolrDocumentList sdl = this.solr.get(SolrField.id.getSolrFieldName()+ ":" + ASCII.String(page.hash()), 0, 1);
+                        final SolrDocumentList sdl = this.solr.query(SolrField.id.getSolrFieldName()+ ":" + ASCII.String(page.hash()), 0, 1);
                         if (!sdl.isEmpty()) {
                             sd = sdl.get(0);
                         }
@@ -553,7 +553,7 @@ public class SnippetProcess {
         }
     }
 
-    protected ResultEntry fetchSnippet(final URIMetadataRow page, final String solrText, final CacheStrategy cacheStrategy) {
+    protected ResultEntry fetchSnippet(final URIMetadata page, final String solrText, final CacheStrategy cacheStrategy) {
         // Snippet Fetching can has 3 modes:
         // 0 - do not fetch snippets
         // 1 - fetch snippets offline only

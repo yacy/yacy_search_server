@@ -116,6 +116,15 @@ public class ShardSolrConnector implements SolrConnector {
         }
         return false;
     }
+    
+	@Override
+	public SolrDocument get(String id) throws IOException {
+		for (final SolrConnector connector: this.connectors) {
+			SolrDocument doc = connector.get(id);
+			if (doc != null) return doc;
+        }
+        return null;
+	}
 
     /**
      * add a Solr document
@@ -148,10 +157,10 @@ public class ShardSolrConnector implements SolrConnector {
      * @throws IOException
      */
     @Override
-    public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException {
+    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
         final SolrDocumentList list = new SolrDocumentList();
         for (final SolrConnector connector: this.connectors) {
-            final SolrDocumentList l = connector.get(querystring, offset, count);
+            final SolrDocumentList l = connector.query(querystring, offset, count);
             for (final SolrDocument d: l) {
                 list.add(d);
             }
@@ -163,7 +172,7 @@ public class ShardSolrConnector implements SolrConnector {
         final SolrDocumentList[] list = new SolrDocumentList[this.connectors.size()];
         int i = 0;
         for (final SolrConnector connector: this.connectors) {
-            list[i++] = connector.get(querystring, offset, count);
+            list[i++] = connector.query(querystring, offset, count);
         }
         return list;
     }

@@ -55,6 +55,7 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -616,7 +617,7 @@ public final class RWIProcess extends Thread
      * @param waitingtime the time this method may take for a result computation
      * @return a metadata entry for a url
      */
-    public URIMetadataRow takeURL(final boolean skipDoubleDom, final long waitingtime) {
+    public URIMetadata takeURL(final boolean skipDoubleDom, final long waitingtime) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
         final long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
         int p = -1;
@@ -627,7 +628,7 @@ public final class RWIProcess extends Thread
             if ( obrwi == null ) {
                 return null; // all time was already wasted in takeRWI to get another element
             }
-            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(obrwi);
+            final URIMetadata page = this.query.getSegment().urlMetadata().load(obrwi);
             if ( page == null ) {
                 try {
                     this.misses.putUnique(obrwi.getElement().urlhash());
@@ -864,7 +865,7 @@ public final class RWIProcess extends Thread
         }
 
         final Iterator<String> domhashs = this.hostNavigator.keys(false);
-        URIMetadataRow row;
+        URIMetadata row;
         byte[] urlhash;
         String hosthash, hostname;
         if ( this.hostResolver != null ) {

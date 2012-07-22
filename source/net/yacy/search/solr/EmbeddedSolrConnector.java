@@ -155,7 +155,7 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
             solrdoc.addSolr(SolrField.text_t, "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
             solr.add(solrdoc);
             SolrServlet.startServer("/solr", 8091, solr);
-            SolrDocumentList searchresult = solr.get(SolrField.text_t.name() + ":tempor", 0, 10);
+            SolrDocumentList searchresult = solr.query(SolrField.text_t.name() + ":tempor", 0, 10);
             for (SolrDocument d : searchresult) {
                 System.out.println(d.toString());
             }
