@@ -221,8 +221,8 @@ public class AbstractSolrConnector implements SolrConnector {
     @Override
     public SolrDocument get(final String id) throws IOException {
         // construct query
-    	StringBuffer sb = new StringBuffer(id.length() + 3);
-    	sb.append(SolrField.id.getSolrFieldName()).append(':').append(id);
+    	StringBuffer sb = new StringBuffer(id.length() + 5);
+    	sb.append(SolrField.id.getSolrFieldName()).append(':').append('"').append(id).append('"');
         final SolrQuery query = new SolrQuery();
         query.setQuery(sb.toString());
         query.setRows(1);
@@ -235,6 +235,7 @@ public class AbstractSolrConnector implements SolrConnector {
             if (docs.isEmpty()) return null;
             return docs.get(0);
         } catch (final Throwable e) {
+            Log.logWarning("AbstractSolrConnection", "problem with id=" + id, e);
             throw new IOException(e);
         }
     }

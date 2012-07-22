@@ -114,6 +114,8 @@ public class ViewFile {
         String urlHash = post.get("urlHash", "");
         URIMetadata urlEntry = null;
         // get the urlEntry that belongs to the url hash
+        //boolean ue = urlHash.length() > 0 && indexSegment.exists(ASCII.getBytes(urlHash));
+        //if (ue) Log.logInfo("ViewFile", "exists(" + urlHash + ")");
         if (urlHash.length() > 0 && (urlEntry = indexSegment.urlMetadata().load(ASCII.getBytes(urlHash))) != null) {
             // get the url that belongs to the entry
             if (urlEntry == null || urlEntry.url() == null) {
