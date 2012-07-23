@@ -45,6 +45,12 @@ public class select {
 
         // this uses the methods in the jetty servlet environment and can be removed if jetty in implemented
         Switchboard sb = (Switchboard) env;
+
+        // check if user is allowed to search (can be switched in /ConfigPortal.html)
+        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
+        if (!searchAllowed) return null;
+
+        // get the embedded connector
         EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.getLocalSolr();
         if (connector == null) return null;
         if (post == null) return null;
