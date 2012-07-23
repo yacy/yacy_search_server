@@ -32,7 +32,6 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.document.LibraryProvider;
-import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.query.QueryParams;

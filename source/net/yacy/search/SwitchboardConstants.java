@@ -296,8 +296,12 @@ public final class SwitchboardConstants {
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING = "federated.service.solr.indexing.sharding";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE = "federated.service.solr.indexing.schemefile";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY = "federated.service.solr.indexing.lazy";
-    public static final String FEDERATED_SERVICE_YACY_INDEXING_ENGINE = "federated.service.yacy.indexing.engine";
-    
+
+    public static final String CORE_SERVICE_URLDB = "core.service.urldb.tmp";
+    public static final String CORE_SERVICE_RWI = "core.service.rwi.tmp";
+    public static final String CORE_SERVICE_SOLR = "core.service.solr.tmp";
+    public static final String CORE_SERVICE_CITATION = "core.service.citation.tmp";
+
     /**
      * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>
      * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>

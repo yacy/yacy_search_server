@@ -75,19 +75,14 @@ public class DocumentIndex extends Segment
 
     public DocumentIndex(final File segmentPath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(
-        		new Log("DocumentIndex"),
-        		segmentPath,
-        		cachesize,
-        		targetFileSize * 4 - 1,
-        		false, // useTailCache
-        		false, // exceed134217727
-        		true,  // connectLocalSolr
-        		true,  // useCitationIndex
-        		true,  // useRWI
-        		true   // useMetadata
-        	);
-        
+        super(new Log("DocumentIndex"), segmentPath);
+        super.connectRWI(cachesize, targetFileSize * 4 - 1);
+        super.connectCitation(cachesize, targetFileSize * 4 - 1);
+        super.connectUrlDb(
+                false, // useTailCache
+                false  // exceed134217727
+                );
+        super.connectLocalSolr();
         final int cores = Runtime.getRuntime().availableProcessors() + 1;
         this.callback = callback;
         this.queue = new LinkedBlockingQueue<DigestURI>(cores * 300);

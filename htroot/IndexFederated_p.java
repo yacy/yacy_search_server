@@ -36,6 +36,7 @@ import net.yacy.cora.services.federated.solr.SingleSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.OS;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.SolrField;
@@ -51,26 +52,40 @@ public class IndexFederated_p {
 
         if (post != null && post.containsKey("set")) {
             // yacy
-        	String localindex = post.get("yacy.indexing", "off"); // possible values: classic, solr, off
-        	final boolean solrLocalWasOn = sb.index.getLocalSolr() != null && env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "off").equals("solr");
-            final boolean solrLocalIsOnAfterwards = localindex.equals("solr");
-            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, localindex);
-            
-            if (solrLocalWasOn && !solrLocalIsOnAfterwards) {
-                sb.index.disconnectLocalSolr();
-            }
+            boolean post_core_rwi = post.getBoolean(SwitchboardConstants.CORE_SERVICE_RWI);
+            final boolean previous_core_rwi = sb.index.connectedRWI() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, post_core_rwi);
+            if (previous_core_rwi && !post_core_rwi) sb.index.disconnectRWI(); // switch off
+            if (!previous_core_rwi && post_core_rwi) try {
+                final int wordCacheMaxCount = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
+                final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
+                sb.index.connectRWI(wordCacheMaxCount, fileSizeMax);
+            } catch (IOException e) { Log.logException(e); } // switch on
 
-            if (!solrLocalWasOn && solrLocalIsOnAfterwards) {
-                // switch on
-            	try {
-					sb.index.connectLocalSolr();
-				} catch (IOException e) {
-					Log.logException(e);
-				}
-            }
-            
+            boolean post_core_citation = post.getBoolean(SwitchboardConstants.CORE_SERVICE_CITATION);
+            final boolean previous_core_citation = sb.index.connectedCitation() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_CITATION, post_core_citation);
+            if (previous_core_citation && !post_core_citation) sb.index.disconnectCitation(); // switch off
+            if (!previous_core_citation && post_core_citation) try {
+                final int wordCacheMaxCount = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
+                final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
+                sb.index.connectCitation(wordCacheMaxCount, fileSizeMax);
+            } catch (IOException e) { Log.logException(e); } // switch on
+
+            boolean post_core_solr = post.getBoolean(SwitchboardConstants.CORE_SERVICE_SOLR);
+            final boolean previous_core_solr = sb.index.connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, false);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_SOLR, post_core_solr);
+            if (previous_core_solr && !post_core_solr) sb.index.disconnectLocalSolr(); // switch off
+            if (!previous_core_solr && post_core_solr) try { sb.index.connectLocalSolr(); } catch (IOException e) { Log.logException(e); } // switch on
+
+            boolean post_core_urldb = post.getBoolean(SwitchboardConstants.CORE_SERVICE_URLDB);
+            final boolean previous_core_urldb = sb.index.connectedUrlDb() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, false);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_URLDB, post_core_urldb);
+            if (previous_core_urldb && !post_core_urldb) sb.index.disconnectUrlDb(); // switch off
+            if (!previous_core_urldb && post_core_urldb) sb.index.connectUrlDb(sb.useTailCache, sb.exceed134217727);
+
             // solr
-            final boolean solrRemoteWasOn = sb.index.getRemoteSolr() != null && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
+            final boolean solrRemoteWasOn = sb.index.connectedRemoteSolr() && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
             final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote");
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
             String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
@@ -198,9 +213,11 @@ public class IndexFederated_p {
         // fill attribute fields
         // allowed values are: classic, solr, off
         // federated.service.yacy.indexing.engine = classic
-        prop.put("yacy.indexing.engine.classic.checked", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("classic") ? 1 : 0);
-        prop.put("yacy.indexing.engine.solr.checked", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("solr") ? 1 : 0);
-        prop.put("yacy.indexing.engine.off.checked", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("off") ? 1 : 0);
+
+        prop.put(SwitchboardConstants.CORE_SERVICE_URLDB + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_RWI + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_SOLR + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
         prop.put("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));

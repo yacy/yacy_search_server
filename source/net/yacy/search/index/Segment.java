@@ -90,85 +90,104 @@ public class Segment {
     public static final long targetFileSize  = 64 * 1024 * 1024; // 256 MB
     public static final int  writeBufferSize = 4 * 1024 * 1024;
     public static final String UrlDbName = "text.urlmd";
-    
+    public static final String termIndexName = "text.index";
+    public static final String citationIndexName = "citation.index";
+
     // the reference factory
     public static final ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
     public static final ReferenceFactory<CitationReference> citationReferenceFactory = new CitationReferenceFactory();
-    //public static final ReferenceFactory<NavigationReference> navigationReferenceFactory = new NavigationReferenceFactory();
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
 
     private   final Log                            log;
-    protected final IndexCell<WordReference>       termIndex;
-    protected final IndexCell<CitationReference>   urlCitationIndex;
-    //private   final IndexCell<NavigationReference> authorNavIndex;
-    protected final MetadataRepository             urlMetadata;
     private   final File                           segmentPath;
+    protected final MetadataRepository             urlMetadata;
+    protected       IndexCell<WordReference>       termIndex;
+    protected       IndexCell<CitationReference>   urlCitationIndex;
 
-    public Segment(
-            final Log log,
-            final File segmentPath,
-            final int entityCacheMaxSize,
-            final long maxFileSize,
-            final boolean useTailCache,
-            final boolean exceed134217727,
-            final boolean connectLocalSolr,
-            final boolean useCitationIndex,
-            final boolean useRWI,
-            final boolean useMetadata) throws IOException {
+    public Segment(final Log log, final File segmentPath) {
 
         log.logInfo("Initializing Segment '" + segmentPath + ".");
-
         this.log = log;
         this.segmentPath = segmentPath;
 
-        this.termIndex = useRWI ? new IndexCell<WordReference>(
-                segmentPath,
-                "text.index",
-                wordReferenceFactory,
-                wordOrder,
-                Word.commonHashLength,
-                entityCacheMaxSize,
-                targetFileSize,
-                maxFileSize,
-                writeBufferSize) : null;
-
-        this.urlCitationIndex = useCitationIndex ? new IndexCell<CitationReference>(
-                segmentPath,
-                "citation.index",
-                citationReferenceFactory,
-                wordOrder,
-                Word.commonHashLength,
-                entityCacheMaxSize,
-                targetFileSize,
-                maxFileSize,
-                writeBufferSize) : null;
-
         // create LURL-db
         this.urlMetadata = new MetadataRepository(segmentPath);
-        if (useMetadata) this.urlMetadata.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
-        if (connectLocalSolr) this.connectLocalSolr();
     }
 
-    public long URLCount() {
-        return this.urlMetadata.size();
+    public boolean connectedRWI() {
+        return this.termIndex != null;
     }
 
-    public long RWICount() {
-    	if (this.termIndex == null) return 0;
-        return this.termIndex.sizesMax();
+    public void connectRWI(final int entityCacheMaxSize, final long maxFileSize) throws IOException {
+        if (this.termIndex != null) return;
+        this.termIndex = new IndexCell<WordReference>(
+                        this.segmentPath,
+                        termIndexName,
+                        wordReferenceFactory,
+                        wordOrder,
+                        Word.commonHashLength,
+                        entityCacheMaxSize,
+                        targetFileSize,
+                        maxFileSize,
+                        writeBufferSize);
     }
 
-    public int RWIBufferCount() {
-    	if (this.termIndex == null) return 0;
-        return this.termIndex.getBufferSize();
+    public void disconnectRWI() {
+        if (this.termIndex == null) return;
+        this.termIndex.close();
+        this.termIndex = null;
+    }
+
+    public boolean connectedCitation() {
+        return this.urlCitationIndex != null;
+    }
+
+    public void connectCitation(final int entityCacheMaxSize, final long maxFileSize) throws IOException {
+        if (this.urlCitationIndex != null) return;
+        this.urlCitationIndex = new IndexCell<CitationReference>(
+                        this.segmentPath,
+                        citationIndexName,
+                        citationReferenceFactory,
+                        wordOrder,
+                        Word.commonHashLength,
+                        entityCacheMaxSize,
+                        targetFileSize,
+                        maxFileSize,
+                        writeBufferSize);
+    }
+
+    public void disconnectCitation() {
+        if (this.urlCitationIndex == null) return;
+        this.urlCitationIndex.close();
+        this.urlCitationIndex = null;
+    }
+
+    public boolean connectedUrlDb() {
+        return this.urlMetadata.connectedUrlDb();
+    }
+
+    public void connectUrlDb(final boolean useTailCache, final boolean exceed134217727) {
+        this.urlMetadata.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
+    }
+
+    public void disconnectUrlDb() {
+        this.urlMetadata.disconnectUrlDb();
+    }
+
+    public boolean connectedRemoteSolr() {
+        return this.urlMetadata.connectedRemoteSolr();
     }
 
     public void connectRemoteSolr(final SolrConnector solr) {
         this.urlMetadata.connectRemoteSolr(solr);
     }
-    
+
     public void disconnectRemoteSolr() {
         this.urlMetadata.disconnectRemoteSolr();
+    }
+
+    public boolean connectedLocalSolr() {
+        return this.urlMetadata.connectedLocalSolr();
     }
 
     public void connectLocalSolr() throws IOException {
@@ -197,6 +216,20 @@ public class Segment {
 
     public IndexCell<CitationReference> urlCitation() {
         return this.urlCitationIndex;
+    }
+
+    public long URLCount() {
+        return this.urlMetadata.size();
+    }
+
+    public long RWICount() {
+        if (this.termIndex == null) return 0;
+        return this.termIndex.sizesMax();
+    }
+
+    public int RWIBufferCount() {
+        if (this.termIndex == null) return 0;
+        return this.termIndex.getBufferSize();
     }
 
     public boolean exists(final byte[] urlhash) {
@@ -382,7 +415,7 @@ public class Segment {
         	MultiProtocolURI anchor = anchorEntry.getKey();
         	byte[] refhash = new DigestURI(anchor).hash();
         	//System.out.println("*** addCitationIndex: urlhash = " + ASCII.String(urlhash) + ", refhash = " + ASCII.String(refhash) + ", urldate = " + urlModified.toString());
-            try {
+        	if (this.urlCitationIndex != null) try {
                 this.urlCitationIndex.add(refhash, new CitationReference(urlhash, urldate));
             } catch (final Exception e) {
                 Log.logException(e);

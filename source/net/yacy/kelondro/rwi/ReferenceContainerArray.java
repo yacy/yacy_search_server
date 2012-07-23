@@ -40,6 +40,7 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.index.Segment;
 
 
 public final class ReferenceContainerArray<ReferenceType extends Reference> {
@@ -453,7 +454,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         final HandleMap references = new HandleMap(payloadrow.primaryKeyLength, termOrder, 4, 1000000, heapLocation.getAbsolutePath());
         final String[] files = heapLocation.list();
         for (final String f: files) {
-            if (f.length() < 22 || !f.startsWith("text.index") || !f.endsWith(".blob")) continue;
+            if (f.length() < 22 || !f.startsWith(Segment.termIndexName) || !f.endsWith(".blob")) continue;
             final File fl = new File(heapLocation, f);
             System.out.println("CELL REFERENCE COLLECTION opening blob " + fl);
             final CloneableIterator<ReferenceContainer<ReferenceType>> ei = new ReferenceIterator<ReferenceType>(fl, factory);

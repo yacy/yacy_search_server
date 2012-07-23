@@ -662,22 +662,13 @@ public final class yacy {
             // db used to hold all neede urls
             final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(new File(indexRoot2, networkName), "TEXT"));
             minimizedUrlDB.connectUrlDb(Segment.UrlDbName, false, false);
-            
+
             final int cacheMem = (int)(MemoryControl.maxMemory() - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
 
-            final Segment wordIndex = new Segment(
-                    log,
-                    new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
-                    10000,
-                    Integer.MAX_VALUE,
-            		false, // useTailCache
-            		false, // exceed134217727
-            		false, // connectLocalSolr
-            		false, // useCitationIndex
-            		true,  // useRWI
-            		true   // useMetadata
-                    );
+            final Segment wordIndex = new Segment(log, new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"));
+            wordIndex.connectRWI(10000, Integer.MAX_VALUE);
+            wordIndex.connectUrlDb(false, false);
             final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.termIndex().referenceContainerIterator("AAAAAAAAAAAA".getBytes(), false, false);
 
             long urlCounter = 0, wordCounter = 0;
@@ -854,18 +845,9 @@ public final class yacy {
         try {
             Iterator<ReferenceContainer<WordReference>> indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new Segment(
-                        log,
-                        new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
-                        10000,
-                        Integer.MAX_VALUE,
-                		false, // useTailCache
-                		false, // exceed134217727
-                		false, // connectLocalSolr
-                		false, // useCitationIndex
-                		true,  // useRWI
-                		true   // useMetadata
-                        );
+                WordIndex = new Segment(log, new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"));
+                WordIndex.connectRWI(10000, Integer.MAX_VALUE);
+                WordIndex.connectUrlDb(false, false);
                 indexContainerIterator = WordIndex.termIndex().referenceContainerIterator(wordChunkStartHash.getBytes(), false, false);
             }
             int counter = 0;

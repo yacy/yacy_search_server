@@ -369,10 +369,7 @@ public final class Switchboard extends serverSwitch
         // start indexing management
         this.log.logConfig("Starting Indexing Management");
         final String networkName = getConfig(SwitchboardConstants.NETWORK_NAME, "");
-        final long fileSizeMax =
-            (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong(
-                "filesize.max.other",
-                Integer.MAX_VALUE);
+        final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
         final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
         final int partitionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
         this.networkRoot = new File(new File(indexPath, networkName), "NETWORK");
@@ -383,21 +380,12 @@ public final class Switchboard extends serverSwitch
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
-        final boolean solrLocal = this.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "off").equals("solr");
-        this.index =
-            new Segment(
-                this.log,
-                new File(segmentsPath, "default"),
-                wordCacheMaxCount,
-                fileSizeMax,
-                this.useTailCache,
-                this.exceed134217727,
-                solrLocal,
-        		true,  // useCitationIndex
-        		true,  // useRWI
-        		true   // useMetadata
-                );
-		
+        this.index = new Segment(this.log, new File(segmentsPath, "default"));
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, true)) this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr();
+
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
         final String schemename =
@@ -417,7 +405,6 @@ public final class Switchboard extends serverSwitch
         // set up the solr interface
         final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
-        int commitWithinMs = getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
 
         if (usesolr && solrurls != null && solrurls.length() > 0) {
             try {
@@ -425,7 +412,7 @@ public final class Switchboard extends serverSwitch
                                 solrurls,
                                 ShardSelection.Method.MODULO_HOST_MD5,
                                 10000, true);
-                solr.setCommitWithinMs(commitWithinMs);
+                solr.setCommitWithinMs(getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
                 this.index.connectRemoteSolr(solr);
             } catch ( final IOException e ) {
                 Log.logException(e);
@@ -1186,7 +1173,6 @@ public final class Switchboard extends serverSwitch
             setConfig("heuristic.site", false);
             setConfig("heuristic.blekko", false);
 
-            final boolean solrLocal = this.getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "off").equals("solr");
             // relocate
             this.peers.relocate(
                 this.networkRoot,
@@ -1194,22 +1180,31 @@ public final class Switchboard extends serverSwitch
                 partitionExponent,
                 this.useTailCache,
                 this.exceed134217727);
-            this.index =
-                new Segment(
-                    this.log,
-                    new File(new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), "default"),
-                    wordCacheMaxCount,
-                    fileSizeMax,
-                    this.useTailCache,
-                    this.exceed134217727,
-                    solrLocal,
-            		true,  // useCitationIndex
-            		true,  // useRWI
-            		true   // useMetadata
-            		);
-            this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
+            this.index = new Segment(this.log, new File(new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), "default"));
+            if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
+            if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
+            if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr();
+            if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, true)) this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
+
+            // set up the solr interface
+            final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
+            final boolean usesolr = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
+
+            if (usesolr && solrurls != null && solrurls.length() > 0) {
+                try {
+                    SolrConnector solr = new ShardSolrConnector(
+                                    solrurls,
+                                    ShardSelection.Method.MODULO_HOST_MD5,
+                                    10000, true);
+                    solr.setCommitWithinMs(getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
+                    this.index.connectRemoteSolr(solr);
+                } catch ( final IOException e ) {
+                    Log.logException(e);
+                }
+            }
 
             // create a crawler
+            this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
             this.crawler = new CrawlSwitchboard(networkName, this.log, this.queuesRoot);
 
             // init a DHT transmission dispatcher
@@ -2456,7 +2451,7 @@ public final class Switchboard extends serverSwitch
         }
 
         // check if we should accept the document for our index
-        if (!getConfig(SwitchboardConstants.FEDERATED_SERVICE_YACY_INDEXING_ENGINE, "classic").equals("classic")) {
+        if (!this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) {
             if ( this.log.isInfo() ) {
                 this.log.logInfo("Not Condensed Resource '"
                     + in.queueEntry.url().toNormalform(false, true)

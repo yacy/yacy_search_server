@@ -66,6 +66,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.lucene.util.Version;
+
 import de.anomic.crawler.CrawlStacker;
 
 public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
@@ -87,7 +88,11 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         this.remoteSolr = null;
         this.localSolr = null;
     }
-    
+
+    public boolean connectedUrlDb() {
+        return this.urlIndexFile != null;
+    }
+
     public void connectUrlDb(final String tablename, final boolean useTailCache, final boolean exceed134217727) {
     	if (this.urlIndexFile != null) return;
         this.tablename = tablename;
@@ -98,6 +103,10 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
     	if (this.urlIndexFile == null) return;
     	this.urlIndexFile.close();
     	this.urlIndexFile = null;
+    }
+
+    public boolean connectedLocalSolr() {
+        return this.localSolr != null;
     }
 
     public void connectLocalSolr() throws IOException {
@@ -120,6 +129,10 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         this.localSolr = null;
     }
 
+    public boolean connectedRemoteSolr() {
+        return this.remoteSolr != null;
+    }
+
     public void connectRemoteSolr(final SolrConnector solr) {
         this.remoteSolr = solr;
     }
@@ -129,7 +142,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         this.remoteSolr.close();
         this.remoteSolr = null;
     }
-    
+
     public SolrConnector getLocalSolr() {
         return this.localSolr;
     }
@@ -248,7 +261,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
 	            //entry = oldEntry;
 	            return; // this did not need to be stored, but is updated
 	        }
-	
+
 	        try {
 	            this.urlIndexFile.put(((URIMetadataRow) entry).toRowEntry());
 	        } catch (final RowSpaceExceededException e) {

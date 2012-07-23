@@ -21,12 +21,15 @@
     <form action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
-        The built-in search index can either be 'classic' (as before YaCy 1.03), 'solr' (experimental since 1.03) and 'off' (useful only if a remote solr index is used)
+        Local Search Index
       </legend>
+      This is an experimental switchboard to test an index migration from embedded metadata to embedded solr. The 'classic' configuration is rwi + metadata switched on. The future configuration is rwi + solr switched on.
+      The rwi index is necessary for index transmission and shall be switched off in future portalmode configurations.
       <dl>
-      <dt><input type="radio" name="yacy.indexing" value="classic" id="yacy.indexing.engine.classic" #(yacy.indexing.engine.classic.checked)#:: checked="checked"#(/yacy.indexing.engine.classic.checked)# /></dt><dd>embedded 'classic' search index</dd>
-      <dt><input type="radio" name="yacy.indexing" value="solr" id="yacy.indexing.engine.solr" #(yacy.indexing.engine.solr.checked)#:: checked="checked"#(/yacy.indexing.engine.solr.checked)# /></dt><dd>embedded solr search index</dd>
-      <dt><input type="radio" name="yacy.indexing" value="off" id="yacy.indexing.engine.off" #(yacy.indexing.engine.off.checked)#:: checked="checked"#(/yacy.indexing.engine.off.checked)# /></dt><dd>no local index</dd>
+      <dt><input type="checkbox" name="core.service.rwi.tmp" id="core.service.rwi" #(core.service.rwi.tmp.checked)#:: checked="checked"#(/core.service.rwi.tmp.checked)# /></dt><dd>embedded 'classic' rwi index</dd>
+      <dt><input type="checkbox" name="core.service.urldb.tmp" id="core.service.urldb" #(core.service.urldb.tmp.checked)#:: checked="checked"#(/core.service.urldb.tmp.checked)# /></dt><dd>embedded 'classic' metadata index</dd>
+      <dt><input type="checkbox" name="core.service.solr.tmp" id="core.service.solr" #(core.service.solr.tmp.checked)#:: checked="checked"#(/core.service.solr.tmp.checked)# /></dt><dd>embedded solr search index</dd>
+      <dt><input type="checkbox" name="core.service.citation.tmp" id="core.service.citation" #(core.service.citation.tmp.checked)#:: checked="checked"#(/core.service.citation.tmp.checked)# /></dt><dd>embedded citation reference index (link structure, used for ranking)</dd>
       <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>
       </dl>
       </fieldset>

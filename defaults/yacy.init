@@ -1047,11 +1047,15 @@ federated.service.solr.indexing.schemefile = solr.keys.default.list
 # the lazy attribute causes that fields containing "" or 0 are not added and not written
 federated.service.solr.indexing.lazy = true
 
-# the indexing engine in YaCy can be switched off or on
-# (off may make sense if federated.service.solr.indexing.enabled = true)
-# for experiments the value federated.service.yacy.indexing.engine = solr may be used
-# allowed values are: classic, solr, off
-federated.service.yacy.indexing.engine = classic
+# temporary definition of backend services to use. The standard is urldb+rwi, but in the future it should be rwi+solr
+# to get a handle for a migration, these values are defined as temporary, if the migration starts the values are renamed
+# and defined with different default values.
+# The citation service is used for ranking; this is a reverse linking index. It should be on before and after the migration.
+# It can be switched off if only a remote solr index is used.
+core.service.urldb.tmp = true
+core.service.rwi.tmp = true
+core.service.solr.tmp = false
+core.service.citation.tmp = true
 
 # RDF triplestore settings
 triplestore.persistent = true
