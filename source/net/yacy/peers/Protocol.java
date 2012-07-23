@@ -273,7 +273,7 @@ public final class Protocol
         } else {
             final String myIP = result.get("yourip");
             final String properIP = Seed.isProperIP(myIP);
-            mySeed.setFlagRootNode(mytype.equals(Seed.PEERTYPE_SENIOR) && responseTime < 1000 && Domains.isThisHostIP(myIP));
+            mySeed.setFlagRootNode((mytype.equals(Seed.PEERTYPE_SENIOR) || mytype.equals(Seed.PEERTYPE_PRINCIPAL)) && responseTime < 1000 && Domains.isThisHostIP(myIP));
             if ( properIP == null ) {
                 mySeed.setIP(myIP);
             }
