@@ -28,7 +28,7 @@
       <dl>
       <dt><input type="checkbox" name="core.service.rwi.tmp" id="core.service.rwi" #(core.service.rwi.tmp.checked)#:: checked="checked"#(/core.service.rwi.tmp.checked)# /></dt><dd>embedded 'classic' rwi index</dd>
       <dt><input type="checkbox" name="core.service.urldb.tmp" id="core.service.urldb" #(core.service.urldb.tmp.checked)#:: checked="checked"#(/core.service.urldb.tmp.checked)# /></dt><dd>embedded 'classic' metadata index</dd>
-      <dt><input type="checkbox" name="core.service.solr.tmp" id="core.service.solr" #(core.service.solr.tmp.checked)#:: checked="checked"#(/core.service.solr.tmp.checked)# /></dt><dd>embedded solr search index</dd>
+      <dt><input type="checkbox" name="core.service.solr.tmp" id="core.service.solr" #(core.service.solr.tmp.checked)#:: checked="checked"#(/core.service.solr.tmp.checked)# /></dt><dd>embedded solr search index, interface at: <a href="/solr/select?q=*:*&start=0&rows=10" target="_blank">/solr/select?q=*:*&amp;start=0&amp;rows=10</a></dd>
       <dt><input type="checkbox" name="core.service.citation.tmp" id="core.service.citation" #(core.service.citation.tmp.checked)#:: checked="checked"#(/core.service.citation.tmp.checked)# /></dt><dd>embedded citation reference index (link structure, used for ranking)</dd>
       <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>
       </dl>
@@ -53,7 +53,7 @@
       </tr>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-        <td><a href="#[url]#">#[url]#</a></td>
+        <td><a href="#[url]#" target="_blank">#[url]#</a></td>
         <td align="right">#[size]#</td>
       </tr>
       #{/list}#
