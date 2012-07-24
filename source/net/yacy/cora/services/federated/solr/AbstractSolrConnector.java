@@ -115,7 +115,7 @@ public class AbstractSolrConnector implements SolrConnector {
     @Override
     public void delete(final String id) throws IOException {
         try {
-            this.server.deleteById(id);
+            this.server.deleteById(id, this.commitWithinMs);
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -124,7 +124,7 @@ public class AbstractSolrConnector implements SolrConnector {
     @Override
     public void delete(final List<String> ids) throws IOException {
         try {
-            this.server.deleteById(ids);
+            this.server.deleteById(ids, this.commitWithinMs);
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -147,6 +147,7 @@ public class AbstractSolrConnector implements SolrConnector {
         up.setParam("literal.id", solrId);
         up.setParam("uprefix", "attr_");
         up.setParam("fmap.content", "attr_content");
+        up.setCommitWithin(this.commitWithinMs);
         //up.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
         try {
             this.server.request(up);

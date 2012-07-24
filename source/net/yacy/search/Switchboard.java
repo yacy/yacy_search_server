@@ -381,15 +381,15 @@ public final class Switchboard extends serverSwitch
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
         this.index = new Segment(this.log, new File(segmentsPath, "default"));
+        final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, true)) this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
-        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr();
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr(connectWithinMs);
 
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
-        final String schemename =
-            getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list");
+        final String schemename = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list");
         final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/" + schemename);
         if ( !solrWorkProfile.exists() ) {
             Files.copy(solrBackupProfile, solrWorkProfile);
@@ -412,7 +412,7 @@ public final class Switchboard extends serverSwitch
                                 solrurls,
                                 ShardSelection.Method.MODULO_HOST_MD5,
                                 10000, true);
-                solr.setCommitWithinMs(getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
+                solr.setCommitWithinMs(connectWithinMs);
                 this.index.connectRemoteSolr(solr);
             } catch ( final IOException e ) {
                 Log.logException(e);
@@ -1181,9 +1181,10 @@ public final class Switchboard extends serverSwitch
                 this.useTailCache,
                 this.exceed134217727);
             this.index = new Segment(this.log, new File(new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), "default"));
+            final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
-            if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr();
+            if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr(connectWithinMs);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, true)) this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
 
             // set up the solr interface
@@ -1196,7 +1197,7 @@ public final class Switchboard extends serverSwitch
                                     solrurls,
                                     ShardSelection.Method.MODULO_HOST_MD5,
                                     10000, true);
-                    solr.setCommitWithinMs(getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
+                    solr.setCommitWithinMs(connectWithinMs);
                     this.index.connectRemoteSolr(solr);
                 } catch ( final IOException e ) {
                     Log.logException(e);
@@ -2412,8 +2413,8 @@ public final class Switchboard extends serverSwitch
             return new indexingQueueEntry(in.queueEntry, in.documents, null);
         }
 
-        boolean localSolr = this.index.getLocalSolr() != null;
-        boolean remoteSolr = this.index.getRemoteSolr() != null;
+        boolean localSolr = this.index.connectedLocalSolr();
+        boolean remoteSolr = this.index.connectedRemoteSolr();
         if (localSolr || remoteSolr) {
             // send the documents to solr
             for ( final Document doc : in.documents ) {
@@ -2433,8 +2434,7 @@ public final class Switchboard extends serverSwitch
                     }
                     try {
                         SolrDoc solrDoc = this.solrScheme.yacy2solr(id, in.queueEntry.getResponseHeader(), doc);
-                        if (localSolr) this.index.getLocalSolr().add(solrDoc);
-                        if (remoteSolr) this.index.getRemoteSolr().add(solrDoc);
+                        this.index.getSolr().add(solrDoc);
                     } catch ( final IOException e ) {
                         Log.logWarning(
                             "SOLR",

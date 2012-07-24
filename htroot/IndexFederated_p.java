@@ -72,11 +72,12 @@ public class IndexFederated_p {
                 sb.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             } catch (IOException e) { Log.logException(e); } // switch on
 
+            final int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
             boolean post_core_solr = post.getBoolean(SwitchboardConstants.CORE_SERVICE_SOLR);
             final boolean previous_core_solr = sb.index.connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_SOLR, post_core_solr);
             if (previous_core_solr && !post_core_solr) sb.index.disconnectLocalSolr(); // switch off
-            if (!previous_core_solr && post_core_solr) try { sb.index.connectLocalSolr(); } catch (IOException e) { Log.logException(e); } // switch on
+            if (!previous_core_solr && post_core_solr) try { sb.index.connectLocalSolr(commitWithinMs); } catch (IOException e) { Log.logException(e); } // switch on
 
             boolean post_core_urldb = post.getBoolean(SwitchboardConstants.CORE_SERVICE_URLDB);
             final boolean previous_core_urldb = sb.index.connectedUrlDb() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, false);
@@ -89,7 +90,6 @@ public class IndexFederated_p {
             final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote");
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
             String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
-            int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
             boolean lazy = post.getBoolean("solr.indexing.lazy");
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
             final StringBuilder s = new StringBuilder();
@@ -167,7 +167,7 @@ public class IndexFederated_p {
         }
 
         // show solr host table
-        if (sb.index.getRemoteSolr() == null) {
+        if (!sb.index.connectedRemoteSolr()) {
             prop.put("table", 0);
         } else {
             prop.put("table", 1);

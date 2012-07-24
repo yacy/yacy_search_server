@@ -190,18 +190,20 @@ public class Segment {
         return this.urlMetadata.connectedLocalSolr();
     }
 
-    public void connectLocalSolr() throws IOException {
-        this.urlMetadata.connectLocalSolr();
+    public void connectLocalSolr(final int connectWithin) throws IOException {
+        this.urlMetadata.connectLocalSolr(connectWithin);
     }
 
     public void disconnectLocalSolr() {
         this.urlMetadata.disconnectLocalSolr();
     }
+    public SolrConnector getSolr() {
+        return this.urlMetadata.getSolr();
+    }
 
     public SolrConnector getRemoteSolr() {
         return this.urlMetadata.getRemoteSolr();
     }
-
     public SolrConnector getLocalSolr() {
         return this.urlMetadata.getLocalSolr();
     }

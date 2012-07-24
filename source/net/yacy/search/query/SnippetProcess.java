@@ -67,7 +67,7 @@ import de.anomic.data.WorkTables;
 public class SnippetProcess {
 
 	public static Log log = new Log("SEARCH");
-	
+
     private final static int SNIPPET_WORKER_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
 
     // input values
@@ -447,7 +447,7 @@ public class SnippetProcess {
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
             this.shallrun = true;
-            this.solr = SnippetProcess.this.rankingProcess.getQuery().getSegment().getRemoteSolr();
+            this.solr = SnippetProcess.this.rankingProcess.getQuery().getSegment().getSolr();
         }
 
         @Override

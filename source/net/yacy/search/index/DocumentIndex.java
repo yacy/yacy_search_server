@@ -82,7 +82,7 @@ public class DocumentIndex extends Segment
                 false, // useTailCache
                 false  // exceed134217727
                 );
-        super.connectLocalSolr();
+        super.connectLocalSolr(1000);
         final int cores = Runtime.getRuntime().availableProcessors() + 1;
         this.callback = callback;
         this.queue = new LinkedBlockingQueue<DigestURI>(cores * 300);
