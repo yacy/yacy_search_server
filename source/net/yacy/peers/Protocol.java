@@ -48,6 +48,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -241,7 +242,9 @@ public final class Protocol
                     if ( p < 0 ) {
                         return -1;
                     }
-                    final String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
+                    String h = address.substring(0, p);
+                    InetAddress ie = Domains.dnsResolve(h);
+                    final String host = ie == null ? h : ie.getHostAddress(); // hack to prevent NPEs
                     otherPeer = Seed.genRemoteSeed(seed, false, host);
                     if ( !otherPeer.hash.equals(otherHash) ) {
                         Network.log.logInfo("yacyClient.hello: consistency error: otherPeer.hash = "
