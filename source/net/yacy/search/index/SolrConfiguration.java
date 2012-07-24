@@ -106,7 +106,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String[] value) {
         if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.length > 0))) solrdoc.addSolr(key, value);
     }
-    
+
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final List<String> value) {
         if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value);
     }
@@ -163,7 +163,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         addSolr(solrdoc, SolrField.author, yacydoc.dc_creator());
         addSolr(solrdoc, SolrField.description, yacydoc.dc_description());
         addSolr(solrdoc, SolrField.content_type, yacydoc.dc_format());
-        addSolr(solrdoc, SolrField.last_modified, header.lastModified());
+        addSolr(solrdoc, SolrField.last_modified, header == null ? new Date() : header.lastModified());
         addSolr(solrdoc, SolrField.keywords, yacydoc.dc_subject(' '));
         final String content = yacydoc.getTextString();
         addSolr(solrdoc, SolrField.text_t, content);
@@ -224,10 +224,14 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 if (robots_meta.indexOf("noindex",0) >= 0) b += 4;  // set bit 2
                 if (robots_meta.indexOf("nofollow",0) >= 0) b += 8; // set bit 3
             }
-            String x_robots_tag = header.get(HeaderFramework.X_ROBOTS_TAG, "");
-            if (x_robots_tag.isEmpty()) {
-            	x_robots_tag = header.get(HeaderFramework.X_ROBOTS, "");
-            } else {
+            String x_robots_tag = "";
+            if (header != null) {
+                x_robots_tag = header.get(HeaderFramework.X_ROBOTS_TAG, "");
+                if (x_robots_tag.isEmpty()) {
+                    x_robots_tag = header.get(HeaderFramework.X_ROBOTS, "");
+                }
+            }
+            if (!x_robots_tag.isEmpty()) {
                 // this tag may have values: noarchive, nosnippet, noindex, unavailable_after
                 if (x_robots_tag.indexOf("noarchive",0) >= 0) b += 256;         // set bit 8
                 if (x_robots_tag.indexOf("nosnippet",0) >= 0) b += 512;         // set bit 9
@@ -398,7 +402,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // response time
-            addSolr(solrdoc, SolrField.responsetime_i, header.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0"));
+            addSolr(solrdoc, SolrField.responsetime_i, header == null ? 0 : Integer.parseInt(header.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0")));
         }
 
         // list all links
@@ -487,7 +491,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             addSolr(solrdoc, SolrField.lon_coordinate, yacydoc.lon());
             addSolr(solrdoc, SolrField.lat_coordinate, yacydoc.lat());
         }
-        addSolr(solrdoc, SolrField.httpstatus_i, header.getStatusCode());
+        addSolr(solrdoc, SolrField.httpstatus_i, header == null ? 200 : header.getStatusCode());
 
         return solrdoc;
     }

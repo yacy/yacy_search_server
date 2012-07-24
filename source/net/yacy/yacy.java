@@ -666,7 +666,7 @@ public final class yacy {
             final int cacheMem = (int)(MemoryControl.maxMemory() - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
 
-            final Segment wordIndex = new Segment(log, new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"));
+            final Segment wordIndex = new Segment(log, new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"), null);
             wordIndex.connectRWI(10000, Integer.MAX_VALUE);
             wordIndex.connectUrlDb(false, false);
             final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.termIndex().referenceContainerIterator("AAAAAAAAAAAA".getBytes(), false, false);
@@ -845,7 +845,7 @@ public final class yacy {
         try {
             Iterator<ReferenceContainer<WordReference>> indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new Segment(log, new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"));
+                WordIndex = new Segment(log, new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"), null);
                 WordIndex.connectRWI(10000, Integer.MAX_VALUE);
                 WordIndex.connectUrlDb(false, false);
                 indexContainerIterator = WordIndex.termIndex().referenceContainerIterator(wordChunkStartHash.getBytes(), false, false);

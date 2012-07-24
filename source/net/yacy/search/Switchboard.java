@@ -97,7 +97,6 @@ import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.services.federated.solr.ShardSelection;
 import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
-import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -251,7 +250,6 @@ public final class Switchboard extends serverSwitch
     public SeedDB peers;
     public WorkTables tables;
     public Tray tray;
-    public SolrConfiguration solrScheme;
 
     public WorkflowProcessor<IndexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<IndexingQueueEntry> indexingCondensementProcessor;
@@ -376,16 +374,6 @@ public final class Switchboard extends serverSwitch
         this.networkRoot.mkdirs();
         this.queuesRoot.mkdirs();
 
-        // initialize index
-        ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
-        final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
-        this.index = new Segment(this.log, new File(segmentsPath, "default"));
-        final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
-        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
-        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
-        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, true)) this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
-        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr(connectWithinMs);
-
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
         final String schemename = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list");
@@ -395,11 +383,21 @@ public final class Switchboard extends serverSwitch
         }
         final boolean solrlazy = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true);
         final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile, solrlazy);
-        this.solrScheme = new SolrConfiguration(solrWorkProfile, solrlazy);
-
+        final SolrConfiguration solrScheme = new SolrConfiguration(solrWorkProfile, solrlazy);
         // update the working scheme with the backup scheme. This is necessary to include new features.
         // new features are always activated by default (if activated in input-backupScheme)
-        this.solrScheme.fill(backupScheme, true);
+        solrScheme.fill(backupScheme, true);
+
+        // initialize index
+        ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
+        final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
+        this.index = new Segment(this.log, new File(segmentsPath, "default"), solrScheme);
+        final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, true)) this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr(connectWithinMs);
+
 
         // set up the solr interface
         final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
@@ -1133,6 +1131,9 @@ public final class Switchboard extends serverSwitch
         // switch the networks
         synchronized ( this ) {
 
+            // remember the solr scheme
+            SolrConfiguration solrScheme = this.index.getSolrScheme();
+
             // shut down
             this.crawler.close();
             if ( this.dhtDispatcher != null ) {
@@ -1179,7 +1180,7 @@ public final class Switchboard extends serverSwitch
                 partitionExponent,
                 this.useTailCache,
                 this.exceed134217727);
-            this.index = new Segment(this.log, new File(new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), "default"));
+            this.index = new Segment(this.log, new File(new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), "default"), solrScheme);
             final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
@@ -2395,55 +2396,8 @@ public final class Switchboard extends serverSwitch
             return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
 
-        boolean localSolr = this.index.connectedLocalSolr();
-        boolean remoteSolr = this.index.connectedRemoteSolr();
-        if (localSolr || remoteSolr) {
-            // send the documents to solr
-            for ( final Document doc : in.documents ) {
-                try {
-                    final String id = UTF8.String(new DigestURI(doc.dc_identifier()).hash());
-                    final String iquh = UTF8.String(in.queueEntry.url().hash());
-                    if ( !id.equals(iquh) ) {
-                        this.log.logWarning("condenseDocument consistency check doc="
-                            + id
-                            + ":"
-                            + doc.dc_identifier()
-                            + ", query="
-                            + iquh
-                            + ":"
-                            + in.queueEntry.url());
-                        // in case that this happens it appears that the doc id is the right one
-                    }
-                    try {
-                        SolrDoc solrDoc = this.solrScheme.yacy2solr(id, in.queueEntry.getResponseHeader(), doc);
-                        this.index.getSolr().add(solrDoc);
-                    } catch ( final IOException e ) {
-                        Log.logWarning(
-                            "SOLR",
-                            "failed to send "
-                                + in.queueEntry.url().toNormalform(true, false)
-                                + " to solr: "
-                                + e.getMessage());
-                    }
-                } catch ( final MalformedURLException e ) {
-                    Log.logException(e);
-                    continue;
-                }
-            }
-        }
-
-        // check if we should accept the document for our index
-        if (!this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) {
-            if ( this.log.isInfo() ) {
-                this.log.logInfo("Not Condensed Resource '"
-                    + in.queueEntry.url().toNormalform(false, true)
-                    + "': indexing not wanted by federated rule for YaCy");
-            }
-            return new IndexingQueueEntry(in.queueEntry, in.documents, null);
-        }
-        final List<Document> doclist = new ArrayList<Document>();
-
         // check which files may take part in the indexing process
+        final List<Document> doclist = new ArrayList<Document>();
         for ( final Document document : in.documents ) {
             if ( document.indexingDenied() ) {
                 if ( this.log.isInfo() ) {
@@ -2569,6 +2523,7 @@ public final class Switchboard extends serverSwitch
                     queueEntry.lastModified(),
                     new Date(),
                     queueEntry.size(),
+                    queueEntry.getResponseHeader(),
                     document,
                     condenser,
                     searchEvent,

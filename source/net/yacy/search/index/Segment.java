@@ -39,7 +39,9 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.solr.SolrConnector;
+import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -100,15 +102,16 @@ public class Segment {
 
     private   final Log                            log;
     private   final File                           segmentPath;
+    private   final SolrConfiguration              solrScheme;
     protected final MetadataRepository             urlMetadata;
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
 
-    public Segment(final Log log, final File segmentPath) {
-
+    public Segment(final Log log, final File segmentPath, final SolrConfiguration solrScheme) {
         log.logInfo("Initializing Segment '" + segmentPath + ".");
         this.log = log;
         this.segmentPath = segmentPath;
+        this.solrScheme = solrScheme;
 
         // create LURL-db
         this.urlMetadata = new MetadataRepository(segmentPath);
@@ -197,8 +200,13 @@ public class Segment {
     public void disconnectLocalSolr() {
         this.urlMetadata.disconnectLocalSolr();
     }
+
     public SolrConnector getSolr() {
         return this.urlMetadata.getSolr();
+    }
+
+    public SolrConfiguration getSolrScheme() {
+        return this.solrScheme;
     }
 
     public SolrConnector getRemoteSolr() {
@@ -318,94 +326,6 @@ public class Segment {
         return this.segmentPath;
     }
 
-    /**
-     * this is called by the switchboard to put in a new page into the index
-     * use all the words in one condenser object to simultanous create index entries
-     *
-     * @param url
-     * @param urlModified
-     * @param document
-     * @param condenser
-     * @param language
-     * @param doctype
-     * @param outlinksSame
-     * @param outlinksOther
-     * @return
-     */
-    private int addPageIndex(
-            final DigestURI url,
-            final Date urlModified,
-            final Document document,
-            final Condenser condenser,
-            final String language,
-            final char doctype,
-            final int outlinksSame,
-            final int outlinksOther,
-            final SearchEvent searchEvent,
-            final String sourceName) {
-        final RWIProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
-        int wordCount = 0;
-        final int urlLength = url.toNormalform(true, true).length();
-        final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
-
-        // iterate over all words of content text
-        final Iterator<Map.Entry<String, Word>> i = condenser.words().entrySet().iterator();
-        Map.Entry<String, Word> wentry;
-        String word;
-        final int len = (document == null) ? urlLength : document.dc_title().length();
-        final WordReferenceRow ientry = new WordReferenceRow(url.hash(),
-                                urlLength, urlComps, len,
-                                condenser.RESULT_NUMB_WORDS,
-                                condenser.RESULT_NUMB_SENTENCES,
-                                urlModified.getTime(),
-                                System.currentTimeMillis(),
-                                UTF8.getBytes(language),
-                                doctype,
-                                outlinksSame, outlinksOther);
-        Word wprop = null;
-        byte[] wordhash;
-        while (i.hasNext()) {
-            wentry = i.next();
-            word = wentry.getKey();
-            wprop = wentry.getValue();
-            assert (wprop.flags != null);
-            ientry.setWord(wprop);
-            wordhash = Word.word2hash(word);
-            if (this.termIndex != null) try {
-                this.termIndex.add(wordhash, ientry);
-            } catch (final Exception e) {
-                Log.logException(e);
-            }
-            wordCount++;
-
-            // during a search event it is possible that a heuristic is used which aquires index
-            // data during search-time. To transfer indexed data directly to the search process
-            // the following lines push the index data additionally to the search process
-            // this is done only for searched words
-            if (searchEvent != null && !searchEvent.getQuery().query_exclude_hashes.has(wordhash) && searchEvent.getQuery().query_include_hashes.has(wordhash)) {
-                // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
-                ReferenceContainer<WordReference> container;
-                try {
-                    container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
-                    container.add(ientry);
-                    rankingProcess.add(container, true, sourceName, -1, !i.hasNext(), 5000);
-                } catch (final RowSpaceExceededException e) {
-                    continue;
-                }
-            }
-        }
-
-        // assign the catchall word
-        ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics
-        if (this.termIndex != null) try {
-            this.termIndex.add(catchallHash, ientry);
-        } catch (final Exception e) {
-            Log.logException(e);
-        }
-
-        return wordCount;
-    }
-
     private int addCitationIndex(final DigestURI url, final Date urlModified, final Map<MultiProtocolURI, Properties> anchors) {
     	if (anchors == null) return 0;
     	int refCount = 0;
@@ -433,25 +353,12 @@ public class Segment {
         if (this.urlCitationIndex != null) this.urlCitationIndex.close();
     }
 
-    public URIMetadataRow storeDocument(
-            final DigestURI url,
-            final DigestURI referrerURL,
-            Date modDate,
-            final Date loadDate,
-            final long sourcesize,
-            final Document document,
-            final Condenser condenser,
-            final SearchEvent searchEvent,
-            final String sourceName
-            ) throws IOException {
-        final long startTime = System.currentTimeMillis();
-
-        // CREATE INDEX
-
-        // load some document metadata
-        final String dc_title = document.dc_title();
-
-        // do a identification of the language
+    private String votedLanguage(
+                    final DigestURI url,
+                    final String urlNormalform,
+                    final Document document,
+                    final Condenser condenser) {
+     // do a identification of the language
         String language = condenser.language(); // this is a statistical analysation of the content: will be compared with other attributes
         final String bymetadata = document.dc_language(); // the languageByMetadata may return null if there was no declaration
         if (language == null) {
@@ -466,7 +373,7 @@ public class Segment {
                 else {
                     final String error = "LANGUAGE-BY-STATISTICS: " + url + " CONFLICTING: " + language + " (the language given by the TLD is " + url.language() + ")";
                     // see if we have a hint in the url that the statistic was right
-                    final String u = url.toNormalform(true, false).toLowerCase();
+                    final String u = urlNormalform.toLowerCase();
                     if (!u.contains("/" + language + "/") && !u.contains("/" + ISO639.country(language).toLowerCase() + "/")) {
                         // no confirmation using the url, use the TLD
                         language = url.language();
@@ -491,9 +398,46 @@ public class Segment {
                 }
             }
         }
+        return language;
+    }
 
-        // create a new loaded URL db entry
-        if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
+    public URIMetadataRow storeDocument(
+            final DigestURI url,
+            final DigestURI referrerURL,
+            Date modDate,
+            final Date loadDate,
+            final long sourcesize,
+            final ResponseHeader responseHeader,
+            final Document document,
+            final Condenser condenser,
+            final SearchEvent searchEvent,
+            final String sourceName
+            ) throws IOException {
+        final long startTime = System.currentTimeMillis();
+
+        // CREATE INDEX
+
+        // load some document metadata
+        final String id = ASCII.String(url.hash());
+        final String dc_title = document.dc_title();
+        final String urlNormalform = url.toNormalform(true, false);
+        final String language = votedLanguage(url, urlNormalform, document, condenser); // identification of the language
+
+        // STORE TO SOLR
+        boolean localSolr = this.connectedLocalSolr();
+        boolean remoteSolr = this.connectedRemoteSolr();
+        if (localSolr || remoteSolr) {
+            try {
+                SolrDoc solrDoc = this.solrScheme.yacy2solr(id, responseHeader, document);
+                this.getSolr().add(solrDoc);
+            } catch ( final IOException e ) {
+                Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
+            }
+        }
+
+        // STORE URL TO LOADED-URL-DB
+        if (modDate.getTime() > loadDate.getTime()) modDate = loadDate; // TODO: compare with modTime from responseHeader
+        char docType = Response.docType(document.dc_format());
         final URIMetadataRow newEntry = new URIMetadataRow(
                 url,                                       // URL
                 dc_title,                                  // document description
@@ -509,7 +453,7 @@ public class Segment {
                 new byte[0],                               // md5
                 (int) sourcesize,                          // size
                 condenser.RESULT_NUMB_WORDS,               // word count
-                Response.docType(document.dc_format()),    // doctype
+                docType,                                   // doctype
                 condenser.RESULT_FLAGS,                    // flags
                 UTF8.getBytes(language),                   // language
                 document.inboundLinks().size(),            // inbound links
@@ -519,25 +463,72 @@ public class Segment {
                 document.getVideolinks().size(),           // lvideo
                 document.getApplinks().size()              // lapp
         );
-
-        // STORE URL TO LOADED-URL-DB
-        this.urlMetadata.store(newEntry); // TODO: should be serialized; integrated in IODispatcher
-
+        this.urlMetadata.store(newEntry);
         final long storageEndTime = System.currentTimeMillis();
 
         // STORE PAGE INDEX INTO WORD INDEX DB
-        final int words = addPageIndex(
-                url,                                          // document url
-                modDate,                                      // document mod date
-                document,                                     // document content
-                condenser,                                    // document condenser
-                language,                                     // document language
-                Response.docType(document.dc_format()),       // document type
-                document.inboundLinks().size(),               // inbound links
-                document.outboundLinks().size(),              // outbound links
-                searchEvent,                                  // a search event that can have results directly
-                sourceName                                    // the name of the source where the index was created
-        );
+        int outlinksSame = document.inboundLinks().size();
+        int outlinksOther = document.outboundLinks().size();
+        final RWIProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
+        int wordCount = 0;
+        final int urlLength = urlNormalform.length();
+        final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
+
+        // create a word prototype which is re-used for all entries
+        final int len = (document == null) ? urlLength : document.dc_title().length();
+        final WordReferenceRow ientry = new WordReferenceRow(
+                        url.hash(),
+                        urlLength, urlComps, len,
+                        condenser.RESULT_NUMB_WORDS,
+                        condenser.RESULT_NUMB_SENTENCES,
+                        modDate.getTime(),
+                        System.currentTimeMillis(),
+                        UTF8.getBytes(language),
+                        docType,
+                        outlinksSame, outlinksOther);
+
+        // iterate over all words of content text
+        Word wprop = null;
+        byte[] wordhash;
+        String word;
+        for (Map.Entry<String, Word> wentry: condenser.words().entrySet()) {
+            word = wentry.getKey();
+            wprop = wentry.getValue();
+            assert (wprop.flags != null);
+            ientry.setWord(wprop);
+            wordhash = Word.word2hash(word);
+            if (this.termIndex != null) try {
+                this.termIndex.add(wordhash, ientry);
+            } catch (final Exception e) {
+                Log.logException(e);
+            }
+            wordCount++;
+
+            // during a search event it is possible that a heuristic is used which aquires index
+            // data during search-time. To transfer indexed data directly to the search process
+            // the following lines push the index data additionally to the search process
+            // this is done only for searched words
+            if (searchEvent != null && !searchEvent.getQuery().query_exclude_hashes.has(wordhash) && searchEvent.getQuery().query_include_hashes.has(wordhash)) {
+                // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
+                ReferenceContainer<WordReference> container;
+                try {
+                    container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
+                    container.add(ientry);
+                    rankingProcess.add(container, true, sourceName, -1, 5000);
+                } catch (final RowSpaceExceededException e) {
+                    continue;
+                }
+            }
+        }
+        if (rankingProcess != null) rankingProcess.addFinalize();
+
+        // assign the catchall word
+        ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics
+        if (this.termIndex != null) try {
+            this.termIndex.add(catchallHash, ientry);
+        } catch (final Exception e) {
+            Log.logException(e);
+        }
 
         // STORE PAGE REFERENCES INTO CITATION INDEX
         final int refs = addCitationIndex(url, modDate, document.getAnchors());
@@ -546,10 +537,8 @@ public class Segment {
         final long indexingEndTime = System.currentTimeMillis();
 
         if (this.log.isInfo()) {
-            // TODO: UTF-8 docDescription seems not to be displayed correctly because
-            // of string concatenation
-            this.log.logInfo("*Indexed " + words + " words in URL " + url +
-                    " [" + ASCII.String(url.hash()) + "]" +
+            this.log.logInfo("*Indexed " + wordCount + " words in URL " + url +
+                    " [" + id + "]" +
                     "\n\tDescription:  " + dc_title +
                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
                     "Size: " + document.getTextLength() + " bytes | " +

@@ -221,7 +221,8 @@ public final class RWIProcess extends Thread
                     System.currentTimeMillis() - timer),
                 false);
             if ( !index.isEmpty() ) {
-                add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true, this.maxtime);
+                add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, this.maxtime);
+                addFinalize();
             }
         } catch ( final Exception e ) {
             Log.logException(e);
@@ -230,12 +231,15 @@ public final class RWIProcess extends Thread
         }
     }
 
+    public void addFinalize() {
+        this.addRunning = false;
+    }
+
     public void add(
         final ReferenceContainer<WordReference> index,
         final boolean local,
         final String resourceName,
         final int fullResource,
-        final boolean finalizeAddAtEnd,
         final long maxtime) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
@@ -422,10 +426,6 @@ public final class RWIProcess extends Thread
 
         } catch ( final InterruptedException e ) {
         } catch ( final RowSpaceExceededException e ) {
-        } finally {
-            if ( finalizeAddAtEnd ) {
-                this.addRunning = false;
-            }
         }
 
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);

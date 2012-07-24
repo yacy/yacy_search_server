@@ -159,4 +159,12 @@ public class ResponseHeader extends HeaderFramework {
         }
         return Charset.forName(charSetName);
     }
+
+    public String getXRobotsTag() {
+        String x_robots_tag = this.get(HeaderFramework.X_ROBOTS_TAG, "");
+        if (x_robots_tag.isEmpty()) {
+            x_robots_tag = this.get(HeaderFramework.X_ROBOTS, "");
+        }
+        return x_robots_tag;
+    }
 }

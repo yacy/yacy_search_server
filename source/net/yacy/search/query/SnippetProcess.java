@@ -503,7 +503,7 @@ public class SnippetProcess {
                             sd = sdl.get(0);
                         }
                         if (sd != null) {
-                            solrContent = Switchboard.getSwitchboard().solrScheme.solrGetText(sd);
+                            solrContent = Switchboard.getSwitchboard().index.getSolrScheme().solrGetText(sd);
                         }
                     }
 

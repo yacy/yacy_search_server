@@ -786,7 +786,8 @@ public final class Protocol
         // store remote result to local result container
         // insert one container into the search result buffer
         // one is enough, only the references are used, not the word
-        containerCache.add(container.get(0), false, target.getName() + "/" + target.hash, result.joincount, true, time);
+        containerCache.add(container.get(0), false, target.getName() + "/" + target.hash, result.joincount, time);
+        containerCache.addFinalize();
         containerCache.addExpectedRemoteReferences(-count);
 
         // insert the containers to the index

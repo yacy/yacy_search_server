@@ -73,9 +73,9 @@ public class DocumentIndex extends Segment
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
 
-    public DocumentIndex(final File segmentPath, final CallbackListener callback, final int cachesize)
+    public DocumentIndex(final File segmentPath, final File schemePath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(new Log("DocumentIndex"), segmentPath);
+        super(new Log("DocumentIndex"), segmentPath, schemePath == null ? null : new SolrConfiguration(schemePath, true));
         super.connectRWI(cachesize, targetFileSize * 4 - 1);
         super.connectCitation(cachesize, targetFileSize * 4 - 1);
         super.connectUrlDb(
@@ -174,6 +174,7 @@ public class DocumentIndex extends Segment
                     new Date(url.lastModified()),
                     new Date(),
                     url.length(),
+                    null,
                     document,
                     condenser,
                     null,
@@ -306,7 +307,7 @@ public class DocumentIndex extends Segment
         try {
             if ( args[1].equals("add") ) {
                 final DigestURI f = new DigestURI(args[2]);
-                final DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
+                final DocumentIndex di = new DocumentIndex(segmentPath, null, callback, 100000);
                 di.addConcurrent(f);
                 di.close();
             } else {
@@ -315,7 +316,7 @@ public class DocumentIndex extends Segment
                     query += args[i];
                 }
                 query.trim();
-                final DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
+                final DocumentIndex di = new DocumentIndex(segmentPath, null, callback, 100000);
                 final ArrayList<DigestURI> results = di.find(query, 100);
                 for ( final DigestURI f : results ) {
                     if ( f != null ) {

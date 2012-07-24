@@ -137,7 +137,7 @@ public class IndexFederated_p {
             }
 
             // read index scheme table flags
-            final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.entryIterator();
+            final Iterator<ConfigurationSet.Entry> i = sb.index.getSolrScheme().entryIterator();
             ConfigurationSet.Entry entry;
             boolean modified = false; // flag to remember changes
             while (i.hasNext()) {
@@ -160,7 +160,7 @@ public class IndexFederated_p {
             }
             if (modified) { // save settings to config file if modified
                 try {
-                    sb.solrScheme.commit();
+                    sb.index.getSolrScheme().commit();
                     modified = false;
                 } catch (IOException ex) {}
             }
@@ -191,7 +191,7 @@ public class IndexFederated_p {
         // use enum SolrField to keep defined order
         for(SolrField field : SolrField.values()) {
             prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
-            prop.put("scheme_" + c + "_checked", sb.solrScheme.contains(field.name()) ? 1 : 0);
+            prop.put("scheme_" + c + "_checked", sb.index.getSolrScheme().contains(field.name()) ? 1 : 0);
             prop.putHTML("scheme_" + c + "_key", field.name());
             prop.putHTML("scheme_" + c + "_solrfieldname",field.name().equalsIgnoreCase(field.getSolrFieldName()) ? "" : field.getSolrFieldName());
             if (field.getComment() != null) prop.putHTML("scheme_" + c + "_comment",field.getComment());
