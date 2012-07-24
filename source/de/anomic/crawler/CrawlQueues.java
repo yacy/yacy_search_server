@@ -50,8 +50,8 @@ import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.search.IndexingQueueEntry;
 import net.yacy.search.Switchboard;
-import net.yacy.search.Switchboard.indexingQueueEntry;
 import net.yacy.search.SwitchboardConstants;
 import de.anomic.crawler.NoticedURL.StackType;
 import de.anomic.crawler.ZURL.FailCategory;
@@ -275,7 +275,7 @@ public class CrawlQueues {
                         return true;
                     }
                     try {
-                        this.sb.indexingDocumentProcessor.enQueue(new indexingQueueEntry(new Response(urlEntry, profile), null, null));
+                        this.sb.indexingDocumentProcessor.enQueue(new IndexingQueueEntry(new Response(urlEntry, profile), null, null));
                         Log.logInfo("CrawlQueues", "placed NOLOAD URL on indexing queue: " + urlEntry.url().toNormalform(true, false));
                     } catch (final InterruptedException e) {
                         Log.logException(e);

@@ -127,7 +127,6 @@ import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.InstantBusyThread;
-import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.peers.EventChannel;
@@ -254,10 +253,10 @@ public final class Switchboard extends serverSwitch
     public Tray tray;
     public SolrConfiguration solrScheme;
 
-    public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
-    public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
-    public WorkflowProcessor<indexingQueueEntry> indexingAnalysisProcessor;
-    public WorkflowProcessor<indexingQueueEntry> indexingStorageProcessor;
+    public WorkflowProcessor<IndexingQueueEntry> indexingDocumentProcessor;
+    public WorkflowProcessor<IndexingQueueEntry> indexingCondensementProcessor;
+    public WorkflowProcessor<IndexingQueueEntry> indexingAnalysisProcessor;
+    public WorkflowProcessor<IndexingQueueEntry> indexingStorageProcessor;
 
     public RobotsTxtConfig robotstxtConfig = null;
     public boolean useTailCache;
@@ -795,7 +794,7 @@ public final class Switchboard extends serverSwitch
 
         // deploy blocking threads
         this.indexingStorageProcessor =
-            new WorkflowProcessor<indexingQueueEntry>(
+            new WorkflowProcessor<IndexingQueueEntry>(
                 "storeDocumentIndex",
                 "This is the sequencing step of the indexing queue. Files are written as streams, too much councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",
                 new String[] {
@@ -807,7 +806,7 @@ public final class Switchboard extends serverSwitch
                 null,
                 1 /*Math.max(1, WorkflowProcessor.availableCPU / 2)*/);
         this.indexingAnalysisProcessor =
-            new WorkflowProcessor<indexingQueueEntry>(
+            new WorkflowProcessor<IndexingQueueEntry>(
                 "webStructureAnalysis",
                 "This just stores the link structure of the document into a web structure database.",
                 new String[] {
@@ -819,7 +818,7 @@ public final class Switchboard extends serverSwitch
                 this.indexingStorageProcessor,
                 WorkflowProcessor.availableCPU);
         this.indexingCondensementProcessor =
-            new WorkflowProcessor<indexingQueueEntry>(
+            new WorkflowProcessor<IndexingQueueEntry>(
                 "condenseDocument",
                 "This does a structural analysis of plain texts: markup of headlines, slicing into phrases (i.e. sentences), markup with position, counting of words, calculation of term frequency.",
                 new String[] {
@@ -831,7 +830,7 @@ public final class Switchboard extends serverSwitch
                 this.indexingAnalysisProcessor,
                 WorkflowProcessor.availableCPU);
         this.indexingDocumentProcessor =
-            new WorkflowProcessor<indexingQueueEntry>(
+            new WorkflowProcessor<IndexingQueueEntry>(
                 "parseDocument",
                 "This does the parsing of the newly loaded documents from the web. The result is not only a plain text document, but also a list of URLs that are embedded into the document. The urls are handed over to the CrawlStacker. This process has two child process queues!",
                 new String[] {
@@ -1671,7 +1670,7 @@ public final class Switchboard extends serverSwitch
 
         // put document into the concurrent processing queue
         try {
-            this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(
+            this.indexingDocumentProcessor.enQueue(new IndexingQueueEntry(
                 response,
                 null,
                 null));
@@ -1785,8 +1784,8 @@ public final class Switchboard extends serverSwitch
                     0,
                     0);
             response = new Response(request, null, null, this.crawler.defaultSurrogateProfile, false);
-            final indexingQueueEntry queueEntry =
-                new indexingQueueEntry(response, new Document[] {document}, null);
+            final IndexingQueueEntry queueEntry =
+                new IndexingQueueEntry(response, new Document[] {document}, null);
 
             // place the queue entry into the concurrent process of the condenser (document analysis)
             try {
@@ -1857,23 +1856,6 @@ public final class Switchboard extends serverSwitch
             return false;
         }
         return false;
-    }
-
-    public static class indexingQueueEntry extends WorkflowJob
-    {
-        public Response queueEntry;
-        public Document[] documents;
-        public Condenser[] condenser;
-
-        public indexingQueueEntry(
-            final Response queueEntry,
-            final Document[] documents,
-            final Condenser[] condenser) {
-            super();
-            this.queueEntry = queueEntry;
-            this.documents = documents;
-            this.condenser = condenser;
-        }
     }
 
     public int cleanupJobSize() {
@@ -2251,7 +2233,7 @@ public final class Switchboard extends serverSwitch
         }
     }
 
-    public indexingQueueEntry parseDocument(final indexingQueueEntry in) {
+    public IndexingQueueEntry parseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_PARSING);
 
         Document[] documents = null;
@@ -2265,7 +2247,7 @@ public final class Switchboard extends serverSwitch
         if ( documents == null ) {
             return null;
         }
-        return new indexingQueueEntry(in.queueEntry, documents, null);
+        return new IndexingQueueEntry(in.queueEntry, documents, null);
     }
 
     private Document[] parseDocument(final Response response) throws InterruptedException {
@@ -2402,7 +2384,7 @@ public final class Switchboard extends serverSwitch
         return documents;
     }
 
-    public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
+    public IndexingQueueEntry condenseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
         if ( !in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia() ) {
             if ( this.log.isInfo() ) {
@@ -2410,7 +2392,7 @@ public final class Switchboard extends serverSwitch
                     + in.queueEntry.url().toNormalform(false, true)
                     + "': indexing not wanted by crawl profile");
             }
-            return new indexingQueueEntry(in.queueEntry, in.documents, null);
+            return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
 
         boolean localSolr = this.index.connectedLocalSolr();
@@ -2457,7 +2439,7 @@ public final class Switchboard extends serverSwitch
                     + in.queueEntry.url().toNormalform(false, true)
                     + "': indexing not wanted by federated rule for YaCy");
             }
-            return new indexingQueueEntry(in.queueEntry, in.documents, null);
+            return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
         final List<Document> doclist = new ArrayList<Document>();
 
@@ -2482,7 +2464,7 @@ public final class Switchboard extends serverSwitch
         }
 
         if ( doclist.isEmpty() ) {
-            return new indexingQueueEntry(in.queueEntry, in.documents, null);
+            return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
         in.documents = doclist.toArray(new Document[doclist.size()]);
         final Condenser[] condenser = new Condenser[in.documents.length];
@@ -2500,10 +2482,10 @@ public final class Switchboard extends serverSwitch
                 ? true
                 : !profile.remoteIndexing());
         }
-        return new indexingQueueEntry(in.queueEntry, in.documents, condenser);
+        return new IndexingQueueEntry(in.queueEntry, in.documents, condenser);
     }
 
-    public indexingQueueEntry webStructureAnalysis(final indexingQueueEntry in) {
+    public IndexingQueueEntry webStructureAnalysis(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_STRUCTUREANALYSIS);
         for (Document document : in.documents) {
             assert this.webStructure != null;
@@ -2516,7 +2498,7 @@ public final class Switchboard extends serverSwitch
         return in;
     }
 
-    public void storeDocumentIndex(final indexingQueueEntry in) {
+    public void storeDocumentIndex(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);
         // the condenser may be null in case that an indexing is not wanted (there may be a no-indexing flag in the file)
         if ( in.condenser != null ) {
@@ -2864,17 +2846,6 @@ public final class Switchboard extends serverSwitch
         }
     }
 
-    public static boolean accessFromLocalhost(final RequestHeader requestHeader) {
-
-        // authorization for localhost, only if flag is set to grant localhost access as admin
-        final String clientIP = requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "");
-        if ( !Domains.isLocalhost(clientIP) ) {
-            return false;
-        }
-        final String refererHost = requestHeader.refererHost();
-        return refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost);
-    }
-
     /**
      * check authentication status for request access shall be granted if return value >= 2; these are the
      * cases where an access is granted to protected pages: - a password is not configured: auth-level 2 -
@@ -2896,7 +2867,7 @@ public final class Switchboard extends serverSwitch
         }
 
         // authorization for localhost, only if flag is set to grant localhost access as admin
-        final boolean accessFromLocalhost = accessFromLocalhost(requestHeader);
+        final boolean accessFromLocalhost = requestHeader.accessFromLocalhost();
         if ( getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost ) {
             return 3; // soft-authenticated for localhost
         }
@@ -2978,16 +2949,6 @@ public final class Switchboard extends serverSwitch
             setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, thread.setBusySleep(newBusySleep));
             thread.setIdleSleep(2000);
         }
-    }
-
-    public static int accessFrequency(final Map<String, SortedSet<Long>> tracker, final String host) {
-        // returns the access frequency in queries per hour for a given host and a specific tracker
-        final long timeInterval = 1000 * 60 * 60;
-        final SortedSet<Long> accessSet = tracker.get(host);
-        if ( accessSet == null ) {
-            return 0;
-        }
-        return accessSet.tailSet(Long.valueOf(System.currentTimeMillis() - timeInterval)).size();
     }
 
     public String dhtShallTransfer() {
@@ -3508,7 +3469,7 @@ public final class Switchboard extends serverSwitch
             throw new IllegalArgumentException("The shutdown delay must be greater than 0.");
         }
         this.log.logInfo("caught delayed terminate request: " + reason);
-        (new delayedShutdown(this, delay, reason)).start();
+        (new Shutdown(this, delay, reason)).start();
     }
 
     public boolean shallTerminate() {
@@ -3528,55 +3489,5 @@ public final class Switchboard extends serverSwitch
     public boolean waitForShutdown() throws InterruptedException {
         this.shutdownSync.acquire();
         return this.terminate;
-    }
-
-    /**
-     * loads the url as Map Strings like abc=123 are parsed as pair: abc => 123
-     *
-     * @param url
-     * @return
-     */
-    /**
-     * @param url
-     * @return
-     */
-    public static Map<String, String> loadFileAsMap(final DigestURI url) {
-        final RequestHeader reqHeader = new RequestHeader();
-        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
-        final HTTPClient client = new HTTPClient();
-        client.setHeader(reqHeader.entrySet());
-        try {
-            // sending request
-            final Map<String, String> result = FileUtils.table(client.GETbytes(url));
-            return (result == null) ? new HashMap<String, String>() : result;
-        } catch ( final Exception e ) {
-            Log.logException(e);
-            return new HashMap<String, String>();
-        }
-    }
-}
-
-class delayedShutdown extends Thread
-{
-    private final Switchboard sb;
-    private final long delay;
-    private final String reason;
-
-    public delayedShutdown(final Switchboard sb, final long delay, final String reason) {
-        this.sb = sb;
-        this.delay = delay;
-        this.reason = reason;
-    }
-
-    @Override
-    public void run() {
-        try {
-            Thread.sleep(this.delay);
-        } catch ( final InterruptedException e ) {
-            this.sb.getLog().logInfo("interrupted delayed shutdown");
-        } catch ( final Exception e ) {
-            Log.logException(e);
-        }
-        this.sb.terminate(this.reason);
     }
 }

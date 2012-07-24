@@ -105,7 +105,7 @@ public class yacysearch {
             final UserDB.Entry user = sb.userDB.getUser(header);
             authenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
         }
-        final boolean localhostAccess = Switchboard.accessFromLocalhost(header);
+        final boolean localhostAccess = header.accessFromLocalhost();
         final String promoteSearchPageGreeting =
             (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
                 "network.unit.description",

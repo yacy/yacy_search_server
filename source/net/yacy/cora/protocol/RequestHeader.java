@@ -120,4 +120,15 @@ public class RequestHeader extends HeaderFramework {
         if (path.endsWith(".rss")) return FileType.XML;
         return FileType.HTML;
     }
+
+
+    public boolean accessFromLocalhost() {
+        // authorization for localhost, only if flag is set to grant localhost access as admin
+        final String clientIP = this.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "");
+        if ( !Domains.isLocalhost(clientIP) ) {
+            return false;
+        }
+        final String refererHost = this.refererHost();
+        return refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost);
+    }
 }
