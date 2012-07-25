@@ -113,11 +113,15 @@ public final class HandleMap implements Iterable<Row.Entry> {
         return Math.min(Runtime.getRuntime().availableProcessors(), Math.max(Runtime.getRuntime().availableProcessors(), expectedspace / 8000));
     }
 
+    /**
+     * Caclulate a statistic about the possible saving in the data structure when the data structure would be compressed.
+     * A tuple of two values is computed:
+     * @return {<the maximum length of consecutive equal-beginning bytes in the key>, <the minimum number of leading zeros in the second column>}
+     */
     public final int[] saturation() {
-    	int keym = 0;
     	int valm = this.rowdef.width(1);
-    	int valc;
     	byte[] lastk = null, thisk;
+        int keym = 0; // will be the maximum length of consecutive equal-beginning byte[]
     	for (final Row.Entry row: this) {
     		// check length of key
     		if (lastk == null) {
@@ -129,14 +133,24 @@ public final class HandleMap implements Iterable<Row.Entry> {
     		}
 
     		// check length of value
+            int valc; // will be the maximum length of leading zeros
     		for (valc = this.rowdef.primaryKeyLength; valc < this.rowdef.objectsize; valc++) {
     			if (lastk[valc] != 0) break;
     		} // valc is the number of leading zeros plus primaryKeyLength
-    		valm = Math.min(valm, valc - this.rowdef.primaryKeyLength); // valm is the number of leading zeros
+    		valm = Math.min(valm, valc - this.rowdef.primaryKeyLength); // valm is the number of leading zeros after the primary key
     	}
+    	// return two values:
+    	// keym = the maximum length of consecutive equal-beginning byte[]
+    	// this.rowdef.width(1) - valm = the minimum number of leading zeros in the second column
     	return new int[]{keym, this.rowdef.width(1) - valm};
     }
 
+    /**
+     * check length of equal leading bytes
+     * @param a
+     * @param b
+     * @return the length of bytes from both arrays which are equal
+     */
     private final static int eq(final byte[] a, final byte[] b) {
     	for (int i = 0; i < a.length; i++) {
     		if (a[i] != b[i]) return i;

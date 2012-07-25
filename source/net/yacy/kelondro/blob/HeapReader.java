@@ -185,8 +185,8 @@ public class HeapReader {
         }
 
         // check saturation
-        int[] saturation = this.index.saturation();
-        log.logInfo("saturation of " + this.fingerprintFileIdx.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", possible saving: " + ((this.keylength - saturation[0] + 8 - saturation[1]) * this.index.size() / 1024 / 1024) + " MB");
+        int[] saturation = this.index.saturation(); // {<the maximum length of consecutive equal-beginning bytes in the key>, <the minimum number of leading zeros in the second column>}
+        log.logInfo("saturation of " + this.fingerprintFileIdx.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", possible saving if data structure would be compressed: " + ((this.keylength - saturation[0] + 8 - saturation[1]) * this.index.size() / 1024 / 1024) + " MB");
 
         // read the gap file:
         try {
