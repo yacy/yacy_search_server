@@ -2662,7 +2662,7 @@ Max:==Максимально:
 #Indexing Queue==Indexier Puffer
 Loader Queue==Загружено запросов
 paused==на паузе
-Queues==Запросы
+>Queues<==>Запросы<
 Local Crawl==Локальный сканер
 Remote triggered Crawl==Удаленный сканер
 Pre-Queueing==Vor-Pufferung
