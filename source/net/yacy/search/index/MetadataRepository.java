@@ -33,21 +33,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.solr.DoubleSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
-import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
@@ -61,14 +57,10 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.repository.Blacklist;
-import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.lucene.util.Version;
-
-import de.anomic.crawler.CrawlStacker;
 
 public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
 
@@ -186,26 +178,20 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         this.solr.close();
     }
 
-    public int writeCacheSize() {
-        if (this.urlIndexFile != null && this.urlIndexFile instanceof SplitTable) return ((SplitTable) this.urlIndexFile).writeBufferSize();
-        if (this.urlIndexFile != null && this.urlIndexFile instanceof Cache) return ((Cache) this.urlIndexFile).writeBufferSize();
-        return 0;
-    }
-
     /**
      * generates an plasmaLURLEntry using the url hash
      * if the url cannot be found, this returns null
      * @param obrwi
      * @return
      */
-    public URIMetadata load(final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi) {
-        if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
-        final byte[] urlHash = obrwi.getElement().urlhash();
+    public URIMetadata load(WordReferenceVars wre, long weight) {
+        if (wre == null) return null; // all time was already wasted in takeRWI to get another element
+        final byte[] urlHash = wre.urlhash();
         if (urlHash == null) return null;
         if (this.urlIndexFile != null) try {
             final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
             if (entry == null) return null;
-            return new URIMetadataRow(entry, obrwi.getElement(), obrwi.getWeight());
+            return new URIMetadataRow(entry, wre, weight);
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -280,27 +266,23 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
 
     public boolean exists(final byte[] urlHash) {
         if (urlHash == null) return false;
+        if (this.urlIndexFile != null && this.urlIndexFile.has(urlHash)) return true;
         try {
             if (this.solr.exists(ASCII.String(urlHash))) return true;
         } catch (final Throwable e) {
             Log.logException(e);
         }
-        if (this.urlIndexFile == null) return false; // case may happen during shutdown
-        return this.urlIndexFile.has(urlHash);
-    }
-
-    public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
-        try {
-            return this.urlIndexFile.keys(up, firstKey);
-        } catch (final IOException e) {
-            Log.logException(e);
-            return null;
-        }
+        return false;
     }
 
     @Override
     public Iterator<byte[]> iterator() {
-        return keys(true, null);
+        try {
+            return this.urlIndexFile.keys(true, null);
+        } catch (final IOException e) {
+            Log.logException(e);
+            return null;
+        }
     }
 
     public CloneableIterator<URIMetadata> entries() throws IOException {
@@ -364,186 +346,6 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         @Override
         public void close() {
             this.iter.close();
-        }
-    }
-
-
-    /**
-     * Uses an Iteration over urlHash.db to detect malformed URL-Entries.
-     * Damaged URL-Entries will be marked in a HashSet and removed at the end of the function.
-     *
-     * @param proxyConfig
-     */
-    public void deadlinkCleaner() {
-        final Log log = new Log("URLDBCLEANUP");
-        final HashSet<String> damagedURLS = new HashSet<String>();
-        try {
-            final Iterator<URIMetadata> eiter = entries(true, null);
-            int iteratorCount = 0;
-            while (eiter.hasNext()) try {
-                eiter.next();
-                iteratorCount++;
-            } catch (final RuntimeException e) {
-                if(e.getMessage() != null) {
-                    final String m = e.getMessage();
-                    damagedURLS.add(m.substring(m.length() - 12));
-                } else {
-                    log.logSevere("RuntimeException:", e);
-                }
-            }
-            log.logInfo("URLs vorher: " + this.urlIndexFile.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
-
-            final HTTPClient client = new HTTPClient();
-            final Iterator<String> eiter2 = damagedURLS.iterator();
-            byte[] urlHashBytes;
-            while (eiter2.hasNext()) {
-                urlHashBytes = ASCII.getBytes(eiter2.next());
-
-                // trying to fix the invalid URL
-                String oldUrlStr = null;
-                try {
-                    // getting the url data as byte array
-                    final Row.Entry entry = this.urlIndexFile.get(urlHashBytes, true);
-
-                    // getting the wrong url string
-                    oldUrlStr = entry.getColUTF8(1).trim();
-
-                    int pos = -1;
-                    if ((pos = oldUrlStr.indexOf("://",0)) != -1) {
-                        // trying to correct the url
-                        final String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
-                        final DigestURI newUrl = new DigestURI(newUrlStr);
-
-                        if (client.HEADResponse(newUrl.toString()) != null
-                        		&& client.getHttpResponse().getStatusLine().getStatusCode() == 200) {
-                            entry.setCol(1, UTF8.getBytes(newUrl.toString()));
-                            this.urlIndexFile.put(entry);
-                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + ASCII.String(urlHashBytes) + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
-                        } else {
-                            remove(urlHashBytes);
-                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + ASCII.String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + (client.getHttpResponse() == null ? "null" : client.getHttpResponse().getStatusLine()));
-                        }
-                    }
-                } catch (final Exception e) {
-                    remove(urlHashBytes);
-                    if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + ASCII.String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
-                }
-            }
-
-            log.logInfo("URLs nachher: " + size() + " kaputte URLs: " + damagedURLS.size());
-        } catch (final IOException e) {
-            log.logSevere("IOException", e);
-        }
-    }
-
-    public BlacklistCleaner getBlacklistCleaner(final Blacklist blacklist, final CrawlStacker crawlStacker) {
-        return new BlacklistCleaner(blacklist, crawlStacker);
-    }
-
-    public class BlacklistCleaner extends Thread {
-
-        private boolean run = true;
-        private boolean pause;
-        public int blacklistedUrls = 0;
-        public int totalSearchedUrls = 1;
-        public String lastBlacklistedUrl = "";
-        public String lastBlacklistedHash = "";
-        public String lastUrl = "";
-        public String lastHash = "";
-        private final Blacklist blacklist;
-        private final CrawlStacker crawlStacker;
-
-        public BlacklistCleaner(final Blacklist blacklist, final CrawlStacker crawlStacker) {
-            this.blacklist = blacklist;
-            this.crawlStacker = crawlStacker;
-        }
-
-        @Override
-        public void run() {
-            try {
-                Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                final Iterator<URIMetadata> eiter = entries(true, null);
-                while (eiter.hasNext() && this.run) {
-                    synchronized (this) {
-                        if (this.pause) {
-                            try {
-                                this.wait();
-                            } catch (final InterruptedException e) {
-                                Log.logWarning("URLDBCLEANER", "InterruptedException", e);
-                                this.run = false;
-                                return;
-                            }
-                        }
-                    }
-                    final URIMetadata entry = eiter.next();
-                    if (entry == null) {
-                        if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "entry == null");
-                    } else if (entry.hash() == null) {
-                        if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++this.blacklistedUrls + " blacklisted (" + ((double) this.blacklistedUrls / this.totalSearchedUrls) * 100 + "%): " + "hash == null");
-                    } else {
-                        this.totalSearchedUrls++;
-                        if (entry.url() == null) {
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++this.blacklistedUrls + " blacklisted (" + ((double) this.blacklistedUrls / this.totalSearchedUrls) * 100 + "%): " + ASCII.String(entry.hash()) + "URL == null");
-                            remove(entry.hash());
-                            continue;
-                        }
-                        if (this.blacklist.isListed(BlacklistType.CRAWLER, entry) ||
-                            this.blacklist.isListed(BlacklistType.DHT, entry) ||
-                            (this.crawlStacker.urlInAcceptedDomain(entry.url()) != null)) {
-                            this.lastBlacklistedUrl = entry.url().toNormalform(true, true);
-                            this.lastBlacklistedHash = ASCII.String(entry.hash());
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++this.blacklistedUrls + " blacklisted (" + ((double) this.blacklistedUrls / this.totalSearchedUrls) * 100 + "%): " + ASCII.String(entry.hash()) + " " + entry.url().toNormalform(false, true));
-                            remove(entry.hash());
-                            if (this.blacklistedUrls % 100 == 0) {
-                                Log.logInfo("URLDBCLEANER", "Deleted " + this.blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + this.lastBlacklistedUrl);
-                            }
-                        }
-                        this.lastUrl = entry.url().toNormalform(true, true);
-                        this.lastHash = ASCII.String(entry.hash());
-                    }
-                }
-            } catch (final RuntimeException e) {
-                if (e.getMessage() != null && e.getMessage().indexOf("not found in LURL",0) != -1) {
-                    Log.logWarning("URLDBCLEANER", "urlHash not found in LURL", e);
-                }
-                else {
-                    Log.logWarning("URLDBCLEANER", "RuntimeException", e);
-                    this.run = false;
-                }
-            } catch (final IOException e) {
-                Log.logException(e);
-                this.run = false;
-            } catch (final Exception e) {
-                Log.logException(e);
-                this.run = false;
-            }
-            Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread stopped");
-        }
-
-        public void abort() {
-            synchronized(this) {
-                this.run = false;
-                notifyAll();
-            }
-        }
-
-        public void pause() {
-            synchronized(this) {
-                if (!this.pause) {
-                    this.pause = true;
-                    Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread paused");
-                }
-            }
-        }
-
-        public void endPause() {
-            synchronized(this) {
-                if (this.pause) {
-                    this.pause = false;
-                    notifyAll();
-                    Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread resumed");
-                }
-            }
         }
     }
 

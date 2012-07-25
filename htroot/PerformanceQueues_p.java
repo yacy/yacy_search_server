@@ -299,7 +299,6 @@ public class PerformanceQueues_p {
         prop.put("minimumGlobalDelta", sb.crawlQueues.noticeURL.getMinimumGlobalDelta());
 
         // table cache settings
-        prop.putNum("urlCacheSize", indexSegment.urlMetadata().writeCacheSize());
         prop.putNum("wordCacheSize", indexSegment.termIndex().getBufferSize());
         prop.putNum("wordCacheSizeKBytes", indexSegment.termIndex().getBufferSizeBytes()/1024);
         prop.putNum("maxURLinCache", indexSegment.termIndex().getBufferMaxReferences());

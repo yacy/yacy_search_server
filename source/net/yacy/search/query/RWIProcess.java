@@ -628,7 +628,7 @@ public final class RWIProcess extends Thread
             if ( obrwi == null ) {
                 return null; // all time was already wasted in takeRWI to get another element
             }
-            final URIMetadata page = this.query.getSegment().urlMetadata().load(obrwi);
+            final URIMetadata page = this.query.getSegment().urlMetadata().load(obrwi.getElement(), obrwi.getWeight());
             if ( page == null ) {
                 try {
                     this.misses.putUnique(obrwi.getElement().urlhash());

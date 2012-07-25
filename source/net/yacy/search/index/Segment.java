@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -55,7 +54,6 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -66,7 +64,6 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.LookAheadIterator;
-import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.RWIProcess;
@@ -252,7 +249,7 @@ public class Segment {
      * @param host
      * @return an iterator for all url hashes that belong to a specific host
      */
-    public Iterator<byte[]> hostSelector(String host) {
+    private Iterator<byte[]> hostSelector(String host) {
         String hh = DigestURI.hosthash(host);
         final HandleSet ref = new HandleSet(12, Base64Order.enhancedCoder, 100);
         for (byte[] b: this.urlMetadata) {
@@ -551,12 +548,6 @@ public class Segment {
         return newEntry;
     }
 
-
-    // method for index deletion
-    public int removeAllUrlReferences(final DigestURI url, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {
-        return removeAllUrlReferences(url.hash(), loader, cacheStrategy);
-    }
-
     public void removeAllUrlReferences(final HandleSet urls, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {
         for (final byte[] urlhash: urls) removeAllUrlReferences(urlhash, loader, cacheStrategy);
     }
@@ -604,129 +595,4 @@ public class Segment {
         }
     }
 
-
-    //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
-    public synchronized ReferenceCleaner getReferenceCleaner(final byte[] startHash) {
-        return new ReferenceCleaner(startHash);
-    }
-
-    public class ReferenceCleaner extends Thread {
-
-        private final byte[] startHash;
-        private boolean run = true;
-        private boolean pause = false;
-        public int rwiCountAtStart = 0;
-        public byte[] wordHashNow = null;
-        public byte[] lastWordHash = null;
-        public int lastDeletionCounter = 0;
-
-        public ReferenceCleaner(final byte[] startHash) {
-            this.startHash = startHash;
-            this.rwiCountAtStart = termIndex().sizesMax();
-        }
-
-        @Override
-        public void run() {
-            Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
-            ReferenceContainer<WordReference> container = null;
-            WordReferenceVars entry = null;
-            DigestURI url = null;
-            final HandleSet urlHashs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-            try {
-                Iterator<ReferenceContainer<WordReference>> indexContainerIterator = Segment.this.termIndex.referenceContainer(this.startHash, false, false, 100, false).iterator();
-                while (indexContainerIterator.hasNext() && this.run) {
-                    waiter();
-                    container = indexContainerIterator.next();
-                    final Iterator<WordReference> containerIterator = container.entries();
-                    this.wordHashNow = container.getTermHash();
-                    while (containerIterator.hasNext() && this.run) {
-                        waiter();
-                        entry = new WordReferenceVars(containerIterator.next());
-                        // System.out.println("Wordhash: "+wordHash+" UrlHash:
-                        // "+entry.getUrlHash());
-                        final URIMetadata ue = Segment.this.urlMetadata.load(entry.urlhash());
-                        if (ue == null) {
-                            urlHashs.put(entry.urlhash());
-                        } else {
-                            url = ue.url();
-                            if (url == null || Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, url)) {
-                                urlHashs.put(entry.urlhash());
-                            }
-                        }
-                    }
-                    if (!urlHashs.isEmpty()) try {
-                        final int removed = Segment.this.termIndex.remove(container.getTermHash(), urlHashs);
-                        Log.logFine("INDEXCLEANER", ASCII.String(container.getTermHash()) + ": " + removed + " of " + container.size() + " URL-entries deleted");
-                        this.lastWordHash = container.getTermHash();
-                        this.lastDeletionCounter = urlHashs.size();
-                        urlHashs.clear();
-                    } catch (final IOException e) {
-                        Log.logException(e);
-                    }
-
-                    if (!containerIterator.hasNext()) {
-                        // We may not be finished yet, try to get the next chunk of wordHashes
-                        final TreeSet<ReferenceContainer<WordReference>> containers = Segment.this.termIndex.referenceContainer(container.getTermHash(), false, false, 100, false);
-                        indexContainerIterator = containers.iterator();
-                        // Make sure we don't get the same wordhash twice, but don't skip a word
-                        if ((indexContainerIterator.hasNext()) && (!container.getTermHash().equals(indexContainerIterator.next().getTermHash()))) {
-                            indexContainerIterator = containers.iterator();
-                        }
-                    }
-                }
-            } catch (final IOException e) {
-                Log.logException(e);
-            } catch (final Exception e) {
-                Log.logException(e);
-            }
-            Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");
-        }
-
-        public void abort() {
-            synchronized(this) {
-                this.run = false;
-                notifyAll();
-            }
-        }
-
-        public void pause() {
-            synchronized (this) {
-                if (!this.pause) {
-                    this.pause = true;
-                    Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread paused");
-                }
-            }
-        }
-
-        public void endPause() {
-            synchronized (this) {
-                if (this.pause) {
-                    this.pause = false;
-                    notifyAll();
-                    Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread resumed");
-                }
-            }
-        }
-
-        public void waiter() {
-            synchronized (this) {
-                if (this.pause) {
-                    try {
-                        this.wait();
-                    } catch (final InterruptedException e) {
-                        this.run = false;
-                        return;
-                    }
-                }
-            }
-        }
-
-        public int rwisize() {
-            return termIndex().sizesMax();
-        }
-
-        public int urlsize() {
-            return urlMetadata().size();
-        }
-    }
 }
