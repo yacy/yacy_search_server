@@ -2730,7 +2730,7 @@ Active:==Aktiv:
 #Indexing Queue==Indexier Puffer
 Loader Queue==Lade Puffer
 paused==angehalten
-Queues==Puffer
+>Queues<==>Puffer<
 Local Crawl==Lokales Crawlen
 Remote triggered Crawl==eingehende Remote-Crawls
 Pre-Queueing==Vor-Pufferung

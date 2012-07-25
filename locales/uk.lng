@@ -2903,7 +2903,7 @@ Max:Макс.:
 Indexing Queue==Черга індексування
 Loader Queue==Черга завантажувача
 paused==вимк.
-Queues==Черги
+>Queues<==>Черги<
 Local Crawl==Місцеве сканування
 Remote triggered Crawl==Вхідні віддалені сканування
 Pre-Queueing==Передчерга
