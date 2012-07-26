@@ -444,6 +444,7 @@ public final class HTTPDProxyHandler {
 
     private static void fulfillRequestFromWeb(final HashMap<String, Object> conProp, final DigestURI url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond) {
         try {
+        	final boolean proxyAugmentation = sb.getConfigBool("proxyAugmentation", false);
             final int reqID = requestHeader.hashCode();
 
             String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
@@ -501,7 +502,7 @@ public final class HTTPDProxyHandler {
                 	throw new Exception(client.getHttpResponse().getStatusLine().toString());
                 }
 
-                if (AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
+                if (proxyAugmentation && AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
                     // enable chunk encoding, because we don't know the length after annotating
                     responseHeader.remove(HeaderFramework.CONTENT_LENGTH);
                     responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
@@ -542,7 +543,7 @@ public final class HTTPDProxyHandler {
 //                prepareResponseHeader(responseHeader, res.getHttpVer());
                 prepareResponseHeader(responseHeader, client.getHttpResponse().getProtocolVersion().toString());
 
-                if(AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
+                if(proxyAugmentation && AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
                 	// chunked encoding disables somewhere, add it again
                     responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
                 }
@@ -575,7 +576,7 @@ public final class HTTPDProxyHandler {
                     final boolean storeHTCache = response.profile().storeHTCache();
                     final String supportError = TextParser.supports(response.url(), response.getMimeType());
 
-                    if(AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
+                    if(proxyAugmentation && AugmentedHtmlStream.supportsMime(responseHeader.mime())) {
                         outStream = new AugmentedHtmlStream(outStream, responseHeader.getCharSet(), url, requestHeader);
                     }
                     if (
@@ -734,7 +735,8 @@ public final class HTTPDProxyHandler {
                 HTTPDemon.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
 
-                if(AugmentedHtmlStream.supportsMime(cachedResponseHeader.mime())) {
+                if(sb.getConfigBool("proxyAugmentation", false)
+                		&& AugmentedHtmlStream.supportsMime(cachedResponseHeader.mime())) {
                     respond = new AugmentedHtmlStream(respond, cachedResponseHeader.getCharSet(), url, requestHeader);
                 }
 
@@ -753,7 +755,7 @@ public final class HTTPDProxyHandler {
                 HTTPDemon.sendRespondError(conProp,respond,4,503,"socket error: " + e.getMessage(),"socket error: " + e.getMessage(), e);
             }
         } finally {
-            try { respond.flush(); } catch (final Exception e) {}
+            try { respond.flush(); respond.close(); } catch (final Exception e) {}
         }
         return;
     }
