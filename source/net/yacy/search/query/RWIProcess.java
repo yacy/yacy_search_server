@@ -52,6 +52,8 @@ import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -60,8 +62,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
@@ -132,8 +133,8 @@ public final class RWIProcess extends Thread
         this.remote_resourceSize = 0;
         this.remote_indexCount = 0;
         this.local_indexCount = 0;
-        this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
-        this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.urlhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.misses = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
         this.sortout = 0;
         this.flagcount = new int[32];
         for ( int i = 0; i < 32; i++ ) {
@@ -425,7 +426,7 @@ public final class RWIProcess extends Thread
             if (System.currentTimeMillis() >= timeout) Log.logWarning("RWIProcess", "rwi normalization ended with timeout = " + maxtime);
 
         } catch ( final InterruptedException e ) {
-        } catch ( final RowSpaceExceededException e ) {
+        } catch ( final SpaceExceededException e ) {
         }
 
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
@@ -632,7 +633,7 @@ public final class RWIProcess extends Thread
             if ( page == null ) {
                 try {
                     this.misses.putUnique(obrwi.getElement().urlhash());
-                } catch ( final RowSpaceExceededException e ) {
+                } catch ( final SpaceExceededException e ) {
                 }
                 continue;
             }

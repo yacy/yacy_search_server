@@ -44,18 +44,19 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.search.Switchboard;
 
 public class Blacklist {
-    
+
     public enum BlacklistType {
     	DHT, CRAWLER, PROXY, SEARCH, SURFTIPS, NEWS;
 
@@ -352,7 +353,7 @@ public class Blacklist {
             if (temp) {
                 try {
                     urlHashCache.put(url.hash());
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                 }
             }
@@ -528,7 +529,7 @@ public class Blacklist {
     	String BLACKLIST_DHT_CACHEFILE_NAME = "DATA/LISTS/blacklist_" + type.name() + "_Cache.ser";
     	return new File(Switchboard.getSwitchboard().dataPath, BLACKLIST_DHT_CACHEFILE_NAME);
     }
-    
+
     private final void saveDHTCache(BlacklistType type) {
         try {
             final ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DHTCacheFile(type)));
@@ -545,10 +546,11 @@ public class Blacklist {
         	File cachefile = DHTCacheFile(type);
             if (cachefile.exists()) {
                 final ObjectInputStream in = new ObjectInputStream(new FileInputStream(cachefile));
-                this.cachedUrlHashs.put(type, (HandleSet) in.readObject());
+                RowHandleSet rhs = (RowHandleSet) in.readObject();
+                this.cachedUrlHashs.put(type, rhs == null ? new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0) : rhs);
                 in.close();
             } else {
-                this.cachedUrlHashs.put(type, new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
+                this.cachedUrlHashs.put(type, new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
             }
         } catch (final ClassNotFoundException e) {
             Log.logException(e);

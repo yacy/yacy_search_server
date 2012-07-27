@@ -41,7 +41,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.MapStore;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -274,10 +274,10 @@ public class BEncodedHeap implements MapStore {
      *
      * @param name
      * @return the map if one found or NULL if no entry exists or the entry is corrupt
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      * @throws IOException
      */
-    public Map<String, byte[]> get(final byte[] pk) throws IOException, RowSpaceExceededException {
+    public Map<String, byte[]> get(final byte[] pk) throws IOException, SpaceExceededException {
         final byte[] b = this.table.get(pk);
         if ( b == null ) {
             return null;
@@ -299,7 +299,7 @@ public class BEncodedHeap implements MapStore {
             } catch ( final IOException e ) {
                 Log.logException(e);
                 return null;
-            } catch ( final RowSpaceExceededException e ) {
+            } catch ( final SpaceExceededException e ) {
                 Log.logException(e);
                 return null;
             }
@@ -314,9 +314,9 @@ public class BEncodedHeap implements MapStore {
      * @param key
      * @return the value
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public byte[] getProp(final byte[] pk, final String key) throws IOException, RowSpaceExceededException {
+    public byte[] getProp(final byte[] pk, final String key) throws IOException, SpaceExceededException {
         final byte[] b = this.table.get(pk);
         if ( b == null ) {
             return null;
@@ -386,11 +386,11 @@ public class BEncodedHeap implements MapStore {
      *
      * @param name
      * @param map
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      * @throws IOException
      */
     public void insert(final byte[] pk, final Map<String, byte[]> map)
-        throws RowSpaceExceededException,
+        throws SpaceExceededException,
         IOException {
         final byte[] b = BEncoder.encode(BEncoder.transcode(map));
         this.table.insert(pk, b);
@@ -404,7 +404,7 @@ public class BEncodedHeap implements MapStore {
     }
 
     public void update(final byte[] pk, final Map<String, byte[]> map)
-        throws RowSpaceExceededException,
+        throws SpaceExceededException,
         IOException {
         final Map<String, byte[]> entry = this.get(pk);
         if ( entry == null ) {
@@ -416,7 +416,7 @@ public class BEncodedHeap implements MapStore {
     }
 
     public void update(final byte[] pk, final String key, final byte[] value)
-        throws RowSpaceExceededException,
+        throws SpaceExceededException,
         IOException {
         Map<String, byte[]> entry = this.get(pk);
         if ( entry == null ) {
@@ -446,7 +446,7 @@ public class BEncodedHeap implements MapStore {
         } catch ( final IOException e ) {
             Log.logException(e);
             return null;
-        } catch ( final RowSpaceExceededException e ) {
+        } catch ( final SpaceExceededException e ) {
             Log.logException(e);
             return null;
         }
@@ -466,10 +466,10 @@ public class BEncodedHeap implements MapStore {
      * delete a map from the table
      *
      * @param name
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      * @throws IOException
      */
-    public Map<String, byte[]> remove(final byte[] key) throws IOException, RowSpaceExceededException {
+    public Map<String, byte[]> remove(final byte[] key) throws IOException, SpaceExceededException {
         final Map<String, byte[]> value = get(key);
         delete(key);
         return value;
@@ -483,7 +483,7 @@ public class BEncodedHeap implements MapStore {
             } catch ( final IOException e ) {
                 Log.logException(e);
                 return null;
-            } catch ( final RowSpaceExceededException e ) {
+            } catch ( final SpaceExceededException e ) {
                 Log.logException(e);
                 return null;
             }
@@ -501,7 +501,7 @@ public class BEncodedHeap implements MapStore {
         for ( final Map.Entry<? extends byte[], ? extends Map<String, byte[]>> me : map.entrySet() ) {
             try {
                 this.insert(me.getKey(), me.getValue());
-            } catch ( final RowSpaceExceededException e ) {
+            } catch ( final SpaceExceededException e ) {
                 Log.logException(e);
             } catch ( final IOException e ) {
                 Log.logException(e);
@@ -686,7 +686,7 @@ public class BEncodedHeap implements MapStore {
                 map.close();
             } catch ( final IOException e ) {
                 Log.logException(e);
-            } catch ( final RowSpaceExceededException e ) {
+            } catch ( final SpaceExceededException e ) {
                 Log.logException(e);
             }
         } else {

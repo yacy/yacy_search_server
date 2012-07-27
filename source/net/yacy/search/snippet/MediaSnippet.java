@@ -40,14 +40,15 @@ import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
@@ -230,14 +231,14 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         final Iterator<byte[]> j = queryhashes.iterator();
         byte[] hash;
         Integer pos;
-        final HandleSet remaininghashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), queryhashes.size());
+        final HandleSet remaininghashes = new RowHandleSet(queryhashes.keylen(), queryhashes.comparator(), queryhashes.size());
         while (j.hasNext()) {
             hash = j.next();
             pos = hs.get(hash);
             if (pos == null) {
                 try {
                     remaininghashes.put(hash);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                 }
             }

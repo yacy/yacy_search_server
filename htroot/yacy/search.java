@@ -46,11 +46,12 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -202,7 +203,7 @@ public final class search {
 
         // prepare search
         final HandleSet queryhashes = QueryParams.hashes2Set(query);
-        final HandleSet excludehashes = (exclude.isEmpty()) ? new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0) : QueryParams.hashes2Set(exclude);
+        final HandleSet excludehashes = (exclude.isEmpty()) ? new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0) : QueryParams.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
 
     	// prepare a search profile
@@ -221,7 +222,7 @@ public final class search {
             theQuery = new QueryParams(
                     null,
                     abstractSet,
-                    new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0),
+                    new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0),
                     null,
                     null,
                     modifier,

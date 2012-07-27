@@ -42,8 +42,8 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.BEncodedHeap;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.ByteCount;
 
 import org.apache.log4j.Logger;
@@ -104,7 +104,7 @@ public class RobotsTxt {
         final BEncodedHeap robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
         try {
             record = robotsTable.get(robotsTable.encodedKey(urlHostPort));
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             log.warn("memory exhausted", e);
             record = null;
         }
@@ -132,7 +132,7 @@ public class RobotsTxt {
                 // to complete a download
                 try {
                     record = robotsTable.get(robotsTable.encodedKey(urlHostPort));
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     log.warn("memory exhausted", e);
                     record = null;
                 }

@@ -40,6 +40,8 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
@@ -47,8 +49,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -116,7 +117,7 @@ public class IndexControlRWIs_p {
             // read values from checkboxes
             final String[] urls = post.getAll("urlhx.*");
             HandleSet urlb =
-                new HandleSet(
+                new RowHandleSet(
                     URIMetadataRow.rowdef.primaryKeyLength,
                     URIMetadataRow.rowdef.objectOrder,
                     urls.length);
@@ -124,7 +125,7 @@ public class IndexControlRWIs_p {
                 for ( final String s : urls ) {
                     try {
                         urlb.put(s.getBytes());
-                    } catch ( final RowSpaceExceededException e ) {
+                    } catch ( final SpaceExceededException e ) {
                         Log.logException(e);
                     }
                 }
@@ -203,14 +204,14 @@ public class IndexControlRWIs_p {
                         index = segment.termIndex().get(keyhash, null);
                         final Iterator<WordReference> en = index.entries();
                         urlb =
-                            new HandleSet(
+                            new RowHandleSet(
                                 URIMetadataRow.rowdef.primaryKeyLength,
                                 URIMetadataRow.rowdef.objectOrder,
                                 index.size());
                         while ( en.hasNext() ) {
                             try {
                                 urlb.put(en.next().urlhash());
-                            } catch ( final RowSpaceExceededException e ) {
+                            } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
                         }
@@ -246,14 +247,14 @@ public class IndexControlRWIs_p {
                         }
                     }
                     final HandleSet urlHashes =
-                        new HandleSet(
+                        new RowHandleSet(
                             URIMetadataRow.rowdef.primaryKeyLength,
                             URIMetadataRow.rowdef.objectOrder,
                             0);
                     for ( final byte[] b : urlb ) {
                         try {
                             urlHashes.put(b);
-                        } catch ( final RowSpaceExceededException e ) {
+                        } catch ( final SpaceExceededException e ) {
                             Log.logException(e);
                         }
                     }
@@ -311,7 +312,7 @@ public class IndexControlRWIs_p {
                         final TreeMap<byte[], URIMetadata> knownURLs =
                                 new TreeMap<byte[], URIMetadata>(Base64Order.enhancedCoder);
                         final HandleSet unknownURLEntries =
-                                new HandleSet(
+                                new RowHandleSet(
                                 WordReferenceRow.urlEntryRow.primaryKeyLength,
                                 WordReferenceRow.urlEntryRow.objectOrder,
                                 index.size());
@@ -323,7 +324,7 @@ public class IndexControlRWIs_p {
                             if (lurl == null) {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
-                                } catch (final RowSpaceExceededException e) {
+                                } catch (final SpaceExceededException e) {
                                     Log.logException(e);
                                 }
                                 urlIter.remove();
@@ -340,7 +341,7 @@ public class IndexControlRWIs_p {
                                 Word.commonHashLength);
                         try {
                             icc.add(index);
-                        } catch (final RowSpaceExceededException e) {
+                        } catch (final SpaceExceededException e) {
                             Log.logException(e);
                         }
 
@@ -396,7 +397,7 @@ public class IndexControlRWIs_p {
             if ( post.containsKey("blacklist") ) {
                 final String blacklist = post.get("blacklist", "");
                 final HandleSet urlHashes =
-                    new HandleSet(
+                    new RowHandleSet(
                         URIMetadataRow.rowdef.primaryKeyLength,
                         URIMetadataRow.rowdef.objectOrder,
                         urlb.size());
@@ -411,7 +412,7 @@ public class IndexControlRWIs_p {
                         for ( final byte[] b : urlb ) {
                             try {
                                 urlHashes.put(b);
-                            } catch ( final RowSpaceExceededException e ) {
+                            } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
                             final URIMetadata e = segment.urlMetadata().load(b);
@@ -446,7 +447,7 @@ public class IndexControlRWIs_p {
                         for ( final byte[] b : urlb ) {
                             try {
                                 urlHashes.put(b);
-                            } catch ( final RowSpaceExceededException e ) {
+                            } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
                             final URIMetadata e = segment.urlMetadata().load(b);

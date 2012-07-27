@@ -33,8 +33,8 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -199,7 +199,7 @@ public class MessageBoard {
         } catch (final IOException e) {
             Log.logException(e);
             return null;
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             Log.logException(e);
             return null;
         }

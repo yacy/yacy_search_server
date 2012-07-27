@@ -55,10 +55,10 @@ import java.util.Properties;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -99,10 +99,10 @@ public class NewsDB {
             );
         try {
             this.news = new Table(path, this.rowdef, 10, 0, useTailCache, exceed134217727, true);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             try {
                 this.news = new Table(path, this.rowdef, 0, 0, false, exceed134217727, true);
-            } catch (final RowSpaceExceededException e1) {
+            } catch (final SpaceExceededException e1) {
                 Log.logException(e1);
             }
         }
@@ -113,10 +113,10 @@ public class NewsDB {
         if (this.path.exists()) FileUtils.deletedelete(this.path);
         try {
             this.news = new Table(this.path, this.rowdef, 10, 0, false, false, true);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             try {
                 this.news = new Table(this.path, this.rowdef, 0, 0, false, false, true);
-            } catch (final RowSpaceExceededException e1) {
+            } catch (final SpaceExceededException e1) {
                 Log.logException(e1);
             }
         }
@@ -140,7 +140,7 @@ public class NewsDB {
         this.news.delete(UTF8.getBytes(id));
     }
 
-    public synchronized Record put(final Record record) throws IOException, RowSpaceExceededException {
+    public synchronized Record put(final Record record) throws IOException, SpaceExceededException {
         try {
             return b2r(this.news.replace(r2b(record)));
         } catch (final Exception e) {

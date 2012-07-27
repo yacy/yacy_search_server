@@ -39,14 +39,15 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Column;
-import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.index.RowCollection;
+import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.BufferedRecords;
 import net.yacy.kelondro.io.Records;
 import net.yacy.kelondro.logging.Log;
@@ -87,7 +88,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     		final int initialSpace,
     		boolean useTailCache,
     		final boolean exceed134217727,
-    		final boolean warmUp) throws RowSpaceExceededException {
+    		final boolean warmUp) throws SpaceExceededException {
 
         this.rowdef = rowdef;
         this.buffersize = buffersize;
@@ -126,7 +127,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             try {
                 this.table = ((exceed134217727 || neededRAM4table < maxarraylength) &&
             	    	      useTailCache && MemoryControl.request(neededRAM4table, true)) ? new RowSet(this.taildef, records) : null;
-            } catch (RowSpaceExceededException e) {
+            } catch (SpaceExceededException e) {
             	this.table = null;
             } catch (Throwable e) {
             	this.table = null;
@@ -141,8 +142,8 @@ public class Table implements Index, Iterable<Row.Entry> {
                 this.table = null; System.gc();
                 Log.logSevere("TABLE", tablefile.getName() + ": RAM after releasing the table: " + (MemoryControl.available() / 1024L / 1024L) + "MB");
             }
-            this.index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, tablefile.getAbsolutePath());
-            final HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records, tablefile.getAbsolutePath() + ".errors");
+            this.index = new RowHandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, tablefile.getAbsolutePath());
+            final RowHandleMap errors = new RowHandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records, tablefile.getAbsolutePath() + ".errors");
             Log.logInfo("TABLE", tablefile + ": TABLE " + tablefile.toString() + " has table copy " + ((this.table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
@@ -178,7 +179,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                         // write the tail into the table
                         try {
                             this.table.addUnique(this.taildef.newEntry(record, rowdef.primaryKeyLength, true));
-                        } catch (final RowSpaceExceededException e) {
+                        } catch (final SpaceExceededException e) {
                             this.table = null;
                             break;
                         }
@@ -201,10 +202,10 @@ public class Table implements Index, Iterable<Row.Entry> {
             final int errorc = errors.size();
             int errorcc = 0;
             int idx;
-            for (final Entry entry: errors) {
-                idx = (int) entry.getColLong(1);
+            for (final Map.Entry<byte[], Long> entry: errors) {
+                idx = (int) entry.getValue().longValue();
                 removeInFile(idx);
-                key = entry.getPrimaryKeyBytes();
+                key = entry.getKey();
                 if (key == null) continue;
                 Log.logWarning("Table", "removing not well-formed entry " + idx + " with key: " + NaturalOrder.arrayList(key, 0, key.length) + ", " + errorcc++ + "/" + errorc);
             }
@@ -260,7 +261,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 delpos.remove(top);
                 removeInFile(top.intValue());
             }
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logSevere("Table", "", e);
         } catch (final IOException e) {
             Log.logSevere("Table", "", e);
@@ -332,8 +333,8 @@ public class Table implements Index, Iterable<Row.Entry> {
         final HashMap<StatKeys, String> map = new HashMap<StatKeys, String>(8);
         if (this.index == null) return map; // possibly closed or beeing closed
         map.put(StatKeys.tableSize, Integer.toString(this.index.size()));
-        map.put(StatKeys.tableKeyChunkSize, Integer.toString(this.index.row().objectsize));
-        map.put(StatKeys.tableKeyMem, Integer.toString(this.index.row().objectsize * this.index.size()));
+        map.put(StatKeys.tableKeyChunkSize, (this.index instanceof RowHandleMap) ? Integer.toString(((RowHandleMap) this.index).row().objectsize) : "-1");
+        map.put(StatKeys.tableKeyMem, (this.index instanceof RowHandleMap) ? Integer.toString(((RowHandleMap) this.index).row().objectsize * this.index.size()) : "-1");
         map.put(StatKeys.tableValueChunkSize, (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize));
         map.put(StatKeys.tableValueMem, (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize * this.table.size()));
         return map;
@@ -357,13 +358,13 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public synchronized void addUnique(final Entry row) throws IOException, RowSpaceExceededException {
+    public synchronized void addUnique(final Entry row) throws IOException, SpaceExceededException {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         final int i = (int) this.file.size();
         try {
             this.index.putUnique(row.getPrimaryKeyBytes(), i);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             if (this.table == null) throw e; // in case the table is not used, there is no help here
             this.table = null;
             // try again with less memory
@@ -374,7 +375,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             assert this.table.size() == i;
             try {
                 this.table.addUnique(this.taildef.newEntry(rowbytes, this.rowdef.primaryKeyLength, true));
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 this.table = null;
             }
             if (abandonTable()) this.table = null;
@@ -383,12 +384,12 @@ public class Table implements Index, Iterable<Row.Entry> {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
     }
 
-    public synchronized void addUnique(final List<Entry> rows) throws IOException, RowSpaceExceededException {
+    public synchronized void addUnique(final List<Entry> rows) throws IOException, SpaceExceededException {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         for (final Entry entry: rows) {
             try {
                 addUnique(entry);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 if (this.table == null) throw e;
                 this.table = null;
                 addUnique(entry);
@@ -398,14 +399,14 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     /**
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      * remove double-entries from the table
      * this process calls the underlying removeDoubles() method from the table index
      * and
      * @throws
      */
     @Override
-    public synchronized List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
+    public synchronized List<RowCollection> removeDoubles() throws IOException, SpaceExceededException {
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         final List<RowCollection> report = new ArrayList<RowCollection>();
         RowSet rows;
@@ -417,7 +418,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         List<long[]> doubles;
         try {
             doubles = this.index.removeDoubles();
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             if (this.table == null) throw e;
             this.table = null;
             doubles = this.index.removeDoubles();
@@ -434,7 +435,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 inconsistentEntry = this.rowdef.newEntry(b);
                 try {
                     rows.addUnique(inconsistentEntry);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     if (this.table == null) throw e;
                     this.table = null;
                     rows.addUnique(inconsistentEntry);
@@ -540,7 +541,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public Entry replace(final Entry row) throws IOException, RowSpaceExceededException {
+    public Entry replace(final Entry row) throws IOException, SpaceExceededException {
         assert row != null;
         if (this.file == null || row == null) return null;
         final byte[] rowb = row.bytes();
@@ -554,7 +555,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             if (i == -1) {
                 try {
                     addUnique(row);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     if (this.table == null) throw e;
                     this.table = null;
                     addUnique(row);
@@ -577,7 +578,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 // write new value
                 try {
                     this.table.set(i, this.taildef.newEntry(rowb, this.rowdef.primaryKeyLength, true));
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     this.table = null;
                 }
                 if (abandonTable()) this.table = null;
@@ -595,10 +596,10 @@ public class Table implements Index, Iterable<Row.Entry> {
      * @param row a index row
      * @return true if this set did _not_ already contain the given row.
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public boolean put(final Entry row) throws IOException, RowSpaceExceededException {
+    public boolean put(final Entry row) throws IOException, SpaceExceededException {
         assert row != null;
         if (this.file == null || row == null) return true;
         final byte[] rowb = row.bytes();
@@ -612,7 +613,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             if (i == -1) {
                 try {
                     addUnique(row);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     if (this.table == null) throw e;
                     this.table = null;
                     addUnique(row);
@@ -628,7 +629,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 this.file.put(i, rowb, 0);
                 if (abandonTable()) this.table = null; else try {
                     this.table.set(i, this.taildef.newEntry(rowb, this.rowdef.primaryKeyLength, true));
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     this.table = null;
                 }
             }
@@ -642,9 +643,9 @@ public class Table implements Index, Iterable<Row.Entry> {
      * remove one entry from the file
      * @param i an index position within the file (not a byte position)
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    private void removeInFile(final int i) throws IOException, RowSpaceExceededException {
+    private void removeInFile(final int i) throws IOException, SpaceExceededException {
         assert i >= 0;
 
         final byte[] p = new byte[this.rowdef.objectsize];
@@ -674,7 +675,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 final Row.Entry te = this.table.removeOne();
                 try {
                     this.table.set(i, te);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     this.table = null;
                 }
 
@@ -746,7 +747,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 System.arraycopy(p, 0, k, 0, this.rowdef.primaryKeyLength);
                 try {
                     this.index.put(k, i);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     throw new IOException("RowSpaceExceededException: " + e.getMessage());
                 }
@@ -776,7 +777,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 // fill the gap in file copy
                 try {
                     this.table.set(i, te);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     this.table = null;
                 }
@@ -788,7 +789,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 final Row.Entry lr = this.rowdef.newEntry(p);
                 try {
                     this.index.put(lr.getPrimaryKeyBytes(), i);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     this.table = null;
                     throw new IOException("RowSpaceExceededException: " + e.getMessage());
                 }
@@ -901,8 +902,8 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     private class rowIteratorNoOrder implements CloneableIterator<Entry> {
-        Iterator<Row.Entry> i;
-        int idx;
+        Iterator<Map.Entry<byte[], Long>> i;
+        long idx;
         byte[] key;
 
         public rowIteratorNoOrder() {
@@ -923,11 +924,11 @@ public class Table implements Index, Iterable<Row.Entry> {
 
         @Override
         public Entry next() {
-            final Row.Entry entry = this.i.next();
+            final Map.Entry<byte[], Long> entry = this.i.next();
             if (entry == null) return null;
-            this.key = entry.getPrimaryKeyBytes();
+            this.key = entry.getKey();
             if (this.key == null) return null;
-            this.idx = (int) entry.getColLong(1);
+            this.idx = entry.getValue().longValue();
             try {
                 return get(this.key, false);
             } catch (final IOException e) {
@@ -939,9 +940,9 @@ public class Table implements Index, Iterable<Row.Entry> {
         public void remove() {
             if (this.key != null) {
                 try {
-                    removeInFile(this.idx);
+                    removeInFile((int) this.idx);
                 } catch (final IOException e) {
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                 }
                 this.i.remove();
             }
@@ -950,7 +951,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         @Override
         public void close() {
             if (this.i instanceof CloneableIterator) {
-                ((CloneableIterator<Entry>) this.i).close();
+                ((CloneableIterator<Map.Entry<byte[], Long>>) this.i).close();
             }
         }
 
@@ -1046,7 +1047,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return result;
     }
 
-    private static Table testTable(final File f, final String testentities, final boolean useTailCache, final boolean exceed134217727) throws IOException, RowSpaceExceededException {
+    private static Table testTable(final File f, final String testentities, final boolean useTailCache, final boolean exceed134217727) throws IOException, SpaceExceededException {
         if (f.exists()) FileUtils.deletedelete(f);
         final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder);
         final Table tt = new Table(f, rowdef, 100, 0, useTailCache, exceed134217727, true);

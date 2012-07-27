@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 public class Stacks {
@@ -147,9 +147,9 @@ public class Stacks {
      * @param b the new stack element
      * @return the handle used to store the new element
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
      */
-    public long push(final String stack, final byte[] b) throws IOException, RowSpaceExceededException {
+    public long push(final String stack, final byte[] b) throws IOException, SpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return -1;
         return s.push(b);
@@ -163,9 +163,9 @@ public class Stacks {
      * @param b the new stack element
      * @return the handle used to store the new element
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
      */
-    protected void push(final String stack, final Stack.Entry e) throws IOException, RowSpaceExceededException {
+    protected void push(final String stack, final Stack.Entry e) throws IOException, SpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return;
         s.push(e);
@@ -178,9 +178,9 @@ public class Stacks {
      * @return the object that belongs to the handle
      *         or null if no such element exists
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
      */
-    public byte[] get(final String stack, final long handle) throws IOException, RowSpaceExceededException {
+    public byte[] get(final String stack, final long handle) throws IOException, SpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.get(handle);
@@ -192,9 +192,9 @@ public class Stacks {
      * @param handle
      * @return the removed element
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
      */
-    public byte[] remove(final String stack, final long handle) throws IOException, RowSpaceExceededException {
+    public byte[] remove(final String stack, final long handle) throws IOException, SpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.remove(handle);

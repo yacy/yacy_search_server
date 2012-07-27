@@ -35,11 +35,11 @@ import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -93,7 +93,7 @@ public class Load_RSS_p {
             }
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
 
@@ -108,7 +108,7 @@ public class Load_RSS_p {
                     sb.tables.insert("rss", pk, rssRow);
                 } catch (final IOException e) {
                     Log.logException(e);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                 }
             }
@@ -139,7 +139,7 @@ public class Load_RSS_p {
             }
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
 
@@ -153,7 +153,7 @@ public class Load_RSS_p {
                     } catch (final IOException e) {
                         Log.logException(e);
                         continue;
-                    } catch (final RowSpaceExceededException e) {
+                    } catch (final SpaceExceededException e) {
                         Log.logException(e);
                         continue;
                     }
@@ -230,7 +230,7 @@ public class Load_RSS_p {
                 prop.put("shownewfeeds", newc > 0 ? 1 : 0);
             } catch (final IOException e) {
                 Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
 

@@ -30,7 +30,7 @@ import java.util.SortedMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.io.CachedFileWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -251,7 +251,7 @@ public class HeapModifier extends HeapReader implements BLOB {
     }
 	
 	@Override
-    public int reduce(byte[] key, final Reducer reducer) throws IOException, RowSpaceExceededException {
+    public int reduce(byte[] key, final Reducer reducer) throws IOException, SpaceExceededException {
         key = normalizeKey(key);
         assert key.length == this.keylength;
      

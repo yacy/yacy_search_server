@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -34,6 +34,8 @@ import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.MemoryControl;
@@ -52,26 +54,26 @@ public class IndexTest {
                     Base64Order.enhancedCoder.encodeLongSB(Math.abs(r1), 6).toString());
         return ASCII.getBytes(s);
     }
-    
+
     public static byte[] randomHash(final Random r) {
         return randomHash(r.nextLong(), r.nextLong());
     }
-    
+
     public static final long mb = 1024 * 1024;
-    
+
     public static void main(final String[] args) {
-        
+
         // pre-generate test data so it will not influence test case time
         final int count = args.length == 0 ? 1000000 : Integer.parseInt(args[0]);
         byte[][] tests = new byte[count][];
         final Random r = new Random(0);
         for (int i = 0; i < count; i++) tests[i] = randomHash(r);
         System.out.println("generated " + count + " test data entries \n");
-        
+
         // start
         System.out.println("\nSTANDARD JAVA CLASS MAPS \n");
         final long t1 = System.currentTimeMillis();
-        
+
         // test tree map
         System.out.println("sorted map");
         Runtime.getRuntime().gc();
@@ -80,7 +82,7 @@ public class IndexTest {
         for (int i = 0; i < count; i++) tm.put(tests[i], 1);
         final long t2 = System.currentTimeMillis();
         System.out.println("time   for TreeMap<byte[]> generation: " + (t2 - t1));
-        
+
         int bugs = 0;
         for (int i = 0; i < count; i++) if (tm.get(tests[i]) == null) bugs++;
         Runtime.getRuntime().gc();
@@ -98,7 +100,7 @@ public class IndexTest {
         for (int i = 0; i < count; i++) hm.put(UTF8.String(tests[i]), 1);
         final long t4 = System.currentTimeMillis();
         System.out.println("time   for HashMap<String> generation: " + (t4 - t3));
-        
+
         bugs = 0;
         for (int i = 0; i < count; i++) if (hm.get(UTF8.String(tests[i])) == null) bugs++;
         Runtime.getRuntime().gc();
@@ -107,25 +109,25 @@ public class IndexTest {
         final long t5 = System.currentTimeMillis();
         System.out.println("time   for HashMap<String> test: " + (t5 - t4) + ", " + bugs + " bugs");
         System.out.println("memory for HashMap<String>: " + (freeStartHash - freeEndHash) / mb + " MB\n");
-        
+
         System.out.println("\nKELONDRO-ENHANCED MAPS \n");
-        
+
         // test kelondro index
         System.out.println("sorted map");
         Runtime.getRuntime().gc();
         final long freeStartKelondro = MemoryControl.available();
         HandleMap ii = null;
-        ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count, "test");
+        ii = new RowHandleMap(12, Base64Order.enhancedCoder, 4, count, "test");
         for (int i = 0; i < count; i++)
             try {
                 ii.putUnique(tests[i], 1);
-            } catch (RowSpaceExceededException e) {
+            } catch (SpaceExceededException e) {
                 e.printStackTrace();
             }
         ii.get(randomHash(r)); // trigger sort
         final long t6 = System.currentTimeMillis();
         System.out.println("time   for HandleMap<byte[]> generation: " + (t6 - t5));
-        
+
         bugs = 0;
         for (int i = 0; i < count; i++) if (ii.get(tests[i]) != 1) bugs++;
         Runtime.getRuntime().gc();
@@ -143,7 +145,7 @@ public class IndexTest {
         for (int i = 0; i < count; i++) bm.put(new ByteArray(tests[i]), 1);
         final long t8 = System.currentTimeMillis();
         System.out.println("time   for HashMap<ByteArray> generation: " + (t8 - t7));
-        
+
         bugs = 0;
         for (int i = 0; i < count; i++) if (bm.get(new ByteArray(tests[i])) == null) bugs++;
         Runtime.getRuntime().gc();

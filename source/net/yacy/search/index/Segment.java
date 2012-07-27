@@ -42,6 +42,8 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -54,8 +56,7 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -251,12 +252,12 @@ public class Segment {
      */
     private Iterator<byte[]> hostSelector(String host) {
         String hh = DigestURI.hosthash(host);
-        final HandleSet ref = new HandleSet(12, Base64Order.enhancedCoder, 100);
+        final HandleSet ref = new RowHandleSet(12, Base64Order.enhancedCoder, 100);
         for (byte[] b: this.urlMetadata) {
             if (hh.equals(ASCII.String(b, 6, 6))) {
                 try {
                     ref.putUnique(b);
-                } catch (RowSpaceExceededException e) {
+                } catch (SpaceExceededException e) {
                     Log.logException(e);
                     break;
                 }
@@ -512,7 +513,7 @@ public class Segment {
                     container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
                     container.add(ientry);
                     rankingProcess.add(container, true, sourceName, -1, 5000);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     continue;
                 }
             }

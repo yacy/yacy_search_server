@@ -51,9 +51,9 @@ import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.Table;
@@ -77,7 +77,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
         this.newsDB = newsDB;
         try {
             this.queueStack = new Table(path, rowdef, 10, 0, false, false, true);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
             this.queueStack = null;
         }
@@ -91,7 +91,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
             if (this.path.exists()) FileUtils.deletedelete(this.path);
             try {
                 this.queueStack = new Table(this.path, rowdef, 10, 0, false, false, true);
-            } catch (final RowSpaceExceededException ee) {
+            } catch (final SpaceExceededException ee) {
                 Log.logException(e);
                 this.queueStack = null;
             }
@@ -116,7 +116,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
         return this.queueStack.isEmpty();
     }
 
-    public synchronized void push(final NewsDB.Record entry) throws IOException, RowSpaceExceededException {
+    public synchronized void push(final NewsDB.Record entry) throws IOException, SpaceExceededException {
         if (!this.queueStack.consistencyCheck()) {
             Log.logSevere("yacyNewsQueue", "reset of table " + this.path);
             this.queueStack.clear();
@@ -163,7 +163,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
         return this.newsDB.get(id);
     }
 
-    private Row.Entry r2b(final NewsDB.Record r) throws IOException, RowSpaceExceededException {
+    private Row.Entry r2b(final NewsDB.Record r) throws IOException, SpaceExceededException {
         if (r == null) return null;
         this.newsDB.put(r);
         final Row.Entry b = this.queueStack.row().newEntry(new byte[][]{

@@ -32,8 +32,9 @@ import java.io.IOException;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
-import net.yacy.kelondro.index.HandleMap;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -81,7 +82,7 @@ public final class HeapWriter {
         this.heapFileTMP = temporaryHeapFile;
         this.heapFileREADY = readyHeapFile;
         this.keylength = keylength;
-        this.index = new HandleMap(keylength, ordering, 8, 100000, readyHeapFile.getAbsolutePath());
+        this.index = new RowHandleMap(keylength, ordering, 8, 100000, readyHeapFile.getAbsolutePath());
         try {
             this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), outBuffer));
         } catch (OutOfMemoryError e) {
@@ -97,13 +98,12 @@ public final class HeapWriter {
      * @param key
      * @param blob
      * @throws IOException
-     * @throws RowSpaceExceededException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
+     * @throws SpaceExceededException
      */
-    public synchronized void add(byte[] key, final byte[] blob) throws IOException, RowSpaceExceededException {
+    public synchronized void add(byte[] key, final byte[] blob) throws IOException, SpaceExceededException {
         assert blob.length > 0;
         key = HeapReader.normalizeKey(key, this.keylength);
-        assert this.index.row().primaryKeyLength == this.keylength : this.index.row().primaryKeyLength + "!=" + key.length;
         assert key.length == this.keylength : "key.length == " + key.length + ", this.keylength = " + this.keylength; // after normalizing they should be equal in length
         assert this.index.get(key) < 0 : "index.get(key) = " + this.index.get(key) + ", index.size() = " + this.index.size() + ", file.length() = " + this.heapFileTMP.length() +  ", key = " + UTF8.String(key); // must not occur before
         if ((blob == null) || (blob.length == 0)) return;

@@ -27,8 +27,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 
 public class SnippetExtractor {
@@ -130,14 +131,14 @@ public class SnippetExtractor {
             final Iterator<byte[]> j = queryhashes.iterator();
             Integer pos;
             int p, minpos = sentence.length(), maxpos = -1;
-            final HandleSet remainingHashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), 0);
+            final HandleSet remainingHashes = new RowHandleSet(queryhashes.keylen(), queryhashes.comparator(), 0);
             while (j.hasNext()) {
                 hash = j.next();
                 pos = hs.get(hash);
                 if (pos == null) {
                     try {
                         remainingHashes.put(hash);
-                    } catch (RowSpaceExceededException e) {
+                    } catch (SpaceExceededException e) {
                         Log.logException(e);
                     }
                 } else {

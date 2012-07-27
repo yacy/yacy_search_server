@@ -44,7 +44,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.index.HandleSet;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.logging.Log;
 
 public final class SetTools {

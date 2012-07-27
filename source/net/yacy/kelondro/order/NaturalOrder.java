@@ -33,7 +33,8 @@ import java.util.Iterator;
 import net.yacy.cora.order.AbstractOrder;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.Order;
-import net.yacy.kelondro.index.HandleSet;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.kelondro.index.RowHandleSet;
 
 public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable, Serializable {
 
@@ -46,7 +47,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
     }
 
     public HandleSet getHandleSet(final int keylength, final int space) {
-        return new HandleSet(keylength, this, space);
+        return new RowHandleSet(keylength, this, space);
     }
 
     @Override

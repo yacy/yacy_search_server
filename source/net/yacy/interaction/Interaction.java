@@ -12,9 +12,9 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
@@ -220,7 +220,7 @@ public static String Tableentry(String url, String type, String comment, String 
             sb.tables.insert(from+"_contribution", map);
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

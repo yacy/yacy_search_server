@@ -27,8 +27,8 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -128,7 +128,7 @@ public class Tables_p {
                     }
                 } catch (final IOException e) {
                     Log.logException(e);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                 }
             } else if (post.containsKey("addrow")) try {
@@ -137,7 +137,7 @@ public class Tables_p {
                 setEdit(sb, prop, table, pk, columns);
             } catch (final IOException e) {
                 Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             } else {
                 prop.put("showtable", 1);
@@ -195,7 +195,7 @@ public class Tables_p {
         return prop;
     }
 
-    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, final List<String> columns) throws IOException, RowSpaceExceededException {
+    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, final List<String> columns) throws IOException, SpaceExceededException {
         prop.put("showedit", 1);
         prop.put("showedit_table", table);
         prop.put("showedit_pk", pk);

@@ -37,9 +37,10 @@ import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -237,7 +238,7 @@ public class PeerSelection {
             this.seedDB = seedDB;
             this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX, alsoMyOwn);
             this.remaining = max;
-            this.doublecheck = new HandleSet(12, Base64Order.enhancedCoder, 0);
+            this.doublecheck = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
             this.nextSeed = nextInternal();
             this.alsoMyOwn = alsoMyOwn;
         }
@@ -258,7 +259,7 @@ public class PeerSelection {
                     if (this.doublecheck.has(hashb)) return null;
                     try {
                         this.doublecheck.put(hashb);
-                    } catch (RowSpaceExceededException e) {
+                    } catch (SpaceExceededException e) {
                         Log.logException(e);
                         break;
                     }
