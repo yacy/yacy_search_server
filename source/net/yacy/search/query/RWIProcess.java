@@ -321,7 +321,7 @@ public final class RWIProcess extends Thread
                 }
 
                 // check document domain
-                if ( this.query.contentdom != Classification.ContentDomain.ALL ) {
+                if ( this.query.contentdom.getCode() > 0 ) {
                     if ( (this.query.contentdom == ContentDomain.AUDIO)
                         && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio))) ) {
                         continue pollloop;
@@ -660,9 +660,10 @@ public final class RWIProcess extends Thread
             }
 
             // check content domain
-            if (this.query.contentdom != Classification.ContentDomain.ALL &&
-                page.url().getContentDomain() != Classification.ContentDomain.ALL &&
-                page.url().getContentDomain() != this.query.contentdom) {
+            if ((this.query.contentdom.getCode() > 0 &&
+                page.url().getContentDomain() != this.query.contentdom) ||
+                (this.query.contentdom == Classification.ContentDomain.TEXT &&
+                page.url().getContentDomain().getCode() > 0)) {
                 this.sortout++;
                 continue;
             }
