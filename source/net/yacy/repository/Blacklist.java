@@ -27,7 +27,6 @@ package net.yacy.repository;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -308,7 +307,8 @@ public class Blacklist {
     }
 
     public boolean hashInBlacklistedCache(final BlacklistType blacklistType, final byte[] urlHash) {
-        return getCacheUrlHashsSet(blacklistType).has(urlHash);
+        HandleSet s = getCacheUrlHashsSet(blacklistType);
+        return s != null && s.has(urlHash);
     }
 
     public boolean contains(final BlacklistType blacklistType, final String host, final String path) {
@@ -347,7 +347,18 @@ public class Blacklist {
         if (url.getHost() == null) {
             return false;
         }
-        final HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);
+        HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);
+        if (urlHashCache == null) {
+           urlHashCache = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+           if (isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
+               try {
+                   urlHashCache.put(url.hash());
+               } catch (final SpaceExceededException e) {
+                   Log.logException(e);
+               }
+               this.cachedUrlHashs.put(blacklistType, urlHashCache);
+           }
+        }
         if (!urlHashCache.has(url.hash())) {
             final boolean temp = isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
             if (temp) {
@@ -533,8 +544,11 @@ public class Blacklist {
     private final void saveDHTCache(BlacklistType type) {
         try {
             final ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DHTCacheFile(type)));
-            out.writeObject(getCacheUrlHashsSet(type));
-            out.close();
+            HandleSet s = getCacheUrlHashsSet(type);
+            if (s != null) {
+                out.writeObject(getCacheUrlHashsSet(type));
+                out.close();
+            }
 
         } catch (final IOException e) {
             Log.logException(e);
@@ -542,22 +556,16 @@ public class Blacklist {
     }
 
     private final void loadDHTCache(BlacklistType type) {
-        try {
         	File cachefile = DHTCacheFile(type);
-            if (cachefile.exists()) {
-                final ObjectInputStream in = new ObjectInputStream(new FileInputStream(cachefile));
+            if (cachefile.exists()) try {
+                ObjectInputStream in = new ObjectInputStream(new FileInputStream(cachefile));
                 RowHandleSet rhs = (RowHandleSet) in.readObject();
                 this.cachedUrlHashs.put(type, rhs == null ? new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0) : rhs);
                 in.close();
-            } else {
-                this.cachedUrlHashs.put(type, new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
+                return;
+            } catch (Throwable e) {
+                Log.logException(e);
             }
-        } catch (final ClassNotFoundException e) {
-            Log.logException(e);
-        } catch (final FileNotFoundException e) {
-            Log.logException(e);
-        } catch (final IOException e) {
-            Log.logException(e);
-        }
+            this.cachedUrlHashs.put(type, new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
     }
 }
