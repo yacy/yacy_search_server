@@ -143,7 +143,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
         Document document;
         try {
-            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, Integer.MAX_VALUE, BlacklistType.SEARCH));
+            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay));
         } catch (final IOException e) {
             Log.logFine("snippet fetch", "load error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();

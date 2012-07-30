@@ -60,6 +60,7 @@ import de.anomic.crawler.retrieval.Response;
 
 public class CrawlQueues {
 
+    public static final long queuedMinLoadDelay = 500;
     private static final String ERROR_DB_FILENAME = "urlError4.db";
     private static final String DELEGATED_DB_FILENAME = "urlDelegated4.db";
 
@@ -656,7 +657,7 @@ public class CrawlQueues {
                     try {
                         this.request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
                         final CrawlProfile e = CrawlQueues.this.sb.crawler.getActive(UTF8.getBytes(this.request.profileHandle()));
-                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), BlacklistType.CRAWLER);
+                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), BlacklistType.CRAWLER, queuedMinLoadDelay);
                         if (response == null) {
                             this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (CrawlQueues.this.log.isFine()) {

@@ -69,6 +69,7 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.retrieval.Response;
 
 public class Segment {
@@ -571,7 +572,7 @@ public class Segment {
 
         try {
             // parse the resource
-            final Document document = Document.mergeDocuments(entry.url(), null, loader.loadDocuments(loader.request(entry.url(), true, false), cacheStrategy, Integer.MAX_VALUE, null));
+            final Document document = Document.mergeDocuments(entry.url(), null, loader.loadDocuments(loader.request(entry.url(), true, false), cacheStrategy, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay));
             if (document == null) {
                 // delete just the url entry
                 urlMetadata().remove(urlhash);

@@ -22,6 +22,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
+import net.yacy.search.snippet.TextSnippet;
 import de.anomic.crawler.retrieval.Response;
 
 public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandler {
@@ -68,7 +69,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			return null;
 		}
 		try {
-			response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null);
+			response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
 		} catch (final IOException e) {
 			Log.logWarning(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to IOException for url: "+url);
 			return null;

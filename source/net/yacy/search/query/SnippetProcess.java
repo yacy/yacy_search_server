@@ -26,6 +26,7 @@
 
 package net.yacy.search.query;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -501,8 +502,13 @@ public class SnippetProcess {
                         SolrDocument sd = null;
                         StringBuilder querystring = new StringBuilder(17);
                         querystring.append(SolrField.id.getSolrFieldName()).append(':').append('"').append(ASCII.String(page.hash())).append('"');
-                        final SolrDocumentList sdl = this.solr.query(querystring.toString(), 0, 1);
-                        if (!sdl.isEmpty()) {
+                        SolrDocumentList sdl = null;
+                        try {
+                            sdl = this.solr.query(querystring.toString(), 0, 1);
+                        } catch (IOException e) {
+                            Log.logException(e);
+                        }
+                        if (sdl != null && !sdl.isEmpty()) {
                             sd = sdl.get(0);
                         }
                         if (sd != null) {
@@ -537,9 +543,7 @@ public class SnippetProcess {
                     Log.logWarning("SnippetProcess", "worker ended with timeout");
                 }
                 //System.out.println("FINISHED WORKER " + id + " FOR " + this.neededResults + " RESULTS, loops = " + loops);
-            } catch (final Exception e) {
-                Log.logException(e);
-            }
+            } catch (final Exception e) { Log.logException(e); }
             //Log.logInfo("SEARCH", "resultWorker thread " + this.id + " terminated");
         }
 

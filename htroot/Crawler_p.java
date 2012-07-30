@@ -55,6 +55,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
@@ -323,7 +324,7 @@ public class Crawler_p {
                         sb.crawlQueues.errorURL.remove(urlhash);
 
                         // get a scraper to get the title
-                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER);
+                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                         final String title = scraper == null ? url.toNormalform(true, true) : scraper.dc_title();
                         final String description = scraper.dc_description();
 
@@ -551,7 +552,7 @@ public class Crawler_p {
                     try {
                         final DigestURI sitelistURL = new DigestURI(crawlingStart);
                         // download document
-                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER);
+                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                         // String title = scraper.getTitle();
                         // String description = scraper.getDescription();
 

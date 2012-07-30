@@ -60,6 +60,7 @@ import de.anomic.crawler.retrieval.Response;
 
 public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnippet> {
 
+    public static final long snippetMinLoadDelay = 10;
     private static final int MAX_CACHE = 1000;
 
 
@@ -213,7 +214,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     final Request request = loader == null ? null : loader.request(url, true, reindexing);
                     Response response;
                     try {
-                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH);
+                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH, snippetMinLoadDelay);
                     } catch (IOException e1) {
                         response = null;
                     }
@@ -245,7 +246,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // try to load the resource from the cache
             Response response = null;
             try {
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB() || cacheStrategy == null) ? CacheStrategy.NOCACHE : cacheStrategy, BlacklistType.SEARCH);
+                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB()) ? CacheStrategy.NOCACHE : (cacheStrategy == null ? CacheStrategy.CACHEONLY : cacheStrategy), BlacklistType.SEARCH, snippetMinLoadDelay);
             } catch (IOException e) {
                 response = null;
             }

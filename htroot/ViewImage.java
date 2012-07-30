@@ -44,6 +44,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -96,7 +97,7 @@ public class ViewImage {
         if (image == null) {
             byte[] resourceb = null;
             if (url != null) try {
-                resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST, BlacklistType.SEARCH);
+                resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST, BlacklistType.SEARCH, CrawlQueues.queuedMinLoadDelay);
             } catch (final IOException e) {
                 Log.logFine("ViewImage", "cannot load: " + e.getMessage());
             }

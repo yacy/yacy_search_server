@@ -45,6 +45,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
+import net.yacy.search.snippet.TextSnippet;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -62,7 +63,7 @@ public class OAIListFriendsLoader implements Serializable {
         listFriends.putAll(moreFriends);
         if (loader != null) for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) {
             try {
-                loader.loadIfNotExistBackground(new DigestURI(oaiFriend.getKey()), oaiFriend.getValue(), Integer.MAX_VALUE, null);
+                loader.loadIfNotExistBackground(new DigestURI(oaiFriend.getKey()), oaiFriend.getValue(), Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
             } catch (final MalformedURLException e) {
             }
         }
@@ -87,7 +88,7 @@ public class OAIListFriendsLoader implements Serializable {
         Map<String, String> m;
         for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) try {
             if (!oaiFriend.getValue().exists()) {
-                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null);
+                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
                 if (response != null) FileUtils.copy(response.getContent(), oaiFriend.getValue());
             }
 
