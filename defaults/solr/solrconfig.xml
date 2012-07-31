@@ -125,8 +125,9 @@
        solr.RAMDirectoryFactory is memory based, not
        persistent, and doesn't work with replication.
     -->
-  <directoryFactory name="DirectoryFactory" 
-                    class="${solr.directoryFactory:solr.StandardDirectoryFactory}"/>
+  <!-- <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.StandardDirectoryFactory}"/> -->
+  <!-- for solr.MMapDirectoryFactory see: https://issues.apache.org/jira/browse/SOLR-2247 -->
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.MMapDirectoryFactory}"/>
 
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        Index Config - These settings control low-level behavior of indexing
