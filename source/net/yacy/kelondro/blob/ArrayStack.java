@@ -64,6 +64,7 @@ import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.rwi.ReferenceIterator;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
@@ -281,7 +282,7 @@ public class ArrayStack implements BLOB {
 
     public synchronized File[] unmountBestMatch(final float maxq, long maxResultSize) {
     	if (this.blobs.size() < 2) return null;
-        long l, r;
+        long l, r, m;
         File lf, rf;
         float min = Float.MAX_VALUE;
         final File[] bestMatch = new File[2];
@@ -292,9 +293,12 @@ public class ArrayStack implements BLOB {
                 loopcount++;
             	lf = this.blobs.get(i).location;
             	rf = this.blobs.get(j).location;
+            	m = this.blobs.get(i).blob.mem();
+            	m += this.blobs.get(j).blob.mem();
                 l = 1 + (lf.length() >> 1);
                 r = 1 + (rf.length() >> 1);
                 if (l + r > maxResultSize) continue;
+                if (!MemoryControl.request(m, true)) continue;
                 final float q = Math.max((float) l, (float) r) / Math.min((float) l, (float) r);
                 if (q < min) {
                     min = q;
