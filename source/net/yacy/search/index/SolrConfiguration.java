@@ -24,7 +24,6 @@
 
 package net.yacy.search.index;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -41,17 +40,23 @@ import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.storage.ConfigurationSet;
+import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Bitfield;
 
 import org.apache.solr.common.SolrDocument;
+
+import de.anomic.crawler.retrieval.Response;
 
 public class SolrConfiguration extends ConfigurationSet implements Serializable {
 
@@ -88,46 +93,63 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 it.remove();
             }
         }
+        // check consistency the other way: look if all enum constants in SolrField appear in the configuration file
+        for (SolrField field: SolrField.values()) {
+        	if (this.get(field.name()) == null) {
+        		Log.logWarning("SolrScheme", " solr scheme file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
+        	}
+        }
         this.lazy = lazy;
     }
 
+    private boolean contains(SolrField field) {
+    	return this.contains(field.name());
+    }
+    
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final byte[] value) {
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length != 0))) solrdoc.addSolr(key, UTF8.String(value));
+    }
+    
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value) {
-        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String value, final float boost) {
-        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value, boost);
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value, boost);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final Date value) {
-        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.getTime() > 0))) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.getTime() > 0))) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final String[] value) {
-        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && value.length > 0))) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length > 0))) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final List<String> value) {
-        if ((isEmpty() || contains(key.name())) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final int value) {
-        if ((isEmpty() || contains(key.name())) && (!this.lazy || value > 0)) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) solrdoc.addSolr(key, value);
+    }
+
+    protected void addSolr(final SolrDoc solrdoc, final SolrField key, final long value) {
+        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final float value) {
-        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0.0f)) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final double value) {
-        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
+        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0.0d)) solrdoc.addSolr(key, value);
     }
 
     protected void addSolr(final SolrDoc solrdoc, final SolrField key, final boolean value) {
-        if (isEmpty() || contains(key.name())) solrdoc.addSolr(key, value);
+        if (isEmpty() || contains(key)) solrdoc.addSolr(key, value);
     }
-
-
+    
     /**
      * save configuration to file and update enum SolrFields
      * @throws IOException
@@ -148,33 +170,103 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
         } catch (final IOException e) {}
     }
+    
+    public SolrDoc metadata2solr(final URIMetadata md) {
+        final SolrDoc solrdoc = new SolrDoc();
+        final DigestURI digestURI = new DigestURI(md.url());
+        boolean allAttr = this.isEmpty();
 
-    public SolrDoc yacy2solr(final String id, final ResponseHeader header, final Document yacydoc) {
+        if (allAttr || contains(SolrField.failreason_t)) addSolr(solrdoc, SolrField.failreason_t, "");
+        addSolr(solrdoc, SolrField.id, ASCII.String(md.hash()));
+        addSolr(solrdoc, SolrField.sku, digestURI.toNormalform(true, false));
+        if (allAttr || contains(SolrField.ip_s)) {
+        	final InetAddress address = digestURI.getInetAddress();
+        	if (address != null) addSolr(solrdoc, SolrField.ip_s, address.getHostAddress());
+        }
+        if (digestURI.getHost() != null) addSolr(solrdoc, SolrField.host_s, digestURI.getHost());
+        if (allAttr || contains(SolrField.title)) addSolr(solrdoc, SolrField.title, md.dc_title());
+        if (allAttr || contains(SolrField.author)) addSolr(solrdoc, SolrField.author, md.dc_creator());
+        if (allAttr || contains(SolrField.description)) addSolr(solrdoc, SolrField.description, md.snippet());
+        if (allAttr || contains(SolrField.content_type)) addSolr(solrdoc, SolrField.content_type, Response.doctype2mime(digestURI.getFileExtension(), md.doctype()));
+        if (allAttr || contains(SolrField.last_modified)) addSolr(solrdoc, SolrField.last_modified, md.moddate());
+        if (allAttr || contains(SolrField.text_t)) addSolr(solrdoc, SolrField.text_t, ""); // not delivered in metadata
+        if (allAttr || contains(SolrField.wordcount_i)) addSolr(solrdoc, SolrField.wordcount_i, md.wordCount());        
+        if (allAttr || contains(SolrField.keywords)) {
+        	String keywords = md.dc_subject();
+        	Bitfield flags = md.flags();
+        	if (flags.get(Condenser.flag_cat_indexof)) {
+        		if (keywords == null || keywords.isEmpty()) keywords = "indexof"; else {
+        			if (keywords.indexOf(',') > 0) keywords += ", indexof"; else keywords += " indexof"; 
+        		}
+        	}
+        	addSolr(solrdoc, SolrField.keywords, keywords);
+        }
+        
+        // path elements of link
+        final String path = digestURI.getPath();
+        if (path != null && (allAttr || contains(SolrField.paths_txt))) {
+            final String[] paths = path.split("/");
+            if (paths.length > 0) addSolr(solrdoc, SolrField.paths_txt, paths);
+        }
+
+        if (allAttr || contains(SolrField.imagescount_i)) addSolr(solrdoc, SolrField.imagescount_i, md.limage());
+        if (allAttr || contains(SolrField.inboundlinkscount_i)) addSolr(solrdoc, SolrField.inboundlinkscount_i, md.llocal());
+        if (allAttr || contains(SolrField.outboundlinkscount_i)) addSolr(solrdoc, SolrField.outboundlinkscount_i, md.lother());
+        if (allAttr || contains(SolrField.charset_s)) addSolr(solrdoc, SolrField.charset_s, "UTF8");
+
+        // coordinates
+        if (md.lat() != 0.0f && md.lon() != 0.0f) {
+        	if (allAttr || contains(SolrField.lon_coordinate)) addSolr(solrdoc, SolrField.lon_coordinate, md.lon());
+        	if (allAttr || contains(SolrField.lat_coordinate)) addSolr(solrdoc, SolrField.lat_coordinate, md.lat());
+        }
+        if (allAttr || contains(SolrField.httpstatus_i)) addSolr(solrdoc, SolrField.httpstatus_i, 200);
+
+        // fields that are in URIMetadataRow additional to yacy2solr basic requirement
+        if (allAttr || contains(SolrField.load_date_dt)) addSolr(solrdoc, SolrField.load_date_dt, md.loaddate());
+        if (allAttr || contains(SolrField.fresh_date_dt)) addSolr(solrdoc, SolrField.fresh_date_dt, md.freshdate());
+        if (allAttr || contains(SolrField.host_id_s)) addSolr(solrdoc, SolrField.host_id_s, md.hosthash());
+        if ((allAttr || contains(SolrField.referrer_id_ss)) && md.referrerHash() != null) addSolr(solrdoc, SolrField.referrer_id_ss, new String[]{ASCII.String(md.referrerHash())});
+        if (allAttr || contains(SolrField.md5_s)) addSolr(solrdoc, SolrField.md5_s, md.md5());
+        if (allAttr || contains(SolrField.publisher_t)) addSolr(solrdoc, SolrField.publisher_t, md.dc_publisher());
+        if ((allAttr || contains(SolrField.language_ss)) && md.language() != null) addSolr(solrdoc, SolrField.language_ss,new String[]{UTF8.String(md.language())});
+        if (allAttr || contains(SolrField.ranking_i)) addSolr(solrdoc, SolrField.ranking_i, md.ranking());
+        if (allAttr || contains(SolrField.size_i)) addSolr(solrdoc, SolrField.size_i, md.size());
+        if (allAttr || contains(SolrField.audiolinkscount_i)) addSolr(solrdoc, SolrField.audiolinkscount_i, md.laudio());
+        if (allAttr || contains(SolrField.videolinkscount_i)) addSolr(solrdoc, SolrField.videolinkscount_i, md.lvideo());
+        if (allAttr || contains(SolrField.applinkscount_i)) addSolr(solrdoc, SolrField.applinkscount_i, md.lapp());
+        
+        return solrdoc;
+    }
+
+    public SolrDoc yacy2solr(final String id, final ResponseHeader header, final Document yacydoc, final URIMetadata metadata) {
         // we use the SolrCell design as index scheme
         final SolrDoc solrdoc = new SolrDoc();
         final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
-        addSolr(solrdoc, SolrField.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
+        boolean allAttr = this.isEmpty();
         addSolr(solrdoc, SolrField.id, id);
         addSolr(solrdoc, SolrField.sku, digestURI.toNormalform(true, false));
-        final InetAddress address = digestURI.getInetAddress();
-        if (address != null) addSolr(solrdoc, SolrField.ip_s, address.getHostAddress());
+        if (allAttr || contains(SolrField.failreason_t)) addSolr(solrdoc, SolrField.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
+        if (allAttr || contains(SolrField.ip_s)) {
+        	final InetAddress address = digestURI.getInetAddress();
+        	if (address != null) addSolr(solrdoc, SolrField.ip_s, address.getHostAddress());
+        }
         if (digestURI.getHost() != null) addSolr(solrdoc, SolrField.host_s, digestURI.getHost());
-        addSolr(solrdoc, SolrField.title, yacydoc.dc_title());
-        addSolr(solrdoc, SolrField.author, yacydoc.dc_creator());
-        addSolr(solrdoc, SolrField.description, yacydoc.dc_description());
-        addSolr(solrdoc, SolrField.content_type, yacydoc.dc_format());
-        addSolr(solrdoc, SolrField.last_modified, header == null ? new Date() : header.lastModified());
-        addSolr(solrdoc, SolrField.keywords, yacydoc.dc_subject(' '));
+        if (allAttr || contains(SolrField.title)) addSolr(solrdoc, SolrField.title, yacydoc.dc_title());
+        if (allAttr || contains(SolrField.author)) addSolr(solrdoc, SolrField.author, yacydoc.dc_creator());
+        if (allAttr || contains(SolrField.description)) addSolr(solrdoc, SolrField.description, yacydoc.dc_description());
+        if (allAttr || contains(SolrField.content_type)) addSolr(solrdoc, SolrField.content_type, yacydoc.dc_format());
+        if (allAttr || contains(SolrField.last_modified)) addSolr(solrdoc, SolrField.last_modified, header == null ? new Date() : header.lastModified());
+        if (allAttr || contains(SolrField.keywords)) addSolr(solrdoc, SolrField.keywords, yacydoc.dc_subject(' '));
         final String content = yacydoc.getTextString();
-        addSolr(solrdoc, SolrField.text_t, content);
-        if (isEmpty() || contains(SolrField.wordcount_i.name())) {
+        if (allAttr || contains(SolrField.text_t)) addSolr(solrdoc, SolrField.text_t, content);
+        if (allAttr || contains(SolrField.wordcount_i)) {
             final int contentwc = content.split(" ").length;
             addSolr(solrdoc, SolrField.wordcount_i, contentwc);
         }
 
         // path elements of link
         final String path = digestURI.getPath();
-        if (path != null && (isEmpty() || contains(SolrField.paths_txt.name()))) {
+        if (path != null && (allAttr || contains(SolrField.paths_txt))) {
             final String[] paths = path.split("/");
             if (paths.length > 0) addSolr(solrdoc, SolrField.paths_txt, paths);
         }
@@ -250,7 +342,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             addSolr(solrdoc, SolrField.boldcount_i, bold.length);
             if (bold.length > 0) {
                 addSolr(solrdoc, SolrField.bold_txt, bold);
-                if (isEmpty() || contains(SolrField.bold_val.name())) {
+                if (allAttr || contains(SolrField.bold_val)) {
                     addSolr(solrdoc, SolrField.bold_val, html.getBoldCount(bold));
                 }
             }
@@ -258,7 +350,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             addSolr(solrdoc, SolrField.italiccount_i, italic.length);
             if (italic.length > 0) {
                 addSolr(solrdoc, SolrField.italic_txt, italic);
-                if (isEmpty() || contains(SolrField.italic_val.name())) {
+                if (allAttr || contains(SolrField.italic_val)) {
                     addSolr(solrdoc, SolrField.italic_val, html.getItalicCount(italic));
                 }
             }
@@ -282,14 +374,14 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 imgstubs.add(uri.toString().substring(protocol.length() + 3));
                 imgalts.add(ie.alt());
             }
-            addSolr(solrdoc, SolrField.imagescount_i, imgtags.size());
-            if (isEmpty() || contains(SolrField.images_tag_txt.name())) addSolr(solrdoc, SolrField.images_tag_txt, imgtags);
-            if (isEmpty() || contains(SolrField.images_protocol_txt.name())) addSolr(solrdoc, SolrField.images_protocol_txt, protocolList2indexedList(imgprots));
-            if (isEmpty() || contains(SolrField.images_urlstub_txt.name())) addSolr(solrdoc, SolrField.images_urlstub_txt, imgstubs);
-            if (isEmpty() || contains(SolrField.images_alt_txt.name())) addSolr(solrdoc, SolrField.images_alt_txt, imgalts);
+            if (allAttr || contains(SolrField.imagescount_i)) addSolr(solrdoc, SolrField.imagescount_i, imgtags.size());
+            if (allAttr || contains(SolrField.images_tag_txt)) addSolr(solrdoc, SolrField.images_tag_txt, imgtags);
+            if (allAttr || contains(SolrField.images_protocol_txt)) addSolr(solrdoc, SolrField.images_protocol_txt, protocolList2indexedList(imgprots));
+            if (allAttr || contains(SolrField.images_urlstub_txt)) addSolr(solrdoc, SolrField.images_urlstub_txt, imgstubs);
+            if (allAttr || contains(SolrField.images_alt_txt)) addSolr(solrdoc, SolrField.images_alt_txt, imgalts);
 
             // style sheets
-            if (isEmpty() || contains(SolrField.css_tag_txt.name())) {
+            if (allAttr || contains(SolrField.css_tag_txt)) {
                 final Map<MultiProtocolURI, String> csss = html.getCSS();
                 final String[] css_tag = new String[csss.size()];
                 final String[] css_url = new String[csss.size()];
@@ -310,7 +402,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // Scripts
-            if (isEmpty() || contains(SolrField.scripts_txt.name())) {
+            if (allAttr || contains(SolrField.scripts_txt)) {
                 final Set<MultiProtocolURI> scriptss = html.getScript();
                 final String[] scripts = new String[scriptss.size()];
                 c = 0;
@@ -324,7 +416,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // Frames
-            if (isEmpty() || contains(SolrField.frames_txt.name())) {
+            if (allAttr || contains(SolrField.frames_txt)) {
                 final Set<MultiProtocolURI> framess = html.getFrames();
                 final String[] frames = new String[framess.size()];
                 c = 0;
@@ -338,7 +430,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // IFrames
-            if (isEmpty() || contains(SolrField.iframes_txt.name())) {
+            if (allAttr || contains(SolrField.iframes_txt)) {
                 final Set<MultiProtocolURI> iframess = html.getIFrames();
                 final String[] iframes = new String[iframess.size()];
                 c = 0;
@@ -352,7 +444,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // canonical tag
-            if (isEmpty() || contains(SolrField.canonical_s.name())) {
+            if (allAttr || contains(SolrField.canonical_s)) {
                 final MultiProtocolURI canonical = html.getCanonical();
                 if (canonical != null) {
                     inboundLinks.remove(canonical);
@@ -362,7 +454,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // meta refresh tag
-            if (isEmpty() || contains(SolrField.refresh_s.name())) {
+            if (allAttr || contains(SolrField.refresh_s)) {
                 String refresh = html.getRefreshPath();
                 if (refresh != null && refresh.length() > 0) {
                     MultiProtocolURI refreshURL;
@@ -380,7 +472,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // flash embedded
-            if (isEmpty() || contains(SolrField.flash_b.name())) {
+            if (allAttr || contains(SolrField.flash_b)) {
                 MultiProtocolURI[] flashURLs = html.getFlash();
                 for (MultiProtocolURI u: flashURLs) {
                     // remove all flash links from ibound/outbound links
@@ -392,7 +484,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
             // generic evaluation pattern
             for (final String model: html.getEvaluationModelNames()) {
-                if (isEmpty() || contains("ext_" + model + "_txt")) {
+                if (allAttr || contains("ext_" + model + "_txt")) {
                     final String[] scorenames = html.getEvaluationModelScoreNames(model);
                     if (scorenames.length > 0) {
                         addSolr(solrdoc, SolrField.valueOf("ext_" + model + "_txt"), scorenames);
@@ -408,8 +500,8 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         // list all links
         final Map<MultiProtocolURI, Properties> alllinks = yacydoc.getAnchors();
         c = 0;
-        if (isEmpty() || contains(SolrField.inboundlinkscount_i.name())) addSolr(solrdoc, SolrField.inboundlinkscount_i, inboundLinks.size());
-        if (isEmpty() || contains(SolrField.inboundlinksnofollowcount_i.name())) addSolr(solrdoc, SolrField.inboundlinksnofollowcount_i, yacydoc.inboundLinkNofollowCount());
+        if (allAttr || contains(SolrField.inboundlinkscount_i)) addSolr(solrdoc, SolrField.inboundlinkscount_i, inboundLinks.size());
+        if (allAttr || contains(SolrField.inboundlinksnofollowcount_i)) addSolr(solrdoc, SolrField.inboundlinksnofollowcount_i, yacydoc.inboundLinkNofollowCount());
         final List<String> inboundlinksTag = new ArrayList<String>(inboundLinks.size());
         final List<String> inboundlinksURLProtocol = new ArrayList<String>(inboundLinks.size());
         final List<String> inboundlinksURLStub = new ArrayList<String>(inboundLinks.size());
@@ -437,17 +529,17 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 ((text.length() > 0) ? text : "") + "</a>");
             c++;
         }
-        if (isEmpty() || contains(SolrField.inboundlinks_tag_txt.name())) addSolr(solrdoc, SolrField.inboundlinks_tag_txt, inboundlinksTag);
-        if (isEmpty() || contains(SolrField.inboundlinks_protocol_txt.name())) addSolr(solrdoc, SolrField.inboundlinks_protocol_txt, protocolList2indexedList(inboundlinksURLProtocol));
-        if (isEmpty() || contains(SolrField.inboundlinks_urlstub_txt.name())) addSolr(solrdoc, SolrField.inboundlinks_urlstub_txt, inboundlinksURLStub);
-        if (isEmpty() || contains(SolrField.inboundlinks_name_txt.name())) addSolr(solrdoc, SolrField.inboundlinks_name_txt, inboundlinksName);
-        if (isEmpty() || contains(SolrField.inboundlinks_rel_txt.name())) addSolr(solrdoc, SolrField.inboundlinks_rel_txt, inboundlinksRel);
-        if (isEmpty() || contains(SolrField.inboundlinks_relflags_txt.name())) addSolr(solrdoc, SolrField.inboundlinks_relflags_txt, relEval(inboundlinksRel));
-        if (isEmpty() || contains(SolrField.inboundlinks_text_txt.name())) addSolr(solrdoc, SolrField.inboundlinks_text_txt, inboundlinksText);
+        if (allAttr || contains(SolrField.inboundlinks_tag_txt)) addSolr(solrdoc, SolrField.inboundlinks_tag_txt, inboundlinksTag);
+        if (allAttr || contains(SolrField.inboundlinks_protocol_txt)) addSolr(solrdoc, SolrField.inboundlinks_protocol_txt, protocolList2indexedList(inboundlinksURLProtocol));
+        if (allAttr || contains(SolrField.inboundlinks_urlstub_txt)) addSolr(solrdoc, SolrField.inboundlinks_urlstub_txt, inboundlinksURLStub);
+        if (allAttr || contains(SolrField.inboundlinks_name_txt)) addSolr(solrdoc, SolrField.inboundlinks_name_txt, inboundlinksName);
+        if (allAttr || contains(SolrField.inboundlinks_rel_txt)) addSolr(solrdoc, SolrField.inboundlinks_rel_txt, inboundlinksRel);
+        if (allAttr || contains(SolrField.inboundlinks_relflags_txt)) addSolr(solrdoc, SolrField.inboundlinks_relflags_txt, relEval(inboundlinksRel));
+        if (allAttr || contains(SolrField.inboundlinks_text_txt)) addSolr(solrdoc, SolrField.inboundlinks_text_txt, inboundlinksText);
 
         c = 0;
-        if (isEmpty() || contains(SolrField.outboundlinkscount_i.name())) addSolr(solrdoc, SolrField.outboundlinkscount_i, ouboundLinks.size());
-        if (isEmpty() || contains(SolrField.outboundlinksnofollowcount_i.name())) addSolr(solrdoc, SolrField.outboundlinksnofollowcount_i, yacydoc.outboundLinkNofollowCount());
+        if (allAttr || contains(SolrField.outboundlinkscount_i)) addSolr(solrdoc, SolrField.outboundlinkscount_i, ouboundLinks.size());
+        if (allAttr || contains(SolrField.outboundlinksnofollowcount_i)) addSolr(solrdoc, SolrField.outboundlinksnofollowcount_i, yacydoc.outboundLinkNofollowCount());
         final List<String> outboundlinksTag = new ArrayList<String>(ouboundLinks.size());
         final List<String> outboundlinksURLProtocol = new ArrayList<String>(ouboundLinks.size());
         final List<String> outboundlinksURLStub = new ArrayList<String>(ouboundLinks.size());
@@ -475,24 +567,38 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 ((text.length() > 0) ? text : "") + "</a>");
             c++;
         }
-        if (isEmpty() || contains(SolrField.outboundlinks_tag_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_tag_txt, outboundlinksTag);
-        if (isEmpty() || contains(SolrField.outboundlinks_protocol_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_protocol_txt, protocolList2indexedList(outboundlinksURLProtocol));
-        if (isEmpty() || contains(SolrField.outboundlinks_urlstub_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_urlstub_txt, outboundlinksURLStub);
-        if (isEmpty() || contains(SolrField.outboundlinks_name_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_name_txt, outboundlinksName);
-        if (isEmpty() || contains(SolrField.outboundlinks_rel_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_rel_txt, outboundlinksRel);
-        if (isEmpty() || contains(SolrField.outboundlinks_relflags_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_relflags_txt, relEval(inboundlinksRel));
-        if (isEmpty() || contains(SolrField.outboundlinks_text_txt.name())) addSolr(solrdoc, SolrField.outboundlinks_text_txt, outboundlinksText);
+        if (allAttr || contains(SolrField.outboundlinks_tag_txt)) addSolr(solrdoc, SolrField.outboundlinks_tag_txt, outboundlinksTag);
+        if (allAttr || contains(SolrField.outboundlinks_protocol_txt)) addSolr(solrdoc, SolrField.outboundlinks_protocol_txt, protocolList2indexedList(outboundlinksURLProtocol));
+        if (allAttr || contains(SolrField.outboundlinks_urlstub_txt)) addSolr(solrdoc, SolrField.outboundlinks_urlstub_txt, outboundlinksURLStub);
+        if (allAttr || contains(SolrField.outboundlinks_name_txt)) addSolr(solrdoc, SolrField.outboundlinks_name_txt, outboundlinksName);
+        if (allAttr || contains(SolrField.outboundlinks_rel_txt)) addSolr(solrdoc, SolrField.outboundlinks_rel_txt, outboundlinksRel);
+        if (allAttr || contains(SolrField.outboundlinks_relflags_txt)) addSolr(solrdoc, SolrField.outboundlinks_relflags_txt, relEval(inboundlinksRel));
+        if (allAttr || contains(SolrField.outboundlinks_text_txt)) addSolr(solrdoc, SolrField.outboundlinks_text_txt, outboundlinksText);
 
         // charset
-        addSolr(solrdoc, SolrField.charset_s, yacydoc.getCharset());
+        if (allAttr || contains(SolrField.charset_s)) addSolr(solrdoc, SolrField.charset_s, yacydoc.getCharset());
 
         // coordinates
         if (yacydoc.lat() != 0.0f && yacydoc.lon() != 0.0f) {
-            addSolr(solrdoc, SolrField.lon_coordinate, yacydoc.lon());
-            addSolr(solrdoc, SolrField.lat_coordinate, yacydoc.lat());
+        	if (allAttr || contains(SolrField.lon_coordinate)) addSolr(solrdoc, SolrField.lon_coordinate, yacydoc.lon());
+        	if (allAttr || contains(SolrField.lat_coordinate)) addSolr(solrdoc, SolrField.lat_coordinate, yacydoc.lat());
         }
-        addSolr(solrdoc, SolrField.httpstatus_i, header == null ? 200 : header.getStatusCode());
+        if (allAttr || contains(SolrField.httpstatus_i)) addSolr(solrdoc, SolrField.httpstatus_i, header == null ? 200 : header.getStatusCode());
 
+        // fields that are additionally in URIMetadataRow        
+        if (allAttr || contains(SolrField.load_date_dt)) addSolr(solrdoc, SolrField.load_date_dt, metadata.loaddate());
+        if (allAttr || contains(SolrField.fresh_date_dt)) addSolr(solrdoc, SolrField.fresh_date_dt, metadata.freshdate());
+        if (allAttr || contains(SolrField.host_id_s)) addSolr(solrdoc, SolrField.host_id_s, metadata.hosthash());
+        if ((allAttr || contains(SolrField.referrer_id_ss)) && metadata.referrerHash() != null) addSolr(solrdoc, SolrField.referrer_id_ss, new String[]{ASCII.String(metadata.referrerHash())});
+        //if (allAttr || contains(SolrField.md5_s)) addSolr(solrdoc, SolrField.md5_s, new byte[0]);
+        if (allAttr || contains(SolrField.publisher_t)) addSolr(solrdoc, SolrField.publisher_t, yacydoc.dc_publisher());
+        if ((allAttr || contains(SolrField.language_ss)) && metadata.language() != null) addSolr(solrdoc, SolrField.language_ss,new String[]{UTF8.String(metadata.language())});
+        if (allAttr || contains(SolrField.ranking_i)) addSolr(solrdoc, SolrField.ranking_i, metadata.ranking());
+        if (allAttr || contains(SolrField.size_i)) addSolr(solrdoc, SolrField.size_i, metadata.size());
+        if (allAttr || contains(SolrField.audiolinkscount_i)) addSolr(solrdoc, SolrField.audiolinkscount_i, yacydoc.getAudiolinks().size());
+        if (allAttr || contains(SolrField.videolinkscount_i)) addSolr(solrdoc, SolrField.videolinkscount_i, yacydoc.getVideolinks().size());
+        if (allAttr || contains(SolrField.applinkscount_i)) addSolr(solrdoc, SolrField.applinkscount_i, yacydoc.getApplinks().size());
+        
         return solrdoc;
     }
 

@@ -111,7 +111,6 @@ import net.yacy.gui.Tray;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -2514,7 +2513,7 @@ public final class Switchboard extends serverSwitch
         this.log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + url);
 
         // STORE WORD INDEX
-        URIMetadataRow newEntry = null;
+        URIMetadata newEntry = null;
         try {
             newEntry =
                 this.index.storeDocument(
@@ -2761,9 +2760,9 @@ public final class Switchboard extends serverSwitch
     public class receiptSending implements Runnable
     {
         private final Seed initiatorPeer;
-        private final URIMetadataRow reference;
+        private final URIMetadata reference;
 
-        public receiptSending(final Seed initiatorPeer, final URIMetadataRow reference) {
+        public receiptSending(final Seed initiatorPeer, final URIMetadata reference) {
             this.initiatorPeer = initiatorPeer;
             this.reference = reference;
         }

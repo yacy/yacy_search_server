@@ -267,3 +267,45 @@ failreason_t
 
 ## response time of target server in milliseconds, int
 responsetime_i
+
+
+### values used additionally by URIMetadataRow, part of the index transfer process
+
+## time when resource was loaded
+load_date_dt
+
+## date until resource shall be considered as fresh
+fresh_date_dt
+
+## id of the host, a 6-byte hash that is part of the document id
+host_id_s
+
+## ids of referrer to this document
+referrer_id_ss
+
+## the md5 of the raw source
+md5_s
+
+## the name of the publisher of the document
+publisher_t
+
+## the language used in the document; starts with primary language
+language_ss
+
+## an external ranking value
+ranking_i
+
+## the size of the raw source
+size_i
+
+## number of links to audio resources
+audiolinkscount_i
+
+## number of links to video resources
+videolinkscount_i
+
+## number of links to application resources
+applinkscount_i
+
+## index creation comment
+process_s

@@ -120,7 +120,21 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     ext_tracker_val(SolrType.integer, true, true, true, "number of attribute counts in ext_tracker_txt"),
     ext_title_txt(SolrType.text_general, true, true, true, "names matching title expressions"),
     ext_title_val(SolrType.integer, true, true, true, "number of matching title expressions"),
-    failreason_t(SolrType.text_general, true, true, "fail reason if a page was not loaded. if the page was loaded then this field is empty");
+    failreason_t(SolrType.text_general, true, true, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
+    
+    // values used additionally by URIMetadataRow
+    load_date_dt(SolrType.date, true, true, "time when resource was loaded"),
+    fresh_date_dt(SolrType.date, true, true, "date until resource shall be considered as fresh"),
+    host_id_s(SolrType.string, true, true, "id of the host, a 6-byte hash that is part of the document id"),// String hosthash();
+    referrer_id_ss(SolrType.string, true, true, true, "ids of referrer to this document"),// byte[] referrerHash();
+    md5_s(SolrType.string, true, true, "the md5 of the raw source"),// String md5();
+    publisher_t(SolrType.text_general, true, true, "the name of the publisher of the document"),// String dc_publisher();
+    language_ss(SolrType.string, true, true, "the language used in the document; starts with primary language"),// byte[] language();
+    ranking_i(SolrType.integer, true, true, "an external ranking value"),// long ranking();
+    size_i(SolrType.integer, true, true, "the size of the raw source"),// int size();
+    audiolinkscount_i(SolrType.integer, true, true, "number of links to audio resources"),// int laudio();
+    videolinkscount_i(SolrType.integer, true, true, "number of links to video resources"),// int lvideo();
+    applinkscount_i(SolrType.integer, true, true, "number of links to application resources");// int lapp();
 
     private String solrFieldName = null; // solr field name in custom solr schema, defaults to solcell schema field name (= same as this.name() )
     private final SolrType type;

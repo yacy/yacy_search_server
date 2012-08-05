@@ -56,54 +56,22 @@ public final class Condenser {
 
     // category flags that show how the page can be distinguished in different interest groups
     public  static final int flag_cat_indexof       =  0; // a directory listing page (i.e. containing 'index of')
-    public  static final int flag_cat_opencontent   =  1; // open source, any free stuff
-    public  static final int flag_cat_business      =  2; // web shops, marketing, trade
-    public  static final int flag_cat_stockfinance  =  3; // stock exchange (quotes), finance, economy
-    public  static final int flag_cat_health        =  4; // health
-    public  static final int flag_cat_sport         =  5; // any sport, cars etc.
-    public  static final int flag_cat_lifestyle     =  6; // travel, lifestyle
-    public  static final int flag_cat_politics      =  7; // politics
-    public  static final int flag_cat_news          =  8; // blogs, news pages
-    public  static final int flag_cat_children      =  9; // toys, childrens education, help for parents
-    public  static final int flag_cat_entertainment = 10; // boulevard, entertainment, cultural content
-    public  static final int flag_cat_knowledge     = 11; // science, school stuff, help for homework
-    public  static final int flag_cat_computer      = 12; // any computer related stuff, networks, operation systems
-    public  static final int flag_cat_p2p           = 13; // p2p support, file-sharing archives etc.
-    public  static final int flag_cat_sex           = 14; // sexual content
-    public  static final int flag_cat_spam          = 15; // pages that anybody would consider as not interesting
-    public  static final int flag_cat_linux         = 16; // pages about linux software
-    public  static final int flag_cat_macos         = 17; // pages about macintosh, apple computers and the mac os
-    public  static final int flag_cat_windows       = 18; // pages about windows os and software
     public  static final int flag_cat_haslocation   = 19; // the page has a location metadata attached
     public  static final int flag_cat_hasimage      = 20; // the page refers to (at least one) images
     public  static final int flag_cat_hasaudio      = 21; // the page refers to (at least one) audio file
     public  static final int flag_cat_hasvideo      = 22; // the page refers to (at least one) videos
     public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
 
-
     //private Properties analysis;
     private final Map<String, Word> words; // a string (the words) to (indexWord) - relation
     private final Map<String, Set<Tagging.Metatag>> tags = new HashMap<String, Set<Tagging.Metatag>>(); // a set of tags, discovered from Autotagging
 
-    //public int RESULT_NUMB_TEXT_BYTES = -1;
     public int RESULT_NUMB_WORDS = -1;
     public int RESULT_DIFF_WORDS = -1;
     public int RESULT_NUMB_SENTENCES = -1;
     public int RESULT_DIFF_SENTENCES = -1;
     public Bitfield RESULT_FLAGS = new Bitfield(4);
     private final Identificator languageIdentificator;
-    /*
-    private final static int numlength = 5;
-    private static final ThreadLocal <NumberFormat> intStringFormatter =
-        new ThreadLocal <NumberFormat>() {
-          @Override protected NumberFormat initialValue() {
-              NumberFormat n = NumberFormat.getIntegerInstance();
-              n.setMinimumIntegerDigits(numlength);
-              n.setMaximumIntegerDigits(numlength);
-              return n;
-          }
-      };
-     */
 
     public Condenser(
             final Document document,

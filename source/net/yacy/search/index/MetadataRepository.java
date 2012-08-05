@@ -71,14 +71,16 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
     private       String              tablename;
     private       ArrayList<HostStat> statsDump;
     private final DoubleSolrConnector solr;
+    private final SolrConfiguration   solrScheme;
 
-    public MetadataRepository(final File path) {
+    public MetadataRepository(final File path, final SolrConfiguration solrScheme) {
         this.location = path;
         this.tablename = null;
         this.urlIndexFile = null;
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
         this.solr = new DoubleSolrConnector();
+        this.solrScheme = solrScheme;
     }
 
     public boolean connectedUrlDb() {
@@ -95,6 +97,10 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
     	if (this.urlIndexFile == null) return;
     	this.urlIndexFile.close();
     	this.urlIndexFile = null;
+    }
+
+    public SolrConfiguration getSolrScheme() {
+        return this.solrScheme;
     }
 
     public boolean connectedLocalSolr() {

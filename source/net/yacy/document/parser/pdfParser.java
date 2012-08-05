@@ -153,20 +153,13 @@ public class pdfParser extends AbstractParser implements Parser {
             if (t.isAlive()) t.interrupt();
             pdfDoc.close();
             contentBytes = writer.getBytes(); // get final text before closing writer
-        } catch (final IOException e) {
+        } catch (final Throwable e) {
             // close the writer
             if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-            try {pdfDoc.close();} catch (final IOException ee) {}
-            //throw new Parser.Failure(e.getMessage(), location);
-        } catch (final NullPointerException e) {
-            // this exception appeared after the insertion of the jempbox-1.5.0.jar library
-            Log.logException(e);
-            // close the writer
-            if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-            try {pdfDoc.close();} catch (final IOException ee) {}
+            try {pdfDoc.close();} catch (final Throwable ee) {}
             //throw new Parser.Failure(e.getMessage(), location);
         } finally {
-            try {pdfDoc.close();} catch (final IOException e) {}
+            try {pdfDoc.close();} catch (final Throwable e) {}
             writer.close();
         }
 

@@ -147,6 +147,9 @@ public final class crawlReceipt {
         if ("fill".equals(result)) try {
             // put new entry into database
             sb.index.urlMetadata().store(entry);
+            if (!sb.index.urlMetadata().getSolr().exists(ASCII.String(entry.url().hash()))) {
+            	sb.index.urlMetadata().getSolr().add(sb.index.urlMetadata().getSolrScheme().metadata2solr(entry));
+            }
             ResultURLs.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true));

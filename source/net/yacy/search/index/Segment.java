@@ -99,7 +99,6 @@ public class Segment {
 
     private   final Log                            log;
     private   final File                           segmentPath;
-    private   final SolrConfiguration              solrScheme;
     protected final MetadataRepository             urlMetadata;
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
@@ -108,10 +107,9 @@ public class Segment {
         log.logInfo("Initializing Segment '" + segmentPath + ".");
         this.log = log;
         this.segmentPath = segmentPath;
-        this.solrScheme = solrScheme;
 
         // create LURL-db
-        this.urlMetadata = new MetadataRepository(segmentPath);
+        this.urlMetadata = new MetadataRepository(segmentPath, solrScheme);
     }
 
     public boolean connectedRWI() {
@@ -203,7 +201,7 @@ public class Segment {
     }
 
     public SolrConfiguration getSolrScheme() {
-        return this.solrScheme;
+        return this.urlMetadata.getSolrScheme();
     }
 
     public SolrConnector getRemoteSolr() {
@@ -398,7 +396,7 @@ public class Segment {
         return language;
     }
 
-    public URIMetadataRow storeDocument(
+    public URIMetadata storeDocument(
             final DigestURI url,
             final DigestURI referrerURL,
             Date modDate,
@@ -420,22 +418,10 @@ public class Segment {
         final String urlNormalform = url.toNormalform(true, false);
         final String language = votedLanguage(url, urlNormalform, document, condenser); // identification of the language
 
-        // STORE TO SOLR
-        boolean localSolr = this.connectedLocalSolr();
-        boolean remoteSolr = this.connectedRemoteSolr();
-        if (localSolr || remoteSolr) {
-            try {
-                SolrDoc solrDoc = this.solrScheme.yacy2solr(id, responseHeader, document);
-                this.getSolr().add(solrDoc);
-            } catch ( final IOException e ) {
-                Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
-            }
-        }
-
         // STORE URL TO LOADED-URL-DB
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate; // TODO: compare with modTime from responseHeader
         char docType = Response.docType(document.dc_format());
-        final URIMetadataRow newEntry = new URIMetadataRow(
+        final URIMetadata metadata = new URIMetadataRow(
                 url,                                       // URL
                 dc_title,                                  // document description
                 document.dc_creator(),                     // author
@@ -460,9 +446,21 @@ public class Segment {
                 document.getVideolinks().size(),           // lvideo
                 document.getApplinks().size()              // lapp
         );
-        this.urlMetadata.store(newEntry);
+        this.urlMetadata.store(metadata);
         final long storageEndTime = System.currentTimeMillis();
 
+        // STORE TO SOLR
+        boolean localSolr = this.connectedLocalSolr();
+        boolean remoteSolr = this.connectedRemoteSolr();
+        if (localSolr || remoteSolr) {
+            try {
+                SolrDoc solrDoc = this.urlMetadata.getSolrScheme().yacy2solr(id, responseHeader, document, metadata);
+                this.getSolr().add(solrDoc);
+            } catch ( final IOException e ) {
+                Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
+            }
+        }
+        
         // STORE PAGE INDEX INTO WORD INDEX DB
         int outlinksSame = document.inboundLinks().size();
         int outlinksOther = document.outboundLinks().size();
@@ -545,7 +543,7 @@ public class Segment {
         }
 
         // finished
-        return newEntry;
+        return metadata;
     }
 
     public void removeAllUrlReferences(final HandleSet urls, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {

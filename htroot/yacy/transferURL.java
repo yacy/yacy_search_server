@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -141,6 +142,9 @@ public final class transferURL {
                 if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true, false));
                 try {
                     sb.index.urlMetadata().store(lEntry);
+                    if (!sb.index.urlMetadata().getSolr().exists(ASCII.String(lEntry.url().hash()))) {
+                    	sb.index.urlMetadata().getSolr().add(sb.index.urlMetadata().getSolrScheme().metadata2solr(lEntry));
+                    }
                     ResultURLs.stack(lEntry, iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);
                     if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;

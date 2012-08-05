@@ -197,17 +197,6 @@ public class IndexFederated_p {
             if (field.getComment() != null) prop.putHTML("scheme_" + c + "_comment",field.getComment());
             c++;
         }
-  /*    final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.entryIterator();
-        ConfigurationSet.Entry entry;
-        while (i.hasNext()) {
-            entry = i.next();
-            prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
-            prop.put("scheme_" + c + "_checked", entry.enabled() ? 1 : 0);
-            prop.putHTML("scheme_" + c + "_key", entry.key());
-            prop.putHTML("scheme_" + c + "_solrfieldname",entry.getValue() == null ? "" : entry.getValue());
-            if (entry.getComment() != null) prop.putHTML("scheme_" + c + "_comment",entry.getComment());
-            c++;
-        }*/
         prop.put("scheme", c);
 
         // fill attribute fields

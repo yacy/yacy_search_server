@@ -123,7 +123,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
     /**
      * override the abstract implementation because that is not stable in concurrent requests
      */
-    public boolean contains (String key) {
+    public boolean contains(String key) {
         if (key == null) return false;
         Entry e = this.get(key);
         return e == null ? false : e.enabled();
@@ -260,11 +260,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         }
         writer.close();
     }
- /*
-    public Iterator<String> iterator() {
-        return  this.keySet().iterator();
-    }
-*/
+
     public Iterator<Entry> entryIterator() {
         return this.values().iterator();
     }

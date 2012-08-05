@@ -357,7 +357,9 @@ public final class Protocol
                         if ( p < 0 ) {
                             return -1;
                         }
-                        final String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
+                        InetAddress ia = Domains.dnsResolve(address.substring(0, p));
+                        if (ia == null) continue;
+                        final String host = ia.getHostAddress();
                         s = Seed.genRemoteSeed(seedStr, false, host);
                     } else {
                         s = Seed.genRemoteSeed(seedStr, false, null);
@@ -752,6 +754,9 @@ public final class Protocol
             // passed all checks, store url
             try {
                 indexSegment.urlMetadata().store(urlEntry);
+                if (!indexSegment.urlMetadata().getSolr().exists(ASCII.String(urlEntry.url().hash()))) {
+                	indexSegment.urlMetadata().getSolr().add(indexSegment.urlMetadata().getSolrScheme().metadata2solr(urlEntry));
+                }
                 ResultURLs.stack(
                     urlEntry,
                     mySeed.hash.getBytes(),
@@ -1081,7 +1086,7 @@ public final class Protocol
         final String process,
         final String result,
         final String reason,
-        final URIMetadataRow entry,
+        final URIMetadata entry,
         final String wordhashes) {
         assert (target != null);
         assert (mySeed != null);

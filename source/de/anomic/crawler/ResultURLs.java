@@ -37,6 +37,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
@@ -96,7 +97,7 @@ public final class ResultURLs {
     }
 
     public static void stack(
-            final URIMetadataRow e,
+            final URIMetadata e,
             final byte[] initiatorHash,
             final byte[] executorHash,
             final EventOrigin stackType) {

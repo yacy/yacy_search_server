@@ -42,7 +42,6 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.RWIProcess;
@@ -54,8 +53,7 @@ import net.yacy.search.ranking.ReferenceOrder;
  *
  * @author Michael Christen
  */
-public class DocumentIndex extends Segment
-{
+public class DocumentIndex extends Segment {
 
     private static final RankingProfile textRankingDefault = new RankingProfile(Classification.ContentDomain.TEXT);
     //private Bitfield zeroConstraint = new Bitfield(4);
@@ -102,12 +100,12 @@ public class DocumentIndex extends Segment
         @Override
         public void run() {
             DigestURI f;
-            URIMetadataRow[] resultRows;
+            URIMetadata[] resultRows;
             try {
                 while ( (f = DocumentIndex.this.queue.take()) != poison ) {
                     try {
                         resultRows = add(f);
-                        for ( final URIMetadataRow resultRow : resultRows ) {
+                        for ( final URIMetadata resultRow : resultRows ) {
                             if ( DocumentIndex.this.callback != null ) {
                                 if ( resultRow == null ) {
                                     DocumentIndex.this.callback.fail(f, "result is null");
@@ -139,7 +137,7 @@ public class DocumentIndex extends Segment
         this.queue.clear();
     }
 
-    private URIMetadataRow[] add(final DigestURI url) throws IOException {
+    private URIMetadata[] add(final DigestURI url) throws IOException {
         if ( url == null ) {
             throw new IOException("file = null");
         }
@@ -162,7 +160,7 @@ public class DocumentIndex extends Segment
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }
         //Document document = Document.mergeDocuments(url, null, documents);
-        final URIMetadataRow[] rows = new URIMetadataRow[documents.length];
+        final URIMetadata[] rows = new URIMetadata[documents.length];
         int c = 0;
         for ( final Document document : documents ) {
         	if (document == null) continue;
@@ -274,7 +272,7 @@ public class DocumentIndex extends Segment
 
     public interface CallbackListener
     {
-        public void commit(DigestURI f, URIMetadataRow resultRow);
+        public void commit(DigestURI f, URIMetadata resultRow);
 
         public void fail(DigestURI f, String failReason);
     }
@@ -295,7 +293,7 @@ public class DocumentIndex extends Segment
         System.out.println("using index files at " + segmentPath.getAbsolutePath());
         final CallbackListener callback = new CallbackListener() {
             @Override
-            public void commit(final DigestURI f, final URIMetadataRow resultRow) {
+            public void commit(final DigestURI f, final URIMetadata resultRow) {
                 System.out.println("indexed: " + f.toString());
             }
 
