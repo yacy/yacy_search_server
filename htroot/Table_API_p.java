@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -95,7 +95,7 @@ public class Table_API_p {
                     }
                 } catch (IOException e) {
                     Log.logException(e);
-                } catch (RowSpaceExceededException e) {
+                } catch (SpaceExceededException e) {
                     Log.logException(e);
                 }
             }
@@ -115,7 +115,7 @@ public class Table_API_p {
                     }
                 } catch (IOException e) {
                     Log.logException(e);
-                } catch (RowSpaceExceededException e) {
+                } catch (SpaceExceededException e) {
                     Log.logException(e);
                 }
             }
@@ -144,7 +144,7 @@ public class Table_API_p {
                     }
                 } catch (IOException e) {
                     Log.logException(e);
-                } catch (RowSpaceExceededException e) {
+                } catch (SpaceExceededException e) {
                     Log.logException(e);
                 }
             }

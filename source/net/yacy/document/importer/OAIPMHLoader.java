@@ -30,6 +30,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
+import net.yacy.search.snippet.TextSnippet;
 import de.anomic.crawler.retrieval.Response;
 
 
@@ -54,7 +55,7 @@ public class OAIPMHLoader {
         for (int i = 0; i < 5; i++) {
             // make some retries if first attempt fails
             try {
-                response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null);
+                response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
                 break;
             } catch (IOException e) {
                 Log.logWarning("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true, false));

@@ -35,9 +35,9 @@ import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -102,7 +102,7 @@ public final class CrawlSwitchboard
                 p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
             } catch ( final IOException e ) {
                 p = null;
-            } catch ( final RowSpaceExceededException e ) {
+            } catch ( final SpaceExceededException e ) {
                 p = null;
             }
             if ( p == null ) {
@@ -149,7 +149,7 @@ public final class CrawlSwitchboard
                 Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
             } catch ( final IOException e ) {
                 continue;
-            } catch ( final RowSpaceExceededException e ) {
+            } catch ( final SpaceExceededException e ) {
                 continue;
             }
         }
@@ -179,7 +179,7 @@ public final class CrawlSwitchboard
             m = this.profilesActiveCrawls.get(profileKey);
         } catch ( final IOException e ) {
             m = null;
-        } catch ( final RowSpaceExceededException e ) {
+        } catch ( final SpaceExceededException e ) {
             m = null;
         }
         if ( m == null ) {
@@ -199,7 +199,7 @@ public final class CrawlSwitchboard
             m = this.profilesPassiveCrawls.get(profileKey);
         } catch ( final IOException e ) {
             m = null;
-        } catch ( final RowSpaceExceededException e ) {
+        } catch ( final SpaceExceededException e ) {
             m = null;
         }
         if ( m == null ) {
@@ -518,7 +518,7 @@ public final class CrawlSwitchboard
                     entry = new CrawlProfile(this.profilesActiveCrawls.get(handle));
                 } catch ( final IOException e ) {
                     continue;
-                } catch ( final RowSpaceExceededException e ) {
+                } catch ( final SpaceExceededException e ) {
                     continue;
                 }
                 if ( !((entry.name().equals(CRAWL_PROFILE_PROXY))

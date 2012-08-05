@@ -30,7 +30,7 @@ import java.io.IOException;
 
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 
 
 public interface BLOB {
@@ -115,7 +115,7 @@ public interface BLOB {
      * @return
      * @throws IOException
      */
-    public byte[] get(byte[] key) throws IOException, RowSpaceExceededException;
+    public byte[] get(byte[] key) throws IOException, SpaceExceededException;
     public byte[] get(Object key);
     
     /**
@@ -139,7 +139,7 @@ public interface BLOB {
      * @param key  the primary key
      * @param b
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
      */
     public void insert(byte[] key, byte[] b) throws IOException;
     
@@ -155,9 +155,9 @@ public interface BLOB {
      * @param rewriter
      * @return the number of bytes that the rewriter reduced the BLOB
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
      */
-    public int replace(byte[] key, Rewriter rewriter) throws IOException, RowSpaceExceededException;
+    public int replace(byte[] key, Rewriter rewriter) throws IOException, SpaceExceededException;
 
     /**
      * a reduce method is the same as the replace. A replace subsumes a reduce method. A reduce method may be more simple.
@@ -165,9 +165,9 @@ public interface BLOB {
      * @param reducer
      * @return the number of bytes that the rewriter reduced the BLOB
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
      */
-    public int reduce(byte[] key, Reducer reducer) throws IOException, RowSpaceExceededException;
+    public int reduce(byte[] key, Reducer reducer) throws IOException, SpaceExceededException;
     
     /**
      * remove a BLOB
@@ -189,9 +189,9 @@ public interface BLOB {
          * of the input
          * @param b
          * @return an array that is equal or smaller in size than b
-         * @throws RowSpaceExceededException 
+         * @throws SpaceExceededException 
          */
-        public byte[] rewrite(byte[] b) throws RowSpaceExceededException;
+        public byte[] rewrite(byte[] b) throws SpaceExceededException;
         
     }
     

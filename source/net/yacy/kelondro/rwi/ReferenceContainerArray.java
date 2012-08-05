@@ -32,13 +32,14 @@ import java.util.Iterator;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.Rating;
+import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.BLOB;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.index.Segment;
 
@@ -305,9 +306,9 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @param key
      * @return the indexContainer if one exist, null otherwise
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException, RowSpaceExceededException {
+    public ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException, SpaceExceededException {
         final long timeout = System.currentTimeMillis() + METHOD_MAXRUNTIME;
         final Iterator<byte[]> entries = this.array.getAll(termHash).iterator();
     	if (entries == null || !entries.hasNext()) return null;
@@ -377,7 +378,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	this.array.delete(termHash);
     }
 
-    public int reduce(final byte[] termHash, final ContainerReducer<ReferenceType> reducer) throws IOException, RowSpaceExceededException {
+    public int reduce(final byte[] termHash, final ContainerReducer<ReferenceType> reducer) throws IOException, SpaceExceededException {
         return this.array.reduce(termHash, new BLOBReducer(termHash, reducer));
     }
 
@@ -392,7 +393,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         }
 
         @Override
-        public byte[] rewrite(final byte[] b) throws RowSpaceExceededException {
+        public byte[] rewrite(final byte[] b) throws SpaceExceededException {
             if (b == null) return null;
             final ReferenceContainer<ReferenceType> c = this.rewriter.reduce(new ReferenceContainer<ReferenceType>(ReferenceContainerArray.this.factory, this.wordHash, RowSet.importRowSet(b, ReferenceContainerArray.this.factory.getRow())));
             if (c == null) return null;
@@ -448,10 +449,10 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                             final File heapLocation,
                             final ReferenceFactory<ReferenceType> factory,
                             final ByteOrder termOrder,
-                            final Row payloadrow) throws IOException, RowSpaceExceededException {
+                            final Row payloadrow) throws IOException, SpaceExceededException {
 
         System.out.println("CELL REFERENCE COLLECTION startup");
-        final HandleMap references = new HandleMap(payloadrow.primaryKeyLength, termOrder, 4, 1000000, heapLocation.getAbsolutePath());
+        final HandleMap references = new RowHandleMap(payloadrow.primaryKeyLength, termOrder, 4, 1000000, heapLocation.getAbsolutePath());
         final String[] files = heapLocation.list();
         for (final String f: files) {
             if (f.length() < 22 || !f.startsWith(Segment.termIndexName) || !f.endsWith(".blob")) continue;

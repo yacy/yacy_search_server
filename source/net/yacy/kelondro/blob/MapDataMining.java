@@ -41,8 +41,8 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -118,7 +118,7 @@ public class MapDataMining extends MapHeap {
                 mapnameb = it.next();
                 try {
                     map = super.get(mapnameb);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logWarning("MapDataMining", e.getMessage());
                     break;
                 }
@@ -200,7 +200,7 @@ public class MapDataMining extends MapHeap {
     }
 
     @Override
-    public synchronized void insert(final byte[] key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
+    public synchronized void insert(final byte[] key, final Map<String, String> newMap) throws IOException, SpaceExceededException {
         assert (key != null);
         assert (key.length > 0);
         assert (newMap != null);
@@ -295,7 +295,7 @@ public class MapDataMining extends MapHeap {
                     // remove from sortCluster
                     if (this.sortfields != null) deleteSortCluster(UTF8.String(key));
                 }
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 map = null;
                 Log.logException(e);
             }

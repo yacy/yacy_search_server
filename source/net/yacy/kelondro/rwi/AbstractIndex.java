@@ -33,9 +33,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.order.Order;
-import net.yacy.kelondro.index.HandleSet;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -52,10 +52,10 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * merge this index with another index
      * @param otherIndex
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public void merge(final Index<ReferenceType> otherIndex) throws IOException, RowSpaceExceededException {
+    public void merge(final Index<ReferenceType> otherIndex) throws IOException, SpaceExceededException {
         byte[] term;
         for (final ReferenceContainer<ReferenceType> otherContainer: otherIndex) {
             term = otherContainer.getTermHash();
@@ -174,9 +174,9 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * @param urlselection
      * @param maxDistance the maximum distance that the words in the result may have
      * @return ReferenceContainer the join result
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public ReferenceContainer<ReferenceType> searchJoin(final HandleSet wordHashes, final HandleSet urlselection, final int maxDistance) throws RowSpaceExceededException {
+    public ReferenceContainer<ReferenceType> searchJoin(final HandleSet wordHashes, final HandleSet urlselection, final int maxDistance) throws SpaceExceededException {
         // first check if there is any entry that has no match;
         // this uses only operations in ram
         for (final byte[] wordHash: wordHashes) {
@@ -212,7 +212,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             final HandleSet excludeHashes,
             final HandleSet urlselection,
             final ReferenceFactory<ReferenceType> termFactory,
-            final int maxDistance) throws RowSpaceExceededException {
+            final int maxDistance) throws SpaceExceededException {
         return new TermSearch<ReferenceType>(this, queryHashes, excludeHashes, urlselection, termFactory, maxDistance);
     }
 

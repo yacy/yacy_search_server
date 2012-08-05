@@ -32,12 +32,13 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -88,12 +89,12 @@ public class Transmission {
          * - a set of yacy seeds which will shrink as the containers are transmitted to them
          * - a counter that gives the number of sucessful and unsuccessful transmissions so far
          */
-        private final byte[]                          primaryTarget;
+        private final byte[]                         primaryTarget;
         private final ReferenceContainerCache<WordReference> containers;
         private final SortedMap<byte[], URIMetadata> references;
-        private final HandleSet                       badReferences;
-        private final List<Seed>             targets;
-        private int                             hit, miss;
+        private final HandleSet                      badReferences;
+        private final List<Seed>                     targets;
+        private int                                  hit, miss;
 
         /**
          * generate a new dispatcher target. such a target is defined with a primary target and
@@ -107,7 +108,7 @@ public class Transmission {
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
             this.references = new TreeMap<byte[], URIMetadata>(Base64Order.enhancedCoder);
-            this.badReferences = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            this.badReferences = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.targets    = targets;
             this.hit = 0;
             this.miss = 0;
@@ -121,7 +122,7 @@ public class Transmission {
          * @throws RowSpaceExceededException
          * @return
          */
-        private ReferenceContainer<WordReference> trimContainer(final ReferenceContainer<WordReference> container, final int max) throws RowSpaceExceededException {
+        private ReferenceContainer<WordReference> trimContainer(final ReferenceContainer<WordReference> container, final int max) throws SpaceExceededException {
             final ReferenceContainer<WordReference> c = new ReferenceContainer<WordReference>(Segment.wordReferenceFactory, container.getTermHash(), max);
             final int part = container.size() / max + 1;
             final Random r = new Random();
@@ -150,9 +151,9 @@ public class Transmission {
          * add a container to the Entry cache.
          * all entries in the container are checked and only such are stored which have a reference entry
          * @param container
-         * @throws RowSpaceExceededException
+         * @throws SpaceExceededException
          */
-        public void add(final ReferenceContainer<WordReference> container) throws RowSpaceExceededException {
+        public void add(final ReferenceContainer<WordReference> container) throws SpaceExceededException {
             int remaining = maxRWIsCount;
             for (final ReferenceContainer<WordReference> ic : this) remaining -= ic.size();
             if (remaining <= 0) {
@@ -193,6 +194,7 @@ public class Transmission {
          * get all containers from the entry. This method may be used to flush remaining entries
          * if they had been finished transmission without success (not enough peers arrived)
          */
+        @Override
         public Iterator<ReferenceContainer<WordReference>> iterator() {
             return this.containers.iterator();
         }

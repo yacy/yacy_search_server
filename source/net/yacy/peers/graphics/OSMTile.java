@@ -38,6 +38,7 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.snippet.TextSnippet;
 import net.yacy.visualization.RasterPlotter;
 import de.anomic.crawler.Cache;
 import de.anomic.crawler.retrieval.Response;
@@ -112,7 +113,7 @@ public class OSMTile {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;
             try {
-                entry = Switchboard.getSwitchboard().loader.load(Switchboard.getSwitchboard().loader.request(tileURL, false, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null);
+                entry = Switchboard.getSwitchboard().loader.load(Switchboard.getSwitchboard().loader.request(tileURL, false, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
             } catch (final IOException e) {
                 Log.logWarning("OSMTile", "cannot load: " + e.getMessage());
                 return null;

@@ -35,8 +35,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import de.anomic.crawler.retrieval.Request;
@@ -206,7 +207,7 @@ public class NoticedURL {
      */
     public boolean removeByURLHash(final byte[] urlhashBytes) {
         try {
-            final HandleSet urlHashes = new HandleSet(12, Base64Order.enhancedCoder, 1);
+            final HandleSet urlHashes = new RowHandleSet(12, Base64Order.enhancedCoder, 1);
             urlHashes.put(urlhashBytes);
             boolean ret = false;
             try {ret |= this.noloadStack.remove(urlHashes) > 0;} catch (final IOException e) {}
@@ -214,13 +215,13 @@ public class NoticedURL {
             try {ret |= this.limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
             try {ret |= this.remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
             return ret;
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
             return false;
         }
     }
 
-    public int removeByProfileHandle(final String handle, final long timeout) throws RowSpaceExceededException {
+    public int removeByProfileHandle(final String handle, final long timeout) throws SpaceExceededException {
         int removed = 0;
         try {removed += this.noloadStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
         try {removed += this.coreStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}

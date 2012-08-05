@@ -1,7 +1,7 @@
 import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
@@ -40,7 +40,7 @@ public class delete_ymark {
 	        	prop.put("result", "1");
 			} catch (final IOException e) {
 				Log.logException(e);
-			} catch (final RowSpaceExceededException e) {
+			} catch (final SpaceExceededException e) {
 				Log.logException(e);
 			}
         } else {

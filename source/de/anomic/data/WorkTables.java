@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -39,11 +39,11 @@ import java.util.TreeMap;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.IndexCell;
@@ -52,12 +52,12 @@ import de.anomic.data.ymark.YMarkTables;
 import de.anomic.server.serverObjects;
 
 public class WorkTables extends Tables {
-	
+
     public final static String TABLE_API_NAME = "api";
     public final static String TABLE_API_TYPE_STEERING = "steering";
     public final static String TABLE_API_TYPE_CONFIGURATION = "configuration";
     public final static String TABLE_API_TYPE_CRAWLER = "crawler";
-    
+
     public final static String TABLE_API_COL_TYPE = "type";
     public final static String TABLE_API_COL_COMMENT = "comment";
     public final static String TABLE_API_COL_DATE_RECORDING = "date_recording"; // if not present default to old date field
@@ -71,7 +71,7 @@ public class WorkTables extends Tables {
     public final static String TABLE_API_COL_APICALL_SCHEDULE_UNIT= "apicall_schedule_unit"; // may be 'minutes', 'hours', 'days'
 
     public final static String TABLE_ROBOTS_NAME = "robots";
-    
+
     public final static String TABLE_ACTIVECRAWLS_NAME = "crawljobsActive";
     public final static String TABLE_PASSIVECRAWLS_NAME = "crawljobsPassive";
 
@@ -80,14 +80,14 @@ public class WorkTables extends Tables {
     public final static String TABLE_SEARCH_FAILURE_COL_DATE = "date";
     public final static String TABLE_SEARCH_FAILURE_COL_WORDS = "words";
     public final static String TABLE_SEARCH_FAILURE_COL_COMMENT = "comment";
-    
+
     public YMarkTables bookmarks;
-    
+
     public WorkTables(final File workPath) {
         super(workPath, 12);
         this.bookmarks = new YMarkTables(this);
     }
-    
+
     /**
      * recording of a api call. stores the call parameters into the API database table
      * @param post the post arguments of the api call
@@ -100,7 +100,7 @@ public class WorkTables extends Tables {
         // remove the apicall attributes from the post object
         String pks = post.remove(TABLE_API_COL_APICALL_PK);
         byte[] pk = pks == null ? null : UTF8.getBytes(pks);
-        
+
         // generate the apicall url - without the apicall attributes
         final String apiurl = /*"http://localhost:" + getConfig("port", "8090") +*/ "/" + servletName + "?" + post.toString();
 
@@ -110,10 +110,10 @@ public class WorkTables extends Tables {
             row = (pk == null) ? null : super.select(TABLE_API_NAME, pk);
         } catch (IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             Log.logException(e);
         }
-        
+
         // insert or update entry
         try {
             if (row == null) {
@@ -125,8 +125,8 @@ public class WorkTables extends Tables {
                 data.put(TABLE_API_COL_DATE_RECORDING, date);
                 data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
                 data.put(TABLE_API_COL_URL, UTF8.getBytes(apiurl));
-                
-                // insert APICALL attributes 
+
+                // insert APICALL attributes
                 data.put(TABLE_API_COL_APICALL_COUNT, "1");
                 pk = super.insert(TABLE_API_NAME, data);
             } else {
@@ -136,21 +136,21 @@ public class WorkTables extends Tables {
                 row.put(TABLE_API_COL_DATE_LAST_EXEC, UTF8.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format()));
                 if (!row.containsKey(TABLE_API_COL_DATE_RECORDING)) row.put(TABLE_API_COL_DATE_RECORDING, row.get(TABLE_API_COL_DATE));
                 row.remove(TABLE_API_COL_DATE);
-                
-                // insert APICALL attributes 
+
+                // insert APICALL attributes
                 row.put(TABLE_API_COL_APICALL_COUNT, row.get(TABLE_API_COL_APICALL_COUNT, 1) + 1);
                 super.update(TABLE_API_NAME, row);
                 assert pk != null;
             }
         } catch (IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             Log.logException(e);
         }
         Log.logInfo("APICALL", apiurl);
         return pk;
     }
-    
+
     /**
      * store a API call and set attributes to schedule a re-call of that API call according to a given frequence
      * This is the same as the previous method but it also computes a re-call time and stores that additionally
@@ -172,7 +172,7 @@ public class WorkTables extends Tables {
         } else {
             if (unit.equals("minutes") && time < 10) time = 10;
         }
-        
+
         // generate the apicall url - without the apicall attributes
         final String apiurl = /*"http://localhost:" + getConfig("port", "8090") +*/ "/" + servletName + "?" + post.toString();
         byte[] pk = null;
@@ -186,8 +186,8 @@ public class WorkTables extends Tables {
             data.put(TABLE_API_COL_DATE_RECORDING, date);
             data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
             data.put(TABLE_API_COL_URL, UTF8.getBytes(apiurl));
-            
-            // insert APICALL attributes 
+
+            // insert APICALL attributes
             data.put(TABLE_API_COL_APICALL_COUNT, UTF8.getBytes("1"));
             data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, UTF8.getBytes(Integer.toString(time)));
             data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, UTF8.getBytes(unit));
@@ -195,13 +195,13 @@ public class WorkTables extends Tables {
             pk = super.insert(TABLE_API_NAME, data);
         } catch (IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             Log.logException(e);
         }
         Log.logInfo("APICALL", apiurl);
         return pk;
     }
-    
+
     /**
      * execute an API call using a api table row which contains all essentials
      * to access the server also the host, port and the authentication realm must be given
@@ -225,7 +225,7 @@ public class WorkTables extends Tables {
                 row = select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
             } catch (IOException e) {
                 Log.logException(e);
-            } catch (RowSpaceExceededException e) {
+            } catch (SpaceExceededException e) {
                 Log.logException(e);
             }
             if (row == null) continue;
@@ -242,7 +242,7 @@ public class WorkTables extends Tables {
         }
         return l;
     }
-    
+
     public static int execAPICall(String host, int port, String realm, String path, byte[] pk) {
         // now call the api URLs and store the result status
         final HTTPClient client = new HTTPClient();
@@ -258,7 +258,7 @@ public class WorkTables extends Tables {
             return -1;
         }
     }
-    
+
     /**
      * simplified call to execute a single entry in the api database table
      * @param pk the primary key of the entry
@@ -297,14 +297,14 @@ public class WorkTables extends Tables {
         d -= d % 60000; // remove seconds
         row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(d));
     }
-    
+
     public void failURLsRegisterMissingWord(IndexCell<WordReference> indexCell, final DigestURI url, HandleSet queryHashes, final String reason) {
 
         // remove words from index
         for (final byte[] word: queryHashes) {
             indexCell.removeDelayed(word, url.hash());
         }
-        
+
         // insert information about changed url into database
         try {
             // create and insert new entry
@@ -319,7 +319,7 @@ public class WorkTables extends Tables {
             Log.logException(e);
         }
     }
-    
+
     public boolean failURLsContains(byte[] urlhash) {
         try {
             return super.has(TABLE_SEARCH_FAILURE_NAME, urlhash);
@@ -328,7 +328,7 @@ public class WorkTables extends Tables {
             return false;
         }
     }
-    
+
     /**
      * cleanup cached failed searchs older then timeout
      */
@@ -351,7 +351,7 @@ public class WorkTables extends Tables {
 			}
     	}
     }
-    
+
     public static Map<byte[], String> commentCache(Switchboard sb) {
         Map<byte[], String> comments = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
         Iterator<Tables.Row> i;

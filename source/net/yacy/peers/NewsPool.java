@@ -53,8 +53,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -315,7 +315,7 @@ public class NewsPool {
         }
     }
 
-    public NewsDB.Record myPublication() throws IOException, RowSpaceExceededException {
+    public NewsDB.Record myPublication() throws IOException, SpaceExceededException {
         // generate a record for next peer-ping
         if (this.outgoingNews.isEmpty()) return null;
         final NewsDB.Record record = this.outgoingNews.pop();
@@ -332,7 +332,7 @@ public class NewsPool {
         return record;
     }
 
-    public void enqueueIncomingNews(final NewsDB.Record record) throws IOException, RowSpaceExceededException {
+    public void enqueueIncomingNews(final NewsDB.Record record) throws IOException, SpaceExceededException {
         // called if a news is attached to a seed
 
         // check consistency
@@ -367,7 +367,7 @@ public class NewsPool {
         return switchQueue(dbKey).size();
     }
 
-    public int automaticProcess(final SeedDB seedDB) throws IOException, InterruptedException, RowSpaceExceededException {
+    public int automaticProcess(final SeedDB seedDB) throws IOException, InterruptedException, SpaceExceededException {
         // processes news in the incoming-db
         // returns number of processes
         NewsDB.Record record;
@@ -493,7 +493,7 @@ public class NewsPool {
             }
     }
 
-    public void moveOff(final int dbKey, final String id) throws IOException, RowSpaceExceededException {
+    public void moveOff(final int dbKey, final String id) throws IOException, SpaceExceededException {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
         switch (dbKey) {
@@ -505,7 +505,7 @@ public class NewsPool {
             }
     }
 
-    private boolean moveOff(final NewsQueue fromqueue, final NewsQueue toqueue, final String id) throws IOException, RowSpaceExceededException {
+    private boolean moveOff(final NewsQueue fromqueue, final NewsQueue toqueue, final String id) throws IOException, SpaceExceededException {
         // called if a published news shall be removed
         final NewsDB.Record record = fromqueue.remove(id);
         if (record == null) {
@@ -519,7 +519,7 @@ public class NewsPool {
         return true;
     }
 
-    public void moveOffAll(final int dbKey) throws IOException, RowSpaceExceededException {
+    public void moveOffAll(final int dbKey) throws IOException, SpaceExceededException {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
         switch (dbKey) {
@@ -530,7 +530,7 @@ public class NewsPool {
         }
     }
 
-    private static int moveOffAll(final NewsQueue fromqueue, final NewsQueue toqueue) throws IOException, RowSpaceExceededException {
+    private static int moveOffAll(final NewsQueue fromqueue, final NewsQueue toqueue) throws IOException, SpaceExceededException {
         // move off all news from a specific queue to another queue
         final Iterator<NewsDB.Record> i = fromqueue.iterator();
         NewsDB.Record record;

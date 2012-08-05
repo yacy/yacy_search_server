@@ -39,11 +39,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.Rating;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.HeapWriter;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.FileUtils;
@@ -154,7 +154,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                     dump.add(term, container.exportCollection());
                 } catch (final IOException e) {
                     Log.logException(e);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                 }
                 if (destructive) container.clear(); // this memory is not needed any more
@@ -285,7 +285,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 if (this.excludePrivate && Word.isPrivate(this.latestTermHash)) continue;
                 try {
                     return c.topLevelClone();
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     return null;
                 }
@@ -302,7 +302,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 if (this.excludePrivate && Word.isPrivate(this.latestTermHash)) continue;
                 try {
                     return c.topLevelClone();
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     return null;
                 }
@@ -446,7 +446,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 }
             }
             return c1;
-        } catch (final RowSpaceExceededException e2) {
+        } catch (final SpaceExceededException e2) {
             Log.logException(e2);
         }
         return null;
@@ -541,7 +541,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void removeDelayed() {}
 
     @Override
-    public void add(final ReferenceContainer<ReferenceType> container) throws RowSpaceExceededException {
+    public void add(final ReferenceContainer<ReferenceType> container) throws SpaceExceededException {
         // this puts the entries into the cache
         if (this.cache == null || container == null || container.isEmpty()) return;
 
@@ -565,7 +565,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     }
 
     @Override
-    public void add(final byte[] termHash, final ReferenceType newEntry) throws RowSpaceExceededException {
+    public void add(final byte[] termHash, final ReferenceType newEntry) throws SpaceExceededException {
         assert this.cache != null;
         if (this.cache == null) return;
         final ByteArray tha = new ByteArray(termHash);

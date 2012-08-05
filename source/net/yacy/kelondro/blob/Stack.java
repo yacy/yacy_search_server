@@ -28,7 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 
@@ -98,9 +98,9 @@ public class Stack {
      * @param b the new stack element
      * @return the handle used to store the new element
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public synchronized long push(final byte[] b) throws IOException, RowSpaceExceededException {
+    public synchronized long push(final byte[] b) throws IOException, SpaceExceededException {
         long handle = nextHandle();
         this.stack.insert(NaturalOrder.encodeLong(handle, 8), b);
         return handle;
@@ -113,9 +113,9 @@ public class Stack {
      * @param b the new stack element
      * @return the handle used to store the new element
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    protected synchronized void push(final Entry e) throws IOException, RowSpaceExceededException {
+    protected synchronized void push(final Entry e) throws IOException, SpaceExceededException {
         this.stack.insert(NaturalOrder.encodeLong(e.h, 8), e.b);
     }
 
@@ -125,9 +125,9 @@ public class Stack {
      * @return the object that belongs to the handle
      *         or null if no such element exists
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public synchronized byte[] get(final long handle) throws IOException, RowSpaceExceededException {
+    public synchronized byte[] get(final long handle) throws IOException, SpaceExceededException {
         byte[] k = NaturalOrder.encodeLong(handle, 8);
         byte[] b = this.stack.get(k);
         if (b == null) return null;
@@ -139,9 +139,9 @@ public class Stack {
      * @param handle
      * @return the removed element
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public synchronized byte[] remove(final long handle) throws IOException, RowSpaceExceededException {
+    public synchronized byte[] remove(final long handle) throws IOException, SpaceExceededException {
         byte[] k = NaturalOrder.encodeLong(handle, 8);
         byte[] b = this.stack.get(k);
         if (b == null) return null;
@@ -195,7 +195,7 @@ public class Stack {
         byte[] b;
         try {
             b = this.stack.get(k);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             Log.logException(e);
             b = null;
         }

@@ -1,9 +1,9 @@
 import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
@@ -46,7 +46,7 @@ public class add_ymark {
 				} catch (final Failure e) {
 					// TODO Auto-generated catch block
 					Log.logException(e);
-				} catch (final RowSpaceExceededException e) {
+				} catch (final SpaceExceededException e) {
 					// TODO Auto-generated catch block
 					Log.logException(e);
 				}
@@ -77,7 +77,7 @@ public class add_ymark {
 					sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
 					} catch (final IOException e) {
 					    Log.logException(e);
-					} catch (final RowSpaceExceededException e) {
+					} catch (final SpaceExceededException e) {
 				}
 	            prop.put("status", "1");
             } else {

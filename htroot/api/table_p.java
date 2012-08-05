@@ -26,8 +26,8 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -112,7 +112,7 @@ public class table_p {
                 }
             } catch (final IOException e) {
                 Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
         }

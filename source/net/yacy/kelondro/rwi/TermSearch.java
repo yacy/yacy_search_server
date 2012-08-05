@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -29,8 +29,8 @@ package net.yacy.kelondro.rwi;
 
 import java.util.TreeMap;
 
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.order.Base64Order;
 
 
@@ -38,43 +38,43 @@ public class TermSearch <ReferenceType extends Reference> {
 
     private final ReferenceContainer<ReferenceType> joinResult;
     TreeMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers;
-    
+
     public TermSearch(
             Index<ReferenceType> base,
             final HandleSet queryHashes,
             final HandleSet excludeHashes,
             final HandleSet urlselection,
             ReferenceFactory<ReferenceType> termFactory,
-            int maxDistance) throws RowSpaceExceededException {
-        
+            int maxDistance) throws SpaceExceededException {
+
         this.inclusionContainers =
             (queryHashes.isEmpty()) ?
                 new TreeMap<byte[], ReferenceContainer<ReferenceType>>(Base64Order.enhancedCoder) :
                 base.searchConjunction(queryHashes, urlselection);
-                
-        if (!inclusionContainers.isEmpty() &&
-            (inclusionContainers.size() < queryHashes.size()))
-            inclusionContainers = new TreeMap<byte[], ReferenceContainer<ReferenceType>>(Base64Order.enhancedCoder); // prevent that only a subset is returned
-        
+
+        if (!this.inclusionContainers.isEmpty() &&
+            (this.inclusionContainers.size() < queryHashes.size()))
+            this.inclusionContainers = new TreeMap<byte[], ReferenceContainer<ReferenceType>>(Base64Order.enhancedCoder); // prevent that only a subset is returned
+
         TreeMap<byte[], ReferenceContainer<ReferenceType>> exclusionContainers =
-            (inclusionContainers.isEmpty()) ?
+            (this.inclusionContainers.isEmpty()) ?
                 new TreeMap<byte[], ReferenceContainer<ReferenceType>>(Base64Order.enhancedCoder) :
                 base.searchConjunction(excludeHashes, urlselection);
-    
+
         // join and exclude the result
         this.joinResult = ReferenceContainer.joinExcludeContainers(
                 termFactory,
-                inclusionContainers.values(),
+                this.inclusionContainers.values(),
                 exclusionContainers.values(),
-                maxDistance);        
+                maxDistance);
     }
-    
+
     public ReferenceContainer<ReferenceType> joined() {
         return this.joinResult;
     }
-    
+
     public TreeMap<byte[], ReferenceContainer<ReferenceType>> inclusion() {
         return this.inclusionContainers;
     }
-    
+
 }

@@ -8,11 +8,11 @@ import java.util.TreeMap;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
@@ -210,7 +210,7 @@ public class get_treeview {
 					}
 				} catch (final IOException e) {
 					Log.logException(e);
-				} catch (final RowSpaceExceededException e) {
+				} catch (final SpaceExceededException e) {
 					Log.logException(e);
 				}
 	        } else if (isAutoTagger || isMetadata || isURLdb || isCrawlStart) {

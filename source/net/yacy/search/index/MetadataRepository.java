@@ -44,16 +44,16 @@ import net.yacy.cora.services.federated.solr.DoubleSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Cache;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
@@ -245,7 +245,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
 
 	        try {
 	            this.urlIndexFile.put(((URIMetadataRow) entry).toRowEntry());
-	        } catch (final RowSpaceExceededException e) {
+	        } catch (final SpaceExceededException e) {
 	            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
 	        }
 	        this.statsDump = null;

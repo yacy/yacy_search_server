@@ -58,6 +58,7 @@ import net.yacy.search.index.Segment;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import de.anomic.crawler.Cache;
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -164,7 +165,7 @@ public class ViewFile {
 
         Response response = null;
         try {
-            response = sb.loader.load(sb.loader.request(url, true, false), authorized ? CacheStrategy.IFEXIST : CacheStrategy.CACHEONLY, Integer.MAX_VALUE, null);
+            response = sb.loader.load(sb.loader.request(url, true, false), authorized ? CacheStrategy.IFEXIST : CacheStrategy.CACHEONLY, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay);
         } catch (final IOException e) {
             prop.put("error", "4");
             prop.put("error_errorText", "error loading resource: " + e.getMessage());

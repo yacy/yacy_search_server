@@ -42,11 +42,11 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
@@ -55,6 +55,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
@@ -127,7 +128,7 @@ public class Crawler_p {
             // delete all entries from the crawl queue that are deleted here
             sb.crawler.removeActive(handle.getBytes());
             sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
 
@@ -323,7 +324,7 @@ public class Crawler_p {
                         sb.crawlQueues.errorURL.remove(urlhash);
 
                         // get a scraper to get the title
-                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER);
+                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                         final String title = scraper == null ? url.toNormalform(true, true) : scraper.dc_title();
                         final String description = scraper.dc_description();
 
@@ -551,7 +552,7 @@ public class Crawler_p {
                     try {
                         final DigestURI sitelistURL = new DigestURI(crawlingStart);
                         // download document
-                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER);
+                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                         // String title = scraper.getTitle();
                         // String description = scraper.getDescription();
 

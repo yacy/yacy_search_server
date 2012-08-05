@@ -45,14 +45,15 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -152,11 +153,11 @@ public final class QueryParams {
         byte[] queryHash;
     	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryHash = UTF8.getBytes(queryString)))) {
             this.queryString = null;
-            this.query_include_hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            this.query_exclude_hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            this.query_include_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            this.query_exclude_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {
                 this.query_include_hashes.put(queryHash);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
     	} else {
@@ -309,11 +310,11 @@ public final class QueryParams {
     }
 
     public static HandleSet hashes2Set(final String query) {
-        final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+        final HandleSet keyhashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
                 keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
         }
@@ -321,11 +322,11 @@ public final class QueryParams {
     }
 
     public static HandleSet hashes2Handles(final String query) {
-        final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+        final HandleSet keyhashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
                 keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
         }

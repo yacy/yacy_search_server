@@ -198,19 +198,22 @@ public class AbstractSolrConnector implements SolrConnector {
 
         // query the server
         //SearchResult result = new SearchResult(count);
-        try {
-            final QueryResponse rsp = this.server.query( query );
-            final SolrDocumentList docs = rsp.getResults();
-            return docs;
-            // add the docs into the YaCy search result container
-            /*
-            for (SolrDocument doc: docs) {
-                result.put(element)
+        Throwable error = null; // well this is a bad hack; see https://issues.apache.org/jira/browse/LUCENE-2239
+        // also: https://issues.apache.org/jira/browse/SOLR-2247
+        // we might try also: $JAVA_OPTS -Dsolr.directoryFactory=solr.MMapDirectoryFactory
+        for (int retry = 30; retry > 0; retry--) {
+            try {
+                final QueryResponse rsp = this.server.query(query);
+                final SolrDocumentList docs = rsp.getResults();
+                if (error != null) Log.logWarning("AbstractSolrConnector", "produced search result by silently ignoring an error before, message = " + error.getMessage());
+                return docs;
+            } catch (final Throwable e) {
+                Log.logWarning("AbstractSolrConnection", "problem with query=" + querystring, e);
+                error = e;
+                continue;
             }
-            */
-        } catch (final Throwable e) {
-            throw new IOException(e);
         }
+        throw new IOException(error.getMessage(), error);
     }
 
     /**
@@ -230,15 +233,23 @@ public class AbstractSolrConnector implements SolrConnector {
         query.setStart(0);
 
         // query the server
-        try {
-            final QueryResponse rsp = this.server.query( query );
-            final SolrDocumentList docs = rsp.getResults();
-            if (docs.isEmpty()) return null;
-            return docs.get(0);
-        } catch (final Throwable e) {
-            Log.logWarning("AbstractSolrConnection", "problem with id=" + id, e);
-            throw new IOException(e);
+        Throwable error = null; // well this is a bad hack; see https://issues.apache.org/jira/browse/LUCENE-2239
+        // also: https://issues.apache.org/jira/browse/SOLR-2247
+        // we might try also: $JAVA_OPTS -Dsolr.directoryFactory=solr.MMapDirectoryFactory
+        for (int retry = 30; retry > 0; retry--) {
+            try {
+                final QueryResponse rsp = this.server.query(query);
+                final SolrDocumentList docs = rsp.getResults();
+                if (docs.isEmpty()) return null;
+                if (error != null) Log.logWarning("AbstractSolrConnector", "produced search result by silently ignoring an error before, message = " + error.getMessage());
+                return docs.get(0);
+            } catch (final Throwable e) {
+                Log.logWarning("AbstractSolrConnection", "problem with id=" + id, e);
+                error = e;
+                continue;
+            }
         }
+        throw new IOException(error.getMessage(), error);
     }
 
 }

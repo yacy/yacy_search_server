@@ -31,7 +31,7 @@ import java.util.SortedMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.kelondro.index.HandleSet;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.peers.dht.PeerSelection;

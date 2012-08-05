@@ -78,12 +78,12 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -682,7 +682,7 @@ public final class Protocol
                         Segment.wordReferenceFactory,
                         ASCII.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)),
                         count));
-            } catch ( final RowSpaceExceededException e ) {
+            } catch ( final SpaceExceededException e ) {
                 Log.logException(e);
                 return -1;
             }
@@ -781,7 +781,7 @@ public final class Protocol
             for ( final ReferenceContainer<WordReference> c : container ) {
                 try {
                     c.add(entry);
-                } catch ( final RowSpaceExceededException e ) {
+                } catch ( final SpaceExceededException e ) {
                     Log.logException(e);
                     break;
                 }

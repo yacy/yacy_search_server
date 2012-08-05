@@ -14,6 +14,7 @@ import net.yacy.search.solr.SolrServlet;
 
 import org.apache.solr.common.util.FastWriter;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.response.JSONResponseWriter;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.response.XMLResponseWriter;
@@ -24,7 +25,8 @@ import de.anomic.server.serverSwitch;
 public class select {
 
     private static SolrServlet solrServlet = new SolrServlet();
-    private static final QueryResponseWriter responseWriter = new XMLResponseWriter();
+    private static final QueryResponseWriter xmlResponseWriter = new XMLResponseWriter();
+    private static final QueryResponseWriter jsonResponseWriter = new JSONResponseWriter();
 
     static {
         try {solrServlet.init(null);} catch (ServletException e) {}
@@ -55,6 +57,8 @@ public class select {
         if (connector == null) return null;
         if (post == null) return null;
         if (!post.containsKey("df")) post.put("df", "text_t"); // set default field to all fields
+        QueryResponseWriter responseWriter = xmlResponseWriter;
+        if (post.get("wt", "").equals("json")) responseWriter = jsonResponseWriter;
         SolrQueryRequest req = connector.request(post.toSolrParams());
         SolrQueryResponse response = connector.query(req);
         Exception e = response.getException();

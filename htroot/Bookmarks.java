@@ -50,6 +50,7 @@ import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
+import net.yacy.search.snippet.TextSnippet;
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.BookmarksDB.Bookmark;
@@ -196,7 +197,7 @@ public class Bookmarks {
                         // try to get the bookmark from the LURL database
                         final URIMetadata urlentry = sb.index.urlMetadata().load(ASCII.getBytes(urlHash));
                         if (urlentry != null) try {
-                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null));
+                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay));
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", urlentry.url().toNormalform(false, true));
                             prop.putHTML("mode_title", urlentry.dc_title());

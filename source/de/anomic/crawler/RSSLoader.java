@@ -35,10 +35,10 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ComparableARC;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -63,7 +63,7 @@ public class RSSLoader extends Thread {
     public void run() {
         RSSReader rss = null;
         try {
-            final Response response = this.sb.loader.load(this.sb.loader.request(this.urlf, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER);
+            final Response response = this.sb.loader.load(this.sb.loader.request(this.urlf, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final MalformedURLException e) {
@@ -120,7 +120,7 @@ public class RSSLoader extends Thread {
             sb.tables.update("rss", url.hash(), rssRow);
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
     }

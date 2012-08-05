@@ -41,6 +41,7 @@ import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -97,7 +98,7 @@ public class webstructure {
                 prop.put("references", 1);
                 net.yacy.document.Document scraper = null;
                 if (url != null) try {
-                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST, null);
+                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST, null, CrawlQueues.queuedMinLoadDelay);
                 } catch (final IOException e) {
                     Log.logException(e);
                 }

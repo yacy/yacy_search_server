@@ -84,6 +84,13 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
                 Files.copy(source, target);
             }
         }
+        /*
+        try {
+            CheckIndex.main(new String[]{new File(new File(storagePath, "data"), "index").getAbsolutePath(), "-fix"});
+        } catch (InterruptedException e1) {
+            Log.logException(e1);
+        }
+        */
         try {
             this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
         } catch (ParserConfigurationException e) {

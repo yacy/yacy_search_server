@@ -30,10 +30,10 @@ import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
@@ -88,7 +88,7 @@ public final class timeline {
         TermSearch<WordReference> search = null;
         try {
             search = segment.termIndex().query(q, Word.words2hashesHandles(query[1]), null, Segment.wordReferenceFactory, maxdist);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             Log.logException(e);
         }
         ReferenceContainer<WordReference> index = search.joined();

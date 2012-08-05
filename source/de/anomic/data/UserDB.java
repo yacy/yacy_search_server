@@ -39,8 +39,8 @@ import java.util.Random;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -103,7 +103,7 @@ public final class UserDB {
             record = userTable.get(UTF8.getBytes(userName));
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             Log.logException(e);
         }
         
@@ -537,7 +537,7 @@ public final class UserDB {
             return this.mem;
         }
         
-        public void setProperty(final String propName, final String newValue) throws IOException, RowSpaceExceededException {
+        public void setProperty(final String propName, final String newValue) throws IOException, SpaceExceededException {
             this.mem.put(propName,  newValue);
             UserDB.this.userTable.insert(UTF8.getBytes(getUserName()), this.mem);
         }

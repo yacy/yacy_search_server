@@ -98,6 +98,8 @@ import net.yacy.cora.services.federated.solr.ShardSelection;
 import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -112,8 +114,6 @@ import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -151,6 +151,7 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
 import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.snippet.TextSnippet;
 
 import com.google.common.io.Files;
 
@@ -1991,7 +1992,7 @@ public final class Switchboard extends serverSwitch
                 } catch ( final IOException e ) {
                     Log.logException(e);
                     continue;
-                } catch ( final RowSpaceExceededException e ) {
+                } catch ( final SpaceExceededException e ) {
                     Log.logException(e);
                     continue;
                 }
@@ -2674,7 +2675,7 @@ public final class Switchboard extends serverSwitch
                 Thread.currentThread().setName("Switchboard.addToIndex:" + urls);
                 try {
                     final Response response =
-                        Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER);
+                        Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                     if ( response == null ) {
                         throw new IOException("response == null");
                     }
@@ -3075,7 +3076,7 @@ public final class Switchboard extends serverSwitch
                 final Map<MultiProtocolURI, String> links;
                 searchEvent.getRankingResult().oneFeederStarted();
                 try {
-                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH);
+                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
                     if ( links != null ) {
                         final Iterator<MultiProtocolURI> i = links.keySet().iterator();
                         while ( i.hasNext() ) {
@@ -3114,7 +3115,7 @@ public final class Switchboard extends serverSwitch
                 final Map<MultiProtocolURI, String> links;
                 DigestURI url;
                 try {
-                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH);
+                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
                     if (links != null) {
                         if (links.size() < 1000) { // limit to 1000 to skip large index pages
                             final Iterator<MultiProtocolURI> i = links.keySet().iterator();
@@ -3178,7 +3179,7 @@ public final class Switchboard extends serverSwitch
                 searchEvent.getRankingResult().oneFeederStarted();
                 try {
                     final Response response =
-                        sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, BlacklistType.SEARCH);
+                        sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
                     final byte[] resource = (response == null) ? null : response.getContent();
                     //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);

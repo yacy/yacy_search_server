@@ -43,12 +43,13 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.BufferedObjectIndex;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.table.Table;
@@ -88,7 +89,7 @@ public class Balancer {
         this.minimumGlobalDelta = minimumGlobalDelta;
         this.myAgentIDs = myAgentIDs;
         this.domStackInitSize = Integer.MAX_VALUE;
-        this.double_push_check = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+        this.double_push_check = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
 
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
@@ -96,10 +97,10 @@ public class Balancer {
         final File f = new File(this.cacheStacksPath, stackname + indexSuffix);
         try {
             this.urlFileIndex = new BufferedObjectIndex(new Table(f, Request.rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727, true), objectIndexBufferSize);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             try {
                 this.urlFileIndex = new BufferedObjectIndex(new Table(f, Request.rowdef, 0, 0, false, exceed134217727, true), objectIndexBufferSize);
-            } catch (final RowSpaceExceededException e1) {
+            } catch (final SpaceExceededException e1) {
                 Log.logException(e1);
             }
         }
@@ -146,13 +147,13 @@ public class Balancer {
         return new Request(entry);
     }
 
-    public int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException, RowSpaceExceededException {
+    public int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException, SpaceExceededException {
         // removes all entries with a specific profile hash.
         // this may last some time
         // returns number of deletions
 
         // first find a list of url hashes that shall be deleted
-        final HandleSet urlHashes = new HandleSet(this.urlFileIndex.row().primaryKeyLength, Base64Order.enhancedCoder, 100);
+        final HandleSet urlHashes = new RowHandleSet(this.urlFileIndex.row().primaryKeyLength, Base64Order.enhancedCoder, 100);
         final long terminate = (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
         synchronized (this) {
             final Iterator<Row.Entry> i = this.urlFileIndex.rows();
@@ -237,9 +238,9 @@ public class Balancer {
      * @param entry
      * @return null if this was successful or a String explaining what went wrong in case of an error
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public String push(final Request entry) throws IOException, RowSpaceExceededException {
+    public String push(final Request entry) throws IOException, SpaceExceededException {
         assert entry != null;
         final byte[] hash = entry.url().hash();
         synchronized (this) {
@@ -328,13 +329,13 @@ public class Balancer {
         return cel;
     }
 
-    private void pushHashToDomainStacks(String host, final byte[] urlhash) throws RowSpaceExceededException {
+    private void pushHashToDomainStacks(String host, final byte[] urlhash) throws SpaceExceededException {
         // extend domain stack
         if (host == null) host = Domains.LOCALHOST;
         HandleSet domainList = this.domainStacks.get(host);
         if (domainList == null) {
             // create new list
-            domainList = new HandleSet(12, Base64Order.enhancedCoder, 1);
+            domainList = new RowHandleSet(12, Base64Order.enhancedCoder, 1);
             domainList.put(urlhash);
             this.domainStacks.put(host, domainList);
         } else {
@@ -365,7 +366,7 @@ public class Balancer {
      * @param profile
      * @return a url in a CrawlEntry object
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     public Request pop(final boolean delay, final CrawlSwitchboard cs, final RobotsTxt robots) throws IOException {
         // returns a crawl entry from the stack and ensures minimum delta times
@@ -495,7 +496,7 @@ public class Balancer {
             }
             try {
                 entry.getValue().put(n); // put entry back, we are checking only
-            } catch (RowSpaceExceededException e) {
+            } catch (SpaceExceededException e) {
                 e.printStackTrace();
             }
     	}
@@ -546,7 +547,7 @@ public class Balancer {
     	    host = request.url().getHost();
     		try {
                 pushHashToDomainStacks(host, handle);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 break;
             }
             count++;

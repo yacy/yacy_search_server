@@ -39,6 +39,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
+import net.yacy.search.snippet.TextSnippet;
 import de.anomic.crawler.retrieval.Response;
 
 public class YMarkMetadata {
@@ -97,7 +98,7 @@ public class YMarkMetadata {
 	public Document loadDocument(final LoaderDispatcher loader) throws IOException, Failure {
 		if(this.document == null) {
 			Response response = null;
-			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null);
+			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
 			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		}
 		return this.document;

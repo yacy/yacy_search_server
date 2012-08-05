@@ -39,12 +39,12 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.table.SplitTable;
@@ -112,10 +112,10 @@ public class ZURL implements Iterable<ZURL.Entry> {
         }
         try {
             this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727, true);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             try {
                 this.urlIndex = new Table(f, rowdef, 0, 0, false, exceed134217727, true);
-            } catch (final RowSpaceExceededException e1) {
+            } catch (final SpaceExceededException e1) {
                 Log.logException(e1);
             }
         }

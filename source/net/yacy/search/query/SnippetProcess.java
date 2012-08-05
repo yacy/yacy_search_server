@@ -26,6 +26,7 @@
 
 package net.yacy.search.query;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,11 +41,12 @@ import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.SeedDB;
@@ -117,10 +119,10 @@ public class SnippetProcess {
         // only with the query minus the stopwords which had not been used for the search
         HandleSet filtered;
         try {
-            filtered = HandleSet.joinConstructive(query.query_include_hashes, Switchboard.stopwordHashes);
-        } catch (final RowSpaceExceededException e) {
+            filtered = RowHandleSet.joinConstructive(query.query_include_hashes, Switchboard.stopwordHashes);
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
-            filtered = new HandleSet(query.query_include_hashes.row().primaryKeyLength, query.query_include_hashes.comparator(), 0);
+            filtered = new RowHandleSet(query.query_include_hashes.keylen(), query.query_include_hashes.comparator(), 0);
         }
         this.snippetFetchWordHashes = query.query_include_hashes.clone();
         if (filtered != null && !filtered.isEmpty()) {
@@ -498,8 +500,15 @@ public class SnippetProcess {
                     String solrContent = null;
                     if (this.solr != null) {
                         SolrDocument sd = null;
-                        final SolrDocumentList sdl = this.solr.query(SolrField.id.getSolrFieldName()+ ":" + ASCII.String(page.hash()), 0, 1);
-                        if (!sdl.isEmpty()) {
+                        StringBuilder querystring = new StringBuilder(17);
+                        querystring.append(SolrField.id.getSolrFieldName()).append(':').append('"').append(ASCII.String(page.hash())).append('"');
+                        SolrDocumentList sdl = null;
+                        try {
+                            sdl = this.solr.query(querystring.toString(), 0, 1);
+                        } catch (IOException e) {
+                            Log.logException(e);
+                        }
+                        if (sdl != null && !sdl.isEmpty()) {
                             sd = sdl.get(0);
                         }
                         if (sd != null) {
@@ -534,9 +543,7 @@ public class SnippetProcess {
                     Log.logWarning("SnippetProcess", "worker ended with timeout");
                 }
                 //System.out.println("FINISHED WORKER " + id + " FOR " + this.neededResults + " RESULTS, loops = " + loops);
-            } catch (final Exception e) {
-                Log.logException(e);
-            }
+            } catch (final Exception e) { Log.logException(e); }
             //Log.logInfo("SEARCH", "resultWorker thread " + this.id + " terminated");
         }
 

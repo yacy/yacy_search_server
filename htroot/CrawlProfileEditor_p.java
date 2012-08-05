@@ -32,7 +32,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.CrawlProfile;
@@ -99,7 +99,7 @@ public class CrawlProfileEditor_p {
                 // delete all entries from the crawl queue that are deleted here
                 sb.crawler.removeActive(handle.getBytes());
                 sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
             if (post.containsKey("delete")) {

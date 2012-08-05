@@ -35,14 +35,15 @@ import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.RSSLoader;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.WorkTables;
@@ -93,7 +94,7 @@ public class Load_RSS_p {
             }
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
 
@@ -108,7 +109,7 @@ public class Load_RSS_p {
                     sb.tables.insert("rss", pk, rssRow);
                 } catch (final IOException e) {
                     Log.logException(e);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                 }
             }
@@ -139,7 +140,7 @@ public class Load_RSS_p {
             }
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
 
@@ -153,7 +154,7 @@ public class Load_RSS_p {
                     } catch (final IOException e) {
                         Log.logException(e);
                         continue;
-                    } catch (final RowSpaceExceededException e) {
+                    } catch (final SpaceExceededException e) {
                         Log.logException(e);
                         continue;
                     }
@@ -230,7 +231,7 @@ public class Load_RSS_p {
                 prop.put("shownewfeeds", newc > 0 ? 1 : 0);
             } catch (final IOException e) {
                 Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
 
@@ -256,7 +257,7 @@ public class Load_RSS_p {
         RSSReader rss = null;
         if (url != null) try {
             prop.put("url", url.toNormalform(true, false));
-            final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER);
+            final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final IOException e) {

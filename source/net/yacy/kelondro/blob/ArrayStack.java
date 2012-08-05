@@ -54,7 +54,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -64,6 +64,7 @@ import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.rwi.ReferenceIterator;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
@@ -281,7 +282,7 @@ public class ArrayStack implements BLOB {
 
     public synchronized File[] unmountBestMatch(final float maxq, long maxResultSize) {
     	if (this.blobs.size() < 2) return null;
-        long l, r;
+        long l, r, m;
         File lf, rf;
         float min = Float.MAX_VALUE;
         final File[] bestMatch = new File[2];
@@ -292,9 +293,12 @@ public class ArrayStack implements BLOB {
                 loopcount++;
             	lf = this.blobs.get(i).location;
             	rf = this.blobs.get(j).location;
+            	m = this.blobs.get(i).blob.mem();
+            	m += this.blobs.get(j).blob.mem();
                 l = 1 + (lf.length() >> 1);
                 r = 1 + (rf.length() >> 1);
                 if (l + r > maxResultSize) continue;
+                if (!MemoryControl.request(m, true)) continue;
                 final float q = Math.max((float) l, (float) r) / Math.min((float) l, (float) r);
                 if (q < min) {
                     min = q;
@@ -627,7 +631,7 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      */
     @Override
-    public byte[] get(final byte[] key) throws IOException, RowSpaceExceededException {
+    public byte[] get(final byte[] key) throws IOException, SpaceExceededException {
         if (this.blobs == null || this.blobs.isEmpty()) return null;
         if (this.blobs.size() == 1) {
             final blobItem bi = this.blobs.get(0);
@@ -654,7 +658,7 @@ public class ArrayStack implements BLOB {
             return get((byte[]) key);
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
         return null;
@@ -692,7 +696,7 @@ public class ArrayStack implements BLOB {
                 } catch (final IOException e) {
                     Log.logSevere("ArrayStack", "BlobValues - IOException: " + e.getMessage(), e);
                     return null;
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logSevere("ArrayStack", "BlobValues - RowSpaceExceededException: " + e.getMessage(), e);
                     break;
                 }
@@ -774,7 +778,7 @@ public class ArrayStack implements BLOB {
      * @param key  the primary key
      * @param b
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
     public synchronized void insert(final byte[] key, final byte[] b) throws IOException {
@@ -801,10 +805,10 @@ public class ArrayStack implements BLOB {
      * replace a BLOB entry with another
      * @param key  the primary key
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public synchronized int replace(final byte[] key, final Rewriter rewriter) throws IOException, RowSpaceExceededException {
+    public synchronized int replace(final byte[] key, final Rewriter rewriter) throws IOException, SpaceExceededException {
         int d = 0;
         for (final blobItem bi: this.blobs) {
             d += bi.blob.replace(key, rewriter);
@@ -816,10 +820,10 @@ public class ArrayStack implements BLOB {
      * replace a BLOB entry with another which must be smaller or same size
      * @param key  the primary key
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public synchronized int reduce(final byte[] key, final Reducer reduce) throws IOException, RowSpaceExceededException {
+    public synchronized int reduce(final byte[] key, final Reducer reduce) throws IOException, SpaceExceededException {
         int d = 0;
         for (final blobItem bi: this.blobs) {
             d += bi.blob.reduce(key, reduce);
@@ -963,7 +967,7 @@ public class ArrayStack implements BLOB {
                     HeapWriter.delete(tmpFile);
                     HeapWriter.delete(newFile);
                     return null;
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logSevere("ArrayStack", "cannot merge because of memory failure: " + e.getMessage(), e);
                     HeapWriter.delete(tmpFile);
                     HeapWriter.delete(newFile);
@@ -1015,7 +1019,7 @@ public class ArrayStack implements BLOB {
             FileUtils.deletedelete(tmpFile);
             FileUtils.deletedelete(newFile);
             return null;
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logSevere("ArrayStack", "cannot rewrite because of memory failure: " + e.getMessage(), e);
             FileUtils.deletedelete(tmpFile);
             FileUtils.deletedelete(newFile);
@@ -1029,7 +1033,7 @@ public class ArrayStack implements BLOB {
     private static <ReferenceType extends Reference> void merge(
             final CloneableIterator<ReferenceContainer<ReferenceType>> i1,
             final CloneableIterator<ReferenceContainer<ReferenceType>> i2,
-            final ByteOrder ordering, final HeapWriter writer) throws IOException, RowSpaceExceededException {
+            final ByteOrder ordering, final HeapWriter writer) throws IOException, SpaceExceededException {
         assert i1.hasNext();
         assert i2.hasNext();
         byte[] c1lh, c2lh;
@@ -1129,7 +1133,7 @@ public class ArrayStack implements BLOB {
 
     private static <ReferenceType extends Reference> void rewrite(
             final CloneableIterator<ReferenceContainer<ReferenceType>> i,
-            final ByteOrder ordering, final HeapWriter writer) throws IOException, RowSpaceExceededException {
+            final ByteOrder ordering, final HeapWriter writer) throws IOException, SpaceExceededException {
         assert i.hasNext();
         byte[] clh;
         ReferenceContainer<ReferenceType> c;

@@ -1,4 +1,4 @@
-// FlatWordPartitionScheme.java 
+// FlatWordPartitionScheme.java
 // ------------------------------
 // part of YaCy
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
@@ -29,8 +29,9 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.kelondro.index.HandleMap;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.MemoryControl;
@@ -45,25 +46,28 @@ import net.yacy.peers.Seed;
 public class FlatWordPartitionScheme implements PartitionScheme {
 
     public static final FlatWordPartitionScheme std = new FlatWordPartitionScheme();
-    
+
     public FlatWordPartitionScheme() {
         // nothing to initialize
     }
 
+    @Override
     public int verticalPartitions() {
         return 1;
     }
-    
+
+    @Override
     public long dhtPosition(byte[] wordHash, String urlHash) {
         // the urlHash has no relevance here
         // normalized to Long.MAX_VALUE
         return Base64Order.enhancedCoder.cardinal(wordHash);
     }
 
+    @Override
     public final long dhtDistance(final byte[] word, final String urlHash, final Seed peer) {
         return dhtDistance(word, urlHash, ASCII.getBytes(peer.hash));
     }
-    
+
     private final long dhtDistance(final byte[] from, final String urlHash, final byte[] to) {
         // the dht distance is a positive value between 0 and 1
         // if the distance is small, the word more probably belongs to the peer
@@ -74,16 +78,19 @@ public class FlatWordPartitionScheme implements PartitionScheme {
         return dhtDistance(fromPos, toPos);
     }
 
+    @Override
     public long dhtPosition(byte[] wordHash, int verticalPosition) {
         return dhtPosition(wordHash, null);
     }
 
+    @Override
     public long[] dhtPositions(byte[] wordHash) {
         long[] l = new long[1];
         l[1] = dhtPosition(wordHash, null);
         return l;
     }
 
+    @Override
     public int verticalPosition(byte[] urlHash) {
         return 0; // this is not a method stub, this is actually true for all FlatWordPartitionScheme
     }
@@ -93,14 +100,14 @@ public class FlatWordPartitionScheme implements PartitionScheme {
                 toPos - fromPos :
                 (Long.MAX_VALUE - fromPos) + toPos + 1;
     }
-    
+
     public static byte[] positionToHash(final long l) {
         // transform the position of a peer position into a close peer hash
         String s = ASCII.String(Base64Order.enhancedCoder.uncardinal(l));
         while (s.length() < 12) s += "A";
         return ASCII.getBytes(s);
     }
-    
+
 
     public static void main(String[] args) {
         int count = (args.length == 0) ? 1000000 : Integer.parseInt(args[0]);
@@ -112,11 +119,11 @@ public class FlatWordPartitionScheme implements PartitionScheme {
 
         System.gc(); // for resource measurement
         long a = MemoryControl.available();
-        HandleMap idx = new HandleMap(12, Base64Order.enhancedCoder, 4, 150000, "test");
+        HandleMap idx = new RowHandleMap(12, Base64Order.enhancedCoder, 4, 150000, "test");
         for (int i = 0; i < count; i++) {
             try {
                 idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)));
-            } catch (RowSpaceExceededException e) {
+            } catch (SpaceExceededException e) {
                 Log.logException(e);
                 break;
             }
@@ -128,7 +135,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
         System.out.println("Used Memory: " + memk + " bytes");
         System.out.println("x " + idx.get(FlatWordPartitionScheme.positionToHash(0)));
         idx.close();
-        
+
         r = new Random(0);
         start = System.currentTimeMillis();
         byte[] hash;

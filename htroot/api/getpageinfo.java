@@ -45,6 +45,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.RobotsTxtEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -95,7 +96,7 @@ public class getpageinfo {
                 }
                 net.yacy.document.Document scraper = null;
                 if (u != null) try {
-                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER);
+                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                 } catch (final IOException e) {
                     Log.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"

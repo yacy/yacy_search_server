@@ -51,6 +51,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -59,7 +60,6 @@ import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.Formatter;
@@ -80,6 +80,7 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.snippet.TextSnippet;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkTables;
@@ -668,7 +669,7 @@ public class yacysearch {
                             sb.loader.loadDocuments(
                                 sb.loader.request(urlentry.url(), true, false),
                                 CacheStrategy.IFEXIST,
-                                Integer.MAX_VALUE, BlacklistType.SEARCH);
+                                Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
                     } catch ( final IOException e ) {
                     } catch ( final Parser.Failure e ) {
                     }

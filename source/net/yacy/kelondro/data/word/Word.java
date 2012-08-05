@@ -34,9 +34,10 @@ import java.util.Set;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.LargeNumberCache;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -160,11 +161,11 @@ public class Word {
     }
 
     public static final HandleSet words2hashesHandles(final Collection<String> words) {
-        final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.size());
+        final HandleSet hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.size());
         for (final String word: words)
             try {
                 hashes.put(word2hash(word));
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
                 return hashes;
             }
@@ -172,11 +173,11 @@ public class Word {
     }
 
     public static final HandleSet words2hashesHandles(final String[] words) {
-        final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.length);
+        final HandleSet hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.length);
         for (final String word: words)
             try {
                 hashes.put(word2hash(word));
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
                 return hashes;
             }
