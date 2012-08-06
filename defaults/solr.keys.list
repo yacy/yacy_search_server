@@ -281,7 +281,7 @@ fresh_date_dt
 host_id_s
 
 ## ids of referrer to this document
-referrer_id_ss
+referrer_id_txt
 
 ## the md5 of the raw source
 md5_s
@@ -290,7 +290,7 @@ md5_s
 publisher_t
 
 ## the language used in the document; starts with primary language
-language_ss
+language_txt
 
 ## an external ranking value
 ranking_i

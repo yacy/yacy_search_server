@@ -225,10 +225,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(SolrField.load_date_dt)) addSolr(solrdoc, SolrField.load_date_dt, md.loaddate());
         if (allAttr || contains(SolrField.fresh_date_dt)) addSolr(solrdoc, SolrField.fresh_date_dt, md.freshdate());
         if (allAttr || contains(SolrField.host_id_s)) addSolr(solrdoc, SolrField.host_id_s, md.hosthash());
-        if ((allAttr || contains(SolrField.referrer_id_ss)) && md.referrerHash() != null) addSolr(solrdoc, SolrField.referrer_id_ss, new String[]{ASCII.String(md.referrerHash())});
+        if ((allAttr || contains(SolrField.referrer_id_txt)) && md.referrerHash() != null) addSolr(solrdoc, SolrField.referrer_id_txt, new String[]{ASCII.String(md.referrerHash())});
         if (allAttr || contains(SolrField.md5_s)) addSolr(solrdoc, SolrField.md5_s, md.md5());
         if (allAttr || contains(SolrField.publisher_t)) addSolr(solrdoc, SolrField.publisher_t, md.dc_publisher());
-        if ((allAttr || contains(SolrField.language_ss)) && md.language() != null) addSolr(solrdoc, SolrField.language_ss,new String[]{UTF8.String(md.language())});
+        if ((allAttr || contains(SolrField.language_txt)) && md.language() != null) addSolr(solrdoc, SolrField.language_txt,new String[]{UTF8.String(md.language())});
         if (allAttr || contains(SolrField.ranking_i)) addSolr(solrdoc, SolrField.ranking_i, md.ranking());
         if (allAttr || contains(SolrField.size_i)) addSolr(solrdoc, SolrField.size_i, md.size());
         if (allAttr || contains(SolrField.audiolinkscount_i)) addSolr(solrdoc, SolrField.audiolinkscount_i, md.laudio());
@@ -589,10 +589,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(SolrField.load_date_dt)) addSolr(solrdoc, SolrField.load_date_dt, metadata.loaddate());
         if (allAttr || contains(SolrField.fresh_date_dt)) addSolr(solrdoc, SolrField.fresh_date_dt, metadata.freshdate());
         if (allAttr || contains(SolrField.host_id_s)) addSolr(solrdoc, SolrField.host_id_s, metadata.hosthash());
-        if ((allAttr || contains(SolrField.referrer_id_ss)) && metadata.referrerHash() != null) addSolr(solrdoc, SolrField.referrer_id_ss, new String[]{ASCII.String(metadata.referrerHash())});
+        if ((allAttr || contains(SolrField.referrer_id_txt)) && metadata.referrerHash() != null) addSolr(solrdoc, SolrField.referrer_id_txt, new String[]{ASCII.String(metadata.referrerHash())});
         //if (allAttr || contains(SolrField.md5_s)) addSolr(solrdoc, SolrField.md5_s, new byte[0]);
         if (allAttr || contains(SolrField.publisher_t)) addSolr(solrdoc, SolrField.publisher_t, yacydoc.dc_publisher());
-        if ((allAttr || contains(SolrField.language_ss)) && metadata.language() != null) addSolr(solrdoc, SolrField.language_ss,new String[]{UTF8.String(metadata.language())});
+        if ((allAttr || contains(SolrField.language_txt)) && metadata.language() != null) addSolr(solrdoc, SolrField.language_txt,new String[]{UTF8.String(metadata.language())});
         if (allAttr || contains(SolrField.ranking_i)) addSolr(solrdoc, SolrField.ranking_i, metadata.ranking());
         if (allAttr || contains(SolrField.size_i)) addSolr(solrdoc, SolrField.size_i, metadata.size());
         if (allAttr || contains(SolrField.audiolinkscount_i)) addSolr(solrdoc, SolrField.audiolinkscount_i, yacydoc.getAudiolinks().size());

@@ -126,10 +126,10 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     load_date_dt(SolrType.date, true, true, "time when resource was loaded"),
     fresh_date_dt(SolrType.date, true, true, "date until resource shall be considered as fresh"),
     host_id_s(SolrType.string, true, true, "id of the host, a 6-byte hash that is part of the document id"),// String hosthash();
-    referrer_id_ss(SolrType.string, true, true, true, "ids of referrer to this document"),// byte[] referrerHash();
+    referrer_id_txt(SolrType.string, true, true, true, "ids of referrer to this document"),// byte[] referrerHash();
     md5_s(SolrType.string, true, true, "the md5 of the raw source"),// String md5();
     publisher_t(SolrType.text_general, true, true, "the name of the publisher of the document"),// String dc_publisher();
-    language_ss(SolrType.string, true, true, "the language used in the document; starts with primary language"),// byte[] language();
+    language_txt(SolrType.string, true, true, "the language used in the document; starts with primary language"),// byte[] language();
     ranking_i(SolrType.integer, true, true, "an external ranking value"),// long ranking();
     size_i(SolrType.integer, true, true, "the size of the raw source"),// int size();
     audiolinkscount_i(SolrType.integer, true, true, "number of links to audio resources"),// int laudio();
