@@ -134,6 +134,7 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
 
         SolrQueryResponse rsp = new SolrQueryResponse();
         NamedList<Object> responseHeader = new SimpleOrderedMap<Object>();
+        responseHeader.add("params", req.getOriginalParams().toNamedList());
         rsp.add("responseHeader", responseHeader);
         SolrRequestInfo.setRequestInfo(new SolrRequestInfo(req, rsp));
 

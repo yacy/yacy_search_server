@@ -387,6 +387,7 @@ public class URIMetadataRow implements URIMetadata {
     }
 
     private String hostHash = null;
+    @Override
     public String hosthash() {
         if (this.hostHash != null) return this.hostHash;
         this.hostHash = ASCII.String(this.entry.getPrimaryKeyBytes(), 6, 6);
@@ -470,6 +471,7 @@ public class URIMetadataRow implements URIMetadata {
         return decodeDate(col_fresh);
     }
 
+    @Override
     public byte[] referrerHash() {
         // return the creator's hash or null if there is none
         // FIXME: There seem to be some malformed entries in the databasees like "null\0\0\0\0\0\0\0\0"
@@ -497,7 +499,7 @@ public class URIMetadataRow implements URIMetadata {
     @Override
     public byte[] language() {
         byte[] b = this.entry.getColBytes(col_lang, true);
-        if (b == null || b[0] == (byte)'[') {
+        if ((b == null || b[0] == (byte)'[') && this.metadata().url != null) {
             String tld = this.metadata().url.getTLD();
             if (tld.length() < 2 || tld.length() > 2) return ASCII.getBytes("en");
             return ASCII.getBytes(tld);
