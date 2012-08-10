@@ -30,7 +30,7 @@ import net.yacy.cora.services.federated.solr.AbstractSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.search.index.SolrField;
+import net.yacy.search.index.YaCySchema;
 
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.common.SolrDocument;
@@ -158,12 +158,12 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
         try {
             EmbeddedSolrConnector solr = new EmbeddedSolrConnector(storage, solr_config);
             SolrDoc solrdoc = new SolrDoc();
-            solrdoc.addSolr(SolrField.id, "ABCD0000abcd");
-            solrdoc.addSolr(SolrField.title, "Lorem ipsum");
-            solrdoc.addSolr(SolrField.text_t, "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+            solrdoc.addSolr(YaCySchema.id, "ABCD0000abcd");
+            solrdoc.addSolr(YaCySchema.title, "Lorem ipsum");
+            solrdoc.addSolr(YaCySchema.text_t, "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
             solr.add(solrdoc);
             SolrServlet.startServer("/solr", 8091, solr);
-            SolrDocumentList searchresult = solr.query(SolrField.text_t.name() + ":tempor", 0, 10);
+            SolrDocumentList searchresult = solr.query(YaCySchema.text_t.name() + ":tempor", 0, 10);
             for (SolrDocument d : searchresult) {
                 System.out.println(d.toString());
             }

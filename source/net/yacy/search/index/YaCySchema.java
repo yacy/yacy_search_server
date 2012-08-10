@@ -24,9 +24,10 @@
 
 package net.yacy.search.index;
 
+import net.yacy.cora.services.federated.solr.Schema;
 import net.yacy.cora.services.federated.solr.SolrType;
 
-public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField {
+public enum YaCySchema implements Schema {
 
     id(SolrType.string, true, true, "primary key of document, the URL hash **mandatory field**"),
     sku(SolrType.text_en_splitting_tight, true, true, false, true, "url of document"),
@@ -121,7 +122,7 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     ext_title_txt(SolrType.text_general, true, true, true, "names matching title expressions"),
     ext_title_val(SolrType.integer, true, true, true, "number of matching title expressions"),
     failreason_t(SolrType.text_general, true, true, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
-    
+
     // values used additionally by URIMetadataRow
     load_date_dt(SolrType.date, true, true, "time when resource was loaded"),
     fresh_date_dt(SolrType.date, true, true, "date until resource shall be considered as fresh"),
@@ -142,7 +143,7 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     private boolean multiValued, omitNorms;
     private String comment;
 
-    private SolrField(final SolrType type, final boolean indexed, final boolean stored, final String comment) {
+    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final String comment) {
         this.type = type;
         this.indexed = indexed;
         this.stored = stored;
@@ -151,12 +152,12 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
         this.comment = comment;
     }
 
-    private SolrField(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final String comment) {
+    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final String comment) {
         this(type, indexed, stored, comment);
         this.multiValued = multiValued;
     }
 
-    private SolrField(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final String comment) {
+    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final String comment) {
         this(type, indexed, stored, multiValued, comment);
         this.omitNorms = omitNorms;
     }

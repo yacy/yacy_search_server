@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.List;
 
 import net.yacy.kelondro.logging.Log;
-import net.yacy.search.index.SolrField;
+import net.yacy.search.index.YaCySchema;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -226,7 +226,7 @@ public class AbstractSolrConnector implements SolrConnector {
     public SolrDocument get(final String id) throws IOException {
         // construct query
     	StringBuffer sb = new StringBuffer(id.length() + 5);
-    	sb.append(SolrField.id.getSolrFieldName()).append(':').append('"').append(id).append('"');
+    	sb.append(YaCySchema.id.getSolrFieldName()).append(':').append('"').append(id).append('"');
         final SolrQuery query = new SolrQuery();
         query.setQuery(sb.toString());
         query.setRows(1);

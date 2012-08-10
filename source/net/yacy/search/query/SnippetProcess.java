@@ -55,7 +55,7 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.SolrField;
+import net.yacy.search.index.YaCySchema;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
@@ -501,7 +501,7 @@ public class SnippetProcess {
                     if (this.solr != null) {
                         SolrDocument sd = null;
                         StringBuilder querystring = new StringBuilder(17);
-                        querystring.append(SolrField.id.getSolrFieldName()).append(':').append('"').append(ASCII.String(page.hash())).append('"');
+                        querystring.append(YaCySchema.id.getSolrFieldName()).append(':').append('"').append(ASCII.String(page.hash())).append('"');
                         SolrDocumentList sdl = null;
                         try {
                             sdl = this.solr.query(querystring.toString(), 0, 1);

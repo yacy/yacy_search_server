@@ -39,7 +39,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.OS;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.SolrField;
+import net.yacy.search.index.YaCySchema;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -189,7 +189,7 @@ public class IndexFederated_p {
         int c = 0;
         boolean dark = false;
         // use enum SolrField to keep defined order
-        for(SolrField field : SolrField.values()) {
+        for(YaCySchema field : YaCySchema.values()) {
             prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
             prop.put("scheme_" + c + "_checked", sb.index.getSolrScheme().contains(field.name()) ? 1 : 0);
             prop.putHTML("scheme_" + c + "_key", field.name());

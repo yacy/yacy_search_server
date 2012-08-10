@@ -25,7 +25,7 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.SolrConfiguration;
-import net.yacy.search.index.SolrField;
+import net.yacy.search.index.YaCySchema;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -39,7 +39,7 @@ public class schema_p {
         // write scheme
         int c = 0;
         SolrConfiguration solrScheme = sb.index.getSolrScheme();
-        for (SolrField field : SolrField.values()) {
+        for (YaCySchema field : YaCySchema.values()) {
             if (solrScheme.contains(field.name())) {
                 prop.put("fields_" + c + "_solrname", field.getSolrFieldName());
                 prop.put("fields_" + c + "_type", field.getType().printName());
@@ -53,8 +53,8 @@ public class schema_p {
         }
         prop.put("fields", c);
 
-        prop.put("solruniquekey",SolrField.id.getSolrFieldName());
-        prop.put("solrdefaultsearchfield",SolrField.text_t.getSolrFieldName());
+        prop.put("solruniquekey",YaCySchema.id.getSolrFieldName());
+        prop.put("solrdefaultsearchfield",YaCySchema.text_t.getSolrFieldName());
         // return rewrite properties
         return prop;
     }

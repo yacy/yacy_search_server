@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 
 import net.yacy.cora.storage.ConfigurationSet.Entry;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.search.index.SolrField;
+import net.yacy.search.index.YaCySchema;
 /**
  * this class reads configuration attributes as a list of keywords from a list
  * the list may contain lines with one keyword, comment lines, empty lines and out-commented keyword lines
@@ -165,7 +165,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
             if (modified) {
                 commit();
                 try {
-                    SolrField f = SolrField.valueOf(key);
+                    YaCySchema f = YaCySchema.valueOf(key);
                     f.setSolrFieldName(entry.getValue());
                 } catch (IllegalArgumentException e) {}
             }
