@@ -136,8 +136,8 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;
         while (fidx1 < sz) {
-            Fieldable f1 = fields.get(fidx1);
-            String fieldName = f1.name();
+            Fieldable value = fields.get(fidx1);
+            String fieldName = value.name();
             fidx2 = fidx1 + 1;
             while (fidx2 < sz && fieldName.equals(fields.get(fidx2).name())) {
                 fidx2++;
@@ -150,10 +150,10 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             if (fidx1 + 1 == fidx2) {
                 if (sf.multiValued()) {
                     startTagOpen(writer, "arr", fieldName);
-                    writeField(writer, type, null, f1.stringValue()); //sf.write(this, null, f1);
+                    writeField(writer, type, null, value.stringValue()); //sf.write(this, null, f1);
                     writer.write("</arr>");
                 } else {
-                    writeField(writer, type, f1.name(), f1.stringValue()); //sf.write(this, f1.name(), f1);
+                    writeField(writer, type, value.name(), value.stringValue()); //sf.write(this, f1.name(), f1);
                 }
             } else {
                 startTagOpen(writer, "arr", fieldName);

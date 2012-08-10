@@ -23,7 +23,10 @@ package net.yacy.cora.services.federated.solr;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.document.RSSMessage;
@@ -56,7 +59,24 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     "    xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\"\n" +
                     ">\n").toCharArray();
     private static final char[] XML_STOP = "</rss>\n".toCharArray();
-    private static final Set<String> DEFAULT_FIELD_LIST = null;
+
+    // define a list of simple YaCySchema -> RSS Token matchings
+    private static final Map<String, String> field2tag = new HashMap<String, String>();
+
+    // pre-select a set of YaCy schema fields for the solr searcher which should cause a better caching
+    private static final YaCySchema[] extrafields = new YaCySchema[]{
+        YaCySchema.id, YaCySchema.title, YaCySchema.description, YaCySchema.text_t,
+        YaCySchema.h1_txt, YaCySchema.h2_txt, YaCySchema.h3_txt, YaCySchema.h4_txt, YaCySchema.h5_txt, YaCySchema.h6_txt,
+        };
+    private static final Set<String> SOLR_FIELDS = new HashSet<String>();
+    static {
+        field2tag.put(YaCySchema.sku.name(), RSSMessage.Token.link.name());
+        field2tag.put(YaCySchema.last_modified.name(), RSSMessage.Token.pubDate.name());
+        field2tag.put(YaCySchema.publisher_t.name(), DublinCore.Publisher.getURIref());
+        field2tag.put(YaCySchema.author.name(), DublinCore.Creator.getURIref());
+        SOLR_FIELDS.addAll(field2tag.keySet());
+        for (YaCySchema field: extrafields) SOLR_FIELDS.add(field.name());
+    }
 
     private String title;
 
@@ -86,8 +106,6 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
-        writer.write(XML_START);
-
         assert rsp.getValues().get("responseHeader") != null;
         assert rsp.getValues().get("response") != null;
 
@@ -109,6 +127,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         //resHead.maxScore = response.maxScore();
 
         // write header
+        writer.write(XML_START);
         openTag(writer, "channel");
         solitaireTag(writer, "opensearch:totalResults", Integer.toString(resHead.numFound));
         solitaireTag(writer, "opensearch:startIndex", Integer.toString(resHead.offset));
@@ -125,53 +144,47 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         for (int i = 0; i < responseCount; i++) {
             openTag(writer, "item");
             int id = iterator.nextDoc();
-            Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+            Document doc = searcher.doc(id, SOLR_FIELDS);
             List<Fieldable> fields = doc.getFields();
             int fieldc = fields.size();
             List<String> texts = new ArrayList<String>();
             String description = "";
             for (int j = 0; j < fieldc; j++) {
-                Fieldable f1 = fields.get(j);
-                String fieldName = f1.name();
-                if (YaCySchema.id.name().equals(fieldName)) {
-                    solitaireTag(writer, RSSMessage.Token.guid.name(), f1.stringValue(), "isPermaLink=\"false\"");
+                Fieldable value = fields.get(j);
+                String fieldName = value.name();
+
+                // apply generic matching rule
+                String stag = field2tag.get(fieldName);
+                if (stag != null) {
+                    solitaireTag(writer, stag, value.stringValue());
                     continue;
                 }
-                if (YaCySchema.sku.name().equals(fieldName)) {
-                    solitaireTag(writer, RSSMessage.Token.link.name(), f1.stringValue());
+
+                // if the rule is not generic, use the specific here
+                if (YaCySchema.id.name().equals(fieldName)) {
+                    solitaireTag(writer, RSSMessage.Token.guid.name(), value.stringValue(), "isPermaLink=\"false\"");
                     continue;
                 }
                 if (YaCySchema.title.name().equals(fieldName)) {
-                    solitaireTag(writer, RSSMessage.Token.title.name(), f1.stringValue());
-                    texts.add(f1.stringValue());
-                    continue;
-                }
-                if (YaCySchema.last_modified.name().equals(fieldName)) {
-                    solitaireTag(writer, RSSMessage.Token.pubDate.name(), f1.stringValue());
-                    continue;
-                }
-                if (YaCySchema.publisher_t.name().equals(fieldName)) {
-                    solitaireTag(writer, DublinCore.Publisher.getURIref(), f1.stringValue());
-                    continue;
-                }
-                if (YaCySchema.author.name().equals(fieldName)) {
-                    solitaireTag(writer, DublinCore.Creator.getURIref(), f1.stringValue());
+                    solitaireTag(writer, RSSMessage.Token.title.name(), value.stringValue());
+                    texts.add(value.stringValue());
                     continue;
                 }
                 if (YaCySchema.description.name().equals(fieldName)) {
-                    description = f1.stringValue();
+                    description = value.stringValue();
                     solitaireTag(writer, DublinCore.Description.getURIref(), description);
                     texts.add(description);
                     continue;
                 }
                 if (YaCySchema.text_t.name().equals(fieldName)) {
-                    texts.add(f1.stringValue());
+                    texts.add(value.stringValue());
                     continue;
                 }
                 if (YaCySchema.h1_txt.name().equals(fieldName) || YaCySchema.h2_txt.name().equals(fieldName) ||
                     YaCySchema.h3_txt.name().equals(fieldName) || YaCySchema.h4_txt.name().equals(fieldName) ||
                     YaCySchema.h5_txt.name().equals(fieldName) || YaCySchema.h6_txt.name().equals(fieldName)) {
-                    texts.add(f1.stringValue());
+                    // because these are multi-valued fields, there can be several of each
+                    texts.add(value.stringValue());
                     continue;
                 }
             }

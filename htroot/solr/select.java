@@ -63,10 +63,6 @@ public class select {
         final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
         if (!searchAllowed) return null;
 
-        // get the embedded connector
-        EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.getLocalSolr();
-        if (connector == null) return null;
-
         // check post
         if (post == null) return null;
 
@@ -79,6 +75,10 @@ public class select {
         if (!post.containsKey(CommonParams.DF)) post.put(CommonParams.DF, YaCySchema.text_t.name()); // set default field to all fields
         if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, "0"); // set default start item
         if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, "10"); // set default number of search results
+
+        // get the embedded connector
+        EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.getLocalSolr();
+        if (connector == null) return null;
 
         // do the solr request
         SolrQueryRequest req = connector.request(post.toSolrParams());
