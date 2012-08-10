@@ -63,6 +63,7 @@ import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.lucene.util.Version;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrException;
 
 public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
 
@@ -103,6 +104,10 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
 
     public SolrConfiguration getSolrScheme() {
         return this.solrScheme;
+    }
+
+    public boolean connectedSolr() {
+        return this.solr.isConnected0() || this.solr.isConnected1();
     }
 
     public boolean connectedLocalSolr() {
@@ -224,33 +229,34 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
     }
 
     public void store(final URIMetadata entry) throws IOException {
-        // Check if there is a more recent Entry already in the DB
-        if (this.urlIndexFile != null && entry instanceof URIMetadataRow) {
+    	if (this.connectedSolr()) {
+    		try {
+	        	SolrDocument sd = getSolr().get(ASCII.String(entry.url().hash()));
+	        	if (sd == null || !entry.isOlder(new URIMetadataNode(sd))) {
+	        		getSolr().add(getSolrScheme().metadata2solr(entry));
+	        	}
+    		} catch (SolrException e) {
+    			throw new IOException(e.getMessage(), e);
+    		}
+    	} else if (this.urlIndexFile != null && entry instanceof URIMetadataRow) {
             URIMetadata oldEntry = null;
 	        try {
 	            final Row.Entry oe = this.urlIndexFile.get(entry.hash(), false);
 	            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
-	        } catch (final Exception e) {
+	        } catch (final Throwable e) {
 	            Log.logException(e);
 	            oldEntry = null;
 	        }
-	        if (oldEntry != null && entry.isOlder(oldEntry)) {
-	            // the fetched oldEntry is better, so return its properties instead of the new ones
-	            // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
-	            // this.url = oldEntry.url; // unnecessary, should be the same
-	            // doesn't make sense, since no return value:
-	            //entry = oldEntry;
-	            return; // this did not need to be stored, but is updated
+	        if (oldEntry == null || !entry.isOlder(oldEntry)) {
+		        try {
+		            this.urlIndexFile.put(((URIMetadataRow) entry).toRowEntry());
+		        } catch (final SpaceExceededException e) {
+		            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
+		        }
 	        }
-
-	        try {
-	            this.urlIndexFile.put(((URIMetadataRow) entry).toRowEntry());
-	        } catch (final SpaceExceededException e) {
-	            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
-	        }
-	        this.statsDump = null;
-	        if (MemoryControl.shortStatus()) clearCache();
         }
+        this.statsDump = null;
+        if (MemoryControl.shortStatus()) clearCache();
     }
 
     public boolean remove(final byte[] urlHash) {

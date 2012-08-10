@@ -173,7 +173,11 @@ public class Segment {
     public void disconnectUrlDb() {
         this.urlMetadata.disconnectUrlDb();
     }
-
+    
+    public boolean connectedSolr() {
+        return this.urlMetadata.connectedSolr();
+    }
+    
     public boolean connectedRemoteSolr() {
         return this.urlMetadata.connectedRemoteSolr();
     }
@@ -448,21 +452,21 @@ public class Segment {
                 document.getVideolinks().size(),           // lvideo
                 document.getApplinks().size()              // lapp
         );
-        this.urlMetadata.store(metadata);
-        final long storageEndTime = System.currentTimeMillis();
-
+        
         // STORE TO SOLR
-        boolean localSolr = this.connectedLocalSolr();
-        boolean remoteSolr = this.connectedRemoteSolr();
-        if (localSolr || remoteSolr) {
+        // we do not store the data in metadatadb any more if a solr is connected
+        if (this.connectedSolr()) {
             try {
                 SolrDoc solrDoc = this.urlMetadata.getSolrScheme().yacy2solr(id, responseHeader, document, metadata);
                 this.getSolr().add(solrDoc);
             } catch ( final IOException e ) {
                 Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
             }
+        } else {
+        	this.urlMetadata.store(metadata);
         }
-        
+        final long storageEndTime = System.currentTimeMillis();
+
         // STORE PAGE INDEX INTO WORD INDEX DB
         int outlinksSame = document.inboundLinks().size();
         int outlinksOther = document.outboundLinks().size();

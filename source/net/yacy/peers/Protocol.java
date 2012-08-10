@@ -754,9 +754,6 @@ public final class Protocol
             // passed all checks, store url
             try {
                 indexSegment.urlMetadata().store(urlEntry);
-                if (!indexSegment.urlMetadata().getSolr().exists(ASCII.String(urlEntry.url().hash()))) {
-                	indexSegment.urlMetadata().getSolr().add(indexSegment.urlMetadata().getSolrScheme().metadata2solr(urlEntry));
-                }
                 ResultURLs.stack(
                     urlEntry,
                     mySeed.hash.getBytes(),
