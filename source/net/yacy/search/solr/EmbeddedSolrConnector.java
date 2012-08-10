@@ -114,7 +114,13 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
     public SolrConfig getConfig() {
         return this.defaultCore.getSolrConfig();
     }
-
+    
+    @Override
+    public long getSize() {
+    	// do some magic here to prevent the super.getSize() call which is a bad hack
+    	return super.getSize();
+    }
+    
     @Override
     public synchronized void close() {
         super.close();

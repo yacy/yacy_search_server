@@ -2930,8 +2930,9 @@ public final class Switchboard extends serverSwitch
             return "no DHT distribution: not enabled (per setting)";
         }
         final Segment indexSegment = this.index;
-        if ( indexSegment.urlMetadata().size() < 10 ) {
-            return "no DHT distribution: loadedURL.size() = " + indexSegment.urlMetadata().size();
+        int size = indexSegment.urlMetadata().size();
+        if ( size < 10 ) {
+            return "no DHT distribution: loadedURL.size() = " + size;
         }
         if ( indexSegment.termIndex().sizesMax() < 100 ) {
             return "no DHT distribution: not enough words - wordIndex.size() = "

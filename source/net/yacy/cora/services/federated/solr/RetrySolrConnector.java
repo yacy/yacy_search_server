@@ -173,6 +173,7 @@ public class RetrySolrConnector implements SolrConnector {
         while (System.currentTimeMillis() < t) try {
             return this.solrConnector.getSize();
         } catch (final Throwable e) {
+            try {Thread.sleep(10);} catch (final InterruptedException e1) {}
             continue;
         }
         return 0;
