@@ -41,9 +41,17 @@ import org.apache.solr.common.SolrInputDocument;
 
 public class AbstractSolrConnector implements SolrConnector {
 
+    private final static SolrQuery catchallQuery = new SolrQuery();
+    static {
+    	catchallQuery.setQuery("*:*");
+    	catchallQuery.setFields(YaCySchema.id.name());
+    	catchallQuery.setRows(1);
+    	catchallQuery.setStart(0);
+    }
+    
     protected SolrServer server;
     protected int commitWithinMs; // max time (in ms) before a commit will happen
-
+    
     protected AbstractSolrConnector() {
         this.server = null;
         this.commitWithinMs = 180000;
@@ -90,8 +98,11 @@ public class AbstractSolrConnector implements SolrConnector {
     @Override
     public long getSize() {
         try {
-            final SolrDocumentList list = query("*:*", 0, 1);
-            return list.getNumFound();
+            final QueryResponse rsp = this.server.query(catchallQuery);
+            if (rsp == null) return 0;
+            final SolrDocumentList docs = rsp.getResults();
+            if (docs == null) return 0;
+            return docs.getNumFound();
         } catch (final Throwable e) {
             Log.logException(e);
             return 0;
