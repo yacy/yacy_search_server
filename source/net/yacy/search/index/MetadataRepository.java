@@ -65,7 +65,7 @@ import org.apache.lucene.util.Version;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 
-public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
+public final class MetadataRepository implements Iterable<byte[]> {
 
     // class objects
 	private final File                location;
