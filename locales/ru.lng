@@ -393,7 +393,7 @@ Peer Name:==Имя пира:
 Your peer cannot be reached from outside==Ваш пир недоступен извне
 which is not fatal, but would be good for the YaCy network==это не критично, но это не хорошо для сети YaCy
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==пожалуйста откройте настройки Вашего брендмауэра и/или настройки виртуального сервера на Вашем роуторе для открытия подключений на этот порт
-Your peer can be reached by other peers==Ваш пир не может быть доступен с других пиров
+Your peer can be reached by other peers==Ваш пир доступен с других пиров
 Peer Port:==Порт пира:
 Configure your router for YaCy:==Настройте ваш роутер для YaCy:
 Configuration was not successful. This may take a moment.==Настройки не были применены. Попробуйте через некоторое время .
