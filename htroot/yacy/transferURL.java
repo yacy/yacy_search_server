@@ -33,6 +33,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.EventChannel;
@@ -87,7 +88,7 @@ public final class transferURL {
             final int sizeBefore = sb.index.urlMetadata().size();
             // read the urls from the other properties and store
             String urls;
-            URIMetadataRow lEntry;
+            URIMetadata lEntry;
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
 

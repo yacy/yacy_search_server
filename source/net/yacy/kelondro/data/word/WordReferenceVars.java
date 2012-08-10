@@ -285,6 +285,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return this.urlHash;
     }
 
+    @Override
     public String hosthash() {
         if (this.hostHash != null) return this.hostHash;
         this.hostHash = ASCII.String(this.urlHash, 6, 6);

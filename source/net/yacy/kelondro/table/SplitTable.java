@@ -265,6 +265,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     }
 
     public static void delete(final File path, final String tablename) {
+        if (path == null || tablename == null) return;
         final File tabledir = new File(path, tablename);
         if (!(tabledir.exists())) return;
         if ((!(tabledir.isDirectory()))) {

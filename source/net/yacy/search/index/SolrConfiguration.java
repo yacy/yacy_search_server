@@ -105,11 +105,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     private boolean contains(YaCySchema field) {
     	return this.contains(field.name());
     }
-    
+
     protected void addSolr(final SolrDoc solrdoc, final YaCySchema key, final byte[] value) {
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length != 0))) solrdoc.addSolr(key, UTF8.String(value));
     }
-    
+
     protected void addSolr(final SolrDoc solrdoc, final YaCySchema key, final String value) {
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) solrdoc.addSolr(key, value);
     }
@@ -149,7 +149,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     protected void addSolr(final SolrDoc solrdoc, final YaCySchema key, final boolean value) {
         if (isEmpty() || contains(key)) solrdoc.addSolr(key, value);
     }
-    
+
     /**
      * save configuration to file and update enum SolrFields
      * @throws IOException
@@ -170,7 +170,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
         } catch (final IOException e) {}
     }
-    
+
     public SolrDoc metadata2solr(final URIMetadata md) {
         final SolrDoc solrdoc = new SolrDoc();
         final DigestURI digestURI = new DigestURI(md.url());
@@ -190,18 +190,18 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.content_type)) addSolr(solrdoc, YaCySchema.content_type, Response.doctype2mime(digestURI.getFileExtension(), md.doctype()));
         if (allAttr || contains(YaCySchema.last_modified)) addSolr(solrdoc, YaCySchema.last_modified, md.moddate());
         if (allAttr || contains(YaCySchema.text_t)) addSolr(solrdoc, YaCySchema.text_t, ""); // not delivered in metadata
-        if (allAttr || contains(YaCySchema.wordcount_i)) addSolr(solrdoc, YaCySchema.wordcount_i, md.wordCount());        
+        if (allAttr || contains(YaCySchema.wordcount_i)) addSolr(solrdoc, YaCySchema.wordcount_i, md.wordCount());
         if (allAttr || contains(YaCySchema.keywords)) {
         	String keywords = md.dc_subject();
         	Bitfield flags = md.flags();
         	if (flags.get(Condenser.flag_cat_indexof)) {
         		if (keywords == null || keywords.isEmpty()) keywords = "indexof"; else {
-        			if (keywords.indexOf(',') > 0) keywords += ", indexof"; else keywords += " indexof"; 
+        			if (keywords.indexOf(',') > 0) keywords += ", indexof"; else keywords += " indexof";
         		}
         	}
         	addSolr(solrdoc, YaCySchema.keywords, keywords);
         }
-        
+
         // path elements of link
         final String path = digestURI.getPath();
         if (path != null && (allAttr || contains(YaCySchema.paths_txt))) {
@@ -229,12 +229,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.md5_s)) addSolr(solrdoc, YaCySchema.md5_s, md.md5());
         if (allAttr || contains(YaCySchema.publisher_t)) addSolr(solrdoc, YaCySchema.publisher_t, md.dc_publisher());
         if ((allAttr || contains(YaCySchema.language_txt)) && md.language() != null) addSolr(solrdoc, YaCySchema.language_txt,new String[]{UTF8.String(md.language())});
-        if (allAttr || contains(YaCySchema.ranking_i)) addSolr(solrdoc, YaCySchema.ranking_i, md.ranking());
         if (allAttr || contains(YaCySchema.size_i)) addSolr(solrdoc, YaCySchema.size_i, md.size());
         if (allAttr || contains(YaCySchema.audiolinkscount_i)) addSolr(solrdoc, YaCySchema.audiolinkscount_i, md.laudio());
         if (allAttr || contains(YaCySchema.videolinkscount_i)) addSolr(solrdoc, YaCySchema.videolinkscount_i, md.lvideo());
         if (allAttr || contains(YaCySchema.applinkscount_i)) addSolr(solrdoc, YaCySchema.applinkscount_i, md.lapp());
-        
+
         return solrdoc;
     }
 
@@ -585,7 +584,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
         if (allAttr || contains(YaCySchema.httpstatus_i)) addSolr(solrdoc, YaCySchema.httpstatus_i, header == null ? 200 : header.getStatusCode());
 
-        // fields that are additionally in URIMetadataRow        
+        // fields that are additionally in URIMetadataRow
         if (allAttr || contains(YaCySchema.load_date_dt)) addSolr(solrdoc, YaCySchema.load_date_dt, metadata.loaddate());
         if (allAttr || contains(YaCySchema.fresh_date_dt)) addSolr(solrdoc, YaCySchema.fresh_date_dt, metadata.freshdate());
         if (allAttr || contains(YaCySchema.host_id_s)) addSolr(solrdoc, YaCySchema.host_id_s, metadata.hosthash());
@@ -593,12 +592,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         //if (allAttr || contains(SolrField.md5_s)) addSolr(solrdoc, SolrField.md5_s, new byte[0]);
         if (allAttr || contains(YaCySchema.publisher_t)) addSolr(solrdoc, YaCySchema.publisher_t, yacydoc.dc_publisher());
         if ((allAttr || contains(YaCySchema.language_txt)) && metadata.language() != null) addSolr(solrdoc, YaCySchema.language_txt,new String[]{UTF8.String(metadata.language())});
-        if (allAttr || contains(YaCySchema.ranking_i)) addSolr(solrdoc, YaCySchema.ranking_i, metadata.ranking());
         if (allAttr || contains(YaCySchema.size_i)) addSolr(solrdoc, YaCySchema.size_i, metadata.size());
         if (allAttr || contains(YaCySchema.audiolinkscount_i)) addSolr(solrdoc, YaCySchema.audiolinkscount_i, yacydoc.getAudiolinks().size());
         if (allAttr || contains(YaCySchema.videolinkscount_i)) addSolr(solrdoc, YaCySchema.videolinkscount_i, yacydoc.getVideolinks().size());
         if (allAttr || contains(YaCySchema.applinkscount_i)) addSolr(solrdoc, YaCySchema.applinkscount_i, yacydoc.getApplinks().size());
-        
+
         return solrdoc;
     }
 

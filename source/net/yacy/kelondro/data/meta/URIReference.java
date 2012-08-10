@@ -9,12 +9,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -23,7 +23,6 @@
 package net.yacy.kelondro.data.meta;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 public interface URIReference {
@@ -40,7 +39,7 @@ public interface URIReference {
      * @return
      */
     public String hosthash();
-    
+
     /**
      * The modification date of the URIReference is given if
      * the record was created first and is defined with the
@@ -48,26 +47,20 @@ public interface URIReference {
      * @return the modification date of this record
      */
     public Date moddate();
-    
+
     /**
      * The DigestURI is the payload of the URIReference
      * @return the url as DigestURI with assigned URL hash according to the record hash
      */
     public DigestURI url();
-    
+
     /**
      * check if the url matches agains a given matcher
      * @param matcher
      * @return true if the url() matches
      */
     public boolean matches(final Pattern matcher);
-    
-    /**
-     * transform the record into a map which can be stored
-     * @return
-     */
-    public Map<String, byte[]> toMap();
-    
+
     /**
      * produce a visible representation of the record
      * @return a string for the url()

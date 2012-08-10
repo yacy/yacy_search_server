@@ -431,4 +431,10 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
 
     }
 
+    @Override
+    public String hosthash() {
+        return ASCII.String(this.urlhash(), 6, 6);
+    }
+
+
 }

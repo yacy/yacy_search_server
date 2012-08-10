@@ -690,7 +690,7 @@ public final class Protocol
 
         // insert results to containers
         int term = count;
-        for ( final URIMetadataRow urlEntry : result.links ) {
+        for ( final URIMetadata urlEntry : result.links ) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
             }
@@ -890,7 +890,7 @@ public final class Protocol
         public Map<byte[], Integer> indexcount; //
         public long searchtime; // time that the peer actually spent to create the result
         public String[] references; // search hints, the top-words
-        public List<URIMetadataRow> links; // LURLs of search
+        public List<URIMetadata> links; // LURLs of search
         public Map<byte[], String> indexabstract; // index abstracts, a collection of url-hashes per word
 
         public SearchResult(
@@ -1015,14 +1015,14 @@ public final class Protocol
                 }
             }
             this.references = resultMap.get("references").split(",");
-            this.links = new ArrayList<URIMetadataRow>(this.urlcount);
+            this.links = new ArrayList<URIMetadata>(this.urlcount);
             for ( int n = 0; n < this.urlcount; n++ ) {
                 // get one single search result
                 final String resultLine = resultMap.get("resource" + n);
                 if ( resultLine == null ) {
                     continue;
                 }
-                final URIMetadataRow urlEntry = URIMetadataRow.importEntry(resultLine);
+                final URIMetadata urlEntry = URIMetadataRow.importEntry(resultLine);
                 if ( urlEntry == null ) {
                     continue;
                 }
@@ -1226,7 +1226,7 @@ public final class Protocol
         } // all url's known
 
         // extract the urlCache from the result
-        final URIMetadata[] urls = new URIMetadataRow[uhs.length];
+        final URIMetadata[] urls = new URIMetadata[uhs.length];
         for ( int i = 0; i < uhs.length; i++ ) {
             urls[i] = urlCache.get(ASCII.getBytes(uhs[i]));
             if ( urls[i] == null ) {
@@ -1540,7 +1540,7 @@ public final class Protocol
                             new RankingProfile(Classification.ContentDomain.TEXT), // rankingProfile,
                             null // constraint);
                         );
-                    for ( final URIMetadataRow link : result.links ) {
+                    for ( final URIMetadata link : result.links ) {
                         System.out.println(link.url().toNormalform(true, false));
                         System.out.println(link.snippet());
                     }

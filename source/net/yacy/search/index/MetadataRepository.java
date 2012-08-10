@@ -49,8 +49,9 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.WordReferenceVars;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
@@ -61,6 +62,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.lucene.util.Version;
+import org.apache.solr.common.SolrDocument;
 
 public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
 
@@ -190,36 +192,34 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
      * @param obrwi
      * @return
      */
-    public URIMetadata load(WordReferenceVars wre, long weight) {
+    public URIMetadata load(WordReference wre, long weight) {
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
-        final byte[] urlHash = wre.urlhash();
-        if (urlHash == null) return null;
-        if (this.urlIndexFile != null) try {
-            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
-            if (entry == null) return null;
-            return new URIMetadataRow(entry, wre, weight);
-        } catch (final IOException e) {
-            Log.logException(e);
-        }
-        /*
-        	try {
-				SolrDocument doc = this.solr.get(ASCII.String(urlHash));
-			} catch (IOException e) {
-	            Log.logException(e);
-			}
-        */
-        return null;
+        return load(wre.urlhash(), wre, weight);
     }
 
     public URIMetadata load(final byte[] urlHash) {
         if (urlHash == null) return null;
+        return load(urlHash, null, 0);
+    }
+
+    private URIMetadata load(final byte[] urlHash, WordReference wre, long weight) {
+
+        // get the metadata from the old metadata index
         if (this.urlIndexFile != null) try {
             final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
-            if (entry == null) return null;
-            return new URIMetadataRow(entry, null, 0);
+            if (entry != null) return new URIMetadataRow(entry, wre, weight);
         } catch (final IOException e) {
-            return null;
+            Log.logException(e);
         }
+
+        // get the metadata from Solr
+        try {
+            SolrDocument doc = this.solr.get(ASCII.String(urlHash));
+            if (doc != null) return new URIMetadataNode(doc, wre, weight);
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+
         return null;
     }
 

@@ -49,10 +49,6 @@ public class DocumentReference {
     	this.data = null;
     }
 
-    public void store(final URIReference entry) {
-    	this.data.put(entry.hash(), entry.toMap());
-    }
-
     public URIReference load(final WeakPriorityBlockingQueue.Element<WordReference> obrwi) {
     	return null;
     }

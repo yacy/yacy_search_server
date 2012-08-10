@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -48,17 +48,19 @@ public interface WordReference extends Reference {
     public char getType();
 
     public int wordsintitle();
-    
+
     public int llocal();
-    
+
     public int lother();
-    
+
     public int urllength();
-    
+
     public int urlcomps();
-    
+
     public Bitfield flags();
-    
+
     public double termFrequency();
+
+    public String hosthash();
 
 }

@@ -30,7 +30,6 @@ import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -38,6 +37,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Row;
@@ -104,7 +104,7 @@ public class URIMetadataRow implements URIMetadata {
 
     private final Row.Entry entry;
     private final String snippet;
-    private WordReferenceVars word; // this is only used if the url is transported via remote search requests
+    private WordReference word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
     private Components comp;
 
@@ -167,12 +167,6 @@ public class URIMetadataRow implements URIMetadata {
         this.comp = null;
     }
 
-	@Override
-	public Map<String, byte[]> toMap() {
-		// TODO to be implemented
-		return null;
-	}
-
     private void encodeDate(final int col, final Date d) {
         // calculates the number of days since 1.1.1970 and returns this as 4-byte array
         // 86400000 is the number of milliseconds in one day
@@ -211,7 +205,7 @@ public class URIMetadataRow implements URIMetadata {
 		return UTF8.getBytes(s0);
     }
 
-    public URIMetadataRow(final Row.Entry entry, final WordReferenceVars searchedWord, final long ranking) {
+    public URIMetadataRow(final Row.Entry entry, final WordReference searchedWord, final long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
@@ -284,7 +278,7 @@ public class URIMetadataRow implements URIMetadata {
         this.comp = null;
     }
 
-    public static URIMetadataRow importEntry(final String propStr) {
+    public static URIMetadata importEntry(final String propStr) {
         if (propStr == null || (!propStr.isEmpty() && propStr.charAt(0) != '{') || !propStr.endsWith("}")) {
             return null;
         }
@@ -560,7 +554,7 @@ public class URIMetadataRow implements URIMetadata {
     }
 
     @Override
-    public WordReferenceVars word() {
+    public WordReference word() {
         return this.word;
     }
 
