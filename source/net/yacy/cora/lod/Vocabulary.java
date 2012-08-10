@@ -56,6 +56,14 @@ public interface Vocabulary {
     public String getPredicate();
 
     /**
+     * The URI Reference as defined in http://www.w3.org/TR/rdf-concepts/ 2.2.3
+     * This is a combination of the namespace prefic and the constant name,
+     * concatenated with ':'.
+     * @return
+     */
+    public String getURIref();
+
+    /**
      * get a set of literals that are allowed for the predicate as values
      * @return
      */

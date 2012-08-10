@@ -26,6 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.search.index.YaCySchema;
+
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
 import org.apache.solr.common.util.NamedList;
@@ -102,11 +106,11 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         //resHead.maxScore = response.maxScore();
 
         // write header
-        startTagOpen(writer, "channel");
+        openTag(writer, "channel");
         solitaireTag(writer, "opensearch:totalResults", Integer.toString(resHead.numFound));
         solitaireTag(writer, "opensearch:startIndex", Integer.toString(resHead.offset));
         solitaireTag(writer, "opensearch:itemsPerPage", Integer.toString(resHead.rows));
-        solitaireTag(writer, "title", this.title);
+        solitaireTag(writer, RSSMessage.Token.title.name(), this.title);
         //solitaireTag(writer, "description", "");
         //solitaireTag(writer, "link", "");
         //solitaireTag(writer, "image", "");
@@ -116,7 +120,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         SolrIndexSearcher searcher = request.getSearcher();
         DocIterator iterator = response.iterator();
         for (int i = 0; i < responseCount; i++) {
-            startTagOpen(writer, "item");
+            openTag(writer, "item");
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
             List<Fieldable> fields = doc.getFields();
@@ -126,19 +130,50 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             for (int j = 0; j < fieldc; j++) {
                 Fieldable f1 = fields.get(j);
                 String fieldName = f1.name();
-                if ("id".equals(fieldName)) {writer.write("<guid isPermaLink=\"false\">"); writer.write(f1.stringValue()); writer.write("</guid>"); writer.write(lb); continue;}
-                if ("sku".equals(fieldName)) {solitaireTag(writer, "link", f1.stringValue()); continue;}
-                if ("title".equals(fieldName)) {solitaireTag(writer, "title", f1.stringValue()); texts.add(f1.stringValue()); continue;}
-                if ("last_modified".equals(fieldName)) {solitaireTag(writer, "pubDate", f1.stringValue()); continue;}
-                if ("".equals(fieldName)) {solitaireTag(writer, "dc:publisher", f1.stringValue()); continue;}
-                if ("".equals(fieldName)) {solitaireTag(writer, "dc:creator", f1.stringValue()); continue;}
-                if ("description".equals(fieldName)) {description = f1.stringValue(); solitaireTag(writer, "dc:subject", description); texts.add(description); continue;}
-                if ("text_t".equals(fieldName)) {texts.add(f1.stringValue()); continue;}
-                if ("h1_txt".equals(fieldName) || "h2_txt".equals(fieldName) || "h3_txt".equals(fieldName) ||
-                    "h4_txt".equals(fieldName) || "h5_txt".equals(fieldName) || "h6_txt".equals(fieldName)) {texts.add(f1.stringValue()); continue;}
+                if (YaCySchema.id.name().equals(fieldName)) {
+                    solitaireTag(writer, RSSMessage.Token.guid.name(), f1.stringValue(), "isPermaLink=\"false\"");
+                    continue;
+                }
+                if (YaCySchema.sku.name().equals(fieldName)) {
+                    solitaireTag(writer, RSSMessage.Token.link.name(), f1.stringValue());
+                    continue;
+                }
+                if (YaCySchema.title.name().equals(fieldName)) {
+                    solitaireTag(writer, RSSMessage.Token.title.name(), f1.stringValue());
+                    texts.add(f1.stringValue());
+                    continue;
+                }
+                if (YaCySchema.last_modified.name().equals(fieldName)) {
+                    solitaireTag(writer, RSSMessage.Token.pubDate.name(), f1.stringValue());
+                    continue;
+                }
+                if (YaCySchema.publisher_t.name().equals(fieldName)) {
+                    solitaireTag(writer, DublinCore.Publisher.getURIref(), f1.stringValue());
+                    continue;
+                }
+                if (YaCySchema.author.name().equals(fieldName)) {
+                    solitaireTag(writer, DublinCore.Creator.getURIref(), f1.stringValue());
+                    continue;
+                }
+                if (YaCySchema.description.name().equals(fieldName)) {
+                    description = f1.stringValue();
+                    solitaireTag(writer, DublinCore.Description.getURIref(), description);
+                    texts.add(description);
+                    continue;
+                }
+                if (YaCySchema.text_t.name().equals(fieldName)) {
+                    texts.add(f1.stringValue());
+                    continue;
+                }
+                if (YaCySchema.h1_txt.name().equals(fieldName) || YaCySchema.h2_txt.name().equals(fieldName) ||
+                    YaCySchema.h3_txt.name().equals(fieldName) || YaCySchema.h4_txt.name().equals(fieldName) ||
+                    YaCySchema.h5_txt.name().equals(fieldName) || YaCySchema.h6_txt.name().equals(fieldName)) {
+                    texts.add(f1.stringValue());
+                    continue;
+                }
             }
             // compute snippet from texts
-            solitaireTag(writer, "description", description);
+            solitaireTag(writer, RSSMessage.Token.description.name(), description);
             closeTag(writer, "item");
         }
 
@@ -146,7 +181,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         writer.write(XML_STOP);
     }
 
-    public static void startTagOpen(final Writer writer, final String tag) throws IOException {
+    public static void openTag(final Writer writer, final String tag) throws IOException {
         writer.write('<'); writer.write(tag); writer.write('>'); writer.write(lb);
     }
 
@@ -155,7 +190,18 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
     }
 
     public static void solitaireTag(final Writer writer, final String tagname, String value) throws IOException {
+        if (value == null || value.length() == 0) return;
         writer.write("<"); writer.write(tagname); writer.write('>');
+        writer.write(value);
+        writer.write("</"); writer.write(tagname); writer.write('>'); writer.write(lb);
+    }
+
+    public static void solitaireTag(final Writer writer, final String tagname, String value, String attr) throws IOException {
+        if (value == null || value.length() == 0) return;
+        writer.write("<"); writer.write(tagname);
+        if (attr.charAt(0) != ' ') writer.write(' ');
+        writer.write(attr);
+        writer.write('>');
         writer.write(value);
         writer.write("</"); writer.write(tagname); writer.write('>'); writer.write(lb);
     }

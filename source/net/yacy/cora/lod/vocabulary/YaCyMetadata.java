@@ -112,4 +112,8 @@ public enum YaCyMetadata implements Vocabulary {
         return this.predicate;
     }
 
+    @Override
+    public String getURIref() {
+        return PREFIX + ':' + this.name();
+    }
 }

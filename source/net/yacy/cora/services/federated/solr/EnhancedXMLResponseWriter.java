@@ -171,19 +171,21 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
 
     private static void writeField(final Writer writer, final FieldType type, final String name, final String value) throws IOException {
         String typeName = type.getTypeName();
-        if (typeName.equals("text_general") || typeName.equals("string") || typeName.equals("text_en_splitting_tight")) {
+        if (typeName.equals(SolrType.text_general.printName()) ||
+            typeName.equals(SolrType.string.printName()) ||
+            typeName.equals(SolrType.text_en_splitting_tight.printName())) {
             writeTag(writer, "str", name, value, true);
-        } else if (typeName.equals("boolean")) {
+        } else if (typeName.equals(SolrType.bool.printName())) {
             writeTag(writer, "bool", name, "F".equals(value) ? "false" : "true", true);
-        } else if (typeName.equals("int")) {
+        } else if (typeName.equals(SolrType.integer.printName())) {
             writeTag(writer, "int", name, value, true);
-        } else if (typeName.equals("long")) {
+        } else if (typeName.equals(SolrType.tlong.printName())) {
             writeTag(writer, "long", name, value, true);
-        } else if (typeName.equals("date")) {
+        } else if (typeName.equals(SolrType.date.printName())) {
             writeTag(writer, "date", name, DateField.formatExternal(new Date(Long.parseLong(value))), true);
-        } else if (typeName.equals("float")) {
+        } else if (typeName.equals(SolrType.tfloat.printName())) {
             writeTag(writer, "float", name, value, true);
-        } else if (typeName.equals("double")) {
+        } else if (typeName.equals(SolrType.tdouble.printName())) {
             writeTag(writer, "double", name, value, true);
         }
     }
