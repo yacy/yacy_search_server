@@ -58,7 +58,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
     private static final char[] XML_STOP = "</rss>\n".toCharArray();
     private static final Set<String> DEFAULT_FIELD_LIST = null;
 
-    private final String title;
+    private String title;
 
     private static class ResHead {
         public int offset, rows, numFound;
@@ -67,8 +67,11 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         //public float maxScore;
     }
 
-    public OpensearchResponseWriter(String searchPageTitle) {
+    public OpensearchResponseWriter() {
         super();
+    }
+
+    public void setTitle(String searchPageTitle) {
         this.title = searchPageTitle;
     }
 

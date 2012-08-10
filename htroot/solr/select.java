@@ -38,6 +38,7 @@ public class select {
         try {solrServlet.init(null);} catch (ServletException e) {}
         RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
         RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
+        RESPONSE_WRITER.put("rss", new OpensearchResponseWriter()); //try http://localhost:8090/solr/select?wt=rss&q=olympia
     }
 
     /**
@@ -91,15 +92,14 @@ public class select {
         // get a response writer for the result
         String wt = post.get("wt", "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
         QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt);
-        if (responseWriter == null) {
-            if (RESPONSE_WRITER.get("rss") == null) {
-                final String promoteSearchPageGreeting =
-                                (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
-                                    "network.unit.description",
-                                    "") : env.getConfig(SwitchboardConstants.GREETING, "");
-                RESPONSE_WRITER.put("rss", new OpensearchResponseWriter(promoteSearchPageGreeting));
-                responseWriter = RESPONSE_WRITER.get(wt); //try http://localhost:8090/solr/select?wt=rss&q=olympia
-            }
+        if (responseWriter == null) return null;
+        if (responseWriter instanceof OpensearchResponseWriter) {
+            // set the title every time, it is possible that it has changed
+            final String promoteSearchPageGreeting =
+                            (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
+                                "network.unit.description",
+                                "") : env.getConfig(SwitchboardConstants.GREETING, "");
+            ((OpensearchResponseWriter) responseWriter).setTitle(promoteSearchPageGreeting);
         }
 
         // write the result directly to the output stream
