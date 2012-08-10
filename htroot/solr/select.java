@@ -14,10 +14,12 @@ import net.yacy.cora.services.federated.solr.OpensearchResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.YaCySchema;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 import net.yacy.search.solr.SolrServlet;
 
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.FastWriter;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
@@ -69,14 +71,14 @@ public class select {
         if (post == null) return null;
 
         // rename post fields according to result style
-        if (!post.containsKey("q")) post.put("q", post.remove("query")); // sru patch
-        if (!post.containsKey("start")) post.put("start", post.remove("startRecord")); // sru patch
-        if (!post.containsKey("rows")) post.put("rows", post.remove("maximumRecords")); // sru patch
+        if (!post.containsKey(CommonParams.Q)) post.put(CommonParams.Q, post.remove("query")); // sru patch
+        if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, post.remove("startRecord")); // sru patch
+        if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, post.remove("maximumRecords")); // sru patch
 
         // check if all required post fields are there
-        if (!post.containsKey("df")) post.put("df", "text_t"); // set default field to all fields
-        if (!post.containsKey("start")) post.put("start", "0"); // set default start item
-        if (!post.containsKey("rows")) post.put("rows", "10"); // set default number of search results
+        if (!post.containsKey(CommonParams.DF)) post.put(CommonParams.DF, YaCySchema.text_t.name()); // set default field to all fields
+        if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, "0"); // set default start item
+        if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, "10"); // set default number of search results
 
         // do the solr request
         SolrQueryRequest req = connector.request(post.toSolrParams());
@@ -90,7 +92,7 @@ public class select {
         }
 
         // get a response writer for the result
-        String wt = post.get("wt", "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
+        String wt = post.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
         QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt);
         if (responseWriter == null) return null;
         if (responseWriter instanceof OpensearchResponseWriter) {
