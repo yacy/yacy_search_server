@@ -23,6 +23,7 @@
 package net.yacy.kelondro.data.meta;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -105,12 +106,6 @@ public class URIMetadataNode implements URIMetadata {
         return x.intValue();
     }
 
-    private long getLong(YaCySchema field) {
-        Long x = (Long) this.doc.getFieldValue(field.name());
-        if (x == null) return 0;
-        return x.longValue();
-    }
-
     private double getDouble(YaCySchema field) {
         Double x = (Double) this.doc.getFieldValue(field.name());
         if (x == null) return 0.0d;
@@ -126,6 +121,13 @@ public class URIMetadataNode implements URIMetadata {
     private String getString(YaCySchema field) {
         String x = (String) this.doc.getFieldValue(field.name());
         if (x == null) return "";
+        return x;
+    }
+
+    private ArrayList<Object> getArrayList(YaCySchema field) {
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        ArrayList<Object> x = (ArrayList) this.doc.getFieldValue(field.name());
+        if (x == null) return new ArrayList<Object>(0);
         return x;
     }
 
@@ -209,14 +211,16 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public char doctype() {
-        return Response.docType(getString(YaCySchema.content_type));
+        ArrayList<Object> a = getArrayList(YaCySchema.content_type);
+        if (a == null || a.size() == 0) return Response.docType(this.url);
+        return Response.docType((String) a.get(0));
     }
 
     @Override
     public byte[] language() {
-        String[] languages = (String[]) this.doc.getFieldValue(YaCySchema.language_txt.name());
-        if (languages == null || languages.length == 0) return ASCII.getBytes("en");
-        return UTF8.getBytes(languages[0]);
+        ArrayList<Object> languages = getArrayList(YaCySchema.language_txt);
+        if (languages == null || languages.size() == 0) return ASCII.getBytes("en");
+        return UTF8.getBytes((String) languages.get(0));
     }
 
     @Override

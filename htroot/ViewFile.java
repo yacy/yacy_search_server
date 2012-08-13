@@ -112,7 +112,28 @@ public class ViewFile {
         boolean pre = false;
 
         // get the url hash from which the content should be loaded
-        String urlHash = post.get("urlHash", "");
+        String urlHash = post.get("urlHash", post.get("urlhash", ""));
+
+        if (urlHash.length() == 0) {
+            // alternatively, get the url simply from a url String
+            // this can be used as a simple tool to test the text parser
+            final String urlString = post.get("url", "");
+            if (urlString.length() > 0) try {
+                // this call forces the peer to download  web pages
+                // it is therefore protected by the admin password
+
+                if (!sb.verifyAuthentication(header)) {
+                    prop.authenticationRequired();
+                    return prop;
+                }
+
+                // define an url by post parameter
+                url = new DigestURI(MultiProtocolURI.unescape(urlString));
+                urlHash = ASCII.String(url.hash());
+                pre = post.getBoolean("pre");
+            } catch (final MalformedURLException e) {}
+        }
+
         URIMetadata urlEntry = null;
         // get the urlEntry that belongs to the url hash
         //boolean ue = urlHash.length() > 0 && indexSegment.exists(ASCII.getBytes(urlHash));
@@ -132,25 +153,6 @@ public class ViewFile {
         }
 
         prop.put("error_inurldb", urlEntry == null ? 0 : 1);
-
-        // alternatively, get the url simply from a url String
-        // this can be used as a simple tool to test the text parser
-        final String urlString = post.get("url", "");
-        if (urlString.length() > 0) try {
-            // this call forces the peer to download  web pages
-            // it is therefore protected by the admin password
-
-            if (!sb.verifyAuthentication(header)) {
-            	prop.authenticationRequired();
-                return prop;
-            }
-
-            // define an url by post parameter
-            url = new DigestURI(MultiProtocolURI.unescape(urlString));
-            urlHash = ASCII.String(url.hash());
-            pre = post.getBoolean("pre");
-        } catch (final MalformedURLException e) {}
-
 
         if (url == null) {
             prop.put("error", "1");
@@ -346,6 +348,53 @@ public class ViewFile {
         prop.put("error_mimeTypeAvailable_mimeType", response.getMimeType());
         Model model = JenaTripleStore.getSubmodelBySubject(YaCyMetadata.hashURI(url.hash()));
         prop.putXML("error_triples", JenaTripleStore.getRDFByModel(model));
+
+        if (urlEntry == null) {
+            prop.put("error_referrerHash", "");
+            prop.put("error_moddate", "");
+            prop.put("error_loaddate", "");
+            prop.put("error_freshdate", "");
+            prop.put("error_hosthash", "");
+            prop.putHTML("error_dc_creator", "");
+            prop.putHTML("error_dc_publisher", "");
+            prop.putHTML("error_dc_subject", "");
+            prop.put("error_md5", "");
+            prop.put("error_lat", "");
+            prop.put("error_lon", "");
+            prop.put("error_doctype", "");
+            prop.put("error_language", "");
+            prop.put("error_flags", "");
+            prop.put("error_wordCount", "");
+            prop.put("error_llocal", "");
+            prop.put("error_lother", "");
+            prop.put("error_limage", "");
+            prop.put("error_laudio", "");
+            prop.put("error_lvideo", "");
+            prop.put("error_lapp", "");
+        } else {
+            prop.put("error_referrerHash", urlEntry.referrerHash());
+            prop.put("error_moddate", urlEntry.moddate());
+            prop.put("error_loaddate", urlEntry.loaddate());
+            prop.put("error_freshdate", urlEntry.freshdate());
+            prop.put("error_hosthash", urlEntry.hosthash());
+            prop.putHTML("error_dc_creator", urlEntry.dc_creator());
+            prop.putHTML("error_dc_publisher", urlEntry.dc_publisher());
+            prop.putHTML("error_dc_subject", urlEntry.dc_subject());
+            prop.put("error_md5", urlEntry.md5());
+            prop.put("error_lat", urlEntry.lat());
+            prop.put("error_lon", urlEntry.lon());
+            prop.put("error_doctype", Response.doctype2mime(url.getFileExtension(), urlEntry.doctype()));
+            prop.put("error_language", urlEntry.language());
+            prop.put("error_flags", urlEntry.flags().toString());
+            prop.put("error_wordCount", urlEntry.wordCount());
+            prop.put("error_llocal", urlEntry.llocal());
+            prop.put("error_lother", urlEntry.lother());
+            prop.put("error_limage", urlEntry.limage());
+            prop.put("error_laudio", urlEntry.laudio());
+            prop.put("error_lvideo", urlEntry.lvideo());
+            prop.put("error_lapp", urlEntry.lapp());
+        }
+
         return prop;
     }
 

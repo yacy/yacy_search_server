@@ -216,8 +216,8 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         // coordinates
         if (md.lat() != 0.0f && md.lon() != 0.0f) {
+            if (allAttr || contains(YaCySchema.lat_coordinate)) addSolr(solrdoc, YaCySchema.lat_coordinate, md.lat());
         	if (allAttr || contains(YaCySchema.lon_coordinate)) addSolr(solrdoc, YaCySchema.lon_coordinate, md.lon());
-        	if (allAttr || contains(YaCySchema.lat_coordinate)) addSolr(solrdoc, YaCySchema.lat_coordinate, md.lat());
         }
         if (allAttr || contains(YaCySchema.httpstatus_i)) addSolr(solrdoc, YaCySchema.httpstatus_i, 200);
 
@@ -579,8 +579,8 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         // coordinates
         if (yacydoc.lat() != 0.0f && yacydoc.lon() != 0.0f) {
+            if (allAttr || contains(YaCySchema.lat_coordinate)) addSolr(solrdoc, YaCySchema.lat_coordinate, yacydoc.lat());
         	if (allAttr || contains(YaCySchema.lon_coordinate)) addSolr(solrdoc, YaCySchema.lon_coordinate, yacydoc.lon());
-        	if (allAttr || contains(YaCySchema.lat_coordinate)) addSolr(solrdoc, YaCySchema.lat_coordinate, yacydoc.lat());
         }
         if (allAttr || contains(YaCySchema.httpstatus_i)) addSolr(solrdoc, YaCySchema.httpstatus_i, header == null ? 200 : header.getStatusCode());
 

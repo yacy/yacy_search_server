@@ -34,14 +34,35 @@
     <form method="get" action="ViewFile.html" accept-charset="ascii">
       <fieldset><legend>URL Metadata</legend>
         <dl>
-          <dt>URL:</dt>        <dd><a href="#[url]#">#[url]#</a></dd>
-          <dt>Hash:</dt>       <dd><a href="/api/yacydoc.html?urlhash=#[hash]#">#[hash]#</a></dd>
-          <dt>In URL-DB:</dt>  <dd>#(inurldb)#no::yes#(/inurldb)#</dd>
-          <dt>In Cache:</dt>   <dd>#(incache)#no::yes#(/incache)#</dd>
-          <dt>Word Count:</dt> <dd>#[wordCount]#</dd>
+          <dt>URL:</dt><dd><a href="#[url]#">#[url]#</a></dd>
+          <dt>Hash:</dt><dd><a href="/api/yacydoc.html?urlhash=#[hash]#">#[hash]#</a></dd>
+          <dt>In Metadata:</dt><dd>#(inurldb)#no::yes#(/inurldb)#</dd>
+          <dt>In Cache:</dt><dd>#(incache)#no::yes#(/incache)#</dd>
+          <dt>Word Count:</dt><dd>#[wordCount]#</dd>
           <dt>Description:</dt><dd>#[desc]#</dd>
-          <dt>Size:</dt>       <dd>#[size]# Bytes</dd>#(mimeTypeAvailable)#::
-          <dt>MimeType:</dt>   <dd>#[mimeType]#</dd>#(/mimeTypeAvailable)#
+          <dt>Size:</dt><dd>#[size]# Bytes</dd>#(mimeTypeAvailable)#::
+          <dt>MimeType:</dt><dd>#[mimeType]#</dd>#(/mimeTypeAvailable)#
+          <dt>Referrer Hash:</dt><dd>#[referrerHash]#</dd>
+          <dt>Modified Date:</dt><dd>#[moddate]#</dd>
+          <dt>Load Date:</dt><dd>#[loaddate]#</dd>
+          <dt>Fresh Date:</dt><dd>#[freshdate]#</dd>
+          <dt>Host Hash:</dt><dd>#[hosthash]#</dd>
+          <dt>dc_creator:</dt><dd>#[dc_creator]#</dd>
+          <dt>dc_publisher:</dt><dd>#[dc_publisher]#</dd>
+          <dt>dc_subject:</dt><dd>#[dc_subject]#</dd>
+          <dt>md5:</dt><dd>#[md5]#</dd>
+          <dt>lat:</dt><dd>#[lat]#</dd>
+          <dt>lon:</dt><dd>#[lon]#</dd>
+          <dt>doctype:</dt><dd>#[doctype]#</dd>
+          <dt>Language:</dt><dd>#[language]#</dd>
+          <dt>Flags:</dt><dd>#[flags]#</dd>
+          <dt>Word Count:</dt><dd>#[wordCount]#</dd>
+          <dt>Local Links:</dt><dd>#[llocal]#</dd>
+          <dt>Global Links:</dt><dd>#[lother]#</dd>
+          <dt>Image Links:</dt><dd>#[limage]#</dd>
+          <dt>Audio Links:</dt><dd>#[laudio]#</dd>
+          <dt>Video Links:</dt><dd>#[lvideo]#</dd>
+          <dt>App Links:</dt><dd>#[lapp]#</dd>
           <dt>Triplestore:</dt><dd><pre>#[triples]#</pre></dd>
           <dt><label for="viewMode">View as</label>:</dt>
           <dd>

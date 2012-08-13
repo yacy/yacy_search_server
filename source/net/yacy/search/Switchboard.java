@@ -1559,19 +1559,15 @@ public final class Switchboard extends serverSwitch
         net.yacy.gui.framework.Switchboard.shutdown();
         this.log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
-        this.indexingDocumentProcessor.announceShutdown();
-        this.indexingDocumentProcessor.awaitShutdown(12000);
         this.crawlStacker.announceClose();
-        this.indexingCondensementProcessor.announceShutdown();
-        this.indexingAnalysisProcessor.announceShutdown();
-        this.indexingStorageProcessor.announceShutdown();
+        this.crawlStacker.close();
+        this.indexingDocumentProcessor.shutdown();
+        this.indexingCondensementProcessor.shutdown();
+        this.indexingAnalysisProcessor.shutdown();
+        this.indexingStorageProcessor.shutdown();
         if ( this.dhtDispatcher != null ) {
             this.dhtDispatcher.close();
         }
-        this.indexingCondensementProcessor.awaitShutdown(12000);
-        this.indexingAnalysisProcessor.awaitShutdown(12000);
-        this.indexingStorageProcessor.awaitShutdown(12000);
-        this.crawlStacker.close();
 //        de.anomic.http.client.Client.closeAllConnections();
         this.wikiDB.close();
         this.blogDB.close();
@@ -1584,8 +1580,7 @@ public final class Switchboard extends serverSwitch
         this.webStructure.close();
         this.crawlQueues.close();
         this.crawler.close();
-        this.log
-            .logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
+        this.log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         this.index.close();
         this.peers.close();
         Cache.close();
@@ -1707,6 +1702,7 @@ public final class Switchboard extends serverSwitch
                     baos.flush();
                     processSurrogate(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
                     baos.close();
+                    if (shallTerminate()) break;
                 }
             } catch ( final IOException e ) {
                 Log.logException(e);
@@ -1725,24 +1721,26 @@ public final class Switchboard extends serverSwitch
         } catch ( final IOException e ) {
             Log.logException(e);
         } finally {
-            moved = infile.renameTo(outfile);
-            if ( moved ) {
-                // check if this file is already compressed, if not, compress now
-                if ( !outfile.getName().endsWith(".gz") ) {
-                    final String gzname = outfile.getName() + ".gz";
-                    final File gzfile = new File(outfile.getParentFile(), gzname);
-                    try {
-                        final OutputStream os =
-                            new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile)));
-                        FileUtils.copy(new BufferedInputStream(new FileInputStream(outfile)), os);
-                        os.close();
-                        if ( gzfile.exists() ) {
-                            FileUtils.deletedelete(outfile);
+            if (!shallTerminate()) {
+                moved = infile.renameTo(outfile);
+                if ( moved ) {
+                    // check if this file is already compressed, if not, compress now
+                    if ( !outfile.getName().endsWith(".gz") ) {
+                        final String gzname = outfile.getName() + ".gz";
+                        final File gzfile = new File(outfile.getParentFile(), gzname);
+                        try {
+                            final OutputStream os =
+                                new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile)));
+                            FileUtils.copy(new BufferedInputStream(new FileInputStream(outfile)), os);
+                            os.close();
+                            if ( gzfile.exists() ) {
+                                FileUtils.deletedelete(outfile);
+                            }
+                        } catch ( final FileNotFoundException e ) {
+                            Log.logException(e);
+                        } catch ( final IOException e ) {
+                            Log.logException(e);
                         }
-                    } catch ( final FileNotFoundException e ) {
-                        Log.logException(e);
-                    } catch ( final IOException e ) {
-                        Log.logException(e);
                     }
                 }
             }
@@ -1795,6 +1793,7 @@ public final class Switchboard extends serverSwitch
                 Log.logException(e);
                 break;
             }
+            if (shallTerminate()) break;
         }
     }
 

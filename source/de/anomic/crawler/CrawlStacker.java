@@ -114,16 +114,14 @@ public final class CrawlStacker {
 
     public void announceClose() {
         this.log.logInfo("Flushing remaining " + size() + " crawl stacker job entries.");
-        this.fastQueue.announceShutdown();
-        this.slowQueue.announceShutdown();
+        this.fastQueue.shutdown();
+        this.slowQueue.shutdown();
     }
 
     public synchronized void close() {
         this.log.logInfo("Shutdown. waiting for remaining " + size() + " crawl stacker job entries. please wait.");
-        this.fastQueue.announceShutdown();
-        this.slowQueue.announceShutdown();
-        this.fastQueue.awaitShutdown(2000);
-        this.slowQueue.awaitShutdown(2000);
+        this.fastQueue.shutdown();
+        this.slowQueue.shutdown();
 
         this.log.logInfo("Shutdown. Closing stackCrawl queue.");
 

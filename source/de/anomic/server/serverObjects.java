@@ -172,6 +172,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return      the previous value as String.
      */
     public String put(final String key, final byte[] value) {
+        if (value == null) return this.put(key, "NULL");
         return this.put(key, UTF8.String(value));
     }
 

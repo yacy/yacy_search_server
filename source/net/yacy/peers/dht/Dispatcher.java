@@ -429,7 +429,7 @@ public class Dispatcher {
 
     public void close() {
         // removes all entries from the dispatcher and puts them back to a RAMRI
-        if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
+        if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.shutdown();
         if (this.transmissionCloud != null) {
         	outerLoop: for (final Map.Entry<ByteArray, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
         		for (final ReferenceContainer<WordReference> i : e.getValue()) try {
@@ -443,7 +443,6 @@ public class Dispatcher {
         }
         this.transmissionCloud = null;
         if (this.indexingTransmissionProcessor != null) {
-        	this.indexingTransmissionProcessor.awaitShutdown(10000);
         	this.indexingTransmissionProcessor.clear();
         }
         this.indexingTransmissionProcessor = null;

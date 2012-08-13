@@ -209,19 +209,19 @@ public final class MetadataRepository implements Iterable<byte[]> {
 
     private URIMetadata load(final byte[] urlHash, WordReference wre, long weight) {
 
-        // get the metadata from the old metadata index
-        if (this.urlIndexFile != null) try {
-            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
-            if (entry != null) return new URIMetadataRow(entry, wre, weight);
-        } catch (final IOException e) {
-            Log.logException(e);
-        }
-
         // get the metadata from Solr
         try {
             SolrDocument doc = this.solr.get(ASCII.String(urlHash));
             if (doc != null) return new URIMetadataNode(doc, wre, weight);
         } catch (IOException e) {
+            Log.logException(e);
+        }
+
+        // get the metadata from the old metadata index
+        if (this.urlIndexFile != null) try {
+            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
+            if (entry != null) return new URIMetadataRow(entry, wre, weight);
+        } catch (final IOException e) {
             Log.logException(e);
         }
 
