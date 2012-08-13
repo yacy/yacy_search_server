@@ -223,6 +223,14 @@ public class URIMetadataNode implements URIMetadata {
         return UTF8.getBytes((String) languages.get(0));
     }
 
+
+    @Override
+    public byte[] referrerHash() {
+        ArrayList<Object>  referrer = getArrayList(YaCySchema.referrer_id_txt);
+        if (referrer == null || referrer.size() == 0) return null;
+        return ASCII.getBytes((String) referrer.get(0));
+    }
+
     @Override
     public int size() {
         return getInt(YaCySchema.size_i);
@@ -377,19 +385,27 @@ public class URIMetadataNode implements URIMetadata {
             return null;
 
         core.ensureCapacity(core.length() + snippet.length() * 2);
-        core.insert(0, "{");
+        core.insert(0, '{');
         core.append(",snippet=").append(crypt.simpleEncode(snippet));
-        core.append("}");
+        core.append('}');
 
         return core.toString();
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
 
+
+    /**
+     * @return the object as String.<br>
+     * This e.g. looks like this:
+     * <pre>{hash=jmqfMk7Y3NKw,referrer=------------,mod=20050610,load=20051003,size=51666,wc=1392,cc=0,local=true,q=AEn,dt=h,lang=uk,url=b|aHR0cDovL3d3dy50cmFuc3BhcmVuY3kub3JnL3N1cnZleXMv,descr=b|S25vd2xlZGdlIENlbnRyZTogQ29ycnVwdGlvbiBTdXJ2ZXlzIGFuZCBJbmRpY2Vz}</pre>
+     */
     @Override
-    public byte[] referrerHash() {
-        String[] referrer = (String[]) this.doc.getFieldValue(YaCySchema.referrer_id_txt.name());
-        if (referrer == null || referrer.length == 0) return null;
-        return ASCII.getBytes(referrer[0]);
+    public String toString() {
+        final StringBuilder core = corePropList();
+        if (core == null) return null;
+        core.insert(0, '{');
+        core.append('}');
+        return core.toString();
     }
 
     @Override

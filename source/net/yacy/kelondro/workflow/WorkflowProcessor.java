@@ -195,8 +195,10 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         }
 
         // wait until input queue is empty
-        while (this.input.size() > 0) {
-            try {Thread.sleep(100);} catch (InterruptedException e) {}
+        for (int i = 0; i < 10; i++) {
+            if (this.input.size() <= 0) break;
+            Log.logInfo("WorkflowProcess", "waiting for queue " + this.processName + " to shut down; input.size = " + this.input.size());
+            try {Thread.sleep(1000);} catch (InterruptedException e) {}
         }
 
         // shut down executors
