@@ -65,9 +65,16 @@
           #{networks}#
             <option>#[network]#</option>
           #{/networks}#
-        </select>
+        </select> <a href="#" onclick="document.getElementById('networkDefinitionURLfield').style.display = ''; return false;" style="font-style: italic;">Enter custom URL...</a>
         
         </dd>
+        <span id="networkDefinitionURLfield" style="display: none;">
+        <dt>Remote Network Definition URL</dt>
+        <dd>
+        <input type="text" id="networkDefinitionURL" name="networkDefinitionURL" value="" size="100">
+        </select>        
+        </dd>
+        </span>
         <dt>Network Nick</dt>
         <dd>#[network.unit.name]#</dd>
         <dt>Long Description</dt>

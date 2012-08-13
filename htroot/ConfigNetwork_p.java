@@ -67,8 +67,13 @@ public class ConfigNetwork_p
                 "network settings");
 
             if ( post.containsKey("changeNetwork") ) {
-                final String networkDefinition =
+                String networkDefinition =
                     post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
+                final String networkDefinitionURL =
+                        post.get("networkDefinitionURL", "");
+                if ( !networkDefinitionURL.equals("")) {
+                	networkDefinition = networkDefinitionURL;
+                }
                 if ( networkDefinition.equals(sb.getConfig("network.unit.definition", "")) ) {
                     // no change
                     commit = 3;
