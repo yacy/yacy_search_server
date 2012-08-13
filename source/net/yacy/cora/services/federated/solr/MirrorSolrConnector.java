@@ -199,8 +199,8 @@ public class MirrorSolrConnector implements SolrConnector {
     @Override
     public SolrDocument get(String id) throws IOException {
         SolrDocument doc = this.documentCache.get(id);
-        if (this.missCache.containsKey(id)) return null;
         if (doc != null) return doc;
+        if (this.missCache.containsKey(id)) return null;
         if (this.solr0 != null) {
             doc = this.solr0.get(id);
             if (doc != null) {
