@@ -66,4 +66,9 @@ public enum Rdf implements Vocabulary {
         return this.predicate;
     }
 
+    @Override
+    public String getURIref() {
+        return PREFIX + ':' + this.name();
+    }
+
 }

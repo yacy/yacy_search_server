@@ -37,9 +37,10 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Order;
 import net.yacy.cora.sorting.Rating;
 import net.yacy.cora.storage.ComparableARC;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.util.MemoryControl;
@@ -125,11 +126,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             final long t = System.currentTimeMillis();
             if ((IndexCell.this.ram.size() >= IndexCell.this.maxRamEntries ||
                 (IndexCell.this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)) ||
-                (IndexCell.this.ram.size() > 0 && IndexCell.this.lastDump + dumpCycle < t))) {
+                (!IndexCell.this.ram.isEmpty() && IndexCell.this.lastDump + dumpCycle < t))) {
                 synchronized (IndexCell.this.merger) {
                     if (IndexCell.this.ram.size() >= IndexCell.this.maxRamEntries ||
                         (IndexCell.this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)) ||
-                        (IndexCell.this.ram.size() > 0 && IndexCell.this.lastDump + dumpCycle < t)) try {
+                        (!IndexCell.this.ram.isEmpty() && IndexCell.this.lastDump + dumpCycle < t)) try {
                             IndexCell.this.lastDump = System.currentTimeMillis();
                         // removed delayed
                         try {removeDelayed();} catch (final IOException e) {}
@@ -180,25 +181,29 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         // first try to merge small files that match
         int term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 3 || this.array.entries() >= 50)) {
-            if (!this.array.shrinkBestSmallFiles(this.merger, targetFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkBestSmallFiles(this.merger, targetFileSize)) break;
+            donesomething = true;
         }
 
         // then try to merge simply any small file
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 2)) {
-            if (!this.array.shrinkAnySmallFiles(this.merger, targetFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkAnySmallFiles(this.merger, targetFileSize)) break;
+            donesomething = true;
         }
 
         // if there is no small file, then merge matching files up to limit
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 1)) {
-            if (!this.array.shrinkUpToMaxSizeFiles(this.merger, maxFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkUpToMaxSizeFiles(this.merger, maxFileSize)) break;
+            donesomething = true;
         }
 
         // rewrite old files (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 1)) {
-            if (!this.array.shrinkOldFiles(this.merger, targetFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkOldFiles(this.merger)) break;
+            donesomething = true;
         }
 
         return donesomething;
@@ -220,17 +225,17 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     /**
      * add entries to the cell: this adds the new entries always to the RAM part, never to BLOBs
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public void add(final ReferenceContainer<ReferenceType> newEntries) throws IOException, RowSpaceExceededException {
+    public void add(final ReferenceContainer<ReferenceType> newEntries) throws IOException, SpaceExceededException {
         try {
             this.ram.add(newEntries);
             final long t = System.currentTimeMillis();
             if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < t || this.lastDump + dumpCycle < t) {
                 EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             }
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             this.ram.add(newEntries);
         }
@@ -238,14 +243,14 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
 
     @Override
-    public void add(final byte[] termHash, final ReferenceType entry) throws IOException, RowSpaceExceededException {
+    public void add(final byte[] termHash, final ReferenceType entry) throws IOException, SpaceExceededException {
         try {
             this.ram.add(termHash, entry);
             final long t = System.currentTimeMillis();
             if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < t || this.lastDump + dumpCycle < t) {
                 EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             }
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             this.ram.add(termHash, entry);
         }
@@ -307,18 +312,18 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         ReferenceContainer<ReferenceType> c1 = null;
         try {
             c1 = this.array.get(termHash);
-        } catch (final RowSpaceExceededException e2) {
+        } catch (final SpaceExceededException e2) {
             Log.logException(e2);
         }
         ReferenceContainer<ReferenceType> result = null;
         if (c0 != null && c1 != null) {
             try {
                 result = c1.merge(c0);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 // try to free some ram
                 try {
                     result = c1.merge(c0);
-                } catch (final RowSpaceExceededException e1) {
+                } catch (final SpaceExceededException e1) {
                     // go silently over the problem
                     result = (c1.size() > c0.size()) ? c1: c0;
                 }
@@ -348,7 +353,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         ReferenceContainer<ReferenceType> c1 = null;
         try {
             c1 = this.array.get(termHash);
-        } catch (final RowSpaceExceededException e2) {
+        } catch (final SpaceExceededException e2) {
             Log.logException(e2);
         }
         if (c1 != null) {
@@ -359,11 +364,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         if (c0 == null) return c1;
         try {
             return c1.merge(c0);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             // try to free some ram
             try {
                 return c1.merge(c0);
-            } catch (final RowSpaceExceededException e1) {
+            } catch (final SpaceExceededException e1) {
                 // go silently over the problem
                 return (c1.size() > c0.size()) ? c1: c0;
             }
@@ -376,7 +381,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         ReferenceContainer<ReferenceType> c1 = null;
         try {
             c1 = this.array.get(termHash);
-        } catch (final RowSpaceExceededException e2) {
+        } catch (final SpaceExceededException e2) {
             Log.logException(e2);
         }
         if (c1 != null) {
@@ -393,11 +398,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             r = this.removeDelayedURLs.get(termHash);
         }
         if (r == null) {
-            r = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            r = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         }
         try {
             r.putAll(urlHashes);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             try {remove(termHash, urlHashes);} catch (final IOException e1) {}
             return;
         }
@@ -413,11 +418,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             r = this.removeDelayedURLs.get(termHash);
         }
         if (r == null) {
-            r = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            r = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         }
         try {
             r.put(urlHashBytes);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             try {remove(termHash, urlHashBytes);} catch (final IOException e1) {}
             return;
         }
@@ -428,9 +433,9 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     @Override
     public void removeDelayed() throws IOException {
-        final HandleSet words = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
+        final HandleSet words = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
         synchronized (this.removeDelayedURLs) {
-            for (final byte[] b: this.removeDelayedURLs.keySet()) try {words.put(b);} catch (final RowSpaceExceededException e) {}
+            for (final byte[] b: this.removeDelayedURLs.keySet()) try {words.put(b);} catch (final SpaceExceededException e) {}
         }
 
         synchronized (this.removeDelayedURLs) {
@@ -457,7 +462,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         //final long am = this.array.mem();
         try {
             reduced = this.array.reduce(termHash, new RemoveReducer<ReferenceType>(urlHashes));
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             reduced = 0;
             Log.logWarning("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
         }
@@ -473,7 +478,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         //final long am = this.array.mem();
         try {
             reduced = this.array.reduce(termHash, new RemoveReducer<ReferenceType>(urlHashBytes));
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             reduced = 0;
             Log.logWarning("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
         }
@@ -490,10 +495,10 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
 
         public RemoveReducer(final byte[] urlHashBytes) {
-            this.urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            this.urlHashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             try {
                 this.urlHashes.put(urlHashBytes);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
         }

@@ -51,15 +51,15 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.Formatter;
@@ -69,16 +69,18 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.snippet.TextSnippet;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkTables;
@@ -104,7 +106,7 @@ public class yacysearch {
             final UserDB.Entry user = sb.userDB.getUser(header);
             authenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
         }
-        final boolean localhostAccess = sb.accessFromLocalhost(header);
+        final boolean localhostAccess = header.accessFromLocalhost();
         final String promoteSearchPageGreeting =
             (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
                 "network.unit.description",
@@ -133,16 +135,7 @@ public class yacysearch {
         prop.put("sidebarVocabulary", j);
 
         // get segment
-        Segment indexSegment = null;
-        if ( post != null && post.containsKey("segment") ) {
-            final String segmentName = post.get("segment");
-            if ( sb.indexSegments.segmentExist(segmentName) ) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            }
-        } else {
-            // take default segment
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
+        Segment indexSegment = sb.index;
 
         final String EXT = header.get("EXT", "");
         final boolean rss = EXT.equals("rss");
@@ -668,7 +661,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(recommendHash));
+                final URIMetadata urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(recommendHash));
                 if ( urlentry != null ) {
                     Document[] documents = null;
                     try {
@@ -676,8 +669,7 @@ public class yacysearch {
                             sb.loader.loadDocuments(
                                 sb.loader.request(urlentry.url(), true, false),
                                 CacheStrategy.IFEXIST,
-                                5000,
-                                Integer.MAX_VALUE);
+                                Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
                     } catch ( final IOException e ) {
                     } catch ( final Parser.Failure e ) {
                     }
@@ -705,7 +697,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(bookmarkHash));
+                final URIMetadata urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(bookmarkHash));
                 if ( urlentry != null ) {
                     try {
                         sb.tables.bookmarks.createBookmark(
@@ -722,13 +714,12 @@ public class yacysearch {
 
             // do the search
             final HandleSet queryHashes = Word.words2hashesHandles(query[0]);
-            final Pattern snippetPattern = QueryParams.stringSearchPattern(originalquerystring);
 
             // check filters
             try {
                 Pattern.compile(urlmask);
             } catch ( final PatternSyntaxException ex ) {
-                Log.logWarning("SEARCH", "Illegal URL mask, not a valid regex: " + urlmask);
+                SnippetProcess.log.logWarning("Illegal URL mask, not a valid regex: " + urlmask);
                 prop.put("urlmaskerror", 1);
                 prop.putHTML("urlmaskerror_urlmask", urlmask);
                 urlmask = ".*";
@@ -737,7 +728,7 @@ public class yacysearch {
             try {
                 Pattern.compile(prefermask);
             } catch ( final PatternSyntaxException ex ) {
-                Log.logWarning("SEARCH", "Illegal prefer mask, not a valid regex: " + prefermask);
+            	SnippetProcess.log.logWarning("Illegal prefer mask, not a valid regex: " + prefermask);
                 prop.put("prefermaskerror", 1);
                 prop.putHTML("prefermaskerror_prefermask", prefermask);
                 prefermask = "";
@@ -749,7 +740,6 @@ public class yacysearch {
                     queryHashes,
                     Word.words2hashesHandles(query[1]),
                     Word.words2hashesHandles(query[2]),
-                    snippetPattern,
                     tenant,
                     modifier.toString().trim(),
                     maxDistance,
@@ -801,7 +791,7 @@ public class yacysearch {
                 "INIT WORD SEARCH: "
                     + theQuery.queryString
                     + ":"
-                    + QueryParams.hashSet2hashString(theQuery.queryHashes)
+                    + QueryParams.hashSet2hashString(theQuery.query_include_hashes)
                     + " - "
                     + theQuery.neededResults()
                     + " links to be computed, "
@@ -960,7 +950,7 @@ public class yacysearch {
                     % theSearch.getQuery().itemsPerPage : startRecord + theSearch.getQuery().itemsPerPage,
                 true));
             prop.put("num-results_itemsPerPage", itemsPerPage);
-            prop.put("num-results_totalcount", Formatter.number(indexcount, true));
+            prop.put("num-results_totalcount", indexcount);
             prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch)
                 ? "1"
                 : "0");

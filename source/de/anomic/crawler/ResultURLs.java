@@ -37,6 +37,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
@@ -96,7 +97,7 @@ public final class ResultURLs {
     }
 
     public static void stack(
-            final URIMetadataRow e,
+            final URIMetadata e,
             final byte[] initiatorHash,
             final byte[] executorHash,
             final EventOrigin stackType) {
@@ -222,7 +223,7 @@ public final class ResultURLs {
     public static void main(final String[] args) {
         try {
             final DigestURI url = new DigestURI("http", "www.yacy.net", 80, "/");
-            final URIMetadataRow urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", 0.0d, 0.0d, new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), UTF8.getBytes("de"), 0, 0, 0, 0, 0, 0);
+            final URIMetadata urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", 0.0d, 0.0d, new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), UTF8.getBytes("de"), 0, 0, 0, 0, 0, 0);
             final EventOrigin stackNo = EventOrigin.LOCAL_CRAWLING;
             System.out.println("valid test:\n=======");
             // add

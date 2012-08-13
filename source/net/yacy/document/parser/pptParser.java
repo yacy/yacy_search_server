@@ -30,7 +30,6 @@ package net.yacy.document.parser;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -95,7 +94,7 @@ public class pptParser extends AbstractParser implements Parser {
                     null,
                     null,
                     0.0f, 0.0f,
-                    UTF8.getBytes(contents),
+                    contents,
                     null,
                     null,
                     null,
@@ -109,7 +108,7 @@ public class pptParser extends AbstractParser implements Parser {
              */
             Log.logException(e);
             final String errorMsg = "Unable to parse the ppt document '" + location + "':" + e.getMessage();
-            this.log.logSevere(errorMsg);
+            AbstractParser.log.logSevere(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
     }

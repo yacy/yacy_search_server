@@ -39,7 +39,7 @@ import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.data.WorkTables;
 
 public class YMarkCrawlStart extends HashMap<String,String>{
-	
+
 	private static final long serialVersionUID = 1L;
 	private final WorkTables worktables;
 	private Date date_last_exec;
@@ -47,7 +47,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 	private Date date_recording;
 	private String apicall_pk;
 	private String url;
-		
+
 	public YMarkCrawlStart(final WorkTables worktables) {
 		super();
 		this.date_recording = new Date(0);
@@ -62,44 +62,41 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		this.clear();
 		this.load();
 	}
-	
+
 	public String getPK() {
 		if(this.isEmpty())
 			return "";
 		return this.apicall_pk;
 	}
-	
+
 	public Date date_last_exec() {
 		if(this.isEmpty())
 			return new Date(0);
 		return this.date_last_exec;
 	}
-	
+
 	public Date date_next_exec() {
 		if(this.isEmpty())
 			return new Date(0);
 		return this.date_next_exec;
 	}
-	
-	public boolean hasSchedule() {		
-		if(!this.isEmpty() && this.date_next_exec.after(new Date()))
-			return true;
-		else
-			return false;
+
+	public boolean hasSchedule() {
+		return !this.isEmpty() && this.date_next_exec.after(new Date());
 	}
-	
+
 	public boolean isRunning(final CrawlSwitchboard crawler) {
 		final Iterator<byte[]> iter = crawler.getActive().iterator();
 		while(iter.hasNext()) {
 			final byte[] key = iter.next();
 			final CrawlProfile crawl = crawler.getActive(key);
 			if (crawl.startURL().equals(this.url)) {
-				return true;				
+				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	public Date date_recording() {
 		return this.date_recording;
 	}
@@ -111,16 +108,16 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 			this.load();
 		}
 	}
-	
+
 	public int exec(final String host, final int port, final String realm) {
 		return this.worktables.execAPICall(this.apicall_pk, host, port, realm);
 	}
-	
+
 	private void load() {
 		try {
 			final StringBuilder buffer = new StringBuilder(500);
 			buffer.append("^crawl start for ");
-			buffer.append(Pattern.quote(url));
+			buffer.append(Pattern.quote(this.url));
 			buffer.append("?.*");
 			final Pattern pattern = Pattern.compile(buffer.toString());
 			//final Iterator<Tables.Row> APIcalls = this.worktables.iterator(WorkTables.TABLE_API_NAME, WorkTables.TABLE_API_COL_URL, pattern);
@@ -129,7 +126,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 			while(APIcalls.hasNext()) {
 				row = APIcalls.next();
 				if(row.get(WorkTables.TABLE_API_COL_TYPE, "").equals("crawler")) {
-					Date date = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, row.get(WorkTables.TABLE_API_COL_DATE, new Date()));					
+					Date date = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, row.get(WorkTables.TABLE_API_COL_DATE, new Date()));
 					if(date.after(this.date_recording)) {
 						this.clear();
 						this.apicall_pk = UTF8.String(row.getPK());

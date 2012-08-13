@@ -56,7 +56,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         // freemem is the name of a method that tries to free memory and returns void
         final Class<?> theClass = (env instanceof Class<?>) ? (Class<?>) env : env.getClass();
         try {
-            this.jobExecMethod = theClass.getMethod(jobExec, new Class[0]);
+            this.jobExecMethod = theClass.getMethod(jobExec);
         } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobExec: " + e.getMessage());
         }
@@ -64,7 +64,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             if (jobCount == null)
                 this.jobCountMethod = null;
             else
-                this.jobCountMethod = theClass.getMethod(jobCount, new Class[0]);
+                this.jobCountMethod = theClass.getMethod(jobCount);
 
         } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobCount: " + e.getMessage());
@@ -73,7 +73,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             if (freemem == null)
                 this.freememExecMethod = null;
             else
-                this.freememExecMethod = theClass.getMethod(freemem, new Class[0]);
+                this.freememExecMethod = theClass.getMethod(freemem);
 
         } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of freemem: " + e.getMessage());
@@ -87,11 +87,8 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     public int getJobCount() {
         if (this.jobCountMethod == null) return Integer.MAX_VALUE;
         try {
-            final Object result = this.jobCountMethod.invoke(this.environment, new Object[0]);
-            if (result instanceof Integer)
-                return ((Integer) result).intValue();
-            else
-                return -1;
+            final Object result = this.jobCountMethod.invoke(this.environment);
+            return (result instanceof Integer) ? ((Integer) result).intValue() : -1;
         } catch (final IllegalAccessException e) {
             return -1;
         } catch (final IllegalArgumentException e) {
@@ -109,7 +106,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         synchronized(jobs) {jobs.put(this.handle, getName());}
         boolean jobHasDoneSomething = false;
         try {
-            final Object result = this.jobExecMethod.invoke(this.environment, new Object[0]);
+            final Object result = this.jobExecMethod.invoke(this.environment);
             if (result == null) jobHasDoneSomething = true;
             else if (result instanceof Boolean) jobHasDoneSomething = ((Boolean) result).booleanValue();
         } catch (final IllegalAccessException e) {
@@ -143,7 +140,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     public void freemem() {
         if (this.freememExecMethod == null) return;
         try {
-            this.freememExecMethod.invoke(this.environment, new Object[0]);
+            this.freememExecMethod.invoke(this.environment);
         } catch (final IllegalAccessException e) {
             Log.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
             Log.logSevere("BUSYTHREAD", "shutting down thread '" + getName() + "'");
@@ -163,7 +160,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         }
     }
 
-    public static BusyThread oneTimeJob(final Object env, final String jobExec, final Log log, final long startupDelay) {
+    public static BusyThread oneTimeJob(final Object env, final String jobExec, final long startupDelay) {
         // start the job and execute it once as background process
         final BusyThread thread = new InstantBusyThread(
                 env, jobExec, null, null, Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE);
@@ -176,9 +173,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     }
 
     public static WorkflowThread oneTimeJob(final Runnable thread, final long startupDelay) {
-        final Log log = new Log(thread.getClass().getName() + "/run");
-        log.setLevel(java.util.logging.Level.INFO);
-        return oneTimeJob(thread, "run", log, startupDelay);
+        return oneTimeJob(thread, "run", startupDelay);
     }
 
     public static WorkflowThread oneTimeJob(final Runnable thread, final long startupDelay, final int maxJobs) {

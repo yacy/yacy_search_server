@@ -2,19 +2,19 @@
  *  OAIPMHImporter
  *  Copyright 2009 by Michael Peter Christen
  *  First released 30.09.2009 at http://yacy.net
- *  
+ *
  *  This is a part of YaCy, a peer-to-peer based web search engine
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -46,11 +46,11 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
 
     private static int importerCounter = Integer.MAX_VALUE;
     private static Object N = new Object();
-    
+
     public static ConcurrentHashMap<OAIPMHImporter, Object> startedJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
     public static ConcurrentHashMap<OAIPMHImporter, Object> runningJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
     public static ConcurrentHashMap<OAIPMHImporter, Object> finishedJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
-    
+
     private final LoaderDispatcher loader;
     private DigestURI source;
     private int recordsCount, chunkCount, completeListSize;
@@ -59,7 +59,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     private final ResumptionToken resumptionToken;
     private String message;
     private final int serialNumber;
-    
+
     public OAIPMHImporter(LoaderDispatcher loader, DigestURI source) {
         this.serialNumber = importerCounter--;
         this.loader = loader;
@@ -82,18 +82,20 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         startedJobs.put(this, N);
     }
 
+    @Override
     public int count() {
         return this.recordsCount;
     }
-    
+
     public int chunkCount() {
         return this.chunkCount;
     }
-    
+
+    @Override
     public String status() {
         return this.message;
     }
-    
+
     public ResumptionToken getResumptionToken() {
         return this.resumptionToken;
     }
@@ -101,23 +103,27 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     public int getCompleteListSize() {
         return this.completeListSize;
     }
-    
+
+    @Override
     public long remainingTime() {
         return (this.isAlive()) ? Long.MAX_VALUE : 0; // we don't know
     }
 
+    @Override
     public long runningTime() {
         return (this.isAlive()) ? System.currentTimeMillis() - this.startTime : this.finishTime - this.startTime;
     }
 
+    @Override
     public String source() {
-        return source.toNormalform(true, false);
+        return this.source.toNormalform(true, false);
     }
 
+    @Override
     public int speed() {
-        return (int) (1000L * ((long) count()) / runningTime());
+        return (int) (1000L * (count()) / runningTime());
     }
-    
+
     @Override
     public void run() {
         while (runningJobs.size() > 50) {
@@ -128,7 +134,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         this.message = "loading first part of records";
         while (true) {
             try {
-                OAIPMHLoader loader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, filenamePrefix);
+                OAIPMHLoader loader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath);
                 this.completeListSize = Math.max(this.completeListSize, loader.getResumptionToken().getCompleteListSize());
                 this.chunkCount++;
                 this.recordsCount += loader.getResumptionToken().getRecordCounter();
@@ -147,14 +153,16 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         runningJobs.remove(this);
         finishedJobs.put(this, N);
     }
-    
-    
+
+
     // methods that are needed to put the object into a Hashtable or a Map:
-    
+
+    @Override
     public int hashCode() {
         return this.serialNumber;
     }
-    
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -164,12 +172,13 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     }
 
     // methods that are needed to put the object into a Tree:
+    @Override
     public int compareTo(OAIPMHImporter o) {
         if (this.serialNumber > o.serialNumber) return 1;
         if (this.serialNumber < o.serialNumber) return -1;
         return 0;
     }
-    
+
     public static Set<String> getUnloadedOAIServer(
             LoaderDispatcher loader,
             File surrogatesIn,
@@ -196,7 +205,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         map.putAll((Map<? extends String, ? extends Date>) getLoadedOAIServer(surrogatesIn).entrySet());
         return map;
     }
-    
+
     private static Map<String, Date> getLoadedOAIServer(File surrogates) {
         HashMap<String, Date> map = new HashMap<String, Date>();
         //oaipmh_opus.bsz-bw.de_20091102113118728.xml
@@ -232,7 +241,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         if (s.startsWith("http://")) s = s.substring(7);
         return s.replace('.', hostReplacementChar).replace('/', hostReplacementChar).replace(':', hostReplacementChar);
     }
-    
+
     /**
      * get a file name for a source. the file name contains a prefix that is used to identify
      * that source as part of the OAI-PMH import process and a host key to identify the source.

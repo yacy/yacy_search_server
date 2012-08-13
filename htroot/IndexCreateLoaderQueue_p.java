@@ -36,12 +36,12 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class IndexCreateLoaderQueue_p {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
 
         if (sb.crawlQueues.workerSize() == 0) {
             prop.put("loader-set", "0");
@@ -51,22 +51,22 @@ public class IndexCreateLoaderQueue_p {
             final Request[] w = sb.crawlQueues.activeWorkerEntries();
             Seed initiator;
             int count = 0;
-            for (int i = 0; i < w.length; i++)  {
-                if (w[i] == null) continue;
-                
-                initiator = sb.peers.getConnected((w[i].initiator() == null) ? "" : ASCII.String(w[i].initiator()));
+            for (Request element : w) {
+                if (element == null) continue;
+
+                initiator = sb.peers.getConnected((element.initiator() == null) ? "" : ASCII.String(element.initiator()));
                 prop.put("loader-set_list_"+count+"_dark", dark ? "1" : "0");
                 prop.putHTML("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
-                prop.put("loader-set_list_"+count+"_depth", w[i].depth());
-                prop.put("loader-set_list_"+count+"_status", w[i].getStatus());
-                prop.putHTML("loader-set_list_"+count+"_url", w[i].url().toNormalform(true, false));
+                prop.put("loader-set_list_"+count+"_depth", element.depth());
+                prop.put("loader-set_list_"+count+"_status", element.getStatus());
+                prop.putHTML("loader-set_list_"+count+"_url", element.url().toNormalform(true, false));
                 dark = !dark;
                 count++;
             }
             prop.put("loader-set_list", count);
             prop.put("loader-set_num", count);
         }
-                
+
         // return rewrite properties
         return prop;
     }

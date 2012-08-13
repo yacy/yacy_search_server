@@ -38,7 +38,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.yacy.cora.storage.ConfigurationSet.Entry;
-import net.yacy.search.index.SolrField;
+import net.yacy.kelondro.logging.Log;
+import net.yacy.search.index.YaCySchema;
 /**
  * this class reads configuration attributes as a list of keywords from a list
  * the list may contain lines with one keyword, comment lines, empty lines and out-commented keyword lines
@@ -64,8 +65,9 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
 
     public ConfigurationSet(final File file) {
         this.file = file;
+        BufferedReader br = null;
         try {
-            final BufferedReader br = new BufferedReader(new FileReader(this.file));
+            br = new BufferedReader(new FileReader(this.file));
             String s;
             boolean enabled;
             String comment, key, value;
@@ -77,48 +79,51 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
                     // is comment line - do nothing
                     if (s.startsWith("##")) comment = s.substring(2);
                     continue;
+                }
+                if (s.startsWith("#")) {
+                    enabled = false ;
+                    s = s.substring (1).trim();
                 } else {
-                    if (s.startsWith("#")) {
-                        enabled = false ;
-                        s = s.substring (1).trim();
-                    } else {
-                        enabled = true;
-                    }
-                    if (s.contains("#")) {
-                        // second # = text afterwards is a comment
-                        i = s.indexOf("#");
-                        comment = s.substring(i+1);
-                        s = s.substring(0,i).trim();
-                    } else {
-                       // comment = null;
-                    }
-                    if (s.contains("=")) {
-                        i = s.indexOf("=");
-                        key = s.substring(0,i).trim();
-                        value = s.substring(i+1).trim();
-                        if (value.isEmpty()) value = null;
+                    enabled = true;
+                }
+                if (s.contains("#")) {
+                    // second # = text afterwards is a comment
+                    i = s.indexOf("#");
+                    comment = s.substring(i+1);
+                    s = s.substring(0,i).trim();
+                } else {
+                   // comment = null;
+                }
+                if (s.contains("=")) {
+                    i = s.indexOf("=");
+                    key = s.substring(0,i).trim();
+                    value = s.substring(i+1).trim();
+                    if (value.isEmpty()) value = null;
 
-                    } else {
-                        key = s.trim();
-                        value = null;
+                } else {
+                    key = s.trim();
+                    value = null;
+                }
+                if (!key.isEmpty()) {
+                    Entry entry = new Entry(key, value, enabled);
+                    if (comment != null) {
+                        entry.setComment(comment);
+                        comment = null;
                     }
-                    if (!key.isEmpty()) {
-                        Entry entry = new Entry(key, value, enabled);
-                        if (comment != null) {
-                            entry.setComment(comment);
-                            comment = null;
-                        }
-                        this.put(key, entry);
-                    }
+                    this.put(key, entry);
                 }
             }
-        } catch (final IOException e) {}
+        } catch (final IOException e) {
+            Log.logException(e);
+        } finally {
+            if (br != null) try {br.close();} catch (IOException e) {}
+        }
     }
 
     /**
      * override the abstract implementation because that is not stable in concurrent requests
      */
-    public boolean contains (String key) {
+    public boolean contains(String key) {
         if (key == null) return false;
         Entry e = this.get(key);
         return e == null ? false : e.enabled();
@@ -160,7 +165,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
             if (modified) {
                 commit();
                 try {
-                    SolrField f = SolrField.valueOf(key);
+                    YaCySchema f = YaCySchema.valueOf(key);
                     f.setSolrFieldName(entry.getValue());
                 } catch (IllegalArgumentException e) {}
             }
@@ -215,33 +220,32 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
                     // is comment line - write as is
                     writer.write(sorig + "\n");
                     continue;
+                }
+                if (sorig.startsWith("#")) {
+                    s = sorig.substring (1).trim();
                 } else {
-                    if (sorig.startsWith("#")) {
-                        s = sorig.substring (1).trim();
-                    } else {
-                        s = sorig;
-                    }
-                    if (s.contains("#")) {
-                        // second # = is a line comment
-                        i = s.indexOf("#");
-                        s = s.substring(0,i).trim();
-                    }
-                    if (s.contains("=")) {
-                        i = s.indexOf("=");
-                        key = s.substring(0,i).trim();
-                    } else {
-                        key = s.trim();
-                    }
-                    if (!key.isEmpty()) {
-                        Entry e = this.get(key);
-                        if (e != null) {
-                            writer.write (e.toString());
-                            tclone.remove(key); // remove written entries from clone
-                        } else {writer.write(sorig); }
-                        writer.write("\n");
-                    } else {
-                        writer.write(sorig+"\n");
-                    }
+                    s = sorig;
+                }
+                if (s.contains("#")) {
+                    // second # = is a line comment
+                    i = s.indexOf("#");
+                    s = s.substring(0,i).trim();
+                }
+                if (s.contains("=")) {
+                    i = s.indexOf("=");
+                    key = s.substring(0,i).trim();
+                } else {
+                    key = s.trim();
+                }
+                if (!key.isEmpty()) {
+                    Entry e = this.get(key);
+                    if (e != null) {
+                        writer.write (e.toString());
+                        tclone.remove(key); // remove written entries from clone
+                    } else {writer.write(sorig); }
+                    writer.write("\n");
+                } else {
+                    writer.write(sorig+"\n");
                 }
             }
             reader.close();
@@ -256,11 +260,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         }
         writer.close();
     }
- /*
-    public Iterator<String> iterator() {
-        return  this.keySet().iterator();
-    }
-*/
+
     public Iterator<Entry> entryIterator() {
         return this.values().iterator();
     }

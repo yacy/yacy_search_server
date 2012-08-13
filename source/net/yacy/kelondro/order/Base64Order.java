@@ -265,7 +265,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
 
     public final byte[] decode(String in) {
-        if ((in == null) || (in.length() == 0)) return new byte[0];
+        if ((in == null) || (in.isEmpty())) return new byte[0];
         try {
             int posIn = 0;
             int posOut = 0;

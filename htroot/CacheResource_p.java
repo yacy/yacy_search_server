@@ -37,7 +37,7 @@ import de.anomic.server.servletProperties;
 
 public class CacheResource_p {
 
-    public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static Object respond(final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         prop.put("resource", new byte[0]);
 
@@ -59,19 +59,18 @@ public class CacheResource_p {
         if (header.get("EXT", "html").equals("png")) {
             // a png was requested
             return ImageParser.parse(u, resource);
-        } else {
-            // get response header and set mime type
-            ResponseHeader responseHeader = Cache.getResponseHeader(url.hash());
-            String resMime = responseHeader == null ? null : responseHeader.mime();
-            if (resMime != null) {
-                final ResponseHeader outgoingHeader = new ResponseHeader(200);
-                outgoingHeader.put(HeaderFramework.CONTENT_TYPE, resMime);
-                prop.setOutgoingHeader(outgoingHeader);
-            }
-
-            // add resource
-            prop.put("resource", resource);
-            return prop;
         }
+        // get response header and set mime type
+        ResponseHeader responseHeader = Cache.getResponseHeader(url.hash());
+        String resMime = responseHeader == null ? null : responseHeader.mime();
+        if (resMime != null) {
+            final ResponseHeader outgoingHeader = new ResponseHeader(200);
+            outgoingHeader.put(HeaderFramework.CONTENT_TYPE, resMime);
+            prop.setOutgoingHeader(outgoingHeader);
+        }
+
+        // add resource
+        prop.put("resource", resource);
+        return prop;
     }
 }

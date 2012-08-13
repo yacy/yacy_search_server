@@ -35,8 +35,8 @@ import java.util.Map;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.BinSearch;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -85,7 +85,7 @@ public class BlockRank {
             index.merge(myIndex);
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
 
@@ -109,13 +109,13 @@ public class BlockRank {
         @Override
         public void run() {
             final ReferenceContainerCache<HostReference> partialIndex = Protocol.loadIDXHosts(this.seed);
-            if (partialIndex == null || partialIndex.size() == 0) return;
+            if (partialIndex == null || partialIndex.isEmpty()) return;
             Log.logInfo("BlockRank", "loaded " + partialIndex.size() + " host indexes from peer " + this.seed.getName());
             try {
                 this.index.merge(partialIndex);
             } catch (final IOException e) {
                 Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
         }
@@ -144,9 +144,10 @@ public class BlockRank {
                 final ReferenceContainer<HostReference> references = ri.next();
                 index.add(references);
             }
+            ri.close();
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
 
@@ -167,7 +168,7 @@ public class BlockRank {
         HostStat hostStat;
         int hostCount;
         for (final ReferenceContainer<HostReference> container: index) {
-            if (container.size() == 0) continue;
+            if (container.isEmpty()) continue;
             if (referenceTable == null) {
                 hostStat = hostHashResolver.get(ASCII.String(container.getTermHash()));
                 hostCount = hostStat == null ? 6 /* high = a penalty for 'i do not know this', this may not be fair*/ : Math.max(1, hostStat.count);
@@ -190,12 +191,12 @@ public class BlockRank {
         final List<BinSearch> table = new ArrayList<BinSearch>();
         while (hostScore.size() > 10) {
             final List<byte[]> smallest = hostScore.lowerHalf();
-            if (smallest.size() == 0) break; // should never happen but this ensures termination of the loop
+            if (smallest.isEmpty()) break; // should never happen but this ensures termination of the loop
             Log.logInfo("BlockRank", "index evaluation: computed partition of size " + smallest.size());
             table.add(new BinSearch(smallest, 6));
             for (final byte[] host: smallest) hostScore.delete(host);
         }
-        if (hostScore.size() > 0) {
+        if (!hostScore.isEmpty()) {
             final ArrayList<byte[]> list = new ArrayList<byte[]>();
             for (final byte[] entry: hostScore) list.add(entry);
             Log.logInfo("BlockRank", "index evaluation: computed last partition of size " + list.size());

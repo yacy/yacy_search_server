@@ -94,12 +94,12 @@ public class tarParser extends AbstractParser implements Parser {
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {
-                    this.log.logWarning("tar parser entry " + name + ": " + e.getMessage());
+                    AbstractParser.log.logWarning("tar parser entry " + name + ": " + e.getMessage());
                 } finally {
                     if (tmp != null) FileUtils.deletedelete(tmp);
                 }
             } catch (final IOException e) {
-                this.log.logWarning("tar parser:" + e.getMessage());
+                AbstractParser.log.logWarning("tar parser:" + e.getMessage());
                 break;
             }
         }
@@ -108,8 +108,9 @@ public class tarParser extends AbstractParser implements Parser {
 
     public final static boolean isTar(File f) {
         if (!f.exists() || f.length() < 0x105) return false;
+        RandomAccessFile raf = null;
         try {
-            RandomAccessFile raf = new RandomAccessFile(f, "r");
+            raf = new RandomAccessFile(f, "r");
             raf.seek(0x101);
             byte[] b = new byte[5];
             raf.read(b);
@@ -118,6 +119,8 @@ public class tarParser extends AbstractParser implements Parser {
             return false;
         } catch (IOException e) {
             return false;
+        } finally {
+            if (raf != null) try {raf.close();} catch (IOException e) {}
         }
     }
 }

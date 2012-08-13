@@ -31,8 +31,10 @@ public enum SolrType {
     text_en_splitting_tight,
     date,
     integer("int"),
-    tdouble,
-    bool("boolean");
+    bool("boolean"),
+    tlong("long"),
+    tfloat("float"),
+    tdouble("double");
 
     private String printName;
     private SolrType() {

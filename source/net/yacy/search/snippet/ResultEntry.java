@@ -34,8 +34,10 @@ import java.util.List;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -50,7 +52,7 @@ import net.yacy.search.index.Segment;
 public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEntry> {
 
     // payload objects
-    private final URIMetadataRow urlentry;
+    private final URIMetadata urlentry;
     private String alternative_urlstring;
     private String alternative_urlname;
     private final TextSnippet textSnippet;
@@ -60,7 +62,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     // statistic objects
     public long dbRetrievalTime, snippetComputationTime, ranking;
 
-    public ResultEntry(final URIMetadataRow urlentry,
+    public ResultEntry(final URIMetadata urlentry,
                        final Segment indexSegment,
                        SeedDB peers,
                        final TextSnippet textSnippet,
@@ -188,10 +190,12 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public double lon() {
         return this.urlentry.lon();
     }
-    public WordReferenceVars word() {
+    public WordReference word() {
         final Reference word = this.urlentry.word();
-        assert word instanceof WordReferenceVars;
-        return (WordReferenceVars) word;
+        if (word instanceof WordReferenceVars) return (WordReferenceVars) word;
+        if (word instanceof WordReferenceRow) return (WordReferenceRow) word;
+        assert word instanceof WordReferenceRow || word instanceof WordReferenceVars : word == null ? "word = null" : "type = " + word.getClass().getCanonicalName();
+        return null;
     }
     public boolean hasTextSnippet() {
         return (this.textSnippet != null) && (!this.textSnippet.getErrorCode().fail());

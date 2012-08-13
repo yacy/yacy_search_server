@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 
 import net.yacy.yacy;
 import net.yacy.cora.document.ASCII;
@@ -134,12 +133,12 @@ public class AugmentHtmlStream {
      *
      * @return the web page with integrated REFLECT elements
      */
-    private static String processExternal(String url, String fieldname,
-            String data) throws IOException {
+    private static String processExternal(String url, String fieldname, String data) throws IOException {
         final HTTPClient client = new HTTPClient();
         try {
             StringBuilder postdata = new StringBuilder();
-            postdata.append("document=");
+            postdata.append(fieldname);
+            postdata.append('=');
             postdata.append(URLEncoder.encode(data, "UTF-8"));
             InputStream in = new ByteArrayInputStream(postdata.toString()
                     .getBytes());
@@ -210,7 +209,7 @@ public class AugmentHtmlStream {
     return result;
     }
 
-    public static StringBuffer process (StringBuffer data, Charset charset, DigestURI url, RequestHeader requestHeader) {
+    public static StringBuffer process(StringBuffer data, DigestURI url, RequestHeader requestHeader) {
 
         String action =  requestHeader.get("YACYACTION");
         requestHeader.remove("YACYACTION");
@@ -234,8 +233,7 @@ public class AugmentHtmlStream {
         if (sb.getConfigBool("augmentation.reflect", false) == true) {
             try {
 
-                Doc = processExternal("http://reflect.ws/REST/GetHTML",
-                        "document", Doc);
+                Doc = processExternal("http://reflect.ws/REST/GetHTML", "document", Doc);
                 Log.logInfo("AUGMENTATION", "reflected " + url);
                 augmented = true;
             } catch (Exception e) {
@@ -401,11 +399,9 @@ public class AugmentHtmlStream {
 
 
         if (augmented) {
-
             return (new StringBuffer (Doc));
-        } else {
-            return (data);
         }
+        return (data);
     }
 
 }

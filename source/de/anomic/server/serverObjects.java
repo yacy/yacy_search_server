@@ -63,6 +63,9 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.Switchboard;
 
+import org.apache.solr.common.params.MultiMapSolrParams;
+import org.apache.solr.common.params.SolrParams;
+
 
 public class serverObjects extends HashMap<String, String> implements Cloneable {
 
@@ -100,7 +103,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     private static final String removeByteOrderMark(final String s) {
-        if (s == null || s.length() == 0) return s;
+        if (s == null || s.isEmpty()) return s;
         if (s.charAt(0) == BOM) return s.substring(1);
         return s;
     }
@@ -169,6 +172,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return      the previous value as String.
      */
     public String put(final String key, final byte[] value) {
+        if (value == null) return this.put(key, "NULL");
         return this.put(key, UTF8.String(value));
     }
 
@@ -373,9 +377,9 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         }
     }
 
-    public boolean getBoolean(final String key, final boolean dflt) {
+    public boolean getBoolean(final String key) {
         String s = removeByteOrderMark(super.get(key));
-        if (s == null) return dflt;
+        if (s == null) return false;
         s = s.toLowerCase();
         return s.equals("true") || s.equals("on") || s.equals("1");
     }
@@ -462,6 +466,15 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         }
         param.setLength(param.length() - 1);
         return param.toString();
+    }
+
+    public SolrParams toSolrParams() {
+        Map<String,String[]> m = new HashMap<String, String[]>();
+        for (Map.Entry<String, String> e: this.entrySet()) {
+            m.put(e.getKey(), new String[]{e.getValue()});
+        }
+        final SolrParams solrParams = new MultiMapSolrParams(m);
+        return solrParams;
     }
 
     public static void main(final String[] args) {

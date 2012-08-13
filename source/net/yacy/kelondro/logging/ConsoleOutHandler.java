@@ -27,6 +27,7 @@
 
 package net.yacy.kelondro.logging;
 
+import java.io.BufferedOutputStream;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
@@ -39,7 +40,7 @@ public final class ConsoleOutHandler extends StreamHandler {
     public ConsoleOutHandler() {
         setLevel(Level.FINEST);
         setFormatter(new SimpleFormatter());
-        setOutputStream(System.out);
+        setOutputStream(new BufferedOutputStream(System.out));
     }
 
     @Override

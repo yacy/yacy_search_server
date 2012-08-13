@@ -109,7 +109,7 @@ public class Autotagging {
     }
 
     public void addPlaces(Locations locations) {
-    	if (locations.size() == 0) return; // otherwise we get a navigation that does nothing
+    	if (locations.isEmpty()) return; // otherwise we get a navigation that does nothing
         Tagging voc = new Tagging("Locations", locations);
         try {
             voc.setObjectspace("http://dbpedia.org/resource/");
@@ -123,6 +123,10 @@ public class Autotagging {
 
     public int size() {
     	return this.vocabularies.size();
+    }
+
+    public boolean isEmpty() {
+    	return this.vocabularies.isEmpty();
     }
 
     /**

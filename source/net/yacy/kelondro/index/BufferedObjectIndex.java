@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.MergeIterator;
@@ -70,8 +72,8 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         return this.backend.row().getOrdering().largest(this.buffer.largestKey(), this.backend.largestKey());
     }
 
-    private final void flushBuffer() throws IOException, RowSpaceExceededException {
-        if (this.buffer.size() > 0) {
+    private final void flushBuffer() throws IOException, SpaceExceededException {
+        if (!this.buffer.isEmpty()) {
             for (final Row.Entry e: this.buffer) {
                 this.backend.put(e);
             }
@@ -87,15 +89,15 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     /**
      * check size of buffer in such a way that a put into the buffer is possible
      * afterwards without exceeding the given maximal buffersize
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      * @throws IOException
      */
-    private final void checkBuffer() throws IOException, RowSpaceExceededException {
+    private final void checkBuffer() throws IOException, SpaceExceededException {
         if (this.buffer.size() >= this.buffersize) flushBuffer();
     }
 
     @Override
-    public void addUnique(final Entry row) throws RowSpaceExceededException, IOException {
+    public void addUnique(final Entry row) throws SpaceExceededException, IOException {
         synchronized (this.backend) {
             checkBuffer();
             this.buffer.put(row);
@@ -117,7 +119,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
                 flushBuffer();
             } catch (final IOException e) {
                 Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
             this.backend.close();
@@ -180,10 +182,10 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
      * @param row a index row
      * @return true if this set did _not_ already contain the given row.
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public boolean put(final Entry row) throws IOException, RowSpaceExceededException {
+    public boolean put(final Entry row) throws IOException, SpaceExceededException {
         synchronized (this.backend) {
             checkBuffer();
             return this.buffer.put(row);
@@ -209,7 +211,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
+    public List<RowCollection> removeDoubles() throws IOException, SpaceExceededException {
         synchronized (this.backend) {
             flushBuffer();
             return this.backend.removeDoubles();
@@ -240,7 +242,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public Entry replace(final Entry row) throws RowSpaceExceededException, IOException {
+    public Entry replace(final Entry row) throws SpaceExceededException, IOException {
         synchronized (this.backend) {
             final Entry entry = this.buffer.replace(row);
             if (entry != null) return entry;
@@ -321,17 +323,17 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
             while (missing-- > 0) {
                 try {
                     this.buffer.put(this.backend.removeOne());
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     break;
                 }
             }
-            final HandleSet handles = new HandleSet(this.buffer.row().primaryKeyLength, this.buffer.row().objectOrder, this.buffer.size());
+            final HandleSet handles = new RowHandleSet(this.buffer.row().primaryKeyLength, this.buffer.row().objectOrder, this.buffer.size());
             final Iterator<byte[]> i = this.buffer.keys();
             while (i.hasNext()) {
                 try {
                     handles.put(i.next());
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     break;
                 }

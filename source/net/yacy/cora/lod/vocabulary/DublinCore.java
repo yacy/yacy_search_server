@@ -51,10 +51,11 @@ public enum DublinCore implements Vocabulary {
     public final static String IDENTIFIER = "http://dublincore.org/documents/2010/10/11/dces/";
     public final static String PREFIX = "dc";
 
-    private final String predicate;
+    private final String predicate, uriref;
 
     private DublinCore() {
         this.predicate = IDENTIFIER +  this.name().toLowerCase();
+        this.uriref = PREFIX + ':' + this.name().toLowerCase();
     }
 
     @Override
@@ -75,5 +76,10 @@ public enum DublinCore implements Vocabulary {
     @Override
     public String getPredicate() {
         return this.predicate;
+    }
+
+    @Override
+    public String getURIref() {
+        return this.uriref;
     }
 }

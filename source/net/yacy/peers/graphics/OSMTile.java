@@ -38,6 +38,7 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.snippet.TextSnippet;
 import net.yacy.visualization.RasterPlotter;
 import de.anomic.crawler.Cache;
 import de.anomic.crawler.retrieval.Response;
@@ -83,6 +84,7 @@ public class OSMTile {
         public Place(final RasterPlotter m, final int xt, final int yt, final int xc, final int yc, final int z) {
             this.m = m; this.xt = xt; this.yt = yt; this.xc = xc; this.yc = yc; this.z = z;
         }
+        @Override
         public void run() {
             final tileCoordinates t = new tileCoordinates(this.xt, this.yt, this.z);
             BufferedImage bi = null;
@@ -111,7 +113,7 @@ public class OSMTile {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;
             try {
-                entry = Switchboard.getSwitchboard().loader.load(Switchboard.getSwitchboard().loader.request(tileURL, false, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, true);
+                entry = Switchboard.getSwitchboard().loader.load(Switchboard.getSwitchboard().loader.request(tileURL, false, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
             } catch (final IOException e) {
                 Log.logWarning("OSMTile", "cannot load: " + e.getMessage());
                 return null;

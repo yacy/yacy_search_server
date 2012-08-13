@@ -75,6 +75,12 @@ network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
 network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt
 network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
 network.unit.bootstrap.seedlist3 = http://www.lulabad.de/seed.txt
+network.unit.bootstrap.seedlist4 = http://fennec.cx/yacy/seed.txt
+network.unit.bootstrap.seedlist5 = http://yacy.dvz24.net/yacy/seed.txt
+network.unit.bootstrap.seedlist6 = http://sixcooler.de/yacy/seed.txt
+network.unit.bootstrap.seedlist7 = http://headrift.dyndns.org/yacy/seed.txt
+network.unit.bootstrap.seedlist8 = http://dk5ras.dyndns.org/seed.txt
+network.unit.bootstrap.seedlist9 = http://yacy.bonus-communis-bibliotheca.eu/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations

@@ -41,7 +41,7 @@ import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.RWIProcess;
@@ -53,8 +53,7 @@ import net.yacy.search.ranking.ReferenceOrder;
  *
  * @author Michael Christen
  */
-public class DocumentIndex extends Segment
-{
+public class DocumentIndex extends Segment {
 
     private static final RankingProfile textRankingDefault = new RankingProfile(Classification.ContentDomain.TEXT);
     //private Bitfield zeroConstraint = new Bitfield(4);
@@ -72,9 +71,16 @@ public class DocumentIndex extends Segment
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
 
-    public DocumentIndex(final File segmentPath, final CallbackListener callback, final int cachesize)
+    public DocumentIndex(final File segmentPath, final File schemePath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(new Log("DocumentIndex"), segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
+        super(new Log("DocumentIndex"), segmentPath, schemePath == null ? null : new SolrConfiguration(schemePath, true));
+        super.connectRWI(cachesize, targetFileSize * 4 - 1);
+        super.connectCitation(cachesize, targetFileSize * 4 - 1);
+        super.connectUrlDb(
+                false, // useTailCache
+                false  // exceed134217727
+                );
+        super.connectLocalSolr(1000);
         final int cores = Runtime.getRuntime().availableProcessors() + 1;
         this.callback = callback;
         this.queue = new LinkedBlockingQueue<DigestURI>(cores * 300);
@@ -94,12 +100,12 @@ public class DocumentIndex extends Segment
         @Override
         public void run() {
             DigestURI f;
-            URIMetadataRow[] resultRows;
+            URIMetadata[] resultRows;
             try {
                 while ( (f = DocumentIndex.this.queue.take()) != poison ) {
                     try {
                         resultRows = add(f);
-                        for ( final URIMetadataRow resultRow : resultRows ) {
+                        for ( final URIMetadata resultRow : resultRows ) {
                             if ( DocumentIndex.this.callback != null ) {
                                 if ( resultRow == null ) {
                                     DocumentIndex.this.callback.fail(f, "result is null");
@@ -131,7 +137,7 @@ public class DocumentIndex extends Segment
         this.queue.clear();
     }
 
-    private URIMetadataRow[] add(final DigestURI url) throws IOException {
+    private URIMetadata[] add(final DigestURI url) throws IOException {
         if ( url == null ) {
             throw new IOException("file = null");
         }
@@ -154,7 +160,7 @@ public class DocumentIndex extends Segment
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }
         //Document document = Document.mergeDocuments(url, null, documents);
-        final URIMetadataRow[] rows = new URIMetadataRow[documents.length];
+        final URIMetadata[] rows = new URIMetadata[documents.length];
         int c = 0;
         for ( final Document document : documents ) {
         	if (document == null) continue;
@@ -166,6 +172,7 @@ public class DocumentIndex extends Segment
                     new Date(url.lastModified()),
                     new Date(),
                     url.length(),
+                    null,
                     document,
                     condenser,
                     null,
@@ -227,7 +234,7 @@ public class DocumentIndex extends Segment
         rankedCache.start();
 
         // search is running; retrieve results
-        URIMetadataRow row;
+        URIMetadata row;
         final ArrayList<DigestURI> files = new ArrayList<DigestURI>();
         while ( (row = rankedCache.takeURL(false, 1000)) != null ) {
             files.add(row.url());
@@ -265,7 +272,7 @@ public class DocumentIndex extends Segment
 
     public interface CallbackListener
     {
-        public void commit(DigestURI f, URIMetadataRow resultRow);
+        public void commit(DigestURI f, URIMetadata resultRow);
 
         public void fail(DigestURI f, String failReason);
     }
@@ -286,7 +293,7 @@ public class DocumentIndex extends Segment
         System.out.println("using index files at " + segmentPath.getAbsolutePath());
         final CallbackListener callback = new CallbackListener() {
             @Override
-            public void commit(final DigestURI f, final URIMetadataRow resultRow) {
+            public void commit(final DigestURI f, final URIMetadata resultRow) {
                 System.out.println("indexed: " + f.toString());
             }
 
@@ -298,7 +305,7 @@ public class DocumentIndex extends Segment
         try {
             if ( args[1].equals("add") ) {
                 final DigestURI f = new DigestURI(args[2]);
-                final DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
+                final DocumentIndex di = new DocumentIndex(segmentPath, null, callback, 100000);
                 di.addConcurrent(f);
                 di.close();
             } else {
@@ -307,7 +314,7 @@ public class DocumentIndex extends Segment
                     query += args[i];
                 }
                 query.trim();
-                final DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
+                final DocumentIndex di = new DocumentIndex(segmentPath, null, callback, 100000);
                 final ArrayList<DigestURI> results = di.find(query, 100);
                 for ( final DigestURI f : results ) {
                     if ( f != null ) {

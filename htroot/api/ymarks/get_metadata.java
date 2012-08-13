@@ -47,7 +47,7 @@ public class get_metadata {
 			}
 
         	try {
-				final YMarkMetadata meta = new YMarkMetadata(new DigestURI(url), sb.indexSegments);
+				final YMarkMetadata meta = new YMarkMetadata(new DigestURI(url), sb.index);
 				final Document document = meta.loadDocument(sb.loader);
 				final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();
 

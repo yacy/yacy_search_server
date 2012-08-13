@@ -73,7 +73,7 @@ public class ResponseHeader extends HeaderFramework {
 
     public Date date() {
         final Date d = headerDate(HeaderFramework.DATE);
-        if (d == null) return new Date(); else return d;
+        return (d == null) ? new Date() : d;
     }
 
     public Date expires() {
@@ -82,7 +82,7 @@ public class ResponseHeader extends HeaderFramework {
 
     public Date lastModified() {
         final Date d = headerDate(LAST_MODIFIED);
-        if (d == null) return date(); else return d;
+        return (d == null) ? date() : d;
     }
 
     public long age() {
@@ -99,7 +99,7 @@ public class ResponseHeader extends HeaderFramework {
 
     public static Object[] parseResponseLine(final String respLine) {
 
-        if ((respLine == null) || (respLine.length() == 0)) {
+        if ((respLine == null) || (respLine.isEmpty())) {
             return new Object[]{"HTTP/1.0",Integer.valueOf(500),"status line parse error"};
         }
 
@@ -158,5 +158,13 @@ public class ResponseHeader extends HeaderFramework {
             return Charset.defaultCharset();
         }
         return Charset.forName(charSetName);
+    }
+
+    public String getXRobotsTag() {
+        String x_robots_tag = this.get(HeaderFramework.X_ROBOTS_TAG, "");
+        if (x_robots_tag.isEmpty()) {
+            x_robots_tag = this.get(HeaderFramework.X_ROBOTS, "");
+        }
+        return x_robots_tag;
     }
 }

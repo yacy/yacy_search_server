@@ -39,7 +39,7 @@ public final class CachedFileReader extends AbstractReader implements Reader {
         this.name = file.getName();
         this.file = file;
         this.RAFile = new RandomAccessFile(this.file, "r");
-        if (MemoryControl.available() / 10L > this.RAFile.length() && this.RAFile.length() < (long) Integer.MAX_VALUE) {
+        if (MemoryControl.available() / 10L > this.RAFile.length() && this.RAFile.length() < Integer.MAX_VALUE) {
         	this.cache = new byte[(int) this.RAFile.length()];
         	this.RAFile.seek(0);
         	this.RAFile.readFully(this.cache);

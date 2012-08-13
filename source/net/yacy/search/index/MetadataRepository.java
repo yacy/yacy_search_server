@@ -33,85 +33,132 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.services.federated.solr.MirrorSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
-import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.WordReferenceVars;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.Cache;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.repository.Blacklist;
-import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.solr.EmbeddedSolrConnector;
-import de.anomic.crawler.CrawlStacker;
 
-public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> {
+import org.apache.lucene.util.Version;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrException;
+
+public final class MetadataRepository implements Iterable<byte[]> {
 
     // class objects
-    protected     Index               urlIndexFile;
+	private final File                location;
+    private       Index               urlIndexFile;
     private       Export              exportthread; // will have a export thread assigned if exporter is running
-    private final File                location;
-    private final String              tablename;
+    private       String              tablename;
     private       ArrayList<HostStat> statsDump;
-    private       SolrConnector       localSolr, remoteSolr;
+    private final MirrorSolrConnector solr;
+    private final SolrConfiguration   solrScheme;
 
-    public MetadataRepository(
-            final File path,
-            final String tablename,
-            final boolean useTailCache,
-            final boolean exceed134217727) {
+    public MetadataRepository(final File path, final SolrConfiguration solrScheme) {
         this.location = path;
-        this.tablename = tablename;
-        Index backupIndex = null;
-        backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
-        this.urlIndexFile = backupIndex; //new Cache(backupIndex, 20000000, 20000000);
+        this.tablename = null;
+        this.urlIndexFile = null;
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
-        this.remoteSolr = null;
-        this.localSolr = null;
+        this.solr = new MirrorSolrConnector(10000, 10000, 1000);
+        this.solrScheme = solrScheme;
     }
 
-    public void connectRemoteSolr(final SolrConnector solr) {
-        this.remoteSolr = solr;
+    public boolean connectedUrlDb() {
+        return this.urlIndexFile != null;
     }
 
-    public void connectLocalSolr() throws IOException {
+    public void connectUrlDb(final String tablename, final boolean useTailCache, final boolean exceed134217727) {
+    	if (this.urlIndexFile != null) return;
+        this.tablename = tablename;
+    	this.urlIndexFile = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
+    }
+
+    public void disconnectUrlDb() {
+    	if (this.urlIndexFile == null) return;
+    	this.urlIndexFile.close();
+    	this.urlIndexFile = null;
+    }
+
+    public SolrConfiguration getSolrScheme() {
+        return this.solrScheme;
+    }
+
+    public boolean connectedSolr() {
+        return this.solr.isConnected0() || this.solr.isConnected1();
+    }
+
+    public boolean connectedLocalSolr() {
+        return this.solr.isConnected0();
+    }
+
+    public void connectLocalSolr(final int commitWithin) throws IOException {
         File solrLocation = this.location;
         if (solrLocation.getName().equals("default")) solrLocation = solrLocation.getParentFile();
-        solrLocation = new File(solrLocation, "solr");
-        this.localSolr = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath,"defaults"), "solr"));
+        String solrPath = "solr_36";
+        solrLocation = new File(solrLocation, solrPath); // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+        EmbeddedSolrConnector esc = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"));
+        esc.setCommitWithinMs(commitWithin);
+        Version luceneVersion = esc.getConfig().getLuceneVersion("luceneMatchVersion");
+        String lvn = luceneVersion.name();
+        int p = lvn.indexOf('_');
+        assert solrPath.endsWith(lvn.substring(p)) : "luceneVersion = " + lvn + ", solrPath = " + solrPath + ", p = " + p;
+        Log.logInfo("MetadataRepository", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn);
+        this.solr.connect0(esc);
     }
 
-    public SolrConnector getRemoteSolr() {
-        return this.remoteSolr;
+    public void disconnectLocalSolr() {
+        this.solr.disconnect0();
+    }
+
+    public boolean connectedRemoteSolr() {
+        return this.solr.isConnected1();
+    }
+
+    public void connectRemoteSolr(final SolrConnector rs) {
+        this.solr.connect1(rs);
+    }
+
+    public void disconnectRemoteSolr() {
+        this.solr.disconnect1();
     }
 
     public SolrConnector getLocalSolr() {
-        return this.localSolr;
+        return this.solr.getSolr0();
+    }
+
+    public SolrConnector getRemoteSolr() {
+        return this.solr.getSolr1();
+    }
+
+    public SolrConnector getSolr() {
+        return this.solr;
     }
 
     public void clearCache() {
-        if (this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
+        if (this.urlIndexFile != null && this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
         if (this.statsDump != null) this.statsDump.clear();
         this.statsDump = null;
     }
@@ -120,15 +167,19 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         if (this.exportthread != null) this.exportthread.interrupt();
         if (this.urlIndexFile == null) {
             SplitTable.delete(this.location, this.tablename);
-            this.urlIndexFile = new SplitTable(this.location, this.tablename, URIMetadataRow.rowdef, false, false);
         } else {
             this.urlIndexFile.clear();
         }
+        this.solr.clear();
+        // the remote solr is not cleared here because that shall be done separately
         this.statsDump = null;
     }
 
     public int size() {
-        return this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
+        int size = 0;
+        size += this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
+        size += this.solr.getSize();
+        return size;
     }
 
     public void close() {
@@ -137,14 +188,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
             this.urlIndexFile.close();
             this.urlIndexFile = null;
         }
-        if (this.remoteSolr != null) this.remoteSolr.close();
-        if (this.localSolr != null) this.localSolr.close();
-    }
-
-    public int writeCacheSize() {
-        if (this.urlIndexFile instanceof SplitTable) return ((SplitTable) this.urlIndexFile).writeBufferSize();
-        if (this.urlIndexFile instanceof Cache) return ((Cache) this.urlIndexFile).writeBufferSize();
-        return 0;
+        this.solr.close();
     }
 
     /**
@@ -153,111 +197,119 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
      * @param obrwi
      * @return
      */
-    public URIMetadataRow load(final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi) {
-        if (this.urlIndexFile == null) return null;
-        if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
-        final byte[] urlHash = obrwi.getElement().urlhash();
-        if (urlHash == null) return null;
-        try {
-            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
-            if (entry == null) return null;
-            return new URIMetadataRow(entry, obrwi.getElement(), obrwi.getWeight());
-        } catch (final IOException e) {
-            return null;
-        }
+    public URIMetadata load(WordReference wre, long weight) {
+        if (wre == null) return null; // all time was already wasted in takeRWI to get another element
+        return load(wre.urlhash(), wre, weight);
     }
 
-    public URIMetadataRow load(final byte[] urlHash) {
-        if (this.urlIndexFile == null) return null;
+    public URIMetadata load(final byte[] urlHash) {
         if (urlHash == null) return null;
-        try {
-            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
-            if (entry == null) return null;
-            return new URIMetadataRow(entry, null, 0);
-        } catch (final IOException e) {
-            return null;
-        }
+        return load(urlHash, null, 0);
     }
 
-    public void store(final URIMetadataRow entry) throws IOException {
-        // Check if there is a more recent Entry already in the DB
-        URIMetadataRow oldEntry;
-        if (this.urlIndexFile == null) return; // case may happen during shutdown or startup
+    private URIMetadata load(final byte[] urlHash, WordReference wre, long weight) {
+
+        // get the metadata from Solr
         try {
-            final Row.Entry oe = this.urlIndexFile.get(entry.hash(), false);
-            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
-        } catch (final Exception e) {
+            SolrDocument doc = this.solr.get(ASCII.String(urlHash));
+            if (doc != null) return new URIMetadataNode(doc, wre, weight);
+        } catch (IOException e) {
             Log.logException(e);
-            oldEntry = null;
-        }
-        if (oldEntry != null && entry.isOlder(oldEntry)) {
-            // the fetched oldEntry is better, so return its properties instead of the new ones
-            // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
-            // this.url = oldEntry.url; // unnecessary, should be the same
-            // doesn't make sense, since no return value:
-            //entry = oldEntry;
-            return; // this did not need to be stored, but is updated
         }
 
-        try {
-            this.urlIndexFile.put(entry.toRowEntry());
-        } catch (final RowSpaceExceededException e) {
-            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
+        // get the metadata from the old metadata index
+        if (this.urlIndexFile != null) try {
+            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
+            if (entry != null) return new URIMetadataRow(entry, wre, weight);
+        } catch (final IOException e) {
+            Log.logException(e);
+        }
+
+        return null;
+    }
+
+    public void store(final URIMetadata entry) throws IOException {
+    	if (this.connectedSolr()) {
+    		try {
+	        	SolrDocument sd = getSolr().get(ASCII.String(entry.url().hash()));
+	        	if (sd == null || !entry.isOlder(new URIMetadataNode(sd))) {
+	        		getSolr().add(getSolrScheme().metadata2solr(entry));
+	        	}
+    		} catch (SolrException e) {
+    			throw new IOException(e.getMessage(), e);
+    		}
+    	} else if (this.urlIndexFile != null && entry instanceof URIMetadataRow) {
+            URIMetadata oldEntry = null;
+	        try {
+	            final Row.Entry oe = this.urlIndexFile.get(entry.hash(), false);
+	            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
+	        } catch (final Throwable e) {
+	            Log.logException(e);
+	            oldEntry = null;
+	        }
+	        if (oldEntry == null || !entry.isOlder(oldEntry)) {
+		        try {
+		            this.urlIndexFile.put(((URIMetadataRow) entry).toRowEntry());
+		        } catch (final SpaceExceededException e) {
+		            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
+		        }
+	        }
         }
         this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache() ;
+        if (MemoryControl.shortStatus()) clearCache();
     }
 
-    public boolean remove(final byte[] urlHashBytes) {
-        if (urlHashBytes == null) return false;
+    public boolean remove(final byte[] urlHash) {
+        if (urlHash == null) return false;
         try {
-            final Row.Entry r = this.urlIndexFile.remove(urlHashBytes);
+            this.solr.delete(ASCII.String(urlHash));
+        } catch (final Throwable e) {
+            Log.logException(e);
+        }
+        if (this.urlIndexFile != null) try {
+            final Row.Entry r = this.urlIndexFile.remove(urlHash);
             if (r != null) this.statsDump = null;
             return r != null;
         } catch (final IOException e) {
             return false;
         }
+        return false;
     }
 
     public boolean exists(final byte[] urlHash) {
         if (urlHash == null) return false;
+        if (this.urlIndexFile != null && this.urlIndexFile.has(urlHash)) return true;
         try {
-            if (this.remoteSolr != null && this.remoteSolr.exists(ASCII.String(urlHash))) {
-                return true;
-            }
+            if (this.solr.exists(ASCII.String(urlHash))) return true;
         } catch (final Throwable e) {
+            Log.logException(e);
         }
-        if (this.urlIndexFile == null) return false; // case may happen during shutdown
-        return this.urlIndexFile.has(urlHash);
+        return false;
     }
 
-    public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
+    @Override
+    public Iterator<byte[]> iterator() {
         try {
-            return this.urlIndexFile.keys(up, firstKey);
+            return this.urlIndexFile.keys(true, null);
         } catch (final IOException e) {
             Log.logException(e);
             return null;
         }
     }
 
-    @Override
-    public Iterator<byte[]> iterator() {
-        return keys(true, null);
-    }
-
-    public CloneableIterator<URIMetadataRow> entries() throws IOException {
+    public CloneableIterator<URIMetadata> entries() throws IOException {
         // enumerates entry elements
         return new kiter();
     }
 
-    public CloneableIterator<URIMetadataRow> entries(final boolean up, final String firstHash) throws IOException {
+    public CloneableIterator<URIMetadata> entries(final boolean up, final String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
 
-    public class kiter implements CloneableIterator<URIMetadataRow> {
+    public class kiter implements CloneableIterator<URIMetadata> {
         // enumerates entry elements
-        private final Iterator<Row.Entry> iter;
+        private final CloneableIterator<Row.Entry> iter;
         private final boolean error;
         boolean up;
 
@@ -290,7 +342,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         }
 
         @Override
-        public final URIMetadataRow next() {
+        public final URIMetadata next() {
             Row.Entry e = null;
             if (this.iter == null) { return null; }
             if (this.iter.hasNext()) { e = this.iter.next(); }
@@ -302,185 +354,10 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         public final void remove() {
             this.iter.remove();
         }
-    }
-
-
-    /**
-     * Uses an Iteration over urlHash.db to detect malformed URL-Entries.
-     * Damaged URL-Entries will be marked in a HashSet and removed at the end of the function.
-     *
-     * @param proxyConfig
-     */
-    public void deadlinkCleaner() {
-        final Log log = new Log("URLDBCLEANUP");
-        final HashSet<String> damagedURLS = new HashSet<String>();
-        try {
-            final Iterator<URIMetadataRow> eiter = entries(true, null);
-            int iteratorCount = 0;
-            while (eiter.hasNext()) try {
-                eiter.next();
-                iteratorCount++;
-            } catch (final RuntimeException e) {
-                if(e.getMessage() != null) {
-                    final String m = e.getMessage();
-                    damagedURLS.add(m.substring(m.length() - 12));
-                } else {
-                    log.logSevere("RuntimeException:", e);
-                }
-            }
-            log.logInfo("URLs vorher: " + this.urlIndexFile.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
-
-            final HTTPClient client = new HTTPClient();
-            final Iterator<String> eiter2 = damagedURLS.iterator();
-            byte[] urlHashBytes;
-            while (eiter2.hasNext()) {
-                urlHashBytes = ASCII.getBytes(eiter2.next());
-
-                // trying to fix the invalid URL
-                String oldUrlStr = null;
-                try {
-                    // getting the url data as byte array
-                    final Row.Entry entry = this.urlIndexFile.get(urlHashBytes, true);
-
-                    // getting the wrong url string
-                    oldUrlStr = entry.getColUTF8(1).trim();
-
-                    int pos = -1;
-                    if ((pos = oldUrlStr.indexOf("://",0)) != -1) {
-                        // trying to correct the url
-                        final String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
-                        final DigestURI newUrl = new DigestURI(newUrlStr);
-
-                        if (client.HEADResponse(newUrl.toString()) != null
-                        		&& client.getHttpResponse().getStatusLine().getStatusCode() == 200) {
-                            entry.setCol(1, UTF8.getBytes(newUrl.toString()));
-                            this.urlIndexFile.put(entry);
-                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + ASCII.String(urlHashBytes) + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
-                        } else {
-                            remove(urlHashBytes);
-                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + ASCII.String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + (client.getHttpResponse() == null ? "null" : client.getHttpResponse().getStatusLine()));
-                        }
-                    }
-                } catch (final Exception e) {
-                    remove(urlHashBytes);
-                    if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + ASCII.String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
-                }
-            }
-
-            log.logInfo("URLs nachher: " + size() + " kaputte URLs: " + damagedURLS.size());
-        } catch (final IOException e) {
-            log.logSevere("IOException", e);
-        }
-    }
-
-    public BlacklistCleaner getBlacklistCleaner(final Blacklist blacklist, final CrawlStacker crawlStacker) {
-        return new BlacklistCleaner(blacklist, crawlStacker);
-    }
-
-    public class BlacklistCleaner extends Thread {
-
-        private boolean run = true;
-        private boolean pause;
-        public int blacklistedUrls = 0;
-        public int totalSearchedUrls = 1;
-        public String lastBlacklistedUrl = "";
-        public String lastBlacklistedHash = "";
-        public String lastUrl = "";
-        public String lastHash = "";
-        private final Blacklist blacklist;
-        private final CrawlStacker crawlStacker;
-
-        public BlacklistCleaner(final Blacklist blacklist, final CrawlStacker crawlStacker) {
-            this.blacklist = blacklist;
-            this.crawlStacker = crawlStacker;
-        }
 
         @Override
-        public void run() {
-            try {
-                Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                final Iterator<URIMetadataRow> eiter = entries(true, null);
-                while (eiter.hasNext() && this.run) {
-                    synchronized (this) {
-                        if (this.pause) {
-                            try {
-                                this.wait();
-                            } catch (final InterruptedException e) {
-                                Log.logWarning("URLDBCLEANER", "InterruptedException", e);
-                                this.run = false;
-                                return;
-                            }
-                        }
-                    }
-                    final URIMetadataRow entry = eiter.next();
-                    if (entry == null) {
-                        if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "entry == null");
-                    } else if (entry.hash() == null) {
-                        if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++this.blacklistedUrls + " blacklisted (" + ((double) this.blacklistedUrls / this.totalSearchedUrls) * 100 + "%): " + "hash == null");
-                    } else {
-                        this.totalSearchedUrls++;
-                        if (entry.url() == null) {
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++this.blacklistedUrls + " blacklisted (" + ((double) this.blacklistedUrls / this.totalSearchedUrls) * 100 + "%): " + ASCII.String(entry.hash()) + "URL == null");
-                            remove(entry.hash());
-                            continue;
-                        }
-                        if (this.blacklist.isListed(BlacklistType.CRAWLER, entry) ||
-                            this.blacklist.isListed(BlacklistType.DHT, entry) ||
-                            (this.crawlStacker.urlInAcceptedDomain(entry.url()) != null)) {
-                            this.lastBlacklistedUrl = entry.url().toNormalform(true, true);
-                            this.lastBlacklistedHash = ASCII.String(entry.hash());
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++this.blacklistedUrls + " blacklisted (" + ((double) this.blacklistedUrls / this.totalSearchedUrls) * 100 + "%): " + ASCII.String(entry.hash()) + " " + entry.url().toNormalform(false, true));
-                            remove(entry.hash());
-                            if (this.blacklistedUrls % 100 == 0) {
-                                Log.logInfo("URLDBCLEANER", "Deleted " + this.blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + this.lastBlacklistedUrl);
-                            }
-                        }
-                        this.lastUrl = entry.url().toNormalform(true, true);
-                        this.lastHash = ASCII.String(entry.hash());
-                    }
-                }
-            } catch (final RuntimeException e) {
-                if (e.getMessage() != null && e.getMessage().indexOf("not found in LURL",0) != -1) {
-                    Log.logWarning("URLDBCLEANER", "urlHash not found in LURL", e);
-                }
-                else {
-                    Log.logWarning("URLDBCLEANER", "RuntimeException", e);
-                    this.run = false;
-                }
-            } catch (final IOException e) {
-                Log.logException(e);
-                this.run = false;
-            } catch (final Exception e) {
-                Log.logException(e);
-                this.run = false;
-            }
-            Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread stopped");
-        }
-
-        public void abort() {
-            synchronized(this) {
-                this.run = false;
-                notifyAll();
-            }
-        }
-
-        public void pause() {
-            synchronized(this) {
-                if (!this.pause) {
-                    this.pause = true;
-                    Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread paused");
-                }
-            }
-        }
-
-        public void endPause() {
-            synchronized(this) {
-                if (this.pause) {
-                    this.pause = false;
-                    notifyAll();
-                    Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread resumed");
-                }
-            }
+        public void close() {
+            this.iter.close();
         }
     }
 
@@ -548,8 +425,8 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
                         this.count++;
                     }
                 } else {
-                    final Iterator<URIMetadataRow> i = entries(); // iterates indexURLEntry objects
-                    URIMetadataRow entry;
+                    final Iterator<URIMetadata> i = entries(); // iterates indexURLEntry objects
+                    URIMetadata entry;
                     String url;
                     while (i.hasNext()) {
                         entry = i.next();
@@ -566,8 +443,8 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
                             pw.println("<item>");
                             pw.println("<title>" + CharacterCoding.unicode2xml(entry.dc_title(), true) + "</title>");
                             pw.println("<link>" + MultiProtocolURI.escape(url) + "</link>");
-                            if (entry.dc_creator().length() > 0) pw.println("<author>" + CharacterCoding.unicode2xml(entry.dc_creator(), true) + "</author>");
-                            if (entry.dc_subject().length() > 0) pw.println("<description>" + CharacterCoding.unicode2xml(entry.dc_subject(), true) + "</description>");
+                            if (!entry.dc_creator().isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(entry.dc_creator(), true) + "</author>");
+                            if (!entry.dc_subject().isEmpty()) pw.println("<description>" + CharacterCoding.unicode2xml(entry.dc_subject(), true) + "</description>");
                             pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
                             pw.println("<yacy:size>" + entry.size() + "</yacy:size>");
                             pw.println("<guid isPermaLink=\"false\">" + ASCII.String(entry.hash()) + "</guid>");
@@ -647,7 +524,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
         // collect hashes from all domains
 
         // fetch urls from the database to determine the host in clear text
-        URIMetadataRow urlref;
+        URIMetadata urlref;
         if (count < 0 || count > domainSamples.size()) count = domainSamples.size();
         this.statsDump = new ArrayList<HostStat>();
         final TreeSet<String> set = new TreeSet<String>();
@@ -684,7 +561,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
      */
     public Map<String, HostStat> domainHashResolver(final Map<String, URLHashCounter> domainSamples) {
         final HashMap<String, HostStat> hostMap = new HashMap<String, HostStat>();
-        URIMetadataRow urlref;
+        URIMetadata urlref;
 
         final ScoreMap<String> hosthashScore = new ConcurrentScoreMap<String>();
         for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
@@ -705,7 +582,7 @@ public final class MetadataRepository implements /*Metadata,*/ Iterable<byte[]> 
 
         // fetch urls from the database to determine the host in clear text
         final Iterator<String> j = domainScore.keys(false); // iterate urlhash-examples in reverse order (biggest first)
-        URIMetadataRow urlref;
+        URIMetadata urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || domainScore.sizeSmaller(count)) count = domainScore.size();

@@ -69,9 +69,9 @@ public class AccessTracker {
         list.add(query);
 
         // shrink dump list but keep essentials in dump
-        while (list.size() > maxSize || (list.size() > 0 && MemoryControl.shortStatus())) {
+        while (list.size() > maxSize || (!list.isEmpty() && MemoryControl.shortStatus())) {
             synchronized (list) {
-                if (list.size() > 0) addToDump(list.removeFirst()); else break;
+                if (!list.isEmpty()) addToDump(list.removeFirst()); else break;
             }
         }
 
@@ -80,7 +80,7 @@ public class AccessTracker {
 
         // if the list is large we look for too old entries
         final long timeout = System.currentTimeMillis() - maxAge;
-        while (list.size() > 0) {
+        while (!list.isEmpty()) {
             final QueryParams q = list.getFirst();
             if (q.starttime > timeout) break;
             addToDump(list.removeFirst());
@@ -101,7 +101,7 @@ public class AccessTracker {
 
     private static void addToDump(final QueryParams query) {
         //if (query.resultcount == 0) return;
-        if (query.queryString == null || query.queryString.length() == 0) return;
+        if (query.queryString == null || query.queryString.isEmpty()) return;
         final StringBuilder sb = new StringBuilder(40);
         sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(query.starttime)));
         sb.append(' ');
@@ -112,11 +112,12 @@ public class AccessTracker {
     }
 
     public static void dumpLog(final File file) {
-        while (localSearches.size() > 0) {
+        while (!localSearches.isEmpty()) {
             addToDump(localSearches.removeFirst());
         }
+        RandomAccessFile raf = null;
         try {
-            final RandomAccessFile raf = new RandomAccessFile(file, "rw");
+            raf = new RandomAccessFile(file, "rw");
             raf.seek(raf.length());
             for (final String s: log) {
                 raf.write(UTF8.getBytes(s));
@@ -126,8 +127,9 @@ public class AccessTracker {
         } catch (final FileNotFoundException e) {
             Log.logException(e);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.logException(e);
+        } finally {
+            if (raf != null) try {raf.close();} catch (IOException e) {}
         }
     }
 }

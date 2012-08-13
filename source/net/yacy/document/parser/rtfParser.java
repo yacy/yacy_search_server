@@ -32,7 +32,6 @@ import java.io.InputStream;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -80,7 +79,7 @@ public class rtfParser extends AbstractParser implements Parser {
                     null,
                     null,
                     0.0f, 0.0f,
-                    UTF8.getBytes(bodyText),
+                    bodyText,
                     null,
                     null,
                     null,

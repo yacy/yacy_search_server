@@ -154,7 +154,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      */
     protected long recommendHeapSize() {
     	// the heap/old-ration is jvm-specific and can be changed by parameter - using this + 20% buffer
-    	final double factor = 1.2 * (double)heap.getHeapMemoryUsage().getMax() / (double)getUsage(old, false).getMax();
+    	final double factor = 1.2 * heap.getHeapMemoryUsage().getMax() / getUsage(old, false).getMax();
     	// current needed space in old gen
     	final long neededOld = getUsage(old, true).getUsed() + getUsage(survivor, false).getMax();
     	return (long) (neededOld * factor);

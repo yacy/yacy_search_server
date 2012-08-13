@@ -302,7 +302,7 @@ public class TarInputStream extends FilterInputStream {
     @Override
     public int read() throws IOException {
         int num = this.read(this.oneBuf, 0, 1);
-        return num == -1 ? -1 : ((int) this.oneBuf[0]) & BYTE_MASK;
+        return num == -1 ? -1 : (this.oneBuf[0]) & BYTE_MASK;
     }
 
     /**

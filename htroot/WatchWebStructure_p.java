@@ -14,7 +14,7 @@ import de.anomic.server.serverSwitch;
 
 
 public class WatchWebStructure_p {
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -73,7 +73,7 @@ public class WatchWebStructure_p {
 
         // find start point
         if (host == null ||
-            host.length() == 0 ||
+            host.isEmpty() ||
             host.equals("auto")
             // || sb.webStructure.referencesCount(DigestURI.hosthash6(host)) == 0
             ) {

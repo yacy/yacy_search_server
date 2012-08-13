@@ -37,7 +37,7 @@ import java.util.TreeMap;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.io.AbstractWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -142,7 +142,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @param key
      * @param blob
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
      */
     private void add(byte[] key, final byte[] blob) throws IOException {
         assert blob.length > 0;
@@ -154,7 +154,7 @@ public final class Heap extends HeapModifier implements BLOB {
             this.file.writeInt(this.keylength + blob.length);
             this.file.write(key);
             this.file.write(blob, 0, blob.length);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             throw new IOException(e.getMessage()); // should never occur;
         }
     }
@@ -163,7 +163,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * flush the buffer completely
      * this is like adding all elements of the buffer, but it needs only one IO access
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
      */
     public void flushBuffer() throws IOException {
         assert this.buffer != null;
@@ -208,7 +208,7 @@ public final class Heap extends HeapModifier implements BLOB {
             blob = entry.getValue();
             try {
                 this.index.put(key, posFile);
-            } catch (RowSpaceExceededException e) {
+            } catch (SpaceExceededException e) {
                 nextBuffer.put(entry.getKey(), blob);
                 continue flush;
             }
@@ -240,7 +240,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      */
     @Override
-    public byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
+    public byte[] get(byte[] key) throws IOException, SpaceExceededException {
         key = normalizeKey(key);
         
         synchronized (this) {
@@ -328,8 +328,8 @@ public final class Heap extends HeapModifier implements BLOB {
      * @param key  the primary key
      * @param b
      * @throws IOException
-     * @throws RowSpaceExceededException 
-     * @throws RowSpaceExceededException 
+     * @throws SpaceExceededException 
+     * @throws SpaceExceededException 
      */
     @Override
     public void insert(byte[] key, final byte[] b) throws IOException {
@@ -346,7 +346,7 @@ public final class Heap extends HeapModifier implements BLOB {
             // then look if we can use a free entry
             try {
                 if (putToGap(key, b)) return;
-            } catch (RowSpaceExceededException e) {} // too less space can be ignored, we have a second try
+            } catch (SpaceExceededException e) {} // too less space can be ignored, we have a second try
             
             assert this.buffer != null;
             
@@ -374,7 +374,7 @@ public final class Heap extends HeapModifier implements BLOB {
         }
     }
     
-    private boolean putToGap(byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
+    private boolean putToGap(byte[] key, final byte[] b) throws IOException, SpaceExceededException {
         // we do not write records of length 0 into the BLOB
         if (b.length == 0) return true;
         
@@ -569,7 +569,7 @@ public final class Heap extends HeapModifier implements BLOB {
             heap.close();
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             Log.logException(e);
         }
     }

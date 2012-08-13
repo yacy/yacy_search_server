@@ -35,17 +35,16 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class Vocabulary_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
@@ -70,8 +69,7 @@ public class Vocabulary_p {
                         boolean discoverFromTitleSplitted = post.get("discovermethod", "").equals("titlesplitted");
                         boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
                         if (discoveruri != null) {
-                            String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
-                            Segment segment = sb.indexSegments.segment(segmentName);
+                            Segment segment = sb.index;
                             Iterator<DigestURI> ui = segment.urlSelector(discoveruri);
                             String t;
                             while (ui.hasNext()) {
@@ -88,27 +86,27 @@ public class Vocabulary_p {
                                     if (p >= 0) t = t.substring(p + 1);
                                 }
                                 if (discoverFromTitle || discoverFromTitleSplitted) {
-                                    URIMetadataRow m = segment.urlMetadata().load(u.hash());
+                                	URIMetadata m = segment.urlMetadata().load(u.hash());
                                     if (m != null) t = m.dc_title();
                                     if (t.endsWith(".jpg") || t.endsWith(".gif")) continue;
                                 }
                                 if (discoverFromAuthor) {
-                                    URIMetadataRow m = segment.urlMetadata().load(u.hash());
+                                	URIMetadata m = segment.urlMetadata().load(u.hash());
                                     if (m != null) t = m.dc_creator();
                                 }
                                 t = t.replaceAll("_", " ").replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();
-                                if (t.length() == 0) continue;
+                                if (t.isEmpty()) continue;
                                 if (discoverFromTitleSplitted) {
                                     String[] ts = t.split(" ");
                                     for (String s: ts) {
-                                        if (s.length() == 0) continue;
+                                        if (s.isEmpty()) continue;
                                         if (s.endsWith(".jpg") || s.endsWith(".gif")) continue;
                                         table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
                                     }
                                 } else if (discoverFromAuthor) {
                                     String[] ts = t.split(";"); // author names are often separated by ';'
                                     for (String s: ts) {
-                                        if (s.length() == 0) continue;
+                                        if (s.isEmpty()) continue;
                                         int p = s.indexOf(','); // check if there is a reversed method to mention the name
                                         if (p >= 0) s = s.substring(p + 1).trim() + " " + s.substring(0, p).trim();
                                         table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));

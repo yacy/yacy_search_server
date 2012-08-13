@@ -28,8 +28,10 @@ package net.yacy.kelondro.data.word;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -116,22 +118,22 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference>, Se
      * decompress an index abstract that was generated from a word index and transmitted over a network connection
      * @param ci
      * @param peerhash
-     * @return
+     * @return a urlhash -> peerlist map: this shows in which peers an url is stored
      */
-    public static final SortedMap<String, StringBuilder> decompressIndex(ByteBuffer ci, final String peerhash) {
-        SortedMap<String, StringBuilder> target = Collections.synchronizedSortedMap(new TreeMap<String, StringBuilder>());
+    public static final SortedMap<String, Set<String>> decompressIndex(ByteBuffer ci, final String peerhash) {
+        SortedMap<String, Set<String>> target = Collections.synchronizedSortedMap(new TreeMap<String, Set<String>>());
         // target is a mapping from url-hashes to a string of peer-hashes
         if (ci.byteAt(0) != '{' || ci.byteAt(ci.length() - 1) != '}') return target;
         //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
         ci = ci.trim(1, ci.length() - 2);
         String dom, url;
-        StringBuilder peers;
+        Set<String> peers;
         StringBuilder urlsb;
-        while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
+        while (ci.length() >= 13 && ci.byteAt(6) == ':') {
             assert ci.length() >= 6 : "ci.length() = " + ci.length();
             dom = ci.toStringBuilder(0, 6, 6).toString();
             ci.trim(7);
-            while ((ci.length() > 0) && (ci.byteAt(0) != ',')) {
+            while (!ci.isEmpty() && ci.byteAt(0) != ',') {
                 assert ci.length() >= 6 : "ci.length() = " + ci.length();
                 urlsb = ci.toStringBuilder(0, 6, 12);
                 urlsb.append(dom);
@@ -140,16 +142,15 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference>, Se
 
                 peers = target.get(url);
                 if (peers == null) {
-                    peers = new StringBuilder(24);
-                    peers.append(peerhash);
+                    peers = new HashSet<String>();
                     target.put(url, peers);
-                } else {
-                    peers.append(peerhash);
                 }
+                peers.add(peerhash);
                 //System.out.println("DEBUG-DECOMPRESS: " + url + ":" + target.get(url));
             }
             if (ci.byteAt(0) == ',') ci.trim(1);
         }
+        //System.out.println("DEBUG-DECOMPRESS: " + target);
         return target;
     }
 }

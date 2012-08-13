@@ -25,7 +25,7 @@
 package net.yacy.cora.services.federated.solr;
 
 
-public interface SolrField {
+public interface Schema {
 
     /**
      * this shall be implemented as enum, thus shall have the name() method

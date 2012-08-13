@@ -34,13 +34,12 @@ import java.util.Map;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class CookieMonitorIncoming_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch sb) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch sb) {
         final Switchboard switchboard = (Switchboard) sb;
 
         // return variable that accumulates replacements
@@ -54,7 +53,7 @@ public class CookieMonitorIncoming_p {
                 switchboard.setConfig("proxy.monitorCookies", false);
 		switchboard.incomingCookies.clear();
 		switchboard.outgoingCookies.clear();
-            } 
+            }
         }
         prop.put("monitorCookies.on", switchboard.getConfigBool("proxy.monitorCookies", false) ? "1":"0");
         prop.put("monitorCookies.off", !switchboard.getConfigBool("proxy.monitorCookies", false) ? "1":"0");

@@ -122,7 +122,7 @@ public class Network {
                 prop.put("table_my-dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
                 prop.put("table_my-nodestate", seed.getFlagRootNode() ? 1 : 0);
 
-                myppm = sb.currentPPM();
+                myppm = Switchboard.currentPPM();
                 myqph = 60d * sb.averageQPM();
                 prop.put("table_my-version", seed.get(Seed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(Seed.UTC, "-"));
@@ -257,7 +257,7 @@ public class Network {
                     final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
                     final HashMap<String, String> isCrawling = new HashMap<String, String>();
                     NewsDB.Record record;
-                    final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB, true);
+                    final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB);
                     while (recordIterator.hasNext()) {
                         record = recordIterator.next();
                         if (record == null) {
@@ -429,7 +429,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", "");
                             } else {
                                 final String peertags = MapTools.set2string(seed.getPeerTags(), ",", false);
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.length() == 0)) ? "no tags given" : ("tags = " + peertags));
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.isEmpty())) ? "no tags given" : ("tags = " + peertags));
                             }
                             String[] yv = yacyVersion.combined2prettyVersion(seed.get(Seed.VERSION, "0.1"), shortname);
                             prop.putHTML(STR_TABLE_LIST + conCount + "_version", yv[0] + "/" + yv[1]);

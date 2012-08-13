@@ -34,10 +34,11 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
@@ -49,7 +50,6 @@ import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.Segments;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -116,9 +116,9 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted. This peer is in robinson mode");
             result = "not_granted";
             pause = 60000;
-        } else if (sb.indexSegments.termIndex(Segments.Process.DHTIN).getBufferSize() > cachelimit) {
+        } else if (sb.index.termIndex().getBufferSize() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.indexSegments.termIndex(Segments.Process.DHTIN).getBufferSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.index.termIndex().getBufferSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
@@ -146,13 +146,13 @@ public final class transferRWI {
             String wordHash;
             byte[] urlHash;
             WordReferenceRow iEntry;
-            final HandleSet unknownURL = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-            final HandleSet knownURL = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            final HandleSet unknownURL = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            final HandleSet knownURL = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             final ArrayList<String> wordhashes = new ArrayList<String>();
             int received = 0;
             int blocked = 0;
             int receivedURL = 0;
-            final IndexCell<WordReference> cell = sb.indexSegments.termIndex(Segments.Process.DHTIN);
+            final IndexCell<WordReference> cell = sb.index.termIndex();
             int count = 0;
             while (it.hasNext()) {
                 serverCore.checkInterruption();
@@ -197,7 +197,7 @@ public final class transferRWI {
 
                 // check if we need to ask for the corresponding URL
                 if (!(knownURL.has(urlHash) || unknownURL.has(urlHash)))  try {
-                    if (sb.indexSegments.urlMetadata(Segments.Process.DHTIN).exists(urlHash)) {
+                    if (sb.index.urlMetadata().exists(urlHash)) {
                         knownURL.put(urlHash);
                     } else {
                         unknownURL.put(urlHash);
@@ -216,9 +216,9 @@ public final class transferRWI {
             final Iterator<byte[]> bit = unknownURL.iterator();
             unknownURLs.ensureCapacity(unknownURL.size() * 25);
             while (bit.hasNext()) {
-                unknownURLs.append(",").append(UTF8.String(bit.next()));
+                unknownURLs.append(UTF8.String(bit.next())).append(',');
             }
-            if (unknownURLs.length() > 0) { unknownURLs.delete(0, 1); }
+            if (unknownURLs.length() > 0) { unknownURLs.setLength(unknownURLs.length() - 1); }
             if (wordhashes.isEmpty() || received == 0) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
@@ -230,7 +230,7 @@ public final class transferRWI {
             }
             result = "ok";
 
-            pause = (int) (sb.indexSegments.termIndex(Segments.Process.DHTIN).getBufferSize() * 20000 / sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
+            pause = (int) (sb.index.termIndex().getBufferSize() * 20000 / sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
         }
 
         prop.put("unknownURL", unknownURLs.toString());

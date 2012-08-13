@@ -312,7 +312,7 @@ public class UPNPRootDevice extends UPNPDevice {
   
   private String getMandatoryData( JXPathContext ctx, String ctxFieldName ) {
     String value = (String)ctx.getValue( ctxFieldName );
-    if ( value != null && value.length() == 0 ) {
+    if ( value != null && value.isEmpty() ) {
       throw new JXPathException( "Mandatory field " + ctxFieldName + " not provided, uncompliant UPNP device !!" );
     }
     return value;
@@ -322,7 +322,7 @@ public class UPNPRootDevice extends UPNPDevice {
     String value = null;
     try {
       value = (String)ctx.getValue( ctxFieldName );
-      if ( value != null && value.length() == 0 ) {
+      if ( value != null && value.isEmpty() ) {
         value = null;
       }
     } catch ( JXPathException ex ) {
@@ -402,7 +402,7 @@ public class UPNPRootDevice extends UPNPDevice {
    */
   public final static URL getURL( String url, URL baseURL ) throws MalformedURLException {
     URL rtrVal;
-    if ( url == null || url.trim().length() == 0 ) return null;
+    if ( url == null || url.trim().isEmpty() ) return null;
     try {
       rtrVal = new URL( url );
     } catch ( MalformedURLException malEx ) {

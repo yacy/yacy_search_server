@@ -81,7 +81,7 @@ public class Metaphone implements StringEncoder {
      */
     public String metaphone(String txt) {
         boolean hard = false ;
-        if ((txt == null) || (txt.length() == 0)) {
+        if ((txt == null) || (txt.isEmpty())) {
             return "" ;
         }
         // single character is itself

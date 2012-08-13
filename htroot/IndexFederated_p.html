@@ -21,12 +21,15 @@
     <form action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
-        The built-in search index can either be 'classic' (as before YaCy 1.03), 'solr' (experimental since 1.03) and 'off' (useful only if a remote solr index is used)
+        Local Search Index
       </legend>
+      This is an experimental switchboard to test an index migration from embedded metadata to embedded solr. The 'classic' configuration is rwi + metadata switched on. The future configuration is rwi + solr switched on.
+      The rwi index is necessary for index transmission and shall be switched off in future portalmode configurations.
       <dl>
-      <dt><input type="radio" name="yacy.indexing" value="classic" id="yacy.indexing.engine.classic" #(yacy.indexing.engine.classic.checked)#:: checked="checked"#(/yacy.indexing.engine.classic.checked)# /></dt><dd>embedded 'classic' search index</dd>
-      <dt><input type="radio" name="yacy.indexing" value="solr" id="yacy.indexing.engine.solr" #(yacy.indexing.engine.solr.checked)#:: checked="checked"#(/yacy.indexing.engine.solr.checked)# /></dt><dd>embedded solr search index</dd>
-      <dt><input type="radio" name="yacy.indexing" value="off" id="yacy.indexing.engine.off" #(yacy.indexing.engine.off.checked)#:: checked="checked"#(/yacy.indexing.engine.off.checked)# /></dt><dd>no local index</dd>
+      <dt><input type="checkbox" name="core.service.rwi.tmp" id="core.service.rwi" #(core.service.rwi.tmp.checked)#:: checked="checked"#(/core.service.rwi.tmp.checked)# /></dt><dd>embedded 'classic' rwi index</dd>
+      <dt><input type="checkbox" name="core.service.urldb.tmp" id="core.service.urldb" #(core.service.urldb.tmp.checked)#:: checked="checked"#(/core.service.urldb.tmp.checked)# /></dt><dd>embedded 'classic' metadata index</dd>
+      <dt><input type="checkbox" name="core.service.solr.tmp" id="core.service.solr" #(core.service.solr.tmp.checked)#:: checked="checked"#(/core.service.solr.tmp.checked)# /></dt><dd>embedded solr search index, interface at: <a href="/solr/select?q=*:*&start=0&rows=10" target="_blank">/solr/select?q=*:*&amp;start=0&amp;rows=10</a></dd>
+      <dt><input type="checkbox" name="core.service.citation.tmp" id="core.service.citation" #(core.service.citation.tmp.checked)#:: checked="checked"#(/core.service.citation.tmp.checked)# /></dt><dd>embedded citation reference index (link structure, used for ranking)</dd>
       <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>
       </dl>
       </fieldset>
@@ -36,7 +39,6 @@
         <input type="checkbox" name="solr.indexing.solrremote" id="solr.indexing.solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# />
         <label for="p2p">Remote Solr Search Index</label>
       </legend>
-      You can set one or more Solr targets here. If you wish to set several targets, then list them in the 'Solr URL' field using a ',' (comma) as separator.
 
       <div align="left">
       <dl>
@@ -51,7 +53,7 @@
       </tr>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-        <td><a href="#[url]#">#[url]#</a></td>
+        <td><a href="#[url]#" target="_blank">#[url]#</a></td>
         <td align="right">#[size]#</td>
       </tr>
       #{/list}#
@@ -60,13 +62,17 @@
         </dd>
       #(/table)#
         <dt class="TableCellDark">Solr URL(s)</dt>
-        <dd><textarea rows="5" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea></dd>
+        <dd><textarea rows="2" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea><br/>
+        You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' (comma) as separator.</dd>
         <dt class="TableCellDark">Commit-Within (milliseconds)</dt>
-        <dd><input type="text" size="6" maxlength="6" value="#[solr.indexing.commitWithinMs]#"  name="solr.indexing.commitWithinMs" id="solr.indexing.commitWithinMs"/></dd>
+        <dd><input type="text" size="6" maxlength="6" value="#[solr.indexing.commitWithinMs]#"  name="solr.indexing.commitWithinMs" id="solr.indexing.commitWithinMs"/> (increase this value to i.e. 180000 - 3 minutes - for more performance)</dd>
+        <dt class="TableCellDark">Lazy Value Initialization</dt>
+        <dd><input type="checkbox" name="solr.indexing.lazy" id="solr.indexing.lazy" #(solr.indexing.lazy.checked)#:: checked="checked"#(/solr.indexing.lazy.checked)# /> (if checked, only non-zero values and non-empty strings are written)</dd>
         <dt class="TableCellDark">Sharding Method</dt>
         <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.sharding]#" name="solr.indexing.sharding" id="solr.indexing.sharding" disabled="disabled"/></dd>
         <dt class="TableCellDark">Scheme</dt>
         <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.schemefile]#" name="solr.indexing.schemefile" id="solr.indexing.schemefile" disabled="disabled"/></dd>
+        <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>
       </dl>
       </div>
       <div>

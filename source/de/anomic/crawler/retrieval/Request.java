@@ -274,6 +274,10 @@ public class Request extends WorkflowJob
         // the date that the client (browser) send as ifModifiedSince in proxy mode
         return this.size;
     }
+    
+    public boolean isEmpty() {
+        return this.size == 0;
+    }
 
     public String name() {
         // return the anchor name (text inside <a> tag)

@@ -149,7 +149,7 @@ public final class RobotsTxtParser {
                 lineUpper = line.toUpperCase();
 
                 // parse empty line
-                if (line.length() == 0) {
+                if (line.isEmpty()) {
                     // we have reached the end of the rule block
                     if (rule4ThisAgentsFound) {
                         // stop here because other robot blocks are either not for YaCy
@@ -167,7 +167,7 @@ public final class RobotsTxtParser {
 
                 // parse sitemap; if there are several sitemaps then take the first url
                 // TODO: support for multiple sitemaps
-                if (lineUpper.startsWith(ROBOTS_SITEMAP) && (this.sitemap == null || this.sitemap.length() == 0)) {
+                if (lineUpper.startsWith(ROBOTS_SITEMAP) && (this.sitemap == null || this.sitemap.isEmpty())) {
                     pos = line.indexOf(' ');
                     if (pos != -1) {
                         this.sitemap = line.substring(pos).trim();

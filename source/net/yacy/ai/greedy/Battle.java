@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -33,7 +33,7 @@ public class Battle<
                     SpecificModel extends Model<SpecificRole, SpecificFinding>
                    >{
 
-    
+
     public Battle(
             SpecificModel startModel,
             Map<SpecificRole, ContextFactory<SpecificRole, SpecificFinding, SpecificModel>> contexts,
@@ -52,18 +52,17 @@ public class Battle<
             if (agent.getContext().hasNoResults()) {
                 System.out.println("battle terminated, "+ agent.getModel().currentRole() + " found no finding");
                 break;
-            } else {
-                Challenge<SpecificRole, SpecificFinding, SpecificModel> challenge = agent.getContext().takeResult();
-                if (challenge == null) {
-                    // lost the game
-                    System.out.println("lost the game: " + agent.getModel().currentRole());
-                    System.exit(1);
-                }
-                System.out.println("finding " + challenge.getFinding().toString());
-                currentModel.applyFinding(challenge.getFinding());
-                currentModel.nextRole();
-                System.out.println(currentModel.toString());
             }
+            Challenge<SpecificRole, SpecificFinding, SpecificModel> challenge = agent.getContext().takeResult();
+            if (challenge == null) {
+                // lost the game
+                System.out.println("lost the game: " + agent.getModel().currentRole());
+                System.exit(1);
+            }
+            System.out.println("finding " + challenge.getFinding().toString());
+            currentModel.applyFinding(challenge.getFinding());
+            currentModel.nextRole();
+            System.out.println(currentModel.toString());
         }
         engine.stop();
     }

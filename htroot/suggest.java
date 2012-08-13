@@ -30,7 +30,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import de.anomic.data.DidYouMean;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -69,19 +68,7 @@ public class suggest {
         final int count = (post == null) ? 20 : post.getInt("count", 20);
 
         // get segment
-        final Segment indexSegment;
-        if (post != null && post.containsKey("segment")) {
-            final String segmentName = post.get("segment");
-            if (sb.indexSegments.segmentExist(segmentName)) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            } else {
-                // take default segment
-                indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-            }
-        } else {
-            // take default segment
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
+        final Segment indexSegment = sb.index;
 
         int c = 0;
         if (more ||

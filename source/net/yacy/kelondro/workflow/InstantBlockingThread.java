@@ -108,28 +108,14 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
 
             try {
                 out = (J) this.jobExecMethod.invoke(this.environment, new Object[]{next});
-            } catch (final IllegalAccessException e) {
+            } catch (final Throwable e) {
                 Log.logSevere(BLOCKINGTHREAD, "Internal Error in serverInstantThread.job: " + e.getMessage());
                 Log.logSevere(BLOCKINGTHREAD, "shutting down thread '" + getName() + "'");
-                terminate(false);
-            } catch (final IllegalArgumentException e) {
-                Log.logSevere(BLOCKINGTHREAD, "Internal Error in serverInstantThread.job: " + e.getMessage());
-                Log.logSevere(BLOCKINGTHREAD, "shutting down thread '" + getName() + "'");
-                terminate(false);
-            } catch (final InvocationTargetException e) {
-                final String targetException = e.getTargetException().getMessage();
+                final Throwable targetException = (e instanceof InvocationTargetException) ? ((InvocationTargetException) e).getTargetException() : null;
                 Log.logException(e);
                 Log.logException(e.getCause());
-                Log.logException(e.getTargetException());
-                if ((targetException != null) &&
-                        ((targetException.indexOf("heap space",0) > 0) ||
-                        (targetException.indexOf("NullPointerException",0) > 0))) {
-                    Log.logException(e.getTargetException());
-                }
-                Log.logSevere(BLOCKINGTHREAD, "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
-            } catch (final OutOfMemoryError e) {
-                Log.logSevere(BLOCKINGTHREAD, "OutOfMemory Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
-                Log.logException(e);
+                if (targetException != null) Log.logException(targetException);
+                Log.logSevere(BLOCKINGTHREAD, "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
             }
             instantThreadCounter--;
             jobs.remove(this.handle);

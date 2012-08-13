@@ -48,7 +48,7 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigAccounts_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
         final Switchboard sb = Switchboard.getSwitchboard();
@@ -74,7 +74,7 @@ public class ConfigAccounts_p {
             	sb.setConfig("adminAccountForLocalhost", true);
             	// if an localhost access is configured, check if a local password is given
             	// if not, set a random password
-            	if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+            	if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty()) {
             		// make a 'random' password
             		env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + sb.genRandomPassword());
             		env.setConfig("adminAccount", "");
@@ -88,7 +88,7 @@ public class ConfigAccounts_p {
             }
         }
 
-        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0 && !env.getConfigBool("adminAccountForLocalhost", false)) {
+        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() && !env.getConfigBool("adminAccountForLocalhost", false)) {
             prop.put("passwordNotSetWarning", 1);
         }
 

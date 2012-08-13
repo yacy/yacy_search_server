@@ -445,7 +445,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         this.log.logConfig("* terminated");
     }
 
-    public List<Session> getJobList() {
+    public static List<Session> getJobList() {
         final Thread[] threadList = new Thread[sessionThreadGroup.activeCount()];
         serverCore.sessionThreadGroup.enumerate(threadList, false);
         final ArrayList<Session> l = new ArrayList<Session>();
@@ -477,7 +477,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     }
 
     // idle sensor: the thread is idle if there are no sessions running
-    public boolean idle() {
+    public static boolean idle() {
         // idleThreadCheck();
         final Thread[] threadList = new Thread[sessionThreadGroup.activeCount()];
         serverCore.sessionThreadGroup.enumerate(threadList, false);
@@ -714,7 +714,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                     try {
                         // if we can not determine the proper command string we try to call function emptyRequest
                         // of the commandObject
-                        if (this.request.trim().length() == 0) this.request = "EMPTY";
+                        if (this.request.trim().isEmpty()) this.request = "EMPTY";
 
                         parameter = new Object[2];
 
@@ -1006,7 +1006,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 final PKCS12Tool pkcsTool = new PKCS12Tool(pkcs12ImportFile,pkcs12ImportPwd);
 
                 // creating a new keystore file
-                if (keyStoreFileName.length() == 0) {
+                if (keyStoreFileName.isEmpty()) {
                     // using the default keystore name
                     keyStoreFileName = "DATA/SETTINGS/myPeerKeystore";
 
@@ -1034,7 +1034,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             } catch (final Exception e) {
                 this.log.logSevere("Unable to import certificate from import file '" + pkcs12ImportFile + "'.",e);
             }
-        } else if (keyStoreFileName.length() == 0) return null;
+        } else if (keyStoreFileName.isEmpty()) return null;
 
 
         // get the ssl context
@@ -1086,7 +1086,8 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
 
             sslsock.addHandshakeCompletedListener(
                     new HandshakeCompletedListener() {
-                       public void handshakeCompleted(
+                       @Override
+                    public void handshakeCompleted(
                           final HandshakeCompletedEvent event) {
                           System.out.println("Handshake finished!");
                           System.out.println(

@@ -11,18 +11,18 @@ import net.yacy.ai.greedy.Model;
 import net.yacy.ai.greedy.Role;
 
 public class SchwarzerPeter {
-    
+
     public static enum Kartentyp {
         A, B, C, D, E, F, G, H, P;
     }
-    
+
     public static enum Kartenzaehler {
         p, q;
     }
-    
+
     public static class Karte {
-        private Kartentyp kartentyp;
-        private Kartenzaehler kartenzaehler;
+        private final Kartentyp kartentyp;
+        private final Kartenzaehler kartenzaehler;
         public Karte(Kartentyp kartentyp, Kartenzaehler kartenzaehler) {
             this.kartentyp = kartentyp; this.kartenzaehler = kartenzaehler;
         }
@@ -44,7 +44,7 @@ public class SchwarzerPeter {
             return k1.kartentyp == k2.kartentyp;
         }
     }
-    
+
     public static final List<Karte> alleKarten;
     static {
         alleKarten = new ArrayList<Karte>(33);
@@ -54,25 +54,26 @@ public class SchwarzerPeter {
         }
         alleKarten.add(new Karte(Kartentyp.P, Kartenzaehler.p));
     }
-    
+
     public static final List<Karte> neuerStapel(Random r) {
         List<Karte> stapel0 = new ArrayList<Karte>();
         for (Karte karte: alleKarten) stapel0.add(karte);
         List<Karte> stapel1 = new ArrayList<Karte>();
-        while (stapel0.size() > 0) stapel1.add(stapel0.remove(r.nextInt(stapel0.size())));
+        while (!stapel0.isEmpty()) stapel1.add(stapel0.remove(r.nextInt(stapel0.size())));
         return stapel1;
     }
-    
+
     public static class Spieler implements Role {
 
-        private int spielernummer;
-        private int spieleranzahl;
-        
+        private final int spielernummer;
+        private final int spieleranzahl;
+
         public Spieler(int spielernummer, int spieleranzahl) {
             this.spielernummer = spielernummer;
             this.spieleranzahl = spieleranzahl;
         }
-        
+
+        @Override
         public Spieler nextRole() {
             int n = (this.spielernummer == this.spieleranzahl - 1) ? 0 : this.spielernummer + 1;
             return new Spieler(n, this.spieleranzahl);
@@ -81,30 +82,30 @@ public class SchwarzerPeter {
             int n = (this.spielernummer == 0) ? this.spieleranzahl - 1 : this.spielernummer - 1;
             return new Spieler(n, this.spieleranzahl);
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             return obj != null
                     && obj instanceof Spieler
                     && this.spielernummer == ((Spieler) obj).spielernummer;
         }
-        
+
         @Override
         public int hashCode() {
             return this.spielernummer;
         }
     }
-    
+
     public static enum Strategy {
         nichtsortieren_linksziehen,
         nichtsortieren_zufallsziehen,
         sortieren_linksziehen,
         sortieren_zufallsziehen;
     }
-    
+
     public static class Hand extends ArrayList<Karte> {
         private static final long serialVersionUID = -5274023237476645059L;
-        private Strategy strategy;
+        private final Strategy strategy;
         public Hand(Strategy strategy) {
             this.strategy = strategy;
         }
@@ -118,21 +119,20 @@ public class SchwarzerPeter {
         public Karte abgeben(Random r) {
             if (this.strategy == Strategy.nichtsortieren_linksziehen || this.strategy == Strategy.sortieren_linksziehen) {
                 return this.remove(0);
-            } else {
-                return this.remove(r.nextInt(this.size()));
             }
+            return this.remove(r.nextInt(this.size()));
         }
         public boolean paerchenAblegen() {
-return true;            
+return true;
         }
     }
-    
+
     public static class Zug extends AbstractFinding<Spieler> implements Finding<Spieler> {
 
         public Zug(Spieler spieler, int priority) {
             super(spieler, priority);
         }
-        
+
         @Override
         public Object clone() {
             return this;
@@ -147,45 +147,50 @@ return true;
         public int hashCode() {
             return 0;
         }
-        
+
     }
 
     public static class Spiel extends AbstractModel<Spieler, Zug> implements Model<Spieler, Zug>, Cloneable {
 
-        private Hand[] haende;
-        private Random random;
-        
+        private final Hand[] haende;
+        private final Random random;
+
         public Spiel(Spieler spieler, Random r) {
             super(spieler);
             this.random = r;
-            haende = new Hand[spieler.spieleranzahl];
-            for (int i = 0; i < spieler.spieleranzahl; i++) haende[i] = new Hand(Strategy.nichtsortieren_linksziehen);
+            this.haende = new Hand[spieler.spieleranzahl];
+            for (int i = 0; i < spieler.spieleranzahl; i++) this.haende[i] = new Hand(Strategy.nichtsortieren_linksziehen);
             List<Karte> geben = neuerStapel(r);
-            while (geben.size() > 0) {
-                haende[spieler.spielernummer].annehmen(r, geben.remove(0));
+            while (!geben.isEmpty()) {
+                this.haende[spieler.spielernummer].annehmen(r, geben.remove(0));
                 spieler = spieler.nextRole();
             }
         }
 
+        @Override
         public List<Zug> explore() {
             return new ArrayList<Zug>(0);
         }
 
+        @Override
         public void applyFinding(Zug finding) {
-            haende[this.currentRole().spielernummer].annehmen(random, this.haende[this.currentRole().linkerNachbar().spielernummer].abgeben(random));
+            this.haende[this.currentRole().spielernummer].annehmen(this.random, this.haende[this.currentRole().linkerNachbar().spielernummer].abgeben(this.random));
 
         }
 
+        @Override
         public int getRanking(int findings, Spieler role) {
             // TODO Auto-generated method stub
             return 0;
         }
 
+        @Override
         public boolean isTermination(Spieler role) {
             // TODO Auto-generated method stub
             return false;
         }
 
+        @Override
         public Spieler isTermination() {
             // TODO Auto-generated method stub
             return null;

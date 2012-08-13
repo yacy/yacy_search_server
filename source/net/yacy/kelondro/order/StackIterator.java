@@ -111,6 +111,9 @@ public class StackIterator<E> implements CloneableIterator<E> {
             public CloneableIterator<A> clone(Object modifier) {
                 return null;
             }
+            @Override
+            public void close() {
+            }
         };
         if (iterators.length == 1) {
             return iterators[0];
@@ -125,5 +128,11 @@ public class StackIterator<E> implements CloneableIterator<E> {
         System.arraycopy(iterators, 1, iterators0, 0, iterators.length - 1);
         if (a == null) return stack(iterators0);
         return new StackIterator<A>(a, stack(iterators0));
+    }
+
+    @Override
+    public void close() {
+        this.a.close();
+        this.b.close();
     }
 }

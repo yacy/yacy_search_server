@@ -52,15 +52,15 @@ import net.yacy.kelondro.order.Base64Order;
 
 /**
  * Tool functions to sign and verify files and generate keys
- * 
+ *
  * Start with "java -cp classes de.anomic.tools.CryptoLib --help"
  * from main folder
- * 
+ *
  * @author flori
  *
  */
 public class CryptoLib {
-    
+
     private static final String HELP =
 	"Tool to sign files and verify the signature.\n" +
 	"Usage:\n" +
@@ -70,70 +70,70 @@ public class CryptoLib {
 	" --verify publickey file file.sig\n" +
 	"         Verify signatur\n" +
 	" --gen-key privatekey publickey\n";
-    
+
     public static final String algorithm = "DSA";
     public static final int bitkey       = 1024;
     public static final String signAlgorithm = "SHA1with"+algorithm;
-    
+
     private final KeyFactory keyFact;
     private final Signature sign;
-    
+
     public CryptoLib() throws NoSuchAlgorithmException {
-	keyFact = KeyFactory.getInstance(algorithm);
-	sign = Signature.getInstance(signAlgorithm);
+	this.keyFact = KeyFactory.getInstance(algorithm);
+	this.sign = Signature.getInstance(signAlgorithm);
     }
-    
+
     public PrivateKey getPrivateKeyFromBytes(byte[] keyBuffer) throws InvalidKeySpecException {
-	return keyFact.generatePrivate(new PKCS8EncodedKeySpec(keyBuffer));
+	return this.keyFact.generatePrivate(new PKCS8EncodedKeySpec(keyBuffer));
     }
-    
+
     public PublicKey getPublicKeyFromBytes(byte[] keyBuffer) throws InvalidKeySpecException {
-	return keyFact.generatePublic(new X509EncodedKeySpec(keyBuffer));	
+	return this.keyFact.generatePublic(new X509EncodedKeySpec(keyBuffer));
     }
-    
-    public byte[] getBytesOfPrivateKey(PrivateKey privKey) throws InvalidKeySpecException {	
+
+    public byte[] getBytesOfPrivateKey(PrivateKey privKey) throws InvalidKeySpecException {
 	EncodedKeySpec keySpec =
-	    keyFact.getKeySpec(privKey, PKCS8EncodedKeySpec.class);
+	    this.keyFact.getKeySpec(privKey, PKCS8EncodedKeySpec.class);
 	return keySpec.getEncoded();
     }
-    
-    public byte[] getBytesOfPublicKey(PublicKey pubKey) throws InvalidKeySpecException {	
+
+    public byte[] getBytesOfPublicKey(PublicKey pubKey) throws InvalidKeySpecException {
 	EncodedKeySpec keySpec =
-	    keyFact.getKeySpec(pubKey, X509EncodedKeySpec.class);
+	    this.keyFact.getKeySpec(pubKey, X509EncodedKeySpec.class);
 	return keySpec.getEncoded();
     }
-    
+
     public byte[] getSignature(PrivateKey privKey, InputStream dataStream) throws InvalidKeyException, SignatureException, IOException {
-	sign.initSign(privKey);
+	this.sign.initSign(privKey);
 	byte[] buffer = new byte[1024];
 	int count = 0;
 	while((count = dataStream.read(buffer)) != -1) {
-	    sign.update(buffer, 0, count);
+	    this.sign.update(buffer, 0, count);
 	}
 	dataStream.close();
-	return sign.sign();
+	return this.sign.sign();
     }
-    
+
     public boolean verifySignature(PublicKey pubKey, InputStream dataStream, byte[] signBuffer) throws InvalidKeyException, SignatureException, IOException {
-	sign.initVerify(pubKey);
-	
+	this.sign.initVerify(pubKey);
+
 	byte[] buffer = new byte[1024];
 	int count = 0;
 	while((count = dataStream.read(buffer)) != -1) {
-	    sign.update(buffer, 0, count);
+	    this.sign.update(buffer, 0, count);
 	}
 	dataStream.close();
-	
-	return sign.verify(signBuffer);
+
+	return this.sign.verify(signBuffer);
     }
-    
+
     public KeyPair genKeyPair() throws NoSuchAlgorithmException {
 	KeyPairGenerator kpg = KeyPairGenerator.getInstance(algorithm);
 	kpg.initialize(bitkey);
-	return kpg.generateKeyPair();	
+	return kpg.generateKeyPair();
     }
 
-    
+
     public static void main(String[] args) {
 	try {
 	    if(args.length < 1 || args[0].contains("help")) {
@@ -143,6 +143,7 @@ public class CryptoLib {
 		CryptoLib cl = new CryptoLib();
 		CharBuffer privKeyBuffer = new CharBuffer(new File(args[1]));
 		byte[] privKeyByteBuffer = Base64Order.standardCoder.decode(privKeyBuffer.toString());
+        privKeyBuffer.close();
 		PrivateKey privKey = cl.getPrivateKeyFromBytes(privKeyByteBuffer);
 
 		FileInputStream dataStream = new FileInputStream(args[2]);
@@ -155,12 +156,14 @@ public class CryptoLib {
 		CryptoLib cl = new CryptoLib();
 		CharBuffer pubKeyBuffer = new CharBuffer(new File(args[1]));
 		byte[] pubKeyByteBuffer = Base64Order.standardCoder.decode(pubKeyBuffer.toString().trim());
+		pubKeyBuffer.close();
 		PublicKey pubKey = cl.getPublicKeyFromBytes(pubKeyByteBuffer);
 
 		FileInputStream dataStream = new FileInputStream(args[2]);
 
 		CharBuffer signBuffer = new CharBuffer(new File(args[2] + ".sig"));
 		byte[] signByteBuffer = Base64Order.standardCoder.decode(signBuffer.toString().trim());
+		signBuffer.close();
 		if(cl.verifySignature(pubKey, dataStream, signByteBuffer)) {
 		    System.out.println("Signature OK!");
 		} else {

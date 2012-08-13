@@ -33,9 +33,10 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
 abstract class AbstractWikiParser implements WikiParser {
-    
+
     protected abstract String transform(String hostport, BufferedReader reader, int length) throws IOException;
 
+    @Override
     public String transform(String hostport, final String content) {
         try {
             return transform(
@@ -46,35 +47,14 @@ abstract class AbstractWikiParser implements WikiParser {
             return "internal error: " + e.getMessage();
         }
     }
-    
-    public String transform(String hostport, final String content, final String publicAddress) {
-        try {
-            return transform(
-                    hostport, 
-                    new BufferedReader(new StringReader(content)),
-                    content.length());
-        } catch (final IOException e) {
-            return "internal error: " + e.getMessage();
-        }
-    }
-    
+
+    @Override
     public String transform(String hostport, final byte[] content) throws UnsupportedEncodingException {
         return transform(hostport, content, "UTF-8");
     }
-    
-    public String transform(String hostport, final byte[] content, final String encoding, final String publicAddress) {
-        final ByteArrayInputStream bais = new ByteArrayInputStream(content);
-        try {
-            return transform(
-                    hostport, 
-                    new BufferedReader(new InputStreamReader(bais, encoding)),
-                    content.length);
-        } catch (final IOException e) {
-            return "internal error: " + e.getMessage();
-        }
-    }
-    
-    public String transform(String hostport, final byte[] content, final String encoding) throws UnsupportedEncodingException {
+
+    @Override
+    public String transform(String hostport, final byte[] content, final String encoding) {
         final ByteArrayInputStream bais = new ByteArrayInputStream(content);
         try {
             return transform(
@@ -85,4 +65,5 @@ abstract class AbstractWikiParser implements WikiParser {
             return "internal error: " + e.getMessage();
         }
     }
+
 }

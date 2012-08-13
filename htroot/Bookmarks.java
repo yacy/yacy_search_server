@@ -46,11 +46,11 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
+import net.yacy.search.snippet.TextSnippet;
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.BookmarksDB.Bookmark;
@@ -182,7 +182,7 @@ public class Bookmarks {
                 prop.put("mode", "2");
                 prop.put("display", "1");
                 display = 1;
-                if (urlHash.length() == 0) {
+                if (urlHash.isEmpty()) {
                     prop.put("mode_edit", "0"); // create mode
                     prop.putHTML("mode_title", post.get("title"));
                     prop.putHTML("mode_description", post.get("description"));
@@ -195,9 +195,9 @@ public class Bookmarks {
                     final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(ASCII.getBytes(urlHash));
+                        final URIMetadata urlentry = sb.index.urlMetadata().load(ASCII.getBytes(urlHash));
                         if (urlentry != null) try {
-                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE));
+                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay));
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", urlentry.url().toNormalform(false, true));
                             prop.putHTML("mode_title", urlentry.dc_title());

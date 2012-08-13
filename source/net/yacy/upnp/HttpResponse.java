@@ -68,7 +68,7 @@ public class HttpResponse {
    * @throws IllegalArgumentException if some error occurs during parsing
    */
   protected HttpResponse( String rawHttpResponse ) throws IllegalArgumentException {
-    if ( rawHttpResponse == null || rawHttpResponse.trim().length() == 0 ) {
+    if ( rawHttpResponse == null || rawHttpResponse.trim().isEmpty() ) {
       throw new IllegalArgumentException( "Empty HTTP response message" );
     }
     boolean bodyParsing = false;
@@ -80,7 +80,7 @@ public class HttpResponse {
     for ( int i = 1; i < lines.length; i++ ) {
       
       String line = lines[i];
-      if ( line.length() == 0 ) {
+      if ( line.isEmpty() ) {
         // line break before body
         bodyParsing = true;
       } else if ( bodyParsing ) {

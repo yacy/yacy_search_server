@@ -179,9 +179,9 @@ public class Hanoi {
             for (int from = 0; from < 3; from++) {
                 toloop: for (int to = 0; to < 3; to++) {
                     if (from == to) continue toloop;
-                    Coin fromCoin = (this.stacks[from].size() == 0) ? null : this.stacks[from].get(this.stacks[from].size() - 1);
+                    Coin fromCoin = (this.stacks[from].isEmpty()) ? null : this.stacks[from].get(this.stacks[from].size() - 1);
                     if (fromCoin == null) continue toloop;
-                    Coin toCoin = (this.stacks[to].size() == 0) ? null : this.stacks[to].get(this.stacks[to].size() - 1);
+                    Coin toCoin = (this.stacks[to].isEmpty()) ? null : this.stacks[to].get(this.stacks[to].size() - 1);
                     if (toCoin != null && fromCoin.size >= toCoin.size) continue toloop;
                     Move move = new Move(from, to);
                     move.setPriority(getPriority(move));

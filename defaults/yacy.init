@@ -700,6 +700,7 @@ crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
 crawler.http.maxFileSize=10485760
 crawler.http.FollowRedirects=true
+crawler.http.RecordRedirects=false
 
 # ftp crawler specific settings; size in bytes
 crawler.ftp.maxFileSize=10485760
@@ -995,17 +996,6 @@ content.phpbb3.dbpw = joshua
 content.phpbb3.ppf = 1000
 content.phpbb3.dumpfile =
 
-# segment assignment for index storage processes in YaCy:
-# each process can store its index result in it's own index segment
-segment.process.receipts_tmp = default
-segment.process.queries_tmp = default
-segment.process.dhtin_tmp = default
-segment.process.dhtout_tmp = default
-segment.process.proxy_tmp = default
-segment.process.localcrawling_tmp = default
-segment.process.remotecrawling_tmp = default
-segment.process.default_tmp = default
-
 # search engine teaser: an about box in search results
 # this is only shown, if the about.body is filled
 about.headline =
@@ -1014,6 +1004,8 @@ about.body =
 # search heuristics
 heuristic.site = false
 heuristic.blekko = false
+heuristic.searchresults = false
+heuristic.searchresults.crawlglobal = false
 
 # colours for generic design
 color_background = #FFFFFF
@@ -1049,15 +1041,21 @@ color_searchurlhover = #008000
 # - to check whats in solr after indexing, open http://localhost:8983/solr/admin/
 federated.service.solr.indexing.enabled = false
 federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
-federated.service.solr.indexing.commitWithinMs = 180000
+federated.service.solr.indexing.commitWithinMs = 1000
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.schemefile = solr.keys.default.list
+# the lazy attribute causes that fields containing "" or 0 are not added and not written
+federated.service.solr.indexing.lazy = true
 
-# the indexing engine in YaCy can be switched off or on
-# (off may make sense if federated.service.solr.indexing.enabled = true)
-# for experiments the value federated.service.yacy.indexing.engine = solr may be used
-# allowed values are: classic, solr, off
-federated.service.yacy.indexing.engine = classic
+# temporary definition of backend services to use. The standard is urldb+rwi, but in the future it should be rwi+solr
+# to get a handle for a migration, these values are defined as temporary, if the migration starts the values are renamed
+# and defined with different default values.
+# The citation service is used for ranking; this is a reverse linking index. It should be on before and after the migration.
+# It can be switched off if only a remote solr index is used.
+core.service.urldb.tmp = true
+core.service.rwi.tmp = true
+core.service.solr.tmp = false
+core.service.citation.tmp = true
 
 # RDF triplestore settings
 triplestore.persistent = true

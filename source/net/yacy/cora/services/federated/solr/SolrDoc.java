@@ -40,39 +40,43 @@ public class SolrDoc extends SolrInputDocument {
         super();
     }
 
-    public final void addSolr(final SolrField key, final String value) {
+    public final void addSolr(final Schema key, final String value) {
        this.setField(key.getSolrFieldName(), value);
     }
 
-    public final void addSolr(final SolrField key, final Date value) {
+    public final void addSolr(final Schema key, final Date value) {
         this.setField(key.getSolrFieldName(), value);
     }
 
-    public final void addSolr(final SolrField key, final int value) {
+    public final void addSolr(final Schema key, final int value) {
         this.setField(key.getSolrFieldName(), value);
     }
 
-    public final void addSolr(final SolrField key, final String[] value) {
+    public final void addSolr(final Schema key, final long value) {
         this.setField(key.getSolrFieldName(), value);
     }
 
-    public final void addSolr(final SolrField key, final List<String> value) {
+    public final void addSolr(final Schema key, final String[] value) {
+        this.setField(key.getSolrFieldName(), value);
+    }
+
+    public final void addSolr(final Schema key, final List<String> value) {
         this.setField(key.getSolrFieldName(), value.toArray(new String[value.size()]));
     }
 
-    public final void addSolr(final SolrField key, final float value) {
+    public final void addSolr(final Schema key, final float value) {
         this.setField(key.getSolrFieldName(), value);
     }
 
-    public final void addSolr(final SolrField key, final double value) {
+    public final void addSolr(final Schema key, final double value) {
         this.setField(key.getSolrFieldName(), value);
     }
 
-    public final void addSolr(final SolrField key, final boolean value) {
+    public final void addSolr(final Schema key, final boolean value) {
         this.setField(key.getSolrFieldName(), value);
     }
 
-    public final void addSolr(final SolrField key, final String value, final float boost) {
+    public final void addSolr(final Schema key, final String value, final float boost) {
         this.setField(key.getSolrFieldName(), value, boost);
     }
 

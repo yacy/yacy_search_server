@@ -40,6 +40,11 @@ public interface Locations {
     public int size();
 
     /**
+     * @return true if the number of locations that this localization stores is empty
+     */
+    public boolean isEmpty();
+
+    /**
      * find a location by name
      * @param anyname - a name of a location
      * @param locationexact - if true, then only exact matched with the location are returned. if false also partially matching names

@@ -47,8 +47,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -138,7 +138,7 @@ public class BlogBoardComments {
         } catch (final IOException e) {
             Log.logException(e);
             record = null;
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
             record = null;
         }
@@ -320,7 +320,7 @@ public class BlogBoardComments {
             return author_byte;
         }
         private void setIp(String ip) {
-            if ((ip == null) || (ip.length() == 0))
+            if ((ip == null) || (ip.isEmpty()))
                 ip = "";
             this.record.put("ip", ip);
         }

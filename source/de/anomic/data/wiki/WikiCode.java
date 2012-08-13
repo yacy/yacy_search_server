@@ -211,6 +211,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @return HTML fragment.
      * @throws IOException in case input from reader can not be read.
      */
+    @Override
     protected String transform(final String hostport, final BufferedReader reader, final int length)
             throws IOException {
         final StringBuilder out = new StringBuilder(length);
@@ -345,7 +346,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @param properties String which may contain several table properties and/or junk.
      * @return String containing only table properties.
      */
-    private StringBuilder filterTableProperties(final String properties) {
+    private static StringBuilder filterTableProperties(final String properties) {
         final String[] values = properties.replaceAll("&quot;", EMPTY).split("[= ]");     //splitting the string at = and blanks
         final StringBuilder stringBuilder = new StringBuilder(properties.length());
         String key, value;
@@ -376,7 +377,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @param stringBuilder this is what key/value are appended to.
      * @return
      */
-    private StringBuilder appendKeyValuePair(final String key, final String value, final StringBuilder stringBuilder) {
+    private static StringBuilder appendKeyValuePair(final String key, final String value, final StringBuilder stringBuilder) {
         return stringBuilder.append(" ").append(key).append("=\"").append(value).append("\"");
     }
 
@@ -577,7 +578,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    private String processLinksAndImages(final String hostport, String line) {
+    private static String processLinksAndImages(final String hostport, String line) {
 
         // create links
         String kl, kv, alt, align;
@@ -1009,7 +1010,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     }
 
 
-    private String processMetadata(String line) {
+    private static String processMetadata(String line) {
         int p, q, s = 0;
         while ((p = line.indexOf(WIKI_OPEN_METADATA, s)) >= 0 && (q = line.indexOf(WIKI_CLOSE_METADATA, p + 1)) >= 0) {
             s = q; // continue with next position

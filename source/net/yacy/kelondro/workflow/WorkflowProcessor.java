@@ -80,14 +80,16 @@ public class WorkflowProcessor<J extends WorkflowJob> {
     }
 
     public int queueSize() {
+        if (this.input == null) return 0;
         return this.input.size();
     }
 
     public boolean queueIsEmpty() {
-        return this.input.isEmpty();
+        return this.input == null || this.input.isEmpty();
     }
 
     public int queueSizeMax() {
+        if (this.input == null) return 0;
         return this.input.size() + this.input.remainingCapacity();
     }
 
@@ -174,7 +176,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
     }
 
     @SuppressWarnings("unchecked")
-    public void announceShutdown() {
+    public void shutdown() {
         if (this.executor == null) {
             return;
         }
@@ -191,14 +193,20 @@ public class WorkflowProcessor<J extends WorkflowJob> {
                 Log.logInfo("serverProcessor", ".. poison pill is in queue " + this.processName + ", thread " + i + ". awaiting termination");
             } catch (final InterruptedException e) { }
         }
-    }
 
-    public void awaitShutdown(final long millisTimeout) {
+        // wait until input queue is empty
+        for (int i = 0; i < 10; i++) {
+            if (this.input.size() <= 0) break;
+            Log.logInfo("WorkflowProcess", "waiting for queue " + this.processName + " to shut down; input.size = " + this.input.size());
+            try {Thread.sleep(1000);} catch (InterruptedException e) {}
+        }
+
+        // shut down executors
         if (this.executor != null & !this.executor.isShutdown()) {
             // wait for shutdown
             try {
                 this.executor.shutdown();
-                this.executor.awaitTermination(millisTimeout, TimeUnit.MILLISECONDS);
+                this.executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
             } catch (final InterruptedException e) {}
         }
         Log.logInfo("serverProcessor", "queue " + this.processName + ": shutdown.");

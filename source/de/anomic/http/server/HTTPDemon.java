@@ -172,7 +172,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return (serverClient.equals("*")) ? true : match(session.userAddress.getHostAddress(), serverClient);
     }
 
-    private static boolean allowYaCyHop(final Session session) {
+    private static boolean allowYaCyHop() {
         return switchboard.getConfigBool("YaCyHop", false);
     }
 
@@ -222,7 +222,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      * @param prop
      * @return <code>true</code> if a persistent connection was requested or <code>false</code> otherwise
      */
-    private boolean handlePersistentConnection(final RequestHeader header, final HashMap<String, Object> prop) {
+    private static boolean handlePersistentConnection(final RequestHeader header, final HashMap<String, Object> prop) {
 
         if (!keepAliveSupport) {
             prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
@@ -256,9 +256,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return persistent;
     }
 
-    private boolean handleYaCyHopAuthentication(final RequestHeader header, final HashMap<String, Object> prop, final Session session) {
+    private static boolean handleYaCyHopAuthentication(final RequestHeader header, final HashMap<String, Object> prop) {
         // check if the user has allowed that his/her peer is used for hops
-        if (!allowYaCyHop(session)) return false;
+        if (!allowYaCyHop()) return false;
 
         // proxy hops must identify with 4 criteria:
 
@@ -408,7 +408,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 }
             } else {
                 // pass to proxy
-                if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+                if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
                     ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
                     HTTPDProxyHandler.doGet(prop, header, session.out);
                 } else {
@@ -425,7 +425,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
     }
 
-    private void logUnexpectedError(final Exception e, final String address) {
+    private static void logUnexpectedError(final Exception e, final String address) {
         if (e instanceof InterruptedException) {
             log.logInfo("Interruption detected");
         } else {
@@ -476,7 +476,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 }
             } else {
                 // pass to proxy
-                if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+                if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
                     ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
                     HTTPDProxyHandler.doHead(prop, header, session.out);
                 } else {
@@ -494,6 +494,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
     public Boolean POST(final String arg, final Session session) {
         //System.out.println("POST " + arg);
+        InputStream sessionIn = null;
+        boolean retv;
         try {
             final HashMap<String, Object> prop = parseRequestLine(HeaderFramework.METHOD_POST, arg, session);
 
@@ -504,7 +506,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     : readHeader(prop, session);
 
             // handle transfer-coding
-            final InputStream sessionIn;
             final String transferEncoding = header.get(HeaderFramework.TRANSFER_ENCODING);
             if (transferEncoding != null) {
                 if (!HeaderFramework.HTTP_VERSION_1_1.equals(httpVersion)) {
@@ -541,7 +542,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 }
             } else {
                 // pass to proxy
-                if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+                if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
                     ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
                     HTTPDProxyHandler.doPost(prop, header, session.out, sessionIn);
                 } else {
@@ -550,13 +551,17 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
-            if (sessionIn instanceof ChunkedInputStream) sessionIn.close(); // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
-            //return serverCore.RESUME_CONNECTION;
-            return prop.get(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            retv = prop.get(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
             logUnexpectedError(e, session.userAddress.getHostAddress());
-            return serverCore.TERMINATE_CONNECTION;
+            retv = serverCore.TERMINATE_CONNECTION;
+        } finally {
+            if (sessionIn != null && (sessionIn instanceof ChunkedInputStream)) {
+                // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
+                try {sessionIn.close();} catch (IOException e) {}
+            }
         }
+        return retv;
     }
 
     public static void handleTransparentProxySupport(final RequestHeader header, final HashMap<String, Object> prop, final String virtualHost, final boolean isTransparentProxy) {
@@ -626,7 +631,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
 
         // pass to proxy
-        if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+        if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
             ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
             HTTPDProxyHandler.doConnect(prop, header, session.in, session.out);
         } else {
@@ -692,7 +697,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // the String argsString is supposed to be constructed as
         // <key1>=<value1>'&'<key2>=<value2>'&'<key3>=<value3>
         // the calling function must strip off a possible leading '?' char
-        if (argsString.length() == 0) return 0;
+        if (argsString.isEmpty()) return 0;
         argsString = argsString + "&"; // for technical reasons
         int sep;
         int eqp;
@@ -933,6 +938,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
          * @see org.apache.commons.fileupload.RequestContext#getInputStream()
          */
         // @Override
+        @Override
         public InputStream getInputStream() throws IOException {
             return this.inStream;
         }
@@ -1323,7 +1329,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public static boolean shallTransportZipped(final String path) {
-        if ((path == null) || (path.length() == 0)) return true;
+        if ((path == null) || (path.isEmpty())) return true;
 
         int pos;
         if ((pos = path.lastIndexOf('.')) != -1) {
@@ -1333,7 +1339,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public static boolean isThisSeedIP(final String hostName) {
-        if ((hostName == null) || (hostName.length() == 0)) return false;
+        if ((hostName == null) || (hostName.isEmpty())) return false;
 
         // getting ip address and port of this seed
         if (getAlternativeResolver() == null) return false;
@@ -1348,7 +1354,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public static boolean isThisHostName(final String hostName) {
-        if ((hostName == null) || (hostName.length() == 0)) return false;
+        if ((hostName == null) || (hostName.isEmpty())) return false;
 
         try {
             final int idx = hostName.indexOf(':');
@@ -1401,7 +1407,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         int p;
         String line;
         while ((line = theSession.readLineAsString()) != null) {
-            if (line.length() == 0) break; // this separates the header of the HTTP request from the body
+            if (line.isEmpty()) break; // this separates the header of the HTTP request from the body
             // parse the header line: a property separated with the ':' sign
             if ((p = line.indexOf(':')) >= 0) {
                 // store a property

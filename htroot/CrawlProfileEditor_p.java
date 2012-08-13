@@ -32,7 +32,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.CrawlProfile;
@@ -83,7 +83,7 @@ public class CrawlProfileEditor_p {
     }
 
     public static serverObjects respond(
-            final RequestHeader header,
+            @SuppressWarnings("unused") final RequestHeader header,
             final serverObjects post,
             final serverSwitch env) {
         final servletProperties prop = new servletProperties();
@@ -99,7 +99,7 @@ public class CrawlProfileEditor_p {
                 // delete all entries from the crawl queue that are deleted here
                 sb.crawler.removeActive(handle.getBytes());
                 sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
             if (post.containsKey("delete")) {
@@ -169,7 +169,7 @@ public class CrawlProfileEditor_p {
         // put active crawls into list
         for (final byte[] h: sb.crawler.getActive()) {
             profile = sb.crawler.getActive(h);
-            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, sb.crawlStacker, true, dark, count, domlistlength);
+            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, true, dark, count, domlistlength);
             dark = !dark;
             count++;
         }
@@ -177,7 +177,7 @@ public class CrawlProfileEditor_p {
         boolean existPassiveCrawls = false;
         for (final byte[] h: sb.crawler.getPassive()) {
             profile = sb.crawler.getPassive(h);
-            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, sb.crawlStacker, false, dark, count, domlistlength);
+            profile.putProfileEntry(CRAWL_PROFILE_PREFIX, prop, false, dark, count, domlistlength);
             dark = !dark;
             count++;
             existPassiveCrawls = true;

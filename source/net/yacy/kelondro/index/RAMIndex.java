@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.StackIterator;
@@ -50,11 +51,10 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
     private final Row.EntryComparator entryComparator;
     //private final int spread;
 
-    public RAMIndex(final String name, final Row rowdef, final int expectedspace) {
+    public RAMIndex(final String name, final Row rowdef) {
         this.name = name;
         this.rowdef = rowdef;
         this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
-        //this.spread = Math.max(10, expectedspace / 3000);
         reset();
         objectTracker.put(name, this);
     }
@@ -93,7 +93,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         this.index1 = null; // to show that this is the initialization phase
     }
 
-    public final synchronized void reset(final int initialspace) throws RowSpaceExceededException {
+    public final synchronized void reset(final int initialspace) throws SpaceExceededException {
         this.index0 = null; // first flush RAM to make room
         this.index0 = new RowSet(this.rowdef, initialspace);
         this.index1 = null; // to show that this is the initialization phase
@@ -165,7 +165,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
 	}
 
 	@Override
-    public final synchronized Row.Entry replace(final Row.Entry entry) throws RowSpaceExceededException {
+    public final synchronized Row.Entry replace(final Row.Entry entry) throws SpaceExceededException {
         assert (entry != null);
         finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
@@ -184,10 +184,10 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
      * @param row a index row
      * @return true if this set did _not_ already contain the given row.
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
 	@Override
-    public final boolean put(final Row.Entry entry) throws RowSpaceExceededException {
+    public final boolean put(final Row.Entry entry) throws SpaceExceededException {
         assert (entry != null);
         if (entry == null) return true;
         synchronized (this) {
@@ -206,7 +206,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public final void addUnique(final Row.Entry entry) throws RowSpaceExceededException {
+    public final void addUnique(final Row.Entry entry) throws SpaceExceededException {
     	assert (entry != null);
     	if (entry == null) return;
     	synchronized (this) {
@@ -220,12 +220,12 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
     	}
     }
 
-	public final void addUnique(final List<Entry> rows) throws RowSpaceExceededException {
+	public final void addUnique(final List<Entry> rows) throws SpaceExceededException {
 		final Iterator<Entry> i = rows.iterator();
 		while (i.hasNext()) addUnique(i.next());
 	}
 
-	public final synchronized long inc(final byte[] key, final int col, final long add, final Row.Entry initrow) throws RowSpaceExceededException {
+	public final synchronized long inc(final byte[] key, final int col, final long add, final Row.Entry initrow) throws SpaceExceededException {
         assert (key != null);
         finishInitialization();
         assert this.index0.isSorted();
@@ -235,7 +235,7 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    public final synchronized ArrayList<RowCollection> removeDoubles() throws RowSpaceExceededException {
+    public final synchronized ArrayList<RowCollection> removeDoubles() throws SpaceExceededException {
 	    // finish initialization phase explicitely
         this.index0.sort();
 	    if (this.index1 == null) {

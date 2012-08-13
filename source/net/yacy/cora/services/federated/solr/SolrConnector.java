@@ -28,8 +28,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 
 public interface SolrConnector {
 
@@ -84,8 +86,16 @@ public interface SolrConnector {
      * @throws IOException
      * @throws SolrException
      */
-    public void add(final SolrDoc solrdoc) throws IOException, SolrException;
-    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException;
+    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException;
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException;
+
+    /**
+     * get a document from solr by given id
+     * @param id
+     * @return one result or null if no result exists
+     * @throws IOException
+     */
+    public SolrDocument get(final String id) throws IOException;
 
     /**
      * get a query result from solr
@@ -93,7 +103,7 @@ public interface SolrConnector {
      * @param querystring
      * @throws IOException
      */
-    public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException;
+    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException;
 
     /**
      * get the size of the index

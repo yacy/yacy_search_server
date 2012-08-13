@@ -1,4 +1,4 @@
-// Threaddump_p.java 
+// Threaddump_p.java
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -28,29 +28,28 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-import java.util.ArrayList;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.ThreadDump;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class Threaddump_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-    	
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
     	serverObjects prop = new serverObjects();
     	Switchboard sb = (Switchboard) env;
-    	
+
     	final StringBuilder buffer = new StringBuilder(1000);
-    	
-	    final boolean plain = post != null && post.getBoolean("plain", false);
+
+	    final boolean plain = post != null && post.getBoolean("plain");
 	    final int sleep = (post == null) ? 0 : post.getInt("sleep", 0); // a sleep before creation of a thread dump can be used for profiling
 	    if (sleep > 0) try {Thread.sleep(sleep);} catch (final InterruptedException e) {}
 	    prop.put("dump", "1");
@@ -58,7 +57,7 @@ public class Threaddump_p {
     	final Date dt = new Date();
     	final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
     	Runtime runtime = Runtime.getRuntime();
-    	
+
     	ThreadDump.bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
     	ThreadDump.bufferappend(buffer, plain, "");
     	ThreadDump.bufferappend(buffer, plain, "YaCy Version: " + versionstring);
@@ -67,7 +66,7 @@ public class Threaddump_p {
     	ThreadDump.bufferappend(buffer, plain, "Available&nbsp;&nbsp;Memory = " + (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory()));
     	ThreadDump.bufferappend(buffer, plain, "");
     	ThreadDump.bufferappend(buffer, plain, "");
-    	
+
     	int multipleCount = 100;
     	File appPath = sb.getAppPath();
         if (post != null && post.containsKey("multipleThreaddump")) {
@@ -94,7 +93,7 @@ public class Threaddump_p {
                 ThreadDump.bufferappend(buffer, plain, "this thread dump function can find threads that lock others, to enable this function start YaCy with 'startYACY.sh -l'");
                 ThreadDump.bufferappend(buffer, plain, "");
             }
-            
+
             // generate a single thread dump
             final Map<Thread,StackTraceElement[]> stackTraces = ThreadDump.getAllStackTraces();
             new ThreadDump(appPath, stackTraces, plain, Thread.State.BLOCKED).appendStackTraces(buffer, plain, Thread.State.BLOCKED);
@@ -104,16 +103,16 @@ public class Threaddump_p {
             new ThreadDump(appPath, stackTraces, plain, Thread.State.NEW).appendStackTraces(buffer, plain, Thread.State.NEW);
             new ThreadDump(appPath, stackTraces, plain, Thread.State.TERMINATED).appendStackTraces(buffer, plain, Thread.State.TERMINATED);
         }
-        
+
         ThreadDump.bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
-    
+
     	prop.put("plain_count", multipleCount);
     	prop.put("plain_content", buffer.toString());
     	prop.put("plain", (plain) ? 1 : 0);
-    	
+
        	return prop;    // return from serverObjects respond()
-    }    
-    
-    
+    }
+
+
 
 }

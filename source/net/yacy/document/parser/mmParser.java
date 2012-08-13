@@ -83,7 +83,7 @@ public class mmParser extends AbstractParser implements Parser {
 
             final List<String> nodeTextList = freeMindHandler.getNodeText();
 
-            rootElementText = (nodeTextList.size() > 0) ? nodeTextList.get(0) : "";
+            rootElementText = nodeTextList.isEmpty() ? "" : nodeTextList.get(0);
 
             for (final String nodeText : nodeTextList) {
                 sb.append(nodeText);
@@ -93,9 +93,9 @@ public class mmParser extends AbstractParser implements Parser {
             content = UTF8.getBytes(sb.toString());
 
         } catch (SAXException ex) {
-            this.log.logWarning(ex.getMessage());
+            AbstractParser.log.logWarning(ex.getMessage());
         } catch (IOException ex) {
-            this.log.logWarning(ex.getMessage());
+            AbstractParser.log.logWarning(ex.getMessage());
         }
 
         return new Document[]{new Document(

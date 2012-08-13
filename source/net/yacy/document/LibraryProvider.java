@@ -245,13 +245,13 @@ public class LibraryProvider {
         	p = term.indexOf('(');
         	if (p >= 0) term = term.substring(0, p);
         	term = term.replaceAll("_", " ").trim();
-        	if (term.length() == 0) continue;
+        	if (term.isEmpty()) continue;
         	if (term.indexOf(' ') < 0) continue; // accept only names that have at least two parts
 
         	// store the term into the vocabulary map
         	map.put(term, new SOTuple(Tagging.normalizeTerm(term), subject));
         }
-        if (map.size() > 0) try {
+        if (!map.isEmpty()) try {
             Log.logInfo("LibraryProvider", "adding vocabulary to autotagging");
 			Tagging pndVoc = new Tagging("Persons", null, objectspace, map);
 			autotagging.addVocabulary(pndVoc);

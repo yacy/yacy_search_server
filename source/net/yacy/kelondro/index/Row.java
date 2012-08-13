@@ -27,6 +27,7 @@
 
 package net.yacy.kelondro.index;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -285,7 +286,7 @@ public final class Row implements Serializable {
 
         public Entry(String external, final boolean decimalCardinal) {
             // parse external form
-            if (external.length() > 0 && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
+            if (!external.isEmpty() && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
             //final String[] elts = commaPattern.split(external);
             final StringTokenizer st = new StringTokenizer(external, ",");
             if (Row.this.nickref == null) genNickRef();
@@ -455,6 +456,8 @@ public final class Row implements Serializable {
                 break;
             case Column.encoder_bytes:
                 throw new kelondroException("ROW", "setColLong of celltype bytes not applicable");
+            default:
+                throw new kelondroException("ROW", "setColLong has celltype none, no encoder given");
             }
         }
 
@@ -472,8 +475,9 @@ public final class Row implements Serializable {
                 l = c + NaturalOrder.decodeLong(this.rowinstance, this.offset + colstrt, cellwidth);
                 NaturalOrder.encodeLong(l, this.rowinstance, this.offset + colstrt, cellwidth);
                 return l;
+            default:
+                throw new kelondroException("ROW", "addCol did not find appropriate encoding");
             }
-            throw new kelondroException("ROW", "addCol did not find appropriate encoding");
         }
 
         public final byte[] getPrimaryKeyBytes() {
@@ -559,8 +563,9 @@ public final class Row implements Serializable {
                 return NaturalOrder.decodeLong(this.rowinstance, this.offset + clstrt, length);
             case Column.encoder_bytes:
                 throw new kelondroException("ROW", "getColLong of celltype bytes not applicable");
+            default:
+                throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
             }
-            throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
         }
 
         public final byte getColByte(final int column) {
@@ -619,7 +624,9 @@ public final class Row implements Serializable {
             }
             if (includeBraces) bb.append('}');
             //System.out.println("DEBUG-ROW " + bb.toString());
-            return bb.toString();
+            String bbs = bb.toString();
+            try {bb.close();} catch (IOException e) {}
+            return bbs;
         }
 
         @Override

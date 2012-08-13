@@ -133,7 +133,7 @@ public class Document {
         this.outboundlinks = null;
         this.languages = languages;
         this.indexingDenied = indexingDenied;
-        this.text = text == null ? new ByteArrayOutputStream() : text;
+        this.text = text == null ? "" : text;
     }
 
     public Object getParserObject() {
@@ -230,7 +230,7 @@ dc_rights
                 sb.append(',').append(s.getObject());
                 String objectlink = vocabulary.getObjectlink(s.getObject());
                 if ((objectspace != null && objectspace.length() > 0) || (objectlink != null && objectlink.length() > 0)) {
-                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectlink == null || objectlink.length() == 0 ? objectspace + s.getObject() + "#" + s.getObject() : objectlink + "#" + s.getObject());
+                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectlink == null || objectlink.isEmpty() ? objectspace + s.getObject() + "#" + s.getObject() : objectlink + "#" + s.getObject());
                 }
             }
             // put to triplestore
@@ -246,7 +246,7 @@ dc_rights
         for (int i = 0; i < this.keywords.size(); i++) {
             if (this.keywords.get(i) == null) continue;
             s = (this.keywords.get(i)).trim();
-            if (s.length() > 0) hs.add(s);
+            if (!s.isEmpty()) hs.add(s);
         }
         final String[] t = new String[hs.size()];
         int i = 0;
@@ -299,7 +299,7 @@ dc_rights
         return this.sections.toArray(new String[this.sections.size()]);
     }
 
-    public InputStream getText() {
+    public InputStream getTextStream() {
         try {
             if (this.text == null) return new ByteArrayInputStream(UTF8.getBytes(""));
             if (this.text instanceof String) {
@@ -322,26 +322,26 @@ dc_rights
         return new ByteArrayInputStream(UTF8.getBytes(""));
     }
 
-    public byte[] getTextBytes() {
+    public String getTextString() {
         try {
-            if (this.text == null) return new byte[0];
+            if (this.text == null) return "";
             if (this.text instanceof String) {
-                return UTF8.getBytes((String) this.text);
+                return (String) this.text;
             } else if (this.text instanceof InputStream) {
-                return FileUtils.read((InputStream) this.text);
+                return UTF8.String(FileUtils.read((InputStream) this.text));
             } else if (this.text instanceof File) {
-                return FileUtils.read((File) this.text);
+                return UTF8.String(FileUtils.read((File) this.text));
             } else if (this.text instanceof byte[]) {
-                return (byte[]) this.text;
+                return UTF8.String((byte[]) this.text);
             } else if (this.text instanceof ByteArrayOutputStream) {
-                return ((ByteArrayOutputStream) this.text).toByteArray();
+                return UTF8.String(((ByteArrayOutputStream) this.text).toByteArray());
             }
             assert false : this.text.getClass().toString();
             return null;
         } catch (final Exception e) {
             Log.logException(e);
         }
-        return new byte[0];
+        return "";
     }
 
     public long getTextLength() {
@@ -367,16 +367,10 @@ dc_rights
     }
 
     public List<StringBuilder> getSentences(final boolean pre) {
-        return getSentences(pre, getText());
-    }
-
-    public static List<StringBuilder> getSentences(final boolean pre, final InputStream text) {
-        if (text == null) return null;
-        final SentenceReader e = new SentenceReader(text);
-        e.pre(pre);
-        final List<StringBuilder> sentences = new ArrayList<StringBuilder>();
-        while (e.hasNext()) {
-            sentences.add(e.next());
+        final SentenceReader sr = new SentenceReader(getTextString(), pre);
+        List<StringBuilder> sentences = new ArrayList<StringBuilder>();
+        while (sr.hasNext()) {
+            sentences.add(sr.next());
         }
         return sentences;
     }
@@ -638,7 +632,7 @@ dc_rights
             if (!(this.text instanceof ByteArrayOutputStream)) {
                 this.text = new ByteArrayOutputStream();
             }
-            FileUtils.copy(doc.getText(), (ByteArrayOutputStream) this.text);
+            FileUtils.copy(doc.getTextStream(), (ByteArrayOutputStream) this.text);
 
             this.anchors.putAll(doc.getAnchors());
             this.rss.putAll(doc.getRSS());
@@ -707,11 +701,7 @@ dc_rights
         if (subject != null && subject.length() > 0) os.write("<dc:subject><![CDATA[" + subject + "]]></dc:subject>\n");
         if (this.text != null) {
             os.write("<dc:description><![CDATA[");
-            final byte[] buffer = new byte[1000];
-            int c = 0;
-            final InputStream is = getText();
-            while ((c = is.read(buffer)) > 0) os.write(UTF8.String(buffer, 0, c));
-            is.close();
+            os.write(getTextString());
             os.write("]]></dc:description>\n");
         }
         final String language = dc_language();
@@ -811,7 +801,7 @@ dc_rights
             if (doc.getTextLength() > 0) {
                 if (docTextLength > 0) content.write('\n');
                 try {
-                    docTextLength += FileUtils.copy(doc.getText(), content);
+                    docTextLength += FileUtils.copy(doc.getTextStream(), content);
                 } catch (final IOException e) {
                     Log.logException(e);
                 }
@@ -821,6 +811,17 @@ dc_rights
             ContentScraper.addAllImages(images, doc.getImages());
             if (doc.lon() != 0.0f && doc.lat() != 0.0f) { lon = doc.lon(); lat = doc.lat(); }
         }
+
+        // clean up parser data
+        for (final Document doc: docs) {
+            Object parserObject = doc.getParserObject();
+            if (parserObject instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) parserObject;
+                html.close();
+            }
+        }
+
+        // return consolidation
         return new Document(
                 location,
                 globalMime,
@@ -891,7 +892,7 @@ dc_rights
     }
 
     private static final String description(Document d, String tagname) {
-        if (tagname == null || tagname.length() == 0) {
+        if (tagname == null || tagname.isEmpty()) {
             tagname = d.source.toTokens();
         }
         StringBuilder sb = new StringBuilder(60);

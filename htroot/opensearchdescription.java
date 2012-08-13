@@ -44,7 +44,7 @@ public class opensearchdescription {
         if (thisaddress.indexOf(':',0) == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
 
         int compareyacy = 0;
-        if (post != null && post.getBoolean("compare_yacy", false))
+        if (post != null && post.getBoolean("compare_yacy"))
 		compareyacy = 1;
 
         final serverObjects prop = new serverObjects();

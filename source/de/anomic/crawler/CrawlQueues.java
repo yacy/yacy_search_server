@@ -49,10 +49,10 @@ import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.dht.PeerSelection;
+import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.search.IndexingQueueEntry;
 import net.yacy.search.Switchboard;
-import net.yacy.search.Switchboard.indexingQueueEntry;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.NoticedURL.StackType;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
@@ -60,9 +60,9 @@ import de.anomic.crawler.retrieval.Response;
 
 public class CrawlQueues {
 
+    public static final long queuedMinLoadDelay = 500;
     private static final String ERROR_DB_FILENAME = "urlError4.db";
     private static final String DELEGATED_DB_FILENAME = "urlDelegated4.db";
-    private static final Segments.Process PROCESS = Segments.Process.LOCALCRAWLING;
 
     protected Switchboard sb;
     protected Log log;
@@ -82,8 +82,8 @@ public class CrawlQueues {
         this.log.logConfig("Starting Crawling Management");
         this.noticeURL = new NoticedURL(queuePath, sb.peers.myBotIDs(), sb.useTailCache, sb.exceed134217727);
         FileUtils.deletedelete(new File(queuePath, ERROR_DB_FILENAME));
-        this.errorURL = new ZURL(sb.indexSegments.segment(PROCESS).getRemoteSolr(), sb.solrScheme, queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
-        this.delegatedURL = new ZURL(sb.indexSegments.segment(PROCESS).getRemoteSolr(), sb.solrScheme, queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
+        this.errorURL = new ZURL(sb.index.getSolr(), sb.index.getSolrScheme(), queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
+        this.delegatedURL = new ZURL(sb.index.getSolr(), sb.index.getSolrScheme(), queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
     }
 
     public void relocate(final File newQueuePath) {
@@ -94,8 +94,8 @@ public class CrawlQueues {
 
         this.noticeURL = new NoticedURL(newQueuePath, this.sb.peers.myBotIDs(), this.sb.useTailCache, this.sb.exceed134217727);
         FileUtils.deletedelete(new File(newQueuePath, ERROR_DB_FILENAME));
-        this.errorURL = new ZURL(this.sb.indexSegments.segment(PROCESS).getRemoteSolr(), this.sb.solrScheme, newQueuePath, ERROR_DB_FILENAME, false, this.sb.useTailCache, this.sb.exceed134217727);
-        this.delegatedURL = new ZURL(this.sb.indexSegments.segment(PROCESS).getRemoteSolr(), this.sb.solrScheme, newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
+        this.errorURL = new ZURL(this.sb.index.getSolr(), this.sb.index.getSolrScheme(), newQueuePath, ERROR_DB_FILENAME, false, this.sb.useTailCache, this.sb.exceed134217727);
+        this.delegatedURL = new ZURL(this.sb.index.getSolr(), this.sb.index.getSolrScheme(), newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
     }
 
     public synchronized void close() {
@@ -276,7 +276,7 @@ public class CrawlQueues {
                         return true;
                     }
                     try {
-                        this.sb.indexingDocumentProcessor.enQueue(new indexingQueueEntry(PROCESS, new Response(urlEntry, profile), null, null));
+                        this.sb.indexingDocumentProcessor.enQueue(new IndexingQueueEntry(new Response(urlEntry, profile), null, null));
                         Log.logInfo("CrawlQueues", "placed NOLOAD URL on indexing queue: " + urlEntry.url().toNormalform(true, false));
                     } catch (final InterruptedException e) {
                         Log.logException(e);
@@ -542,7 +542,7 @@ public class CrawlQueues {
      * @param url
      * @return
      */
-    private String urlToString(final DigestURI url) {
+    private static String urlToString(final DigestURI url) {
         return (url == null ? "null" : url.toNormalform(true, false));
     }
 
@@ -657,7 +657,7 @@ public class CrawlQueues {
                     try {
                         this.request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
                         final CrawlProfile e = CrawlQueues.this.sb.crawler.getActive(UTF8.getBytes(this.request.profileHandle()));
-                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), true);
+                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), BlacklistType.CRAWLER, queuedMinLoadDelay);
                         if (response == null) {
                             this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (CrawlQueues.this.log.isFine()) {

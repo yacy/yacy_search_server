@@ -21,7 +21,7 @@ public class xbel {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
-    	int count = 0;;
+    	int count = 0;
     	String root = "/";
     	int style = 0;
 

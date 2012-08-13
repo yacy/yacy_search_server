@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -23,6 +23,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.content.dao.Dao;
@@ -35,16 +36,16 @@ import de.anomic.server.serverSwitch;
 
 public class ContentIntegrationPHPBB3_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        
+
         prop.put("check", 0);
         prop.put("export", 0);
         prop.put("import", 0);
-        
+
         if (post != null) {
-            
+
             String urlstub = post.get("content.phpbb3.urlstub", "");
             String dbtype = post.get("content.phpbb3.dbtype", "");
             String dbhost = post.get("content.phpbb3.dbhost", "");
@@ -55,8 +56,8 @@ public class ContentIntegrationPHPBB3_p {
             String dbpw = post.get("content.phpbb3.dbpw", "");
             int    ppf = post.getInt("content.phpbb3.ppf", 1000);
             String dumpfile = post.get("content.phpbb3.dumpfile", "");
-            
-            
+
+
             sb.setConfig("content.phpbb3.urlstub", urlstub);
             sb.setConfig("content.phpbb3.dbtype", dbtype);
             sb.setConfig("content.phpbb3.dbhost", dbhost);
@@ -67,7 +68,7 @@ public class ContentIntegrationPHPBB3_p {
             sb.setConfig("content.phpbb3.dbpw", dbpw);
             sb.setConfig("content.phpbb3.ppf", ppf);
             sb.setConfig("content.phpbb3.dumpfile", dumpfile);
-            
+
             if (post.containsKey("check")) {
                 try {
                     Dao db = new PhpBB3Dao(
@@ -91,7 +92,7 @@ public class ContentIntegrationPHPBB3_p {
                     prop.put("check_error", e.getMessage());
                 }
             }
-            
+
             if (post.containsKey("export")) {
                 try {
                     Dao db = new PhpBB3Dao(
@@ -104,7 +105,7 @@ public class ContentIntegrationPHPBB3_p {
                                             dbuser,
                                             dbpw
                                             );
-                    
+
                     int files = db.writeSurrogates(db.query(0, -1, 100), sb.surrogatesInPath, "fullexport-" + GenericFormatter.SHORT_SECOND_FORMATTER.format(), ppf);
                     prop.put("export", 1);
                     prop.put("export_files", files);
@@ -115,7 +116,7 @@ public class ContentIntegrationPHPBB3_p {
                     prop.put("export_error", e.getMessage());
                 }
             }
-            
+
             if (post.containsKey("import")) {
             	File f = new File(dumpfile);
             	if (!f.exists()) {
@@ -130,7 +131,7 @@ public class ContentIntegrationPHPBB3_p {
                                             dbuser,
                                             dbpw
                                             );
-                    
+
                 	importer.imp(f);
                 	prop.put("import", 1);
                     importer.close();

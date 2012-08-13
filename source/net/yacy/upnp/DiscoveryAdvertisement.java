@@ -291,7 +291,7 @@ public class DiscoveryAdvertisement implements Runnable
                 log.debug(received);
             }
             String ntsField = msg.getHTTPHeaderField("nts");
-            if ( ntsField == null || ntsField.trim().length() == 0 ) {
+            if ( ntsField == null || ntsField.trim().isEmpty() ) {
                 if ( log.isDebugEnabled() ) {
                     log.debug("Skipping SSDP message, missing HTTP header 'ntsField' field");
                 }
@@ -299,7 +299,7 @@ public class DiscoveryAdvertisement implements Runnable
             }
             if ( ntsField.equals(NTS_SSDP_ALIVE) ) {
                 String deviceDescrLoc = msg.getHTTPHeaderField("location");
-                if ( deviceDescrLoc == null || deviceDescrLoc.trim().length() == 0 ) {
+                if ( deviceDescrLoc == null || deviceDescrLoc.trim().isEmpty() ) {
                     if ( log.isDebugEnabled() ) {
                         log.debug("Skipping SSDP message, missing HTTP header 'location' field");
                     }
@@ -320,21 +320,21 @@ public class DiscoveryAdvertisement implements Runnable
                 }
 
                 String nt = msg.getHTTPHeaderField("nt");
-                if ( nt == null || nt.trim().length() == 0 ) {
+                if ( nt == null || nt.trim().isEmpty() ) {
                     if ( log.isDebugEnabled() ) {
                         log.debug("Skipping SSDP message, missing HTTP header 'nt' field");
                     }
                     return;
                 }
                 String maxAge = msg.getHTTPFieldElement("Cache-Control", "max-age");
-                if ( maxAge == null || maxAge.trim().length() == 0 ) {
+                if ( maxAge == null || maxAge.trim().isEmpty() ) {
                     if ( log.isDebugEnabled() ) {
                         log.debug("Skipping SSDP message, missing HTTP header 'max-age' field");
                     }
                     return;
                 }
                 String usn = msg.getHTTPHeaderField("usn");
-                if ( usn == null || usn.trim().length() == 0 ) {
+                if ( usn == null || usn.trim().isEmpty() ) {
                     if ( log.isDebugEnabled() ) {
                         log.debug("Skipping SSDP message, missing HTTP header 'usn' field");
                     }
@@ -363,14 +363,14 @@ public class DiscoveryAdvertisement implements Runnable
                 }
             } else if ( ntsField.equals(NTS_SSDP_BYE_BYE) ) {
                 String usn = msg.getHTTPHeaderField("usn");
-                if ( usn == null || usn.trim().length() == 0 ) {
+                if ( usn == null || usn.trim().isEmpty() ) {
                     if ( log.isDebugEnabled() ) {
                         log.debug("Skipping SSDP message, missing HTTP header 'usn' field");
                     }
                     return;
                 }
                 String nt = msg.getHTTPHeaderField("nt");
-                if ( nt == null || nt.trim().length() == 0 ) {
+                if ( nt == null || nt.trim().isEmpty() ) {
                     if ( log.isDebugEnabled() ) {
                         log.debug("Skipping SSDP message, missing HTTP header 'nt' field");
                     }

@@ -40,8 +40,8 @@ public abstract class AbstractReference implements Reference {
     }
     
     protected static int max(Collection<Integer> a, Collection<Integer> b) {
-        if (a == null || a.size() == 0) return max(b);
-        if (b == null || b.size() == 0) return max(a);
+        if (a == null || a.isEmpty()) return max(b);
+        if (b == null || b.isEmpty()) return max(a);
         int ma = max(a);
         int mb = max(b);
         if (ma == Integer.MIN_VALUE) return mb;
@@ -51,8 +51,8 @@ public abstract class AbstractReference implements Reference {
     
     protected static int min(Collection<Integer> a, Collection<Integer> b) {
         assert a != null;
-        if (a == null || a.size() == 0) return min(b);
-        if (b == null || b.size() == 0) return min(a);
+        if (a == null || a.isEmpty()) return min(b);
+        if (b == null || b.isEmpty()) return min(a);
         int ma = min(a);
         int mb = min(b);
         if (ma == Integer.MAX_VALUE) return mb;
@@ -61,7 +61,7 @@ public abstract class AbstractReference implements Reference {
     }
 
     private static int max(Collection<Integer> a) {
-        if (a == null || a.size() == 0) return Integer.MIN_VALUE;
+        if (a == null || a.isEmpty()) return Integer.MIN_VALUE;
         Iterator<Integer> i = a.iterator();
         if (a.size() == 1) return i.next();
         if (a.size() == 2) return Math.max(i.next(), i.next());
@@ -75,7 +75,7 @@ public abstract class AbstractReference implements Reference {
     }
     
     private static int min(Collection<Integer> a) {
-        if (a == null || a.size() == 0) return Integer.MAX_VALUE;
+        if (a == null || a.isEmpty()) return Integer.MAX_VALUE;
         Iterator<Integer> i = a.iterator();
         if (a.size() == 1) return i.next();
         if (a.size() == 2) return Math.min(i.next(), i.next());

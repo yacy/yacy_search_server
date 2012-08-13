@@ -65,8 +65,8 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.MapTools;
@@ -306,7 +306,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public final String getIP() {
         final String ip = get(Seed.IP, Domains.LOCALHOST);
-        return (ip == null || ip.length() == 0) ? Domains.LOCALHOST : ip;
+        return (ip == null || ip.isEmpty()) ? Domains.LOCALHOST : ip;
     }
 
     /**
@@ -956,7 +956,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     public static Seed genRemoteSeed(
         final String seedStr,
-        final String key,
         final boolean ownSeed,
         final String patchIP) throws IOException {
         // this method is used to convert the external representation of a seed into a seed object
@@ -966,15 +965,15 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( seedStr == null ) {
             throw new IOException("seedStr == null");
         }
-        if ( seedStr.length() == 0 ) {
-            throw new IOException("seedStr.length() == 0");
+        if ( seedStr.isEmpty() ) {
+            throw new IOException("seedStr.isEmpty()");
         }
-        final String seed = crypt.simpleDecode(seedStr, key);
+        final String seed = crypt.simpleDecode(seedStr);
         if ( seed == null ) {
             throw new IOException("seed == null");
         }
-        if ( seed.length() == 0 ) {
-            throw new IOException("seed.length() == 0");
+        if ( seed.isEmpty() ) {
+            throw new IOException("seed.isEmpty()");
         }
 
         // extract hash
@@ -1041,7 +1040,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
         // seedURL
         final String seedURL = this.dna.get(SEEDLISTURL);
-        if ( seedURL != null && seedURL.length() > 0 ) {
+        if ( seedURL != null && !seedURL.isEmpty() ) {
             if ( !seedURL.startsWith("http://") && !seedURL.startsWith("https://") ) {
                 return "wrong protocol for seedURL";
             }
@@ -1063,7 +1062,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( ipString == null ) {
             return ipString + " -> IP is null";
         }
-        if ( ipString.length() > 0 && ipString.length() < 8 ) {
+        if ( !ipString.isEmpty() && ipString.length() < 8 ) {
             return ipString + " -> IP is too short: ";
         }
         if ( Switchboard.getSwitchboard().isAllIPMode() ) {
@@ -1092,11 +1091,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final String b = crypt.simpleEncode(r, key, 'b');
         // the compressed string may be longer that the uncompressed if there is too much overhead for compression meta-info
         // take simply that string that is shorter
-        if ( b.length() < z.length() ) {
-            return b;
-        } else {
-            return z;
-        }
+        return ( b.length() < z.length() ) ? b : z;
     }
 
     public final void save(final File f) throws IOException {
@@ -1111,7 +1106,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final char[] b = new char[(int) f.length()];
         fr.read(b, 0, b.length);
         fr.close();
-        final Seed mySeed = genRemoteSeed(new String(b), null, true, null);
+        final Seed mySeed = genRemoteSeed(new String(b), true, null);
         assert mySeed != null; // in case of an error, an IOException is thrown
         mySeed.dna.put(Seed.IP, ""); // set own IP as unknown
         return mySeed;

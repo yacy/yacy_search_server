@@ -179,6 +179,7 @@ public class PhpBB3Dao implements Dao {
         Thread dbreader = new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("PhpBB3Dao.toQueue");
                 Statement stmt = null;
                 ResultSet rs = null;
                 try {

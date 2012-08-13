@@ -62,6 +62,12 @@ public class MergeIterator<E> implements CloneableIterator<E> {
     }
 
     @Override
+    public void close() {
+        this.a.close();
+        this.b.close();
+    }
+
+    @Override
     public MergeIterator<E> clone(final Object modifier) {
         assert this.a != null;
         assert this.b != null;
@@ -159,6 +165,9 @@ public class MergeIterator<E> implements CloneableIterator<E> {
             public CloneableIterator<A> clone(Object modifier) {
                 return this;
             }
+            @Override
+            public void close() {
+            }
         };
         return cascade(iterators.iterator(), c, merger, up);
     }
@@ -179,6 +188,9 @@ public class MergeIterator<E> implements CloneableIterator<E> {
             @Override
             public CloneableIterator<A> clone(Object modifier) {
                 return this;
+            }
+            @Override
+            public void close() {
             }
         };
         final CloneableIterator<A> one = iiterators.next();
@@ -206,7 +218,7 @@ public class MergeIterator<E> implements CloneableIterator<E> {
 
     // do not remove the following method, it is not reference anywhere directly but indirectly using reflection
     // please see initialization of simpleMerge above
-    public static Object mergeEqualByReplace(final Object a, final Object b) {
+    public static Object mergeEqualByReplace(final Object a, @SuppressWarnings("unused") final Object b) {
         return a;
     }
 }

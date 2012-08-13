@@ -44,7 +44,7 @@ import de.anomic.server.serverSwitch;
 
 public class IndexImportOAIPMH_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
@@ -61,7 +61,7 @@ public class IndexImportOAIPMH_p {
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl);
-                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath, "oaipmh-one");
+                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath);
                     final ResumptionToken rt = r.getResumptionToken();
                     prop.put("import-one", 1);
                     prop.put("import-one_count", (rt == null) ? "not available" : Integer.toString(rt.getRecordCounter()));
@@ -127,7 +127,7 @@ public class IndexImportOAIPMH_p {
 
                 // start jobs for the sources
                 DigestURI url = null;
-                while (sourceList.size() > 0) {
+                while (!sourceList.isEmpty()) {
                     final String oaipmhurl = sourceList.remove(r.nextInt(sourceList.size()));
                     try {
                         url = new DigestURI(oaipmhurl);

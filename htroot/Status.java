@@ -72,7 +72,7 @@ public class Status
             post.remove("noforward");
         }
 
-        if ( post != null && post.size() > 0 ) {
+        if ( post != null && !post.isEmpty() ) {
             if ( sb.adminAuthenticated(header) < 2 ) {
             	prop.authenticationRequired();
                 return prop;
@@ -101,11 +101,11 @@ public class Status
                 ByteCount.resetCount();
                 redirect = true;
             } else if ( post.containsKey("popup") ) {
-                final boolean trigger_enabled = post.getBoolean("popup", false);
+                final boolean trigger_enabled = post.getBoolean("popup");
                 sb.setConfig("browserPopUpTrigger", trigger_enabled);
                 redirect = true;
             } else if ( post.containsKey("tray") ) {
-                final boolean trigger_enabled = post.getBoolean("tray", false);
+                final boolean trigger_enabled = post.getBoolean("tray");
                 sb.setConfig("trayIcon", trigger_enabled);
                 redirect = true;
             }
@@ -129,7 +129,7 @@ public class Status
         }
 
         // password protection
-        if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0)
+        if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty())
             && (!sb.getConfigBool("adminAccountForLocalhost", false)) ) {
             prop.put("protection", "0"); // not protected
             prop.put("urgentSetPassword", "1");
@@ -194,7 +194,7 @@ public class Status
         prop.put("host", hostIP != null ? hostIP.getHostAddress() : "Unkown IP");
 
         // ssl support
-        prop.put("sslSupport", sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
+        prop.put("sslSupport", sb.getConfig("keyStore", "").isEmpty() ? "0" : "1");
 
         if ( sb.getConfigBool("remoteProxyUse", false) ) {
             prop.put("remoteProxy", "1");

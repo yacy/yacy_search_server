@@ -12,12 +12,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -50,34 +50,35 @@ public class YaCySearchClient {
      * YaCy Search Results are produced in Opensearch format which is basically RSS.
      * The YaCy Search Result API Client is therefore implemented as a simple RSS reader.
      */
-    private String host, query;
-    private int port, offset;
-    
+    private final String host, query;
+    private final int port;
+    private int offset;
+
     public YaCySearchClient(final String host, final int port, final String query) {
         this.host = host;
         this.port = port;
         this.offset = -10;
         this.query = query;
     }
-    
+
     public SearchResult next() throws IOException {
         this.offset += 10; // you may call this again and get the next results
         return new SearchResult();
     }
-    
+
     public class SearchResult extends ArrayList<RSSEntry> {
         private static final long serialVersionUID = 1337L;
         public SearchResult() throws IOException {
             URL url;
             Document doc;
             String u = new StringBuilder(120).append("http://")
-                    .append(host)
+                    .append(YaCySearchClient.this.host)
                     .append(":")
-                    .append(port)
+                    .append(YaCySearchClient.this.port)
                     .append("/yacysearch.rss?verify=false&startRecord=")
-                    .append(offset)
+                    .append(YaCySearchClient.this.offset)
                     .append("&maximumRecords=10&resource=local&query=")
-                    .append(query.replaceAll(" ", "+")).toString();
+                    .append(YaCySearchClient.this.query.replaceAll(" ", "+")).toString();
             try { url = new URL(u); } catch (MalformedURLException e) { throw new IOException (e); }
             try { doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream()); }
             catch (ParserConfigurationException e) { throw new IOException (e); }
@@ -86,7 +87,7 @@ public class YaCySearchClient {
             for (int i = 0; i < nodes.getLength(); i++)
                 this.add(new RSSEntry((Element) nodes.item(i)));
         }
-        
+
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder(this.size() * 80 + 1);
@@ -98,11 +99,11 @@ public class YaCySearchClient {
     public static class RSSEntry {
         String title, link, snippet;
         public RSSEntry(Element element) {
-            title = val(element, "title", "");
-            link  = val(element, "link", "");
-            snippet = val(element, "description", "");
+            this.title = val(element, "title", "");
+            this.link  = val(element, "link", "");
+            this.snippet = val(element, "description", "");
         }
-        private String val(Element parent, String label, String dflt) {
+        private static String val(Element parent, String label, String dflt) {
             Element e = (Element) parent.getElementsByTagName(label).item(0);
             Node child = e.getFirstChild();
             return (child instanceof CharacterData) ?
@@ -112,15 +113,15 @@ public class YaCySearchClient {
         @Override
         public String toString() {
             return new StringBuilder(80).append("Title      : ")
-                    .append(title)
+                    .append(this.title)
                     .append("\nLink       : ")
-                    .append(link)
+                    .append(this.link)
                     .append("\nDescription: ")
-                    .append(snippet)
+                    .append(this.snippet)
                     .append("\n").toString();
         }
     }
-    
+
     /**
      * Call the main method with one argument, the query string
      * search results are then simply printed out.

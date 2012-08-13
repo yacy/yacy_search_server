@@ -1,4 +1,4 @@
-//SitemapImporter.java 
+//SitemapImporter.java
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -30,11 +30,11 @@ import java.util.Date;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.document.parser.sitemapParser;
+import net.yacy.document.parser.sitemapParser.URLEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.retrieval.Request;
 
 public class SitemapImporter extends Thread {
@@ -43,7 +43,7 @@ public class SitemapImporter extends Thread {
     private static final Log logger = new Log("SITEMAP");
     private DigestURI siteMapURL = null;
     private final Switchboard sb;
-    
+
     public SitemapImporter(final Switchboard sb, final DigestURI sitemapURL, final CrawlProfile profileEntry) {
         assert sitemapURL != null;
         this.sb = sb;
@@ -52,11 +52,16 @@ public class SitemapImporter extends Thread {
         this.crawlingProfile = profileEntry;
     }
 
+    @Override
     public void run() {
         try {
             logger.logInfo("Start parsing sitemap file " + this.siteMapURL);
             sitemapParser.SitemapReader parser = sitemapParser.parse(this.siteMapURL);
-            for (sitemapParser.URLEntry entry: parser) process(entry);
+            parser.start();
+            URLEntry item;
+            while ((item = parser.take()) != sitemapParser.POISON_URLEntry) {
+                process(item);
+            }
         } catch (final Exception e) {
             logger.logWarning("Unable to parse sitemap file " + this.siteMapURL, e);
         }
@@ -76,10 +81,10 @@ public class SitemapImporter extends Thread {
         // check if the url is known and needs to be recrawled
         Date lastMod = entry.lastmod(null);
         if (lastMod != null) {
-            final String dbocc = this.sb.urlExists(Segments.Process.LOCALCRAWLING, nexturlhash);
+            final String dbocc = this.sb.urlExists(nexturlhash);
             if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                 // the url was already loaded. we need to check the date
-                final URIMetadataRow oldEntry = this.sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(nexturlhash);
+                final URIMetadata oldEntry = this.sb.index.urlMetadata().load(nexturlhash);
                 if (oldEntry != null) {
                     final Date modDate = oldEntry.moddate();
                     // check if modDate is null

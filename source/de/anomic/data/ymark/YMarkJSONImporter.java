@@ -141,9 +141,9 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 			if(value instanceof java.lang.String) {
 				this.value.append((String)value);
 			} else if(value instanceof java.lang.Boolean) {
-				this.value.append((Boolean)value);
+				this.value.append(value);
 			} else if(value instanceof java.lang.Number) {
-				this.value.append((Number)value);
+				this.value.append(value);
 			}
 		}
 		return true;

@@ -35,11 +35,10 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.ResultURLs.InitExecEntry;
@@ -117,7 +116,7 @@ public class CrawlResults {
                 final String hash = post.get("hash", null);
                 if (hash != null) {
                     // delete from database
-                    sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(hash.getBytes());
+                    sb.index.urlMetadata().remove(hash.getBytes());
                 }
             }
 
@@ -127,7 +126,7 @@ public class CrawlResults {
                 if (hashpart != null) {
                     // delete all urls for this domain from database
                     try {
-                        sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).deleteDomain(hashpart);
+                        sb.index.urlMetadata().deleteDomain(hashpart);
                         ResultURLs.deleteDomain(tabletype, domain, hashpart);
                     } catch (final IOException e) {
                         Log.logException(e);
@@ -179,7 +178,7 @@ public class CrawlResults {
             boolean dark = true;
             String urlstr, urltxt;
             Seed initiatorSeed, executorSeed;
-            URIMetadataRow urle;
+            URIMetadata urle;
 
             int cnt = 0;
             final Iterator<Map.Entry<String, InitExecEntry>> i = ResultURLs.results(tabletype);
@@ -187,7 +186,7 @@ public class CrawlResults {
             while (i.hasNext()) {
                 entry = i.next();
                 try {
-                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(UTF8.getBytes(entry.getKey()));
+                    urle = sb.index.urlMetadata().load(UTF8.getBytes(entry.getKey()));
                     if (urle == null) {
                         Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;
@@ -233,7 +232,7 @@ public class CrawlResults {
                         prop.put("table_indexed_" + cnt + "_showTitle", (showTitle) ? "1" : "0");
                         prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
 
-                        if (urle.dc_title() == null || urle.dc_title().trim().length() == 0)
+                        if (urle.dc_title() == null || urle.dc_title().trim().isEmpty())
                             prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "0");
                         else {
                             prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "1");

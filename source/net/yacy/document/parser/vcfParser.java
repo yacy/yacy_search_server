@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -88,7 +89,7 @@ public class vcfParser extends AbstractParser implements Parser {
                 }
 
                 if (line == null) break;
-                else if (line.length() == 0) continue;
+                else if (line.isEmpty()) continue;
 
                 lineNr++;
                 final int pos = line.indexOf(':',0);
@@ -197,12 +198,13 @@ public class vcfParser extends AbstractParser implements Parser {
                     }
 
                 } else {
-                    if (this.log.isFinest()) this.log.logFinest("Invalid data in vcf file" +
+                    if (AbstractParser.log.isFinest()) AbstractParser.log.logFinest("Invalid data in vcf file" +
                                              "\n\tURL: " + url +
                                              "\n\tLine: " + line +
                                              "\n\tLine-Nr: " + lineNr);
                 }
             }
+            try {inputReader.close();} catch (IOException e) {}
 
             final String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
             final byte[] text = UTF8.getBytes(parsedDataText.toString());

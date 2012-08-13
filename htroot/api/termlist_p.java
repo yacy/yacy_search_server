@@ -32,24 +32,19 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class termlist_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
     	final Log log = new Log("TERMLIST");
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        Segment segment = null;
+        Segment segment = sb.index;
         final boolean delete = post != null && post.containsKey("delete");
         final long mincount = post == null ? 10000 : post.getLong("mincount", 10000);
-        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header)) {
-            segment = sb.indexSegments.segment(post.get("segment"));
-        }
-        if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         final Iterator<Rating<byte[]>> i = segment.termIndex().referenceCountIterator(null, false, false);
         Rating<byte[]> e;
         int c = 0, termnumber = 0;

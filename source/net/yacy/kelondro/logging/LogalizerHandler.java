@@ -1,4 +1,4 @@
-//LogalizerHandler.java 
+//LogalizerHandler.java
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -37,17 +37,18 @@ public final class LogalizerHandler extends Handler {
 
     public static boolean enabled;
     public static boolean debug;
-    
+
     public LogalizerHandler() {
         super();
-        
+
         final LogManager manager = LogManager.getLogManager();
         final String className = getClass().getName();
 
         enabled = "true".equalsIgnoreCase(manager.getProperty(className + ".enabled"));
         debug = "true".equalsIgnoreCase(manager.getProperty(className + ".debug"));
     }
-    
+
+    @Override
     public final void publish(final LogRecord record) {
         if (enabled) {
             final LogParser temp = new LogParser();
@@ -58,14 +59,16 @@ public final class LogalizerHandler extends Handler {
         }
         flush();
     }
-    
-    public final Map<String, Object> getParserResults(final LogParser parsername) {
+
+    public final static Map<String, Object> getParserResults(final LogParser parsername) {
         return (parsername == null) ? null : parsername.getResults();
     }
-    
+
+    @Override
     public final void close() throws SecurityException {
     }
 
+    @Override
     public final void flush() {
     }
 }

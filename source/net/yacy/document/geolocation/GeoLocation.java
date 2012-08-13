@@ -82,7 +82,7 @@ public class GeoLocation extends IntegerGeoPoint implements Comparable<GeoLocati
         return 0;
     }
 
-    private long ph(int population) {
+    private static long ph(int population) {
         if (population > 10000) population -= 10000;
         return population;
     }

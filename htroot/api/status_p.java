@@ -32,7 +32,6 @@ import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -41,22 +40,18 @@ public class status_p {
     public static final String STATE_RUNNING = "running";
     public static final String STATE_PAUSED = "paused";
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        Segment segment = null;
         final boolean html = post != null && post.containsKey("html");
         prop.setLocalized(html);
-        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header)) {
-            segment = sb.indexSegments.segment(post.get("segment"));
-        }
-        if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        Segment segment = sb.index;
 
         prop.put("rejected", "0");
         sb.updateMySeed();
         final int cacheMaxSize = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
-        prop.putNum("ppm", sb.currentPPM());
+        prop.putNum("ppm", Switchboard.currentPPM());
         prop.putNum("qpm", sb.peers.mySeed().getQPM());
         prop.putNum("wordCacheSize", segment.termIndex().getBufferSize());
         prop.putNum("wordCacheMaxSize", cacheMaxSize);

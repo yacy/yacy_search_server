@@ -40,13 +40,12 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.GuiHandler;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.logging.LogalizerHandler;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class ViewLog_p {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         String[] log = new String[0];
         boolean reversed = false;
@@ -58,7 +57,7 @@ public class ViewLog_p {
          * interface.
          */
         String filter = ".*.*";
-        
+
         if(post != null){
             reversed = (post.containsKey("mode") && "reversed".equals(post.get("mode")));
             json = post.containsKey("json");
@@ -84,13 +83,13 @@ public class ViewLog_p {
                 displaySubmenu = true;
              }
         }
-        
+
         prop.put("submenu", displaySubmenu ? "1" : "0");
         prop.put("reverseChecked", reversed ? "1" : "0");
         prop.put("lines", lines);
         prop.put("maxlines",maxlines);
         prop.putHTML("filter", filter);
-        
+
         // trying to compile the regular expression filter expression
         Matcher filterMatcher = null;
         try {
@@ -133,7 +132,7 @@ public class ViewLog_p {
             lc++;
         }
         prop.put("log", lc);
-        
+
         // return rewrite properties
         return prop;
     }

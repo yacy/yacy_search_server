@@ -6,7 +6,7 @@ import de.anomic.server.serverSwitch;
 
 public class OverlayInteraction {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
 
@@ -15,10 +15,10 @@ public class OverlayInteraction {
         prop.put("enabled_url", post.get("url", ""));
 
         prop.put("enabled_urlhash", post.get("urlhash", ""));
-        
+
         prop.put("enabled_action", post.get("action", ""));
-        
-        prop.put("enabled_color", env.getConfig("color_tableheader", "")); 
+
+        prop.put("enabled_color", env.getConfig("color_tableheader", ""));
 
         return prop;
     }

@@ -82,7 +82,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         for (String s: idNames) {
             if (s == null) continue;
             s = s.trim();
-            if (s.length() > 0) sessionIDnames.put(s, PRESENT);
+            if (!s.isEmpty()) sessionIDnames.put(s, PRESENT);
         }
     }
 
@@ -135,6 +135,10 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         url = url.trim();
         url = UTF8.decodeURL(url); // normalization here
         //url = patternSpace.matcher(url).replaceAll(" ");
+        if (url.startsWith("//")) {
+            // patch for urls starting with "//" which can be found in the wild
+            url = "http:" + url;
+        }
         if (url.startsWith("\\\\")) {
             url = "smb://" + patternBackSlash.matcher(url.substring(2)).replaceAll("/");
         }
@@ -154,7 +158,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             url = "http://" + url;
             p = 4;
         }
-        this.protocol = url.substring(0, p).toLowerCase().trim();
+        this.protocol = url.substring(0, p).toLowerCase().trim().intern();
         if (url.length() < p + 4) throw new MalformedURLException("URL not parseable: '" + url + "'");
         if (!this.protocol.equals("file") && url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
@@ -162,20 +166,20 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
-                    this.host = url.substring(p + 3);
+                    this.host = url.substring(p + 3).intern();
                     this.userInfo = null;
                 } else {
-                    this.host = url.substring(r + 1);
+                    this.host = url.substring(r + 1).intern();
                     this.userInfo = url.substring(p + 3, r);
                 }
                 this.path = "/";
             } else {
-                this.host = url.substring(p + 3, q).trim();
+                this.host = url.substring(p + 3, q).trim().intern();
                 if ((r = this.host.indexOf('@')) < 0) {
                     this.userInfo = null;
                 } else {
                     this.userInfo = this.host.substring(0, r);
-                    this.host = this.host.substring(r + 1);
+                    this.host = this.host.substring(r + 1).intern();
                 }
                 this.path = url.substring(q);
             }
@@ -271,7 +275,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return this.contentDomain;
     }
 
-    public static MultiProtocolURI newURL(final String baseURL, final String relPath) throws MalformedURLException {
+    public static MultiProtocolURI newURL(final String baseURL, String relPath) throws MalformedURLException {
+        if (relPath.startsWith("//")) {
+            // patch for urls starting with "//" which can be found in the wild
+            relPath = "http:" + relPath;
+        }
         if ((baseURL == null) ||
             isHTTP(relPath) ||
             isHTTPS(relPath) ||
@@ -284,7 +292,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return new MultiProtocolURI(new MultiProtocolURI(baseURL), relPath);
     }
 
-    public static MultiProtocolURI newURL(final MultiProtocolURI baseURL, final String relPath) throws MalformedURLException {
+    public static MultiProtocolURI newURL(final MultiProtocolURI baseURL, String relPath) throws MalformedURLException {
+        if (relPath.startsWith("//")) {
+            // patch for urls starting with "//" which can be found in the wild
+            relPath = (baseURL == null) ? "http:" + relPath : baseURL.getProtocol() + ":" + relPath;
+        }
         if ((baseURL == null) ||
             isHTTP(relPath) ||
             isHTTPS(relPath) ||
@@ -327,7 +339,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
                 throw new MalformedURLException("relative path malformed: " + relPath);
             }
-            this.path = baseURL.path + relPath;
+            if (relPath.startsWith("/")) this.path = baseURL.path + relPath.substring(1); else this.path = baseURL.path + relPath;
         } else {
             if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
                 this.path = baseURL.path + relPath;
@@ -365,9 +377,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     //  resolve '..'
-    public static final String resolveBackpath(final String path) {
+    private static final String resolveBackpath(final String path) {
         String p = path;
-        if (p.length() == 0 || p.charAt(0) != '/') { p = "/" + p; }
+        if (p.isEmpty() || p.charAt(0) != '/') { p = "/" + p; }
         final Matcher qm = patternQuestion.matcher(p); // do not resolve backpaths in the post values
         final int end = qm.find() ? qm.start() : p.length();
         final Matcher matcher = backPathPattern.matcher(p);
@@ -574,6 +586,10 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     private void identPort(final String inputURL, final int dflt) throws MalformedURLException {
         // identify ref in file
+        if (this.host == null) {
+            this.port = dflt;
+            return;
+        }
         int pss = 0;
         int ip6 = this.host.indexOf('[');
         if (ip6 >= 0 && ((ip6 = this.host.indexOf("]", ip6)) > 0)) {
@@ -710,10 +726,17 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public String getHost() {
-        return (this.host.charAt(0) == '[' && this.host.charAt(this.host.length() - 1) == ']') ? this.host.substring(1, this.host.length() - 1) : this.host;
+        if (this.host == null) return null;
+        if (this.host.length() > 0 && this.host.charAt(0) == '[') {
+            int p = this.host.indexOf(']');
+            if (p < 0) return this.host;
+            return this.host.substring(1, p);
+        }
+        return this.host;
     }
 
     public String getTLD() {
+        if (this.host == null) return "";
         int p = this.host.lastIndexOf('.');
         if (p < 0) return "";
         return this.host.substring(p + 1);
@@ -801,7 +824,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     public static Map<String, Object> parseCamelCase(String s) {
         final Map<String, Object> token = new LinkedHashMap<String, Object>();
-        if (s.length() == 0) return token;
+        if (s.isEmpty()) return token;
         int p = 0;
         CharType type = charType(s.charAt(0)), nct = type;
         while (p < s.length()) {
@@ -838,7 +861,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public String toNormalform(final boolean excludeReference, final boolean stripAmp, final boolean removeSessionID) {
         String result = toNormalform0(excludeReference, removeSessionID);
         if (stripAmp) {
-            result = ampPattern.matcher(result).replaceAll("&");
+            Matcher matcher = ampPattern.matcher(result);
+            while (matcher.find()) {
+                result = matcher.replaceAll("&");
+                matcher.reset(result);
+            }
         }
         return result;
     }
@@ -903,6 +930,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
           this.port == other.port;
     }
 
+    @Override
     public int compareTo(final MultiProtocolURI h) {
         return toString().compareTo(h.toString());
     }
@@ -1831,7 +1859,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      * Please call isHTTP(), isHTTPS() and isFTP() before using this class
      */
     public java.net.URL getURL() throws MalformedURLException {
-        if (!(isHTTP() || isHTTPS() || isFTP())) throw new UnsupportedOperationException();
+        if (!(isHTTP() || isHTTPS() || isFTP())) throw new MalformedURLException();
         return new java.net.URL(this.toNormalform(false, true));
     }
 
@@ -1839,8 +1867,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      * create a standard java File.
      * Please call isFile() before using this class
      */
-    public java.io.File getFSFile() {
-        if (!isFile()) throw new UnsupportedOperationException();
+    public java.io.File getFSFile() throws MalformedURLException {
+        if (!isFile()) throw new MalformedURLException();
         return new java.io.File(this.toNormalform(false, true).substring(7));
     }
 
@@ -1850,7 +1878,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      * @throws MalformedURLException
      */
     public SmbFile getSmbFile() throws MalformedURLException {
-        if (!isSMB()) throw new UnsupportedOperationException();
+        if (!isSMB()) throw new MalformedURLException();
         final String url = unescape(this.toNormalform(false, true));
         return new SmbFile(url);
     }
@@ -2042,12 +2070,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         if (p > 0) normalizedURL = normalizedURL.substring(p + 2);
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
-
+/*
     public static void main(final String[] args) {
         for (final String s: args) System.out.println(toTokens(s));
     }
-
-    /*
+*/
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
           new String[]{null, "C:WINDOWS\\CMD0.EXE"},
@@ -2094,15 +2121,17 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
           new String[]{null, "smb://localhost/repository/"},
           new String[]{null, "\\\\localhost\\"}, // Windows-like notion of smb shares
           new String[]{null, "\\\\localhost\\repository"},
-          new String[]{null, "\\\\localhost\\repository\\"}
+          new String[]{null, "\\\\localhost\\repository\\"},
+          new String[]{null, "http://test.net/test1.htm?s=multiple&amp;a=amp&amp;b=in&amp;c=url"},
+          new String[]{null, "http://test.net/test2.htm?s=multiple&amp;amp;amp;amp;a=amp"}
           };
         //MultiProtocolURI.initSessionIDNames(FileUtils.loadList(new File("defaults/sessionid.names")));
         String environment, url;
         MultiProtocolURI aURL, aURL1;
         java.net.URL jURL;
-        for (int i = 0; i < test.length; i++) {
-            environment = test[i][0];
-            url = test[i][1];
+        for (String[] element : test) {
+            environment = element[0];
+            url = element[1];
             try {aURL = MultiProtocolURI.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}
@@ -2134,6 +2163,5 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             }
         }
     }
-    */
 
 }

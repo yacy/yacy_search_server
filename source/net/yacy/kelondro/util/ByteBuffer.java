@@ -131,6 +131,10 @@ public final class ByteBuffer extends OutputStream {
     public int length() {
         return this.length;
     }
+    
+    public boolean isEmpty() {
+        return this.length == 0;
+    }
 
     private void grow() {
         int newsize = this.buffer.length * 2 + 1;
@@ -549,13 +553,12 @@ public final class ByteBuffer extends OutputStream {
                 System.arraycopy(b, c, bb, 0, bb.length);
                 a.add(bb);
                 break loop;
-            } else {
-                // found a separator
-                final byte[] bb = new byte[i - c];
-                System.arraycopy(b, c, bb, 0, bb.length);
-                a.add(bb);
-                c = i + 1;
             }
+            // found a separator
+            final byte[] bb = new byte[i - c];
+            System.arraycopy(b, c, bb, 0, bb.length);
+            a.add(bb);
+            c = i + 1;
         }
         return a;
     }

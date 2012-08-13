@@ -69,7 +69,7 @@ public class BlacklistCleaner_p {
         Blacklist.class
     };
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
 
         // initialize the list manager
@@ -86,7 +86,7 @@ public class BlacklistCleaner_p {
 
             if (post.containsKey("listNames")) {
                 blacklistToUse = post.get("listNames");
-                if (blacklistToUse.length() == 0 || !ListManager.listSetContains("listManager.listsPath", blacklistToUse)) {
+                if (blacklistToUse.isEmpty() || !ListManager.listSetContains("listManager.listsPath", blacklistToUse)) {
                     prop.put("results", "2");
 
                 }
@@ -109,7 +109,7 @@ public class BlacklistCleaner_p {
                 final Map<String, BlacklistError> illegalEntries = getIllegalEntries(blacklistToUse, Switchboard.urlBlacklist, allowRegex);
                 prop.put(RESULTS + "blList", blacklistToUse);
                 prop.put(RESULTS + "entries", illegalEntries.size());
-                prop.putHTML(RESULTS + "blEngine", Switchboard.urlBlacklist.getEngineInfo());
+                prop.putHTML(RESULTS + "blEngine", Blacklist.getEngineInfo());
                 prop.put(RESULTS + "disabled", (illegalEntries.isEmpty()) ? "1" : "0");
                 if (!illegalEntries.isEmpty()) {
                     prop.put(RESULTS + DISABLED + "entries", illegalEntries.size());
@@ -255,7 +255,7 @@ public class BlacklistCleaner_p {
             }
             legalEntries.add(element);
 
-            err = blEngine.checkError(element, properties);
+            err = Blacklist.checkError(element, properties);
 
             if (err.getInt() > 0) {
                 illegalEntries.put(element, err);

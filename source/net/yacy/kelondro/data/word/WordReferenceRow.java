@@ -217,6 +217,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                 this.worker[i] = new Thread() {
                     @Override
                     public void run() {
+                        Thread.currentThread().setName("WordReferenceRow.ExternalParser:" + concurrency);
                         String s;
                         try {
                             while ((s = ExternalParser.this.in.take()) != PIN) {
@@ -429,5 +430,11 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         throw new UnsupportedOperationException("");
 
     }
+
+    @Override
+    public String hosthash() {
+        return ASCII.String(this.urlhash(), 6, 6);
+    }
+
 
 }

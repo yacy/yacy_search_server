@@ -2721,7 +2721,7 @@ Active:==活动:
 #Indexing Queue==Indexier Puffer
 Loader Queue==加载器队列
 paused==已暂停
-Queues==队列
+>Queues<==>队列<
 Local Crawl==本地crawl
 Remote triggered Crawl==引入远端crawl
 Pre-Queueing==预排序

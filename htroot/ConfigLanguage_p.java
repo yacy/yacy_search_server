@@ -1,4 +1,4 @@
-//ConfigLanguage_p.java 
+//ConfigLanguage_p.java
 //-----------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -52,7 +52,7 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigLanguage_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
         Switchboard sb = (Switchboard) env;
@@ -72,7 +72,7 @@ public class ConfigLanguage_p {
 
             // store this call as api call
             ((Switchboard) env).tables.recordAPICall(post, "ConfigLanguage_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "language settings: " + selectedLanguage);
-            
+
             //change language
             if (post.containsKey("use_button") && selectedLanguage != null){
                 /* Only change language if filename is contained in list of filesnames
@@ -142,7 +142,7 @@ public class ConfigLanguage_p {
             final String langName = langNames.get(langKey);
             prop.put("langlist_" + (count + 1) + "_file", langFile);
             prop.put("langlist_" + (count + 1) + "_name", ((langName == null) ? langKey : langName));
-            
+
             if(env.getConfig("locale.language", "default").equals(langKey)) {
                 prop.put("langlist_" + (count + 1) + "_selected", "selected=\"selected\"");
                 prop.put("langlist_0_selected", " "); // reset Default

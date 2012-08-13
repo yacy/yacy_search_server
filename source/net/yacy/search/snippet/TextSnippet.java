@@ -24,7 +24,6 @@
 
 package net.yacy.search.snippet;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,23 +35,24 @@ import java.util.SortedMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.SentenceReader;
 import net.yacy.document.SnippetExtractor;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.peers.RemoteSearch;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import de.anomic.crawler.retrieval.Request;
@@ -60,6 +60,7 @@ import de.anomic.crawler.retrieval.Response;
 
 public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnippet> {
 
+    public static final long snippetMinLoadDelay = 10;
     private static final int MAX_CACHE = 1000;
 
 
@@ -146,12 +147,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public TextSnippet(
             final LoaderDispatcher loader,
             final String solrText,
-            final URIMetadataRow row,
+            final URIMetadata row,
             final HandleSet queryhashes,
             final CacheStrategy cacheStrategy,
             final boolean pre,
             final int snippetMaxLength,
-            final int maxDocLen,
             final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final DigestURI url = row.url();
@@ -182,7 +182,12 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // try the solr text first
             if (solrText != null) {
                 // compute sentences from solr query
-                sentences = Document.getSentences(pre, new ByteArrayInputStream(UTF8.getBytes(solrText)));
+                final SentenceReader sr = new SentenceReader(solrText, pre);
+                sentences = new ArrayList<StringBuilder>();
+                while (sr.hasNext()) {
+                    sentences.add(sr.next());
+                }
+
                 if (sentences != null) {
                     try {
                         final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
@@ -201,7 +206,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             removeMatchingHashes(row.dc_subject(), remainingHashes);
             removeMatchingHashes(row.url().toNormalform(true, true).replace('-', ' '), remainingHashes);
 
-            if (remainingHashes.size() == 0) {
+            if (remainingHashes.isEmpty()) {
                 // the snippet is fully inside the metadata!
 
                 if (de.anomic.crawler.Cache.has(url.hash())) {
@@ -209,7 +214,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     final Request request = loader == null ? null : loader.request(url, true, reindexing);
                     Response response;
                     try {
-                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, true);
+                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH, snippetMinLoadDelay);
                     } catch (IOException e1) {
                         response = null;
                     }
@@ -226,23 +231,22 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 if (sentences == null) {
                     init(url.hash(), null, ResultClass.SOURCE_METADATA, null);
                     return;
-                } else {
-                    // use the first lines from the text as snippet
-                    final StringBuilder s = new StringBuilder(snippetMaxLength);
-                    for (final StringBuilder t: sentences) {
-                        s.append(t).append(' ');
-                        if (s.length() >= snippetMaxLength / 4 * 3) break;
-                    }
-                    if (s.length() > snippetMaxLength) { s.setLength(snippetMaxLength); s.trimToSize(); }
-                    init(url.hash(), s.length() > 0 ? s.toString() : this.line, ResultClass.SOURCE_METADATA, null);
-                    return;
                 }
+                // use the first lines from the text as snippet
+                final StringBuilder s = new StringBuilder(snippetMaxLength);
+                for (final StringBuilder t: sentences) {
+                    s.append(t).append(' ');
+                    if (s.length() >= snippetMaxLength / 4 * 3) break;
+                }
+                if (s.length() > snippetMaxLength) { s.setLength(snippetMaxLength); s.trimToSize(); }
+                init(url.hash(), s.length() > 0 ? s.toString() : this.line, ResultClass.SOURCE_METADATA, null);
+                return;
             }
 
             // try to load the resource from the cache
             Response response = null;
             try {
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB() || cacheStrategy == null) ? CacheStrategy.NOCACHE : cacheStrategy, true);
+                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB()) ? CacheStrategy.NOCACHE : (cacheStrategy == null ? CacheStrategy.CACHEONLY : cacheStrategy), BlacklistType.SEARCH, snippetMinLoadDelay);
             } catch (IOException e) {
                 response = null;
             }
@@ -265,6 +269,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 this.resultStatus = ResultClass.SOURCE_WEB;
             }
 
+            // parse the document to get all sentenced; available for snippet computation
             Document document = null;
             try {
                 document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
@@ -304,11 +309,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         //String imageline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
 
         snippetLine = "";
-        //if (audioline != null) line += (line.length() == 0) ? audioline : "<br />" + audioline;
-        //if (videoline != null) line += (line.length() == 0) ? videoline : "<br />" + videoline;
-        //if (appline   != null) line += (line.length() == 0) ? appline   : "<br />" + appline;
-        //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
-        if (textline  != null) snippetLine += (snippetLine.length() == 0) ? textline  : "<br />" + textline;
+        //if (audioline != null) line += (line.isEmpty()) ? audioline : "<br />" + audioline;
+        //if (videoline != null) line += (line.isEmpty()) ? videoline : "<br />" + videoline;
+        //if (appline   != null) line += (line.isEmpty()) ? appline   : "<br />" + appline;
+        //if (hrefline  != null) line += (line.isEmpty()) ? hrefline  : "<br />" + hrefline;
+        if (textline  != null) snippetLine += (snippetLine.isEmpty()) ? textline  : "<br />" + textline;
 
         if (snippetLine == null || !remainingHashes.isEmpty()) {
             init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");

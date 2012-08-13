@@ -63,7 +63,7 @@ public class KeyList implements Iterable<String> {
             String l;
             try {
                 while ((l = reader.readLine()) != null) {
-                    if (l.length() == 0 || l.charAt(0) == '#') continue;
+                    if (l.isEmpty() || l.charAt(0) == '#') continue;
                     l = l.trim().toLowerCase();
                     this.keys.put(l, _obj);
                 }

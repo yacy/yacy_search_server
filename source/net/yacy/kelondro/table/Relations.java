@@ -32,9 +32,9 @@ import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 
@@ -81,7 +81,7 @@ public class Relations {
         return tablename + "-" + keysize + "-" + payloadsize + ".eco";
     }
 
-    public void declareRelation(final String name, final int keysize, final int payloadsize) throws RowSpaceExceededException {
+    public void declareRelation(final String name, final int keysize, final int payloadsize) throws SpaceExceededException {
         // try to get the relation from the relation-cache
         final Index relation = this.relations.get(name);
         if (relation != null) return;
@@ -96,7 +96,7 @@ public class Relations {
                 Index table;
                 try {
                     table = new Table(new File(this.baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727, true);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     table = new Table(new File(this.baseDir, list[i]), row, 0, 0, false, this.exceed134217727, true);
                 }
                 this.relations.put(name, table);
@@ -108,13 +108,13 @@ public class Relations {
         Index table;
         try {
             table = new Table(new File(this.baseDir, targetfilename), row, 1024*1024, 0, this.useTailCache, this.exceed134217727, true);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             table = new Table(new File(this.baseDir, targetfilename), row, 0, 0, false, this.exceed134217727, true);
         }
         this.relations.put(name, table);
     }
 
-    public Index getRelation(final String name) throws RowSpaceExceededException {
+    public Index getRelation(final String name) throws SpaceExceededException {
         // try to get the relation from the relation-cache
         final Index relation = this.relations.get(name);
         if (relation != null) return relation;
@@ -126,7 +126,7 @@ public class Relations {
                 Index table;
                 try {
                     table = new Table(new File(this.baseDir, element), row, 1024*1024, 0, this.useTailCache, this.exceed134217727, true);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     table = new Table(new File(this.baseDir, element), row, 0, 0, false, this.exceed134217727, true);
                 }
                 this.relations.put(name, table);
@@ -137,13 +137,13 @@ public class Relations {
         return null;
     }
 
-    public String putRelation(final String name, final String key, final String value) throws IOException, RowSpaceExceededException {
+    public String putRelation(final String name, final String key, final String value) throws IOException, SpaceExceededException {
         final byte[] r = putRelation(name, UTF8.getBytes(key), UTF8.getBytes(value));
         if (r == null) return null;
         return UTF8.String(r);
     }
 
-    public byte[] putRelation(final String name, final byte[] key, final byte[] value) throws IOException, RowSpaceExceededException {
+    public byte[] putRelation(final String name, final byte[] key, final byte[] value) throws IOException, SpaceExceededException {
         final Index table = getRelation(name);
         if (table == null) return null;
         final Row.Entry entry = table.row().newEntry();
@@ -156,13 +156,13 @@ public class Relations {
         return oldentry.getColBytes(3, true);
     }
 
-    public String getRelation(final String name, final String key) throws IOException, RowSpaceExceededException {
+    public String getRelation(final String name, final String key) throws IOException, SpaceExceededException {
         final byte[] r = getRelation(name, UTF8.getBytes(key));
         if (r == null) return null;
         return UTF8.String(r);
     }
 
-    public byte[] getRelation(final String name, final byte[] key) throws IOException, RowSpaceExceededException {
+    public byte[] getRelation(final String name, final byte[] key) throws IOException, SpaceExceededException {
         final Index table = getRelation(name);
         if (table == null) return null;
         final Row.Entry entry = table.get(key, false);
@@ -170,13 +170,13 @@ public class Relations {
         return entry.getColBytes(3, true);
     }
 
-    public boolean hasRelation(final String name, final byte[] key) throws RowSpaceExceededException {
+    public boolean hasRelation(final String name, final byte[] key) throws SpaceExceededException {
         final Index table = getRelation(name);
         if (table == null) return false;
         return table.has(key);
     }
 
-    public byte[] removeRelation(final String name, final byte[] key) throws IOException, RowSpaceExceededException {
+    public byte[] removeRelation(final String name, final byte[] key) throws IOException, SpaceExceededException {
         final Index table = getRelation(name);
         if (table == null) return null;
         final Row.Entry entry = table.remove(key);
@@ -193,7 +193,7 @@ public class Relations {
             r.putRelation(table1, "abcdefg", "eineintrag");
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
     }

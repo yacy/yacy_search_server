@@ -1,4 +1,4 @@
-// RandomAccessIO.java 
+// RandomAccessIO.java
 // -----------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -30,18 +30,18 @@ public final class RandomAccessIO {
 
     protected final Writer ra;
     protected final String name;
-    
+
     public RandomAccessIO(final Writer ra, final String name) {
         this.name = name;
         this.ra = ra;
     }
-    
+
     public final Writer getRA() {
     	return this.ra;
     }
 
     public final synchronized long length() throws IOException {
-        return ra.length();
+        return this.ra.length();
     }
 
     public final synchronized void readFully(long pos, final byte[] b, int off, int len) throws IOException {
@@ -57,9 +57,9 @@ public final class RandomAccessIO {
     }
 
     public final String name() {
-        return name;
+        return this.name;
     }
-    
+
     public final synchronized byte readByte(final long pos) throws IOException {
         final byte[] b = new byte[1];
         this.readFully(pos, b, 0, 1);
@@ -117,7 +117,7 @@ public final class RandomAccessIO {
     public final synchronized void write(final long pos, final byte[] b) throws IOException {
         this.write(pos, b, 0, b.length);
     }
-    
+
     public final synchronized void writeSpace(long pos, int spaceCount) throws IOException {
         if (spaceCount < 512) {
             write(pos, space(spaceCount));
@@ -133,17 +133,18 @@ public final class RandomAccessIO {
             write(pos, space(spaceCount));
         }
     }
-    
-    private final byte[] space(int count) {
+
+    private final static byte[] space(int count) {
         byte[] s = new byte[count];
         while (count-- > 0) s[count] = 0;
         return s;
     }
-    
+
     public final synchronized void close() throws IOException {
         if (this.ra != null) this.ra.close();
     }
 
+    @Override
     protected final void finalize() throws Throwable {
         if (this.ra != null) this.close();
         super.finalize();

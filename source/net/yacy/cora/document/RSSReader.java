@@ -46,7 +46,7 @@ public class RSSReader extends DefaultHandler {
     private final RSSFeed theChannel;
     private Type type;
 
-    public enum Type { rss, atom, rdf, none };
+    public enum Type { rss, atom, rdf, none }
 
     private RSSReader(final int maxsize) {
         this.theChannel = new RSSFeed(maxsize);
@@ -57,7 +57,7 @@ public class RSSReader extends DefaultHandler {
         this.parsingItem = false;
         this.type = Type.none;
     }
-    
+
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
     private static SAXParser getParser() throws SAXException {
     	SAXParser parser = tlSax.get();
@@ -71,7 +71,7 @@ public class RSSReader extends DefaultHandler {
     	}
     	return parser;
     }
-    
+
     public RSSReader(final int maxsize, InputStream stream, final Type type) throws IOException {
         this(maxsize);
         this.type = type;
@@ -182,10 +182,10 @@ public class RSSReader extends DefaultHandler {
             }
             this.item = new RSSMessage();
             this.parsingItem = true;
-        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag)) {
+        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("text"))) {
             final String url = atts.getValue("href");
             if (url != null && url.length() > 0) this.item.setValue("link", url);
-        } else if ("image".equals(tag)) {
+        } else if ("image".equals(tag) || (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("image")))) {
             this.parsingImage = true;
         }
     }

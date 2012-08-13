@@ -108,6 +108,10 @@ public final class CharBuffer extends Writer {
         return this.length;
     }
 
+    public boolean isEmpty() {
+        return this.length == 0;
+    }
+
     private void grow(int minSize) {
         int newsize = 12 * Math.max(this.buffer.length, minSize) / 10; // grow by 20%
         char[] tmp = new char[newsize];

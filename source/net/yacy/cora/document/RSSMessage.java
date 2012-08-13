@@ -35,6 +35,8 @@ import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.kelondro.data.meta.DigestURI;
 
@@ -42,30 +44,29 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     public static enum Token {
 
-        title("title,atom:title,rss:title"),
-        link("link,rss:link,atom:link"),
-        description("description,rss:description,subtitle,atom:subtitle"),
-        pubDate("pubDate,lastBuildDate,rss:lastBuildDate,updated,rss:updated"),
-        copyright("copyright,dc:publisher,publisher"),
-        author("author,dc:creator,creator"),
-        subject("subject,dc:subject"),
-        category("category"),
-        referrer("referrer,referer"),
-        language("language"),
-        guid("guid"),
-        ttl("ttl"),
-        docs("docs"),
-        size("size,length"),
-        lon("geo:long,geo:lon"),
-        lat("geo:lat");
+        title(new String[]{"title","atom:title","rss:title",DublinCore.Title.getURIref()}),
+        link(new String[]{"link","atom:link","rss:link"}),
+        description(new String[]{"description","subtitle","atom:subtitle","rss:description", DublinCore.Description.getURIref()}),
+        pubDate(new String[]{"pubDate","lastBuildDate","updated","rss:lastBuildDate","rss:updated"}),
+        copyright(new String[]{"copyright","publisher",DublinCore.Publisher.getURIref()}),
+        author(new String[]{"author","creator",DublinCore.Creator.getURIref()}),
+        subject(new String[]{"subject",DublinCore.Subject.getURIref()}),
+        category(new String[]{"category"}),
+        referrer(new String[]{"referrer","referer"}),
+        language(new String[]{"language",DublinCore.Language.getURIref()}),
+        guid(new String[]{"guid"}),
+        ttl(new String[]{"ttl"}),
+        docs(new String[]{"docs"}),
+        size(new String[]{"size","length"}),
+        lon(new String[]{"geo:lon",Geo.Long.getURIref()}),
+        lat(new String[]{Geo.Lat.getURIref()});
         //point("gml:pos,georss:point,coordinates");
 
         private Set<String> keys;
 
-        private Token(final String keylist) {
-            final String[] k = keylist.split(",");
+        private Token(final String[] keylist) {
             this.keys = new HashSet<String>();
-            this.keys.addAll(Arrays.asList(k));
+            this.keys.addAll(Arrays.asList(keylist));
         }
 
         public String valueFrom(final Map<String, String> map, final String dflt) {
@@ -148,7 +149,6 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     @Override
     public int compareTo(final RSSMessage o) {
-        if (!(o instanceof RSSMessage)) return 1;
         return getLink().compareTo(o.getLink());
     }
 
@@ -214,7 +214,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     @Override
     public String getGuid() {
         String guid = Token.guid.valueFrom(this.map, "");
-        if ((guid.length() == 0 || guid.startsWith(artificialGuidPrefix)) &&
+        if ((guid.isEmpty() || guid.startsWith(artificialGuidPrefix)) &&
             (this.map.containsKey("title") || this.map.containsKey("description") || this.map.containsKey("link"))) {
             guid = calculatedGuidPrefix + Integer.toHexString(getTitle().hashCode() + getDescription().hashCode() + getLink().hashCode());
             this.map.put("guid", guid);
@@ -234,7 +234,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     @Override
     public long getSize() {
         final String size = Token.size.valueFrom(this.map, "-1");
-        return (size == null || size.length() == 0) ? -1 : Long.parseLong(size);
+        return (size == null || size.isEmpty()) ? -1 : Long.parseLong(size);
     }
 
     public String getFulltext() {

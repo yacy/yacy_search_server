@@ -711,7 +711,7 @@ public class Network
     }
 
     public static boolean changeSeedUploadMethod(final String method) {
-        if ( method == null || method.length() == 0 ) {
+        if ( method == null || method.isEmpty() ) {
             return false;
         }
 
@@ -772,7 +772,7 @@ public class Network
             DigestURI seedURL;
             try {
                 final String seedURLStr = sb.peers.mySeed().get(Seed.SEEDLISTURL, "");
-                if ( seedURLStr.length() == 0 ) {
+                if ( seedURLStr.isEmpty() ) {
                     throw new MalformedURLException("The seed-file url must not be empty.");
                 }
                 if ( !(seedURLStr.toLowerCase().startsWith("http://") || seedURLStr.toLowerCase().startsWith(

@@ -27,8 +27,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 
 public class SnippetExtractor {
@@ -61,7 +62,7 @@ public class SnippetExtractor {
             // - 2nd order: word distance
             // - 3th order: line length (not too short and not too long)
             // - 4rd order: line number
-            if (positions.size() > 0) {
+            if (!positions.isEmpty()) {
                 order.put(Long.valueOf(-100000000L * (linenumber == 0 ? 1 : 0) + 10000000L * positions.size() + 1000000L * worddistance + 100000L * linelengthKey(sentence.length(), maxLength) - 10000L * linenumber + uniqCounter--), sentence);
                 if (order.size() > 5) order.remove(order.firstEntry().getKey());
                 if (positions.size() == queryhashes.size()) fullmatchcounter++;
@@ -130,14 +131,14 @@ public class SnippetExtractor {
             final Iterator<byte[]> j = queryhashes.iterator();
             Integer pos;
             int p, minpos = sentence.length(), maxpos = -1;
-            final HandleSet remainingHashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), 0);
+            final HandleSet remainingHashes = new RowHandleSet(queryhashes.keylen(), queryhashes.comparator(), 0);
             while (j.hasNext()) {
                 hash = j.next();
                 pos = hs.get(hash);
                 if (pos == null) {
                     try {
                         remainingHashes.put(hash);
-                    } catch (RowSpaceExceededException e) {
+                    } catch (SpaceExceededException e) {
                         Log.logException(e);
                     }
                 } else {

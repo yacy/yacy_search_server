@@ -34,7 +34,7 @@ public class FilterEngine {
     public static final int ERR_DOUBLE_OCCURANCE = 6;
     public static final int ERR_HOST_REGEX = 7;
 
-    protected enum listTypes { type1 };
+    protected enum listTypes { type1 }
 
     protected class FilterEntry implements Comparable<FilterEntry> {
         public String path;
@@ -81,7 +81,7 @@ public class FilterEngine {
             final String path = entry.substring(pos + 1).trim();
 
             // avoid PatternSyntaxException e
-            if (!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*')
+            if (!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*')
             	host = "." + host;
 
             if(isMatchable(host)) {
@@ -112,9 +112,6 @@ public class FilterEngine {
     	this.hostpaths_notmatchable.remove(host);
     }
 
-    public void remove(final String listType, final String host, final String path) {
-    }
-
     public boolean isListed(final DigestURI url, final EnumSet<listTypes> type) {
     	// trival anwser
     	if (url.getHost() == null)
@@ -124,10 +121,9 @@ public class FilterEngine {
     		// Cache Hit
     		final EnumSet<listTypes> e = this.cachedUrlHashs.get(url);
     		return e.containsAll(type);
-    	} else {
-    		// Cache Miss
-    		return isListed(url.getHost().toLowerCase(), url.getFile(), type);
     	}
+        // Cache Miss
+        return isListed(url.getHost().toLowerCase(), url.getFile());
     }
 
     public static boolean isMatchable (final String host) {
@@ -145,7 +141,7 @@ public class FilterEngine {
        return false;
     }
 
-    public boolean isListed(final String host, String path, final EnumSet<listTypes> type) {
+    public boolean isListed(final String host, String path) {
         if (host == null) throw new NullPointerException();
         if (path == null) throw new NullPointerException();
 

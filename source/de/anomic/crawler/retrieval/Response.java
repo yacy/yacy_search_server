@@ -70,29 +70,28 @@ public class Response {
 
     // doctype calculation
     public static char docType(final MultiProtocolURI url) {
-        final String path = url.getPath().toLowerCase();
-        // serverLog.logFinest("PLASMA", "docType URL=" + path);
-        char doctype = DT_UNKNOWN;
-        if (path.endsWith(".gif"))       { doctype = DT_IMAGE; }
-        else if (path.endsWith(".ico"))  { doctype = DT_IMAGE; }
-        else if (path.endsWith(".bmp"))  { doctype = DT_IMAGE; }
-        else if (path.endsWith(".jpg"))  { doctype = DT_IMAGE; }
-        else if (path.endsWith(".jpeg")) { doctype = DT_IMAGE; }
-        else if (path.endsWith(".png"))  { doctype = DT_IMAGE; }
-        else if (path.endsWith(".html")) { doctype = DT_HTML;  }
-        else if (path.endsWith(".txt"))  { doctype = DT_TEXT;  }
-        else if (path.endsWith(".doc"))  { doctype = DT_DOC;   }
-        else if (path.endsWith(".rtf"))  { doctype = DT_DOC;   }
-        else if (path.endsWith(".pdf"))  { doctype = DT_PDFPS; }
-        else if (path.endsWith(".ps"))   { doctype = DT_PDFPS; }
-        else if (path.endsWith(".avi"))  { doctype = DT_MOVIE; }
-        else if (path.endsWith(".mov"))  { doctype = DT_MOVIE; }
-        else if (path.endsWith(".qt"))   { doctype = DT_MOVIE; }
-        else if (path.endsWith(".mpg"))  { doctype = DT_MOVIE; }
-        else if (path.endsWith(".md5"))  { doctype = DT_SHARE; }
-        else if (path.endsWith(".mpeg")) { doctype = DT_MOVIE; }
-        else if (path.endsWith(".asf"))  { doctype = DT_FLASH; }
-        return doctype;
+        String ext = url.getFileExtension();
+        if (ext == null) return DT_UNKNOWN;
+        if (ext.equals(".gif"))  return DT_IMAGE;
+        if (ext.equals(".ico"))  return DT_IMAGE;
+        if (ext.equals(".bmp"))  return DT_IMAGE;
+        if (ext.equals(".jpg"))  return DT_IMAGE;
+        if (ext.equals(".jpeg")) return DT_IMAGE;
+        if (ext.equals(".png"))  return DT_IMAGE;
+        if (ext.equals(".html")) return DT_HTML;
+        if (ext.equals(".txt"))  return DT_TEXT;
+        if (ext.equals(".doc"))  return DT_DOC;
+        if (ext.equals(".rtf"))  return DT_DOC;
+        if (ext.equals(".pdf"))  return DT_PDFPS;
+        if (ext.equals(".ps"))   return DT_PDFPS;
+        if (ext.equals(".avi"))  return DT_MOVIE;
+        if (ext.equals(".mov"))  return DT_MOVIE;
+        if (ext.equals(".qt"))   return DT_MOVIE;
+        if (ext.equals(".mpg"))  return DT_MOVIE;
+        if (ext.equals(".md5"))  return DT_SHARE;
+        if (ext.equals(".mpeg")) return DT_MOVIE;
+        if (ext.equals(".asf"))  return DT_FLASH;
+        return DT_UNKNOWN;
     }
 
     public static char docType(final String mime) {
@@ -115,30 +114,20 @@ public class Response {
         else if (mime.startsWith("image/")) doctype = DT_IMAGE;
         else if (mime.startsWith("audio/")) doctype = DT_AUDIO;
         else if (mime.startsWith("video/")) doctype = DT_MOVIE;
-        //bz2     = application/x-bzip2
-        //dvi     = application/x-dvi
-        //gz      = application/gzip
-        //hqx     = application/mac-binhex40
-        //lha     = application/x-lzh
-        //lzh     = application/x-lzh
-        //pac     = application/x-ns-proxy-autoconfig
-        //php     = application/x-httpd-php
-        //phtml   = application/x-httpd-php
-        //rss     = application/xml
-        //tar     = application/tar
-        //tex     = application/x-tex
-        //tgz     = application/tar
-        //torrent = application/x-bittorrent
-        //xhtml   = application/xhtml+xml
-        //xla     = application/msexcel
-        //xls     = application/msexcel
-        //xsl     = application/xml
-        //xml     = application/xml
-        //Z       = application/x-compress
-        //zip     = application/zip
         return doctype;
     }
 
+    public static String doctype2mime(String ext, char doctype) {
+    	String mime = Classification.ext2mime(ext);
+    	int p = mime.indexOf('/');
+    	if (p < 0) return mime;
+    	if (doctype == DT_TEXT) return "text" + mime.substring(p);
+    	if (doctype == DT_IMAGE) return "image" + mime.substring(p);
+    	if (doctype == DT_AUDIO) return "audio" + mime.substring(p);
+    	if (doctype == DT_MOVIE) return "video" + mime.substring(p);
+    	return mime;
+    }
+    
     public static final int QUEUE_STATE_FRESH             = 0;
     public static final int QUEUE_STATE_PARSING           = 1;
     public static final int QUEUE_STATE_CONDENSING        = 2;
@@ -175,7 +164,7 @@ public class Response {
         this.requestHeader = new RequestHeader();
         this.responseHeader = new ResponseHeader(200);
         this.responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain"); // tell parser how to handle the content
-        if (request.size() > 0) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
+        if (!request.isEmpty()) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
         this.content = request.name().length() > 0 ? request.name().getBytes() : request.url().toTokens().getBytes();
@@ -782,7 +771,7 @@ public class Response {
     public byte[] referrerHash() {
         if (this.requestHeader == null) return null;
         final String u = this.requestHeader.get(RequestHeader.REFERER, "");
-        if (u == null || u.length() == 0) return null;
+        if (u == null || u.isEmpty()) return null;
         try {
             return new DigestURI(u).hash();
         } catch (final Exception e) {

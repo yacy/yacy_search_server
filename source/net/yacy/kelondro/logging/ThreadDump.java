@@ -242,7 +242,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                         } else {
                             line = null;
                         }
-                        if ((line != null) && (line.length() > 0)) {
+                        if (line != null && !line.isEmpty()) {
                             bufferappend(sb, plain, tracename + "at " + CharacterCoding.unicode2html(ste.toString(), true) + " [" + line.trim() + "]");
                         } else {
                             bufferappend(sb, plain, tracename + "at " + CharacterCoding.unicode2html(ste.toString(), true));

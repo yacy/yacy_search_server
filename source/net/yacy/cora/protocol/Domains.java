@@ -570,7 +570,7 @@ public class Domains {
      * @return the hosts InetAddress or null if the address cannot be resolved
      */
     public static InetAddress dnsResolve(final String host0) {
-        if (host0 == null || host0.length() == 0) return null;
+        if (host0 == null || host0.isEmpty()) return null;
         final String host = host0.toLowerCase().trim();
         // try to simply parse the address
         InetAddress ip = parseInetAddress(host);
@@ -746,6 +746,7 @@ public class Domains {
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("Domains: init");
                 // try to get local addresses from interfaces
                 try {
                     final Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
@@ -855,7 +856,7 @@ public class Domains {
     }
 
     public static boolean isThisHostIP(final String hostName) {
-        if ((hostName == null) || (hostName.length() == 0)) return false;
+        if ((hostName == null) || (hostName.isEmpty())) return false;
 
         boolean isThisHostIP = false;
         try {
@@ -911,10 +912,10 @@ public class Domains {
         return (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
                 "127.0.0.1".equals(host) ||
                 "localhost".equals(host) ||
-                host.startsWith("0:0:0:0:0:0:0:1") ||
-                host.startsWith("fe80:0:0:0:0:0:0:1") || // used by my mac as localhost
-                host.startsWith("::1/") ||
-                "::1".equals(host)
+                host.startsWith("0:0:0:0:0:0:0:1") || host.startsWith("[0:0:0:0:0:0:0:1]") ||
+                host.startsWith("fe80:0:0:0:0:0:0:1") || host.startsWith("[fe80:0:0:0:0:0:0:1]") || // used by my mac as localhost
+                host.startsWith("::1/") || host.startsWith("[::1/") ||
+                "::1".equals(host) || "[::1]".equals(host)
                 );
     }
 
@@ -933,7 +934,7 @@ public class Domains {
 
         if (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
             host == null ||
-            host.length() == 0) return true;
+            host.isEmpty()) return true;
 
         // FIXME IPv4 only
         // check local ip addresses

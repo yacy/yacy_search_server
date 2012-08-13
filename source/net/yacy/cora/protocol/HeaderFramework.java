@@ -578,7 +578,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         int p;
         String line;
         while ((line = reader.readLine()) != null) {
-            if (line.length() == 0) break;
+            if (line.isEmpty()) break;
             if ((p = line.indexOf(':')) >= 0) {
                 // store a property
                 add(line.substring(0, p).trim(), line.substring(p + 1).trim());

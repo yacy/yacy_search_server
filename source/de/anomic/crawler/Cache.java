@@ -43,13 +43,14 @@ import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.Compressor;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -103,14 +104,15 @@ public final class Cache {
             Thread startupCleanup = new Thread() {
                 @Override
                 public void run() {
+                    Thread.currentThread().setName("Cache startupCleanup");
                     // enumerate the responseHeaderDB and find out all entries that are not inside the fileDBunbuffered
                     BlockingQueue<byte[]> q = responseHeaderDB.keyQueue(1000);
-                    final HandleSet delkeys = new HandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
+                    final HandleSet delkeys = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
                     Log.logInfo("Cache", "started cleanup thread to remove unused cache metadata");
                     try {
                         byte[] k;
                         while (((k = q.take()) != MapHeap.POISON_QUEUE_ENTRY)) {
-                            if (!fileDB.containsKey(k)) try { delkeys.put(k); } catch (RowSpaceExceededException e) { break; }
+                            if (!fileDB.containsKey(k)) try { delkeys.put(k); } catch (SpaceExceededException e) { break; }
                         }
                     } catch (InterruptedException e) {
                     } finally {
@@ -127,7 +129,7 @@ public final class Cache {
                     Log.logInfo("Cache", "running check to remove unused file cache data");
                     delkeys.clear();
                     for (byte[] k: fileDB) {
-                        if (!responseHeaderDB.containsKey(k)) try { delkeys.put(k); } catch (RowSpaceExceededException e) { break; }
+                        if (!responseHeaderDB.containsKey(k)) try { delkeys.put(k); } catch (SpaceExceededException e) { break; }
                     }
                     Log.logInfo("Cache", "cleanup thread collected " + delkeys.size() + " unused cache entries; now deleting them from the file...");
                     for (byte[] k: delkeys) {
@@ -146,7 +148,7 @@ public final class Cache {
     public static void commit() {
     	fileDB.flushAll();
     }
-    
+
     /**
      * clear the cache
      */
@@ -259,7 +261,7 @@ public final class Cache {
             hdb = responseHeaderDB.get(hash);
         } catch (IOException e) {
             return null;
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             return null;
         }
         if (hdb == null) return null;
@@ -287,12 +289,22 @@ public final class Cache {
         } catch (final IOException e) {
             Log.logException(e);
             return null;
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
             return null;
         } catch (final OutOfMemoryError e) {
             Log.logException(e);
             return null;
+        }
+    }
+
+    public static boolean hasContent(final byte[] hash) {
+        // load the url as resource from the cache
+        try {
+            return fileDB.containsKey(hash);
+        } catch (final OutOfMemoryError e) {
+            Log.logException(e);
+            return false;
         }
     }
 

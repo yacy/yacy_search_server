@@ -27,27 +27,26 @@ import java.util.List;
 import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.importer.OAIPMHImporter;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class IndexImportOAIPMHList_p {
 
-    public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
         prop.put("refresh", 0);
         prop.put("import", 0);
         prop.put("source", 0);
-        
+
         if (post != null && post.containsKey("source")) {
             final Set<String> oaiRoots = OAIListFriendsLoader.getListFriends(sb.loader).keySet();
-            
+
             boolean dark = false;
             int count = 0;
             for (final String root: oaiRoots) {
@@ -62,13 +61,13 @@ public class IndexImportOAIPMHList_p {
             prop.put("source_num", count);
             prop.put("source", 1);
         }
-        
+
         if (post != null && post.containsKey("import")) {
             final List<OAIPMHImporter> jobs = new ArrayList<OAIPMHImporter>();
             for (OAIPMHImporter job: OAIPMHImporter.runningJobs.keySet()) jobs.add(job);
             for (OAIPMHImporter job: OAIPMHImporter.startedJobs.keySet()) jobs.add(job);
             for (OAIPMHImporter job: OAIPMHImporter.finishedJobs.keySet()) jobs.add(job);
-            
+
             boolean dark = false;
             int count = 0;
             for (final OAIPMHImporter job: jobs) {

@@ -24,9 +24,10 @@
 
 package net.yacy.search.index;
 
+import net.yacy.cora.services.federated.solr.Schema;
 import net.yacy.cora.services.federated.solr.SolrType;
 
-public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField {
+public enum YaCySchema implements Schema {
 
     id(SolrType.string, true, true, "primary key of document, the URL hash **mandatory field**"),
     sku(SolrType.text_en_splitting_tight, true, true, false, true, "url of document"),
@@ -71,8 +72,8 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     outboundlinks_relflags_txt(SolrType.text_general, true, true, true, "external links, the rel property of the a-tag, coded binary"),
     outboundlinks_text_txt(SolrType.text_general, true, true, true, "external links, the text content of the a-tag"),
     charset_s(SolrType.string, true, true, "character encoding"),
-    lon_coordinate(SolrType.tdouble, true, false, "longitude of location as declared in WSG84"),
-    lat_coordinate(SolrType.tdouble, true, false, "latitude of location as declared in WSG84"),
+    lon_coordinate(SolrType.tdouble, true, true, "longitude of location as declared in WSG84"),
+    lat_coordinate(SolrType.tdouble, true, true, "latitude of location as declared in WSG84"),
     httpstatus_i(SolrType.integer, true, true, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     h1_txt(SolrType.text_general, true, true, true, "h1 header"),
     h2_txt(SolrType.text_general, true, true, true, "h2 header"),
@@ -82,6 +83,7 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     h6_txt(SolrType.text_general, true, true, true, "h6 header"),
     htags_i(SolrType.integer, true, true, "binary pattern for the existance of h1..h6 headlines"),
     canonical_s(SolrType.string, true, true, "url inside the canonical link element"),
+    refresh_s(SolrType.string, true, true, "link from the url property inside the refresh link element"),
     metagenerator_t(SolrType.text_general, true, true, "content of <meta name=\"generator\" content=#content#> tag"),
     boldcount_i(SolrType.integer, true, true, "total number of occurrences of <b> or <strong>"),
     bold_txt(SolrType.text_general, true, true, true, "all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order"),
@@ -119,7 +121,20 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     ext_tracker_val(SolrType.integer, true, true, true, "number of attribute counts in ext_tracker_txt"),
     ext_title_txt(SolrType.text_general, true, true, true, "names matching title expressions"),
     ext_title_val(SolrType.integer, true, true, true, "number of matching title expressions"),
-    failreason_t(SolrType.text_general, true, true, "fail reason if a page was not loaded. if the page was loaded then this field is empty");
+    failreason_t(SolrType.text_general, true, true, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
+
+    // values used additionally by URIMetadataRow
+    load_date_dt(SolrType.date, true, true, "time when resource was loaded"),
+    fresh_date_dt(SolrType.date, true, true, "date until resource shall be considered as fresh"),
+    host_id_s(SolrType.string, true, true, "id of the host, a 6-byte hash that is part of the document id"),// String hosthash();
+    referrer_id_txt(SolrType.string, true, true, true, "ids of referrer to this document"),// byte[] referrerHash();
+    md5_s(SolrType.string, true, true, "the md5 of the raw source"),// String md5();
+    publisher_t(SolrType.text_general, true, true, "the name of the publisher of the document"),// String dc_publisher();
+    language_txt(SolrType.string, true, true, "the language used in the document; starts with primary language"),// byte[] language();
+    size_i(SolrType.integer, true, true, "the size of the raw source"),// int size();
+    audiolinkscount_i(SolrType.integer, true, true, "number of links to audio resources"),// int laudio();
+    videolinkscount_i(SolrType.integer, true, true, "number of links to video resources"),// int lvideo();
+    applinkscount_i(SolrType.integer, true, true, "number of links to application resources");// int lapp();
 
     private String solrFieldName = null; // solr field name in custom solr schema, defaults to solcell schema field name (= same as this.name() )
     private final SolrType type;
@@ -127,7 +142,7 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
     private boolean multiValued, omitNorms;
     private String comment;
 
-    private SolrField(final SolrType type, final boolean indexed, final boolean stored, final String comment) {
+    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final String comment) {
         this.type = type;
         this.indexed = indexed;
         this.stored = stored;
@@ -136,12 +151,12 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
         this.comment = comment;
     }
 
-    private SolrField(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final String comment) {
+    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final String comment) {
         this(type, indexed, stored, comment);
         this.multiValued = multiValued;
     }
 
-    private SolrField(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final String comment) {
+    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final String comment) {
         this(type, indexed, stored, multiValued, comment);
         this.omitNorms = omitNorms;
     }
@@ -150,6 +165,7 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
      * Returns the YaCy default or (if available) custom field name for Solr
      * @return SolrFieldname String
      */
+    @Override
     public final String getSolrFieldName() {
         return (this.solrFieldName == null ? this.name() : this.solrFieldName);
     }
@@ -167,26 +183,32 @@ public enum SolrField implements net.yacy.cora.services.federated.solr.SolrField
         }
     }
 
+    @Override
     public final SolrType getType() {
         return this.type;
     }
 
+    @Override
     public final boolean isIndexed() {
         return this.indexed;
     }
 
+    @Override
     public final boolean isStored() {
         return this.stored;
     }
 
+    @Override
     public final boolean isMultiValued() {
         return this.multiValued;
     }
 
+    @Override
     public final boolean isOmitNorms() {
         return this.omitNorms;
     }
 
+    @Override
     public final String getComment() {
         return this.comment;
     }

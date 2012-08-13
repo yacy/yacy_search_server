@@ -172,7 +172,7 @@ public class AccessTracker_p {
                 } else {
                     // remote search
                     prop.putHTML("page_list_" + m + "_peername", (query.remotepeer == null) ? "<unknown>" : query.remotepeer.getName());
-                    prop.put("page_list_" + m + "_queryhashes", QueryParams.anonymizedQueryHashes(query.queryHashes));
+                    prop.put("page_list_" + m + "_queryhashes", QueryParams.anonymizedQueryHashes(query.query_include_hashes));
                 }
                 prop.putNum("page_list_" + m + "_querycount", query.itemsPerPage);
                 prop.putNum("page_list_" + m + "_transmitcount", query.transmitcount);

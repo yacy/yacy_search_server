@@ -42,19 +42,20 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
@@ -71,7 +72,7 @@ public class Crawler_p {
     // this servlet does NOT create the Crawler servlet page content!
     // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         // inital values for AJAX Elements (without JavaScript)
@@ -95,16 +96,7 @@ public class Crawler_p {
         prop.put("forwardToCrawlStart", "0");
 
         // get segment
-        Segment indexSegment = null;
-        if (post != null && post.containsKey("segment")) {
-            final String segmentName = post.get("segment");
-            if (sb.indexSegments.segmentExist(segmentName)) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            }
-        } else {
-            // take default segment
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
+        Segment indexSegment = sb.index;
 
         prop.put("info", "0");
 
@@ -136,7 +128,7 @@ public class Crawler_p {
             // delete all entries from the crawl queue that are deleted here
             sb.crawler.removeActive(handle.getBytes());
             sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
 
@@ -156,7 +148,7 @@ public class Crawler_p {
                 // remove crawlingFileContent before we record the call
                 String crawlingFileName = post.get("crawlingFile");
                 final File crawlingFile;
-                if (crawlingFileName == null || crawlingFileName.length() == 0) {
+                if (crawlingFileName == null || crawlingFileName.isEmpty()) {
                     crawlingFile = null;
                 } else {
                     if (crawlingFileName.startsWith("file://")) crawlingFileName = crawlingFileName.substring(7);
@@ -182,7 +174,7 @@ public class Crawler_p {
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
                 final String ipMustNotMatch = post.get("ipMustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
                 if (ipMustMatch.length() < 2) ipMustMatch = CrawlProfile.MATCH_ALL_STRING;
-                final String countryMustMatch = post.getBoolean("countryMustMatchSwitch", false) ? post.get("countryMustMatchList", "") : "";
+                final String countryMustMatch = post.getBoolean("countryMustMatchSwitch") ? post.get("countryMustMatchList", "") : "";
                 sb.setConfig("crawlingIPMustMatch", ipMustMatch);
                 sb.setConfig("crawlingIPMustNotMatch", ipMustNotMatch);
                 if (countryMustMatch.length() > 0) sb.setConfig("crawlingCountryMustMatch", countryMustMatch);
@@ -332,7 +324,7 @@ public class Crawler_p {
                         sb.crawlQueues.errorURL.remove(urlhash);
 
                         // get a scraper to get the title
-                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH);
+                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                         final String title = scraper == null ? url.toNormalform(true, true) : scraper.dc_title();
                         final String description = scraper.dc_description();
 
@@ -464,7 +456,7 @@ public class Crawler_p {
                         try {
                             // check if the crawl filter works correctly
                             Pattern.compile(newcrawlingMustMatch);
-                            final ContentScraper scraper = new ContentScraper(new DigestURI(crawlingFile));
+                            final ContentScraper scraper = new ContentScraper(new DigestURI(crawlingFile), 10000);
                             final Writer writer = new TransformerWriter(null, null, scraper, null, false);
                             if (crawlingFile != null && crawlingFile.exists()) {
                                 FileUtils.copy(new FileInputStream(crawlingFile), writer);
@@ -475,7 +467,13 @@ public class Crawler_p {
 
                             // get links and generate filter
                             final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
-                            if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
+                            if (newcrawlingdepth > 0) {
+                                if (fullDomain) {
+                                    newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
+                                } else if (subPath) {
+                                    newcrawlingMustMatch = subpathFilter(hyperlinks.keySet());
+                                }
+                            }
 
                             final DigestURI crawlURL = new DigestURI("file://" + crawlingFile.toString());
                             final CrawlProfile profile = new CrawlProfile(
@@ -501,7 +499,7 @@ public class Crawler_p {
                                     cachePolicy);
                             sb.crawler.putActive(profile.handle().getBytes(), profile);
                             sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, true);
+                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks);
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); // crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
@@ -554,7 +552,7 @@ public class Crawler_p {
                     try {
                         final DigestURI sitelistURL = new DigestURI(crawlingStart);
                         // download document
-                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH);
+                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                         // String title = scraper.getTitle();
                         // String description = scraper.getDescription();
 
@@ -643,7 +641,7 @@ public class Crawler_p {
         for (final byte[] h: sb.crawler.getActive()) {
             profile = sb.crawler.getActive(h);
         	if (CrawlProfile.ignoreNames.contains(profile.name())) continue;
-            profile.putProfileEntry("crawlProfilesShow_list_", prop, sb.crawlStacker, true, dark, count, domlistlength);
+            profile.putProfileEntry("crawlProfilesShow_list_", prop, true, dark, count, domlistlength);
             dark = !dark;
             count++;
         }
@@ -657,11 +655,11 @@ public class Crawler_p {
 
     private static long recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
         if (!recrawlIfOlderCheck) return 0L;
-        if ("year".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
-        if ("month".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 30L;
-        if ("day".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L;
-        if ("hour".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L;
-        return System.currentTimeMillis() - (long) recrawlIfOlderNumber;
+        if ("year".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
+        if ("month".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 30L;
+        if ("day".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L;
+        if ("hour".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L;
+        return System.currentTimeMillis() - recrawlIfOlderNumber;
     }
 
     private static void setPerformance(final Switchboard sb, final serverObjects post) {
@@ -684,6 +682,18 @@ public class Crawler_p {
             if (!uri.getHost().startsWith("www.")) {
                 filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://www.").append(uri.getHost()).append(".*").toString());
             }
+        }
+        for (final String element : filterSet) {
+            filter.append('|').append(element);
+        }
+        return filter.length() > 0 ? filter.substring(1) : "";
+    }
+
+    private static String subpathFilter(final Set<MultiProtocolURI> uris) {
+        final StringBuilder filter = new StringBuilder();
+        final Set<String> filterSet = new HashSet<String>();
+        for (final MultiProtocolURI uri: uris) {
+            filterSet.add(new StringBuilder().append(uri.toNormalform(true, false)).append(".*").toString());
         }
         for (final String element : filterSet) {
             filter.append('|').append(element);

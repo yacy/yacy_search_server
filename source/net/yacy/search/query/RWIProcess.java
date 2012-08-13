@@ -52,15 +52,17 @@ import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
@@ -131,8 +133,8 @@ public final class RWIProcess extends Thread
         this.remote_resourceSize = 0;
         this.remote_indexCount = 0;
         this.local_indexCount = 0;
-        this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
-        this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.urlhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.misses = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
         this.sortout = 0;
         this.flagcount = new int[32];
         for ( int i = 0; i < 32; i++ ) {
@@ -203,8 +205,8 @@ public final class RWIProcess extends Thread
                     .getSegment()
                     .termIndex()
                     .query(
-                        this.query.queryHashes,
-                        this.query.excludeHashes,
+                        this.query.query_include_hashes,
+                        this.query.query_exclude_hashes,
                         null,
                         Segment.wordReferenceFactory,
                         this.query.maxDistance);
@@ -220,7 +222,8 @@ public final class RWIProcess extends Thread
                     System.currentTimeMillis() - timer),
                 false);
             if ( !index.isEmpty() ) {
-                add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true, this.maxtime);
+                add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, this.maxtime);
+                addFinalize();
             }
         } catch ( final Exception e ) {
             Log.logException(e);
@@ -229,12 +232,15 @@ public final class RWIProcess extends Thread
         }
     }
 
+    public void addFinalize() {
+        this.addRunning = false;
+    }
+
     public void add(
         final ReferenceContainer<WordReference> index,
         final boolean local,
         final String resourceName,
         final int fullResource,
-        final boolean finalizeAddAtEnd,
         final long maxtime) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
@@ -315,7 +321,7 @@ public final class RWIProcess extends Thread
                 }
 
                 // check document domain
-                if ( this.query.contentdom != Classification.ContentDomain.ALL ) {
+                if ( this.query.contentdom.getCode() > 0 ) {
                     if ( (this.query.contentdom == ContentDomain.AUDIO)
                         && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio))) ) {
                         continue pollloop;
@@ -370,7 +376,7 @@ public final class RWIProcess extends Thread
                 // check vocabulary constraint
                 String subject = YaCyMetadata.hashURI(iEntry.urlhash());
                 Resource resource = JenaTripleStore.getResource(subject);
-                if (this.query.metatags != null && this.query.metatags.size() > 0) {
+                if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
                     // all metatags must appear in the tags list
                     for (Tagging.Metatag metatag: this.query.metatags) {
                         Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, metatag.getPredicate());
@@ -420,11 +426,7 @@ public final class RWIProcess extends Thread
             if (System.currentTimeMillis() >= timeout) Log.logWarning("RWIProcess", "rwi normalization ended with timeout = " + maxtime);
 
         } catch ( final InterruptedException e ) {
-        } catch ( final RowSpaceExceededException e ) {
-        } finally {
-            if ( finalizeAddAtEnd ) {
-                this.addRunning = false;
-            }
+        } catch ( final SpaceExceededException e ) {
         }
 
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
@@ -509,7 +511,7 @@ public final class RWIProcess extends Thread
             while ( ((!feedingIsFinished() && this.addRunning) || this.stack.sizeQueue() > 0) &&
                    (this.query.itemsPerPage < 1 ||
                     loops++ < this.query.itemsPerPage ||
-                    (loops > 1000 && this.doubleDomCache.size() > 0)) ) {
+                    (loops > 1000 && !this.doubleDomCache.isEmpty())) ) {
                 if ( waitingtime <= 0 ) {
                     rwi = this.addRunning ? this.stack.poll(waitingtime) : this.stack.poll();
                 } else {
@@ -616,7 +618,7 @@ public final class RWIProcess extends Thread
      * @param waitingtime the time this method may take for a result computation
      * @return a metadata entry for a url
      */
-    public URIMetadataRow takeURL(final boolean skipDoubleDom, final long waitingtime) {
+    public URIMetadata takeURL(final boolean skipDoubleDom, final long waitingtime) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
         final long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
         int p = -1;
@@ -627,11 +629,11 @@ public final class RWIProcess extends Thread
             if ( obrwi == null ) {
                 return null; // all time was already wasted in takeRWI to get another element
             }
-            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(obrwi);
+            final URIMetadata page = this.query.getSegment().urlMetadata().load(obrwi.getElement(), obrwi.getWeight());
             if ( page == null ) {
                 try {
                     this.misses.putUnique(obrwi.getElement().urlhash());
-                } catch ( final RowSpaceExceededException e ) {
+                } catch ( final SpaceExceededException e ) {
                 }
                 continue;
             }
@@ -658,9 +660,10 @@ public final class RWIProcess extends Thread
             }
 
             // check content domain
-            if (this.query.contentdom != Classification.ContentDomain.ALL &&
-                page.url().getContentDomain() != Classification.ContentDomain.ALL &&
-                page.url().getContentDomain() != this.query.contentdom) {
+            if ((this.query.contentdom.getCode() > 0 &&
+                page.url().getContentDomain() != this.query.contentdom) ||
+                (this.query.contentdom == Classification.ContentDomain.TEXT &&
+                page.url().getContentDomain().getCode() > 0)) {
                 this.sortout++;
                 continue;
             }
@@ -676,10 +679,10 @@ public final class RWIProcess extends Thread
             final String pagetitle = page.dc_title().toLowerCase();
 
             // check exclusion
-            if ( this.query.excludeHashes != null && !this.query.excludeHashes.isEmpty() &&
-                ((QueryParams.anymatch(pagetitle, this.query.excludeHashes))
-                || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.excludeHashes))
-                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.excludeHashes)))) {
+            if ( this.query.query_exclude_hashes != null && !this.query.query_exclude_hashes.isEmpty() &&
+                ((QueryParams.anymatch(pagetitle, this.query.query_exclude_hashes))
+                || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.query_exclude_hashes))
+                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.query_exclude_hashes)))) {
                 this.sortout++;
                 continue;
             }
@@ -688,7 +691,7 @@ public final class RWIProcess extends Thread
             if ( (this.query.constraint != null)
                 && (this.query.constraint.get(Condenser.flag_cat_indexof))
                 && (!(pagetitle.startsWith("index of"))) ) {
-                final Iterator<byte[]> wi = this.query.queryHashes.iterator();
+                final Iterator<byte[]> wi = this.query.query_include_hashes.iterator();
                 while ( wi.hasNext() ) {
                     this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                 }
@@ -864,7 +867,7 @@ public final class RWIProcess extends Thread
         }
 
         final Iterator<String> domhashs = this.hostNavigator.keys(false);
-        URIMetadataRow row;
+        URIMetadata row;
         byte[] urlhash;
         String hosthash, hostname;
         if ( this.hostResolver != null ) {
@@ -964,7 +967,7 @@ public final class RWIProcess extends Thread
             if ( word.length() > 2
                 && "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off"
                     .indexOf(word) < 0
-                && !this.query.queryHashes.has(Word.word2hash(word))
+                && !this.query.query_include_hashes.has(Word.word2hash(word))
                 && lettermatch.matcher(word).matches()
                 && !Switchboard.badwords.contains(word)
                 && !Switchboard.stopwords.contains(word) ) {

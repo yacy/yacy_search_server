@@ -49,7 +49,7 @@ import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
@@ -121,7 +121,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         return bb.toString();
     }
 
-    private static Map<String, String> bytes2map(final byte[] b) throws IOException, RowSpaceExceededException {
+    private static Map<String, String> bytes2map(final byte[] b) throws IOException, SpaceExceededException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
         final Map<String, String> map = new ConcurrentHashMap<String, String>();
         String line;
@@ -130,13 +130,13 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         while ((line = br.readLine()) != null) { // very slow readLine????
             line = line.trim();
             if (line.equals("# EOF")) return map;
-            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
+            if ((line.isEmpty()) || (line.charAt(0) == '#')) continue;
             pos = line.indexOf('=');
             if (pos < 0) continue;
             map.put(line.substring(0, pos), line.substring(pos + 1));
         }
         } catch (final OutOfMemoryError e) {
-            throw new RowSpaceExceededException(0, "readLine probably uses too much RAM", e);
+            throw new SpaceExceededException(0, "readLine probably uses too much RAM", e);
         } finally {
             br.close();
         }
@@ -152,9 +152,9 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
      * @param key  the primary key
      * @param newMap
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public void insert(byte[] key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
+    public void insert(byte[] key, final Map<String, String> newMap) throws IOException, SpaceExceededException {
         assert key != null;
         assert key.length > 0;
         assert newMap != null;
@@ -188,7 +188,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             insert(key, newMap);
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
         return v;
@@ -251,7 +251,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
      * @return
      * @throws IOException
      */
-    public Map<String, String> get(final byte[] key) throws IOException, RowSpaceExceededException {
+    public Map<String, String> get(final byte[] key) throws IOException, SpaceExceededException {
         if (key == null) return null;
         return get(key, true);
     }
@@ -264,7 +264,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             if (key instanceof String) return get(UTF8.getBytes((String) key));
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
         return null;
@@ -297,7 +297,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         return k;
     }
 
-    protected Map<String, String> get(byte[] key, final boolean storeCache) throws IOException, RowSpaceExceededException {
+    protected Map<String, String> get(byte[] key, final boolean storeCache) throws IOException, SpaceExceededException {
         // load map from cache
         assert key != null;
         if (this.cache == null) return null; // case may appear during shutdown
@@ -324,7 +324,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 if (b == null) return null;
                 try {
                     map = bytes2map(b);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     throw new IOException(e.getMessage());
                 }
 
@@ -334,19 +334,18 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 // return value
                 return map;
             }
-        } else {
-            byte[] b;
-            synchronized (this) {
-                map = this.cache.get(key);
-                if (map != null) return map;
-                b = this.blob.get(key);
-            }
-            if (b == null) return null;
-            try {
-                return bytes2map(b);
-            } catch (final RowSpaceExceededException e) {
-                throw new IOException(e.getMessage());
-            }
+        }
+        byte[] b = null;
+        synchronized (this) {
+            map = this.cache.get(key);
+            if (map != null) return map;
+            b = this.blob.get(key);
+        }
+        if (b == null) return null;
+        try {
+            return bytes2map(b);
+        } catch (final SpaceExceededException e) {
+            throw new IOException(e.getMessage());
         }
     }
 
@@ -385,14 +384,15 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         final boolean up, rotating;
         final byte[] firstKey, secondKey;
         Iterator<byte[]> iterator;
+        final private CloneableIterator<byte[]> blobkeys;
 
         public KeyIterator(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
             this.up = up;
             this.rotating = rotating;
             this.firstKey = firstKey;
             this.secondKey = secondKey;
-            final CloneableIterator<byte[]> i = MapHeap.this.blob.keys(up, firstKey);
-            this.iterator = rotating ? new RotateIterator<byte[]>(i, secondKey, MapHeap.this.blob.size()) : i;
+            this.blobkeys = MapHeap.this.blob.keys(up, firstKey);
+            this.iterator = rotating ? new RotateIterator<byte[]>(this.blobkeys, secondKey, MapHeap.this.blob.size()) : this.blobkeys;
         }
 
         @Override
@@ -421,6 +421,10 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             }
         }
 
+        @Override
+        public void close() {
+            this.blobkeys.close();
+        }
     }
 
     public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final boolean rotating) throws IOException {
@@ -482,7 +486,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 } catch (final IOException e) {
                     Log.logWarning("MapDataMining", e.getMessage());
                     continue;
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     continue;
                 }
@@ -501,7 +505,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         for (final Map.Entry<? extends byte[], ? extends Map<String, String>> me: map.entrySet()) {
             try {
                 insert(me.getKey(), me.getValue());
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
             } catch (final IOException e) {
                 Log.logException(e);
@@ -525,6 +529,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         (new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("MapHeap.keyQueue:" + size);
                 try {
                     final Iterator<byte[]> i = MapHeap.this.blob.keys(true, false);
                     while (i.hasNext())
@@ -581,7 +586,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             map.close();
         } catch (final IOException e) {
             Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
         }
     }

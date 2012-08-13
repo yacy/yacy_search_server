@@ -115,7 +115,7 @@ public class pdfParser extends AbstractParser implements Parser {
             docSubject = info.getSubject();
             docAuthor = info.getAuthor();
             docPublisher = info.getProducer();
-            if (docPublisher == null || docPublisher.length() == 0) docPublisher = info.getCreator();
+            if (docPublisher == null || docPublisher.isEmpty()) docPublisher = info.getCreator();
             docKeywordStr = info.getKeywords();
             // unused:
             // info.getTrapped());
@@ -123,7 +123,7 @@ public class pdfParser extends AbstractParser implements Parser {
             // info.getModificationDate();
         }
 
-        if (docTitle == null || docTitle.length() == 0) {
+        if (docTitle == null || docTitle.isEmpty()) {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
         }
         final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
@@ -142,6 +142,7 @@ public class pdfParser extends AbstractParser implements Parser {
             final Thread t = new Thread() {
                 @Override
                 public void run() {
+                    Thread.currentThread().setName("pdfParser.getText:" + location);
                     try {
                         writer.append(stripper.getText(pdfDoc));
                     } catch (final Throwable e) {}
@@ -152,20 +153,13 @@ public class pdfParser extends AbstractParser implements Parser {
             if (t.isAlive()) t.interrupt();
             pdfDoc.close();
             contentBytes = writer.getBytes(); // get final text before closing writer
-        } catch (final IOException e) {
+        } catch (final Throwable e) {
             // close the writer
             if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-            try {pdfDoc.close();} catch (final IOException ee) {}
-            //throw new Parser.Failure(e.getMessage(), location);
-        } catch (final NullPointerException e) {
-            // this exception appeared after the insertion of the jempbox-1.5.0.jar library
-            Log.logException(e);
-            // close the writer
-            if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-            try {pdfDoc.close();} catch (final IOException ee) {}
+            try {pdfDoc.close();} catch (final Throwable ee) {}
             //throw new Parser.Failure(e.getMessage(), location);
         } finally {
-            try {pdfDoc.close();} catch (final IOException e) {}
+            try {pdfDoc.close();} catch (final Throwable e) {}
             writer.close();
         }
 
@@ -249,7 +243,7 @@ public class pdfParser extends AbstractParser implements Parser {
                     System.out.println("\tParsed text with " + document.getTextLength() + " chars of text and " + document.getAnchors().size() + " anchors");
                     try {
                         // write file
-                        FileUtils.copy(document.getText(), new File("parsedPdf.txt"));
+                        FileUtils.copy(document.getTextStream(), new File("parsedPdf.txt"));
                     } catch (final IOException e) {
                         System.err.println("error saving parsed document");
                         Log.logException(e);

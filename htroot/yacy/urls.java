@@ -31,10 +31,9 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
@@ -43,7 +42,7 @@ import de.anomic.server.serverSwitch;
 
 public class urls {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
         // insert default values
@@ -78,7 +77,7 @@ public class urls {
                 if (entry == null) break;
 
                 // find referrer, if there is one
-                referrer = sb.getURL(Segments.Process.PUBLIC, entry.referrerhash());
+                referrer = sb.getURL(entry.referrerhash());
 
                 // place url to notice-url db
                 sb.crawlQueues.delegatedURL.push(
@@ -111,13 +110,13 @@ public class urls {
             if (urlhashes.length() % 12 != 0) return prop;
             final int count = urlhashes.length() / 12;
         	int c = 0;
-        	URIMetadataRow entry;
+        	URIMetadata entry;
             DigestURI referrer;
             for (int i = 0; i < count; i++) {
-                entry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));
+                entry = sb.index.urlMetadata().load(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));
                 if (entry == null) continue;
                 // find referrer, if there is one
-                referrer = sb.getURL(Segments.Process.PUBLIC, entry.referrerHash());
+                referrer = sb.getURL(entry.referrerHash());
                 // create RSS entry
                 prop.put("item_" + c + "_title", entry.dc_title());
                 prop.putXML("item_" + c + "_link", entry.url().toNormalform(true, false));

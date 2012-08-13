@@ -31,13 +31,13 @@ import java.io.IOException;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segments;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.ZURL.FailCategory;
@@ -52,7 +52,7 @@ public final class crawlReceipt {
      * this is used to respond on a remote crawling request
      */
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -68,13 +68,10 @@ public final class crawlReceipt {
         // request values
         final String iam        = post.get("iam", "");      // seed hash of requester
         final String youare     = post.get("youare", "");    // seed hash of the target peer, needed for network stability
-        //String process    = post.get("process", "");  // process type
-        final String key        = post.get("key", "");      // transmission key
-        //String receivedUrlhash    = post.get("urlhash", "");  // the url hash that has been crawled
         final String result     = post.get("result", "");   // the result; either "ok" or "fail"
         final String reason     = post.get("reason", "");   // the reason for that result
         //String words      = post.get("wordh", "");    // priority word hashes
-        final String propStr    = crypt.simpleDecode(post.get("lurlEntry", ""), key);
+        final String propStr    = crypt.simpleDecode(post.get("lurlEntry", ""));
 
         /*
          the result can have one of the following values:
@@ -119,7 +116,7 @@ public final class crawlReceipt {
     	}
 
         // generating a new loaded URL entry
-        final URIMetadataRow entry = URIMetadataRow.importEntry(propStr);
+        final URIMetadata entry = URIMetadataRow.importEntry(propStr);
         if (entry == null) {
             if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
@@ -150,7 +147,7 @@ public final class crawlReceipt {
 
         if ("fill".equals(result)) try {
             // put new entry into database
-            sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
+            sb.index.urlMetadata().store(entry);
             ResultURLs.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true));

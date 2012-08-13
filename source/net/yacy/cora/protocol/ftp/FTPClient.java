@@ -143,7 +143,7 @@ public class FTPClient {
     }
 
     public boolean exec(String command, final boolean promptIt) {
-        if ((command == null) || (command.length() == 0)) {
+        if ((command == null) || (command.isEmpty())) {
             return true;
         }
         int pos;
@@ -205,7 +205,7 @@ public class FTPClient {
 
     private String[] line2args(final String line) {
         // parse the command line
-        if ((line == null) || (line.length() == 0)) {
+        if ((line == null) || (line.isEmpty())) {
             return null;
         }
         // pre-parse
@@ -237,6 +237,7 @@ public class FTPClient {
             super();
         }
 
+        @Override
         public synchronized Class<?> loadClass(final String classname, final boolean resolve) throws ClassNotFoundException {
             Class<?> c = findLoadedClass(classname);
             if (c == null) {
@@ -422,9 +423,8 @@ public class FTPClient {
                 // appropriate error message
                 if (isFolder(path)) {
                     throw new IOException(reply2);
-                } else {
-                    throw new IOException(reply1);
                 }
+                throw new IOException(reply1);
             }
         }
     }
@@ -945,8 +945,8 @@ public class FTPClient {
             return true;
         }
         final String[] name = this.currentLocalPath.list();
-        for (int n = 0; n < name.length; ++n) {
-            log.info(ls(new File(this.currentLocalPath, name[n])));
+        for (String element : name) {
+            log.info(ls(new File(this.currentLocalPath, element)));
         }
         return true;
     }
@@ -2315,9 +2315,8 @@ public class FTPClient {
             /*reply =*/ receive();
             // boolean success = !isNotPositiveCompletion(reply);
             return os.toByteArray();
-        } else {
-            throw new IOException(reply);
         }
+        throw new IOException(reply);
     }
 
 
@@ -2539,6 +2538,7 @@ public class FTPClient {
             @Override
             public void run() {
                 try {
+                    Thread.currentThread().setName("FTP.sitelist(" + host + ":" + port + ")");
                     sitelist(ftpClient, "/", queue);
                     ftpClient.quit();
                 } catch (final Exception e) {} finally {
@@ -2693,7 +2693,7 @@ public class FTPClient {
                 c.exec("lcd \"" + localFile.getParent() + "\"", false);
                 localFile = new File(localFile.getName());
             }
-            c.exec("put " + localFile.toString() + ((remoteName.length() == 0) ? "" : (" " + remoteName)), false);
+            c.exec("put " + localFile.toString() + ((remoteName.isEmpty()) ? "" : (" " + remoteName)), false);
             c.exec("close", false);
             c.exec("exit", false);
 
@@ -2719,7 +2719,7 @@ public class FTPClient {
     public static void get(final String host, String remoteFile, final File localPath, final String account, final String password) {
         try {
             final FTPClient c = new FTPClient();
-            if (remoteFile.length() == 0) {
+            if (remoteFile.isEmpty()) {
                 remoteFile = "/";
             }
             c.exec("open " + host, false);
@@ -2757,8 +2757,10 @@ public class FTPClient {
             this.password = p;
         }
 
+        @Override
         public final void run() {
             try {
+                Thread.currentThread().setName("FTP.pt(" + this.host + ")");
                 put(this.host, this.localFile, this.remotePath, this.remoteName, this.account, this.password);
             } catch (final IOException e) {
                 log.error(e, e);

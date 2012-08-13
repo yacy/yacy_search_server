@@ -17,7 +17,7 @@ import de.anomic.server.servletProperties;
 
 public class robots {
 
-    public static servletProperties respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static servletProperties respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final RobotsTxtConfig rbc = ((Switchboard)env).robotstxtConfig;
 

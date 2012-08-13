@@ -100,7 +100,6 @@ public final class BufferedRecords {
             assert b.length - start >= this.efs.recordsize;
             bb = this.buffer.get(idx);
             if (bb == null) {
-                if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + size() + ")");
                 this.efs.get(index, b, start);
                 return;
             }

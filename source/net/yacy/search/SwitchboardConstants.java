@@ -287,16 +287,28 @@ public final class SwitchboardConstants {
 
     public static final String REMOTESEARCH_MAXCOUNT_DEFAULT    = "network.unit.remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_DEFAULT     = "network.unit.remotesearch.maxtime";
-
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_USER        = "remotesearch.maxtime";
+
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED = "federated.service.solr.indexing.enabled";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL = "federated.service.solr.indexing.url";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS = "federated.service.solr.indexing.commitWithinMs";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING = "federated.service.solr.indexing.sharding";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE = "federated.service.solr.indexing.schemefile";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY = "federated.service.solr.indexing.lazy";
+
+    public static final String CORE_SERVICE_URLDB = "core.service.urldb.tmp";
+    public static final String CORE_SERVICE_RWI = "core.service.rwi.tmp";
+    public static final String CORE_SERVICE_SOLR = "core.service.solr.tmp";
+    public static final String CORE_SERVICE_CITATION = "core.service.citation.tmp";
 
     /**
      * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>
      * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>
      */
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
-    public static final String CRAWLER_FOLLOW_REDIRECTS         = "crawler.http.FollowRedirects";
+    public static final String CRAWLER_FOLLOW_REDIRECTS         = "crawler.http.FollowRedirects"; // ignore the target url and follow to the redirect
+    public static final String CRAWLER_RECORD_REDIRECTS         = "crawler.http.RecordRedirects"; // record the ignored redirected page to the index store
     public static final String YACY_MODE_DEBUG                  = "yacyDebugMode";
 
     /**
@@ -451,16 +463,4 @@ public final class SwitchboardConstants {
 	public static final String TRAY_ICON_FORCED		 = "tray.icon.force";
 	public static final String TRAY_ICON_LABEL		 = "tray.icon.label";
 	public static final String TRAY_MENU_ENABLED	 = "tray.menu.enabled";
-
-	/**
-	 * Segments
-	 */
-	public static final String SEGMENT_RECEIPTS      = "segment.process.receipts_tmp";
-	public static final String SEGMENT_QUERIES       = "segment.process.queries_tmp";
-	public static final String SEGMENT_DHTIN         = "segment.process.dhtin_tmp";
-	public static final String SEGMENT_DHTOUT        = "segment.process.dhtout_tmp";
-	public static final String SEGMENT_PROXY         = "segment.process.proxy_tmp";
-	public static final String SEGMENT_LOCALCRAWLING = "segment.process.localcrawling_tmp";
-	public static final String SEGMENT_REMOTECRAWLING= "segment.process.remotecrawling_tmp";
-	public static final String SEGMENT_PUBLIC        = "segment.process.public_tmp";
 }

@@ -5,17 +5,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class config_p {
-       
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         //plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         //change a Key
         if(post != null && post.containsKey("key") && post.containsKey("value")) {
             final String key = post.get("key");
@@ -24,9 +23,9 @@ public class config_p {
                 env.setConfig(key, value);
             }
         }
-        
+
         final Iterator<String> keys = env.configKeys();
-        
+
         final List<String> list = new ArrayList<String>(250);
 
         while (keys.hasNext()) {
@@ -34,18 +33,18 @@ public class config_p {
         }
 
         Collections.sort(list);
-        
+
         int count=0;
-        
+
         for (final String key : list) {
             prop.putHTML("options_" + count + "_key", key);
             prop.putHTML("options_" + count + "_value", env.getConfig(key, "ERROR"));
-            count++;        
+            count++;
         }
         prop.put("options", count);
-        
+
         // return rewrite properties
         return prop;
     }
-    
+
 }

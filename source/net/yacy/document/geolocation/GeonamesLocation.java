@@ -43,8 +43,7 @@ import net.yacy.document.StringBuilderComparator;
 import net.yacy.document.WordCache;
 import net.yacy.kelondro.logging.Log;
 
-public class GeonamesLocation implements Locations
-{
+public class GeonamesLocation implements Locations {
 
     /*
         The main 'geoname' table has the following fields :
@@ -125,7 +124,7 @@ public class GeonamesLocation implements Locations
             String[] fields;
             Set<StringBuilder> locnames;
             while ( (line = reader.readLine()) != null ) {
-                if ( line.length() == 0 ) {
+                if ( line.isEmpty() ) {
                     continue;
                 }
                 fields = line.split("\t");
@@ -162,6 +161,11 @@ public class GeonamesLocation implements Locations
     public int size() {
         return this.id2loc.size();
     }
+
+	@Override
+	public boolean isEmpty() {
+		return this.id2loc.isEmpty();
+	}
 
     @Override
     public TreeSet<GeoLocation> find(final String anyname, final boolean locationexact) {
@@ -211,7 +215,7 @@ public class GeonamesLocation implements Locations
     public Set<String> recommend(final String s) {
         final Set<String> a = new HashSet<String>();
         final StringBuilder an = new StringBuilder(s);
-        if ( s.length() == 0 ) {
+        if ( s.isEmpty() ) {
             return a;
         }
         final SortedMap<StringBuilder, List<Integer>> t = this.name2ids.tailMap(an);

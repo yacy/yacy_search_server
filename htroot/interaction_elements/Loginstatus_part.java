@@ -1,6 +1,6 @@
 package interaction_elements;
 
-//ViewLog_p.java 
+//ViewLog_p.java
 //-----------------------
 //part of the AnomicHTTPD caching proxy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -38,27 +38,27 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
 public class Loginstatus_part {
-    
-    public static serverObjects respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
-    	
+
+    public static serverObjects respond(final RequestHeader requestHeader, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
+
     	final Switchboard sb = (Switchboard) env;
-    	
+
     	final servletProperties prop = new servletProperties();
-        
+
         prop.put("enabled", env.getConfigBool("interaction.userlogon.enabled", false) ? "1" : "0");
-        
+
         prop.put("enabled_color", env.getConfig("color_tableheader", ""));
 
         prop.put("enabled_logged-in_registrationenabled", env.getConfigBool("interaction.userselfregistration.enabled", false) ? "1" : "0");
-        
-//        
+
+//
 //        final String address = sb.peers.mySeed().getPublicAddress();
-        
+
         prop.put("enabled_peer", sb.peers.myName());
-        
+
         prop.put("enabled_logged-in_returnto", "/index.html");
-        
-        
+
+
         UserDB.Entry entry=null;
 
         //default values
@@ -82,7 +82,7 @@ public class Loginstatus_part {
                 }
             }
         }
-        
+
         //identified via userDB
         if(entry != null){
             prop.put("enabled_logged-in", "1");
@@ -106,9 +106,9 @@ public class Loginstatus_part {
         //identified via form-login
         //TODO: this does not work for a static admin, yet.
         }
-        
+
         // return rewrite properties
         return prop;
-        
+
     }
 }

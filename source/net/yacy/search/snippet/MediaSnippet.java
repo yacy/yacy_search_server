@@ -40,14 +40,15 @@ import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
@@ -81,8 +82,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             this.height = NumberTools.parseIntDecSubstring(attr, p + 3);
         }
         this.ranking = ranking; // the smaller the better! small values should be shown first
-        if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
-        if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
+        if ((this.name == null) || (this.name.isEmpty())) this.name = "_";
+        if ((this.attr == null) || (this.attr.isEmpty())) this.attr = "_";
     }
 
     public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final int width, final int height, final long ranking, final DigestURI source) {
@@ -96,8 +97,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         this.width = width;
         this.height = height;
         this.ranking = ranking; // the smaller the better! small values should be shown first
-        if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
-        if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
+        if ((this.name == null) || (this.name.isEmpty())) this.name = "_";
+        if ((this.attr == null) || (this.attr.isEmpty())) this.attr = "_";
     }
 
     private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
@@ -134,7 +135,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return o1.compareTo(o2);
     }
 
-    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
+    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
@@ -142,7 +143,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
         Document document;
         try {
-            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, timeout, Integer.MAX_VALUE));
+            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay));
         } catch (final IOException e) {
             Log.logFine("snippet fetch", "load error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();
@@ -230,14 +231,14 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         final Iterator<byte[]> j = queryhashes.iterator();
         byte[] hash;
         Integer pos;
-        final HandleSet remaininghashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), queryhashes.size());
+        final HandleSet remaininghashes = new RowHandleSet(queryhashes.keylen(), queryhashes.comparator(), queryhashes.size());
         while (j.hasNext()) {
             hash = j.next();
             pos = hs.get(hash);
             if (pos == null) {
                 try {
                     remaininghashes.put(hash);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                 }
             }

@@ -99,9 +99,9 @@ public class Surftips {
                 // make new news message with voting
                 final HashMap<String, String> map = new HashMap<String, String>();
                 map.put("urlhash", hash);
-                map.put("url", crypt.simpleDecode(post.get("url", ""), null));
-                map.put("title", crypt.simpleDecode(post.get("title", ""), null));
-                map.put("description", crypt.simpleDecode(post.get("description", ""), null));
+                map.put("url", crypt.simpleDecode(post.get("url", "")));
+                map.put("title", crypt.simpleDecode(post.get("title", "")));
+                map.put("description", crypt.simpleDecode(post.get("description", "")));
                 map.put("vote", "positive");
                 map.put("refid", post.get("refid", ""));
                 map.put("comment", post.get("comment", ""));
@@ -138,7 +138,7 @@ public class Surftips {
                 try{
                 	if(Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS ,new DigestURI(url)))
                 		continue;
-                }catch(final MalformedURLException e){continue;};
+                }catch(final MalformedURLException e){continue;}
                 title = row.getColUTF8(1);
                 description = row.getColUTF8(2);
                 if ((url == null) || (title == null) || (description == null)) continue;
@@ -182,7 +182,7 @@ public class Surftips {
     private static void accumulateVotes(final Switchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
         NewsDB.Record record;
-        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype);
         int j = 0;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
@@ -212,7 +212,7 @@ public class Surftips {
             final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
         NewsDB.Record record;
-        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype);
         int j = 0;
         String url = "", urlhash;
         Row.Entry entry;
@@ -229,7 +229,7 @@ public class Surftips {
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (((intention.length() == 0) || intention.equals("simple web crawl") || intention.equals("Automatic ReCrawl!")) ? record.attribute("startURL", "") : intention).getBytes(),
+                                (((intention.isEmpty()) || intention.equals("simple web crawl") || intention.equals("Automatic ReCrawl!")) ? record.attribute("startURL", "") : intention).getBytes(),
                                 intention.equals("Automatic ReCrawl!") ? UTF8.getBytes("Automatic ReCrawl") : UTF8.getBytes("Crawl Start Point"),
                                 record.id().getBytes()
                         });

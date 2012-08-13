@@ -10,7 +10,7 @@
 // $LastChangedBy: lotus $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -33,25 +33,31 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigHeuristics_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         if (post != null) {
-            
+
             // store this call as api call
             sb.tables.recordAPICall(post, "ConfigHeuristics.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "heuristic settings");
-            
+
             if (post.containsKey("site_on")) sb.setConfig("heuristic.site", true);
             if (post.containsKey("site_off")) sb.setConfig("heuristic.site", false);
+            if (post.containsKey("searchresult_on")) sb.setConfig("heuristic.searchresults", true);
+            if (post.containsKey("searchresult_off")) sb.setConfig("heuristic.searchresults", false);
+            if (post.containsKey("searchresultglobal_on")) sb.setConfig("heuristic.searchresults.crawlglobal", true);
+            if (post.containsKey("searchresultglobal_off")) sb.setConfig("heuristic.searchresults.crawlglobal", false);
             if (post.containsKey("blekko_on")) sb.setConfig("heuristic.blekko", true);
             if (post.containsKey("blekko_off")) sb.setConfig("heuristic.blekko", false);
         }
-        
+
         prop.put("site.checked", sb.getConfigBool("heuristic.site", false) ? 1 : 0);
+        prop.put("searchresult.checked", sb.getConfigBool("heuristic.searchresults", false) ? 1 : 0);
+        prop.put("searchresultglobal.checked", sb.getConfigBool("heuristic.searchresults.crawlglobal", false) ? 1 : 0);
         prop.put("blekko.checked", sb.getConfigBool("heuristic.blekko", false) ? 1 : 0);
-        
+
         return prop;
     }
 }

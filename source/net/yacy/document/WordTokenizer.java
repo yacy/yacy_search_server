@@ -24,15 +24,12 @@
 
 package net.yacy.document;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -44,9 +41,9 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
     private final unsievedWordsEnum e;
     private final WordCache meaningLib;
 
-    public WordTokenizer(final InputStream is, final WordCache meaningLib) {
-        assert is != null;
-        this.e = new unsievedWordsEnum(is);
+    public WordTokenizer(final SentenceReader sr, final WordCache meaningLib) {
+        assert sr != null;
+        this.e = new unsievedWordsEnum(sr);
         this.buffer = nextElement0();
         this.meaningLib = meaningLib;
     }
@@ -89,20 +86,20 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
     private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
         // returns an enumeration of StringBuilder Objects
         private StringBuilder buffer = null;
-        private final SentenceReader e;
+        private final SentenceReader sr;
         private final List<StringBuilder> s;
         private int sIndex;
 
-        public unsievedWordsEnum(final InputStream is) {
-            assert is != null;
-            this.e = new SentenceReader(is);
+        public unsievedWordsEnum(final SentenceReader sr0) {
+            assert sr0 != null;
+            this.sr = sr0;
             this.s = new ArrayList<StringBuilder>();
             this.sIndex = 0;
             this.buffer = nextElement0();
         }
 
         public void pre(final boolean x) {
-            this.e.pre(x);
+            this.sr.pre(x);
         }
 
         private StringBuilder nextElement0() {
@@ -114,8 +111,8 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
                 this.s.clear();
             }
             while (this.s.isEmpty()) {
-                if (!this.e.hasNext()) return null;
-                r = this.e.next();
+                if (!this.sr.hasNext()) return null;
+                r = this.sr.next();
                 if (r == null) return null;
                 r = trim(r);
                 sb = new StringBuilder(20);
@@ -154,7 +151,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         }
 
         public synchronized void close() {
-        	this.e.close();
+        	this.sr.close();
         }
     }
 
@@ -183,7 +180,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
      */
     public static SortedMap<byte[], Integer> hashSentence(final String sentence, final WordCache meaningLib, int maxlength) {
         final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-        final WordTokenizer words = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), meaningLib);
+        final WordTokenizer words = new WordTokenizer(new SentenceReader(sentence), meaningLib);
         try {
 	        int pos = 0;
 	        StringBuilder word;

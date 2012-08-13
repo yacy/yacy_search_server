@@ -40,47 +40,50 @@ import java.util.Iterator;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.SetTools;
 
 
-public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializable {
+public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneable, Serializable {
 
     private static final long serialVersionUID=444204785291174968L;
 
     private final Row rowdef;
     private RowSet index;
 
-    public HandleSet(final int keylength, final ByteOrder objectOrder, final int expectedspace) {
+    public RowHandleSet(final int keylength, final ByteOrder objectOrder, final int expectedspace) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key")}, objectOrder);
         try {
             this.index = new RowSet(this.rowdef, expectedspace);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             try {
                 this.index = new RowSet(this.rowdef, 0);
-            } catch (RowSpaceExceededException ee) {
+            } catch (SpaceExceededException ee) {
                 Log.logException(ee);
                 this.index = null;
             }
         }
     }
 
-    private HandleSet(Row rowdef, RowSet index) {
+    private RowHandleSet(Row rowdef, RowSet index) {
         this.rowdef = rowdef;
         this.index = index;
     }
 
-    public HandleSet(Row rowdef, byte[] b) throws RowSpaceExceededException {
+    public RowHandleSet(Row rowdef, byte[] b) throws SpaceExceededException {
         this.rowdef = rowdef;
         this.index = RowSet.importRowSet(b, this.rowdef);
     }
 
     @Override
-    public HandleSet clone() {
-        return new HandleSet(this.rowdef, this.index.clone());
+    public RowHandleSet clone() {
+        return new RowHandleSet(this.rowdef, this.index.clone());
     }
 
+    @Override
     public byte[] export() {
         return this.index.exportCollection();
     }
@@ -91,9 +94,9 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
      * @param objectOrder
      * @param file
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public HandleSet(final int keylength, final ByteOrder objectOrder, final File file) throws IOException, RowSpaceExceededException {
+    public RowHandleSet(final int keylength, final ByteOrder objectOrder, final File file) throws IOException, SpaceExceededException {
         this(keylength, objectOrder, (int) (file.length() / (keylength + 8)));
         // read the index dump and fill the index
         final InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
@@ -115,6 +118,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
      * @return the number of written entries
      * @throws IOException
      */
+    @Override
     public final int dump(final File file) throws IOException {
         // we must use an iterator from the combined index, because we need the entries sorted
         // otherwise we could just write the byte[] from the in kelondroRowSet which would make
@@ -136,14 +140,17 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
         return c;
     }
 
+    @Override
     public final synchronized byte[] smallestKey() {
         return this.index.smallestKey();
     }
 
+    @Override
     public final synchronized byte[] largestKey() {
         return this.index.largestKey();
     }
 
+    @Override
     public ByteOrder comparator() {
         return this.rowdef.objectOrder;
     }
@@ -152,16 +159,24 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
         return this.index.row();
     }
 
+    @Override
+    public int keylen() {
+        return this.index.rowdef.primaryKeyLength;
+    }
+
+    @Override
     public final void clear() {
         this.index.clear();
     }
 
+    @Override
     public final synchronized boolean has(final byte[] key) {
         assert (key != null);
         return this.index.has(key);
     }
 
-    public final void putAll(final HandleSet aset) throws RowSpaceExceededException {
+    @Override
+    public final void putAll(final HandleSet aset) throws SpaceExceededException {
         for (byte[] b: aset) put(b);
     }
 
@@ -170,20 +185,23 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
      * @param key
      * @return true if this set did _not_ already contain the given key.
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public final boolean put(final byte[] key) throws RowSpaceExceededException {
+    @Override
+    public final boolean put(final byte[] key) throws SpaceExceededException {
         assert (key != null);
         final Row.Entry newentry = this.index.row().newEntry(key);
         return this.index.put(newentry);
     }
 
-    public final void putUnique(final byte[] key) throws RowSpaceExceededException {
+    @Override
+    public final void putUnique(final byte[] key) throws SpaceExceededException {
         assert (key != null);
         final Row.Entry newentry = this.index.row().newEntry(key);
         this.index.addUnique(newentry);
     }
 
+    @Override
     public final boolean remove(final byte[] key) {
         assert (key != null);
         Row.Entry indexentry;
@@ -191,6 +209,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
         return indexentry != null;
     }
 
+    @Override
     public final synchronized byte[] removeOne() {
         Row.Entry indexentry;
         indexentry = this.index.removeOne();
@@ -204,6 +223,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
      * @param idx
      * @return entry from the end of the list
      */
+    @Override
     public final synchronized byte[] getOne(int idx) {
         if (idx >= this.size()) return null;
         Row.Entry indexentry;
@@ -212,14 +232,17 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
         return indexentry.getPrimaryKeyBytes();
     }
 
+    @Override
     public final synchronized boolean isEmpty() {
         return this.index.isEmpty();
     }
 
+    @Override
     public final synchronized int size() {
         return this.index.size();
     }
 
+    @Override
     public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         return this.index.keys(up, firstKey);
     }
@@ -229,6 +252,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
         return keys(true, null);
     }
 
+    @Override
     public final synchronized void close() {
         this.index.close();
         this.index = null;
@@ -241,17 +265,17 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
 
     // set tools
 
-    public HandleSet joinConstructive(final HandleSet other) throws RowSpaceExceededException {
+    public HandleSet joinConstructive(final HandleSet other) throws SpaceExceededException {
         return joinConstructive(this, other);
     }
 
     // now the same for set-set
-    public static HandleSet joinConstructive(final HandleSet set1, final HandleSet set2) throws RowSpaceExceededException {
+    public static HandleSet joinConstructive(final HandleSet set1, final HandleSet set2) throws SpaceExceededException {
         // comparators must be equal
         if ((set1 == null) || (set2 == null)) return null;
         assert set1.comparator() == set2.comparator();
         if (set1.comparator() != set2.comparator()) return null;
-        if (set1.isEmpty() || set2.isEmpty()) return new HandleSet(set1.rowdef.primaryKeyLength, set1.comparator(), 0);
+        if (set1.isEmpty() || set2.isEmpty()) return new RowHandleSet(set1.keylen(), set1.comparator(), 0);
 
         // decide which method to use
         final int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
@@ -267,9 +291,9 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
         return joinConstructiveByEnumeration(set1, set2);
     }
 
-    private static HandleSet joinConstructiveByTest(final HandleSet small, final HandleSet large) throws RowSpaceExceededException {
+    private static HandleSet joinConstructiveByTest(final HandleSet small, final HandleSet large) throws SpaceExceededException {
         final Iterator<byte[]> mi = small.iterator();
-        final HandleSet result = new HandleSet(small.rowdef.primaryKeyLength, small.comparator(), 0);
+        final HandleSet result = new RowHandleSet(small.keylen(), small.comparator(), 0);
         byte[] o;
         while (mi.hasNext()) {
             o = mi.next();
@@ -278,12 +302,12 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
         return result;
     }
 
-    private static HandleSet joinConstructiveByEnumeration(final HandleSet set1, final HandleSet set2) throws RowSpaceExceededException {
+    private static HandleSet joinConstructiveByEnumeration(final HandleSet set1, final HandleSet set2) throws SpaceExceededException {
         // implement pairwise enumeration
         final ByteOrder comp = set1.comparator();
         final Iterator<byte[]> mi = set1.iterator();
         final Iterator<byte[]> si = set2.iterator();
-        final HandleSet result = new HandleSet(set1.rowdef.primaryKeyLength, comp, 0);
+        final HandleSet result = new RowHandleSet(set1.keylen(), comp, 0);
         int c;
         if (mi.hasNext() && si.hasNext()) {
             byte[] mobj = mi.next();
@@ -304,6 +328,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
         return result;
     }
 
+    @Override
     public void excludeDestructive(final HandleSet other) {
         excludeDestructive(this, other);
     }
@@ -331,7 +356,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
     }
 
     public static void main(String[] args) {
-        HandleSet s = new HandleSet(8, NaturalOrder.naturalOrder, 100);
+        HandleSet s = new RowHandleSet(8, NaturalOrder.naturalOrder, 100);
         try {
             s.put(UTF8.getBytes("Hello"));
             s.put(UTF8.getBytes("World"));
@@ -346,7 +371,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
 
                 // read from file
                 ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
-                HandleSet s1 = (HandleSet) in.readObject();
+                RowHandleSet s1 = (RowHandleSet) in.readObject();
                 in.close();
 
                 for (byte[] b: s1) {
@@ -358,7 +383,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable, Serializabl
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             e.printStackTrace();
         }
         s.close();

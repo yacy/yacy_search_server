@@ -28,15 +28,15 @@ import java.util.Map;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import de.anomic.crawler.Latency;
-import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.Latency.Host;
+import de.anomic.crawler.NoticedURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class latency_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+
         final serverObjects prop = new serverObjects();
         //final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final Iterator<Map.Entry<String, Host>> i = Latency.iterator();
@@ -56,9 +56,9 @@ public class latency_p {
             c++;
         }
         prop.put("domains", c);
-        
+
         // return rewrite properties
         return prop;
     }
-    
+
 }

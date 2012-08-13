@@ -213,7 +213,7 @@ public class ReferenceOrder {
      * @param t
      * @return a ranking: the higher the number, the better is the ranking
      */
-    public long cardinal(final WordReferenceVars t) {
+    public long cardinal(final WordReference t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
         final Bitfield flags = t.flags();
@@ -254,7 +254,7 @@ public class ReferenceOrder {
            + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
            + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
-           + ((ByteBuffer.equals(t.language, this.language)) ? 255 << this.ranking.coeff_language           : 0)
+           + ((ByteBuffer.equals(t.getLanguage(), this.language)) ? 255 << this.ranking.coeff_language           : 0)
            + ((DigestURI.probablyRootURL(t.urlhash())) ?  15 << this.ranking.coeff_urllength          : 0);
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;

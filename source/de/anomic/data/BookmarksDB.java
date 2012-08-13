@@ -38,9 +38,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 
@@ -124,7 +124,7 @@ public class BookmarksDB {
     // -----------------------------------------------------------
 
     public Bookmark createBookmark(final String url, final String user){
-        if (url == null || url.length() == 0) return null;
+        if (url == null || url.isEmpty()) return null;
         Bookmark bk;
         try {
             bk = new Bookmark(url);
@@ -164,7 +164,7 @@ public class BookmarksDB {
         } catch (final IOException e) {
             Log.logException(e);
             return null;
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
             return null;
         }
@@ -259,10 +259,10 @@ public class BookmarksDB {
      */
     public void putTag(final Tag tag){
     	if (tag == null) return;
-        if (tag.size() > 0) {
-            this.tags.put(tag.getTagHash(), tag);
-        } else {
+        if (tag.isEmpty()) {
             this.tags.remove(tag.getTagHash());
+        } else {
+            this.tags.put(tag.getTagHash(), tag);
         }
     }
 
@@ -460,6 +460,10 @@ public class BookmarksDB {
 
         public int size(){
             return this.urlHashes.size();
+        }
+
+        public boolean isEmpty() {
+            return this.urlHashes.isEmpty();
         }
     }
 

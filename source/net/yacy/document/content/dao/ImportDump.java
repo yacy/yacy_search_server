@@ -61,7 +61,7 @@ public class ImportDump {
         	String s = UTF8.String(baos.toByteArray());
         	int p, q;
         	String t;
-        	loop: while (s.length() > 0) {
+        	loop: while (!s.isEmpty()) {
         		p = s.indexOf("INSERT INTO", 1);
         		q = s.indexOf("CREATE TABLE", 1);
         		if (q >= 0 && q < p) p = q;

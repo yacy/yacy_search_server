@@ -24,7 +24,6 @@
         </Task>
 	#{/table}#</Tasks>
 	<Cache>
-		<urlCacheSize>#[urlCacheSize]#</urlCacheSize>
 		<wordCacheSize>#[wordCacheSize]#</wordCacheSize>
 		<maxURLinCache>#[maxURLinCache]#</maxURLinCache>
 		<maxAgeOfCache>#[maxAgeOfCache]#</maxAgeOfCache>

@@ -81,7 +81,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
-            final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
                   byte[]   language,      // (guessed) language of document
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
@@ -102,7 +101,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.lother = outlinksOther;
         this.phrasesintext = phrasecount;
         this.positions = new LinkedBlockingQueue<Integer>();
-        if (ps.size() > 0) for (final Integer i: ps) this.positions.add(i);
+        if (!ps.isEmpty()) for (final Integer i: ps) this.positions.add(i);
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
         this.urlcomps = urlComps;
@@ -125,7 +124,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.lother = e.lother();
         this.phrasesintext = e.phrasesintext();
         this.positions = new LinkedBlockingQueue<Integer>();
-        if (e.positions().size() > 0) for (final Integer i: e.positions()) this.positions.add(i);
+        if (!e.positions().isEmpty()) for (final Integer i: e.positions()) this.positions.add(i);
         this.posinphrase = e.posinphrase();
         this.posofphrase = e.posofphrase();
         this.urlcomps = e.urlcomps();
@@ -174,7 +173,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.posinphrase,
                 this.posofphrase,
                 this.lastModified,
-                System.currentTimeMillis(),
                 this.language,
                 this.type,
                 this.llocal,
@@ -287,6 +285,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return this.urlHash;
     }
 
+    @Override
     public String hosthash() {
         if (this.hostHash != null) return this.hostHash;
         this.hostHash = ASCII.String(this.urlHash, 6, 6);

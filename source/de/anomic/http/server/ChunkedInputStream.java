@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.httpclient.HttpMethod;
+
 
 /**
  * <p>Transparently coalesces chunks of a HTTP stream that uses
@@ -377,7 +379,7 @@ public class ChunkedInputStream extends InputStream {
             throw new IllegalArgumentException("Parameter may not be null");
         }
 
-        if (charset == null || charset.length() == 0) {
+        if (charset == null || charset.isEmpty()) {
             throw new IllegalArgumentException("charset may not be null or empty");
         }
 
@@ -451,7 +453,6 @@ public class ChunkedInputStream extends InputStream {
         // read and discard the remainder of the message
         byte buffer[] = new byte[1024];
         while (inStream.read(buffer) >= 0) {
-            ;
         }
     }
 }

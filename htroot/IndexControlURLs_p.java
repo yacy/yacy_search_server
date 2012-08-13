@@ -35,13 +35,12 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.MetadataRepository;
 import net.yacy.search.index.Segment;
 import de.anomic.server.serverObjects;
@@ -49,25 +48,18 @@ import de.anomic.server.serverSwitch;
 
 public class IndexControlURLs_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
 
         final serverObjects prop = new serverObjects();
 
+        Segment segment = sb.index;
+
         // set default values
         prop.put("urlstring", "");
         prop.put("urlhash", "");
         prop.put("result", "");
-        String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
-        int i = 0;
-        for (final String s: sb.indexSegments.segmentNames()) {
-            prop.put("segments_" + i + "_name", s);
-            prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
-            i++;
-        }
-        Segment segment = sb.indexSegments.segment(segmentName);
-        prop.put("segments", i);
         prop.putNum("ucount", segment.urlMetadata().size());
         prop.put("otherHosts", "");
         prop.put("genUrlProfile", 0);
@@ -75,20 +67,6 @@ public class IndexControlURLs_p {
         prop.put("statistics_lines", 100);
         prop.put("statisticslines", 0);
         prop.put("reload", 0);
-
-        // do segment selection
-        if (post != null && post.containsKey("segment")) {
-            // default values
-            segmentName = post.get("segment", segmentName).trim();
-            i= 0;
-            for (final String s: sb.indexSegments.segmentNames()) {
-                prop.put("segments_" + i + "_name", s);
-                prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
-                i++;
-            }
-            prop.put("segments", i);
-            segment = sb.indexSegments.segment(segmentName);
-        }
 
         // show export messages
         final MetadataRepository.Export export = segment.urlMetadata().export();
@@ -129,7 +107,7 @@ public class IndexControlURLs_p {
         // post values that are set on numerous input fields with same name
         String urlstring = post.get("urlstring", "").trim();
         String urlhash = post.get("urlhash", "").trim();
-        if (urlhash.length() == 0 && urlstring.length() > 0) {
+        if (urlhash.isEmpty() && urlstring.length() > 0) {
             try {
                 urlhash = ASCII.String(new DigestURI(urlstring).hash());
             } catch (final MalformedURLException e) {
@@ -147,14 +125,14 @@ public class IndexControlURLs_p {
         prop.put("result", " ");
 
         if (post.containsKey("urlhashdeleteall")) {
-            i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, CacheStrategy.IFEXIST);
+            int i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, CacheStrategy.IFEXIST);
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
             prop.put("lurlexport", 0);
             prop.put("reload", 0);
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final URIMetadataRow entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
+            final URIMetadata entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -188,7 +166,7 @@ public class IndexControlURLs_p {
                 final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
                 prop.put("urlhash", urlhash);
-                final URIMetadataRow entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
+                final URIMetadata entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
                 if (entry == null) {
                     prop.putHTML("result", "No Entry for URL " + url.toNormalform(true, true));
                     prop.putHTML("urlstring", urlstring);
@@ -206,7 +184,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            final URIMetadataRow entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
+            final URIMetadata entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -221,11 +199,10 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<URIMetadataRow> entryIt = new RotateIterator<URIMetadataRow>(segment.urlMetadata().entries(true, urlhash), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax());
+                final Iterator<URIMetadata> entryIt = new RotateIterator<URIMetadata>(segment.urlMetadata().entries(true, urlhash), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax());
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
-                URIMetadataRow entry;
-                i = 0;
-                int rows = 0, cols = 0;
+                URIMetadata entry;
+                int i = 0, rows = 0, cols = 0;
                 prop.put("urlhashsimilar", "1");
                 while (entryIt.hasNext() && i < 256) {
                     entry = entryIt.next();
@@ -326,14 +303,14 @@ public class IndexControlURLs_p {
         return prop;
     }
 
-    private static serverObjects genUrlProfile(final Segment segment, final URIMetadataRow entry, final String urlhash) {
+    private static serverObjects genUrlProfile(final Segment segment, final URIMetadata entry, final String urlhash) {
         final serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
+        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
         if (entry.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

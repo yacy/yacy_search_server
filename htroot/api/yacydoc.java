@@ -35,12 +35,11 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -55,15 +54,9 @@ public class yacydoc {
         final Switchboard sb = (Switchboard) env;
 
         final serverObjects prop = new serverObjects();
-        final Segment segment;
+        final Segment segment = sb.index;
         final boolean html = post != null && post.containsKey("html");
         prop.setLocalized(html);
-        final boolean authorized = sb.verifyAuthentication(header);
-        if (post != null && post.containsKey("segment") && authorized) {
-            segment = sb.indexSegments.segment(post.get("segment"));
-        } else {
-            segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
 
         prop.put("dc_title", "");
         prop.put("dc_creator", "");
@@ -92,9 +85,9 @@ public class yacydoc {
 
         final String urlstring = post.get("url", "").trim();
         String urlhash = post.get("urlhash", "").trim();
-        if (urlstring.length() == 0 && urlhash.length() == 0) return prop;
+        if (urlstring.isEmpty() && urlhash.isEmpty()) return prop;
 
-        if (urlstring.length() > 0 && urlhash.length() == 0) {
+        if (urlstring.length() > 0 && urlhash.isEmpty()) {
             try {
                 final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
@@ -102,15 +95,15 @@ public class yacydoc {
                 Log.logException(e);
             }
         }
-        if (urlhash == null || urlhash.length() == 0) return prop;
+        if (urlhash == null || urlhash.isEmpty()) return prop;
 
-        final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes());
+        final URIMetadata entry = segment.urlMetadata().load(urlhash.getBytes());
         if (entry == null) return prop;
 
         if (entry.url() == null) {
             return prop;
         }
-        final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
+        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
 
         prop.putXML("dc_title", entry.dc_title());
         prop.putXML("dc_creator", entry.dc_creator());
@@ -131,7 +124,7 @@ public class yacydoc {
         prop.putXML("yacy_referrer_url", (le == null) ? "" : le.url().toNormalform(false, true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words", entry.wordCount());
-        prop.put("yacy_citations", sb.indexSegments.segment(Segments.Process.PUBLIC).urlCitation().count(entry.hash()));
+        prop.put("yacy_citations", sb.index.urlCitation().count(entry.hash()));
         prop.put("yacy_inbound", entry.llocal());
         prop.put("yacy_outbound", entry.lother());
 
@@ -140,18 +133,18 @@ public class yacydoc {
         String rdf = JenaTripleStore.getRDFByModel(model);
         prop.putXML("triples", rdf);
         prop.put("rdf", header.fileType() == FileType.XML ? rdf : "");
-        
-        
+
+
         String references = "";
         Iterator<RDFNode> t = JenaTripleStore.getObjects("http://yacy.net/url#"+urlhash, "http://purl.org/dc/terms/references");
-        
+
         while (t.hasNext()) {
             RDFNode r = t.next();
             references += r.toString()+",";
         }
-        
-        Log.logInfo ("TRIPLESTORE", references);
-        
+
+        JenaTripleStore.log.logInfo(references);
+
         prop.put("taglinks", references);
 
         // return rewrite properties

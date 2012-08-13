@@ -1,4 +1,3 @@
-package net.yacy;
 // yacy.java
 // -----------------------
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -23,9 +22,8 @@ package net.yacy;
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+package net.yacy;
 
-//import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,54 +37,33 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.Semaphore;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
-import net.yacy.cora.sorting.OrderedScoreMap;
-import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
-import net.yacy.kelondro.blob.MapDataMining;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.rwi.Reference;
-import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
-import net.yacy.peers.SeedDB;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.peers.operation.yacyRelease;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.MetadataRepository;
-import net.yacy.search.index.Segment;
 
 import com.google.common.io.Files;
 
 import de.anomic.data.Translator;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.server.serverCore;
-import de.anomic.tools.enumerateFiles;
 
 /**
 * This is the main class of YaCy. Several threads are started from here:
@@ -216,7 +193,7 @@ public final class yacy {
             try {
             	channel = new RandomAccessFile(f,"rw").getChannel();
             	lock = channel.tryLock(); // lock yacy.running
-            } catch (final Exception e) { };
+            } catch (final Exception e) { }
 
             final String oldconf = "DATA/SETTINGS/httpProxy.conf".replace("/", File.separator);
             final String newconf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
@@ -353,7 +330,7 @@ public final class yacy {
                 final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
                 if (browserPopUpTrigger) try {
                     final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
-                    //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
+                    //boolean properPW = (sb.getConfig("adminAccount", "").isEmpty()) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                     //if (!properPW) browserPopUpPage = "ConfigBasic.html";
                     Browser.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage);
                 } catch (final Throwable e) {
@@ -597,347 +574,6 @@ public final class yacy {
     }
 
     /**
-    * This method gets all found words and outputs a statistic about the score
-    * of the words. The output of this method can be used to create stop-word
-    * lists. This method will be called if you start yacy with the argument
-    * -genwordstat.
-    * FIXME: How can stop-word list be created from this output? What type of
-    * score is output?
-    *
-    * @param homePath Root-Path where all the information is to be found.
-    */
-    private static void genWordstat(final File homePath) {
-        // start up
-        System.out.println(copyright);
-        System.out.println(hline);
-
-        // load words
-        Log.logInfo("GEN-WORDSTAT", "loading words...");
-        final TreeMap<byte[], String> words = loadWordMap(new File(homePath, "yacy.words"));
-
-        // find all hashes
-        Log.logInfo("GEN-WORDSTAT", "searching all word-hash databases...");
-        final File dbRoot = new File(homePath, "DATA/INDEX/freeworld/");
-        final enumerateFiles ef = new enumerateFiles(new File(dbRoot, "WORDS"), true, false, true, true);
-        File f;
-        byte[] h;
-        final ScoreMap<byte[]> hs = new OrderedScoreMap<byte[]>(Base64Order.standardCoder);
-        while (ef.hasMoreElements()) {
-            f = ef.nextElement();
-            h = f.getName().substring(0, Word.commonHashLength).getBytes();
-            hs.inc(h, (int) f.length());
-        }
-
-        // list the hashes in reverse order
-        Log.logInfo("GEN-WORDSTAT", "listing words in reverse size order...");
-        String w;
-        final Iterator<byte[]> i = hs.keys(false);
-        while (i.hasNext()) {
-            h = i.next();
-            w = words.get(h);
-            if (w == null) System.out.print("# " + h); else System.out.print(w);
-            System.out.println(" - " + hs.get(h));
-        }
-
-        // finished
-        Log.logConfig("GEN-WORDSTAT", "FINISHED");
-    }
-
-    /**
-     * @param homePath path to the YaCy directory
-     * @param networkName
-     */
-    public static void minimizeUrlDB(final File dataHome, final File appHome, final String networkName) {
-        // run with "java -classpath classes yacy -minimizeUrlDB"
-        try {Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
-        final File indexPrimaryRoot = new File(dataHome, "DATA/INDEX");
-        final File indexRoot2 = new File(dataHome, "DATA/INDEX2");
-        final Log log = new Log("URL-CLEANUP");
-        try {
-            log.logInfo("STARTING URL CLEANUP");
-
-            // db containing all currently loades urls
-            final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexPrimaryRoot, networkName), "TEXT"), "text.urlmd", false, false);
-
-            // db used to hold all neede urls
-            final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(new File(indexRoot2, networkName), "TEXT"), "text.urlmd", false, false);
-
-            final int cacheMem = (int)(MemoryControl.maxMemory() - MemoryControl.total());
-            if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
-
-            final Segment wordIndex = new Segment(
-                    log,
-                    new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
-                    10000,
-                    (long) Integer.MAX_VALUE, false, false);
-            final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.termIndex().referenceContainerIterator("AAAAAAAAAAAA".getBytes(), false, false);
-
-            long urlCounter = 0, wordCounter = 0;
-            long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
-            String wordChunkStartHash = "AAAAAAAAAAAA", wordChunkEndHash;
-
-            while (indexContainerIterator.hasNext()) {
-                ReferenceContainer<WordReference> wordIdxContainer = null;
-                try {
-                    wordCounter++;
-                    wordIdxContainer = indexContainerIterator.next();
-
-                    // the combined container will fit, read the container
-                    final Iterator<WordReference> wordIdxEntries = wordIdxContainer.entries();
-                    Reference iEntry;
-                    while (wordIdxEntries.hasNext()) {
-                        iEntry = wordIdxEntries.next();
-                        final byte[] urlHash = iEntry.urlhash();
-                        if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            final URIMetadataRow urlEntry = currentUrlDB.load(urlHash);
-                            urlCounter++;
-                            minimizedUrlDB.store(urlEntry);
-                            if (urlCounter % 500 == 0) {
-                                log.logInfo(urlCounter + " URLs found so far.");
-                            }
-                        } catch (final IOException e) {}
-                    }
-
-                    if (wordCounter%500 == 0) {
-                        wordChunkEndHash = ASCII.String(wordIdxContainer.getTermHash());
-                        wordChunkEnd = System.currentTimeMillis();
-                        final long duration = wordChunkEnd - wordChunkStart;
-                        log.logInfo(wordCounter + " words scanned " +
-                                "[" + wordChunkStartHash + " .. " + wordChunkEndHash + "]\n" +
-                                "Duration: "+ 500*1000/duration + " words/s" +
-                                " | Free memory: " + MemoryControl.free() +
-                                " | Total memory: " + MemoryControl.total());
-                        wordChunkStart = wordChunkEnd;
-                        wordChunkStartHash = wordChunkEndHash;
-                    }
-
-                    // we have read all elements, now we can close it
-                    wordIdxContainer = null;
-
-                } catch (final Exception e) {
-                    log.logSevere("Exception", e);
-                } finally {
-                    if (wordIdxContainer != null) try { wordIdxContainer = null; } catch (final Exception e) {}
-                }
-            }
-            log.logInfo("current LURL DB contains " + currentUrlDB.size() + " entries.");
-            log.logInfo("mimimized LURL DB contains " + minimizedUrlDB.size() + " entries.");
-
-            currentUrlDB.close();
-            minimizedUrlDB.close();
-            wordIndex.close();
-
-            // TODO: rename the mimimized UrlDB to the name of the previous UrlDB
-
-            log.logInfo("FINISHED URL CLEANUP, WAIT FOR DUMP");
-            log.logInfo("You can now backup your old URL DB and rename minimized/urlHash.db to urlHash.db");
-
-            log.logInfo("TERMINATED URL CLEANUP");
-        } catch (final Exception e) {
-            log.logSevere("Exception: " + e.getMessage(), e);
-        } catch (final Error e) {
-            log.logSevere("Error: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-    * Reads all words from the given file and creates a treemap, where key is
-    * the plasma word hash and value is the word itself.
-    *
-    * @param wordlist File where the words are stored.
-    * @return HashMap with the hash-word - relation.
-    */
-    private static TreeMap<byte[], String> loadWordMap(final File wordlist) {
-        // returns a hash-word - Relation
-        final TreeMap<byte[], String> wordmap = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
-        try {
-            String word;
-            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
-            while ((word = br.readLine()) != null) wordmap.put(Word.word2hash(word), word);
-            br.close();
-        } catch (final IOException e) {}
-        return wordmap;
-    }
-
-    /**
-    * Cleans a wordlist in a file according to the length of the words. The
-    * file with the given filename is read and then only the words in the given
-    * length-range are written back to the file.
-    *
-    * @param wordlist Name of the file the words are stored in.
-    * @param minlength Minimal needed length for each word to be stored.
-    * @param maxlength Maximal allowed length for each word to be stored.
-    */
-    private static void cleanwordlist(final String wordlist, final int minlength, final int maxlength) {
-        // start up
-        System.out.println(copyright);
-        System.out.println(hline);
-        Log.logConfig("CLEAN-WORDLIST", "START");
-
-        String word;
-        final TreeSet<String> wordset = new TreeSet<String>();
-        int count = 0;
-        try {
-            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
-            final String seps = "' .,:/-&";
-            while ((word = br.readLine()) != null) {
-                word = word.toLowerCase().trim();
-                for (int i = 0; i < seps.length(); i++) {
-                    if (word.indexOf(seps.charAt(i)) >= 0) word = word.substring(0, word.indexOf(seps.charAt(i)));
-                }
-                if ((word.length() >= minlength) && (word.length() <= maxlength)) wordset.add(word);
-                count++;
-            }
-            br.close();
-
-            if (wordset.size() != count) {
-                count = count - wordset.size();
-                final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(wordlist)));
-                while (!wordset.isEmpty()) {
-                    word = wordset.first();
-                    bw.write(word + "\n");
-                    wordset.remove(word);
-                }
-                bw.close();
-                Log.logInfo("CLEAN-WORDLIST", "shrinked wordlist by " + count + " words.");
-            } else {
-                Log.logInfo("CLEAN-WORDLIST", "not necessary to change wordlist");
-            }
-        } catch (final IOException e) {
-            Log.logSevere("CLEAN-WORDLIST", "ERROR: " + e.getMessage());
-            System.exit(-1);
-        }
-
-        // finished
-        Log.logConfig("CLEAN-WORDLIST", "FINISHED");
-    }
-
-    private static String[] shift(final String[] args, final int pos, final int count) {
-        final String[] newargs = new String[args.length - count];
-        System.arraycopy(args, 0, newargs, 0, pos);
-        System.arraycopy(args, pos + count, newargs, pos, args.length - pos - count);
-        return newargs;
-    }
-
-    /**
-     * Uses an Iteration over urlHash.db to detect malformed URL-Entries.
-     * Damaged URL-Entries will be marked in a HashSet and removed at the end of the function.
-     *
-     * @param homePath Root-Path where all information is to be found.
-     */
-    private static void urldbcleanup(final File dataHome, final File appHome, final String networkName) {
-        final File root = dataHome;
-        final File indexroot = new File(root, "DATA/INDEX");
-        try {Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
-        final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexroot, networkName), "TEXT"), "text.urlmd", false, false);
-        currentUrlDB.deadlinkCleaner();
-        currentUrlDB.close();
-    }
-
-    private static void RWIHashList(final File dataHome, final File appHome, final String targetName, final String resource, final String format) {
-        Segment WordIndex = null;
-        final Log log = new Log("HASHLIST");
-        final File indexPrimaryRoot = new File(dataHome, "DATA/INDEX");
-        final String wordChunkStartHash = "AAAAAAAAAAAA";
-        try {Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
-        log.logInfo("STARTING CREATION OF RWI-HASHLIST");
-        final File root = dataHome;
-        try {
-            Iterator<ReferenceContainer<WordReference>> indexContainerIterator = null;
-            if (resource.equals("all")) {
-                WordIndex = new Segment(
-                        log,
-                        new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
-                        10000,
-                        (long) Integer.MAX_VALUE, false, false);
-                indexContainerIterator = WordIndex.termIndex().referenceContainerIterator(wordChunkStartHash.getBytes(), false, false);
-            }
-            int counter = 0;
-            ReferenceContainer<WordReference> container = null;
-            if (format.equals("zip")) {
-                log.logInfo("Writing Hashlist to ZIP-file: " + targetName + ".zip");
-                final ZipEntry zipEntry = new ZipEntry(targetName + ".txt");
-                final File file = new File(root, targetName + ".zip");
-                final ZipOutputStream bos = new ZipOutputStream(new FileOutputStream(file));
-                bos.putNextEntry(zipEntry);
-                if(indexContainerIterator != null) {
-                    while (indexContainerIterator.hasNext()) {
-                        counter++;
-                        container = indexContainerIterator.next();
-                        bos.write(container.getTermHash());
-                        bos.write(serverCore.CRLF);
-                        if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + ASCII.String(container.getTermHash()));
-                        }
-                    }
-                }
-                bos.flush();
-                bos.close();
-            } else {
-                log.logInfo("Writing Hashlist to TXT-file: " + targetName + ".txt");
-                final File file = new File(root, targetName + ".txt");
-                final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                if(indexContainerIterator != null) {
-                    while (indexContainerIterator.hasNext()) {
-                        counter++;
-                        container = indexContainerIterator.next();
-                        bos.write(container.getTermHash());
-                        bos.write(serverCore.CRLF);
-                        if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + ASCII.String(container.getTermHash()));
-                        }
-                    }
-                }
-                bos.flush();
-                bos.close();
-            }
-            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : ASCII.String(container.getTermHash())));
-        } catch (final IOException e) {
-            log.logSevere("IOException", e);
-        }
-        if (WordIndex != null) {
-            WordIndex.close();
-            WordIndex = null;
-        }
-    }
-
-    /**
-     * Searching for peers affected by Bug
-     * @param homePath
-     */
-    public static void testPeerDB(final File homePath) {
-
-        try {
-            final File yacyDBPath = new File(homePath, "DATA/INDEX/freeworld/NETWORK");
-
-            final String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
-            for (final String dbFileName : dbFileNames) {
-                final File dbFile = new File(yacyDBPath,dbFileName);
-                final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, SeedDB.sortFields, SeedDB.longaccFields, SeedDB.doubleaccFields, null);
-
-                Iterator<Map.Entry<byte[], Map<String, String>>> it;
-                it = db.entries(true, false);
-                while (it.hasNext()) {
-                    final Map.Entry<byte[], Map<String, String>> dna = it.next();
-                    String peerHash = UTF8.String(dna.getKey());
-                    if (peerHash.length() < Word.commonHashLength) {
-                        final String peerName = dna.getValue().get("Name");
-                        final String peerIP = dna.getValue().get("IP");
-                        final String peerPort = dna.getValue().get("Port");
-
-                        while (peerHash.length() < Word.commonHashLength) { peerHash = peerHash + "_"; }
-                        System.err.println("Invalid Peer-Hash found in '" + dbFileName + "': " + peerName + ":" +  peerHash + ", http://" + peerIP + ":" + peerPort);
-                    }
-                }
-                db.close();
-            }
-        } catch (final Exception e) {
-            Log.logException(e);
-        }
-    }
-
-
-    /**
      * Main-method which is started by java. Checks for special arguments or
      * starts up the application.
      *
@@ -995,46 +631,6 @@ public final class yacy {
 	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-version"))) {
 	            // show yacy version
 	            System.out.println(copyright);
-	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-minimizeurldb"))) {
-	            // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
-	            // attention: this may run long and should not be interrupted!
-	            if (args.length >= 3 && args[1].toLowerCase().equals("-cache")) {
-	                args = shift(args, 1, 2);
-	            }
-	            if (args.length == 2) applicationRoot= new File(args[1]);
-	            minimizeUrlDB(dataRoot, applicationRoot, "freeworld");
-	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-testpeerdb"))) {
-	            if (args.length == 2) {
-	                applicationRoot = new File(args[1]);
-	            } else if (args.length > 2) {
-	                System.err.println("Usage: -testPeerDB [homeDbRoot]");
-	            }
-	            testPeerDB(applicationRoot);
-	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-genwordstat"))) {
-	            // this can help to create a stop-word list
-	            // to use this, you need a 'yacy.words' file in the root path
-	            // start this with "java -classpath classes yacy -genwordstat [<rootdir>]"
-	            if (args.length == 2) applicationRoot= new File(args[1]);
-	            genWordstat(applicationRoot);
-	        } else if ((args.length == 4) && (args[0].toLowerCase().equals("-cleanwordlist"))) {
-	            // this can be used to organize and clean a word-list
-	            // start this with "java -classpath classes yacy -cleanwordlist <word-file> <minlength> <maxlength>"
-	            final int minlength = Integer.parseInt(args[2]);
-	            final int maxlength = Integer.parseInt(args[3]);
-	            cleanwordlist(args[1], minlength, maxlength);
-	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
-	            // generate a url list and save it in a file
-	            if (args.length == 2) applicationRoot= new File(args[1]);
-	            urldbcleanup(dataRoot, applicationRoot, "freeworld");
-	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-rwihashlist"))) {
-	            // generate a url list and save it in a file
-	            String domain = "all";
-	            String format = "txt";
-	            if (args.length >= 2) domain= args[1];
-	            if (args.length >= 3) format= args[2];
-	            if (args.length == 4) applicationRoot= new File(args[3]);
-	            final String outfile = "rwihashlist_" + System.currentTimeMillis();
-	            RWIHashList(dataRoot, applicationRoot, outfile, domain, format);
 	        } else {
 	            if (args.length == 1) applicationRoot= new File(args[0]);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
@@ -1059,6 +655,7 @@ class shutdownHookThread extends Thread {
         this.mainThread = mainThread;
     }
 
+    @Override
     public void run() {
         try {
             if (!this.sb.isTerminated()) {

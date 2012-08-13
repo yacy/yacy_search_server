@@ -34,9 +34,10 @@ import java.util.Set;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.LargeNumberCache;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -56,13 +57,15 @@ public class Word {
      */
     public static final int commonHashLength = 12;
 
-    private static final int hashCacheSize = Math.max(200000, Math.min(10000000, (int) (MemoryControl.available() / 20000L)));
+    private static final int hashCacheSize = Math.max(20000, Math.min(200000, (int) (MemoryControl.available() / 40000L)));
     private static ARC<String, byte[]> hashCache = null;
     static {
         try {
             hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()));
+            Log.logInfo("Word", "hashCache.size = " + hashCacheSize);
         } catch (final OutOfMemoryError e) {
             hashCache = new ConcurrentARC<String, byte[]>(1000, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
+            Log.logInfo("Word", "hashCache.size = " + 1000);
         }
     }
     /*
@@ -152,17 +155,17 @@ public class Word {
 
     public static final byte[] hash2private(final byte[] hash, byte privateType) {
         byte[] p = new byte[commonHashLength];
-        p[0] = highByte; p[1] = highByte; p[2] = highByte; ; p[3] = highByte; ; p[4] = highByte; p[5] = privateType;
+        p[0] = highByte; p[1] = highByte; p[2] = highByte; p[3] = highByte; p[4] = highByte; p[5] = privateType;
         System.arraycopy(hash, 0, p, 6, commonHashLength - 6); // 36 bits left for private hashes should be enough
         return p;
     }
 
     public static final HandleSet words2hashesHandles(final Collection<String> words) {
-        final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.size());
+        final HandleSet hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.size());
         for (final String word: words)
             try {
                 hashes.put(word2hash(word));
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
                 return hashes;
             }
@@ -170,11 +173,11 @@ public class Word {
     }
 
     public static final HandleSet words2hashesHandles(final String[] words) {
-        final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.length);
+        final HandleSet hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.length);
         for (final String word: words)
             try {
                 hashes.put(word2hash(word));
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 Log.logException(e);
                 return hashes;
             }

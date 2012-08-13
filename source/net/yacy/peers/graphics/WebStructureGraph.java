@@ -47,12 +47,11 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
-import net.yacy.document.Condenser;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.MicroDate;
@@ -153,10 +152,7 @@ public class WebStructureGraph
         }
     }
 
-    public void generateCitationReference(
-        final DigestURI url,
-        final Document document,
-        final Condenser condenser) {
+    public void generateCitationReference(final DigestURI url, final Document document) {
         // generate citation reference
         final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
         final Iterator<MultiProtocolURI> it = hl.keySet().iterator();
@@ -175,7 +171,7 @@ public class WebStructureGraph
             }
         }
         final leanrefObject lro = new leanrefObject(url, globalRefURLs);
-        if ( globalRefURLs.size() > 0 ) {
+        if ( !globalRefURLs.isEmpty() ) {
             try {
                 if ( this.publicRefDNSResolvingWorker.isAlive() ) {
                     this.publicRefDNSResolvingQueue.put(lro);
@@ -295,10 +291,10 @@ public class WebStructureGraph
                 final String key = tailMap.firstKey();
                 if ( key.startsWith(hosthash) ) {
                     ref = UTF8.String(tailMap.get(key));
-                    if ( hostname.length() == 0 ) {
+                    if ( hostname.isEmpty() ) {
                         hostname = key.substring(7);
                     }
-                    if ( date.length() == 0 ) {
+                    if ( date.isEmpty() ) {
                         date = ref.substring(0, 8);
                     }
                     h.putAll(refstr2map(ref));
@@ -502,7 +498,7 @@ public class WebStructureGraph
                     } else {
                         r.put(hr);
                     }
-                } catch ( final RowSpaceExceededException e ) {
+                } catch ( final SpaceExceededException e ) {
                     continue refloop;
                 }
             }
@@ -769,9 +765,9 @@ public class WebStructureGraph
             + " entries");
         final long time = System.currentTimeMillis();
         joinOldNew();
-        if ( this.structure_old.size() > 0 ) {
+        if ( !this.structure_old.isEmpty() ) {
             synchronized ( this.structure_old ) {
-                if ( this.structure_old.size() > 0 ) {
+                if ( !this.structure_old.isEmpty() ) {
                     FileUtils
                         .saveMapB(
                             this.structureFile,

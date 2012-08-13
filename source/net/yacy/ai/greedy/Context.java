@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -36,8 +36,8 @@ public class Context<
                      SpecificFinding extends Finding<SpecificRole>,
                      SpecificModel extends Model<SpecificRole, SpecificFinding>
                     >{
-    
-    private static final Object PRESENT = (Object) "";
+
+    private static final Object PRESENT = "";
     private final Goal<SpecificRole, SpecificFinding, SpecificModel> goal;
     private final SpecificModel initialModel;
     private final SpecificRole initialRole;
@@ -50,7 +50,7 @@ public class Context<
     private final boolean feedAssetCache, useAssetCache;
     private long startTime;
     private boolean fullfilled;
-    
+
     protected Context(
             Goal<SpecificRole, SpecificFinding, SpecificModel> goal,
             SpecificModel initialModel,
@@ -69,11 +69,11 @@ public class Context<
         this.feedAssetCache = feedAssetCache;
         this.useAssetCache = useAssetCache;
     }
-    
+
     public int getInstanceCount() {
         return this.instances.get();
     }
-    
+
     public void incInstances() {
         this.instances.incrementAndGet();
     }
@@ -82,52 +82,51 @@ public class Context<
         return this.instances.decrementAndGet();
     }
 
-    
+
     public boolean setBestMove(SpecificRole role, int ranking) {
         Integer b = this.bestMove.get(role);
         if (b == null) {
             this.bestMove.put(role, ranking);
             System.out.println("first move");
             return true;
-        } else {
-            if (b.intValue() < ranking) {
-                System.out.println("best next move");
-                this.bestMove.put(role, ranking);
-                return true;
-            }
+        }
+        if (b.intValue() < ranking) {
+            System.out.println("best next move");
+            this.bestMove.put(role, ranking);
+            return true;
         }
         return false;
     }
-    
+
     public int getBestMove(SpecificRole role) {
         Integer b = this.bestMove.get(role);
         if (b == null) return Integer.MIN_VALUE;
         return b.intValue();
     }
-    
+
     public void addModel(SpecificModel model) {
         if (model.toString().equals("[],[3, 2, 1],[]")) {
             System.out.println("target");
         }
         this.models.put(model, PRESENT);
     }
-    
+
     public Goal<SpecificRole, SpecificFinding, SpecificModel> getGoal() {
-        return goal;
+        return this.goal;
     }
-    
+
     public SpecificModel getInitialModel() {
-        return initialModel;
+        return this.initialModel;
     }
-    
+
     public boolean isKnownModel(SpecificModel model) {
         return this.models.containsKey(model);
     }
-    
+
     public int getKnownModelsCount() {
         return this.models.size();
     }
-    
+
     public void registerResult(Agent<SpecificRole, SpecificFinding, SpecificModel> agent, SpecificFinding finding) {
         assert agent != null;
         assert agent.getFinding() != null;
@@ -135,11 +134,11 @@ public class Context<
         assert finding != null;
         this.result.offer(new Challenge<SpecificRole, SpecificFinding, SpecificModel>(agent, finding));
     }
-    
+
     public SpecificRole initialRole() {
         return this.initialRole;
     }
-    
+
     /**
      * return one of the results from the problem solving computation.
      * if there is no result available, then return null.
@@ -156,39 +155,39 @@ public class Context<
                 return resultChallenge;
             }
             // if this state is reached then all possible findings will cause a lost situation
-            
+
             return null;
         } catch (InterruptedException e) {
             return null;
         }
     }
-    
+
     public boolean hasNoResults() {
         return this.result.isEmpty();
     }
-    
+
     public int countResults() {
         return this.result.size();
     }
-    
+
     public void reset() {
         this.startTime = System.currentTimeMillis();
         this.termination.drainPermits();
     }
 
     public boolean feedAssetCache() {
-        return feedAssetCache;
+        return this.feedAssetCache;
     }
-    
+
     public boolean useAssetCache() {
-        return useAssetCache;
+        return this.useAssetCache;
     }
-    
+
     public void announceCompletion() {
         this.fullfilled = true;
         this.termination.release();
     }
-    
+
     public boolean isCompleted() {
         if (this.fullfilled) return true;
         //System.out.println("runtime = " + runtime);
@@ -206,7 +205,7 @@ public class Context<
 
     public void awaitTermination(long pauseAfterAquire, boolean announceCompletionAfterTimeOut) {
         try {
-            if (this.termination.tryAcquire(timeoutForSnapshot, TimeUnit.MILLISECONDS)) {
+            if (this.termination.tryAcquire(this.timeoutForSnapshot, TimeUnit.MILLISECONDS)) {
                 Thread.sleep(pauseAfterAquire);
             } else {
                 System.out.println("timed-out termination");
@@ -214,7 +213,7 @@ public class Context<
         } catch (InterruptedException e) {}
         if (announceCompletionAfterTimeOut) announceCompletion();
     }
-    
+
     public void printReport(int count) {
         System.out.println("==== " + this.getKnownModelsCount() + " models computed");
         Challenge<SpecificRole, SpecificFinding, SpecificModel> resultChallenge;

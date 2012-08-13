@@ -99,7 +99,7 @@ public class compare_yacy {
         prop.putHTML("search_left", searchengines.get(default_left));
         prop.putHTML("search_right", searchengines.get(default_right));
 
-        if (post == null || post.get("query", "").length() == 0) {
+        if (post == null || post.get("query", "").isEmpty()) {
             prop.put("search", 0);
             prop.put("search_query", "");
             return prop;

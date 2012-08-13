@@ -45,7 +45,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
@@ -114,23 +114,21 @@ public final class CrawlStacker {
 
     public void announceClose() {
         this.log.logInfo("Flushing remaining " + size() + " crawl stacker job entries.");
-        this.fastQueue.announceShutdown();
-        this.slowQueue.announceShutdown();
+        this.fastQueue.shutdown();
+        this.slowQueue.shutdown();
     }
 
     public synchronized void close() {
         this.log.logInfo("Shutdown. waiting for remaining " + size() + " crawl stacker job entries. please wait.");
-        this.fastQueue.announceShutdown();
-        this.slowQueue.announceShutdown();
-        this.fastQueue.awaitShutdown(2000);
-        this.slowQueue.awaitShutdown(2000);
+        this.fastQueue.shutdown();
+        this.slowQueue.shutdown();
 
         this.log.logInfo("Shutdown. Closing stackCrawl queue.");
 
         clear();
     }
 
-    private boolean prefetchHost(final String host) {
+    private static boolean prefetchHost(final String host) {
         // returns true when the host was known in the dns cache.
         // If not, the host is stacked on the fetch stack and false is returned
         try {
@@ -181,10 +179,11 @@ public final class CrawlStacker {
             }
         }
     }
-    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks, final boolean replace) {
+    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks) {
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("enqueueEntriesAsynchronous");
                 enqueueEntries(initiator, profileHandle, hyperlinks, true);
             }
         }.start();
@@ -240,6 +239,7 @@ public final class CrawlStacker {
         new Thread() {
             @Override
             public void run() {
+                Thread.currentThread().setName("enqueueEntriesFTP");
                 BlockingQueue<FTPClient.entryInfo> queue;
                 try {
                     queue = FTPClient.sitelist(host, port);
@@ -341,7 +341,7 @@ public final class CrawlStacker {
         }
 
         long maxFileSize = Long.MAX_VALUE;
-        if (entry.size() > 0) {
+        if (!entry.isEmpty()) {
             final String protocol = entry.url().getProtocol();
             if (protocol.equals("http") || protocol.equals("https")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
             if (protocol.equals("ftp")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.ftp.maxFileSize", FTPLoader.DEFAULT_MAXFILESIZE);
@@ -354,7 +354,8 @@ public final class CrawlStacker {
             entry.url().getContentDomain() == ContentDomain.APP  ||
             entry.url().getContentDomain() == ContentDomain.IMAGE  ||
             entry.url().getContentDomain() == ContentDomain.AUDIO  ||
-            entry.url().getContentDomain() == ContentDomain.VIDEO ) {
+            entry.url().getContentDomain() == ContentDomain.VIDEO ||
+            entry.url().getContentDomain() == ContentDomain.CTRL) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
             //if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;
@@ -436,17 +437,15 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
-        final URIMetadataRow oldEntry = this.indexSegment.urlMetadata().load(url.hash());
+        final URIMetadata oldEntry = this.indexSegment.urlMetadata().load(url.hash());
         if (oldEntry == null) {
             if (dbocc != null) {
                 // do double-check
-                if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is double registered in '" + dbocc + "'.");
                 if (dbocc.equals("errors")) {
                     final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
                     return "double in: errors (" + errorEntry.anycause() + ")";
-                } else {
-                    return "double in: " + dbocc;
                 }
+                return "double in: " + dbocc;
             }
         } else {
             final boolean recrawl = profile.recrawlIfOlder() > oldEntry.loaddate().getTime();
@@ -457,15 +456,13 @@ public final class CrawlStacker {
             } else {
                 if (dbocc == null) {
                     return "double in: LURL-DB";
-                } else {
-                    if (this.log.isInfo()) this.log.logInfo("URL '" + urlstring + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
-                    if (dbocc.equals("errors")) {
-                        final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
-                        return "double in: errors (" + errorEntry.anycause() + ")";
-                    } else {
-                        return "double in: " + dbocc;
-                    }
                 }
+                if (this.log.isInfo()) this.log.logInfo("URL '" + urlstring + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
+                if (dbocc.equals("errors")) {
+                    final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
+                    return "double in: errors (" + errorEntry.anycause() + ")";
+                }
+                return "double in: " + dbocc;
             }
         }
 

@@ -31,14 +31,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
-
+import net.yacy.document.StringBuilderComparator;
 
 public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<E> {
 
@@ -252,4 +252,16 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         }
     }
 
+    public static void main(String[] args) {
+    	OrderedScoreMap<StringBuilder> w = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+    	Random r = new Random();
+    	for (int i = 0; i < 10000; i++) {
+    		w.inc(new StringBuilder("a" + ((char) (('a') + r.nextInt(26)))));
+    	}
+    	for (StringBuilder s: w) System.out.println(s + ":" + w.get(s));
+    	System.out.println("--");
+    	w.shrinkToMaxSize(10);
+    	for (StringBuilder s: w) System.out.println(s + ":" + w.get(s));
+    }
+    
 }

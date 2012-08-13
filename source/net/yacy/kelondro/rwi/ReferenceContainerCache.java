@@ -39,11 +39,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.Rating;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.HeapWriter;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.FileUtils;
@@ -58,6 +58,8 @@ import net.yacy.kelondro.util.FileUtils;
  * @param <ReferenceType>
  */
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
+
+    public static final Log log = new Log("ReferenceContainerCache");
 
     private final int termSize;
     private final ByteOrder termOrder;
@@ -117,7 +119,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void dump(final File heapFile, final int writeBuffer, final boolean destructive) {
         assert this.cache != null;
         if (this.cache == null) return;
-        Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + this.cache.size() + " rwi's");
+        log.logInfo("creating rwi heap dump '" + heapFile.getName() + "', " + this.cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
         final File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".prt");
         HeapWriter dump;
@@ -152,7 +154,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                     dump.add(term, container.exportCollection());
                 } catch (final IOException e) {
                     Log.logException(e);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                 }
                 if (destructive) container.clear(); // this memory is not needed any more
@@ -162,9 +164,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         try {
             dump.close(true);
-            Log.logInfo("indexContainerRAMHeap", "finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
+            log.logInfo("finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
         } catch (final IOException e) {
-            Log.logSevere("indexContainerRAMHeap", "failed rwi heap dump: " + e.getMessage(), e);
+            log.logSevere("failed rwi heap dump: " + e.getMessage(), e);
         } finally {
             dump = null;
         }
@@ -271,7 +273,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 
         @Override
         public boolean hasNext() {
-            if (this.rot) return this.cachecopy.size() > 0;
+            if (this.rot) return !this.cachecopy.isEmpty();
             return this.p < this.cachecopy.size();
         }
 
@@ -283,7 +285,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 if (this.excludePrivate && Word.isPrivate(this.latestTermHash)) continue;
                 try {
                     return c.topLevelClone();
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     return null;
                 }
@@ -300,7 +302,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 if (this.excludePrivate && Word.isPrivate(this.latestTermHash)) continue;
                 try {
                     return c.topLevelClone();
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     return null;
                 }
@@ -319,6 +321,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             return this;
         }
 
+        @Override
+        public void close() {
+        }
     }
 
     @Override
@@ -363,7 +368,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 
         @Override
         public boolean hasNext() {
-            if (this.rot) return this.cachecounts.size() > 0;
+            if (this.rot) return !this.cachecounts.isEmpty();
             return this.p < this.cachecounts.size();
         }
 
@@ -401,6 +406,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             return this;
         }
 
+        @Override
+        public void close() {
+        }
     }
 
     /**
@@ -438,7 +446,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 }
             }
             return c1;
-        } catch (final RowSpaceExceededException e2) {
+        } catch (final SpaceExceededException e2) {
             Log.logException(e2);
         }
         return null;
@@ -533,7 +541,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void removeDelayed() {}
 
     @Override
-    public void add(final ReferenceContainer<ReferenceType> container) throws RowSpaceExceededException {
+    public void add(final ReferenceContainer<ReferenceType> container) throws SpaceExceededException {
         // this puts the entries into the cache
         if (this.cache == null || container == null || container.isEmpty()) return;
 
@@ -557,7 +565,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     }
 
     @Override
-    public void add(final byte[] termHash, final ReferenceType newEntry) throws RowSpaceExceededException {
+    public void add(final byte[] termHash, final ReferenceType newEntry) throws SpaceExceededException {
         assert this.cache != null;
         if (this.cache == null) return;
         final ByteArray tha = new ByteArray(termHash);

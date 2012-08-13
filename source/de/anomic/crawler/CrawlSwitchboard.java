@@ -35,9 +35,9 @@ import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -81,7 +81,7 @@ public final class CrawlSwitchboard
 
         log.logInfo("Initializing Word Index for the network '" + networkName + "'.");
 
-        if ( networkName == null || networkName.length() == 0 ) {
+        if ( networkName == null || networkName.isEmpty() ) {
             log.logSevere("no network name given - shutting down");
             System.exit(0);
         }
@@ -102,7 +102,7 @@ public final class CrawlSwitchboard
                 p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
             } catch ( final IOException e ) {
                 p = null;
-            } catch ( final RowSpaceExceededException e ) {
+            } catch ( final SpaceExceededException e ) {
                 p = null;
             }
             if ( p == null ) {
@@ -149,7 +149,7 @@ public final class CrawlSwitchboard
                 Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
             } catch ( final IOException e ) {
                 continue;
-            } catch ( final RowSpaceExceededException e ) {
+            } catch ( final SpaceExceededException e ) {
                 continue;
             }
         }
@@ -179,7 +179,7 @@ public final class CrawlSwitchboard
             m = this.profilesActiveCrawls.get(profileKey);
         } catch ( final IOException e ) {
             m = null;
-        } catch ( final RowSpaceExceededException e ) {
+        } catch ( final SpaceExceededException e ) {
             m = null;
         }
         if ( m == null ) {
@@ -199,7 +199,7 @@ public final class CrawlSwitchboard
             m = this.profilesPassiveCrawls.get(profileKey);
         } catch ( final IOException e ) {
             m = null;
-        } catch ( final RowSpaceExceededException e ) {
+        } catch ( final SpaceExceededException e ) {
             m = null;
         }
         if ( m == null ) {
@@ -518,7 +518,7 @@ public final class CrawlSwitchboard
                     entry = new CrawlProfile(this.profilesActiveCrawls.get(handle));
                 } catch ( final IOException e ) {
                     continue;
-                } catch ( final RowSpaceExceededException e ) {
+                } catch ( final SpaceExceededException e ) {
                     continue;
                 }
                 if ( !((entry.name().equals(CRAWL_PROFILE_PROXY))
@@ -549,11 +549,11 @@ public final class CrawlSwitchboard
 
     /**
      * Loads crawl profiles from a DB file.
-     * 
+     *
      * @param file DB file
      * @return crawl profile data
      */
-    private MapHeap loadFromDB(final File file) {
+    private static MapHeap loadFromDB(final File file) {
         MapHeap ret;
         try {
             ret = new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');

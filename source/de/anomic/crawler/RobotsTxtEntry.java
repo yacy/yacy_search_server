@@ -231,7 +231,7 @@ public class RobotsTxtEntry {
         }
 
         // if the path is null or empty we set it to /
-        if (path == null || path.length() == 0) path = "/";
+        if (path == null || path.isEmpty()) path = "/";
         // escaping all occurences of ; because this char is used as special char in the Robots DB
         else  path = RobotsTxt.ROBOTS_DB_PATH_SEPARATOR_MATCHER.matcher(path).replaceAll("%3B");
 

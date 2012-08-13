@@ -30,7 +30,7 @@ import net.yacy.kelondro.logging.Log;
 
 public abstract class AbstractParser implements Parser {
 
-    protected final Log log = new Log("PARSER");
+    public final static Log log = new Log("PARSER");
     protected final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
     protected final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     private   final String name;

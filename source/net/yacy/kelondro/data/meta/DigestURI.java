@@ -86,7 +86,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         for (String h: hs) {
             if (h == null) continue;
             h = h.trim();
-            if (h.length() == 0) continue;
+            if (h.isEmpty()) continue;
             h = hosthash(h);
             if (h == null || h.length() != 6) continue;
             sb.append(h);
@@ -95,7 +95,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     }
 
     public static Set<String> hosthashess(String hosthashes) {
-        if (hosthashes == null || hosthashes.length() == 0) return null;
+        if (hosthashes == null || hosthashes.isEmpty()) return null;
         HashSet<String> h = new HashSet<String>();
         assert hosthashes.length() % 6 == 0;
         for (int i = 0; i < hosthashes.length(); i = i + 6) {
@@ -222,7 +222,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         // find rootpath
         int rootpathStart = 0;
         int rootpathEnd = this.path.length() - 1;
-        if (this.path.length() > 0 && this.path.charAt(0) == '/')
+        if (!this.path.isEmpty() && this.path.charAt(0) == '/')
             rootpathStart = 1;
         if (this.path.endsWith("/"))
             rootpathEnd = this.path.length() - 2;
@@ -295,11 +295,10 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     private static final String hosthash5(final String protocol, final String host, final int port) {
         if (host == null) {
             return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(protocol)).substring(0, 5);
-        } else {
-            final StringBuilder sb = new StringBuilder(host.length() + 15);
-            sb.append(protocol).append(':').append(host).append(':').append(Integer.toString(port));
-            return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).substring(0, 5);
         }
+        final StringBuilder sb = new StringBuilder(host.length() + 15);
+        sb.append(protocol).append(':').append(host).append(':').append(Integer.toString(port));
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).substring(0, 5);
     }
 
     /**
@@ -347,8 +346,9 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
             return 14;
         case 3:
             return 20;
+        default:
+            return 20;
         }
-        return 20;
     }
 
     public static int domLengthNormalized(final byte[] urlHashBytes) {

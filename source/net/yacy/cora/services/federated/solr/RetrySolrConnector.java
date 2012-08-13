@@ -3,10 +3,6 @@
  *  Copyright 2011 by Michael Peter Christen
  *  First released 08.11.2011 at http://yacy.net
  *
- *  $LastChangedDate: 2011-04-14 22:05:04 +0200 (Do, 14 Apr 2011) $
- *  $LastChangedRevision: 7654 $
- *  $LastChangedBy: orbiter $
- *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -28,8 +24,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 
 public class RetrySolrConnector implements SolrConnector {
 
@@ -120,8 +118,23 @@ public class RetrySolrConnector implements SolrConnector {
         return false;
     }
 
+	@Override
+	public SolrDocument get(String id) throws IOException {
+		final long t = System.currentTimeMillis() + this.retryMaxTime;
+        Throwable ee = null;
+        while (System.currentTimeMillis() < t) try {
+            return this.solrConnector.get(id);
+        } catch (final Throwable e) {
+            ee = e;
+            try {Thread.sleep(10);} catch (final InterruptedException e1) {}
+            continue;
+        }
+        if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
+        return null;
+	}
+
     @Override
-    public void add(final SolrDoc solrdoc) throws IOException, SolrException {
+    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
@@ -136,16 +149,16 @@ public class RetrySolrConnector implements SolrConnector {
     }
 
     @Override
-    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
-        for (SolrDoc d: solrdocs) add(d);
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
+        for (SolrInputDocument d: solrdocs) add(d);
     }
 
     @Override
-    public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException {
+    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
-            return this.solrConnector.get(querystring, offset, count);
+            return this.solrConnector.query(querystring, offset, count);
         } catch (final Throwable e) {
             ee = e;
             try {Thread.sleep(10);} catch (final InterruptedException e1) {}
@@ -161,6 +174,7 @@ public class RetrySolrConnector implements SolrConnector {
         while (System.currentTimeMillis() < t) try {
             return this.solrConnector.getSize();
         } catch (final Throwable e) {
+            try {Thread.sleep(10);} catch (final InterruptedException e1) {}
             continue;
         }
         return 0;

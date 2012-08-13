@@ -33,11 +33,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -194,12 +195,12 @@ public class Dispatcher {
         final ArrayList<ReferenceContainer<WordReference>> rc;
         if (ram) {
             // selection was only from ram, so we have to carefully remove only the selected entries
-            final HandleSet urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            final HandleSet urlHashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             Iterator<WordReference> it;
             for (final ReferenceContainer<WordReference> c: containers) {
                 urlHashes.clear();
                 it = c.entries();
-                while (it.hasNext()) try { urlHashes.put(it.next().urlhash()); } catch (final RowSpaceExceededException e) { Log.logException(e); }
+                while (it.hasNext()) try { urlHashes.put(it.next().urlhash()); } catch (final SpaceExceededException e) { Log.logException(e); }
                 if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
                 if (!urlHashes.isEmpty()) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
             }
@@ -227,10 +228,10 @@ public class Dispatcher {
      * @param containers
      * @param scheme
      * @return
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @SuppressWarnings("unchecked")
-    private List<ReferenceContainer<WordReference>>[] splitContainers(final List<ReferenceContainer<WordReference>> containers) throws RowSpaceExceededException {
+    private List<ReferenceContainer<WordReference>>[] splitContainers(final List<ReferenceContainer<WordReference>> containers) throws SpaceExceededException {
 
         // init the result vector
         final int partitionCount = this.seeds.scheme.verticalPartitions();
@@ -309,7 +310,7 @@ public class Dispatcher {
             for (final ReferenceContainer<WordReference> c: containers[vertical]) {
                 try {
                     entry.add(c);
-                } catch (final RowSpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     Log.logException(e);
                     break;
                 }
@@ -345,7 +346,7 @@ public class Dispatcher {
         List<ReferenceContainer<WordReference>>[] splitContainerCache;
         try {
             splitContainerCache = splitContainers(selectedContainerCache);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             this.log.logSevere("selectContainersEnqueueToCloud: splitContainers failed because of too low RAM", e);
             return false;
         }
@@ -428,7 +429,7 @@ public class Dispatcher {
 
     public void close() {
         // removes all entries from the dispatcher and puts them back to a RAMRI
-        if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
+        if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.shutdown();
         if (this.transmissionCloud != null) {
         	outerLoop: for (final Map.Entry<ByteArray, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
         		for (final ReferenceContainer<WordReference> i : e.getValue()) try {
@@ -442,7 +443,6 @@ public class Dispatcher {
         }
         this.transmissionCloud = null;
         if (this.indexingTransmissionProcessor != null) {
-        	this.indexingTransmissionProcessor.awaitShutdown(10000);
         	this.indexingTransmissionProcessor.clear();
         }
         this.indexingTransmissionProcessor = null;

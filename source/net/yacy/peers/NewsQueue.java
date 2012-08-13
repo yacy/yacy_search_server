@@ -51,9 +51,9 @@ import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.Table;
@@ -77,7 +77,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
         this.newsDB = newsDB;
         try {
             this.queueStack = new Table(path, rowdef, 10, 0, false, false, true);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             Log.logException(e);
             this.queueStack = null;
         }
@@ -91,7 +91,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
             if (this.path.exists()) FileUtils.deletedelete(this.path);
             try {
                 this.queueStack = new Table(this.path, rowdef, 10, 0, false, false, true);
-            } catch (final RowSpaceExceededException ee) {
+            } catch (final SpaceExceededException ee) {
                 Log.logException(e);
                 this.queueStack = null;
             }
@@ -116,7 +116,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
         return this.queueStack.isEmpty();
     }
 
-    public synchronized void push(final NewsDB.Record entry) throws IOException, RowSpaceExceededException {
+    public synchronized void push(final NewsDB.Record entry) throws IOException, SpaceExceededException {
         if (!this.queueStack.consistencyCheck()) {
             Log.logSevere("yacyNewsQueue", "reset of table " + this.path);
             this.queueStack.clear();
@@ -131,7 +131,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
     public synchronized NewsDB.Record get(final String id) {
         NewsDB.Record record;
-        final Iterator<NewsDB.Record> i = records(true);
+        final Iterator<NewsDB.Record> i = iterator();
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) return record;
@@ -141,7 +141,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
     public synchronized NewsDB.Record remove(final String id) {
         NewsDB.Record record;
-        final Iterator<NewsDB.Record> i = records(true);
+        final Iterator<NewsDB.Record> i = iterator();
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) {
@@ -163,7 +163,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
         return this.newsDB.get(id);
     }
 
-    private Row.Entry r2b(final NewsDB.Record r) throws IOException, RowSpaceExceededException {
+    private Row.Entry r2b(final NewsDB.Record r) throws IOException, SpaceExceededException {
         if (r == null) return null;
         this.newsDB.put(r);
         final Row.Entry b = this.queueStack.row().newEntry(new byte[][]{
@@ -174,13 +174,9 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
     @Override
     public Iterator<NewsDB.Record> iterator() {
-        return records(true);
-    }
-
-    public Iterator<NewsDB.Record> records(final boolean up) {
         // iterates yacyNewsRecord-type objects
         if (this.queueStack == null) return new HashSet<NewsDB.Record>().iterator();
-        return new newsIterator(up);
+        return new newsIterator();
     }
 
     private class newsIterator implements Iterator<NewsDB.Record> {
@@ -188,7 +184,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
         Iterator<Row.Entry> stackNodeIterator;
 
-        private newsIterator(final boolean up) {
+        private newsIterator() {
             try {
                 this.stackNodeIterator = NewsQueue.this.queueStack.rows();
             } catch (final IOException e) {
@@ -197,10 +193,12 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
             }
         }
 
+        @Override
         public boolean hasNext() {
             return this.stackNodeIterator != null && this.stackNodeIterator.hasNext();
         }
 
+        @Override
         public NewsDB.Record next() {
             if (this.stackNodeIterator == null) return null;
             Row.Entry row;
@@ -218,6 +216,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
             }
         }
 
+        @Override
         public void remove() {
             if (this.stackNodeIterator != null) this.stackNodeIterator.remove();
         }

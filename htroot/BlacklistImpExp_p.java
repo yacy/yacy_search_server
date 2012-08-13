@@ -1,4 +1,4 @@
-// BlacklistImpExp_p.java 
+// BlacklistImpExp_p.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -31,34 +31,34 @@
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.TreeMap;
-
-import de.anomic.data.ListManager;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 import java.util.List;
+import java.util.TreeMap;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
+import de.anomic.data.ListManager;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class BlacklistImpExp_p {
     private final static String DISABLED = "disabled_";
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-        
+
         // initialize the list manager
         ListManager.switchboard = (Switchboard) env;
         ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-        
+
         // loading all blacklist files located in the directory
         final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
-        
+
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
-        prop.putHTML("blacklistEngine", Switchboard.urlBlacklist.getEngineInfo());
+        prop.putHTML("blacklistEngine", Blacklist.getEngineInfo());
 
         // if we have not chosen a blacklist until yet we use the first file
         if (blacklistToUse == null && dirlist != null && !dirlist.isEmpty()) {
@@ -99,7 +99,7 @@ public class BlacklistImpExp_p {
             }
         }
         prop.put("blackListNames", count);
-        
+
         return prop;
     }
 }

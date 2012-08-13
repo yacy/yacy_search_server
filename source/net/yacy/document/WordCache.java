@@ -48,9 +48,12 @@ import net.yacy.kelondro.util.MemoryControl;
 public class WordCache {
 
     // common word cache
-    private static final int commonWordsMaxSize = 100000; // maximum size of common word cache
+    private static final int commonWordsMaxSize = (int) (MemoryControl.available() / 30000); // maximum size of common word cache
     private static final int commonWordsMinLength = 5;    // words must have that length at minimum
     private static OrderedScoreMap<StringBuilder> commonWords = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+    static {
+    	Log.logConfig("WordCache", "commonWordsMaxSize = " + commonWordsMaxSize);
+    }
 
     // dictionaries
     private final File dictionaryPath;
@@ -62,6 +65,7 @@ public class WordCache {
         private final TreeSet<StringBuilder> tcid; // the dictionary of reverse words
 
         public Dictionary(final File file) throws IOException {
+
             this.dict = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
             this.tcid = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
 
@@ -74,7 +78,7 @@ public class WordCache {
             StringBuilder sb;
             try {
                 while ((l = reader.readLine()) != null) {
-                    if (l.length() == 0 || l.charAt(0) == '#') {
+                    if (l.isEmpty() || l.charAt(0) == '#') {
                         continue;
                     }
                     l = l.trim().toLowerCase();
@@ -140,18 +144,16 @@ public class WordCache {
             for (final StringBuilder r: t) {
                 if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) {
                     return true;
-                } else {
-                    break;
                 }
+                break;
             }
             string = reverse(string);
             t = this.tcid.tailSet(string);
             for (final StringBuilder r: t) {
                 if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(string, r)) {
                     return true;
-                } else {
-                    break;
                 }
+                break;
             }
             return false;
         }

@@ -33,7 +33,7 @@ import de.anomic.server.serverSwitch;
 
 public class PerformanceGraph {
 
-    public static RasterPlotter respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
+    public static RasterPlotter respond(@SuppressWarnings("unused") final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
         if (post == null) post = new serverObjects();
@@ -42,7 +42,7 @@ public class PerformanceGraph {
         final int height = post.getInt("height", 240);
         final boolean showMemory = !post.containsKey("nomem");
 
-        return ProfilingGraph.performanceGraph(width, height, sb.indexSegments.URLCount() + " URLS / " + sb.indexSegments.RWICount() + " WORDS IN INDEX / " + sb.indexSegments.RWIBufferCount() + " WORDS IN CACHE", showMemory);
+        return ProfilingGraph.performanceGraph(width, height, sb.index.URLCount() + " URLS / " + sb.index.RWICount() + " WORDS IN INDEX / " + sb.index.RWIBufferCount() + " WORDS IN CACHE", showMemory);
     }
 
 }

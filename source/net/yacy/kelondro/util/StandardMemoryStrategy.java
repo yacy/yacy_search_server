@@ -49,7 +49,6 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      * @param last time which must be passed since lased gc
      * @param info additional info for log
      */
-    @Override
     protected final synchronized boolean gc(final int last, final String info) { // thq
     	assert last >= 10000; // too many forced GCs will cause bad execution performance
         final long elapsed = System.currentTimeMillis() - lastGC;
@@ -176,11 +175,10 @@ public class StandardMemoryStrategy extends MemoryStrategy {
             }
             checkProper(avail);
             return avail >= size;
-        } else {
-            if (log.isFine()) log.logFine("former GCs indicate to not be able to free enough memory (requested/available/average: "
-                    + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
-            return false;
         }
+        if (log.isFine()) log.logFine("former GCs indicate to not be able to free enough memory (requested/available/average: "
+                + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
+        return false;
     }
 
     /**

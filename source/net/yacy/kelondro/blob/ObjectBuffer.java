@@ -12,7 +12,7 @@
 //
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -42,7 +42,7 @@
 // software, even if provoked by documentation provided together with
 // the software.
 //
-// 
+//
 // A NOTE FROM THE AUTHOR TO DEVELOPERS:
 //
 // Contributions and changes to the program code should be marked as such:
@@ -63,12 +63,12 @@ public class ObjectBuffer {
 
     // this is a buffer for a single (only one) key/value object
     // without an index-backend
-    
+
     private int    readHit, readMiss, writeUnique, writeDouble;
     private final String name;
     private byte[] key;
     private Object value;
-    
+
     public ObjectBuffer(final String name) {
         this.name = name;
         this.readHit = 0;
@@ -80,18 +80,18 @@ public class ObjectBuffer {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
-    
+
     public String[] status() {
         return new String[]{
-                Integer.toString(readHit),
-                Integer.toString(readMiss),
-                Integer.toString(writeUnique),
-                Integer.toString(writeDouble)
+                Integer.toString(this.readHit),
+                Integer.toString(this.readMiss),
+                Integer.toString(this.writeUnique),
+                Integer.toString(this.writeDouble)
                 };
     }
-    
+
     private static String[] combinedStatus(final String[] a, final String[] b) {
         return new String[]{
                 Integer.toString(Integer.parseInt(a[0]) + Integer.parseInt(b[0])),
@@ -100,66 +100,64 @@ public class ObjectBuffer {
                 Integer.toString(Integer.parseInt(a[3]) + Integer.parseInt(b[3]))
         };
     }
-    
+
     public static String[] combinedStatus(final String[][] a, final int l) {
         if ((a == null) || (a.length == 0) || (l == 0)) return null;
         if ((a.length >= 1) && (l == 1)) return a[0];
         if ((a.length >= 2) && (l == 2)) return combinedStatus(a[0], a[1]);
         return combinedStatus(combinedStatus(a, l - 1), a[l - 1]);
     }
-    
+
     public void put(final byte[] key, final Object value) {
         if ((key == null) || (value == null)) return;
         synchronized(this) {
             if (NaturalOrder.naturalOrder.equal(this.key, key)){
                 this.writeDouble++;
             } else {
-                this.writeUnique++; 
+                this.writeUnique++;
             }
             this.key = key;
             this.value = value;
         }
     }
-    
+
     public void put(final String key, final Object value) {
         if ((key == null) || (value == null)) return;
         synchronized(this) {
             if (NaturalOrder.naturalOrder.equal(this.key, UTF8.getBytes(key))){
                 this.writeDouble++;
             } else {
-                this.writeUnique++; 
+                this.writeUnique++;
             }
             this.key = UTF8.getBytes(key);
             this.value = value;
         }
     }
-    
+
     public Object get(final byte[] key) {
         if (key == null) return null;
         synchronized(this) {
             if (NaturalOrder.naturalOrder.equal(this.key, key)){
                 this.readHit++;
                 return this.value;
-            } else {
-                this.readMiss++;
-                return null;
             }
+            this.readMiss++;
+            return null;
         }
     }
-    
+
     public Object get(final String key) {
         if (key == null) return null;
         synchronized(this) {
             if (NaturalOrder.naturalOrder.equal(this.key, UTF8.getBytes(key))){
                 this.readHit++;
                 return this.value;
-            } else {
-                this.readMiss++;
-                return null;
             }
+            this.readMiss++;
+            return null;
         }
     }
-    
+
     public void remove(final byte[] key) {
         if (key == null) return;
         synchronized(this) {
@@ -169,7 +167,7 @@ public class ObjectBuffer {
             }
         }
     }
-    
+
     public void remove(final String key) {
         if (key == null) return;
         synchronized(this) {
@@ -179,5 +177,5 @@ public class ObjectBuffer {
             }
         }
     }
-    
+
 }

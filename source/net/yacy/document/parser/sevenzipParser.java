@@ -75,15 +75,14 @@ public class sevenzipParser extends AbstractParser implements Parser {
                 null,
                 false);
         Handler archive;
-        super.log.logFine("opening 7zip archive...");
+        AbstractParser.log.logFine("opening 7zip archive...");
         try {
             archive = new Handler(source);
         } catch (final IOException e) {
             throw new Parser.Failure("error opening 7zip archive: " + e.getMessage(), location);
         }
-        final SZParserExtractCallback aec = new SZParserExtractCallback(super.log, archive,
-                doc, location.getFile());
-        super.log.logFine("processing archive contents...");
+        final SZParserExtractCallback aec = new SZParserExtractCallback(AbstractParser.log, archive, doc, location.getFile());
+        AbstractParser.log.logFine("processing archive contents...");
         try {
             archive.Extract(null, -1, 0, aec);
             return doc;
@@ -100,13 +99,16 @@ public class sevenzipParser extends AbstractParser implements Parser {
         }
     }
 
+    public Document parse(final DigestURI location, final String mimeType, final String charset, final byte[] source) throws Parser.Failure, InterruptedException {
+        return parse(location, mimeType, charset, new ByteArrayIInStream(source));
+    }
+
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType, final String charset,
-            final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         try {
             final ByteArrayOutputStream cfos = new ByteArrayOutputStream();
             FileUtils.copy(source, cfos);
-            return parse(location, mimeType, charset, new ByteArrayInputStream(cfos.toByteArray()));
+            return new Document[]{parse(location, mimeType, charset, cfos.toByteArray())};
         } catch (final IOException e) {
             throw new Parser.Failure("error processing 7zip archive: " + e.getMessage(), location);
         }
@@ -192,4 +194,44 @@ public class sevenzipParser extends AbstractParser implements Parser {
          }
      }
 
+     private static class SeekableByteArrayInputStream extends ByteArrayInputStream {
+         public SeekableByteArrayInputStream(final byte[] buf) { super(buf); }
+         public SeekableByteArrayInputStream(final byte[] buf, final int off, final int len) { super(buf, off, len); }
+
+         public int getPosition() { return super.pos; }
+         public void seekRelative(final int offset) { seekAbsolute(super.pos + offset); }
+         public void seekAbsolute(final int offset) {
+             if (offset > super.count)
+                 throw new IndexOutOfBoundsException(Integer.toString(offset));
+             super.pos = offset;
+         }
+     }
+
+     private static class ByteArrayIInStream extends IInStream {
+
+         private final SeekableByteArrayInputStream sbais;
+
+         public ByteArrayIInStream(final byte[] buffer) {
+             this.sbais = new SeekableByteArrayInputStream(buffer);
+         }
+
+         @Override
+        public long Seek(final long offset, final int origin) {
+             switch (origin) {
+                 case STREAM_SEEK_SET: this.sbais.seekAbsolute((int)offset); break;
+                 case STREAM_SEEK_CUR: this.sbais.seekRelative((int)offset); break;
+             }
+             return this.sbais.getPosition();
+         }
+
+         @Override
+        public int read() throws IOException {
+             return this.sbais.read();
+         }
+
+         @Override
+        public int read(final byte[] b, final int off, final int len) throws IOException {
+             return this.sbais.read(b, off, len);
+         }
+     }
 }

@@ -70,6 +70,14 @@ public class OverarchingLocation implements Locations {
         return locations;
     }
 
+	@Override
+	public boolean isEmpty() {
+        for (final Locations service: this.services.values()) {
+        	if (!service.isEmpty()) return false;
+        }
+        return true;
+	}
+	
     /**
      * find a location by name
      * @param anyname - a name of a location
@@ -106,7 +114,7 @@ public class OverarchingLocation implements Locations {
     @Override
     public Set<String> recommend(final String s) {
         final Set<String> recommendations = new HashSet<String>();
-        if (s.length() == 0) {
+        if (s.isEmpty()) {
             return recommendations;
         }
         for (final Locations service: this.services.values()) {

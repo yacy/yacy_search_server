@@ -1,4 +1,4 @@
-// ConfigSearchBox.java 
+// ConfigSearchBox.java
 // -----------------------
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
 // first published 25.09.2009 on http://yacy.net
@@ -8,7 +8,7 @@
 //$LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -30,10 +30,10 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigSearchBox {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        
+
         String myaddress = sb.peers.mySeed().getPublicAddress();
         if (myaddress == null) myaddress = "localhost:" + sb.getConfig("port", "8090");
         prop.put("myaddress", myaddress);

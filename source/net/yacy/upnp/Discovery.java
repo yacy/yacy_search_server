@@ -156,7 +156,7 @@ public class Discovery {
   }
  
   private static UPNPRootDevice[] discoverDevices( int timeOut, int ttl, int mx, String searchTarget, NetworkInterface ni ) throws IOException {
-    if ( searchTarget == null || searchTarget.trim().length() == 0  ) {
+    if ( searchTarget == null || searchTarget.trim().isEmpty()  ) {
       throw new IllegalArgumentException( "Illegal searchTarget" );
     }
     

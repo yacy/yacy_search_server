@@ -151,9 +151,15 @@ public class MediawikiImporter extends Thread implements Importer {
             InputStream is = new BufferedInputStream(new FileInputStream(this.sourcefile), 1024 * 1024);
             if (this.sourcefile.getName().endsWith(".bz2")) {
                 int b = is.read();
-                if (b != 'B') throw new IOException("Invalid bz2 content.");
+                if (b != 'B') {
+                    try {is.close();} catch (IOException e) {}
+                    throw new IOException("Invalid bz2 content.");
+                }
                 b = is.read();
-                if (b != 'Z') throw new IOException("Invalid bz2 content.");
+                if (b != 'Z') {
+                    try {is.close();} catch (IOException e) {}
+                    throw new IOException("Invalid bz2 content.");
+                }
                 is = new BZip2CompressorInputStream(is);
             } else if (this.sourcefile.getName().endsWith(".gz")) {
                 is = new GZIPInputStream(is);
@@ -217,9 +223,8 @@ public class MediawikiImporter extends Thread implements Importer {
                             }
                             sb = new StringBuilder(200);
                             continue;
-                        } else {
-                            sb.append(t.substring(q + 1));
                         }
+                        sb.append(t.substring(q + 1));
                     }
                     continue;
                 }

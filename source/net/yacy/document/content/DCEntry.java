@@ -36,11 +36,9 @@ import java.util.Locale;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-
 
 public class DCEntry extends TreeMap<String, String> {
 
@@ -100,7 +98,7 @@ public class DCEntry extends TreeMap<String, String> {
         String d = this.get("docdatetime");
         if (d == null) d = this.get("dc:date");
         if (d == null) return null;
-        if (d.length() == 0) return null;
+        if (d.isEmpty()) return null;
         try {
             return ISO8601Formatter.FORMATTER.parse(d);
         } catch (ParseException e) {
@@ -147,7 +145,7 @@ public class DCEntry extends TreeMap<String, String> {
         }
     }
 
-    private String bestU(String[] urls) {
+    private static String bestU(String[] urls) {
         for (String uu: urls) {
             if (uu.startsWith("http://") && (uu.endsWith(".html") || uu.endsWith(".htm") || uu.endsWith(".pdf") || uu.endsWith(".doc") || uu.endsWith(".rss") || uu.endsWith(".xml"))) return uu;
         }
@@ -252,7 +250,7 @@ public class DCEntry extends TreeMap<String, String> {
         return Double.parseDouble(t);
     }
 
-    private String stripCDATA(String s) {
+    private static String stripCDATA(String s) {
         if (s == null) return null;
         s = s.trim();
         if (s.startsWith("<![CDATA[")) s = s.substring(9);
@@ -277,7 +275,7 @@ public class DCEntry extends TreeMap<String, String> {
             null,
             "",
             getLon(), getLat(),
-            UTF8.getBytes(getDescription()),
+            getDescription(),
             null,
             null,
             null,

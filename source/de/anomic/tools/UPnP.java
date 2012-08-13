@@ -52,7 +52,7 @@ public class UPnP {
 	private final static String mappedName = "YaCy";
 	private final static String mappedProtocol = "TCP";
 	private static int mappedPort = 0;
-	private static String localHostIP = null;;
+	private static String localHostIP = null;
 	
 	/* Discovery message sender IP /10.100.100.2 does not match device description IP /192.168.1.254 skipping message,
 	set the net.yacy.upnp.ddos.matchip system property to false to avoid this check
@@ -181,7 +181,8 @@ public class UPnP {
 		
 		protected static class Handler implements DiscoveryEventHandler {
 		
-			public void eventSSDPAlive(String usn, String udn, String nt, String maxAge, URL location) {
+			@Override
+            public void eventSSDPAlive(String usn, String udn, String nt, String maxAge, URL location) {
 				InternetGatewayDevice[] newIGD = { null };
 				boolean error = false;
 				String errorMsg = null;
@@ -207,7 +208,8 @@ public class UPnP {
 				Listener.unregister();
 			}
 		
-			public void eventSSDPByeBye(String usn, String udn, String nt) {}
+			@Override
+            public void eventSSDPByeBye(String usn, String udn, String nt) {}
 			
 		}
 		

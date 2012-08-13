@@ -36,15 +36,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
-import net.yacy.cora.services.federated.solr.ShardSolrConnector;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.table.SplitTable;
@@ -55,16 +55,25 @@ import de.anomic.crawler.retrieval.Request;
 
 public class ZURL implements Iterable<ZURL.Entry> {
 
+    public static Log log = new Log("REJECTED");
+
     private static final int EcoFSBufferSize = 2000;
     private static final int maxStackSize    = 1000;
 
     public enum FailCategory {
         // TEMPORARY categories are such failure cases that should be tried again
         // FINAL categories are such failure cases that are final and should not be tried again
-        TEMPORARY_NETWORK_FAILURE, // an entity could not been loaded
-        FINAL_PROCESS_CONTEXT,     // because of a processing context we do not want that url again (i.e. remote crawling)
-        FINAL_LOAD_CONTEXT,        // the crawler configuration does not want to load the entity
-        FINAL_ROBOTS_RULE;         // a remote server denies indexing or loading
+        TEMPORARY_NETWORK_FAILURE(true), // an entity could not been loaded
+        FINAL_PROCESS_CONTEXT(false),    // because of a processing context we do not want that url again (i.e. remote crawling)
+        FINAL_LOAD_CONTEXT(false),       // the crawler configuration does not want to load the entity
+        FINAL_ROBOTS_RULE(true),         // a remote server denies indexing or loading
+        FINAL_REDIRECT_RULE(true);       // the remote server redirects this page, thus disallowing reading of content
+
+        public final boolean store;
+
+        private FailCategory(boolean store) {
+            this.store = store;
+        }
     }
 
     private final static Row rowdef = new Row(
@@ -103,10 +112,10 @@ public class ZURL implements Iterable<ZURL.Entry> {
         }
         try {
             this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727, true);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             try {
                 this.urlIndex = new Table(f, rowdef, 0, 0, false, exceed134217727, true);
-            } catch (final RowSpaceExceededException e1) {
+            } catch (final SpaceExceededException e1) {
                 Log.logException(e1);
             }
         }
@@ -153,14 +162,15 @@ public class ZURL implements Iterable<ZURL.Entry> {
             String anycause,
             final int httpcode) {
         // assert executor != null; // null == proxy !
+        assert failCategory.store || httpcode == -1 : "failCategory=" + failCategory.name();
         if (exists(bentry.url().hash())) return; // don't insert double causes
         if (anycause == null) anycause = "unknown";
         final String reason = anycause + ((httpcode >= 0) ? " (http return code = " + httpcode + ")" : "");
         final Entry entry = new Entry(bentry, executor, workdate, workcount, reason);
         put(entry);
         this.stack.add(entry.hash());
-        Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + reason);
-        if (this.solrConnector != null && (failCategory == FailCategory.TEMPORARY_NETWORK_FAILURE || failCategory == FailCategory.FINAL_ROBOTS_RULE)) {
+        if (!reason.startsWith("double")) log.logInfo(bentry.url().toNormalform(false, false) + " - " + reason);
+        if (this.solrConnector != null && failCategory.store) {
             // send the error to solr
             try {
                 SolrDoc errorDoc = this.solrConfiguration.err(bentry.url(), failCategory.name() + " " + reason, httpcode);

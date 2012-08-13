@@ -61,13 +61,11 @@ public class RDFaParser extends AbstractParser implements Parser {
 			}
 			retDocs[retDocs.length - 1] = rdfaDoc;
 			return retDocs;
-		} else {
-			return htmlDocs;
 		}
-
+        return htmlDocs;
 	}
 
-	private Document parseRDFa(DigestURI url, String mimeType,
+	private static Document parseRDFa(DigestURI url, String mimeType,
 			String charset, InputStream source) {
 		RDFaTripleImpl triple;
 		IRDFaTriple[] allTriples = null;
@@ -93,7 +91,6 @@ public class RDFaParser extends AbstractParser implements Parser {
 					"Conversion triple to document failed");
 		}
 		return doc;
-
 	}
 
 	private Document[] parseHtml(DigestURI url, String mimeType,
@@ -109,10 +106,9 @@ public class RDFaParser extends AbstractParser implements Parser {
 			Log.logWarning("RDFA PARSER", "Super call failed");
 		}
 		return htmlDocs;
-
 	}
 
-	private Document convertAllTriplesToDocument(DigestURI url,
+	private static Document convertAllTriplesToDocument(DigestURI url,
 			String mimeType, String charset, IRDFaTriple[] allTriples) {
 
 		//Set<String> languages = new HashSet<String>(2);
@@ -142,11 +138,11 @@ public class RDFaParser extends AbstractParser implements Parser {
 		}
 
 		Document doc = new Document(url, mimeType, charset, null, null, null, "", "",
-				"", null, "", 0, 0, all.getBytes(), null, null, null, false);
+				"", null, "", 0, 0, all, null, null, null, false);
 		return doc;
 	}
 
-	private void addNotEmptyValuesToSet(Set<String> set, String value) {
+	private static void addNotEmptyValuesToSet(Set<String> set, String value) {
 		if (value != null) {
 			set.add(value);
 		}
@@ -155,8 +151,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 	public static void main(String[] args) {
         URL aURL = null;
         if (args.length < 1) {
-            System.out
-                    .println("Usage: one and only one argument giving a file path or a URL.");
+            System.out.println("Usage: one and only one argument giving a file path or a URL.");
         } else {
             File aFile = new File(args[0]);
             Reader aReader = null;

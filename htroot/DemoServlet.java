@@ -7,7 +7,7 @@ import de.anomic.server.serverSwitch;
 public final class DemoServlet {
 
 	public static serverObjects respond(final RequestHeader header,
-			final serverObjects post, final serverSwitch env) {
+			final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 
 		// return variable that accumulates replacements
 		final serverObjects prop = new serverObjects();

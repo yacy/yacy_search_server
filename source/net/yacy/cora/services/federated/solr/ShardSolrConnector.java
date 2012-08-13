@@ -35,6 +35,7 @@ import net.yacy.cora.protocol.Domains;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 
 
 public class ShardSolrConnector implements SolrConnector {
@@ -117,19 +118,28 @@ public class ShardSolrConnector implements SolrConnector {
         return false;
     }
 
+	@Override
+	public SolrDocument get(String id) throws IOException {
+		for (final SolrConnector connector: this.connectors) {
+			SolrDocument doc = connector.get(id);
+			if (doc != null) return doc;
+        }
+        return null;
+	}
+
     /**
      * add a Solr document
      * @param solrdoc
      * @throws IOException
      */
     @Override
-    public void add(final SolrDoc solrdoc) throws IOException {
+    public void add(final SolrInputDocument solrdoc) throws IOException {
         this.connectors.get(this.sharding.select(solrdoc)).add(solrdoc);
     }
 
     @Override
-    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
-        for (SolrDoc d: solrdocs) this.connectors.get(this.sharding.select(d)).add(d);
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
+        for (SolrInputDocument d: solrdocs) this.connectors.get(this.sharding.select(d)).add(d);
     }
 
     /**
@@ -137,8 +147,8 @@ public class ShardSolrConnector implements SolrConnector {
      * @param docs
      * @throws IOException
      */
-    protected void addSolr(final Collection<SolrDoc> docs) throws IOException {
-        for (final SolrDoc doc: docs) add(doc);
+    protected void addSolr(final Collection<SolrInputDocument> docs) throws IOException {
+        for (final SolrInputDocument doc: docs) add(doc);
     }
 
     /**
@@ -148,10 +158,10 @@ public class ShardSolrConnector implements SolrConnector {
      * @throws IOException
      */
     @Override
-    public SolrDocumentList get(final String querystring, final int offset, final int count) throws IOException {
+    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
         final SolrDocumentList list = new SolrDocumentList();
         for (final SolrConnector connector: this.connectors) {
-            final SolrDocumentList l = connector.get(querystring, offset, count);
+            final SolrDocumentList l = connector.query(querystring, offset, count);
             for (final SolrDocument d: l) {
                 list.add(d);
             }
@@ -163,7 +173,7 @@ public class ShardSolrConnector implements SolrConnector {
         final SolrDocumentList[] list = new SolrDocumentList[this.connectors.size()];
         int i = 0;
         for (final SolrConnector connector: this.connectors) {
-            list[i++] = connector.get(querystring, offset, count);
+            list[i++] = connector.query(querystring, offset, count);
         }
         return list;
     }

@@ -33,8 +33,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import de.anomic.server.serverObjects;
-
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
@@ -43,6 +41,7 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
+import de.anomic.server.serverObjects;
 
 public class CrawlProfile extends ConcurrentHashMap<String, String> implements Map<String, String> {
 
@@ -350,7 +349,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public String[] countryMustMatchList() {
         String countryMustMatch = get(FILTER_COUNTRY_MUSTMATCH);
         if (countryMustMatch == null) countryMustMatch = "";
-        if (countryMustMatch.length() == 0) return new String[0];
+        if (countryMustMatch.isEmpty()) return new String[0];
         String[] list = countryMustMatch.split(",");
         if (list.length == 1 && list.length == 0) list = new String[0];
         return list;
@@ -494,13 +493,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String host = crawlingStartURL.getHost();
             if (host.startsWith("www.")) {
                 return "https?://" + crawlingStartURL.getHost() + ".*";
-            } else {
-                // if the www is not given we accept that also
-                return "https?://(?:www.)?" + crawlingStartURL.getHost() + ".*";
             }
+            // if the www is not given we accept that also
+            return "https?://(?:www.)?" + crawlingStartURL.getHost() + ".*";
         }
     }
-    
+
 
     public static final Set<String> ignoreNames = new HashSet<String>();
     static {
@@ -518,7 +516,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public void putProfileEntry(
     		final String CRAWL_PROFILE_PREFIX,
             final serverObjects prop,
-            final CrawlStacker crawlStacker,
             final boolean active,
             final boolean dark,
             final int count,

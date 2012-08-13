@@ -30,10 +30,10 @@ import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
@@ -41,7 +41,6 @@ import net.yacy.kelondro.util.ISO639;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.Segments;
 import net.yacy.search.query.QueryParams;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -56,12 +55,7 @@ public final class timeline {
         if ((post == null) || (env == null)) return prop;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
 
-        Segment segment = null;
-        if (post.containsKey("segment") && authenticated) {
-            segment = sb.indexSegments.segment(post.get("segment"));
-        } else {
-            segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
+        Segment segment = sb.index;
 
         final String  querystring = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final int     count  = Math.min((authenticated) ? 1000 : 10, post.getInt("maximumRecords", 1000)); // SRU syntax
@@ -94,7 +88,7 @@ public final class timeline {
         TermSearch<WordReference> search = null;
         try {
             search = segment.termIndex().query(q, Word.words2hashesHandles(query[1]), null, Segment.wordReferenceFactory, maxdist);
-        } catch (RowSpaceExceededException e) {
+        } catch (SpaceExceededException e) {
             Log.logException(e);
         }
         ReferenceContainer<WordReference> index = search.joined();

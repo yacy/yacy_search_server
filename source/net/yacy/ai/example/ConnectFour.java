@@ -6,17 +6,17 @@
  *  $LastChangedDate$
  *  $LastChangedRevision$
  *  $LastChangedBy$
- * 
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -29,25 +29,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.ai.greedy.AbstractModel;
 import net.yacy.ai.greedy.AbstractFinding;
+import net.yacy.ai.greedy.AbstractModel;
 import net.yacy.ai.greedy.Battle;
 import net.yacy.ai.greedy.ContextFactory;
 import net.yacy.ai.greedy.Finding;
+import net.yacy.ai.greedy.Goal;
 import net.yacy.ai.greedy.Model;
 import net.yacy.ai.greedy.Role;
-import net.yacy.ai.greedy.Goal;
 
 public class ConnectFour {
 
     static final int width = 7;
     static final int height = 6;
-    
+
     public static enum Coin implements Role {
         red('*'),
         blue('#');
-        private String c;
+        private final String c;
         Coin(char c) {this.c = String.valueOf(c);}
+        @Override
         public Coin nextRole() {
             return (this == red) ? blue : red;
         }
@@ -55,7 +56,7 @@ public class ConnectFour {
         public String toString() {return this.c;}
         public final static Coin[] allCoins = {red, blue};
     }
-    
+
     public static class Move extends AbstractFinding<Coin> implements Finding<Coin> {
         protected final int column;
         public Move(Coin role, int column) {
@@ -84,21 +85,21 @@ public class ConnectFour {
             return super.getRole().toString() + ":" + Integer.toString(this.column);
         }
     }
-    
+
     public static class Board extends AbstractModel<Coin, Move> implements Model<Coin, Move>, Cloneable {
 
         Coin[] b; // 2 dimensions folded: array starts in the bottom left and first position in second row is at index position <width>
-        
+
         /**
          * create a board with start configuration: empty board
          * @param nextRole
          */
         public Board(Coin startPlayer) {
             super(startPlayer);
-            b = new Coin[height * width];
-            for (int i = 0; i < b.length; i++) b[i] = null;
+            this.b = new Coin[height * width];
+            for (int i = 0; i < this.b.length; i++) this.b[i] = null;
         }
-        
+
         /**
          * clone a board and return a new board
          * @param board
@@ -106,69 +107,73 @@ public class ConnectFour {
         public Board(Board board) {
             super(board.currentRole());
             this.b = new Coin[board.b.length];
-            System.arraycopy(board.b, 0, b, 0, b.length);
+            System.arraycopy(board.b, 0, this.b, 0, this.b.length);
         }
 
+        @Override
         public Object clone() {
             return new Board(this);
         }
-        
+
         public boolean columnFull(int column) {
-            return b[(height - 1) * width + column] != null;
+            return this.b[(height - 1) * width + column] != null;
         }
 
         public Coin getCell(int column, int row) {
-            return b[row * width + column];
+            return this.b[row * width + column];
         }
-        
+
+        @Override
         public void applyFinding(Move nextStep) {
             int column = nextStep.getColumn();
             int row = 0;
-            while (row < height && b[row * width + column] != null) row++;
+            while (row < height && this.b[row * width + column] != null) row++;
             if (row == height) throw new RuntimeException("column " + column + " is full");
-            b[row * width + column] = nextStep.getRole();
+            this.b[row * width + column] = nextStep.getRole();
         }
-        
+
+        @Override
         public int hashCode() {
             int c = 0;
             Coin x;
-            for (int i = 0; i < b.length; i++) {
-                x = b[i];
+            for (int i = 0; i < this.b.length; i++) {
+                x = this.b[i];
                 if (x != null) c += (i + 1) * (x.ordinal() + 1);
             }
             return c;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (!(o instanceof Board)) return false;
             Board om = (Board) o;
             Coin c0, c1;
-            for (int i = 0; i < b.length; i++) {
-                c0 = b[i];
+            for (int i = 0; i < this.b.length; i++) {
+                c0 = this.b[i];
                 c1 = om.b[i];
                 if (!(c0 == null ? c1 == null : c0.equals(c1))) return false;
             }
             return true;
         }
-        
+
         private boolean count4(int x, int y, int xi, int yi, Coin c) {
             int steps = 4;
             Coin cell;
             while (steps-- > 0) {
-                cell = b[y * width + x];
+                cell = this.b[y * width + x];
                 if (cell == null || !cell.equals(c)) return false;
                 x += xi;
                 y += yi;
             }
             return true;
         }
-        
+
         private int countSame(int x, int y, int xi, int yi, Coin c) {
             int rb = 0;
             int steps = 4;
             Coin cell;
             while (steps-- > 0) {
-                cell = b[y * width + x];
+                cell = this.b[y * width + x];
                 if (cell != null) {
                     if (cell.equals(c)) rb++; else return rb;
                 }
@@ -177,12 +182,14 @@ public class ConnectFour {
             }
             return rb;
         }
-        
+
+        @Override
         public Coin isTermination() {
             for (Coin coin: Coin.allCoins) if (isTermination(coin)) return coin;
             return null;
         }
-        
+
+        @Override
         public boolean isTermination(Coin coin) {
             // waagerecht
             for (int x = 0; x < width - 3; x++)
@@ -204,11 +211,12 @@ public class ConnectFour {
             return false;
         }
 
+        @Override
         public int getRanking(int findings, Coin coin) {
-            return 2 * getRankingSingle(findings, coin) - getRankingSingle(findings, coin.nextRole()) - 3 * findings;
+            return 2 * getRankingSingle(coin) - getRankingSingle(coin.nextRole()) - 3 * findings;
         }
-        
-        private int getRankingSingle(int findings, Coin coin) {
+
+        private int getRankingSingle(Coin coin) {
             int r = 0;
             // waagerecht
             for (int x = 0; x < width - 3; x++)
@@ -233,7 +241,8 @@ public class ConnectFour {
             if (finding.column <= width / 2) return finding.column;
             return width - 1 - finding.column;
         }
-        
+
+        @Override
         public List<Move> explore() {
             ArrayList<Move> moves = new ArrayList<Move>();
             for (int i = 0; i < width; i++) {
@@ -243,7 +252,7 @@ public class ConnectFour {
             }
             return moves;
         }
-        
+
         @Override
         public String toString() {
             StringBuilder s = new StringBuilder((width + 1) * height);
@@ -251,7 +260,7 @@ public class ConnectFour {
             for (int row = height - 1; row >= 0; row--) {
                 s.append('\"');
                 for (int column = 0; column < width; column++) {
-                    coin = b[row * width + column];
+                    coin = this.b[row * width + column];
                     s.append((coin == null) ? " " : coin.toString());
                 }
                 if (row == 0) s.append('\"'); else s.append("\"+\n");
@@ -259,24 +268,27 @@ public class ConnectFour {
             return s.toString();
         }
     }
-    
-    public static class Strategy implements Goal<Coin, Move, Board> {        
+
+    public static class Strategy implements Goal<Coin, Move, Board> {
 
         public Strategy() {
         }
 
+        @Override
         public boolean isFulfilled(Board model) {
             return false;
         }
 
+        @Override
         public boolean isSnapshot(Board model) {
             return false;
         }
 
+        @Override
         public boolean pruning(Board model) {
             return false;
         }
-        
+
     }
 
 
@@ -288,9 +300,9 @@ public class ConnectFour {
         strategies.put(Coin.blue, blueFactroy);
         /*Battle<Coin, Move, Board> battle =*/ new Battle<Coin, Move, Board>(new Board(Coin.red), strategies, 2000);
     }
-    
+
     public static void main(String[] args) {
-        
+
         battle();
         /*
         int cores = Runtime.getRuntime().availableProcessors();
@@ -299,7 +311,7 @@ public class ConnectFour {
         engine.start();
         long comptime = 60;
         long relaxtime = 20;
-        
+
         agent = new Agent<Coin, Move, Board>(new Board(Coin.red), new Strategy(comptime, false, false));  // red begins
         engine.inject(agent);
         agent.getTeorem().getGoal().awaitTermination(relaxtime);
@@ -312,9 +324,9 @@ public class ConnectFour {
         agent.getGoal().awaitTermination(relaxtime);
         System.out.println("=========== terminated ==========");
         agent.printReport(10);
-         */        
-        
+         */
+
         //engine.stop();
     }
-    
+
 }

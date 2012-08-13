@@ -1,4 +1,4 @@
-//yacySeedUploadScp.java 
+//yacySeedUploadScp.java
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -44,33 +44,34 @@ import com.jcraft.jsch.UserInfo;
 import de.anomic.server.serverSwitch;
 
 public class yacySeedUploadScp implements yacySeedUploader {
-    
+
     public static final String CONFIG_SCP_SERVER = "seedScpServer";
     public static final String CONFIG_SCP_SERVER_PORT = "seedScpServerPort";
     public static final String CONFIG_SCP_ACCOUNT = "seedScpAccount";
     public static final String CONFIG_SCP_PASSWORD = "seedScpPassword";
     public static final String CONFIG_SCP_PATH = "seedScpPath";
-    
+
+    @Override
     public String uploadSeedFile(final serverSwitch sb, final File seedFile) throws Exception {
-        try {        
+        try {
             if (sb == null) throw new NullPointerException("Reference to serverSwitch nut not be null.");
             if ((seedFile == null)||(!seedFile.exists())) throw new Exception("Seed file does not exist.");
-            
+
             final String  seedScpServer   = sb.getConfig(CONFIG_SCP_SERVER,null);
             final String  seedScpServerPort =  sb.getConfig(CONFIG_SCP_SERVER_PORT,"22");
             final String  seedScpAccount  = sb.getConfig(CONFIG_SCP_ACCOUNT,null);
             final String  seedScpPassword = sb.getConfig(CONFIG_SCP_PASSWORD,null);
-            final String  seedScpPath = sb.getConfig(CONFIG_SCP_PATH,null);       
-            
-            if (seedScpServer == null || seedScpServer.length() == 0)
+            final String  seedScpPath = sb.getConfig(CONFIG_SCP_PATH,null);
+
+            if (seedScpServer == null || seedScpServer.isEmpty())
                 throw new Exception("Seed SCP upload settings not configured properly. Servername must not be null or empty.");
-            else if (seedScpAccount == null || seedScpAccount.length() == 0)
-                throw new Exception("Seed SCP upload settings not configured properly. Username must not be null or empty.");            
-            else if (seedScpPassword == null || seedScpPassword.length() == 0)
-                throw new Exception("Seed SCP upload settings not configured properly. Password must not be null or empty.");            
-            else if (seedScpPath == null || seedScpPath.length() == 0)
+            else if (seedScpAccount == null || seedScpAccount.isEmpty())
+                throw new Exception("Seed SCP upload settings not configured properly. Username must not be null or empty.");
+            else if (seedScpPassword == null || seedScpPassword.isEmpty())
+                throw new Exception("Seed SCP upload settings not configured properly. Password must not be null or empty.");
+            else if (seedScpPath == null || seedScpPath.isEmpty())
                 throw new Exception("Seed SCP upload settings not configured properly. File path must not be null or empty.");
-            else if (seedScpServerPort == null || seedScpServerPort.length() == 0)
+            else if (seedScpServerPort == null || seedScpServerPort.isEmpty())
             throw new Exception("Seed SCP upload settings not configured properly. Server port must not be null or empty.");
             int port = 22;
             try {
@@ -78,38 +79,39 @@ public class yacySeedUploadScp implements yacySeedUploader {
             } catch (final NumberFormatException ex) {
                 throw new Exception("Seed SCP upload settings not configured properly. Server port is not a vaild integer.");
             }
-            
+
             return sshc.put(seedScpServer, port, seedFile, seedScpPath, seedScpAccount, seedScpPassword);
         } catch (final Exception e) {
             throw e;
         }
     }
-    
+
+    @Override
     public String[] getConfigurationOptions() {
         return new String[] {CONFIG_SCP_SERVER,CONFIG_SCP_SERVER_PORT,CONFIG_SCP_ACCOUNT,CONFIG_SCP_PASSWORD,CONFIG_SCP_PATH};
     }
-    
+
 }
 
 class sshc {
     public static String put(
             final String host,
             final int port,
-            final File localFile, 
+            final File localFile,
             final String remoteName,
-            final String account, 
+            final String account,
             final String password
     ) throws Exception {
-        
+
         Session session = null;
-        try {    
+        try {
             // Creating a new secure channel object
             final JSch jsch=new JSch();
-            
+
             // setting hostname, username, userpassword
             session = jsch.getSession(account, host, port);
-            session.setPassword(password);        
-            
+            session.setPassword(password);
+
             /*
              * Setting the StrictHostKeyChecking to ignore unknown
              * hosts because of a missing known_hosts file ...
@@ -117,29 +119,29 @@ class sshc {
             final java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking","no");
             session.setConfig(config);
-            
-            /* 
+
+            /*
              * we need this user interaction interface to support
              * the interactive-keyboard mode
-             */             
+             */
             final UserInfo ui=new SchUserInfo(password);
-            session.setUserInfo(ui);        
-            
+            session.setUserInfo(ui);
+
             // trying to connect ...
-            session.connect();        
-            
+            session.connect();
+
             String command="scp -p -t " + remoteName;
             final Channel channel = session.openChannel("exec");
-            ((ChannelExec)channel).setCommand(command);        
-            
+            ((ChannelExec)channel).setCommand(command);
+
             // get I/O streams for remote scp
             final OutputStream out=channel.getOutputStream();
             final InputStream in=channel.getInputStream();
-            
+
             channel.connect();
-            
+
             checkAck(in);
-            
+
             // send "C0644 filesize filename", where filename should not include '/'
             final int filesize=(int)(localFile).length();
             command="C0644 "+filesize+" ";
@@ -151,14 +153,14 @@ class sshc {
             }
             command+="\n";
             out.write(UTF8.getBytes(command)); out.flush();
-            
+
             checkAck(in);
-            
+
             // send a content of lfile
             final byte[] buf=new byte[1024];
             BufferedInputStream bufferedIn = null;
             try {
-                bufferedIn=new BufferedInputStream(new FileInputStream(localFile));                
+                bufferedIn=new BufferedInputStream(new FileInputStream(localFile));
                 while(true){
                     final int len=bufferedIn.read(buf, 0, buf.length);
                     if(len<=0) break;
@@ -167,12 +169,12 @@ class sshc {
             } finally {
                 if (bufferedIn != null) try{bufferedIn.close();}catch(final Exception e){}
             }
-            
+
             // send '\0'
             buf[0]=0; out.write(buf, 0, 1); out.flush();
-            
-            checkAck(in);       
-            
+
+            checkAck(in);
+
             return "SCP: File uploaded successfully.";
         } catch (final Exception e) {
             throw new Exception("SCP: File uploading failed: " + e.getMessage());
@@ -180,7 +182,7 @@ class sshc {
             if ((session != null) && (session.isConnected())) session.disconnect();
         }
     }
-    
+
     static int checkAck(final InputStream in) throws IOException{
         final int b=in.read();
         // b may be 0 for success,
@@ -189,7 +191,7 @@ class sshc {
         //          -1
         if(b==0) return b;
         if(b==-1) return b;
-        
+
         if(b==1 || b==2){
             final StringBuilder sb=new StringBuilder();
             int c;
@@ -198,7 +200,7 @@ class sshc {
                 sb.append((char)c);
             }
             while(c!='\n');
-            
+
             if(b==1){ // error
                 throw new IOException(sb.toString());
             }
@@ -211,44 +213,51 @@ class sshc {
 }
 
 
-class SchUserInfo 
+class SchUserInfo
 implements UserInfo, UIKeyboardInteractive {
     String passwd;
-    
+
     public SchUserInfo(final String password) {
         this.passwd = password;
     }
-    
-    public String getPassword() { 
-        return this.passwd; 
+
+    @Override
+    public String getPassword() {
+        return this.passwd;
     }
-    
-    public boolean promptYesNo(final String str){   
+
+    @Override
+    public boolean promptYesNo(final String str){
         System.err.println("User was prompted from: " + str);
         return true;
     }
-    
-    public String getPassphrase() { 
-        return null; 
+
+    @Override
+    public String getPassphrase() {
+        return null;
     }
-    
+
+    @Override
     public boolean promptPassphrase(final String message) {
-        System.out.println("promptPassphrase : " + message);            
+        System.out.println("promptPassphrase : " + message);
         return false;
     }
-    
+
+    @Override
     public boolean promptPassword(final String message) {
-        System.out.println("promptPassword : " + message);      
+        System.out.println("promptPassword : " + message);
         return true;
     }
-    
+
     /**
      * @see com.jcraft.jsch.UserInfo#showMessage(java.lang.String)
      */
+    @Override
     public void showMessage(final String message) {
         System.out.println("Sch has tried to show the following message to the user: " + message);
     }
-    
+
+    @Override
     public String[] promptKeyboardInteractive(final String destination,
             final String name,
             final String instruction,
@@ -258,15 +267,15 @@ implements UserInfo, UIKeyboardInteractive {
                 "\n\tDestination: " + destination +
                 "\n\tName:        " + name +
                 "\n\tInstruction: " + instruction +
-                "\n\tPrompt:      " + arrayToString2(prompt,"|") + 
-                "\n\techo:        " + arrayToString2(echo,"|"));        
-        
+                "\n\tPrompt:      " + arrayToString2(prompt,"|") +
+                "\n\techo:        " + arrayToString2(echo,"|"));
+
         if ((prompt.length >= 1) && (prompt[0].startsWith("Password")))
             return new String[]{this.passwd};
         return new String[]{};
     }
-    
-    String arrayToString2(final String[] a, final String separator) {
+
+    static String arrayToString2(final String[] a, final String separator) {
         final StringBuilder result = new StringBuilder();// start with first element
         if (a.length > 0) {
             result.append(a[0]);
@@ -275,10 +284,10 @@ implements UserInfo, UIKeyboardInteractive {
                 result.append(a[i]);
             }
         }
-        return result.toString();        
+        return result.toString();
     }
-    
-    String arrayToString2(final boolean[] a, final String separator) {
+
+    static String arrayToString2(final boolean[] a, final String separator) {
         final StringBuilder result = new StringBuilder();// start with first element
         if (a.length > 0) {
             result.append(a[0]);
@@ -287,7 +296,7 @@ implements UserInfo, UIKeyboardInteractive {
                 result.append(a[i]);
             }
         }
-        return result.toString();        
+        return result.toString();
     }
 }
 

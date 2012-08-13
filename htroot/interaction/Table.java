@@ -120,13 +120,9 @@ public class Table {
         }
 
         if (post.containsKey("load")) {
-
-        	o = Interaction.GetTableentry(s, p, global ? "global" : username, "");
-
+        	o = Interaction.GetTableentry(s, p, global ? "global" : username);
         } else {
-
         	Interaction.Tableentry(s, p, o, global ? "global" : username, "");
-
         }
 
         prop.put("result", o);

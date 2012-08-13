@@ -466,7 +466,7 @@ public class serverSwitch
         final List<String> list = new ArrayList<String>();
         final WorkflowThread st = getThread(threadName);
 
-        for ( final Session s : ((serverCore) st).getJobList() ) {
+        for ( final Session s : serverCore.getJobList() ) {
             if ( !s.isAlive() ) {
                 continue;
             }
@@ -483,7 +483,7 @@ public class serverSwitch
         }
         final WorkflowThread st = getThread(threadName);
 
-        for ( final Session s : ((serverCore) st).getJobList() ) {
+        for ( final Session s : serverCore.getJobList() ) {
             if ( (s.isAlive()) && (s.getName().equals(sessionName)) ) {
                 // try to stop session
                 s.setStopped(true);
@@ -647,18 +647,12 @@ public class serverSwitch
             }
             if ( file != null && file.exists() ) {
                 return new FileReader(file);
-            } else {
-                throw new FileNotFoundException();
             }
-        } else {
-            final File f =
-                (uri.length() > 0 && uri.startsWith("/")) ? new File(uri) : new File(rootPath, uri);
-            if ( f.exists() ) {
-                return new FileReader(f);
-            } else {
-                throw new FileNotFoundException(f.toString());
-            }
+            throw new FileNotFoundException();
         }
+        final File f = (uri.length() > 0 && uri.startsWith("/")) ? new File(uri) : new File(rootPath, uri);
+        if (f.exists()) return new FileReader(f);
+        throw new FileNotFoundException(f.toString());
     }
 
     private static Random pwGenerator = new Random();

@@ -63,6 +63,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
+import de.anomic.crawler.CrawlQueues;
 import de.anomic.server.serverCore;
 import de.anomic.tools.CryptoLib;
 import de.anomic.tools.SignatureOutputStream;
@@ -240,7 +241,7 @@ public final class yacyRelease extends yacyVersion {
         try {
             final DigestURI uri = location.getLocationURL();
             Thread.currentThread().setName("allReleaseFrom - host " + uri.getHost()); // makes it more easy to see which release blocks process in thread dump
-            scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE);
+            scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE, null, CrawlQueues.queuedMinLoadDelay);
         } catch (final IOException e) {
             return null;
         }

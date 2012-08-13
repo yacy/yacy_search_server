@@ -266,7 +266,7 @@ public final class TemplateEngine {
             // #(
             } else if ((bb & 0xFF) == lrbr) { //alternative
                 int others=0;
-                final ByteBuffer text= new ByteBuffer();
+                final ByteBuffer text = new ByteBuffer();
 
                 transferUntil(pis, keyStream, aClose);
                 key = keyStream.toByteArray(); //Caution: Key does not contain prefix
@@ -297,7 +297,10 @@ public final class TemplateEngine {
                     transferUntil(pis, keyStream, appendBytes(PP, patternName, null, null));
                     if(pis.available()==0){
                         Log.logSevere("TEMPLATE", "No such Template: %%" + UTF8.String(patternName));
-                        return structure.getBytes();
+                        final byte[] sb = structure.getBytes();
+                        structure.close();
+                        text.close();
+                        return sb;
                     }
                     keyStream.reset();
                     transferUntil(pis, keyStream, dpdpa);
@@ -364,7 +367,7 @@ public final class TemplateEngine {
                         }
                     }//while
                 }//if(byName) (else branch)
-
+                text.close();
             // #[
             } else if ((bb & 0xFF) == lbr) { //normal
                 if (transferUntil(pis, keyStream, pClose)) {
@@ -382,7 +385,9 @@ public final class TemplateEngine {
                 } else {
                     // inconsistency, simply finalize this
                     FileUtils.copy(pis, out);
-                    return structure.getBytes();
+                    final byte[] sb = structure.getBytes();
+                    structure.close();
+                    return sb;
                 }
 
             // #%
@@ -427,7 +432,9 @@ public final class TemplateEngine {
                 out.write(bb);
             }
         }
-        return structure.getBytes();
+        final byte[] sb = structure.getBytes();
+        structure.close();
+        return sb;
     }
 
     private final static byte[] replacePattern(final String key, final Map<String, String> pattern, final byte dflt[]) {

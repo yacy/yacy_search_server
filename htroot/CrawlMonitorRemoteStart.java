@@ -9,7 +9,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,21 +31,20 @@ import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class CrawlMonitorRemoteStart {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
-        boolean dark = true;   
-        
+
+        boolean dark = true;
+
         // create other peer crawl table using YaCyNews
-        Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB, true);
+        Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB);
         int showedCrawl = 0;
         NewsDB.Record record;
         Seed peer;
@@ -73,9 +72,9 @@ public class CrawlMonitorRemoteStart {
             }
         }
         prop.put("otherCrawlStartInProgress", showedCrawl);
-        
+
         // finished remote crawls
-        recordIterator = sb.peers.newsPool.recordIterator(NewsPool.PROCESSED_DB, true);
+        recordIterator = sb.peers.newsPool.recordIterator(NewsPool.PROCESSED_DB);
         showedCrawl = 0;
         while (recordIterator.hasNext()) {
             record = recordIterator.next();

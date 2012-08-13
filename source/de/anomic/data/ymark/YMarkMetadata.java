@@ -36,15 +36,16 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.repository.LoaderDispatcher;
-import net.yacy.search.index.Segments;
+import net.yacy.search.index.Segment;
+import net.yacy.search.snippet.TextSnippet;
 import de.anomic.crawler.retrieval.Response;
 
 public class YMarkMetadata {
 	private DigestURI uri;
 	Document document;
-	Segments indexSegment;
+	Segment indexSegment;
 
 	public enum METADATA {
 		TITLE,
@@ -72,16 +73,16 @@ public class YMarkMetadata {
 		this.indexSegment = null;
 	}
 
-	public YMarkMetadata(final DigestURI uri, final Segments indexSegment) {
+	public YMarkMetadata(final DigestURI uri, final Segment indexSegment) {
 		this.uri = uri;
 		this.document = null;
 		this.indexSegment = indexSegment;
 	}
-	
-	public YMarkMetadata(final byte[] urlHash, final Segments indexSegment) {
+
+	public YMarkMetadata(final byte[] urlHash, final Segment indexSegment) {
 		this.document = null;
 		this.indexSegment = indexSegment;
-		this.uri = this.indexSegment.segment(Segments.Process.PUBLIC).urlMetadata().load(urlHash).url();
+		this.uri = this.indexSegment.urlMetadata().load(urlHash).url();
 	}
 
 	public YMarkMetadata(final Document document) {
@@ -97,15 +98,15 @@ public class YMarkMetadata {
 	public Document loadDocument(final LoaderDispatcher loader) throws IOException, Failure {
 		if(this.document == null) {
 			Response response = null;
-			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, true);
+			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
 			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		}
 		return this.document;
-	}	
+	}
 
 	public EnumMap<METADATA, String> getMetadata() {
 		final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);
-        final URIMetadataRow urlEntry = this.indexSegment.segment(Segments.Process.PUBLIC).urlMetadata().load(this.uri.hash());
+        final URIMetadata urlEntry = this.indexSegment.urlMetadata().load(this.uri.hash());
         if (urlEntry != null) {
         	metadata.put(METADATA.SIZE, String.valueOf(urlEntry.size()));
         	metadata.put(METADATA.FRESHDATE, ISO8601Formatter.FORMATTER.format(urlEntry.freshdate()));
