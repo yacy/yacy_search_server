@@ -28,19 +28,20 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 
 public class MultipleSolrConnector implements SolrConnector {
 
-    private final static SolrDoc POISON_DOC = new SolrDoc();
+    private final static SolrInputDocument POISON_DOC = new SolrInputDocument();
 
-    private final ArrayBlockingQueue<SolrDoc> queue;
+    private final ArrayBlockingQueue<SolrInputDocument> queue;
     private final AddWorker[] worker;
     private final SolrConnector solr;
     private int commitWithinMs;
 
     public MultipleSolrConnector(final String url, int connections) throws IOException {
         this.solr = new SingleSolrConnector(url);
-        this.queue = new ArrayBlockingQueue<SolrDoc>(1000);
+        this.queue = new ArrayBlockingQueue<SolrInputDocument>(1000);
         this.worker = new AddWorker[connections];
         this.commitWithinMs = 180000;
         for (int i = 0; i < connections; i++) {
@@ -57,7 +58,7 @@ public class MultipleSolrConnector implements SolrConnector {
         }
         @Override
         public void run() {
-            SolrDoc doc;
+            SolrInputDocument doc;
             try {
                 while ((doc = MultipleSolrConnector.this.queue.take()) != POISON_DOC) {
                     try {
@@ -138,7 +139,7 @@ public class MultipleSolrConnector implements SolrConnector {
 	}
 
     @Override
-    public void add(final SolrDoc solrdoc) throws IOException, SolrException {
+    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         try {
             this.queue.put(solrdoc);
         } catch (InterruptedException e) {
@@ -147,8 +148,8 @@ public class MultipleSolrConnector implements SolrConnector {
     }
 
     @Override
-    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
-        for (SolrDoc d: solrdocs) {
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
+        for (SolrInputDocument d: solrdocs) {
             try {
                 this.queue.put(d);
             } catch (InterruptedException e) {

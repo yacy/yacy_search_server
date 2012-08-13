@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.HandleMap;
 import net.yacy.cora.util.SpaceExceededException;
@@ -487,7 +488,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             //assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
             assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
             e = get0(key);
-            assert e == null || this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes());
+            assert e == null || this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes()) : "key = " + ASCII.String(key) + ", e.k = " + ASCII.String(e.getPrimaryKeyBytes());
             return e;
         }
     }

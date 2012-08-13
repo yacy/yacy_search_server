@@ -40,7 +40,7 @@ import java.util.TreeSet;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.cora.services.federated.solr.DoubleSolrConnector;
+import net.yacy.cora.services.federated.solr.MirrorSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
@@ -73,7 +73,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     private       Export              exportthread; // will have a export thread assigned if exporter is running
     private       String              tablename;
     private       ArrayList<HostStat> statsDump;
-    private final DoubleSolrConnector solr;
+    private final MirrorSolrConnector solr;
     private final SolrConfiguration   solrScheme;
 
     public MetadataRepository(final File path, final SolrConfiguration solrScheme) {
@@ -82,7 +82,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         this.urlIndexFile = null;
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
-        this.solr = new DoubleSolrConnector();
+        this.solr = new MirrorSolrConnector(10000, 10000, 1000);
         this.solrScheme = solrScheme;
     }
 

@@ -31,7 +31,10 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicLong;
+
 import net.yacy.search.index.YaCySchema;
+
+import org.apache.solr.common.SolrInputDocument;
 
 public class ShardSelection {
 
@@ -57,7 +60,7 @@ public class ShardSelection {
         return (int) (this.chardID.getAndIncrement() % this.dimension);
     }
 
-    public int select(final SolrDoc solrdoc) throws IOException {
+    public int select(final SolrInputDocument solrdoc) throws IOException {
         if (this.method == Method.MODULO_HOST_MD5) {
             final String sku = (String) solrdoc.getField(YaCySchema.sku.getSolrFieldName()).getValue();
             return selectURL(sku);

@@ -25,7 +25,6 @@ package net.yacy.kelondro.data.meta;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -124,11 +123,16 @@ public class URIMetadataNode implements URIMetadata {
         return x;
     }
 
-    private ArrayList<Object> getArrayList(YaCySchema field) {
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        ArrayList<Object> x = (ArrayList) this.doc.getFieldValue(field.name());
-        if (x == null) return new ArrayList<Object>(0);
-        return x;
+    @SuppressWarnings("unchecked")
+    private ArrayList<String> getArrayList(YaCySchema field) {
+        Object r = this.doc.getFieldValue(field.name());
+        if (r == null) return new ArrayList<String>(0);
+        if (r instanceof ArrayList) {
+            return (ArrayList<String>) r;
+        }
+        ArrayList<String> a = new ArrayList<String>(1);
+        a.add((String) r);
+        return a;
     }
 
     @Override
@@ -158,10 +162,9 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public String dc_title() {
-        @SuppressWarnings("unchecked")
-        List<String> titles = (List<String>) this.doc.getFieldValue(YaCySchema.title.name());
-        if (titles == null || titles.size() == 0) return "";
-        return titles.get(0);
+        ArrayList<String> a = getArrayList(YaCySchema.title);
+        if (a == null || a.size() == 0) return "";
+        return a.get(0);
     }
 
     @Override
@@ -211,24 +214,24 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public char doctype() {
-        ArrayList<Object> a = getArrayList(YaCySchema.content_type);
+        ArrayList<String> a = getArrayList(YaCySchema.content_type);
         if (a == null || a.size() == 0) return Response.docType(this.url);
-        return Response.docType((String) a.get(0));
+        return Response.docType(a.get(0));
     }
 
     @Override
     public byte[] language() {
-        ArrayList<Object> languages = getArrayList(YaCySchema.language_txt);
+        ArrayList<String> languages = getArrayList(YaCySchema.language_txt);
         if (languages == null || languages.size() == 0) return ASCII.getBytes("en");
-        return UTF8.getBytes((String) languages.get(0));
+        return UTF8.getBytes(languages.get(0));
     }
 
 
     @Override
     public byte[] referrerHash() {
-        ArrayList<Object>  referrer = getArrayList(YaCySchema.referrer_id_txt);
+        ArrayList<String>  referrer = getArrayList(YaCySchema.referrer_id_txt);
         if (referrer == null || referrer.size() == 0) return null;
-        return ASCII.getBytes((String) referrer.get(0));
+        return ASCII.getBytes(referrer.get(0));
     }
 
     @Override

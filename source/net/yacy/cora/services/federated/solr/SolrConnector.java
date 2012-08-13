@@ -31,6 +31,7 @@ import java.util.List;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 
 public interface SolrConnector {
 
@@ -85,8 +86,8 @@ public interface SolrConnector {
      * @throws IOException
      * @throws SolrException
      */
-    public void add(final SolrDoc solrdoc) throws IOException, SolrException;
-    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException;
+    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException;
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException;
 
     /**
      * get a document from solr by given id

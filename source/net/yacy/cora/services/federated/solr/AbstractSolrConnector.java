@@ -48,10 +48,10 @@ public class AbstractSolrConnector implements SolrConnector {
     	catchallQuery.setRows(1);
     	catchallQuery.setStart(0);
     }
-    
+
     protected SolrServer server;
     protected int commitWithinMs; // max time (in ms) before a commit will happen
-    
+
     protected AbstractSolrConnector() {
         this.server = null;
         this.commitWithinMs = 180000;
@@ -169,7 +169,7 @@ public class AbstractSolrConnector implements SolrConnector {
     }
 
     @Override
-    public void add(final SolrDoc solrdoc) throws IOException, SolrException {
+    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         try {
             this.server.add(solrdoc, this.commitWithinMs);
             //this.server.commit();
@@ -180,9 +180,9 @@ public class AbstractSolrConnector implements SolrConnector {
     }
 
     @Override
-    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
         ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
-        for (SolrDoc d: solrdocs) l.add(d);
+        for (SolrInputDocument d: solrdocs) l.add(d);
         try {
             this.server.add(l, this.commitWithinMs);
             //this.server.commit();

@@ -55,13 +55,11 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.YaCySchema;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
 
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 
 import de.anomic.crawler.Cache;
 import de.anomic.data.WorkTables;
@@ -500,16 +498,10 @@ public class SnippetProcess {
                     String solrContent = null;
                     if (this.solr != null) {
                         SolrDocument sd = null;
-                        StringBuilder querystring = new StringBuilder(17);
-                        querystring.append(YaCySchema.id.getSolrFieldName()).append(':').append('"').append(ASCII.String(page.hash())).append('"');
-                        SolrDocumentList sdl = null;
                         try {
-                            sdl = this.solr.query(querystring.toString(), 0, 1);
+                            sd = this.solr.get(ASCII.String(page.hash()));
                         } catch (IOException e) {
                             Log.logException(e);
-                        }
-                        if (sdl != null && !sdl.isEmpty()) {
-                            sd = sdl.get(0);
                         }
                         if (sd != null) {
                             solrContent = Switchboard.getSwitchboard().index.getSolrScheme().solrGetText(sd);

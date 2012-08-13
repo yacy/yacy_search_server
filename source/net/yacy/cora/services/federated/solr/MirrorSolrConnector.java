@@ -24,19 +24,42 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import net.yacy.cora.storage.ARC;
+import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.search.index.YaCySchema;
+
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 
+/**
+ * Implementation of a mirrored solr connector.
+ * Two Solr servers can be attached to serve as storage and search locations.
+ * When doing a retrieval only the first Solr is requested, if it does not answer or has no result, the second is used.
+ * When data is stored or deleted this applies to both attached solr.
+ * It is also possible to attach only one of the solr instances.
+ * Because it is not possible to set a cache in front of this class (the single connect methods would need to be passed through the cache class),
+ * this class also contains an object and hit/miss cache.
+ */
+public class MirrorSolrConnector implements SolrConnector {
 
-public class DoubleSolrConnector implements SolrConnector {
+    private final static Object EXIST = new Object();
 
     private SolrConnector solr0;
     private SolrConnector solr1;
+    private final ARC<String, Object> hitCache, missCache;
+    private final ARC<String, SolrDocument> documentCache;
 
-    public DoubleSolrConnector() {
+
+    public MirrorSolrConnector(int hitCacheMax, int missCacheMax, int docCacheMax) {
         this.solr0 = null;
         this.solr1 = null;
+        int partitions = Runtime.getRuntime().availableProcessors() * 2;
+        this.hitCache = new ConcurrentARC<String, Object>(hitCacheMax, partitions);
+        this.missCache = new ConcurrentARC<String, Object>(missCacheMax, partitions);
+        this.documentCache = new ConcurrentARC<String, SolrDocument>(docCacheMax, partitions);
     }
 
     public boolean isConnected0() {
@@ -75,6 +98,12 @@ public class DoubleSolrConnector implements SolrConnector {
         this.solr1 = null;
     }
 
+    public void clearCache() {
+        this.hitCache.clear();
+        this.missCache.clear();
+        this.documentCache.clear();
+    }
+
     @Override
     public int getCommitWithinMs() {
         if (this.solr0 != null) this.solr0.getCommitWithinMs();
@@ -104,6 +133,9 @@ public class DoubleSolrConnector implements SolrConnector {
      */
     @Override
     public void clear() throws IOException {
+        this.hitCache.clear();
+        this.missCache.clear();
+        this.documentCache.clear();
         if (this.solr0 != null) this.solr0.clear();
         if (this.solr1 != null) this.solr1.clear();
     }
@@ -115,6 +147,9 @@ public class DoubleSolrConnector implements SolrConnector {
      */
     @Override
     public void delete(final String id) throws IOException {
+        this.hitCache.remove(id);
+        this.missCache.put(id, EXIST);
+        this.documentCache.remove(id);
         if (this.solr0 != null) this.solr0.delete(id);
         if (this.solr1 != null) this.solr1.delete(id);
     }
@@ -126,6 +161,11 @@ public class DoubleSolrConnector implements SolrConnector {
      */
     @Override
     public void delete(final List<String> ids) throws IOException {
+        for (String id: ids) {
+            this.hitCache.remove(id);
+            this.missCache.put(id, EXIST);
+            this.documentCache.remove(id);
+        }
         if (this.solr0 != null) this.solr0.delete(ids);
         if (this.solr1 != null) this.solr1.delete(ids);
     }
@@ -138,25 +178,46 @@ public class DoubleSolrConnector implements SolrConnector {
      */
     @Override
     public boolean exists(final String id) throws IOException {
+        if (this.hitCache.containsKey(id) || this.documentCache.containsKey(id)) return true;
+        if (this.missCache.containsKey(id)) return false;
         if (this.solr0 != null) {
-            if (this.solr0.exists(id)) return true;
+            if (this.solr0.exists(id)) {
+                this.hitCache.put(id, EXIST);
+                return true;
+            }
         }
         if (this.solr1 != null) {
-            if (this.solr1.exists(id)) return true;
+            if (this.solr1.exists(id)) {
+                this.hitCache.put(id, EXIST);
+                return true;
+            }
         }
+        this.missCache.put(id, EXIST);
         return false;
     }
 
     @Override
     public SolrDocument get(String id) throws IOException {
+        SolrDocument doc = this.documentCache.get(id);
+        if (this.missCache.containsKey(id)) return null;
+        if (doc != null) return doc;
         if (this.solr0 != null) {
-            SolrDocument doc = this.solr0.get(id);
-            if (doc != null) return doc;
+            doc = this.solr0.get(id);
+            if (doc != null) {
+                this.hitCache.put(id, EXIST);
+                this.documentCache.put(id, doc);
+                return doc;
+            }
         }
         if (this.solr1 != null) {
-            SolrDocument doc = this.solr1.get(id);
-            if (doc != null) return doc;
+            doc = this.solr1.get(id);
+            if (doc != null) {
+                this.hitCache.put(id, EXIST);
+                this.documentCache.put(id, doc);
+                return doc;
+            }
         }
+        this.missCache.put(id, EXIST);
         return null;
     }
 
@@ -166,22 +227,34 @@ public class DoubleSolrConnector implements SolrConnector {
      * @throws IOException
      */
     @Override
-    public void add(final SolrDoc solrdoc) throws IOException {
+    public void add(final SolrInputDocument solrdoc) throws IOException {
         if (this.solr0 != null) {
             this.solr0.add(solrdoc);
         }
         if (this.solr1 != null) {
             this.solr1.add(solrdoc);
         }
+        String id = (String) solrdoc.getFieldValue(YaCySchema.id.name());
+        if (id != null) {
+            this.hitCache.put(id, EXIST);
+            this.documentCache.put(id, ClientUtils.toSolrDocument(solrdoc));
+        }
     }
 
     @Override
-    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
         if (this.solr0 != null) {
-            for (SolrDoc d: solrdocs) this.solr0.add(d);
+            for (SolrInputDocument d: solrdocs) this.solr0.add(d);
         }
         if (this.solr1 != null) {
-            for (SolrDoc d: solrdocs) this.solr1.add(d);
+            for (SolrInputDocument d: solrdocs) this.solr1.add(d);
+        }
+        for (SolrInputDocument solrdoc: solrdocs) {
+            String id = (String) solrdoc.getFieldValue(YaCySchema.id.name());
+            if (id != null) {
+                this.hitCache.put(id, EXIST);
+                this.documentCache.put(id, ClientUtils.toSolrDocument(solrdoc));
+            }
         }
     }
 
@@ -193,7 +266,13 @@ public class DoubleSolrConnector implements SolrConnector {
      */
     @Override
     public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
-        if (this.solr0 == null && this.solr1 == null) return new SolrDocumentList();
+        final SolrDocumentList list = new SolrDocumentList();
+        if (this.solr0 == null && this.solr1 == null) return list;
+        if (offset == 0 && count == 1 && querystring.startsWith("id:")) {
+            SolrDocument doc = get(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3));
+            list.add(doc);
+            return list;
+        }
         if (this.solr0 != null && this.solr1 == null) return this.solr0.query(querystring, offset, count);
         if (this.solr1 != null && this.solr0 == null) return this.solr1.query(querystring, offset, count);
 
@@ -211,10 +290,18 @@ public class DoubleSolrConnector implements SolrConnector {
         }
 
         // now use the size of the first query to do a second query
-        final SolrDocumentList list = new SolrDocumentList();
         for (final SolrDocument d: l) list.add(d);
         l = this.solr1.query(querystring, offset + l.size() - size0, count - l.size());
         for (final SolrDocument d: l) list.add(d);
+
+        // add caching
+        for (final SolrDocument solrdoc: list) {
+            String id = (String) solrdoc.getFieldValue(YaCySchema.id.name());
+            if (id != null) {
+                this.hitCache.put(id, EXIST);
+                this.documentCache.put(id, solrdoc);
+            }
+        }
         return list;
     }
 

@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 
 public class RetrySolrConnector implements SolrConnector {
 
@@ -133,7 +134,7 @@ public class RetrySolrConnector implements SolrConnector {
 	}
 
     @Override
-    public void add(final SolrDoc solrdoc) throws IOException, SolrException {
+    public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
@@ -148,8 +149,8 @@ public class RetrySolrConnector implements SolrConnector {
     }
 
     @Override
-    public void add(final Collection<SolrDoc> solrdocs) throws IOException, SolrException {
-        for (SolrDoc d: solrdocs) add(d);
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
+        for (SolrInputDocument d: solrdocs) add(d);
     }
 
     @Override
