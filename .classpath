@@ -69,5 +69,6 @@
 	<classpathentry kind="lib" path="lib/arq-2.8.7.jar"/>
 	<classpathentry kind="lib" path="lib/iri-0.8.jar"/>
 	<classpathentry kind="lib" path="lib/apache-solr-core-3.6.0.jar" sourcepath="/Volumes/Raptor/Data/workspace/apache-solr-3.6.0/src/java"/>
+	<classpathentry kind="lib" path="lib/jsoup-1.6.3.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
