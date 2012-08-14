@@ -1,3 +1,23 @@
+/**
+ *  select
+ *  Copyright 2012 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ *  First released 12.08.2012 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -21,10 +41,12 @@ import net.yacy.search.solr.SolrServlet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.FastWriter;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.response.XSLTResponseWriter;
 
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -32,6 +54,11 @@ import de.anomic.server.serverSwitch;
 // try
 // http://localhost:8090/solr/select?q=*:*&start=0&rows=10&indent=on
 
+/**
+ *
+ * http://wiki.apache.org/solr/SolrQuerySyntax
+ *
+ */
 public class select {
 
     private static SolrServlet solrServlet = new SolrServlet();
@@ -39,8 +66,38 @@ public class select {
     static {
         try {solrServlet.init(null);} catch (ServletException e) {}
         RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
+        XSLTResponseWriter xsltWriter = new XSLTResponseWriter();
+        @SuppressWarnings("rawtypes")
+        NamedList initArgs = new NamedList();
+        xsltWriter.init(initArgs);
+        RESPONSE_WRITER.put("xslt", xsltWriter); // try i.e. http://localhost:8090/solr/select?q=*:*&start=0&rows=10&wt=xslt&tr=json.xsl
         RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
         RESPONSE_WRITER.put("rss", new OpensearchResponseWriter()); //try http://localhost:8090/solr/select?wt=rss&q=olympia
+    }
+
+    /**
+     * get the right mime type for this streamed result page
+     * @param header
+     * @param post
+     * @param env
+     * @return
+     */
+    public static String mime(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        String wt = post.get(CommonParams.WT, "xml");
+        if (wt == null || wt.length() == 0 || "xml".equals(wt) || "exml".equals(wt)) return "text/xml";
+        if ("xslt".equals(wt)) {
+            String tr = post.get("tr","");
+            if (tr.indexOf("json") >= 0) return "application/json";
+        }
+        if ("rss".equals(wt)) return "application/rss+xml";
+        if ("json".equals(wt)) return "application/json";
+        if ("python".equals(wt)) return "text/html";
+        if ("php".equals(wt) || "phps".equals(wt)) return "application/x-httpd-php";
+        if ("ruby".equals(wt)) return "text/html";
+        if ("raw".equals(wt)) return "application/octet-stream";
+        if ("javabin".equals(wt)) return "application/octet-stream";
+        if ("csv".equals(wt)) return "text/csv";
+        return "text/xml";
     }
 
     /**

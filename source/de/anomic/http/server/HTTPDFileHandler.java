@@ -875,7 +875,7 @@ public final class HTTPDFileHandler {
                 //requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
                 //requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
                 ResponseHeader header = new ResponseHeader(200);
-                header.put(HeaderFramework.CONTENT_TYPE, "text/xml"); // this is a hack; the actual content type should be given by the servlet, but there is no handover process for that at this time
+                header.put(HeaderFramework.CONTENT_TYPE, getMimeFromServlet(targetClass, requestHeader, args, "text/xml"));
                 conProp.remove(HeaderFramework.CONNECTION_PROP_PERSISTENT);
                 HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, header);
                 invokeServlet(targetClass, requestHeader, args, out);
@@ -1322,11 +1322,11 @@ public final class HTTPDFileHandler {
         }
     }
 
-    private static final Method rewriteMethod(final File classFile) throws InvocationTargetException {
+    private static final Method rewriteMethod(final File classFile, final String methodName) throws InvocationTargetException {
         Method m = null;
         // now make a class out of the stream
         try {
-            if (templateMethodCache != null) {
+            if (templateMethodCache != null && "respond".equals(methodName)) {
                 final SoftReference<Method> ref = templateMethodCache.get(classFile);
                 if (ref != null) {
                     m = ref.get();
@@ -1344,22 +1344,23 @@ public final class HTTPDFileHandler {
                     serverObjects.class,
                     serverSwitch.class };
             try {
-                m = c.getMethod("respond", params);
+                m = c.getMethod(methodName, params);
             } catch (NoSuchMethodException e) {
                 params = new Class[] {
                     RequestHeader.class,
                     serverObjects.class,
                     serverSwitch.class,
                     OutputStream.class};
-                m = c.getMethod("respond", params);
+                m = c.getMethod(methodName, params);
             }
 
             if (MemoryControl.shortStatus()) {
                 templateMethodCache.clear();
             } else {
-                // storing the method into the cache
-                final SoftReference<Method> ref = new SoftReference<Method>(m);
-                templateMethodCache.put(classFile, ref);
+                // store the method into the cache
+                if (templateMethodCache != null && "respond".equals(methodName)) {
+                    templateMethodCache.put(classFile, new SoftReference<Method>(m));
+                }
             }
 
         } catch (final ClassNotFoundException e) {
@@ -1375,9 +1376,9 @@ public final class HTTPDFileHandler {
     private static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args, final OutputStream os) {
         try {
             if (os == null) {
-                return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
+                return rewriteMethod(targetClass, "respond").invoke(null, new Object[] {request, args, switchboard});
             }
-            return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard, os});
+            return rewriteMethod(targetClass, "respond").invoke(null, new Object[] {request, args, switchboard, os});
         } catch (final Throwable e) {
             theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                             e.getMessage() +
@@ -1387,6 +1388,21 @@ public final class HTTPDFileHandler {
             Log.logException(e.getCause());
             if (e instanceof InvocationTargetException) Log.logException(((InvocationTargetException) e).getTargetException());
             return null;
+        }
+    }
+
+    private static final String getMimeFromServlet(final File targetClass, final RequestHeader request, final serverObjects args, final String dflt) {
+        try {
+            return (String) rewriteMethod(targetClass, "mime").invoke(null, new Object[] {request, args, switchboard});
+        } catch (final Throwable e) {
+            theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
+                            e.getMessage() +
+                            " target exception at " + targetClass + ": " +
+                            "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
+            Log.logException(e);
+            Log.logException(e.getCause());
+            if (e instanceof InvocationTargetException) Log.logException(((InvocationTargetException) e).getTargetException());
+            return dflt;
         }
     }
 

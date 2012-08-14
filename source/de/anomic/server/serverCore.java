@@ -658,8 +658,11 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 listen();
             } catch (final IOException e) {
                 Log.logException(e);
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 Log.logException(e);
+                final Throwable targetException = (e instanceof InvocationTargetException) ? ((InvocationTargetException) e).getTargetException() : null;
+                Log.logException(e.getCause());
+                if (targetException != null) Log.logException(targetException);
             } finally {
                 try {
                     if ((this.controlSocket != null) && (! this.controlSocket.isClosed())) {

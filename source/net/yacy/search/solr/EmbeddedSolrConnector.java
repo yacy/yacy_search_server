@@ -56,7 +56,7 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
 
     public static final String SELECT = "/select";
     public static final String CONTEXT = "/solr";
-    private final static String[] confFiles = {"solrconfig.xml", "schema.xml", "stopwords.txt", "synonyms.txt", "protwords.txt", "currency.xml", "elevate.xml", "lang/"};
+    private final static String[] confFiles = {"solrconfig.xml", "schema.xml", "stopwords.txt", "synonyms.txt", "protwords.txt", "currency.xml", "elevate.xml", "xslt/example.xsl", "xslt/json.xsl", "lang/"};
 
     private final CoreContainer cores;
     private final String defaultCoreName;
@@ -76,12 +76,20 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
                 target = new File(conf, cf);
                 target.mkdirs();
                 for (String cfl: source.list()) {
-                    Files.copy(new File(source, cfl), new File(target, cfl));
+                    try {
+                        Files.copy(new File(source, cfl), new File(target, cfl));
+                    } catch (IOException e) {
+                        Log.logException(e);
+                    }
                 }
             } else {
                 target = new File(conf, cf);
                 target.getParentFile().mkdirs();
-                Files.copy(source, target);
+                try {
+                    Files.copy(source, target);
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
             }
         }
         /*
