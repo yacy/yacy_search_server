@@ -23,6 +23,7 @@ package net.yacy.cora.services.federated.solr;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,8 @@ import java.util.Set;
 
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.index.YaCySchema;
 
 import org.apache.lucene.document.Document;
@@ -81,8 +84,6 @@ public class GSAResponseWriter implements QueryResponseWriter {
         };
     private static final Set<String> SOLR_FIELDS = new HashSet<String>();
     static {
-        field2tag.put(YaCySchema.last_modified.name(), GSAToken.CACHE_LAST_MODIFIED.name());
-        field2tag.put(YaCySchema.load_date_dt.name(), GSAToken.CRAWLDATE.name());
         field2tag.put(YaCySchema.language_txt.name(), GSAToken.LANG.name());
         SOLR_FIELDS.addAll(field2tag.keySet());
         for (YaCySchema field: extrafields) SOLR_FIELDS.add(field.name());
@@ -167,20 +168,31 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
                 // if the rule is not generic, use the specific here
                 if (YaCySchema.sku.name().equals(fieldName)) {
-                    String U = value.stringValue();
-                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.U.name(), U);
-                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.UE.name(), U);
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.U.name(), CharacterCoding.unicode2xml(value.stringValue(), true));
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.UE.name(), CharacterCoding.unicode2html(value.stringValue(), true));
                     continue;
                 }
                 if (YaCySchema.title.name().equals(fieldName)) {
-                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), value.stringValue());
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), CharacterCoding.unicode2xml(value.stringValue(), true));
                     texts.add(value.stringValue());
                     continue;
                 }
                 if (YaCySchema.description.name().equals(fieldName)) {
                     description = value.stringValue();
-                    OpensearchResponseWriter.solitaireTag(writer, DublinCore.Description.getURIref(), description);
+                    OpensearchResponseWriter.solitaireTag(writer, DublinCore.Description.getURIref(), CharacterCoding.unicode2xml(description, true));
                     texts.add(description);
+                    continue;
+                }
+                if (YaCySchema.last_modified.name().equals(fieldName)) {
+                    Date d = new Date(Long.parseLong(value.stringValue()));
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.CACHE_LAST_MODIFIED.name(), HeaderFramework.formatRFC1123(d));
+                    texts.add(value.stringValue());
+                    continue;
+                }
+                if (YaCySchema.load_date_dt.name().equals(fieldName)) {
+                    Date d = new Date(Long.parseLong(value.stringValue()));
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.CRAWLDATE.name(), HeaderFramework.formatRFC1123(d));
+                    texts.add(value.stringValue());
                     continue;
                 }
                 if (YaCySchema.text_t.name().equals(fieldName)) {
@@ -196,7 +208,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
             }
             // compute snippet from texts
-            OpensearchResponseWriter.solitaireTag(writer, RSSMessage.Token.description.name(), description);
+            OpensearchResponseWriter.solitaireTag(writer, RSSMessage.Token.description.name(), CharacterCoding.unicode2xml(description, true));
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.ENT_SOURCE.name(), "YaCy");
             OpensearchResponseWriter.closeTag(writer, "R");
         }

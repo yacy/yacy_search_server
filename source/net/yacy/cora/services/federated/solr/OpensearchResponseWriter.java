@@ -23,6 +23,7 @@ package net.yacy.cora.services.federated.solr;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,8 @@ import java.util.Set;
 
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.index.YaCySchema;
 
 import org.apache.lucene.document.Document;
@@ -71,7 +74,6 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
     private static final Set<String> SOLR_FIELDS = new HashSet<String>();
     static {
         field2tag.put(YaCySchema.sku.name(), RSSMessage.Token.link.name());
-        field2tag.put(YaCySchema.last_modified.name(), RSSMessage.Token.pubDate.name());
         field2tag.put(YaCySchema.publisher_t.name(), DublinCore.Publisher.getURIref());
         field2tag.put(YaCySchema.author.name(), DublinCore.Creator.getURIref());
         SOLR_FIELDS.addAll(field2tag.keySet());
@@ -133,7 +135,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         solitaireTag(writer, "opensearch:startIndex", Integer.toString(resHead.offset));
         solitaireTag(writer, "opensearch:itemsPerPage", Integer.toString(resHead.rows));
         solitaireTag(writer, RSSMessage.Token.title.name(), this.title);
-        //solitaireTag(writer, "description", "");
+        writer.write("<atom:link rel=\"search\" href=\"http://localhost:8090/opensearchdescription.xml\" type=\"application/opensearchdescription+xml\"/>");
+        solitaireTag(writer, "description", "Search Result");
         //solitaireTag(writer, "link", "");
         //solitaireTag(writer, "image", "");
 
@@ -156,7 +159,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 // apply generic matching rule
                 String stag = field2tag.get(fieldName);
                 if (stag != null) {
-                    solitaireTag(writer, stag, value.stringValue());
+                    solitaireTag(writer, stag, CharacterCoding.unicode2xml(value.stringValue(), true));
                     continue;
                 }
 
@@ -166,13 +169,19 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     continue;
                 }
                 if (YaCySchema.title.name().equals(fieldName)) {
-                    solitaireTag(writer, RSSMessage.Token.title.name(), value.stringValue());
+                    solitaireTag(writer, RSSMessage.Token.title.name(), CharacterCoding.unicode2xml(value.stringValue(), true));
+                    texts.add(value.stringValue());
+                    continue;
+                }
+                if (YaCySchema.last_modified.name().equals(fieldName)) {
+                    Date d = new Date(Long.parseLong(value.stringValue()));
+                    solitaireTag(writer, RSSMessage.Token.pubDate.name(), HeaderFramework.formatRFC1123(d));
                     texts.add(value.stringValue());
                     continue;
                 }
                 if (YaCySchema.description.name().equals(fieldName)) {
                     description = value.stringValue();
-                    solitaireTag(writer, DublinCore.Description.getURIref(), description);
+                    solitaireTag(writer, DublinCore.Description.getURIref(), CharacterCoding.unicode2xml(description, true));
                     texts.add(description);
                     continue;
                 }
@@ -189,7 +198,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 }
             }
             // compute snippet from texts
-            solitaireTag(writer, RSSMessage.Token.description.name(), description);
+            solitaireTagNocheck(writer, RSSMessage.Token.description.name(), CharacterCoding.unicode2xml(description, true));
             closeTag(writer, "item");
         }
 
@@ -207,6 +216,10 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
 
     public static void solitaireTag(final Writer writer, final String tagname, String value) throws IOException {
         if (value == null || value.length() == 0) return;
+        solitaireTagNocheck(writer, tagname, value);
+    }
+
+    public static void solitaireTagNocheck(final Writer writer, final String tagname, String value) throws IOException {
         writer.write("<"); writer.write(tagname); writer.write('>');
         writer.write(value);
         writer.write("</"); writer.write(tagname); writer.write('>'); writer.write(lb);
