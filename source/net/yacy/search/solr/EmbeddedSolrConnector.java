@@ -143,7 +143,7 @@ public class EmbeddedSolrConnector extends AbstractSolrConnector implements Solr
         return req;
     }
 
-    public SolrQueryResponse query(SolrQueryRequest req) {
+    public SolrQueryResponse query(SolrQueryRequest req) throws SolrException {
         final long startTime = System.currentTimeMillis();
 
         SolrQueryResponse rsp = new SolrQueryResponse();

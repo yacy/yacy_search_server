@@ -103,7 +103,7 @@ public interface SolrConnector {
      * @param querystring
      * @throws IOException
      */
-    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException;
+    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException, SolrException;
 
     /**
      * get the size of the index

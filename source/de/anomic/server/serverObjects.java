@@ -62,7 +62,9 @@ import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.Switchboard;
+import net.yacy.search.index.YaCySchema;
 
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 
@@ -469,6 +471,11 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public SolrParams toSolrParams() {
+        // check if all required post fields are there
+        if (!this.containsKey(CommonParams.DF)) this.put(CommonParams.DF, YaCySchema.text_t.name()); // set default field to all fields
+        if (!this.containsKey(CommonParams.START)) this.put(CommonParams.START, "0"); // set default start item
+        if (!this.containsKey(CommonParams.ROWS)) this.put(CommonParams.ROWS, "10"); // set default number of search results
+
         Map<String,String[]> m = new HashMap<String, String[]>();
         for (Map.Entry<String, String> e: this.entrySet()) {
             m.put(e.getKey(), new String[]{e.getValue()});

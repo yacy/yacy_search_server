@@ -34,7 +34,6 @@ import net.yacy.cora.services.federated.solr.OpensearchResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.YaCySchema;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 import net.yacy.search.solr.SolrServlet;
 
@@ -55,9 +54,8 @@ import de.anomic.server.serverSwitch;
 // http://localhost:8090/solr/select?q=*:*&start=0&rows=10&indent=on
 
 /**
- *
+ * this is a standard solr search result formatter as defined in
  * http://wiki.apache.org/solr/SolrQuerySyntax
- *
  */
 public class select {
 
@@ -128,10 +126,18 @@ public class select {
         if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, post.remove("startRecord")); // sru patch
         if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, post.remove("maximumRecords")); // sru patch
 
-        // check if all required post fields are there
-        if (!post.containsKey(CommonParams.DF)) post.put(CommonParams.DF, YaCySchema.text_t.name()); // set default field to all fields
-        if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, "0"); // set default start item
-        if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, "10"); // set default number of search results
+        // get a response writer for the result
+        String wt = post.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
+        QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt);
+        if (responseWriter == null) return null;
+        if (responseWriter instanceof OpensearchResponseWriter) {
+            // set the title every time, it is possible that it has changed
+            final String promoteSearchPageGreeting =
+                            (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
+                                "network.unit.description",
+                                "") : env.getConfig(SwitchboardConstants.GREETING, "");
+            ((OpensearchResponseWriter) responseWriter).setTitle(promoteSearchPageGreeting);
+        }
 
         // get the embedded connector
         EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.getLocalSolr();
@@ -146,19 +152,6 @@ public class select {
         if (e != null) {
             Log.logException(e);
             return null;
-        }
-
-        // get a response writer for the result
-        String wt = post.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
-        QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt);
-        if (responseWriter == null) return null;
-        if (responseWriter instanceof OpensearchResponseWriter) {
-            // set the title every time, it is possible that it has changed
-            final String promoteSearchPageGreeting =
-                            (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
-                                "network.unit.description",
-                                "") : env.getConfig(SwitchboardConstants.GREETING, "");
-            ((OpensearchResponseWriter) responseWriter).setTitle(promoteSearchPageGreeting);
         }
 
         // write the result directly to the output stream
