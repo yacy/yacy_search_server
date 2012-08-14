@@ -176,7 +176,6 @@
         <pathelement location="${lib}/geronimo-stax-api_1.0_spec-1.0.1.jar" />
         <pathelement location="${lib}/guava-r05.jar" />
         <pathelement location="${lib}/htmllexer.jar" />
-        <pathelement location="${lib}/htmlparser.jar" />
         <pathelement location="${lib}/httpclient-4.2.1.jar" />
         <pathelement location="${lib}/httpcore-4.2.1.jar" />
         <pathelement location="${lib}/httpmime-4.2.1.jar" />
