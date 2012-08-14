@@ -508,6 +508,7 @@ proxyURL=false
 proxyURL.access=127.0.0.1,0:0:0:0:0:0:0:1
 # which urls to rewrite to /proxy.html?url=x (values: all, domainlist)
 proxyURL.rewriteURLs=domainlist
+proxyURL.useforresults=false
 
 # From the 'IndexCreate' menu point you can also define a crawling start point.
 # The crawling works the same way as the prefetch, but it is possible to
