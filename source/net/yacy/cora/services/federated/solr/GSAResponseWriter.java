@@ -33,13 +33,13 @@ import java.util.Set;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.index.YaCySchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
+import org.apache.solr.common.util.XML;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
@@ -168,18 +168,18 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
                 // if the rule is not generic, use the specific here
                 if (YaCySchema.sku.name().equals(fieldName)) {
-                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.U.name(), CharacterCoding.unicode2xml(value.stringValue(), true));
-                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.UE.name(), CharacterCoding.unicode2html(value.stringValue(), true));
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.U.name(), value.stringValue());
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.UE.name(), value.stringValue());
                     continue;
                 }
                 if (YaCySchema.title.name().equals(fieldName)) {
-                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), CharacterCoding.unicode2xml(value.stringValue(), true));
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), value.stringValue());
                     texts.add(value.stringValue());
                     continue;
                 }
                 if (YaCySchema.description.name().equals(fieldName)) {
                     description = value.stringValue();
-                    OpensearchResponseWriter.solitaireTag(writer, DublinCore.Description.getURIref(), CharacterCoding.unicode2xml(description, true));
+                    OpensearchResponseWriter.solitaireTag(writer, DublinCore.Description.getURIref(), description);
                     texts.add(description);
                     continue;
                 }
@@ -208,7 +208,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
             }
             // compute snippet from texts
-            OpensearchResponseWriter.solitaireTag(writer, RSSMessage.Token.description.name(), CharacterCoding.unicode2xml(description, true));
+            OpensearchResponseWriter.solitaireTag(writer, RSSMessage.Token.description.name(), description);
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.ENT_SOURCE.name(), "YaCy");
             OpensearchResponseWriter.closeTag(writer, "R");
         }
@@ -222,7 +222,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         writer.write("<PARAM name=\"");
         writer.write(tagname);
         writer.write("\" value=\"");
-        writer.write(value);
+        XML.escapeCharData(value, writer);
         writer.write("\" original_value=\"");
         writer.write(value);
         writer.write("\"/>"); writer.write(lb);

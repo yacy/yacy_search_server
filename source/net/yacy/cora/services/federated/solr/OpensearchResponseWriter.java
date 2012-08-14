@@ -33,13 +33,13 @@ import java.util.Set;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.index.YaCySchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
+import org.apache.solr.common.util.XML;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
@@ -159,7 +159,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 // apply generic matching rule
                 String stag = field2tag.get(fieldName);
                 if (stag != null) {
-                    solitaireTag(writer, stag, CharacterCoding.unicode2xml(value.stringValue(), true));
+                    solitaireTag(writer, stag, value.stringValue());
                     continue;
                 }
 
@@ -169,7 +169,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     continue;
                 }
                 if (YaCySchema.title.name().equals(fieldName)) {
-                    solitaireTag(writer, RSSMessage.Token.title.name(), CharacterCoding.unicode2xml(value.stringValue(), true));
+                    solitaireTag(writer, RSSMessage.Token.title.name(), value.stringValue());
                     texts.add(value.stringValue());
                     continue;
                 }
@@ -181,7 +181,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 }
                 if (YaCySchema.description.name().equals(fieldName)) {
                     description = value.stringValue();
-                    solitaireTag(writer, DublinCore.Description.getURIref(), CharacterCoding.unicode2xml(description, true));
+                    solitaireTag(writer, DublinCore.Description.getURIref(), description);
                     texts.add(description);
                     continue;
                 }
@@ -198,7 +198,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 }
             }
             // compute snippet from texts
-            solitaireTagNocheck(writer, RSSMessage.Token.description.name(), CharacterCoding.unicode2xml(description, true));
+            solitaireTagNocheck(writer, RSSMessage.Token.description.name(), description);
             closeTag(writer, "item");
         }
 
@@ -221,7 +221,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
 
     public static void solitaireTagNocheck(final Writer writer, final String tagname, String value) throws IOException {
         writer.write("<"); writer.write(tagname); writer.write('>');
-        writer.write(value);
+        XML.escapeCharData(value, writer);
         writer.write("</"); writer.write(tagname); writer.write('>'); writer.write(lb);
     }
 
