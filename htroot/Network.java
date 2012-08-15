@@ -368,9 +368,9 @@ public class Network {
                                 location = ClientIdentification.generateLocation();
                             } else {
                                userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
-                               location = ClientIdentification.parseLocationInUserAgent(userAgent);
+                               location = ClientIdentification.parseLocationInUserAgent(userAgent).substring(0, 10);
                             }
-                            prop.put(STR_TABLE_LIST + conCount + "_location", location);
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_ip", seed.getIP() );
