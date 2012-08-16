@@ -420,8 +420,8 @@ public class Network
                         attempts = diff;
                     }
                 } else {
-                    if ( attempts > PING_MIN_RUNNING ) {
-                        attempts = PING_MIN_RUNNING;
+                    if ( attempts > PING_MAX_RUNNING ) {
+                        attempts = PING_MAX_RUNNING;
                     }
                 }
                 seeds = PeerSelection.seedsByAge(this.sb.peers, false, attempts); // best for seed list maintenance/cleaning
