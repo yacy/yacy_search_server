@@ -26,6 +26,7 @@
 
 package net.yacy.search.query;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -73,6 +74,10 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ResultEntry;
+
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -193,6 +198,30 @@ public final class RWIProcess extends Thread
 
     @Override
     public void run() {
+
+        // start a concurrent solr search
+        if (this.query.query_include_words != null) {
+            Thread solrSearch = new Thread() {
+                @Override
+                public void run() {
+                    Thread.currentThread().setName("SearchEvent.solrSearch");
+                    String solrQuery = RWIProcess.this.query.solrQuery();
+                    try {
+                        ReferenceContainer<WordReference> wr = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, null);
+                        SolrDocumentList sdl = RWIProcess.this.query.getSegment().getSolr().query(solrQuery, 0, 20);
+                        for (SolrDocument d : sdl) {
+                            try {wr.add(new WordReferenceVars(d));} catch (SpaceExceededException e) {}
+                        }
+                        Log.logInfo("SearchEvent", "added " + wr.size() + " hits from solr to ranking process");
+                        RWIProcess.this.add(wr, true, "embedded solr", sdl.size(), 60000);
+                    } catch (SolrException e) {
+                    } catch (IOException e) {
+                    }
+                }
+            };
+            solrSearch.start();
+        }
+
         // do a search
         oneFeederStarted();
 

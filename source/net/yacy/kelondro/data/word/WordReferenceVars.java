@@ -33,7 +33,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
@@ -45,6 +48,8 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ByteArray;
 
+import org.apache.solr.common.SolrDocument;
+
 
 public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable, Comparable<WordReferenceVars>, Comparator<WordReferenceVars> {
 
@@ -55,12 +60,12 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	private static int cores = Runtime.getRuntime().availableProcessors();
 	public static final byte[] default_language = UTF8.getBytes("uk");
 
-    public Bitfield flags;
+    public final Bitfield flags;
     public long lastModified;
-    public byte[] language;
-    public byte[] urlHash;
+    public final byte[] language;
+    public final byte[] urlHash;
     private String hostHash = null;
-    public char type;
+    public final char type;
     public int hitcount, llocal, lother, phrasesintext,
                posinphrase, posofphrase,
                urlcomps, urllength,
@@ -68,6 +73,31 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     private int virtualAge;
     private final Queue<Integer> positions;
     public double termFrequency;
+
+    public WordReferenceVars(final SolrDocument doc) {
+        URIMetadata md = new URIMetadataNode(doc);
+        this.language = md.language();
+        this.flags = md.flags();
+        this.lastModified = md.moddate().getTime();
+        this.urlHash = md.hash();
+        this.type = md.doctype();
+        this.llocal = md.llocal();
+        this.lother = md.lother();
+        this.positions = new LinkedBlockingQueue<Integer>();
+        this.positions.add(1);
+        String urlNormalform = md.url().toNormalform(true, false);
+        this.urlcomps = MultiProtocolURI.urlComps(urlNormalform).length;
+        this.urllength = urlNormalform.length();
+        this.virtualAge = -1; // compute that later
+        // the following fields cannot be computed here very easy and are just filled with dummy values
+        this.phrasesintext = 1;
+        this.hitcount = 1;
+        this.posinphrase = 1;
+        this.posofphrase = 1;
+        this.wordsintext = 1;
+        this.wordsintitle = 1;
+        this.termFrequency = 1;
+    }
 
     public WordReferenceVars(
             final byte[]   urlHash,

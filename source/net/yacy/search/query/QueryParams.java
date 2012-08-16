@@ -323,6 +323,15 @@ public final class QueryParams {
         return this.domType == Searchdom.LOCAL;
     }
 
+    public String solrQuery() {
+        if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
+        StringBuilder sb = new StringBuilder(80);
+        for (String s: this.query_include_words) {sb.append('+'); sb.append(s);}
+        for (String s: this.query_exclude_words) {sb.append("+-"); sb.append(s);}
+        if (sb.length() == 0) return null;
+        return "text_t:" + sb.substring(1, sb.length());
+    }
+
     public static HandleSet hashes2Set(final String query) {
         final HandleSet keyhashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
