@@ -47,6 +47,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -221,9 +222,10 @@ public final class search {
             final Segment indexSegment = sb.index;
             theQuery = new QueryParams(
                     null,
+                    null, null, null,
                     abstractSet,
                     new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0),
-                    null,
+                    abstractSet,
                     null,
                     modifier,
                     maxdist,
@@ -281,11 +283,15 @@ public final class search {
 
         } else {
             // retrieve index containers from search request
+            RowHandleSet allHashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            try {allHashes.putAll(queryhashes);} catch (SpaceExceededException e) {}
+            try {allHashes.putAll(excludehashes);} catch (SpaceExceededException e) {}
             theQuery = new QueryParams(
                     null,
+                    null, null, null,
                     queryhashes,
                     excludehashes,
-                    null,
+                    allHashes,
                     null,
                     modifier,
                     maxdist,

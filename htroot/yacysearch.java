@@ -51,7 +51,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
-import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -712,9 +711,6 @@ public class yacysearch {
                 }
             }
 
-            // do the search
-            final HandleSet queryHashes = Word.words2hashesHandles(query[0]);
-
             // check filters
             try {
                 Pattern.compile(urlmask);
@@ -734,10 +730,14 @@ public class yacysearch {
                 prefermask = "";
             }
 
+            // do the search
             final QueryParams theQuery =
                 new QueryParams(
                     originalquerystring,
-                    queryHashes,
+                    query[0],
+                    query[1],
+                    query[2],
+                    Word.words2hashesHandles(query[0]),
                     Word.words2hashesHandles(query[1]),
                     Word.words2hashesHandles(query[2]),
                     tenant,

@@ -107,8 +107,8 @@ public final class QueryParams {
     public static final Pattern matchnothing_pattern = Pattern.compile("");
 
     public final String queryString;
-    public HandleSet query_include_hashes, query_exclude_hashes, query_all_hashes;
-    public Collection<String> query_include_words, query_exclude_words, query_all_words = new ArrayList<String>();
+    public final HandleSet query_include_hashes, query_exclude_hashes, query_all_hashes;
+    public final Collection<String> query_include_words, query_exclude_words, query_all_words;
     public final int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
@@ -153,16 +153,24 @@ public final class QueryParams {
         byte[] queryHash;
     	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryHash = UTF8.getBytes(queryString)))) {
             this.queryString = null;
+            this.query_include_words = null;
+            this.query_exclude_words = null;
+            this.query_all_words = null;
             this.query_include_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.query_exclude_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            this.query_all_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {
                 this.query_include_hashes.put(queryHash);
+                this.query_all_hashes.put(queryHash);
             } catch (final SpaceExceededException e) {
                 Log.logException(e);
             }
     	} else {
     		this.queryString = queryString;
     		final Collection<String>[] cq = cleanQuery(queryString);
+            this.query_include_words = cq[0];
+            this.query_exclude_words = cq[1];
+            this.query_all_words = cq[2];
     		this.query_include_hashes = Word.words2hashesHandles(cq[0]);
     		this.query_exclude_hashes = Word.words2hashesHandles(cq[1]);
     		this.query_all_hashes = Word.words2hashesHandles(cq[2]);
@@ -207,6 +215,9 @@ public final class QueryParams {
 
     public QueryParams(
         final String queryString,
+        final Collection<String> queryWords,
+        final Collection<String> excludeWords,
+        final Collection<String> fullqueryWords,
         final HandleSet queryHashes,
         final HandleSet excludeHashes,
         final HandleSet fullqueryHashes,
@@ -233,6 +244,9 @@ public final class QueryParams {
         final double lat, final double lon, final double radius) {
 
         this.queryString = queryString;
+        this.query_include_words = queryWords;
+        this.query_exclude_words = excludeWords;
+        this.query_all_words = fullqueryWords;
         this.query_include_hashes = queryHashes;
         this.query_exclude_hashes = excludeHashes;
         this.query_all_hashes = fullqueryHashes;
@@ -389,7 +403,7 @@ public final class QueryParams {
 
     @SuppressWarnings("unchecked")
 	public static Collection<String>[] cleanQuery(String querystring) {
-        // returns three sets: a query set, a exclude set and a full query set
+        // returns three sets: a query set, an exclude set and a full query set
         final Collection<String> query_include_words = new ArrayList<String>();
         final Collection<String> query_exclude_words = new ArrayList<String>();
         final Collection<String> query_all_words = new ArrayList<String>();
