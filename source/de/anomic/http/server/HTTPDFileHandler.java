@@ -874,12 +874,28 @@ public final class HTTPDFileHandler {
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, path.endsWith(".stream") ? "stream" : "");
                 //requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
                 //requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
+
+                // prepare response header
                 ResponseHeader header = new ResponseHeader(200);
                 header.put(HeaderFramework.CONTENT_TYPE, getMimeFromServlet(targetClass, requestHeader, args, "text/xml"));
                 conProp.remove(HeaderFramework.CONNECTION_PROP_PERSISTENT);
-                HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, header);
-                invokeServlet(targetClass, requestHeader, args, out);
+                final boolean zipContent = requestHeader.acceptGzip();
+                if (zipContent) header.put(HeaderFramework.CONTENT_ENCODING, "gzip");
+
+                // send response head
+                HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, header);
                 forceConnectionClose(conProp);
+
+                // send response content
+                OutputStream o = zipContent ? new GZIPOutputStream(out) : out;
+                invokeServlet(targetClass, requestHeader, args, o);
+
+                // immediately close stream as this terminates the http transmission
+                if (o instanceof GZIPOutputStream) ((GZIPOutputStream) o).finish();
+                o.flush();
+                o.close();
+                out.flush();
+                out.close();
                 return;
             } else if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
                 // we have found a file that can be written to the client
@@ -1305,7 +1321,7 @@ public final class HTTPDFileHandler {
 
     private static final void forceConnectionClose(final HashMap<String, Object> conprop) {
         if (conprop != null) {
-            conprop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
+            conprop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT, "close");
         }
     }
 
