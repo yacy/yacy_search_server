@@ -288,7 +288,7 @@ public class Network {
                     String startURL;
                     Map<String, String> wikiMap;
                     Map<String, String> blogMap;
-                    String userAgent, location;
+                    String userAgent, location = "";
                     int PPM;
                     double QPM;
                     Pattern peerSearchPattern = null;
@@ -368,7 +368,10 @@ public class Network {
                                 location = ClientIdentification.generateLocation();
                             } else {
                                userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
-                               location = ClientIdentification.parseLocationInUserAgent(userAgent).substring(0, 10);
+                               String loc = ClientIdentification.parseLocationInUserAgent(userAgent);
+                               if (loc.length() >= 10) {
+                            	   location = ClientIdentification.parseLocationInUserAgent(userAgent).substring(0, 10);
+                               }
                             }
                             prop.putHTML(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
