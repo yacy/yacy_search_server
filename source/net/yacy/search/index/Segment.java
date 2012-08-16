@@ -287,7 +287,7 @@ public class Segment {
             }
             @Override
             public DigestURI next() {
-                URIMetadata umr = Segment.this.urlMetadata.load(bi.next());
+                URIMetadata umr = Segment.this.urlMetadata.getMetadata(bi.next());
                 return umr.url();
             }
             @Override
@@ -463,7 +463,7 @@ public class Segment {
                 Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
             }
         } else {
-        	this.urlMetadata.store(metadata);
+        	this.urlMetadata.putMetadata(metadata);
         }
         final long storageEndTime = System.currentTimeMillis();
 
@@ -568,7 +568,7 @@ public class Segment {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final URIMetadata entry = urlMetadata().load(urlhash);
+        final URIMetadata entry = urlMetadata().getMetadata(urlhash);
         if (entry == null) return 0;
         if (entry.url() == null) return 0;
 

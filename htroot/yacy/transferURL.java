@@ -141,7 +141,7 @@ public final class transferURL {
                 // write entry to database
                 if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true, false));
                 try {
-                    sb.index.urlMetadata().store(lEntry);
+                    sb.index.urlMetadata().putMetadata(lEntry);
                     ResultURLs.stack(lEntry, iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);
                     if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;

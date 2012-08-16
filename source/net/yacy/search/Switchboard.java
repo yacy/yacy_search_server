@@ -1455,7 +1455,7 @@ public final class Switchboard extends serverSwitch
         if ( urlhash.length == 0 ) {
             return null;
         }
-        final URIMetadata le = this.index.urlMetadata().load(urlhash);
+        final URIMetadata le = this.index.urlMetadata().getMetadata(urlhash);
         if ( le != null ) {
             return le.url();
         }

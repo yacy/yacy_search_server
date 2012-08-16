@@ -97,13 +97,13 @@ public class yacydoc {
         }
         if (urlhash == null || urlhash.isEmpty()) return prop;
 
-        final URIMetadata entry = segment.urlMetadata().load(urlhash.getBytes());
+        final URIMetadata entry = segment.urlMetadata().getMetadata(urlhash.getBytes());
         if (entry == null) return prop;
 
         if (entry.url() == null) {
             return prop;
         }
-        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
+        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().getMetadata(entry.referrerHash());
 
         prop.putXML("dc_title", entry.dc_title());
         prop.putXML("dc_creator", entry.dc_creator());

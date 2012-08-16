@@ -660,7 +660,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URIMetadata urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(recommendHash));
+                final URIMetadata urlentry = indexSegment.urlMetadata().getMetadata(UTF8.getBytes(recommendHash));
                 if ( urlentry != null ) {
                     Document[] documents = null;
                     try {
@@ -696,7 +696,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                final URIMetadata urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(bookmarkHash));
+                final URIMetadata urlentry = indexSegment.urlMetadata().getMetadata(UTF8.getBytes(bookmarkHash));
                 if ( urlentry != null ) {
                     try {
                         sb.tables.bookmarks.createBookmark(

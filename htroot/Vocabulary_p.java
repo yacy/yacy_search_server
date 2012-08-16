@@ -86,12 +86,12 @@ public class Vocabulary_p {
                                     if (p >= 0) t = t.substring(p + 1);
                                 }
                                 if (discoverFromTitle || discoverFromTitleSplitted) {
-                                	URIMetadata m = segment.urlMetadata().load(u.hash());
+                                	URIMetadata m = segment.urlMetadata().getMetadata(u.hash());
                                     if (m != null) t = m.dc_title();
                                     if (t.endsWith(".jpg") || t.endsWith(".gif")) continue;
                                 }
                                 if (discoverFromAuthor) {
-                                	URIMetadata m = segment.urlMetadata().load(u.hash());
+                                	URIMetadata m = segment.urlMetadata().getMetadata(u.hash());
                                     if (m != null) t = m.dc_creator();
                                 }
                                 t = t.replaceAll("_", " ").replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();

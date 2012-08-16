@@ -320,7 +320,7 @@ public class IndexControlRWIs_p {
                         URIMetadata lurl;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
-                            lurl = segment.urlMetadata().load(iEntry.urlhash());
+                            lurl = segment.urlMetadata().getMetadata(iEntry.urlhash());
                             if (lurl == null) {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
@@ -415,7 +415,7 @@ public class IndexControlRWIs_p {
                             } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadata e = segment.urlMetadata().load(b);
+                            final URIMetadata e = segment.urlMetadata().getMetadata(b);
                             segment.urlMetadata().remove(b);
                             if ( e != null ) {
                                 url = e.url();
@@ -450,7 +450,7 @@ public class IndexControlRWIs_p {
                             } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadata e = segment.urlMetadata().load(b);
+                            final URIMetadata e = segment.urlMetadata().getMetadata(b);
                             segment.urlMetadata().remove(b);
                             if ( e != null ) {
                                 url = e.url();

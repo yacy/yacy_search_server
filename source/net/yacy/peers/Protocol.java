@@ -754,7 +754,7 @@ public final class Protocol
 
             // passed all checks, store url
             try {
-                indexSegment.urlMetadata().store(urlEntry);
+                indexSegment.urlMetadata().putMetadata(urlEntry);
                 ResultURLs.stack(
                     urlEntry,
                     mySeed.hash.getBytes(),

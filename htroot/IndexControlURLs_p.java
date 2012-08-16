@@ -132,7 +132,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final URIMetadata entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
+            final URIMetadata entry = segment.urlMetadata().getMetadata(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -166,7 +166,7 @@ public class IndexControlURLs_p {
                 final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
                 prop.put("urlhash", urlhash);
-                final URIMetadata entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
+                final URIMetadata entry = segment.urlMetadata().getMetadata(ASCII.getBytes(urlhash));
                 if (entry == null) {
                     prop.putHTML("result", "No Entry for URL " + url.toNormalform(true, true));
                     prop.putHTML("urlstring", urlstring);
@@ -184,7 +184,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            final URIMetadata entry = segment.urlMetadata().load(ASCII.getBytes(urlhash));
+            final URIMetadata entry = segment.urlMetadata().getMetadata(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -310,7 +310,7 @@ public class IndexControlURLs_p {
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
+        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().getMetadata(entry.referrerHash());
         if (entry.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

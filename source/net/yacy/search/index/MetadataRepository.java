@@ -62,6 +62,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.lucene.util.Version;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 
@@ -197,17 +198,17 @@ public final class MetadataRepository implements Iterable<byte[]> {
      * @param obrwi
      * @return
      */
-    public URIMetadata load(WordReference wre, long weight) {
+    public URIMetadata getMetadata(WordReference wre, long weight) {
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
-        return load(wre.urlhash(), wre, weight);
+        return getMetadata(wre.urlhash(), wre, weight);
     }
 
-    public URIMetadata load(final byte[] urlHash) {
+    public URIMetadata getMetadata(final byte[] urlHash) {
         if (urlHash == null) return null;
-        return load(urlHash, null, 0);
+        return getMetadata(urlHash, null, 0);
     }
 
-    private URIMetadata load(final byte[] urlHash, WordReference wre, long weight) {
+    private URIMetadata getMetadata(final byte[] urlHash, WordReference wre, long weight) {
 
         // get the metadata from Solr
         try {
@@ -228,7 +229,39 @@ public final class MetadataRepository implements Iterable<byte[]> {
         return null;
     }
 
-    public void store(final URIMetadata entry) throws IOException {
+    public SolrDocument getDocument(WordReference wre, long weight) {
+        if (wre == null) return null; // all time was already wasted in takeRWI to get another element
+        return getDocument(wre.urlhash(), wre, weight);
+    }
+
+    public SolrDocument getDocument(final byte[] urlHash) {
+        if (urlHash == null) return null;
+        return getDocument(urlHash, null, 0);
+    }
+
+    private SolrDocument getDocument(final byte[] urlHash, WordReference wre, long weight) {
+
+        // get the document from Solr
+        try {
+            SolrDocument doc = this.solr.get(ASCII.String(urlHash));
+            if (doc != null) return doc;
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+
+        // get the document from the old metadata index
+        if (this.urlIndexFile != null) try {
+            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
+            if (entry == null) return null;
+            return ClientUtils.toSolrDocument(getSolrScheme().metadata2solr(new URIMetadataRow(entry, wre, weight)));
+        } catch (final IOException e) {
+            Log.logException(e);
+        }
+
+        return null;
+    }
+
+    public void putMetadata(final URIMetadata entry) throws IOException {
     	if (this.connectedSolr()) {
     		try {
 	        	SolrDocument sd = getSolr().get(ASCII.String(entry.url().hash()));
@@ -530,7 +563,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         final TreeSet<String> set = new TreeSet<String>();
         for (final URLHashCounter hs: domainSamples.values()) {
             if (hs == null) continue;
-            urlref = this.load(hs.urlhashb);
+            urlref = this.getMetadata(hs.urlhashb);
             if (urlref == null || urlref.url() == null || urlref.url().getHost() == null) continue;
             set.add(urlref.url().getHost());
             count--;
@@ -569,7 +602,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         }
         DigestURI url;
         for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
-            urlref = this.load(e.getValue().urlhashb);
+            urlref = this.getMetadata(e.getValue().urlhashb);
             url = urlref.url();
             hostMap.put(e.getKey(), new HostStat(url.getHost(), url.getPort(), e.getKey(), hosthashScore.get(e.getKey())));
         }
@@ -591,7 +624,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         while (j.hasNext()) {
             urlhash = j.next();
             if (urlhash == null) continue;
-            urlref = this.load(ASCII.getBytes(urlhash));
+            urlref = this.getMetadata(ASCII.getBytes(urlhash));
             if (urlref == null || urlref.url() == null || urlref.url().getHost() == null) continue;
             if (this.statsDump == null) return new ArrayList<HostStat>().iterator(); // some other operation has destroyed the object
             url = urlref.url();

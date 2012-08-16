@@ -658,7 +658,7 @@ public final class RWIProcess extends Thread
             if ( obrwi == null ) {
                 return null; // all time was already wasted in takeRWI to get another element
             }
-            final URIMetadata page = this.query.getSegment().urlMetadata().load(obrwi.getElement(), obrwi.getWeight());
+            final URIMetadata page = this.query.getSegment().urlMetadata().getMetadata(obrwi.getElement(), obrwi.getWeight());
             if ( page == null ) {
                 try {
                     this.misses.putUnique(obrwi.getElement().urlhash());
@@ -906,7 +906,7 @@ public final class RWIProcess extends Thread
                     continue;
                 }
                 urlhash = this.hostResolver.get(hosthash);
-                row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(urlhash);
+                row = urlhash == null ? null : this.query.getSegment().urlMetadata().getMetadata(urlhash);
                 hostname = row == null ? null : row.url().getHost();
                 if ( hostname != null ) {
                     result.set(hostname, this.hostNavigator.get(hosthash));

@@ -437,7 +437,7 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
-        final URIMetadata oldEntry = this.indexSegment.urlMetadata().load(url.hash());
+        final URIMetadata oldEntry = this.indexSegment.urlMetadata().getMetadata(url.hash());
         if (oldEntry == null) {
             if (dbocc != null) {
                 // do double-check

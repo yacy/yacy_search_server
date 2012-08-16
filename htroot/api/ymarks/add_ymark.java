@@ -34,7 +34,7 @@ public class add_ymark {
 
             if(post.containsKey("urlHash")) {
             	final String urlHash = post.get("urlHash",YMarkUtil.EMPTY_STRING);
-            	final DigestURI url = sb.index.urlMetadata().load(urlHash.getBytes()).url();
+            	final DigestURI url = sb.index.urlMetadata().getMetadata(urlHash.getBytes()).url();
             	final String folders = post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.BOOKMARK.FOLDERS.deflt());
             	final String tags = post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.EMPTY_STRING);
             	try {
