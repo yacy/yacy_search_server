@@ -2,6 +2,8 @@
 
 User-agent: *
 
+Disallow: /*query=
+
 #(all)#
 
 # dirs
