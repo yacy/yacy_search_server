@@ -25,10 +25,10 @@
 package net.yacy.peers;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.peers.operation.yacyVersion;
 
@@ -43,7 +43,7 @@ public class PeerActions {
     public PeerActions(final SeedDB seedDB, final NewsPool newsPool) {
         this.seedDB = seedDB;
         this.newsPool = newsPool;
-        this.userAgents = new ConcurrentHashMap<String, String>();
+        this.userAgents = new ConcurrentARC<String, String>(10000, Runtime.getRuntime().availableProcessors() + 1);
         this.disconnects = 0;
     }
 

@@ -33,6 +33,7 @@ import java.util.Iterator;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -60,6 +61,12 @@ public final class transferRWI {
 
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
+
+        // remember the peer contact for peer statistics
+        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        final String userAgent = header.get(HeaderFramework.USER_AGENT, "<unknown>");
+        sb.peers.peerActions.setUserAgent(clientip, userAgent);
+
         final serverObjects prop = new serverObjects();
         final String contentType = header.getContentType();
         if ((post == null) || (env == null)) {

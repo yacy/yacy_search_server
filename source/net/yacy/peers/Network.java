@@ -391,8 +391,7 @@ public class Network
                     attempts = PING_INITIAL;
                 }
                 final Map<byte[], String> ch = Switchboard.getSwitchboard().clusterhashes;
-                seeds =
-                    PeerSelection.seedsByAge(this.sb.peers, true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
+                seeds = PeerSelection.seedsByAge(this.sb.peers, true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if ( ch != null ) {
                     final Iterator<Map.Entry<byte[], String>> i = ch.entrySet().iterator();

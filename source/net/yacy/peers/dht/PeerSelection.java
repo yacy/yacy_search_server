@@ -33,10 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.sorting.ConcurrentScoreMap;
-import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
@@ -432,53 +429,6 @@ public class PeerSelection {
         }
 
     }
-
-
-    /**
-     * get either the youngest or oldest peers from the seed db. Count as many as requested
-     * @param seedDB
-     * @param up if up = true then get the most recent peers, if up = false then get oldest
-     * @param count number of wanted peers
-     * @return a hash map of peer hashes to seed object
-     */
-    public static Map<String, Seed> seedsByAgeX(final SeedDB seedDB, final boolean up, int count) {
-
-        if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
-
-        // fill a score object
-        final ScoreMap<String> seedScore = new ConcurrentScoreMap<String>();
-        Seed ys;
-        long absage;
-        final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN);
-        int searchcount = 1000;
-        if (searchcount > seedDB.sizeConnected()) searchcount = seedDB.sizeConnected();
-        try {
-            while ((s.hasNext()) && (searchcount-- > 0)) {
-                ys = s.next();
-                if ((ys != null) && (ys.get(Seed.LASTSEEN, "").length() > 10)) try {
-                    absage = Math.abs(System.currentTimeMillis() + AbstractFormatter.dayMillis - ys.getLastSeenUTC()) / 1000 / 60;
-                    if (absage > Integer.MAX_VALUE) absage = Integer.MAX_VALUE;
-                    seedScore.inc(ys.hash, (int) absage); // the higher absage, the older is the peer
-                } catch (final Exception e) {}
-            }
-
-            // result is now in the score object; create a result vector
-            final Map<String, Seed> result = new HashMap<String, Seed>();
-            final Iterator<String> it = seedScore.keys(up);
-            int c = 0;
-            while ((c < count) && (it.hasNext())) {
-                c++;
-                ys = seedDB.getConnected(it.next());
-                if ((ys != null) && (ys.hash != null)) result.put(ys.hash, ys);
-            }
-            return result;
-        } catch (final kelondroException e) {
-            Network.log.logSevere("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
-            return null;
-        }
-    }
-
-
 
     /**
      * get either the youngest or oldest peers from the seed db. Count as many as requested

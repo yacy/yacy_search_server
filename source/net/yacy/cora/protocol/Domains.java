@@ -986,13 +986,15 @@ public class Domains {
         if (host == null) return null;
         final Locale locale = getLocale(dnsResolve(host));
         if (locale != null && locale.getCountry() != null && locale.getCountry().length() > 0) return locale;
-
+        return null;
+        /*
         final int p = host.lastIndexOf('.');
         if (p < 0) return null;
         String tld = host.substring(p + 1).toUpperCase();
         if (tld.length() < 2) return null;
         if (tld.length() > 2) tld = "US";
         return new Locale("en", tld);
+        */
     }
 
     /**

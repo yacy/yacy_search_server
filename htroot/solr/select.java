@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.EnhancedXMLResponseWriter;
 import net.yacy.cora.services.federated.solr.OpensearchResponseWriter;
@@ -113,6 +114,11 @@ public class select {
 
         // this uses the methods in the jetty servlet environment and can be removed if jetty in implemented
         Switchboard sb = (Switchboard) env;
+
+        // remember the peer contact for peer statistics
+        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        final String userAgent = header.get(HeaderFramework.USER_AGENT, "<unknown>");
+        sb.peers.peerActions.setUserAgent(clientip, userAgent);
 
         // check if user is allowed to search (can be switched in /ConfigPortal.html)
         final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);

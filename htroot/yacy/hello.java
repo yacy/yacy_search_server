@@ -110,6 +110,7 @@ public final class hello {
 
         // we easily know the caller's IP:
         final String userAgent = header.get(HeaderFramework.USER_AGENT, "<unknown>");
+        sb.peers.peerActions.setUserAgent(clientip, userAgent);
         final String reportedip = remoteSeed.getIP();
         final String reportedPeerType = remoteSeed.get(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR);
         final double clientversion = remoteSeed.getVersion();
@@ -126,7 +127,6 @@ public final class hello {
         // if the remote client has reported its own IP address and the client supports
         // the port forwarding feature (if client version >= 0.383) then we try to
         // connect to the reported IP address first
-        time = System.currentTimeMillis();
         long time_backping = 0;
         String backping_method = "none";
         if (reportedip.length() > 0 &&
@@ -138,6 +138,7 @@ public final class hello {
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put("yourip", reportedip);
             remoteSeed.setIP(reportedip);
+            time = System.currentTimeMillis();
             callback = Protocol.queryUrlCount(remoteSeed);
             time_backping = System.currentTimeMillis() - time;
             backping_method = "reportedip=" + reportedip;
@@ -161,6 +162,7 @@ public final class hello {
 
                 prop.put("yourip", clientip);
                 remoteSeed.setIP(clientip);
+                time = System.currentTimeMillis();
                 callback = Protocol.queryUrlCount(remoteSeed);
                 time_backping = System.currentTimeMillis() - time;
                 backping_method = "clientip=" + clientip;
@@ -199,8 +201,6 @@ public final class hello {
 
         // update event tracker
         EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(remoteSeed.getName(), sb.peers.myName(), false, connectedAfter - connectedBefore), false);
-
-        sb.peers.peerActions.setUserAgent(clientip, userAgent);
         if (!(prop.get(Seed.YOURTYPE)).equals(reportedPeerType)) {
             Network.log.logInfo("hello/server: changing remote peer '" + remoteSeed.getName() +
                                                            "' [" + reportedip +

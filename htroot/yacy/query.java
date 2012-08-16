@@ -49,8 +49,13 @@ public final class query {
 
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) ss;
-        final serverObjects prop = new serverObjects();
 
+        // remember the peer contact for peer statistics
+        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        final String userAgent = header.get(HeaderFramework.USER_AGENT, "<unknown>");
+        sb.peers.peerActions.setUserAgent(clientip, userAgent);
+
+        final serverObjects prop = new serverObjects();
         prop.put("magic", Network.magic);
 
         if ((post == null) || (ss == null) || !Protocol.authentifyRequest(post, ss)) {

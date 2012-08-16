@@ -30,6 +30,7 @@
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -38,6 +39,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.MapTools;
@@ -288,7 +290,7 @@ public class Network {
                     String startURL;
                     Map<String, String> wikiMap;
                     Map<String, String> blogMap;
-                    String userAgent, location = "";
+                    String userAgent, location;
                     int PPM;
                     double QPM;
                     Pattern peerSearchPattern = null;
@@ -367,11 +369,13 @@ public class Network {
                                 userAgent = ClientIdentification.getUserAgent();
                                 location = ClientIdentification.generateLocation();
                             } else {
-                               userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
-                               String loc = ClientIdentification.parseLocationInUserAgent(userAgent);
-                               if (loc.length() >= 10) {
-                            	   location = ClientIdentification.parseLocationInUserAgent(userAgent).substring(0, 10);
-                               }
+                                userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
+                                location = ClientIdentification.parseLocationInUserAgent(userAgent);
+                            }
+                            if (location.length() > 10) location = location.substring(0, 10);
+                            if (location.length() == 0) {
+                                Locale l = Domains.getLocale(seed.getIP());
+                                if (l != null) location = l.toString();
                             }
                             prop.putHTML(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
