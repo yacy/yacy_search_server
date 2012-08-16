@@ -184,7 +184,7 @@ public class Classification {
     }
 
     public static String ext2mime(final String ext) {
-        return mimeTable.getProperty(ext, "application/" + ext);
+        return mimeTable.getProperty(ext, "application/" + (ext == null || ext.length() == 0 ? "octet-stream" : ext));
     }
 
     public static String ext2mime(final String ext, final String dfltMime) {

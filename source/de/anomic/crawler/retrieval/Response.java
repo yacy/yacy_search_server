@@ -118,16 +118,22 @@ public class Response {
     }
 
     public static String doctype2mime(String ext, char doctype) {
-    	String mime = Classification.ext2mime(ext);
-    	int p = mime.indexOf('/');
-    	if (p < 0) return mime;
-    	if (doctype == DT_TEXT) return "text" + mime.substring(p);
+        if (doctype == DT_PDFPS) return "application/pdf";
+        if (doctype == DT_HTML) return "text/html";
+        if (doctype == DT_DOC) return "application/msword";
+        if (doctype == DT_FLASH) return "application/x-shockwave-flash";
+        if (doctype == DT_SHARE) return "text/plain";
+        if (doctype == DT_BINARY) return "application/octet-stream";
+        String mime = Classification.ext2mime(ext);
+        int p = mime.indexOf('/');
+        if (p < 0) return mime;
+        if (doctype == DT_TEXT) return "text" + mime.substring(p);
     	if (doctype == DT_IMAGE) return "image" + mime.substring(p);
     	if (doctype == DT_AUDIO) return "audio" + mime.substring(p);
     	if (doctype == DT_MOVIE) return "video" + mime.substring(p);
     	return mime;
     }
-    
+
     public static final int QUEUE_STATE_FRESH             = 0;
     public static final int QUEUE_STATE_PARSING           = 1;
     public static final int QUEUE_STATE_CONDENSING        = 2;
