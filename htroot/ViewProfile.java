@@ -1,4 +1,4 @@
-// ViewProfile_p.java 
+// ViewProfile_p.java
 // -----------------------
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 07.04.2005 on http://yacy.net
@@ -43,13 +43,12 @@ import java.util.Properties;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-import net.yacy.peers.Protocol;
 import net.yacy.peers.Network;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
+import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -63,23 +62,23 @@ public class ViewProfile {
         prop.put("display", display);
         prop.put("edit", authenticated ? 1 : 0);
         final String hash = (post == null) ? null : post.get("hash");
-        
+
         if ((hash == null) || (sb.peers == null)) {
             // wrong access
             prop.put("success", "0");
             return prop;
         }
         prop.put("hash", hash);
-        
+
         // get the profile
         Map<String, String> profile = null;
-        if (hash.equals("localhash")) {
+        if (hash.equals("localhash") || sb.peers.mySeed().hash.equals(hash)) {
             // read the profile from local peer
             final Properties p = new Properties();
             FileInputStream fileIn = null;
             try {
                 fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
-                p.load(fileIn);        
+                p.load(fileIn);
             } catch(final IOException e) {} finally {
                 if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (final Exception e) {}
             }
@@ -93,6 +92,7 @@ public class ViewProfile {
             // read the profile from remote peer
             Seed seed = sb.peers.getConnected(hash);
             if (seed == null) seed = sb.peers.getDisconnected(hash);
+            if (seed == null) seed = sb.peers.getPotential(hash);
             if (seed == null) {
                 prop.put("success", "1"); // peer unknown
             } else {
@@ -103,11 +103,11 @@ public class ViewProfile {
                 } catch (final Exception e) {
                     Log.logException(e);
                 }
-                
+
                 // try to get the profile from remote peer
                 if (sb.clusterhashes != null) seed.setAlternativeAddress(sb.clusterhashes.get(seed.hash.getBytes()));
                 profile = Protocol.getProfile(seed);
-                
+
                 // if profile did not arrive, say that peer is disconnected
                 if (profile == null) {
                     prop.put("success", "2"); // peer known, but disconnected
@@ -138,14 +138,14 @@ public class ViewProfile {
         knownKeys.add("yahoo");
         knownKeys.add("msn");
         knownKeys.add("skype");
-        knownKeys.add("comment");        
+        knownKeys.add("comment");
 
         //empty values
         final Iterator<String> it = knownKeys.iterator();
         while (it.hasNext()) {
             prop.put("success_" + it.next(), "0");
         }
-        
+
         //number of not explicitly recognized but displayed items
         int numUnknown = 0;
         while (i.hasNext()) {
@@ -162,7 +162,7 @@ public class ViewProfile {
                     prop.put("success_" + key, "1");
                     // only comments get "wikified"
                     if(key.equals("comment")){
-                        prop.putWiki(sb.peers.mySeed().getClusterAddress(), 
+                        prop.putWiki(sb.peers.mySeed().getClusterAddress(),
                                 "success_" + key + "_value",
                                 entry.getValue().replaceAll("\r", "").replaceAll("\\\\n", "\n"));
                         prop.put("success_" + key + "_b64value", Base64Order.standardCoder.encodeString(entry.getValue()));

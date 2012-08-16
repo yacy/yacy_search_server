@@ -175,6 +175,7 @@ public final class Protocol
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
         long responseTime = Long.MAX_VALUE;
+        byte[] content = null;
         try {
             // generate request
             final Map<String, ContentBody> parts =
@@ -186,22 +187,13 @@ public final class Protocol
             final long start = System.currentTimeMillis();
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/hello.html"), 30000, yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts);
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 30000);
-            final byte[] content =
+            content =
                 httpClient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/hello.html"),
                     Seed.b64Hash2hexHash(otherHash) + ".yacyh",
                     parts,
                     false);
             responseTime = System.currentTimeMillis() - start;
-            Network.log.logInfo("yacyClient.hello thread '"
-                + Thread.currentThread().getName()
-                + "' contacted peer at "
-                + address
-                + ", received "
-                + ((content == null) ? "null" : content.length)
-                + " bytes, time = "
-                + responseTime
-                + " milliseconds");
             result = FileUtils.table(content);
         } catch ( final Exception e ) {
             if ( Thread.currentThread().isInterrupted() ) {
@@ -220,11 +212,20 @@ public final class Protocol
             result = null;
         }
 
-        if ( result == null ) {
+        if (result == null || result.size() == 0) {
             Network.log.logInfo("yacyClient.hello result error: "
                 + ((result == null) ? "result null" : ("result=" + result.toString())));
             return -1;
         }
+        Network.log.logInfo("yacyClient.hello thread '"
+                        + Thread.currentThread().getName()
+                        + "' contacted peer at "
+                        + address
+                        + ", received "
+                        + ((content == null) ? "null" : content.length)
+                        + " bytes, time = "
+                        + responseTime
+                        + " milliseconds");
 
         // check consistency with expectation
         Seed otherPeer = null;
@@ -421,7 +422,7 @@ public final class Protocol
             parts.put("object", UTF8.StringBody("rwicount"));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("env", UTF8.StringBody(wordHash));
-            final byte[] content = postToFile(target, "query.html", parts, 5000);
+            final byte[] content = postToFile(target, "query.html", parts, 6000);
             final Map<String, String> result = FileUtils.table(content);
 
             if ( result == null || result.isEmpty() ) {
@@ -457,7 +458,7 @@ public final class Protocol
             parts.put("object", UTF8.StringBody("lurlcount"));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("env", UTF8.StringBody(""));
-            final byte[] content = postToFile(target, "query.html", parts, 5000);
+            final byte[] content = postToFile(target, "query.html", parts, 6000);
             final Map<String, String> result = FileUtils.table(content);
 
             if ( result == null || result.isEmpty() ) {
@@ -965,7 +966,7 @@ public final class Protocol
                 //resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
             }
 
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 8000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 20000);
             byte[] a = httpClient.POSTbytes(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false);
             if (a != null && a.length > 200000) {
                 // there is something wrong. This is too large, maybe a hack on the other side?
@@ -1040,7 +1041,7 @@ public final class Protocol
             final Map<String, ContentBody> parts =
                 basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
             parts.put("process", UTF8.StringBody("permission"));
-            final byte[] content = postToFile(seedDB, targetHash, "message.html", parts, 5000);
+            final byte[] content = postToFile(seedDB, targetHash, "message.html", parts, 6000);
             final Map<String, String> result = FileUtils.table(content);
             return result;
         } catch ( final Exception e ) {
@@ -1400,7 +1401,7 @@ public final class Protocol
             final Map<String, ContentBody> parts =
                 basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/profile.html"), 5000, targetSeed.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpclient = new HTTPClient(ClientIdentification.getUserAgent(), 5000);
+            final HTTPClient httpclient = new HTTPClient(ClientIdentification.getUserAgent(), 15000);
             final byte[] content =
                 httpclient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/profile.html"),

@@ -77,7 +77,7 @@ public class Network
     public static long magic = System.currentTimeMillis();
     public static final Map<String, Accessible> amIAccessibleDB = new ConcurrentHashMap<String, Accessible>(); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behavior
-    private static final int PING_INITIAL = 10;
+    private static final int PING_INITIAL = 20;
     private static final int PING_MAX_RUNNING = 3;
     private static final int PING_MIN_RUNNING = 1;
     private static final int PING_MIN_DBSIZE = 5;
@@ -461,7 +461,7 @@ public class Network
             int i = 0;
             while ( si.hasNext() ) {
                 seed = si.next();
-                if ( seed == null ) {
+                if ( seed == null || seed.hash.equals(this.sb.peers.mySeed().hash)) {
                     sync.acquire();
                     continue;
                 }
