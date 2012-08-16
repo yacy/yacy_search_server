@@ -395,9 +395,10 @@ public final class Switchboard extends serverSwitch
         final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
-        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, true)) this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
-        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr(connectWithinMs);
-
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
+            this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
+            this.index.connectLocalSolr(connectWithinMs);
+        }
 
         // set up the solr interface
         final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
@@ -1184,8 +1185,10 @@ public final class Switchboard extends serverSwitch
             final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
-            if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, true)) this.index.connectLocalSolr(connectWithinMs);
-            if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, true)) this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
+            if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
+                this.index.connectLocalSolr(connectWithinMs);
+                this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
+            }
 
             // set up the solr interface
             final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");

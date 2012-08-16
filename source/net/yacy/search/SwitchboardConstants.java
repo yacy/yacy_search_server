@@ -297,9 +297,10 @@ public final class SwitchboardConstants {
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE = "federated.service.solr.indexing.schemefile";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY = "federated.service.solr.indexing.lazy";
 
-    public static final String CORE_SERVICE_URLDB = "core.service.urldb.tmp";
+    //public static final String CORE_SERVICE_URLDB = "core.service.urldb.tmp";
+    //public static final String CORE_SERVICE_SOLR = "core.service.solr.tmp";
+    public static final String CORE_SERVICE_FULLTEXT = "core.service.fulltext";
     public static final String CORE_SERVICE_RWI = "core.service.rwi.tmp";
-    public static final String CORE_SERVICE_SOLR = "core.service.solr.tmp";
     public static final String CORE_SERVICE_CITATION = "core.service.citation.tmp";
 
     /**

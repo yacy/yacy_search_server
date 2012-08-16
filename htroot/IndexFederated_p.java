@@ -72,18 +72,21 @@ public class IndexFederated_p {
                 sb.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             } catch (IOException e) { Log.logException(e); } // switch on
 
-            final int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
-            boolean post_core_solr = post.getBoolean(SwitchboardConstants.CORE_SERVICE_SOLR);
-            final boolean previous_core_solr = sb.index.connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, false);
-            env.setConfig(SwitchboardConstants.CORE_SERVICE_SOLR, post_core_solr);
-            if (previous_core_solr && !post_core_solr) sb.index.disconnectLocalSolr(); // switch off
-            if (!previous_core_solr && post_core_solr) try { sb.index.connectLocalSolr(commitWithinMs); } catch (IOException e) { Log.logException(e); } // switch on
+            boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT);
+            final boolean previous_core_fulltext = sb.index.connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_FULLTEXT, post_core_fulltext);
 
-            boolean post_core_urldb = post.getBoolean(SwitchboardConstants.CORE_SERVICE_URLDB);
-            final boolean previous_core_urldb = sb.index.connectedUrlDb() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, false);
-            env.setConfig(SwitchboardConstants.CORE_SERVICE_URLDB, post_core_urldb);
-            if (previous_core_urldb && !post_core_urldb) sb.index.disconnectUrlDb(); // switch off
-            if (!previous_core_urldb && post_core_urldb) sb.index.connectUrlDb(sb.useTailCache, sb.exceed134217727);
+            final int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
+            if (previous_core_fulltext && !post_core_fulltext) {
+                // switch off
+                sb.index.disconnectLocalSolr();
+                sb.index.disconnectUrlDb();
+            }
+            if (!previous_core_fulltext && post_core_fulltext) {
+                // switch on
+                sb.index.connectUrlDb(sb.useTailCache, sb.exceed134217727);
+                try { sb.index.connectLocalSolr(commitWithinMs); } catch (IOException e) { Log.logException(e); }
+            }
 
             // solr
             final boolean solrRemoteWasOn = sb.index.connectedRemoteSolr() && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
@@ -203,9 +206,8 @@ public class IndexFederated_p {
         // allowed values are: classic, solr, off
         // federated.service.yacy.indexing.engine = classic
 
-        prop.put(SwitchboardConstants.CORE_SERVICE_URLDB + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_URLDB, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_FULLTEXT + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_RWI + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false) ? 1 : 0);
-        prop.put(SwitchboardConstants.CORE_SERVICE_SOLR + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_SOLR, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
