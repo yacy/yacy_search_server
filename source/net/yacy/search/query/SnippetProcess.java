@@ -35,7 +35,6 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
@@ -45,6 +44,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
@@ -54,6 +54,7 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
+import net.yacy.search.index.MetadataRepository;
 import net.yacy.search.index.Segment;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
@@ -439,7 +440,7 @@ public class SnippetProcess {
         private final CacheStrategy cacheStrategy;
         private final int neededResults;
         private boolean shallrun;
-        private final SolrConnector solr;
+        private final MetadataRepository metadata;
 
         public Worker(final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
             this.cacheStrategy = cacheStrategy;
@@ -447,7 +448,7 @@ public class SnippetProcess {
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
             this.shallrun = true;
-            this.solr = SnippetProcess.this.rankingProcess.getQuery().getSegment().getSolr();
+            this.metadata = SnippetProcess.this.rankingProcess.getQuery().getSegment().urlMetadata();
         }
 
         @Override
@@ -496,16 +497,18 @@ public class SnippetProcess {
 
                     // in case that we have an attached solr, we load also the solr document
                     String solrContent = null;
-                    if (this.solr != null) {
-                        SolrDocument sd = null;
+                    SolrDocument sd = null;
+                    if (page instanceof URIMetadataNode) {
+                        sd = ((URIMetadataNode) page).getDocument();
+                    } else {
                         try {
-                            sd = this.solr.get(ASCII.String(page.hash()));
+                            sd = this.metadata.getSolr().get(ASCII.String(page.hash()));
                         } catch (IOException e) {
                             Log.logException(e);
                         }
-                        if (sd != null) {
-                            solrContent = Switchboard.getSwitchboard().index.getSolrScheme().solrGetText(sd);
-                        }
+                    }
+                    if (sd != null) {
+                        solrContent = this.metadata.getSolrScheme().solrGetText(sd);
                     }
 
                     resultEntry = fetchSnippet(page, solrContent, this.cacheStrategy); // does not fetch snippets if snippetMode == 0

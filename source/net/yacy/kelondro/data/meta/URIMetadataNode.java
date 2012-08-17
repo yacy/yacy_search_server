@@ -99,6 +99,10 @@ public class URIMetadataNode implements URIMetadata {
         this.ranking = ranking;
     }
 
+    public SolrDocument getDocument() {
+        return this.doc;
+    }
+
     private int getInt(YaCySchema field) {
         Integer x = (Integer) this.doc.getFieldValue(field.name());
         if (x == null) return 0;
