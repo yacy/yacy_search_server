@@ -448,7 +448,7 @@ public class SnippetProcess {
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
             this.shallrun = true;
-            this.metadata = SnippetProcess.this.rankingProcess.getQuery().getSegment().urlMetadata();
+            this.metadata = SnippetProcess.this.rankingProcess.getQuery().getSegment().fulltext();
         }
 
         @Override

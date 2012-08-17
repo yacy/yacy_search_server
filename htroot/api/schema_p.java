@@ -38,7 +38,7 @@ public class schema_p {
 
         // write scheme
         int c = 0;
-        SolrConfiguration solrScheme = sb.index.urlMetadata().getSolrScheme();
+        SolrConfiguration solrScheme = sb.index.fulltext().getSolrScheme();
         for (YaCySchema field : YaCySchema.values()) {
             if (solrScheme.contains(field.name())) {
                 prop.put("fields_" + c + "_solrname", field.getSolrFieldName());

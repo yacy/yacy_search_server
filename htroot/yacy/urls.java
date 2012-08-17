@@ -113,7 +113,7 @@ public class urls {
         	URIMetadata entry;
             DigestURI referrer;
             for (int i = 0; i < count; i++) {
-                entry = sb.index.urlMetadata().getMetadata(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));
+                entry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));
                 if (entry == null) continue;
                 // find referrer, if there is one
                 referrer = sb.getURL(entry.referrerHash());

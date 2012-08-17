@@ -176,7 +176,7 @@ public class Transmission {
                     notFoundx.add(e.urlhash());
                     continue;
                 }
-                final URIMetadata r = Transmission.this.segment.urlMetadata().getMetadata(e.urlhash());
+                final URIMetadata r = Transmission.this.segment.fulltext().getMetadata(e.urlhash());
                 if (r == null) {
                     notFoundx.add(e.urlhash());
                     this.badReferences.put(e.urlhash());

@@ -109,7 +109,7 @@ public final class query {
 
         if (obj.equals("lurlcount")) {
             // return the number of all available l-url's
-            prop.put("response", sb.index.urlMetadata().size());
+            prop.put("response", sb.index.fulltext().size());
             return prop;
         }
 

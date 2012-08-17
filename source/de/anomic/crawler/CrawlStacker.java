@@ -197,7 +197,7 @@ public final class CrawlStacker {
             final DigestURI url = new DigestURI(e.getKey());
             final byte[] urlhash = url.hash();
             if (replace) {
-                this.indexSegment.urlMetadata().remove(urlhash);
+                this.indexSegment.fulltext().remove(urlhash);
                 this.nextQueue.urlRemove(urlhash);
                 String u = url.toNormalform(true, true);
                 if (u.endsWith("/")) {
@@ -207,7 +207,7 @@ public final class CrawlStacker {
                 }
                 try {
                     final byte[] uh = new DigestURI(u).hash();
-                    this.indexSegment.urlMetadata().remove(uh);
+                    this.indexSegment.fulltext().remove(uh);
                     this.nextQueue.noticeURL.removeByURLHash(uh);
                     this.nextQueue.errorURL.remove(uh);
                 } catch (final MalformedURLException e1) {}
@@ -255,7 +255,7 @@ public final class CrawlStacker {
                         }
                         final byte[] urlhash = url.hash();
                         if (replace) {
-                            CrawlStacker.this.indexSegment.urlMetadata().remove(urlhash);
+                            CrawlStacker.this.indexSegment.fulltext().remove(urlhash);
                             cq.noticeURL.removeByURLHash(urlhash);
                             cq.errorURL.remove(urlhash);
                         }
@@ -437,7 +437,7 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
-        final URIMetadata oldEntry = this.indexSegment.urlMetadata().getMetadata(url.hash());
+        final URIMetadata oldEntry = this.indexSegment.fulltext().getMetadata(url.hash());
         if (oldEntry == null) {
             if (dbocc != null) {
                 // do double-check

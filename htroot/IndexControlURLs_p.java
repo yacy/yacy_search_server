@@ -60,7 +60,7 @@ public class IndexControlURLs_p {
         prop.put("urlstring", "");
         prop.put("urlhash", "");
         prop.put("result", "");
-        prop.putNum("ucount", segment.urlMetadata().size());
+        prop.putNum("ucount", segment.fulltext().size());
         prop.put("otherHosts", "");
         prop.put("genUrlProfile", 0);
         prop.put("statistics", 1);
@@ -69,7 +69,7 @@ public class IndexControlURLs_p {
         prop.put("reload", 0);
 
         // show export messages
-        final Fulltext.Export export = segment.urlMetadata().export();
+        final Fulltext.Export export = segment.fulltext().export();
         if ((export != null) && (export.isAlive())) {
         	// there is currently a running export
             prop.put("lurlexport", 2);
@@ -132,7 +132,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final URIMetadata entry = segment.urlMetadata().getMetadata(ASCII.getBytes(urlhash));
+            final URIMetadata entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -166,7 +166,7 @@ public class IndexControlURLs_p {
                 final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
                 prop.put("urlhash", urlhash);
-                final URIMetadata entry = segment.urlMetadata().getMetadata(ASCII.getBytes(urlhash));
+                final URIMetadata entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
                 if (entry == null) {
                     prop.putHTML("result", "No Entry for URL " + url.toNormalform(true, true));
                     prop.putHTML("urlstring", urlstring);
@@ -184,7 +184,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            final URIMetadata entry = segment.urlMetadata().getMetadata(ASCII.getBytes(urlhash));
+            final URIMetadata entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -199,7 +199,7 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<URIMetadata> entryIt = new RotateIterator<URIMetadata>(segment.urlMetadata().entries(true, urlhash), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax());
+                final Iterator<URIMetadata> entryIt = new RotateIterator<URIMetadata>(segment.fulltext().entries(true, urlhash), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax());
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
                 URIMetadata entry;
                 int i = 0, rows = 0, cols = 0;
@@ -245,7 +245,7 @@ public class IndexControlURLs_p {
         	final File f = new File(s);
 			f.getParentFile().mkdirs();
 			final String filter = post.get("exportfilter", ".*");
-			final Fulltext.Export running = segment.urlMetadata().export(f, filter, null, format, dom);
+			final Fulltext.Export running = segment.fulltext().export(f, filter, null, format, dom);
 
 			prop.put("lurlexport_exportfile", s);
 			prop.put("lurlexport_urlcount", running.count());
@@ -258,7 +258,7 @@ public class IndexControlURLs_p {
         if (post.containsKey("deletedomain")) {
             final String hp = post.get("hashpart");
             try {
-                segment.urlMetadata().deleteDomain(hp);
+                segment.fulltext().deleteDomain(hp);
             } catch (final IOException e) {
                 // TODO Auto-generated catch block
                 Log.logException(e);
@@ -274,7 +274,7 @@ public class IndexControlURLs_p {
             prop.put("statistics_lines", count);
             int cnt = 0;
             try {
-                final Fulltext metadata = segment.urlMetadata();
+                final Fulltext metadata = segment.fulltext();
                 statsiter = metadata.statistics(count, metadata.urlSampleScores(metadata.domainSampleCollector()));
                 boolean dark = true;
                 Fulltext.HostStat hs;
@@ -298,7 +298,7 @@ public class IndexControlURLs_p {
         }
 
         // insert constants
-        prop.putNum("ucount", segment.urlMetadata().size());
+        prop.putNum("ucount", segment.fulltext().size());
         // return rewrite properties
         return prop;
     }
@@ -310,7 +310,7 @@ public class IndexControlURLs_p {
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().getMetadata(entry.referrerHash());
+        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.fulltext().getMetadata(entry.referrerHash());
         if (entry.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

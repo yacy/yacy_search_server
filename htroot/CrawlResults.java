@@ -116,7 +116,7 @@ public class CrawlResults {
                 final String hash = post.get("hash", null);
                 if (hash != null) {
                     // delete from database
-                    sb.index.urlMetadata().remove(hash.getBytes());
+                    sb.index.fulltext().remove(hash.getBytes());
                 }
             }
 
@@ -126,7 +126,7 @@ public class CrawlResults {
                 if (hashpart != null) {
                     // delete all urls for this domain from database
                     try {
-                        sb.index.urlMetadata().deleteDomain(hashpart);
+                        sb.index.fulltext().deleteDomain(hashpart);
                         ResultURLs.deleteDomain(tabletype, domain, hashpart);
                     } catch (final IOException e) {
                         Log.logException(e);
@@ -186,7 +186,7 @@ public class CrawlResults {
             while (i.hasNext()) {
                 entry = i.next();
                 try {
-                    urle = sb.index.urlMetadata().getMetadata(UTF8.getBytes(entry.getKey()));
+                    urle = sb.index.fulltext().getMetadata(UTF8.getBytes(entry.getKey()));
                     if (urle == null) {
                         Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;

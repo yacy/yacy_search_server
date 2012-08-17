@@ -97,7 +97,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                 } catch (IOException e) {
                     Log.logException(e);
                 }
-                indexSegment.urlMetadata().remove(urlentry.hash()); // clean up
+                indexSegment.fulltext().remove(urlentry.hash()); // clean up
                 throw new RuntimeException("index void");
             }
             this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;

@@ -93,7 +93,7 @@ public class IndexControlRWIs_p {
         prop.put("keyhash", "");
         prop.put("result", "");
         prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
-        prop.put("cleanup_solr", sb.index.urlMetadata().connectedSolr() ? 1 : 0);
+        prop.put("cleanup_solr", sb.index.fulltext().connectedSolr() ? 1 : 0);
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
@@ -158,9 +158,9 @@ public class IndexControlRWIs_p {
                 if ( post.get("deleteIndex", "").equals("on") ) {
                     segment.clear();
                 }
-                if ( post.get("deleteRemoteSolr", "").equals("on") && sb.index.urlMetadata().connectedSolr()) {
+                if ( post.get("deleteRemoteSolr", "").equals("on") && sb.index.fulltext().connectedSolr()) {
                     try {
-                        sb.index.urlMetadata().getSolr().clear();
+                        sb.index.fulltext().getSolr().clear();
                     } catch ( final Exception e ) {
                         Log.logException(e);
                     }
@@ -320,7 +320,7 @@ public class IndexControlRWIs_p {
                         URIMetadata lurl;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
-                            lurl = segment.urlMetadata().getMetadata(iEntry.urlhash());
+                            lurl = segment.fulltext().getMetadata(iEntry.urlhash());
                             if (lurl == null) {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
@@ -415,8 +415,8 @@ public class IndexControlRWIs_p {
                             } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadata e = segment.urlMetadata().getMetadata(b);
-                            segment.urlMetadata().remove(b);
+                            final URIMetadata e = segment.fulltext().getMetadata(b);
+                            segment.fulltext().remove(b);
                             if ( e != null ) {
                                 url = e.url();
                                 pw.println(url.getHost() + "/" + url.getFile());
@@ -450,8 +450,8 @@ public class IndexControlRWIs_p {
                             } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadata e = segment.urlMetadata().getMetadata(b);
-                            segment.urlMetadata().remove(b);
+                            final URIMetadata e = segment.fulltext().getMetadata(b);
+                            segment.fulltext().remove(b);
                             if ( e != null ) {
                                 url = e.url();
                                 pw.println(url.getHost() + "/.*");

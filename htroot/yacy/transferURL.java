@@ -84,7 +84,7 @@ public final class transferURL {
         } else {
             int received = 0;
             int blocked = 0;
-            final int sizeBefore = sb.index.urlMetadata().size();
+            final int sizeBefore = sb.index.fulltext().size();
             // read the urls from the other properties and store
             String urls;
             URIMetadata lEntry;
@@ -141,7 +141,7 @@ public final class transferURL {
                 // write entry to database
                 if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true, false));
                 try {
-                    sb.index.urlMetadata().putMetadata(lEntry);
+                    sb.index.fulltext().putMetadata(lEntry);
                     ResultURLs.stack(lEntry, iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);
                     if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;
@@ -153,7 +153,7 @@ public final class transferURL {
             sb.peers.mySeed().incRU(received);
 
             // return rewrite properties
-            final int more = sb.index.urlMetadata().size() - sizeBefore;
+            final int more = sb.index.fulltext().size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
             Network.log.logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
             EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));

@@ -319,7 +319,7 @@ public class Crawler_p {
                         // first delete old entry, if exists
                         final DigestURI url = new DigestURI(crawlingStart);
                         final byte[] urlhash = url.hash();
-                        indexSegment.urlMetadata().remove(urlhash);
+                        indexSegment.fulltext().remove(urlhash);
                         sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                         sb.crawlQueues.errorURL.remove(urlhash);
 
@@ -592,7 +592,7 @@ public class Crawler_p {
                             nexturl = new DigestURI(e.getKey());
                             // remove the url from the database to be prepared to crawl them again
                             final byte[] urlhash = nexturl.hash();
-                            indexSegment.urlMetadata().remove(urlhash);
+                            indexSegment.fulltext().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
                             sb.crawlStacker.enqueueEntry(new Request(

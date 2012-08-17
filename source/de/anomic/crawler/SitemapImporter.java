@@ -84,7 +84,7 @@ public class SitemapImporter extends Thread {
             final String dbocc = this.sb.urlExists(nexturlhash);
             if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                 // the url was already loaded. we need to check the date
-                final URIMetadata oldEntry = this.sb.index.urlMetadata().getMetadata(nexturlhash);
+                final URIMetadata oldEntry = this.sb.index.fulltext().getMetadata(nexturlhash);
                 if (oldEntry != null) {
                     final Date modDate = oldEntry.moddate();
                     // check if modDate is null

@@ -42,7 +42,7 @@ public class YBRFetch_p
 
         // use an index segment to find hosts for given host hashes
         final Segment segment = sb.index;
-        final Fulltext metadata = segment.urlMetadata();
+        final Fulltext metadata = segment.fulltext();
         Map<String, HostStat> hostHashResolver;
         try {
             hostHashResolver = metadata.domainHashResolver(metadata.domainSampleCollector());

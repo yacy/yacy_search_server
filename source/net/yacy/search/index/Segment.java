@@ -99,7 +99,7 @@ public class Segment {
 
     private   final Log                            log;
     private   final File                           segmentPath;
-    protected final Fulltext             urlMetadata;
+    protected final Fulltext                       fulltext;
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
 
@@ -109,7 +109,7 @@ public class Segment {
         this.segmentPath = segmentPath;
 
         // create LURL-db
-        this.urlMetadata = new Fulltext(segmentPath, solrScheme);
+        this.fulltext = new Fulltext(segmentPath, solrScheme);
     }
 
     public boolean connectedRWI() {
@@ -161,11 +161,11 @@ public class Segment {
     }
 
     public void connectUrlDb(final boolean useTailCache, final boolean exceed134217727) {
-        this.urlMetadata.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
+        this.fulltext.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
     }
 
-    public Fulltext urlMetadata() {
-        return this.urlMetadata;
+    public Fulltext fulltext() {
+        return this.fulltext;
     }
 
     public IndexCell<WordReference> termIndex() {
@@ -177,7 +177,7 @@ public class Segment {
     }
 
     public long URLCount() {
-        return this.urlMetadata.size();
+        return this.fulltext.size();
     }
 
     public long RWICount() {
@@ -191,7 +191,7 @@ public class Segment {
     }
 
     public boolean exists(final byte[] urlhash) {
-        return this.urlMetadata.exists(urlhash);
+        return this.fulltext.exists(urlhash);
     }
 
     /**
@@ -203,7 +203,7 @@ public class Segment {
     private Iterator<byte[]> hostSelector(String host) {
         String hh = DigestURI.hosthash(host);
         final HandleSet ref = new RowHandleSet(12, Base64Order.enhancedCoder, 100);
-        for (byte[] b: this.urlMetadata) {
+        for (byte[] b: this.fulltext) {
             if (hh.equals(ASCII.String(b, 6, 6))) {
                 try {
                     ref.putUnique(b);
@@ -234,7 +234,7 @@ public class Segment {
             }
             @Override
             public DigestURI next() {
-                URIMetadata umr = Segment.this.urlMetadata.getMetadata(bi.next());
+                URIMetadata umr = Segment.this.fulltext.getMetadata(bi.next());
                 return umr.url();
             }
             @Override
@@ -260,7 +260,7 @@ public class Segment {
     public void clear() {
         try {
             if (this.termIndex != null) this.termIndex.clear();
-            if (this.urlMetadata != null) this.urlMetadata.clear();
+            if (this.fulltext != null) this.fulltext.clear();
             if (this.urlCitationIndex != null) this.urlCitationIndex.clear();
         } catch (final IOException e) {
             Log.logException(e);
@@ -297,7 +297,7 @@ public class Segment {
 
     public synchronized void close() {
     	if (this.termIndex != null) this.termIndex.close();
-        if (this.urlMetadata != null) this.urlMetadata.close();
+        if (this.fulltext != null) this.fulltext.close();
         if (this.urlCitationIndex != null) this.urlCitationIndex.close();
     }
 
@@ -402,14 +402,14 @@ public class Segment {
 
         // STORE TO SOLR
         // we do not store the data in metadatadb any more if a solr is connected
-        if (this.urlMetadata.connectedSolr()) {
+        if (this.fulltext.connectedSolr()) {
             try {
-                this.urlMetadata.putDocument(this.urlMetadata.getSolrScheme().yacy2solr(id, responseHeader, document, metadata));
+                this.fulltext.putDocument(this.fulltext.getSolrScheme().yacy2solr(id, responseHeader, document, metadata));
             } catch ( final IOException e ) {
                 Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
             }
         } else {
-        	this.urlMetadata.putMetadata(metadata);
+        	this.fulltext.putMetadata(metadata);
         }
         final long storageEndTime = System.currentTimeMillis();
 
@@ -514,7 +514,7 @@ public class Segment {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final URIMetadata entry = urlMetadata().getMetadata(urlhash);
+        final URIMetadata entry = fulltext().getMetadata(urlhash);
         if (entry == null) return 0;
         if (entry.url() == null) return 0;
 
@@ -523,7 +523,7 @@ public class Segment {
             final Document document = Document.mergeDocuments(entry.url(), null, loader.loadDocuments(loader.request(entry.url(), true, false), cacheStrategy, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay));
             if (document == null) {
                 // delete just the url entry
-                urlMetadata().remove(urlhash);
+                fulltext().remove(urlhash);
                 return 0;
             }
             // get the word set
@@ -535,7 +535,7 @@ public class Segment {
             if (words != null) count = termIndex().remove(Word.words2hashesHandles(words), urlhash);
 
             // finally delete the url entry itself
-            urlMetadata().remove(urlhash);
+            fulltext().remove(urlhash);
             return count;
         } catch (final Parser.Failure e) {
             return 0;

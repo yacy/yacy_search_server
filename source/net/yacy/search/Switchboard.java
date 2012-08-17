@@ -397,7 +397,7 @@ public final class Switchboard extends serverSwitch
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
             this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
-            this.index.urlMetadata().connectLocalSolr(connectWithinMs);
+            this.index.fulltext().connectLocalSolr(connectWithinMs);
         }
 
         // set up the solr interface
@@ -411,7 +411,7 @@ public final class Switchboard extends serverSwitch
                                 ShardSelection.Method.MODULO_HOST_MD5,
                                 10000, true);
                 solr.setCommitWithinMs(connectWithinMs);
-                this.index.urlMetadata().connectRemoteSolr(solr);
+                this.index.fulltext().connectRemoteSolr(solr);
             } catch ( final IOException e ) {
                 Log.logException(e);
             }
@@ -1133,7 +1133,7 @@ public final class Switchboard extends serverSwitch
         synchronized ( this ) {
 
             // remember the solr scheme
-            SolrConfiguration solrScheme = this.index.urlMetadata().getSolrScheme();
+            SolrConfiguration solrScheme = this.index.fulltext().getSolrScheme();
 
             // shut down
             this.crawler.close();
@@ -1186,7 +1186,7 @@ public final class Switchboard extends serverSwitch
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
-                this.index.urlMetadata().connectLocalSolr(connectWithinMs);
+                this.index.fulltext().connectLocalSolr(connectWithinMs);
                 this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             }
 
@@ -1201,7 +1201,7 @@ public final class Switchboard extends serverSwitch
                                     ShardSelection.Method.MODULO_HOST_MD5,
                                     10000, true);
                     solr.setCommitWithinMs(connectWithinMs);
-                    this.index.urlMetadata().connectRemoteSolr(solr);
+                    this.index.fulltext().connectRemoteSolr(solr);
                 } catch ( final IOException e ) {
                     Log.logException(e);
                 }
@@ -1436,14 +1436,14 @@ public final class Switchboard extends serverSwitch
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
-        if ( this.index.urlMetadata().exists(hash) ) {
+        if ( this.index.fulltext().exists(hash) ) {
             return "loaded";
         }
         return this.crawlQueues.urlExists(hash);
     }
 
     public void urlRemove(final Segment segment, final byte[] hash) {
-        segment.urlMetadata().remove(hash);
+        segment.fulltext().remove(hash);
         ResultURLs.remove(ASCII.String(hash));
         this.crawlQueues.urlRemove(hash);
     }
@@ -1455,7 +1455,7 @@ public final class Switchboard extends serverSwitch
         if ( urlhash.length == 0 ) {
             return null;
         }
-        final URIMetadata le = this.index.urlMetadata().getMetadata(urlhash);
+        final URIMetadata le = this.index.fulltext().getMetadata(urlhash);
         if ( le != null ) {
             return le.url();
         }
@@ -1885,7 +1885,7 @@ public final class Switchboard extends serverSwitch
 
             // clear caches if necessary
             if ( !MemoryControl.request(8000000L, false) ) {
-                sb.index.urlMetadata().clearCache();
+                sb.index.fulltext().clearCache();
                 SearchEventCache.cleanupEvents(false);
                 this.trail.clear();
             }
@@ -2932,7 +2932,7 @@ public final class Switchboard extends serverSwitch
             return "no DHT distribution: not enabled (per setting)";
         }
         final Segment indexSegment = this.index;
-        int size = indexSegment.urlMetadata().size();
+        int size = indexSegment.fulltext().size();
         if ( size < 10 ) {
             return "no DHT distribution: loadedURL.size() = " + size;
         }

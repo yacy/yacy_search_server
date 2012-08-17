@@ -147,7 +147,7 @@ public final class crawlReceipt {
 
         if ("fill".equals(result)) try {
             // put new entry into database
-            sb.index.urlMetadata().putMetadata(entry);
+            sb.index.fulltext().putMetadata(entry);
             ResultURLs.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true));
