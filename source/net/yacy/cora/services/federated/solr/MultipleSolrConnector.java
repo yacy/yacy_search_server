@@ -40,7 +40,7 @@ public class MultipleSolrConnector implements SolrConnector {
     private int commitWithinMs;
 
     public MultipleSolrConnector(final String url, int connections) throws IOException {
-        this.solr = new SingleSolrConnector(url);
+        this.solr = new RemoteSolrConnector(url);
         this.queue = new ArrayBlockingQueue<SolrInputDocument>(1000);
         this.worker = new AddWorker[connections];
         this.commitWithinMs = 180000;
@@ -53,7 +53,7 @@ public class MultipleSolrConnector implements SolrConnector {
     private class AddWorker extends Thread {
         private final SolrConnector solr;
         public AddWorker(final String url) throws IOException {
-            this.solr = new SingleSolrConnector(url);
+            this.solr = new RemoteSolrConnector(url);
             this.solr.setCommitWithinMs(MultipleSolrConnector.this.commitWithinMs);
         }
         @Override

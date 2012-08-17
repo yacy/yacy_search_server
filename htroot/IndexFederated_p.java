@@ -32,7 +32,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.ShardSelection;
 import net.yacy.cora.services.federated.solr.ShardSolrConnector;
-import net.yacy.cora.services.federated.solr.SingleSolrConnector;
+import net.yacy.cora.services.federated.solr.RemoteSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.kelondro.logging.Log;
@@ -175,8 +175,8 @@ public class IndexFederated_p {
         } else {
             prop.put("table", 1);
             final SolrConnector solr = sb.index.fulltext().getRemoteSolr();
-            final long[] size = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getSizeList() : new long[]{((SingleSolrConnector) solr).getSize()};
-            final String[] urls = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getAdminInterfaceList() : new String[]{((SingleSolrConnector) solr).getAdminInterface()};
+            final long[] size = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getSizeList() : new long[]{((RemoteSolrConnector) solr).getSize()};
+            final String[] urls = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getAdminInterfaceList() : new String[]{((RemoteSolrConnector) solr).getAdminInterface()};
             boolean dark = false;
             for (int i = 0; i < size.length; i++) {
                 prop.put("table_list_" + i + "_dark", dark ? 1 : 0); dark = !dark;

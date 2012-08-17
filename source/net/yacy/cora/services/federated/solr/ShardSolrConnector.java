@@ -50,7 +50,7 @@ public class ShardSolrConnector implements SolrConnector {
         this.connectors = new ArrayList<SolrConnector>();
         SolrConnector s;
         for (final String u: this.urls) {
-            s = multipleConnections ? new MultipleSolrConnector(u.trim(), 2) : new SingleSolrConnector(u.trim());
+            s = multipleConnections ? new MultipleSolrConnector(u.trim(), 2) : new RemoteSolrConnector(u.trim());
             this.connectors.add(new RetrySolrConnector(s, timeout));
         }
         this.sharding = new ShardSelection(method, this.urls.length);
