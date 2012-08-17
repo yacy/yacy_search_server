@@ -100,7 +100,7 @@ public class Segment {
 
     private   final Log                            log;
     private   final File                           segmentPath;
-    protected final MetadataRepository             urlMetadata;
+    protected final Fulltext             urlMetadata;
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
 
@@ -110,7 +110,7 @@ public class Segment {
         this.segmentPath = segmentPath;
 
         // create LURL-db
-        this.urlMetadata = new MetadataRepository(segmentPath, solrScheme);
+        this.urlMetadata = new Fulltext(segmentPath, solrScheme);
     }
 
     public boolean connectedRWI() {
@@ -165,7 +165,7 @@ public class Segment {
         this.urlMetadata.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
     }
 
-    public MetadataRepository urlMetadata() {
+    public Fulltext urlMetadata() {
         return this.urlMetadata;
     }
 

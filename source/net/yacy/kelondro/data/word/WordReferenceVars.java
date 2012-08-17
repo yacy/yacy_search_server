@@ -36,7 +36,6 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.URIMetadata;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
@@ -47,8 +46,6 @@ import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ByteArray;
-
-import org.apache.solr.common.SolrDocument;
 
 
 public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable, Comparable<WordReferenceVars>, Comparator<WordReferenceVars> {
@@ -74,8 +71,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     private final Queue<Integer> positions;
     public double termFrequency;
 
-    public WordReferenceVars(final SolrDocument doc) {
-        URIMetadata md = new URIMetadataNode(doc);
+    public WordReferenceVars(final URIMetadata md) {
         this.language = md.language();
         this.flags = md.flags();
         this.lastModified = md.moddate().getTime();

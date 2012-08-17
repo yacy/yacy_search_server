@@ -49,7 +49,7 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.peers.graphics.WebStructureGraph.HostReference;
-import net.yacy.search.index.MetadataRepository.HostStat;
+import net.yacy.search.index.Fulltext.HostStat;
 import net.yacy.search.index.Segment;
 
 

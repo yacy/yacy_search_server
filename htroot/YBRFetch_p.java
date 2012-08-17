@@ -9,8 +9,8 @@ import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.graphics.WebStructureGraph.HostReference;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.MetadataRepository;
-import net.yacy.search.index.MetadataRepository.HostStat;
+import net.yacy.search.index.Fulltext;
+import net.yacy.search.index.Fulltext.HostStat;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.BlockRank;
 import de.anomic.server.serverObjects;
@@ -42,7 +42,7 @@ public class YBRFetch_p
 
         // use an index segment to find hosts for given host hashes
         final Segment segment = sb.index;
-        final MetadataRepository metadata = segment.urlMetadata();
+        final Fulltext metadata = segment.urlMetadata();
         Map<String, HostStat> hostHashResolver;
         try {
             hostHashResolver = metadata.domainHashResolver(metadata.domainSampleCollector());

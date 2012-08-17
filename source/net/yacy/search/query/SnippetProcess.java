@@ -54,7 +54,7 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.MetadataRepository;
+import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
@@ -440,7 +440,7 @@ public class SnippetProcess {
         private final CacheStrategy cacheStrategy;
         private final int neededResults;
         private boolean shallrun;
-        private final MetadataRepository metadata;
+        private final Fulltext metadata;
 
         public Worker(final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
             this.cacheStrategy = cacheStrategy;

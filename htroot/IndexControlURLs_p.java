@@ -41,7 +41,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.MetadataRepository;
+import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -69,7 +69,7 @@ public class IndexControlURLs_p {
         prop.put("reload", 0);
 
         // show export messages
-        final MetadataRepository.Export export = segment.urlMetadata().export();
+        final Fulltext.Export export = segment.urlMetadata().export();
         if ((export != null) && (export.isAlive())) {
         	// there is currently a running export
             prop.put("lurlexport", 2);
@@ -245,7 +245,7 @@ public class IndexControlURLs_p {
         	final File f = new File(s);
 			f.getParentFile().mkdirs();
 			final String filter = post.get("exportfilter", ".*");
-			final MetadataRepository.Export running = segment.urlMetadata().export(f, filter, null, format, dom);
+			final Fulltext.Export running = segment.urlMetadata().export(f, filter, null, format, dom);
 
 			prop.put("lurlexport_exportfile", s);
 			prop.put("lurlexport_urlcount", running.count());
@@ -270,14 +270,14 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("statistics")) {
             final int count = post.getInt("lines", 100);
-            Iterator<MetadataRepository.HostStat> statsiter;
+            Iterator<Fulltext.HostStat> statsiter;
             prop.put("statistics_lines", count);
             int cnt = 0;
             try {
-                final MetadataRepository metadata = segment.urlMetadata();
+                final Fulltext metadata = segment.urlMetadata();
                 statsiter = metadata.statistics(count, metadata.urlSampleScores(metadata.domainSampleCollector()));
                 boolean dark = true;
-                MetadataRepository.HostStat hs;
+                Fulltext.HostStat hs;
                 while (statsiter.hasNext() && cnt < count) {
                     hs = statsiter.next();
                     prop.put("statisticslines_domains_" + cnt + "_dark", (dark) ? "1" : "0");

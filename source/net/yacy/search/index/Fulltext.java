@@ -1,12 +1,8 @@
-// indexRepositoryReference.java
+// Fulltext.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2006 as part of 'plasmaCrawlLURL.java' on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
 //
 // LICENSE
 //
@@ -66,7 +62,7 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 
-public final class MetadataRepository implements Iterable<byte[]> {
+public final class Fulltext implements Iterable<byte[]> {
 
     // class objects
 	private final File                location;
@@ -77,7 +73,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     private final MirrorSolrConnector solr;
     private final SolrConfiguration   solrScheme;
 
-    public MetadataRepository(final File path, final SolrConfiguration solrScheme) {
+    public Fulltext(final File path, final SolrConfiguration solrScheme) {
         this.location = path;
         this.tablename = null;
         this.urlIndexFile = null;
@@ -348,13 +344,13 @@ public final class MetadataRepository implements Iterable<byte[]> {
 
         public kiter() throws IOException {
             this.up = true;
-            this.iter = MetadataRepository.this.urlIndexFile.rows();
+            this.iter = Fulltext.this.urlIndexFile.rows();
             this.error = false;
         }
 
         public kiter(final boolean up, final String firstHash) throws IOException {
             this.up = up;
-            this.iter = MetadataRepository.this.urlIndexFile.rows(up, (firstHash == null) ? null : ASCII.getBytes(firstHash));
+            this.iter = Fulltext.this.urlIndexFile.rows(up, (firstHash == null) ? null : ASCII.getBytes(firstHash));
             this.error = false;
         }
 
