@@ -228,34 +228,19 @@ public class MirrorSolrConnector implements SolrConnector {
      */
     @Override
     public void add(final SolrInputDocument solrdoc) throws IOException {
-        if (this.solr0 != null) {
-            this.solr0.add(solrdoc);
-        }
-        if (this.solr1 != null) {
-            this.solr1.add(solrdoc);
-        }
         String id = (String) solrdoc.getFieldValue(YaCySchema.id.name());
-        if (id != null) {
-            this.hitCache.put(id, EXIST);
-            this.documentCache.put(id, ClientUtils.toSolrDocument(solrdoc));
-        }
+        assert id != null;
+        if (id == null) return;
+        this.missCache.remove(id);
+        this.documentCache.put(id, ClientUtils.toSolrDocument(solrdoc));
+        if (this.solr0 != null) this.solr0.add(solrdoc);
+        if (this.solr1 != null) this.solr1.add(solrdoc);
+        this.hitCache.put(id, EXIST);
     }
 
     @Override
     public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
-        if (this.solr0 != null) {
-            for (SolrInputDocument d: solrdocs) this.solr0.add(d);
-        }
-        if (this.solr1 != null) {
-            for (SolrInputDocument d: solrdocs) this.solr1.add(d);
-        }
-        for (SolrInputDocument solrdoc: solrdocs) {
-            String id = (String) solrdoc.getFieldValue(YaCySchema.id.name());
-            if (id != null) {
-                this.hitCache.put(id, EXIST);
-                this.documentCache.put(id, ClientUtils.toSolrDocument(solrdoc));
-            }
-        }
+        for (SolrInputDocument solrdoc: solrdocs) add(solrdoc);
     }
 
     /**
