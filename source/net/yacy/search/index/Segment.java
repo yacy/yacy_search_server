@@ -39,7 +39,6 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
@@ -405,8 +404,7 @@ public class Segment {
         // we do not store the data in metadatadb any more if a solr is connected
         if (this.urlMetadata.connectedSolr()) {
             try {
-                SolrDoc solrDoc = this.urlMetadata.getSolrScheme().yacy2solr(id, responseHeader, document, metadata);
-                this.urlMetadata.getSolr().add(solrDoc);
+                this.urlMetadata.putDocument(this.urlMetadata.getSolrScheme().yacy2solr(id, responseHeader, document, metadata));
             } catch ( final IOException e ) {
                 Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
             }
