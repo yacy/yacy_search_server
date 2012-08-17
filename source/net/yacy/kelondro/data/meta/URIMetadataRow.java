@@ -213,15 +213,16 @@ public class URIMetadataRow implements URIMetadata {
         this.comp = null;
     }
 
-    public URIMetadataRow(final Properties prop) {
+    public URIMetadataRow(final Properties prop) throws kelondroException {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         DigestURI url;
+        String urls = crypt.simpleDecode(prop.getProperty("url", ""));
         try {
-            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", "")));
+            url = new DigestURI(urls);
         } catch (final MalformedURLException e) {
-            url = null;
+            throw new kelondroException("bad url: " + urls);
         }
         String descr = crypt.simpleDecode(prop.getProperty("descr", "")); if (descr == null) descr = "";
         String dc_creator = crypt.simpleDecode(prop.getProperty("author", "")); if (dc_creator == null) dc_creator = "";
@@ -285,8 +286,9 @@ public class URIMetadataRow implements URIMetadata {
         try {
             return new URIMetadataRow(MapTools.s2p(propStr.substring(1, propStr.length() - 1)));
         } catch (final kelondroException e) {
-                // wrong format
-                return null;
+            // wrong format
+            Log.logSevere("URIMetadataRow", e.getMessage());
+            return null;
         }
     }
 
@@ -589,6 +591,7 @@ public class URIMetadataRow implements URIMetadata {
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
 
+    @Override
     public Request toBalancerEntry(final String initiatorHash) {
         return new Request(
                 ASCII.getBytes(initiatorHash),
