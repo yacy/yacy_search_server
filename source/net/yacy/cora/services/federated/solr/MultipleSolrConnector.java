@@ -30,7 +30,7 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 
-public class MultipleSolrConnector implements SolrConnector {
+public class MultipleSolrConnector extends AbstractSolrConnector implements SolrConnector {
 
     private final static SolrInputDocument POISON_DOC = new SolrInputDocument();
 
@@ -131,11 +131,6 @@ public class MultipleSolrConnector implements SolrConnector {
     @Override
     public void deleteByQuery(final String querystring) throws IOException {
         this.solr.deleteByQuery(querystring);
-    }
-
-    @Override
-    public boolean exists(String id) throws IOException {
-        return this.solr.exists(id);
     }
 
 	@Override

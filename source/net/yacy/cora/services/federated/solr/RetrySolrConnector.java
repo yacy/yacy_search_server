@@ -29,7 +29,7 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 
-public class RetrySolrConnector implements SolrConnector {
+public class RetrySolrConnector extends AbstractSolrConnector implements SolrConnector {
 
     private final SolrConnector solrConnector;
     private final long retryMaxTime;

@@ -38,7 +38,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 
 
-public class ShardSolrConnector implements SolrConnector {
+public class ShardSolrConnector extends AbstractSolrConnector implements SolrConnector {
 
     private final List<SolrConnector> connectors;
     private final ShardSelection sharding;

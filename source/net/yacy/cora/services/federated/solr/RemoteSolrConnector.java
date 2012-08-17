@@ -44,7 +44,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 
 
-public class RemoteSolrConnector extends AbstractSolrConnector implements SolrConnector {
+public class RemoteSolrConnector extends SolrServerConnector implements SolrConnector {
 
     private final String solrurl, host, solrpath, solraccount, solrpw;
     private final int port;

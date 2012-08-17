@@ -27,13 +27,14 @@ package net.yacy.cora.services.federated.solr;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 
-public interface SolrConnector {
+public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
 
     /**
      * get the solr autocommit delay
@@ -111,6 +112,28 @@ public interface SolrConnector {
      * @throws IOException
      */
     public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException, SolrException;
+
+    /**
+     * Get a query result from solr as a stream of documents.
+     * The result queue is considered as terminated if AbstractSolrConnectro.POISON_DOCUMENT is returned.
+     * The method returns immediately and feeds the search results into the queue
+     * @param querystring
+     * @param offset
+     * @param maxcount
+     * @return
+     */
+    public BlockingQueue<SolrDocument> concurrentQuery(final String querystring, final int offset, final int maxcount, final long maxtime);
+
+    /**
+     * get a document id result stream from a solr query.
+     * The result queue is considered as terminated if AbstractSolrConnectro.POISON_ID is returned.
+     * The method returns immediately and feeds the search results into the queue
+     * @param querystring
+     * @param offset
+     * @param maxcount
+     * @return
+     */
+    public BlockingQueue<String> concurrentIDs(final String querystring, final int offset, final int maxcount, final long maxtime);
 
     /**
      * get the size of the index

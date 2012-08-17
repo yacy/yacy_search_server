@@ -26,7 +26,7 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import net.yacy.cora.services.federated.solr.AbstractSolrConnector;
+import net.yacy.cora.services.federated.solr.SolrServerConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.kelondro.logging.Log;
@@ -52,7 +52,7 @@ import org.xml.sax.SAXException;
 
 import com.google.common.io.Files;
 
-public class EmbeddedSolrConnector extends AbstractSolrConnector implements SolrConnector {
+public class EmbeddedSolrConnector extends SolrServerConnector implements SolrConnector {
 
     public static final String SELECT = "/select";
     public static final String CONTEXT = "/solr";

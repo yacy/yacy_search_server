@@ -43,7 +43,7 @@ import org.apache.solr.common.SolrInputDocument;
  * Because it is not possible to set a cache in front of this class (the single connect methods would need to be passed through the cache class),
  * this class also contains an object and hit/miss cache.
  */
-public class MirrorSolrConnector implements SolrConnector {
+public class MirrorSolrConnector extends AbstractSolrConnector implements SolrConnector {
 
     private final static Object EXIST = new Object();
 
