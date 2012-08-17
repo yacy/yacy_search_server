@@ -3,6 +3,7 @@
 User-agent: *
 
 Disallow: /*query=
+Disallow: /proxy.html
 
 #(all)#
 
