@@ -208,7 +208,7 @@ public final class RWIProcess extends Thread
                     String solrQuery = RWIProcess.this.query.solrQuery();
                     try {
                         ReferenceContainer<WordReference> wr = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, null);
-                        SolrDocumentList sdl = RWIProcess.this.query.getSegment().getSolr().query(solrQuery, 0, 20);
+                        SolrDocumentList sdl = RWIProcess.this.query.getSegment().urlMetadata().getSolr().query(solrQuery, 0, 20);
                         for (SolrDocument d : sdl) {
                             try {wr.add(new WordReferenceVars(d));} catch (SpaceExceededException e) {}
                         }

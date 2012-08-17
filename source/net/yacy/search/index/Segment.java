@@ -39,7 +39,6 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.HandleSet;
@@ -162,59 +161,8 @@ public class Segment {
         this.urlCitationIndex = null;
     }
 
-    public boolean connectedUrlDb() {
-        return this.urlMetadata.connectedUrlDb();
-    }
-
     public void connectUrlDb(final boolean useTailCache, final boolean exceed134217727) {
         this.urlMetadata.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
-    }
-
-    public void disconnectUrlDb() {
-        this.urlMetadata.disconnectUrlDb();
-    }
-    
-    public boolean connectedSolr() {
-        return this.urlMetadata.connectedSolr();
-    }
-    
-    public boolean connectedRemoteSolr() {
-        return this.urlMetadata.connectedRemoteSolr();
-    }
-
-    public void connectRemoteSolr(final SolrConnector solr) {
-        this.urlMetadata.connectRemoteSolr(solr);
-    }
-
-    public void disconnectRemoteSolr() {
-        this.urlMetadata.disconnectRemoteSolr();
-    }
-
-    public boolean connectedLocalSolr() {
-        return this.urlMetadata.connectedLocalSolr();
-    }
-
-    public void connectLocalSolr(final int connectWithin) throws IOException {
-        this.urlMetadata.connectLocalSolr(connectWithin);
-    }
-
-    public void disconnectLocalSolr() {
-        this.urlMetadata.disconnectLocalSolr();
-    }
-
-    public SolrConnector getSolr() {
-        return this.urlMetadata.getSolr();
-    }
-
-    public SolrConfiguration getSolrScheme() {
-        return this.urlMetadata.getSolrScheme();
-    }
-
-    public SolrConnector getRemoteSolr() {
-        return this.urlMetadata.getRemoteSolr();
-    }
-    public SolrConnector getLocalSolr() {
-        return this.urlMetadata.getLocalSolr();
     }
 
     public MetadataRepository urlMetadata() {
@@ -452,13 +400,13 @@ public class Segment {
                 document.getVideolinks().size(),           // lvideo
                 document.getApplinks().size()              // lapp
         );
-        
+
         // STORE TO SOLR
         // we do not store the data in metadatadb any more if a solr is connected
-        if (this.connectedSolr()) {
+        if (this.urlMetadata.connectedSolr()) {
             try {
                 SolrDoc solrDoc = this.urlMetadata.getSolrScheme().yacy2solr(id, responseHeader, document, metadata);
-                this.getSolr().add(solrDoc);
+                this.urlMetadata.getSolr().add(solrDoc);
             } catch ( final IOException e ) {
                 Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
             }

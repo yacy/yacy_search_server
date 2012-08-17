@@ -96,7 +96,7 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
 
         // get the embedded connector
-        EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.getLocalSolr();
+        EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.urlMetadata().getLocalSolr();
         if (connector == null) return null;
 
         // do the solr request

@@ -93,7 +93,7 @@ public class IndexControlRWIs_p {
         prop.put("keyhash", "");
         prop.put("result", "");
         prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
-        prop.put("cleanup_solr", sb.index.connectedSolr() ? 1 : 0);
+        prop.put("cleanup_solr", sb.index.urlMetadata().connectedSolr() ? 1 : 0);
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
@@ -158,9 +158,9 @@ public class IndexControlRWIs_p {
                 if ( post.get("deleteIndex", "").equals("on") ) {
                     segment.clear();
                 }
-                if ( post.get("deleteRemoteSolr", "").equals("on") && sb.index.connectedSolr()) {
+                if ( post.get("deleteRemoteSolr", "").equals("on") && sb.index.urlMetadata().connectedSolr()) {
                     try {
-                        sb.index.getSolr().clear();
+                        sb.index.urlMetadata().getSolr().clear();
                     } catch ( final Exception e ) {
                         Log.logException(e);
                     }

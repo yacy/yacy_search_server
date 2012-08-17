@@ -146,7 +146,7 @@ public class select {
         }
 
         // get the embedded connector
-        EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.getLocalSolr();
+        EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.urlMetadata().getLocalSolr();
         if (connector == null) return null;
 
         // do the solr request

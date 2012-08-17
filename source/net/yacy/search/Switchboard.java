@@ -397,7 +397,7 @@ public final class Switchboard extends serverSwitch
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
             this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
-            this.index.connectLocalSolr(connectWithinMs);
+            this.index.urlMetadata().connectLocalSolr(connectWithinMs);
         }
 
         // set up the solr interface
@@ -411,7 +411,7 @@ public final class Switchboard extends serverSwitch
                                 ShardSelection.Method.MODULO_HOST_MD5,
                                 10000, true);
                 solr.setCommitWithinMs(connectWithinMs);
-                this.index.connectRemoteSolr(solr);
+                this.index.urlMetadata().connectRemoteSolr(solr);
             } catch ( final IOException e ) {
                 Log.logException(e);
             }
@@ -1133,7 +1133,7 @@ public final class Switchboard extends serverSwitch
         synchronized ( this ) {
 
             // remember the solr scheme
-            SolrConfiguration solrScheme = this.index.getSolrScheme();
+            SolrConfiguration solrScheme = this.index.urlMetadata().getSolrScheme();
 
             // shut down
             this.crawler.close();
@@ -1186,7 +1186,7 @@ public final class Switchboard extends serverSwitch
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
-                this.index.connectLocalSolr(connectWithinMs);
+                this.index.urlMetadata().connectLocalSolr(connectWithinMs);
                 this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             }
 
@@ -1201,7 +1201,7 @@ public final class Switchboard extends serverSwitch
                                     ShardSelection.Method.MODULO_HOST_MD5,
                                     10000, true);
                     solr.setCommitWithinMs(connectWithinMs);
-                    this.index.connectRemoteSolr(solr);
+                    this.index.urlMetadata().connectRemoteSolr(solr);
                 } catch ( final IOException e ) {
                     Log.logException(e);
                 }
