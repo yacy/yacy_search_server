@@ -60,8 +60,8 @@
 	<classpathentry kind="lib" path="lib/fontbox-1.7.0.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.7.0.jar"/>
 	<classpathentry kind="lib" path="lib/jempbox-1.7.0.jar"/>
-	<classpathentry kind="lib" path="lib/apache-solr-core-3.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/apache-solr-solrj-3.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/apache-solr-core-3.6.1.jar" sourcepath="/Volumes/Raptor/Data/sourcecode/solr-3.6.1/core/src/java"/>
+	<classpathentry kind="lib" path="lib/apache-solr-solrj-3.6.1.jar" sourcepath="/Volumes/Raptor/Data/sourcecode/solr-3.6.1/core/src/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>

@@ -104,6 +104,11 @@ public class ShardSolrConnector implements SolrConnector {
         for (final SolrConnector connector: this.connectors) connector.delete(ids);
     }
 
+    @Override
+    public void deleteByQuery(final String querystring) throws IOException {
+        for (final SolrConnector connector: this.connectors) connector.deleteByQuery(querystring);
+    }
+
     /**
      * check if a given id exists in solr
      * @param id

@@ -73,6 +73,13 @@ public interface SolrConnector {
     public void delete(final List<String> ids) throws IOException;
 
     /**
+     * delete entries from solr according the given solr query string
+     * @param id the url hash of the entry
+     * @throws IOException
+     */
+    public void deleteByQuery(final String querystring) throws IOException;
+
+    /**
      * check if a given id exists in solr
      * @param id
      * @return true if any entry in solr exists

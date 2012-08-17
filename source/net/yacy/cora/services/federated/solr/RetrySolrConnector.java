@@ -104,6 +104,21 @@ public class RetrySolrConnector implements SolrConnector {
     }
 
     @Override
+    public void deleteByQuery(final String querystring) throws IOException {
+        final long t = System.currentTimeMillis() + this.retryMaxTime;
+        Throwable ee = null;
+        while (System.currentTimeMillis() < t) try {
+            this.solrConnector.deleteByQuery(querystring);
+            return;
+        } catch (final Throwable e) {
+            ee = e;
+            try {Thread.sleep(10);} catch (final InterruptedException e1) {}
+            continue;
+        }
+        if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
+    }
+
+    @Override
     public boolean exists(final String id) throws IOException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;

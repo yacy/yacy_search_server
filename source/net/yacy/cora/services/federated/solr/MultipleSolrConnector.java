@@ -129,6 +129,11 @@ public class MultipleSolrConnector implements SolrConnector {
     }
 
     @Override
+    public void deleteByQuery(final String querystring) throws IOException {
+        this.solr.deleteByQuery(querystring);
+    }
+
+    @Override
     public boolean exists(String id) throws IOException {
         return this.solr.exists(id);
     }

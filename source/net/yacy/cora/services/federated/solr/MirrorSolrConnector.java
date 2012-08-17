@@ -170,6 +170,15 @@ public class MirrorSolrConnector implements SolrConnector {
         if (this.solr1 != null) this.solr1.delete(ids);
     }
 
+    @Override
+    public void deleteByQuery(final String querystring) throws IOException {
+        if (this.solr0 != null) this.solr0.deleteByQuery(querystring);
+        if (this.solr1 != null) this.solr1.deleteByQuery(querystring);
+        this.hitCache.clear();
+        this.missCache.clear();
+        this.documentCache.clear();
+    }
+
     /**
      * check if a given id exists in solr
      * @param id

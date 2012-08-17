@@ -141,6 +141,20 @@ public class AbstractSolrConnector implements SolrConnector {
         }
     }
 
+    /**
+     * delete entries from solr according the given solr query string
+     * @param id the url hash of the entry
+     * @throws IOException
+     */
+    @Override
+    public void deleteByQuery(final String querystring) throws IOException {
+        try {
+            this.server.deleteByQuery(querystring, this.commitWithinMs);
+        } catch (final Throwable e) {
+            throw new IOException(e);
+        }
+    }
+
     @Override
     public boolean exists(final String id) throws IOException {
         try {
