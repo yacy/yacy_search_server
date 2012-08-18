@@ -279,7 +279,7 @@ public class URIMetadataRow implements URIMetadata {
         this.comp = null;
     }
 
-    public static URIMetadata importEntry(final String propStr) {
+    public static URIMetadataRow importEntry(final String propStr) {
         if (propStr == null || (!propStr.isEmpty() && propStr.charAt(0) != '{') || !propStr.endsWith("}")) {
             return null;
         }

@@ -51,10 +51,13 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
 
 import de.anomic.crawler.retrieval.Response;
 
@@ -150,6 +153,16 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (isEmpty() || contains(key)) solrdoc.addSolr(key, value);
     }
 
+    public Date getDate(SolrInputDocument doc, final YaCySchema key) {
+        Date x = (Date) doc.getFieldValue(key.name());
+        return (x == null) ? new Date(0) : x;
+    }
+    
+    public Date getDate(SolrDocument doc, final YaCySchema key) {
+        Date x = (Date) doc.getFieldValue(key.name());
+        return (x == null) ? new Date(0) : x;
+    }
+    
     /**
      * save configuration to file and update enum SolrFields
      * @throws IOException
@@ -171,7 +184,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         } catch (final IOException e) {}
     }
 
-    public SolrDoc metadata2solr(final URIMetadata md) {
+    public SolrInputDocument metadata2solr(final URIMetadata md) {
+    	if (md instanceof URIMetadataNode) {
+    		return ClientUtils.toSolrInputDocument(((URIMetadataNode) md).getDocument());
+    	} 
+    	
         final SolrDoc solrdoc = new SolrDoc();
         final DigestURI digestURI = new DigestURI(md.url());
         boolean allAttr = this.isEmpty();

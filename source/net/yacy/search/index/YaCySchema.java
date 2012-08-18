@@ -211,7 +211,7 @@ public enum YaCySchema implements Schema {
     @Override
     public final String getComment() {
         return this.comment;
-    }
-
+    }    
+    
 }
 

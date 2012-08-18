@@ -259,41 +259,81 @@ public final class Fulltext implements Iterable<byte[]> {
     }
 
     public void putDocument(final SolrInputDocument doc) throws IOException {
-        if (!this.connectedSolr()) return;
-        this.solr.add(doc);
-    }
-
-    public void putMetadata(final URIMetadata entry) throws IOException {
+        String id = (String) doc.getFieldValue(YaCySchema.id.name());
+        byte[] idb = ASCII.getBytes(id);
         if (this.connectedSolr()) {
 	        try {
-	            SolrDocument sd = getSolr().get(ASCII.String(entry.url().hash()));
-	            if (sd == null || !entry.isOlder(new URIMetadataNode(sd))) {
-	                getSolr().add(getSolrScheme().metadata2solr(entry));
+	        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
+	            SolrDocument sd = this.solr.get(id);
+	            if (sd == null || this.solrScheme.getDate(sd, YaCySchema.last_modified).before(this.solrScheme.getDate(doc, YaCySchema.last_modified))) {
+		            this.solr.add(doc);
 	            }
 	        } catch (SolrException e) {
 	            throw new IOException(e.getMessage(), e);
 	        }
-        } else if (this.urlIndexFile != null && entry instanceof URIMetadataRow) {
+        } else if (this.urlIndexFile != null) {
             URIMetadata oldEntry = null;
 	        try {
-	            final Row.Entry oe = this.urlIndexFile.get(entry.hash(), false);
+	            final Row.Entry oe = this.urlIndexFile.get(idb, false);
 	            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
 	        } catch (final Throwable e) {
 	            Log.logException(e);
 	            oldEntry = null;
 	        }
-	        if (oldEntry == null || !entry.isOlder(oldEntry)) {
+	        URIMetadata entry = new URIMetadataNode(ClientUtils.toSolrDocument(doc));
+	        if (oldEntry == null || oldEntry.isOlder(entry)) {
 		        try {
-		            this.urlIndexFile.put(((URIMetadataRow) entry).toRowEntry());
+		        	URIMetadataRow row = URIMetadataRow.importEntry(entry.toString());
+		        	this.urlIndexFile.put(row.toRowEntry());
 		        } catch (final SpaceExceededException e) {
 		            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
 		        }
-	        }
+        	}
         }
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
     }
 
+    public void putMetadata(final URIMetadata entry) throws IOException {
+    	if (entry instanceof URIMetadataNode) {
+    		putDocument(ClientUtils.toSolrInputDocument(((URIMetadataNode) entry).getDocument()));
+    	}
+    	assert entry instanceof URIMetadataRow;
+    	URIMetadataRow row = (URIMetadataRow) entry;
+
+        byte[] idb = row.hash();
+        String id = ASCII.String(idb);
+        if (this.connectedSolr()) {
+	        try {
+	        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
+	            SolrDocument sd = this.solr.get(id);
+	            if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
+	            	this.solr.add(getSolrScheme().metadata2solr(row));
+	            }
+	        } catch (SolrException e) {
+	            throw new IOException(e.getMessage(), e);
+	        }
+        } else if (this.urlIndexFile != null) {
+            URIMetadata oldEntry = null;
+	        try {
+	            final Row.Entry oe = this.urlIndexFile.get(idb, false);
+	            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
+	        } catch (final Throwable e) {
+	            Log.logException(e);
+	            oldEntry = null;
+	        }
+	        if (oldEntry == null || oldEntry.isOlder(row)) {
+		        try {
+		        	this.urlIndexFile.put(row.toRowEntry());
+		        } catch (final SpaceExceededException e) {
+		            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
+		        }
+        	}
+        }
+        this.statsDump = null;
+        if (MemoryControl.shortStatus()) clearCache();
+    }
+    
     public boolean remove(final byte[] urlHash) {
         if (urlHash == null) return false;
         try {
