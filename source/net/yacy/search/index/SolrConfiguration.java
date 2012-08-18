@@ -206,16 +206,16 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.description)) addSolr(solrdoc, YaCySchema.description, md.snippet());
         if (allAttr || contains(YaCySchema.content_type)) addSolr(solrdoc, YaCySchema.content_type, Response.doctype2mime(digestURI.getFileExtension(), md.doctype()));
         if (allAttr || contains(YaCySchema.last_modified)) addSolr(solrdoc, YaCySchema.last_modified, md.moddate());
-        if (allAttr || contains(YaCySchema.text_t)) addSolr(solrdoc, YaCySchema.text_t, ""); // not delivered in metadata
         if (allAttr || contains(YaCySchema.wordcount_i)) addSolr(solrdoc, YaCySchema.wordcount_i, md.wordCount());
-        if (allAttr || contains(YaCySchema.keywords)) {
-        	String keywords = md.dc_subject();
-        	Bitfield flags = md.flags();
-        	if (flags.get(Condenser.flag_cat_indexof)) {
-        		if (keywords == null || keywords.isEmpty()) keywords = "indexof"; else {
-        			if (keywords.indexOf(',') > 0) keywords += ", indexof"; else keywords += " indexof";
-        		}
-        	}
+        
+        String keywords = md.dc_subject();
+    	Bitfield flags = md.flags();
+    	if (flags.get(Condenser.flag_cat_indexof)) {
+    		if (keywords == null || keywords.isEmpty()) keywords = "indexof"; else {
+    			if (keywords.indexOf(',') > 0) keywords += ", indexof"; else keywords += " indexof";
+    		}
+    	}
+        if (allAttr || contains(YaCySchema.keywords)) {        	
         	addSolr(solrdoc, YaCySchema.keywords, keywords);
         }
 
@@ -250,8 +250,27 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.audiolinkscount_i)) addSolr(solrdoc, YaCySchema.audiolinkscount_i, md.laudio());
         if (allAttr || contains(YaCySchema.videolinkscount_i)) addSolr(solrdoc, YaCySchema.videolinkscount_i, md.lvideo());
         if (allAttr || contains(YaCySchema.applinkscount_i)) addSolr(solrdoc, YaCySchema.applinkscount_i, md.lapp());
-
+        if (allAttr || contains(YaCySchema.text_t)) {
+        	// construct the text from other metadata parts.
+        	// This is necessary here since that is used to search the link when no other data (parsed text body) is available
+        	StringBuilder sb = new StringBuilder(120);
+        	accText(sb, md.dc_title());
+        	accText(sb, md.dc_creator());
+        	accText(sb, md.dc_publisher());
+        	accText(sb, md.snippet());
+        	accText(sb, digestURI.toTokens());
+        	accText(sb, keywords);
+        	addSolr(solrdoc, YaCySchema.text_t, sb.toString());
+        }
+        
         return solrdoc;
+    }
+    
+    private static void accText(final StringBuilder sb, String text) {
+    	if (text == null || text.length() == 0) return;
+    	if (sb.length() != 0) sb.append(' ');
+    	text = text.trim();
+    	if (text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
     public SolrDoc yacy2solr(final String id, final ResponseHeader header, final Document yacydoc, final URIMetadata metadata) {

@@ -211,15 +211,26 @@ public final class Fulltext implements Iterable<byte[]> {
         // get the metadata from Solr
         try {
             SolrDocument doc = this.solr.get(ASCII.String(urlHash));
-            if (doc != null) return new URIMetadataNode(doc, wre, weight);
+            if (doc != null) {
+            	if (this.urlIndexFile != null) this.urlIndexFile.remove(urlHash);
+            	return new URIMetadataNode(doc, wre, weight);
+            }
         } catch (IOException e) {
             Log.logException(e);
         }
 
         // get the metadata from the old metadata index
         if (this.urlIndexFile != null) try {
-            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
-            if (entry != null) return new URIMetadataRow(entry, wre, weight);
+        	if (this.connectedSolr()) {
+        		// slow migration to solr
+        		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
+                if (entry == null) return null;
+    			URIMetadataRow row = new URIMetadataRow(entry, wre, weight);
+    			this.putDocument(this.solrScheme.metadata2solr(row));
+    			return row;
+        	}
+    		final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
+    		if (entry != null) return new URIMetadataRow(entry, wre, weight);
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -242,14 +253,25 @@ public final class Fulltext implements Iterable<byte[]> {
         // get the document from Solr
         try {
             SolrDocument doc = this.solr.get(ASCII.String(urlHash));
-            if (doc != null) return doc;
+            if (doc != null) {
+            	if (this.urlIndexFile != null) this.urlIndexFile.remove(urlHash);
+            	return doc;
+            }
         } catch (IOException e) {
             Log.logException(e);
         }
 
         // get the document from the old metadata index
         if (this.urlIndexFile != null) try {
-            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
+        	if (this.connectedSolr()) {
+        		// slow migration to solr
+        		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
+                if (entry == null) return null;
+        		URIMetadataRow row = new URIMetadataRow(entry, wre, weight);
+        		this.putDocument(this.solrScheme.metadata2solr(row));
+        		return ClientUtils.toSolrDocument(getSolrScheme().metadata2solr(row));
+        	}
+        	final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
             if (entry == null) return null;
             return ClientUtils.toSolrDocument(getSolrScheme().metadata2solr(new URIMetadataRow(entry, wre, weight)));
         } catch (final IOException e) {
