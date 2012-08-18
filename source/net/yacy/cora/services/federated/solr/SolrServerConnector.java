@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.List;
 
 import net.yacy.kelondro.logging.Log;
-import net.yacy.search.index.YaCySchema;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -222,6 +221,8 @@ public class SolrServerConnector extends AbstractSolrConnector implements SolrCo
         throw new IOException(error.getMessage(), error);
     }
 
+    private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
+    
     /**
      * get a document from solr by given id
      * @param id
@@ -230,11 +231,13 @@ public class SolrServerConnector extends AbstractSolrConnector implements SolrCo
      */
     @Override
     public SolrDocument get(final String id) throws IOException {
+    	assert id.length() == 12;
         // construct query
-    	StringBuffer sb = new StringBuffer(id.length() + 5);
-    	sb.append(YaCySchema.id.getSolrFieldName()).append(':').append('"').append(id).append('"');
+    	char[] q = new char[17];
+    	System.arraycopy(queryIDTemplate, 0, q, 0, 17);
+    	System.arraycopy(id.toCharArray(), 0, q, 4, 12);
         final SolrQuery query = new SolrQuery();
-        query.setQuery(sb.toString());
+        query.setQuery(new String(q));
         query.setRows(1);
         query.setStart(0);
 
