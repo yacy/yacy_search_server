@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -70,6 +71,34 @@ public class PeerSelection {
             }
         }
         return l.toArray(new Seed[l.size()]);
+    }
+    
+    public static Seed[] selectNodeSearchTargets(final SeedDB seedDB, int maxCount, Set<Seed> omit) {
+        if (seedDB == null) { return null; }
+
+        final List<Seed> goodSeeds = new ArrayList<Seed>();
+        final List<Seed> optionalSeeds = new ArrayList<Seed>();
+        Seed seed;
+        Iterator<Seed> seedenum = seedDB.seedsConnected(true, true, Seed.randomHash(), 1.041f);
+        int c = seedDB.sizeConnected();
+        while (seedenum.hasNext() && c-- > 0 && goodSeeds.size() < maxCount) {
+            seed = seedenum.next();
+            if (seed == null || omit.contains(seed)) continue;
+            if (seed.getFlagRootNode()) {
+            	goodSeeds.add(seed);
+            } else {
+            	optionalSeeds.add(seed);
+            }
+        }
+        Random r = new Random(System.currentTimeMillis());
+        while (goodSeeds.size() < maxCount && optionalSeeds.size() > 0) {
+        	goodSeeds.add(optionalSeeds.remove(r.nextInt(optionalSeeds.size())));
+        }
+        
+        // produce return set
+        Seed[] result = new Seed[goodSeeds.size()];
+        result = goodSeeds.toArray(result);
+        return result;
     }
 
     public static Seed[] selectSearchTargets(
@@ -163,7 +192,7 @@ public class PeerSelection {
         result = regularSeeds.values().toArray(result);
         return result;
     }
-
+    
     private static void selectDHTPositions(
             final SeedDB seedDB,
             byte[] wordhash,

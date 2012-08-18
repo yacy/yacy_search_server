@@ -63,8 +63,7 @@ import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ResultEntry;
 import de.anomic.data.WorkTables;
 
-public final class SearchEvent
-{
+public final class SearchEvent {
 
     public enum Type {
         INITIALIZATION,
@@ -95,7 +94,7 @@ public final class SearchEvent
     private final SecondarySearchSuperviser secondarySearchSuperviser;
 
     // class variables for remote searches
-    private final List<RemoteSearch> primarySearchThreadsL;
+    public final List<RemoteSearch> primarySearchThreadsL;
     private RemoteSearch[] secondarySearchThreads;
     private final SortedMap<byte[], String> preselectedPeerHashes;
     private final Thread localSearchThread;
@@ -167,7 +166,7 @@ public final class SearchEvent
                     public void run() {
                         Thread.currentThread().setName("SearchEvent.primaryRemoteSearches");
                         RemoteSearch.primaryRemoteSearches(
-                            SearchEvent.this.primarySearchThreadsL,
+                        	SearchEvent.this,
                             QueryParams.hashSet2hashString(SearchEvent.this.query.query_include_hashes),
                             QueryParams.hashSet2hashString(SearchEvent.this.query.query_exclude_hashes),
                             SearchEvent.this.query.prefer,
@@ -304,7 +303,7 @@ public final class SearchEvent
         }
         SearchEventCache.put(this.query.id(false), this);
     }
-
+    
     public ReferenceOrder getOrder() {
         return this.order;
     }
@@ -691,6 +690,7 @@ public final class SearchEvent
                 this.checkedPeers.add(peer);
                 SearchEvent.this.secondarySearchThreads[c++] =
                     RemoteSearch.secondaryRemoteSearch(
+                    	SearchEvent.this,
                         words,
                         urls.toString(),
                         6000,
@@ -703,9 +703,7 @@ public final class SearchEvent
                         SearchEvent.this.query.constraint,
                         SearchEvent.this.preselectedPeerHashes);
             }
-
         }
-
     }
 
     public SnippetProcess result() {

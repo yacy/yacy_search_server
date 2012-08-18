@@ -1143,6 +1143,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return o1.compareTo(o2);
     }
 
+    @Override
+    public boolean equals(Object other) {
+    	return this.hash.equals(((Seed) other).hash);
+    }
+    		
     public static void main(final String[] args) {
         final ScoreMap<Integer> s = new ClusteredScoreMap<Integer>();
         for ( int i = 0; i < 10000; i++ ) {

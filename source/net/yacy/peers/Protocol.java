@@ -77,6 +77,8 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
+import net.yacy.cora.services.federated.solr.RemoteSolrConnector;
+import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadata;
@@ -110,6 +112,7 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.TextSnippet;
 
 import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.solr.common.SolrDocumentList;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
@@ -1029,6 +1032,22 @@ public final class Protocol
         }
     }
 
+    public static void solrQuery(
+            final RWIProcess containerCache,
+            final String solrURL, final String querystring, final int offset, final int count) {
+        containerCache.oneFeederStarted();
+    	SolrConnector solrConnector;
+		try {
+			solrConnector = new RemoteSolrConnector(solrURL);
+	    	SolrDocumentList docList = solrConnector.query(querystring, offset, count);
+	    	
+		} catch (IOException e) {
+			Log.logException(e);
+		} finally {
+	    	containerCache.oneFeederTerminated();
+		}
+    }
+    
     public static Map<String, String> permissionMessage(final SeedDB seedDB, final String targetHash) {
         // ask for allowed message size and attachement size
         // if this replies null, the peer does not answer
