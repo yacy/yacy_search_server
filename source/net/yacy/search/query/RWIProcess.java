@@ -86,7 +86,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 public final class RWIProcess extends Thread
 {
 
-    private static final long maxWaitPerResult = 300;
+    private static final long maxWaitPerResult = 30;
     private static final int max_results_preparation = 3000, max_results_preparation_special = -1; // -1 means 'no limit'
 
     private final QueryParams query;

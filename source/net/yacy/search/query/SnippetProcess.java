@@ -159,7 +159,7 @@ public class SnippetProcess {
             // the first 10 results have a very special timing to get most of the remote results ordered
             // before they are presented on the first lines .. yes sleeps seem to be bad. but how shall we predict how long other
             // peers will take until they respond?
-            long sleep = item == 0 ? 600 : (10 - item) * 12; // the first result takes the longest time
+            long sleep = item == 0 ? 400 : (10 - item) * 9; // the first result takes the longest time
             //Log.logInfo("SnippetProcess", "SLEEP = " + sleep);
             try { Thread.sleep(sleep); } catch (final InterruptedException e1) { Log.logException(e1); }
         }
