@@ -450,8 +450,8 @@
                and old cache.  
       -->
     <filterCache class="solr.FastLRUCache"
-                 size="512"
-                 initialSize="512"
+                 size="100"
+                 initialSize="10"
                  autowarmCount="0"/>
 
     <!-- Query Result Cache
@@ -460,9 +460,9 @@
          (DocList) based on a query, a sort, and the range of documents 
          requested.  
       -->
-    <queryResultCache class="solr.LRUCache"
-                     size="512"
-                     initialSize="512"
+    <queryResultCache class="solr.FastLRUCache"
+                     size="100"
+                     initialSize="10"
                      autowarmCount="0"/>
    
     <!-- Document Cache
@@ -471,9 +471,9 @@
          document).  Since Lucene internal document ids are transient,
          this cache will not be autowarmed.  
       -->
-    <documentCache class="solr.LRUCache"
-                   size="512"
-                   initialSize="512"
+    <documentCache class="solr.FastLRUCache"
+                   size="100"
+                   initialSize="10"
                    autowarmCount="0"/>
     
     <!-- Field Value Cache
@@ -482,12 +482,12 @@
          by document id.  The fieldValueCache is created by default
          even if not configured here.
       -->
-    <!--
+    
        <fieldValueCache class="solr.FastLRUCache"
-                        size="512"
-                        autowarmCount="128"
+                        size="100"
+                        autowarmCount="0"
                         showItems="32" />
-      -->
+      
 
     <!-- Custom Cache
 
