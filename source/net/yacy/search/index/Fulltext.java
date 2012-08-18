@@ -41,6 +41,7 @@ import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
@@ -263,14 +264,31 @@ public final class Fulltext implements Iterable<byte[]> {
     }
 
     public void putMetadata(final URIMetadata entry) throws IOException {
-        if (!this.connectedSolr()) return;
-        try {
-            SolrDocument sd = getSolr().get(ASCII.String(entry.url().hash()));
-            if (sd == null || !entry.isOlder(new URIMetadataNode(sd))) {
-                getSolr().add(getSolrScheme().metadata2solr(entry));
-            }
-        } catch (SolrException e) {
-            throw new IOException(e.getMessage(), e);
+        if (this.connectedSolr()) {
+	        try {
+	            SolrDocument sd = getSolr().get(ASCII.String(entry.url().hash()));
+	            if (sd == null || !entry.isOlder(new URIMetadataNode(sd))) {
+	                getSolr().add(getSolrScheme().metadata2solr(entry));
+	            }
+	        } catch (SolrException e) {
+	            throw new IOException(e.getMessage(), e);
+	        }
+        } else if (this.urlIndexFile != null && entry instanceof URIMetadataRow) {
+            URIMetadata oldEntry = null;
+	        try {
+	            final Row.Entry oe = this.urlIndexFile.get(entry.hash(), false);
+	            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
+	        } catch (final Throwable e) {
+	            Log.logException(e);
+	            oldEntry = null;
+	        }
+	        if (oldEntry == null || !entry.isOlder(oldEntry)) {
+		        try {
+		            this.urlIndexFile.put(((URIMetadataRow) entry).toRowEntry());
+		        } catch (final SpaceExceededException e) {
+		            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
+		        }
+	        }
         }
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
