@@ -84,7 +84,7 @@ public final class transferURL {
         } else {
             int received = 0;
             int blocked = 0;
-            final int sizeBefore = sb.index.fulltext().size();
+            int doublecheck = 0;
             // read the urls from the other properties and store
             String urls;
             URIMetadata lEntry;
@@ -102,14 +102,14 @@ public final class transferURL {
                 // parse new lurl-entry
                 lEntry = URIMetadataRow.importEntry(urls);
                 if (lEntry == null) {
-                    Network.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
+                	if (Network.log.isWarning()) Network.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
                     continue;
                 }
 
                 // check if entry is well-formed
                 if (lEntry.url() == null) {
-                    Network.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
+                	if (Network.log.isWarning()) Network.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
                     continue;
                 }
@@ -123,7 +123,7 @@ public final class transferURL {
 
                 // check if the entry is blacklisted
                 if ((blockBlacklist) && (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, lEntry))) {
-                    Network.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                	if (Network.log.isFine()) Network.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;
@@ -138,6 +138,14 @@ public final class transferURL {
                     continue;
                 }
 
+                // doublecheck
+                if (sb.index.exists(lEntry.hash())) {
+                	if (Network.log.isFine()) Network.log.logFine("transferURL: double URL '" + lEntry.url() + "' from peer " + otherPeerName);
+                	lEntry = null;
+                    doublecheck++;
+                    continue;
+                }
+                
                 // write entry to database
                 if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true, false));
                 try {
@@ -153,11 +161,12 @@ public final class transferURL {
             sb.peers.mySeed().incRU(received);
 
             // return rewrite properties
-            final int more = sb.index.fulltext().size() - sizeBefore;
-            doublevalues = Integer.toString(received - more);
             Network.log.logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
             EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));
-            if ((received - more) > 0) Network.log.logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
+            if (doublecheck > 0) {
+            	Network.log.logSevere("Received " + doublecheck + " double URLs from peer " + otherPeerName);
+            	doublevalues = Integer.toString(doublecheck);
+            }
             result = "ok";
         }
 
