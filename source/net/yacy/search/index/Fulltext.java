@@ -52,6 +52,7 @@ import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
@@ -364,78 +365,66 @@ public final class Fulltext implements Iterable<byte[]> {
 
     @Override
     public Iterator<byte[]> iterator() {
-        try {
-            return this.urlIndexFile.keys(true, null);
-        } catch (final IOException e) {
-            Log.logException(e);
-            return null;
-        }
+    	CloneableIterator<byte[]> a = null;
+    	if (this.urlIndexFile != null) try {a = this.urlIndexFile.keys(true, null);} catch (IOException e) {}
+    	final Iterator<String> idi = this.solr.iterator();
+    	CloneableIterator<byte[]> b = new CloneableIterator<byte[]>() {
+			@Override
+			public boolean hasNext() {
+				return idi.hasNext();
+			}
+			@Override
+			public byte[] next() {
+				String s = idi.next();
+				return s == null ? null : ASCII.getBytes(s);
+			}
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			@Override
+			public CloneableIterator<byte[]> clone(Object modifier) {
+				return this;
+			}
+			@Override
+			public void close() {
+			}
+    	};
+    	if (a == null) return b;
+        return new MergeIterator<byte[]>(a, b,
+                URIMetadataRow.rowdef.objectOrder,
+                MergeIterator.simpleMerge,
+                true);
     }
 
-    public CloneableIterator<URIMetadata> entries() throws IOException {
+    public CloneableIterator<URIMetadata> entries() {
         // enumerates entry elements
-        return new kiter();
-    }
-
-    public CloneableIterator<URIMetadata> entries(final boolean up, final String firstHash) throws IOException {
-        // enumerates entry elements
-        return new kiter(up, firstHash);
-    }
-
-    public class kiter implements CloneableIterator<URIMetadata> {
-        // enumerates entry elements
-        private final CloneableIterator<Row.Entry> iter;
-        private final boolean error;
-        boolean up;
-
-        public kiter() throws IOException {
-            this.up = true;
-            this.iter = Fulltext.this.urlIndexFile.rows();
-            this.error = false;
-        }
-
-        public kiter(final boolean up, final String firstHash) throws IOException {
-            this.up = up;
-            this.iter = Fulltext.this.urlIndexFile.rows(up, (firstHash == null) ? null : ASCII.getBytes(firstHash));
-            this.error = false;
-        }
-
-        @Override
-        public kiter clone(final Object secondHash) {
-            try {
-                return new kiter(this.up, (String) secondHash);
-            } catch (final IOException e) {
-                return null;
+    	final Iterator<byte[]> ids = iterator();
+        return new CloneableIterator<URIMetadata>() {
+            @Override
+            public CloneableIterator<URIMetadata> clone(final Object secondHash) {
+                return this;
             }
-        }
-
-        @Override
-        public final boolean hasNext() {
-            if (this.error) return false;
-            if (this.iter == null) return false;
-            return this.iter.hasNext();
-        }
-
-        @Override
-        public final URIMetadata next() {
-            Row.Entry e = null;
-            if (this.iter == null) { return null; }
-            if (this.iter.hasNext()) { e = this.iter.next(); }
-            if (e == null) { return null; }
-            return new URIMetadataRow(e, null, 0);
-        }
-
-        @Override
-        public final void remove() {
-            this.iter.remove();
-        }
-
-        @Override
-        public void close() {
-            this.iter.close();
-        }
+            @Override
+            public final boolean hasNext() {
+                return ids.hasNext();
+            }
+            @Override
+            public final URIMetadata next() {
+                byte[] id = ids.next();
+                if (id == null) return null;
+                return getMetadata(id);
+            }
+            @Override
+            public final void remove() {
+                ids.remove();
+            }
+            @Override
+            public void close() {
+            }
+        };
     }
-
+    
     // export methods
     public Export export(final File f, final String filter, final HandleSet set, final int format, final boolean dom) {
         if ((this.exportthread != null) && (this.exportthread.isAlive())) {
@@ -570,7 +559,7 @@ public final class Fulltext implements Iterable<byte[]> {
         final Map<String, URLHashCounter> map = new HashMap<String, URLHashCounter>();
         // first collect all domains and calculate statistics about it
         synchronized (this) {
-            final CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
+            final Iterator<byte[]> i = this.iterator();
             String hosthash;
             byte[] urlhashb;
             URLHashCounter ds;
@@ -710,6 +699,10 @@ public final class Fulltext implements Iterable<byte[]> {
     public int deleteDomain(final String hosthash) throws IOException {
         // first collect all url hashes that belong to the domain
         assert hosthash.length() == 6;
+        // delete in solr
+        this.solr.deleteByQuery(YaCySchema.host_id_s.name() + ":\"" + hosthash + "\"");
+        
+        // delete in old metadata structure
         final ArrayList<String> l = new ArrayList<String>();
         synchronized (this) {
             final CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);

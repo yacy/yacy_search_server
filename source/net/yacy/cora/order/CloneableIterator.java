@@ -26,7 +26,7 @@ package net.yacy.cora.order;
 
 import java.util.Iterator;
 
-public interface CloneableIterator<E> extends Iterator<E> {
+public interface CloneableIterator<E> extends Iterator<E>, Cloneable {
 
     /**
      * clone the iterator using a modifier

@@ -198,30 +198,26 @@ public class IndexControlURLs_p {
 
         // generate list
         if (post.containsKey("urlhashsimilar")) {
-            try {
-                final Iterator<URIMetadata> entryIt = new RotateIterator<URIMetadata>(segment.fulltext().entries(true, urlhash), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax());
-                final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
-                URIMetadata entry;
-                int i = 0, rows = 0, cols = 0;
-                prop.put("urlhashsimilar", "1");
-                while (entryIt.hasNext() && i < 256) {
-                    entry = entryIt.next();
-                    if (entry == null) break;
-                    prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", ASCII.String(entry.hash()));
-                    cols++;
-                    if (cols==8) {
-                        prop.put("urlhashsimilar_rows_"+rows+"_cols", cols);
-                        cols = 0;
-                        rows++;
-                    }
-                    i++;
-                }
-                prop.put("statistics", 0);
-                prop.put("urlhashsimilar_rows", rows);
-                prop.put("result", result.toString());
-            } catch (final IOException e) {
-                prop.putHTML("result", "No Entries for URL hash " + urlhash);
-            }
+            final Iterator<URIMetadata> entryIt = new RotateIterator<URIMetadata>(segment.fulltext().entries(), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax());
+			final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
+			URIMetadata entry;
+			int i = 0, rows = 0, cols = 0;
+			prop.put("urlhashsimilar", "1");
+			while (entryIt.hasNext() && i < 256) {
+			    entry = entryIt.next();
+			    if (entry == null) break;
+			    prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", ASCII.String(entry.hash()));
+			    cols++;
+			    if (cols==8) {
+			        prop.put("urlhashsimilar_rows_"+rows+"_cols", cols);
+			        cols = 0;
+			        rows++;
+			    }
+			    i++;
+			}
+			prop.put("statistics", 0);
+			prop.put("urlhashsimilar_rows", rows);
+			prop.put("result", result.toString());
             prop.put("lurlexport", 0);
             prop.put("reload", 0);
         }
