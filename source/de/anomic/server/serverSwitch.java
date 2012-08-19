@@ -31,10 +31,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Random;
@@ -462,26 +460,10 @@ public class serverSwitch
         }
     }
 
-    public String[] sessionsOlderThan(String threadName, long timeout) {
-        final List<String> list = new ArrayList<String>();
-        final WorkflowThread st = getThread(threadName);
-
-        for ( final Session s : serverCore.getJobList() ) {
-            if ( !s.isAlive() ) {
-                continue;
-            }
-            if ( s.getTime() > timeout ) {
-                list.add(s.getName());
-            }
-        }
-        return (String[]) list.toArray();
-    }
-
-    public void closeSessions(String threadName, String sessionName) {
+    public void closeSessions(String sessionName) {
         if ( sessionName == null ) {
             return;
         }
-        final WorkflowThread st = getThread(threadName);
 
         for ( final Session s : serverCore.getJobList() ) {
             if ( (s.isAlive()) && (s.getName().equals(sessionName)) ) {

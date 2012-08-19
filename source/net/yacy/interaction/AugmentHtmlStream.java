@@ -3,20 +3,15 @@ package net.yacy.interaction;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
 
-import net.yacy.yacy;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.document.Document;
-import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
@@ -89,28 +84,6 @@ public class AugmentHtmlStream {
 
     }
 
-    /**
-     * load snippet from resource text file
-     *
-     * @return text from resource text file
-     */
-    private static String loadPart(String part) {
-        String result = "";
-    try {
-        BufferedReader in = new BufferedReader(new FileReader(yacy.homedir + File.separatorChar + "htroot"
-                + File.separatorChar + "interaction" + File.separatorChar
-                + "parts" + File.separatorChar + part));
-        String str;
-        while ((str = in.readLine()) != null) {
-            result += str;
-        }
-        in.close();
-    } catch (IOException e) {
-    }
-
-    return result;
-    }
-
     public static StringBuffer process(StringBuffer data, DigestURI url, RequestHeader requestHeader) {
 
         String action =  requestHeader.get("YACYACTION");
@@ -150,28 +123,28 @@ public class AugmentHtmlStream {
             Doc = processAddDoctype(Doc);
             augmented = true;
         }
-      
-        
+
+
         if (sb.getConfigBool("augmentation.reparse", false) == true) {
-        	
+
         	org.jsoup.nodes.Document d = Jsoup.parse(Doc);
-        	
+
         	d.title ("yacy - "+d.title());
-        	
+
         	if (sb.getConfigBool("interaction.overlayinteraction.enabled", false) == true) {
-        	
+
         		d.head().append (loadInternal("env/templates/jqueryheader.template", requestHeader));
 	        	d.head().append ("<script type='text/javascript'>"+loadInternal("interaction_elements/interaction.js", requestHeader)+"</script>");
-	        	d.head().append ("<script type='text/javascript'>"+loadInternal("interaction_elements/interaction_metadata.js", requestHeader)+"</script>");        	
-        	
-        	                  
+	        	d.head().append ("<script type='text/javascript'>"+loadInternal("interaction_elements/interaction_metadata.js", requestHeader)+"</script>");
+
+
 	        	d.body().append (loadInternal("interaction_elements/OverlayInteraction.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader));
-	        	d.body().append (loadInternal("interaction_elements/Footer.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader));            
-        	
+	        	d.body().append (loadInternal("interaction_elements/Footer.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader));
+
         	}
-        	
+
         	Doc = d.html();
-        	
+
         	augmented = true;
         }
 

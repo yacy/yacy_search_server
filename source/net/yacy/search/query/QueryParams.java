@@ -367,6 +367,17 @@ public final class QueryParams {
         return ASCII.String(bb);
     }
 
+    public static String hashSet2hashString(final Set<String> hashes) {
+        final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
+        int p = 0;
+        for (final String s : hashes) {
+            assert s.length() == Word.commonHashLength : "hash = " + s;
+            System.arraycopy(ASCII.getBytes(s), 0, bb, p, Word.commonHashLength);
+            p += Word.commonHashLength;
+        }
+        return ASCII.String(bb);
+    }
+
     public static String anonymizedQueryHashes(final HandleSet hashes) {
         // create a more anonymized representation of a query hashes for logging
         final Iterator<byte[]> i = hashes.iterator();

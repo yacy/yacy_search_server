@@ -64,7 +64,7 @@ public final class Connections_p {
             doNameLookup = post.getBoolean("nameLookup");
             if (post.containsKey("closeServerSession")) {
                 final String sessionName = post.get("closeServerSession", null);
-                sb.closeSessions("10_httpd", sessionName);
+                sb.closeSessions(sessionName);
                 prop.put("LOCATION","");
                 return prop;
             }

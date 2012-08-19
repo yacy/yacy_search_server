@@ -86,17 +86,17 @@ public final class SearchEvent {
     // class variables that may be implemented with an abstract class
     private long eventTime;
     private QueryParams query;
-    private final SeedDB peers;
+    public final SeedDB peers;
     private final WorkTables workTables;
-    private final RWIProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
+    public  final RWIProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
     private final SnippetProcess resultFetcher;
 
-    private final SecondarySearchSuperviser secondarySearchSuperviser;
+    public final SecondarySearchSuperviser secondarySearchSuperviser;
 
     // class variables for remote searches
     public final List<RemoteSearch> primarySearchThreadsL;
     private RemoteSearch[] secondarySearchThreads;
-    private final SortedMap<byte[], String> preselectedPeerHashes;
+    public final SortedMap<byte[], String> preselectedPeerHashes;
     private final Thread localSearchThread;
     private final SortedMap<byte[], Integer> IACount;
     private final SortedMap<byte[], String> IAResults;
@@ -167,25 +167,9 @@ public final class SearchEvent {
                         Thread.currentThread().setName("SearchEvent.primaryRemoteSearches");
                         RemoteSearch.primaryRemoteSearches(
                         	SearchEvent.this,
-                            QueryParams.hashSet2hashString(SearchEvent.this.query.query_include_hashes),
-                            QueryParams.hashSet2hashString(SearchEvent.this.query.query_exclude_hashes),
-                            SearchEvent.this.query.prefer,
-                            SearchEvent.this.query.urlMask,
-                            SearchEvent.this.query.modifier,
-                            SearchEvent.this.query.targetlang == null ? "" : SearchEvent.this.query.targetlang,
-                            SearchEvent.this.query.sitehash == null ? "" : SearchEvent.this.query.sitehash,
-                            SearchEvent.this.query.authorhash == null ? "" : SearchEvent.this.query.authorhash,
-                            SearchEvent.this.query.contentdom == null ? "all" : SearchEvent.this.query.contentdom.toString(),
                             remote_maxcount,
                             remote_maxtime,
-                            SearchEvent.this.query.maxDistance,
-                            SearchEvent.this.query.getSegment(),
-                            peers,
-                            SearchEvent.this.rankingProcess,
-                            SearchEvent.this.secondarySearchSuperviser,
                             Switchboard.urlBlacklist,
-                            SearchEvent.this.query.ranking,
-                            SearchEvent.this.query.constraint,
                             (SearchEvent.this.query.domType == QueryParams.Searchdom.GLOBAL) ? null : preselectedPeerHashes,
                             burstRobinsonPercent,
                             burstMultiwordPercent);
@@ -303,7 +287,7 @@ public final class SearchEvent {
         }
         SearchEventCache.put(this.query.id(false), this);
     }
-    
+
     public ReferenceOrder getOrder() {
         return this.order;
     }
@@ -694,14 +678,8 @@ public final class SearchEvent {
                         words,
                         urls.toString(),
                         6000,
-                        SearchEvent.this.query.getSegment(),
-                        SearchEvent.this.peers,
-                        SearchEvent.this.rankingProcess,
                         peer,
-                        Switchboard.urlBlacklist,
-                        SearchEvent.this.query.ranking,
-                        SearchEvent.this.query.constraint,
-                        SearchEvent.this.preselectedPeerHashes);
+                        Switchboard.urlBlacklist);
             }
         }
     }

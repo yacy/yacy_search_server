@@ -27,19 +27,14 @@ package net.yacy.peers;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Bitfield;
 import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist;
-import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
-import net.yacy.search.ranking.RankingProfile;
 
 
 public class RemoteSearch extends Thread {
@@ -50,49 +45,37 @@ public class RemoteSearch extends Thread {
     final private String wordhashes, excludehashes, urlhashes, sitehash, authorhash, contentdom;
     final private boolean global;
     final private int partitions;
-    final private Segment indexSegment;
-    final private RWIProcess containerCache;
     final private SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser;
     final private Blacklist blacklist;
     final private Seed targetPeer;
     private int urls;
     private final int count, maxDistance;
     private final long time;
-    final private RankingProfile rankingProfile;
-    final private Pattern prefer, filter;
     final private QueryParams.Modifier modifier;
     final private String language;
-    final private Bitfield constraint;
-    final private SeedDB peers;
 
     public RemoteSearch(
               final SearchEvent event,
               final String wordhashes, final String excludehashes,
               final String urlhashes, // this is the field that is filled during a secondary search to restrict to specific urls that are to be retrieved
-              final Pattern prefer,
-              final Pattern filter,
               final QueryParams.Modifier modifier,
               final String language,
-              final String sitehash, final String authorhash, final String contentdom,
-              final int count, final long time, final int maxDistance,
-              final boolean global, final int partitions,
+              final String sitehash,
+              final String authorhash,
+              final String contentdom,
+              final int count,
+              final long time,
+              final int maxDistance,
+              final boolean global,
+              final int partitions,
               final Seed targetPeer,
-              final Segment indexSegment,
-              final SeedDB peers,
-              final RWIProcess containerCache,
               final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
-              final Blacklist blacklist,
-              final RankingProfile rankingProfile,
-              final Bitfield constraint) {
+              final Blacklist blacklist) {
         super(ysThreadGroup, "yacySearch_" + targetPeer.getName());
-        //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.isEmpty()) ? "(primary)" : "(secondary)"));
-        assert wordhashes.length() >= 12;
         this.event = event;
         this.wordhashes = wordhashes;
         this.excludehashes = excludehashes;
         this.urlhashes = urlhashes;
-        this.prefer = prefer;
-        this.filter = filter;
         this.modifier = modifier;
         this.language = language;
         this.sitehash = sitehash;
@@ -100,9 +83,6 @@ public class RemoteSearch extends Thread {
         this.contentdom = contentdom;
         this.global = global;
         this.partitions = partitions;
-        this.indexSegment = indexSegment;
-        this.peers = peers;
-        this.containerCache = containerCache;
         this.secondarySearchSuperviser = secondarySearchSuperviser;
         this.blacklist = blacklist;
         this.targetPeer = targetPeer;
@@ -110,34 +90,42 @@ public class RemoteSearch extends Thread {
         this.count = count;
         this.time = time;
         this.maxDistance = maxDistance;
-        this.rankingProfile = rankingProfile;
-        this.constraint = constraint;
     }
 
     @Override
     public void run() {
-        this.containerCache.oneFeederStarted();
+        this.event.rankingProcess.oneFeederStarted();
         try {
             this.urls = Protocol.search(
-                        this.peers.mySeed(),
-                        this.wordhashes, this.excludehashes, this.urlhashes,
-                        this.prefer, this.filter, this.modifier.getModifier(),
-                        this.language, this.sitehash, this.authorhash, this.contentdom,
-                        this.count, this.time, this.maxDistance, this.global, this.partitions,
-                        this.targetPeer, this.indexSegment, this.containerCache, this.secondarySearchSuperviser,
-                        this.blacklist, this.rankingProfile, this.constraint);
+                        this.event,
+                        this.wordhashes,
+                        this.excludehashes,
+                        this.urlhashes,
+                        this.modifier.getModifier(),
+                        this.language,
+                        this.sitehash,
+                        this.authorhash,
+                        this.contentdom,
+                        this.count,
+                        this.time,
+                        this.maxDistance,
+                        this.global,
+                        this.partitions,
+                        this.targetPeer,
+                        this.secondarySearchSuperviser,
+                        this.blacklist);
             if (this.urls >= 0) {
                 // urls is an array of url hashes. this is only used for log output
                 if (this.urlhashes != null && this.urlhashes.length() > 0) Network.log.logInfo("SECONDARY REMOTE SEARCH - remote peer " + this.targetPeer.hash + ":" + this.targetPeer.getName() + " contributed " + this.urls + " links for word hash " + this.wordhashes);
-                this.peers.mySeed().incRI(this.urls);
-                this.peers.mySeed().incRU(this.urls);
+                this.event.peers.mySeed().incRI(this.urls);
+                this.event.peers.mySeed().incRU(this.urls);
             } else {
                 Network.log.logInfo("REMOTE SEARCH - no answer from remote peer " + this.targetPeer.hash + ":" + this.targetPeer.getName());
             }
         } catch (final Exception e) {
             Log.logException(e);
         } finally {
-        	this.containerCache.oneFeederTerminated();
+            this.event.rankingProcess.oneFeederTerminated();
         }
     }
 
@@ -162,21 +150,8 @@ public class RemoteSearch extends Thread {
 
     public static void primaryRemoteSearches(
     		final SearchEvent event,
-            final String wordhashes, final String excludehashes,
-            final Pattern prefer, final Pattern filter,
-            final QueryParams.Modifier modifier,
-            final String language,
-            final String sitehash,
-            final String authorhash,
-            final String contentdom,
-            final int count, final long time, final int maxDist,
-            final Segment indexSegment,
-            final SeedDB peers,
-            final RWIProcess containerCache,
-            final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
+            final int count, final long time,
             final Blacklist blacklist,
-            final RankingProfile rankingProfile,
-            final Bitfield constraint,
             final SortedMap<byte[], String> clusterselection,
             final int burstRobinsonPercent,
             final int burstMultiwordPercent) {
@@ -184,17 +159,15 @@ public class RemoteSearch extends Thread {
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        assert language != null;
-        assert wordhashes.length() >= 12 : "wordhashes = " + wordhashes;
         final Seed[] targetPeers =
             (clusterselection == null) ?
                     PeerSelection.selectSearchTargets(
-                            peers,
-                            QueryParams.hashes2Set(wordhashes),
-                            peers.redundancy(),
+                            event.peers,
+                            event.getQuery().query_include_hashes,
+                            event.peers.redundancy(),
                             burstRobinsonPercent,
                             burstMultiwordPercent)
-                  : PeerSelection.selectClusterPeers(peers, clusterselection);
+                  : PeerSelection.selectClusterPeers(event.peers, clusterselection);
         if (targetPeers == null) return;
         final int targets = targetPeers.length;
         if (targets == 0) return;
@@ -203,10 +176,22 @@ public class RemoteSearch extends Thread {
             try {
                 RemoteSearch rs = new RemoteSearch(
                     event,
-                    wordhashes, excludehashes, "", prefer, filter, modifier,
-                    language, sitehash, authorhash, contentdom,
-                    count, time, maxDist, true, targets, targetPeers[i],
-                    indexSegment, peers, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
+                    QueryParams.hashSet2hashString(event.getQuery().query_include_hashes),
+                    QueryParams.hashSet2hashString(event.getQuery().query_exclude_hashes),
+                    "",
+                    event.getQuery().modifier,
+                    event.getQuery().targetlang == null ? "" : event.getQuery().targetlang,
+                    event.getQuery().sitehash == null ? "" : event.getQuery().sitehash,
+                    event.getQuery().authorhash == null ? "" : event.getQuery().authorhash,
+                    event.getQuery().contentdom == null ? "all" : event.getQuery().contentdom.toString(),
+                    count,
+                    time,
+                    event.getQuery().maxDistance,
+                    true,
+                    targets,
+                    targetPeers[i],
+                    event.secondarySearchSuperviser,
+                    blacklist);
                 rs.start();
                 event.primarySearchThreadsL.add(rs);
             } catch (final OutOfMemoryError e) {
@@ -215,33 +200,43 @@ public class RemoteSearch extends Thread {
             }
         }
     }
-    
+
     public static RemoteSearch secondaryRemoteSearch(
     		final SearchEvent event,
-            final Set<String> wordhashes, final String urlhashes,
+            final Set<String> wordhashes,
+            final String urlhashes,
             final long time,
-            final Segment indexSegment,
-            final SeedDB peers,
-            final RWIProcess containerCache,
-            final String targethash, final Blacklist blacklist,
-            final RankingProfile rankingProfile,
-            final Bitfield constraint, final SortedMap<byte[], String> clusterselection) {
+            final String targethash,
+            final Blacklist blacklist) {
 
         // check own peer status
-        if (peers.mySeed() == null || peers.mySeed().getPublicAddress() == null) { return null; }
+        if (event.peers.mySeed() == null || event.peers.mySeed().getPublicAddress() == null) { return null; }
         assert urlhashes != null;
         assert urlhashes.length() > 0;
 
         // prepare seed targets and threads
-        final Seed targetPeer = peers.getConnected(targethash);
+        final Seed targetPeer = event.peers.getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
-        if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(ASCII.getBytes(targetPeer.hash)));
-        StringBuilder whs = new StringBuilder(24);
-        for (String s: wordhashes) whs.append(s);
+        if (event.preselectedPeerHashes != null) targetPeer.setAlternativeAddress(event.preselectedPeerHashes.get(ASCII.getBytes(targetPeer.hash)));
+
         final RemoteSearch searchThread = new RemoteSearch(
         		event,
-                whs.toString(), "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, new QueryParams.Modifier(""), "", "", "", "all", 20, time, 9999, true, 0, targetPeer,
-                indexSegment, peers, containerCache, null, blacklist, rankingProfile, constraint);
+        		QueryParams.hashSet2hashString(wordhashes),
+                "",
+                urlhashes,
+                new QueryParams.Modifier(""),
+                "",
+                "",
+                "",
+                "all",
+                20,
+                time,
+                9999,
+                true,
+                0,
+                targetPeer,
+                null,
+                blacklist);
         searchThread.start();
         return searchThread;
     }
