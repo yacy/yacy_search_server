@@ -308,72 +308,44 @@ public class URIMetadataNode implements URIMetadata {
         return false;
     }
 
-    private StringBuilder corePropList() {
+    public static StringBuilder corePropList(URIMetadata md) {
         // generate a parseable string; this is a simple property-list
         final StringBuilder s = new StringBuilder(300);
-        //System.out.println("author=" + comp.author());
 
         // create new formatters to make concurrency possible
         final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
 
         try {
-            s.append("hash=").append(ASCII.String(hash()));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",url=").append(crypt.simpleEncode(url().toNormalform(false, true)));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",descr=").append(crypt.simpleEncode(dc_title()));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",author=").append(crypt.simpleEncode(dc_creator()));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",tags=").append(crypt.simpleEncode(Tagging.cleanTagFromAutotagging(dc_subject())));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",publisher=").append(crypt.simpleEncode(dc_publisher()));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",lat=").append(lat());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",lon=").append(lon());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",mod=").append(formatter.format(moddate()));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",load=").append(formatter.format(loaddate()));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",fresh=").append(formatter.format(freshdate()));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",referrer=").append(referrerHash() == null ? "" : ASCII.String(referrerHash()));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",md5=").append(md5());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",size=").append(size());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",wc=").append(wordCount());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",dt=").append(doctype());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",flags=").append(flags().exportB64());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",lang=").append(language() == null ? "EN" : UTF8.String(language()));
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",llocal=").append(llocal());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",lother=").append(lother());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",limage=").append(limage());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",laudio=").append(laudio());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",lvideo=").append(lvideo());
-            assert (s.toString().indexOf(0) < 0);
-            s.append(",lapp=").append(lapp());
-            assert (s.toString().indexOf(0) < 0);
-
-            if (this.word != null) {
+            s.append("hash=").append(ASCII.String(md.hash()));
+            s.append(",url=").append(crypt.simpleEncode(md.url().toNormalform(false, true)));
+            s.append(",descr=").append(crypt.simpleEncode(md.dc_title()));
+            s.append(",author=").append(crypt.simpleEncode(md.dc_creator()));
+            s.append(",tags=").append(crypt.simpleEncode(Tagging.cleanTagFromAutotagging(md.dc_subject())));
+            s.append(",publisher=").append(crypt.simpleEncode(md.dc_publisher()));
+            s.append(",lat=").append(md.lat());
+            s.append(",lon=").append(md.lon());
+            s.append(",mod=").append(formatter.format(md.moddate()));
+            s.append(",load=").append(formatter.format(md.loaddate()));
+            s.append(",fresh=").append(formatter.format(md.freshdate()));
+            s.append(",referrer=").append(md.referrerHash() == null ? "" : ASCII.String(md.referrerHash()));
+            s.append(",md5=").append(md.md5());
+            s.append(",size=").append(md.size());
+            s.append(",wc=").append(md.wordCount());
+            s.append(",dt=").append(md.doctype());
+            s.append(",flags=").append(md.flags().exportB64());
+            s.append(",lang=").append(md.language() == null ? "EN" : UTF8.String(md.language()));
+            s.append(",llocal=").append(md.llocal());
+            s.append(",lother=").append(md.lother());
+            s.append(",limage=").append(md.limage());
+            s.append(",laudio=").append(md.laudio());
+            s.append(",lvideo=").append(md.lvideo());
+            s.append(",lapp=").append(md.lapp());
+            if (md.word() != null) {
                 // append also word properties
-                final String wprop = this.word.toPropertyForm();
+                final String wprop = md.word().toPropertyForm();
                 s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(wprop));
             }
-            assert (s.toString().indexOf(0) < 0);
             return s;
-
         } catch (final Throwable e) {
             Log.logException(e);
             return null;
@@ -387,7 +359,7 @@ public class URIMetadataNode implements URIMetadata {
     @Override
     public String toString(String snippet) {
         // add information needed for remote transport
-        final StringBuilder core = corePropList();
+        final StringBuilder core = corePropList(this);
         if (core == null)
             return null;
 
@@ -408,7 +380,7 @@ public class URIMetadataNode implements URIMetadata {
      */
     @Override
     public String toString() {
-        final StringBuilder core = corePropList();
+        final StringBuilder core = corePropList(this);
         if (core == null) return null;
         core.insert(0, '{');
         core.append('}');
