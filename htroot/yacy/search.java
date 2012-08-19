@@ -141,7 +141,6 @@ public final class search {
             }
             if (allon) constraint = null;
         }
-//      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
         // test:

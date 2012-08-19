@@ -585,11 +585,10 @@ public final class Protocol
             null);
     }
 
-    public static int search(
+    public static int primarySearch(
         final SearchEvent event,
         final String wordhashes,
         final String excludehashes,
-        final String urlhashes,
         final String modifier,
         final String language,
         final String sitehash,
@@ -598,7 +597,6 @@ public final class Protocol
         final int count,
         final long time,
         final int maxDistance,
-        final boolean global,
         final int partitions,
         final Seed target,
         final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
@@ -628,7 +626,7 @@ public final class Protocol
                     basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
                     wordhashes,
                     excludehashes,
-                    urlhashes,
+                    "",
                     modifier,
                     language,
                     sitehash,
@@ -637,43 +635,127 @@ public final class Protocol
                     count,
                     time,
                     maxDistance,
-                    global,
                     partitions,
                     target.getHexHash() + ".yacyh",
                     target.getClusterAddress(),
                     secondarySearchSuperviser
                     );
         } catch ( final IOException e ) {
-            Network.log.logInfo("SEARCH failed, Peer: "
-                + target.hash
-                + ":"
-                + target.getName()
-                + " ("
-                + e.getMessage()
-                + ")");
+            Network.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return -1;
         }
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
 
-        final boolean thisIsASecondarySearch = urlhashes.length() > 0;
-        assert !thisIsASecondarySearch || secondarySearchSuperviser == null;
+        try {
+            remoteSearchProcess(event, count, totalrequesttime, wordhashes, target, blacklist, result);
+        } catch (SpaceExceededException e) {
+            Log.logException(e);
+            return -1;
+        }
+
+        // read index abstract
+        if ( secondarySearchSuperviser != null ) {
+            String wordhash;
+            String whacc = "";
+            ByteBuffer ci;
+            int ac = 0;
+            for ( final Map.Entry<byte[], String> abstractEntry : result.indexabstract.entrySet() ) {
+                try {
+                    ci = new ByteBuffer(abstractEntry.getValue());
+                    wordhash = ASCII.String(abstractEntry.getKey());
+                } catch ( final OutOfMemoryError e ) {
+                    Log.logException(e);
+                    continue;
+                }
+                whacc += wordhash;
+                secondarySearchSuperviser.addAbstract(
+                    wordhash,
+                    WordReferenceFactory.decompressIndex(ci, target.hash));
+                ac++;
+
+            }
+            if ( ac > 0 ) {
+                secondarySearchSuperviser.commitAbstract();
+                Network.log.logInfo("remote search: peer " + target.getName() + " sent " + ac + " index abstracts for words " + whacc);
+            }
+        }
+        return result.urlcount;
+    }
+
+    public static int secondarySearch(
+        final SearchEvent event,
+        final String wordhashes,
+        final String urlhashes,
+        final String contentdom,
+        final int count,
+        final long time,
+        final int maxDistance,
+        final int partitions,
+        final Seed target,
+        final Blacklist blacklist) {
+
+        final long timestamp = System.currentTimeMillis();
+        event.rankingProcess.addExpectedRemoteReferences(count);
+        SearchResult result;
+        try {
+            result =
+                new SearchResult(
+                    event,
+                    basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
+                    wordhashes,
+                    "",
+                    urlhashes,
+                    "",
+                    "",
+                    "",
+                    "",
+                    contentdom,
+                    count,
+                    time,
+                    maxDistance,
+                    partitions,
+                    target.getHexHash() + ".yacyh",
+                    target.getClusterAddress(),
+                    null
+                    );
+        } catch ( final IOException e ) {
+            Network.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
+            //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
+            return -1;
+        }
+        // computation time
+        final long totalrequesttime = System.currentTimeMillis() - timestamp;
+
+        try {
+            remoteSearchProcess(event, count, totalrequesttime, wordhashes, target, blacklist, result);
+        } catch (SpaceExceededException e) {
+            Log.logException(e);
+            return -1;
+        }
+        return result.urlcount;
+    }
+
+    public static void remoteSearchProcess(
+        final SearchEvent event,
+        final int count,
+        final long time,
+        final String wordhashes,
+        final Seed target,
+        final Blacklist blacklist,
+        final SearchResult result
+        ) throws SpaceExceededException {
 
         // create containers
         final int words = wordhashes.length() / Word.commonHashLength;
         assert words > 0 : "wordhashes = " + wordhashes;
         final List<ReferenceContainer<WordReference>> container = new ArrayList<ReferenceContainer<WordReference>>(words);
         for ( int i = 0; i < words; i++ ) {
-            try {
-                container.add(ReferenceContainer.emptyContainer(
+            container.add(ReferenceContainer.emptyContainer(
                         Segment.wordReferenceFactory,
                         ASCII.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)),
-                        count));
-            } catch ( final SpaceExceededException e ) {
-                Log.logException(e);
-                return -1;
-            }
+                        count)); // throws SpaceExceededException
         }
 
         // insert results to containers
@@ -692,10 +774,7 @@ public final class Protocol
             }
             if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry) ) {
                 if ( Network.log.isInfo() ) {
-                    Network.log.logInfo("remote search: filtered blacklisted url "
-                        + urlEntry.url()
-                        + " from peer "
-                        + target.getName());
+                    Network.log.logInfo("remote search: filtered blacklisted url " + urlEntry.url() + " from peer " + target.getName());
                 }
                 continue; // block with backlist
             }
@@ -704,12 +783,7 @@ public final class Protocol
                 Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(urlEntry.url());
             if ( urlRejectReason != null ) {
                 if ( Network.log.isInfo() ) {
-                    Network.log.logInfo("remote search: rejected url '"
-                        + urlEntry.url()
-                        + "' ("
-                        + urlRejectReason
-                        + ") from peer "
-                        + target.getName());
+                    Network.log.logInfo("remote search: rejected url '" + urlEntry.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
                 }
                 continue; // reject url outside of our domain
             }
@@ -718,24 +792,14 @@ public final class Protocol
             final Reference entry = urlEntry.word();
             if ( entry == null ) {
                 if ( Network.log.isWarning() ) {
-                    Network.log.logWarning("remote search: no word attached from peer "
-                        + target.getName()
-                        + ", version "
-                        + target.getVersion());
+                    Network.log.logWarning("remote search: no word attached from peer " + target.getName() + ", version " + target.getVersion());
                 }
                 continue; // no word attached
             }
 
             // the search-result-url transports all the attributes of word indexes
             if ( !Base64Order.enhancedCoder.equal(entry.urlhash(), urlEntry.hash()) ) {
-                Network.log.logInfo("remote search: url-hash "
-                    + ASCII.String(urlEntry.hash())
-                    + " does not belong to word-attached-hash "
-                    + ASCII.String(entry.urlhash())
-                    + "; url = "
-                    + urlEntry.url()
-                    + " from peer "
-                    + target.getName());
+                Network.log.logInfo("remote search: url-hash " + ASCII.String(urlEntry.hash()) + " does not belong to word-attached-hash " + ASCII.String(entry.urlhash()) + "; url = " + urlEntry.url() + " from peer " + target.getName());
                 continue; // spammed
             }
 
@@ -789,82 +853,19 @@ public final class Protocol
             }
         }
 
-        Network.log.logInfo("remote search: peer "
-            + target.getName()
-            + " sent "
-            + container.get(0).size()
-            + "/"
-            + result.joincount
-            + " references for "
-            + (thisIsASecondarySearch ? "a secondary search" : "joined word queries"));
-
         // integrate remote top-words/topics
         if ( result.references != null && result.references.length > 0 ) {
-            Network.log.logInfo("remote search: peer "
-                + target.getName()
-                + " sent "
-                + result.references.length
-                + " topics");
+            Network.log.logInfo("remote search: peer " + target.getName() + " sent " + result.references.length + " topics");
             // add references twice, so they can be counted (must have at least 2 entries)
             synchronized ( event.rankingProcess ) {
                 event.rankingProcess.addTopic(result.references);
                 event.rankingProcess.addTopic(result.references);
             }
         }
-
-        // read index abstract
-        if ( secondarySearchSuperviser != null ) {
-            String wordhash;
-            String whacc = "";
-            ByteBuffer ci;
-            int ac = 0;
-            for ( final Map.Entry<byte[], String> abstractEntry : result.indexabstract.entrySet() ) {
-                try {
-                    ci = new ByteBuffer(abstractEntry.getValue());
-                    wordhash = ASCII.String(abstractEntry.getKey());
-                } catch ( final OutOfMemoryError e ) {
-                    Log.logException(e);
-                    continue;
-                }
-                whacc += wordhash;
-                secondarySearchSuperviser.addAbstract(
-                    wordhash,
-                    WordReferenceFactory.decompressIndex(ci, target.hash));
-                ac++;
-
-            }
-            if ( ac > 0 ) {
-                secondarySearchSuperviser.commitAbstract();
-                Network.log.logInfo("remote search: peer "
-                    + target.getName()
-                    + " sent "
-                    + ac
-                    + " index abstracts for words "
-                    + whacc);
-            }
-        }
-
-        // generate statistics
-        if ( Network.log.isFine() ) {
-            Network.log.logFine("SEARCH "
-                + result.urlcount
-                + " URLS FROM "
-                + target.hash
-                + ":"
-                + target.getName()
-                + ", searchtime="
-                + result.searchtime
-                + ", netdelay="
-                + (totalrequesttime - result.searchtime)
-                + ", references="
-                + result.references);
-        }
-        return result.urlcount;
+        Network.log.logInfo("remote search: peer " + target.getName() + " sent " + container.get(0).size() + "/" + result.joincount + " references");
     }
 
-    public static class SearchResult
-    {
-
+    public static class SearchResult {
         public String version; // version : application version of responder
         public String uptime; // uptime : uptime in seconds of responder
         public String fwhop; // hops (depth) of forwards that had been performed to construct this result
@@ -892,7 +893,6 @@ public final class Protocol
             final int count,
             final long time,
             final int maxDistance,
-            final boolean global,
             final int partitions,
             final String hostname,
             final String hostaddress,
@@ -927,7 +927,6 @@ public final class Protocol
             parts.put("myseed", UTF8.StringBody((event.peers.mySeed() == null) ? "" : event.peers.mySeed().genSeedStr(key)));
             parts.put("count", UTF8.StringBody(Integer.toString(Math.max(10, count))));
             parts.put("time", UTF8.StringBody(Long.toString(Math.max(3000, time))));
-            parts.put("resource", UTF8.StringBody(((global) ? "global" : "local")));
             parts.put("partitions", UTF8.StringBody(Integer.toString(partitions)));
             parts.put("query", UTF8.StringBody(wordhashes));
             parts.put("exclude", UTF8.StringBody(excludehashes));

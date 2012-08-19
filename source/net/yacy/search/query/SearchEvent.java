@@ -95,7 +95,7 @@ public final class SearchEvent {
 
     // class variables for remote searches
     public final List<RemoteSearch> primarySearchThreadsL;
-    private RemoteSearch[] secondarySearchThreads;
+    private Thread[] secondarySearchThreads;
     public final SortedMap<byte[], String> preselectedPeerHashes;
     private final Thread localSearchThread;
     private final SortedMap<byte[], Integer> IACount;
@@ -325,7 +325,7 @@ public final class SearchEvent {
             }
         }
         if ( this.secondarySearchThreads != null ) {
-            for ( final RemoteSearch search : this.secondarySearchThreads ) {
+            for ( final Thread search : this.secondarySearchThreads ) {
                 if ( search != null ) {
                     synchronized ( search ) {
                         if ( search.isAlive() ) {
@@ -409,7 +409,7 @@ public final class SearchEvent {
         }
         // maybe a secondary search thread is alive, check this
         if ( (this.secondarySearchThreads != null) && (this.secondarySearchThreads.length != 0) ) {
-            for ( final RemoteSearch secondarySearchThread : this.secondarySearchThreads ) {
+            for ( final Thread secondarySearchThread : this.secondarySearchThreads ) {
                 if ( (secondarySearchThread != null) && (secondarySearchThread.isAlive()) ) {
                     return true;
                 }
@@ -422,7 +422,7 @@ public final class SearchEvent {
         return this.primarySearchThreadsL;
     }
 
-    public RemoteSearch[] getSecondarySearchThreads() {
+    public Thread[] getSecondarySearchThreads() {
         return this.secondarySearchThreads;
     }
 
@@ -654,8 +654,7 @@ public final class SearchEvent {
 
             // compute words for secondary search and start the secondary searches
             Set<String> words;
-            SearchEvent.this.secondarySearchThreads =
-                new RemoteSearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs.size()];
+            SearchEvent.this.secondarySearchThreads = new Thread[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs.size()];
             int c = 0;
             for ( final Map.Entry<String, Set<String>> entry : secondarySearchURLs.entrySet() ) {
                 String peer = entry.getKey();

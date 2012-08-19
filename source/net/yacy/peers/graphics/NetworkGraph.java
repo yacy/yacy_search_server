@@ -120,7 +120,7 @@ public class NetworkGraph {
         final SearchEvent event = SearchEventCache.getEvent(eventID);
         if (event == null) return null;
         final List<RemoteSearch> primarySearches = event.getPrimarySearchThreads();
-        final RemoteSearch[] secondarySearches = event.getSecondarySearchThreads();
+        //final Thread[] secondarySearches = event.getSecondarySearchThreads();
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
@@ -144,8 +144,9 @@ public class NetworkGraph {
         }
 
         // draw in the secondary search peers
+        /*
         if (secondarySearches != null) {
-            for (final RemoteSearch secondarySearche : secondarySearches) {
+            for (final Thread secondarySearche : secondarySearches) {
                 if (secondarySearche == null) continue;
                 eventPicture.setColor((secondarySearche.isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
                 angle = cyc + (360.0d * ((FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(secondarySearche.target().hash), null)) / DOUBLE_LONG_MAX_VALUE));
@@ -153,6 +154,7 @@ public class NetworkGraph {
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1.0, true, null, null, -1, -1, -1, false);
             }
         }
+        */
 
         // draw in the search target
         final QueryParams query = event.getQuery();
