@@ -31,10 +31,19 @@ import java.net.InetAddress;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 
+import org.apache.commons.httpclient.HttpException;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
+import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
@@ -47,6 +56,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrServer;
 public class RemoteSolrConnector extends SolrServerConnector implements SolrConnector {
 
     private final String solrurl, host, solrpath, solraccount, solrpw;
+    private DefaultHttpClient client;
     private final int port;
 
     /**
@@ -77,7 +87,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         }
         HttpSolrServer s;
         if (this.solraccount.length() > 0) {
-            final DefaultHttpClient client = new DefaultHttpClient() {
+            this.client = new DefaultHttpClient() {
                 @Override
                 protected HttpContext createHttpContext() {
                     HttpContext context = super.createHttpContext();
@@ -89,10 +99,35 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
                     return context;
                 }
             };
+            this.client.addRequestInterceptor(new HttpRequestInterceptor() {
+                @Override
+                public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
+                    if (!request.containsHeader("Accept-Encoding")) request.addHeader("Accept-Encoding", "gzip");
+                }
+
+            });
+            this.client.addResponseInterceptor(new HttpResponseInterceptor() {
+                @Override
+                public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
+                    HttpEntity entity = response.getEntity();
+                    if (entity != null) {
+                        Header ceheader = entity.getContentEncoding();
+                        if (ceheader != null) {
+                            HeaderElement[] codecs = ceheader.getElements();
+                            for (HeaderElement codec : codecs) {
+                                if (codec.getName().equalsIgnoreCase("gzip")) {
+                                    response.setEntity(new GzipDecompressingEntity(response.getEntity()));
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
             BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(new AuthScope(this.host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(this.solraccount, this.solrpw));
-            client.setCredentialsProvider(credsProvider);
-            s = new HttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, client);
+            this.client.setCredentialsProvider(credsProvider);
+            s = new HttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, this.client);
         } else {
             s = new HttpSolrServer(this.solrurl);
         }
@@ -101,6 +136,16 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
         s.setSoTimeout(60000);
         super.init(s);
+    }
+
+    public void terminate() {
+        this.client.getConnectionManager().shutdown();
+    }
+
+    @Override
+    public synchronized void close() {
+        super.close();
+        this.terminate();
     }
 
     public String getAdminInterface() {
