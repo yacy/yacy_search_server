@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -29,6 +30,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.GSAResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.index.YaCySchema;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.solr.common.SolrException;
@@ -61,6 +63,24 @@ public class searchresult {
      */
     public static String mime(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         return "text/xml";
+    }
+
+    public static class Sort {
+        public String sort, action, direction, mode, format;
+        public Sort(String d) {
+            this.sort = d;
+            String[] s = d.split(":");
+            this.action = s[0]; // date
+            this.direction = s[1]; // A or D
+            this.mode = s[2]; // S, R, L
+            this.format = s[3]; // d1
+        }
+        public String toSolr() {
+            if ("date".equals(this.action)) {
+                return YaCySchema.last_modified.name() + " " + (("D".equals(this.direction) ? "desc" : "asc"));
+            }
+            return null;
+        }
     }
 
     /**
@@ -98,6 +118,16 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt("num", 10), (authenticated) ? 5000 : 100));
         post.remove("num");
+        Sort sort = new Sort(post.get(CommonParams.SORT, ""));
+        String sorts = sort.toSolr();
+        if (sorts == null) {
+            post.remove(CommonParams.SORT);
+        } else {
+            post.put(CommonParams.SORT, sorts);
+        }
+        String site = post.remove("site");
+        String access = post.remove("access");
+        String entqr = post.remove("entqr");
 
         // get the embedded connector
         EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.fulltext().getLocalSolr();
@@ -113,6 +143,15 @@ public class searchresult {
             Log.logException(e);
             return null;
         }
+
+        // set some context for the writer
+        Map<Object,Object> context = req.getContext();
+        context.put("ip", header.get("CLIENTIP", ""));
+        context.put("client", header.get("User-Agent", ""));
+        context.put("sort", sort.sort);
+        context.put("site", site == null ? "" : site);
+        context.put("access", access == null ? "p" : access);
+        context.put("entqr", entqr == null ? "3" : entqr);
 
         // write the result directly to the output stream
         Writer ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));

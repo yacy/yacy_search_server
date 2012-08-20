@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.peers.operation.yacyVersion;
+import net.yacy.search.Switchboard;
 import net.yacy.search.index.YaCySchema;
 
 import org.apache.lucene.document.Document;
@@ -52,6 +54,7 @@ import org.apache.solr.search.SolrIndexSearcher;
  */
 public class GSAResponseWriter implements QueryResponseWriter {
 
+    private static String YaCyVer = null;
     private static final char lb = '\n';
     private enum GSAToken {
         CACHE_LAST_MODIFIED, // Date that the document was crawled, as specified in the Date HTTP header when the document was crawled for this index.
@@ -113,9 +116,12 @@ public class GSAResponseWriter implements QueryResponseWriter {
         assert rsp.getValues().get("responseHeader") != null;
         assert rsp.getValues().get("response") != null;
 
+        long start = System.currentTimeMillis();
+
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
         DocSlice response = (DocSlice) rsp.getValues().get("response");
+        Map<Object,Object> context = request.getContext();
 
         // parse response header
         ResHead resHead = new ResHead();
@@ -132,15 +138,35 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
         // write header
         writer.write(XML_START);
+        OpensearchResponseWriter.solitaireTag(writer, "TM", Long.toString(System.currentTimeMillis() - start));
+        OpensearchResponseWriter.solitaireTag(writer, "Q", request.getParams().get("q"));
+        paramTag(writer, "sort", (String) context.get("sort"));
+        paramTag(writer, "output", "xml_no_dtd");
+        paramTag(writer, "ie", "UTF-8");
+        paramTag(writer, "oe", "UTF-8");
+        paramTag(writer, "client", (String) context.get("client"));
+        paramTag(writer, "q", request.getParams().get("q"));
+        paramTag(writer, "site", (String) context.get("site"));
         paramTag(writer, "start", Integer.toString(resHead.offset));
         paramTag(writer, "num", Integer.toString(resHead.rows));
+        paramTag(writer, "ip", (String) context.get("ip"));
+        paramTag(writer, "access", (String) context.get("access")); // p - search only public content, s - search only secure content, a - search all content, both public and secure
+        paramTag(writer, "entqr", (String) context.get("entqr")); // query expansion policy; (entqr=1) -- Uses only the search appliance's synonym file, (entqr=1) -- Uses only the search appliance's synonym file, (entqr=3) -- Uses both standard and local synonym files.
+
+        // body introduction
+        final int responseCount = response.size();
+        writer.write("<RES SN=\"" + (resHead.offset + 1) + "\" EN=\"" + (resHead.offset + responseCount) + "\">"); writer.write(lb); // The index (1-based) of the first and last search result returned in this result set.
+        writer.write("<M>" + response.matches() + "</M>"); writer.write(lb); // The estimated total number of results for the search.
+        writer.write("<FI/>"); writer.write(lb); // Indicates that document filtering was performed during this search.
+        XML.escapeCharData("<NB><NU>/search?q=" + request.getParams().get("q") + "&site=" + (String) context.get("site") +
+                     "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + (String) context.get("client") + "&access=" + (String) context.get("access") +
+                     "&sort=" + (String) context.get("sort") + "&start=" + resHead.offset + responseCount + "&sa=N</NU></NB>", writer); writer.write(lb); // a relative URL pointing to the NEXT results page.
 
         // parse body
-        final int responseCount = response.size();
         SolrIndexSearcher searcher = request.getSearcher();
         DocIterator iterator = response.iterator();
         for (int i = 0; i < responseCount; i++) {
-            OpensearchResponseWriter.openTag(writer, "R");
+            writer.write("<R N=\"" + (resHead.offset + i + 1)  + "\"" + (i == 1 ? " L=\"\"" : "") + ">"); writer.write(lb);
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id, SOLR_FIELDS);
             List<Fieldable> fields = doc.getFields();
@@ -157,13 +183,6 @@ public class GSAResponseWriter implements QueryResponseWriter {
                     OpensearchResponseWriter.solitaireTag(writer, stag, value.stringValue());
                     continue;
                 }
-
-/*
-<RK></RK>
-<FS NAME="date" VALUE=""/>
-<S></S>
-<HAS><L/><C SZ="7k" CID="XN-uikfmLv0J" ENC="UTF-8"/></HAS>
-*/
 
                 // if the rule is not generic, use the specific here
                 if (YaCySchema.sku.name().equals(fieldName)) {
@@ -207,13 +226,13 @@ public class GSAResponseWriter implements QueryResponseWriter {
             }
             // compute snippet from texts
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.GD.name(), description);
-            OpensearchResponseWriter.solitaireTag(writer, GSAToken.ENT_SOURCE.name(), "YaCy");
+            if (YaCyVer == null) YaCyVer = yacyVersion.thisVersion().getName() + "/" + Switchboard.getSwitchboard().peers.mySeed().hash;
+            OpensearchResponseWriter.solitaireTag(writer, GSAToken.ENT_SOURCE.name(), YaCyVer);
             OpensearchResponseWriter.closeTag(writer, "R");
         }
-
+        writer.write("</RES>"); writer.write(lb);
         writer.write(XML_STOP);
     }
-
 
     public static void paramTag(final Writer writer, final String tagname, String value) throws IOException {
         if (value == null || value.length() == 0) return;
@@ -226,43 +245,3 @@ public class GSAResponseWriter implements QueryResponseWriter {
         writer.write("\"/>"); writer.write(lb);
     }
 }
-
-/*
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<GSP VER="3.2">
-<TM>0.053898</TM>
-<Q>pdf</Q>
-<PARAM name="sort" value="date:D:L:d1" original_value="date:D:L:d1"/>
-<PARAM name="output" value="xml_no_dtd" original_value="xml_no_dtd"/>
-<PARAM name="ie" value="UTF-8" original_value="UTF-8"/>
-<PARAM name="oe" value="UTF-8" original_value="UTF-8"/>
-<PARAM name="client" value="" original_value=""/>
-<PARAM name="q" value="pdf" original_value="pdf"/>
-<PARAM name="site" value="" original_value=""/>
-<PARAM name="start" value="0" original_value="0"/>
-<PARAM name="num" value="10" original_value="10"/>
-<PARAM name="ip" value="" original_value=""/>
-<PARAM name="access" value="p" original_value="p"/>
-<PARAM name="entqr" value="3" original_value="3"/>
-<PARAM name="entqrm" value="0" original_value="0"/>
-<RES SN="1" EN="10">
-<M>296</M>
-<NB>
-<NU></NU>
-</NB>
-
-<R N="1">
-<U></U>
-<UE></UE>
-<T></T>
-<RK></RK>
-<ENT_SOURCE></ENT_SOURCE>
-<FS NAME="date" VALUE=""/>
-<S></S>
-<LANG>de</LANG>
-<HAS><L/><C SZ="7k" CID="XN-uikfmLv0J" ENC="UTF-8"/></HAS>
-</R>
-<R N="2"></R>
-</RES>
-</GSP>
-*/
