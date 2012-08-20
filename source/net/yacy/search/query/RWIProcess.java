@@ -338,6 +338,11 @@ public final class RWIProcess extends Thread
                 assert (iEntry.urlhash().length == index.row().primaryKeyLength);
                 //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
+                // doublecheck for urls
+                if (this.urlhashes.has(iEntry.urlhash())) {
+                    continue pollloop;
+                }
+
                 // increase flag counts
                 for ( int j = 0; j < 32; j++ ) {
                     if ( iEntry.flags().get(j) ) {
@@ -432,9 +437,7 @@ public final class RWIProcess extends Thread
                     }
                 }
 
-                // finally make a double-check and insert result to stack
-                // the url hashes should be unique, no reason to check that
-                //if (!this.urlhashes.has(iEntry.urlhash())) {
+                // finally extend the double-check and insert result to stack
                 this.urlhashes.putUnique(iEntry.urlhash());
                 rankingtryloop: while ( true ) {
                     try {
