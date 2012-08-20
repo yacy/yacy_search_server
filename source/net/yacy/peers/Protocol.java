@@ -1026,6 +1026,9 @@ public final class Protocol
             final long time,
             final Seed target,
             final Blacklist blacklist) {
+        if (event.getQuery().queryString == null || event.getQuery().queryString.length() == 0) {
+            return -1; // we cannot query solr only with word hashes, there is no clear text string
+        }
         event.rankingProcess.addExpectedRemoteReferences(count);
         SolrDocumentList docList = null;
         final String solrQuerystring = YaCySchema.text_t + ":" + event.getQuery().queryString(true).replace(' ', '+');
