@@ -144,11 +144,15 @@ public final class SearchEvent {
                     .getFlagAcceptRemoteIndex()));
         final long start = System.currentTimeMillis();
 
+        // prepare a local RWI search
         // initialize a ranking process that is the target for data
         // that is generated concurrently from local and global search threads
         this.rankingProcess = new RWIProcess(this.query, this.order, remote);
 
-        // start a local search concurrently
+        // start a local solr search
+        RemoteSearch.solrRemoteSearch(this, 100, this.query.query_include_hashes, 10000, null, Switchboard.urlBlacklist);
+
+        // start a local RWI search concurrently
         this.rankingProcess.start();
 
         if ( remote ) {

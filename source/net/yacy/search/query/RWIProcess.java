@@ -26,7 +26,6 @@
 
 package net.yacy.search.query;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -59,7 +58,6 @@ import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -75,10 +73,6 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ResultEntry;
-
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException;
 
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -200,6 +194,7 @@ public final class RWIProcess extends Thread
     @Override
     public void run() {
 
+        /*
         // start a concurrent solr search
         if (this.query.query_include_words != null) {
             Thread solrSearch = new Thread() {
@@ -226,6 +221,7 @@ public final class RWIProcess extends Thread
             };
             solrSearch.start();
         }
+        */
 
         // do a search
         oneFeederStarted();

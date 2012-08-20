@@ -28,10 +28,13 @@ import java.util.List;
 
 import net.yacy.kelondro.logging.Log;
 
+import org.apache.solr.client.solrj.ResponseParser;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
+import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -202,27 +205,21 @@ public class SolrServerConnector extends AbstractSolrConnector implements SolrCo
         //query.addSortField( "price", SolrQuery.ORDER.asc );
 
         // query the server
-        //SearchResult result = new SearchResult(count);
-        Throwable error = null; // well this is a bad hack; see https://issues.apache.org/jira/browse/LUCENE-2239
-        // also: https://issues.apache.org/jira/browse/SOLR-2247
-        // we might try also: $JAVA_OPTS -Dsolr.directoryFactory=solr.MMapDirectoryFactory
-        for (int retry = 30; retry > 0; retry--) {
-            try {
-                final QueryResponse rsp = this.server.query(query);
-                final SolrDocumentList docs = rsp.getResults();
-                if (error != null) Log.logWarning("AbstractSolrConnector", "produced search result by silently ignoring an error before, message = " + error.getMessage());
-                return docs;
-            } catch (final Throwable e) {
-                Log.logWarning("AbstractSolrConnection", "problem with query=" + querystring, e);
-                error = e;
-                continue;
-            }
+        try {
+            QueryRequest request = new QueryRequest(query);
+            ResponseParser responseParser = new XMLResponseParser();
+            request.setResponseParser(responseParser);
+            final QueryResponse rsp = request.process(this.server);
+            final SolrDocumentList docs = rsp.getResults();
+            return docs;
+        } catch (final Throwable e) {
+            //Log.logException(e);
+            throw new IOException(e.getMessage(), e);
         }
-        throw new IOException(error.getMessage(), error);
     }
 
     private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
-    
+
     /**
      * get a document from solr by given id
      * @param id
@@ -234,7 +231,7 @@ public class SolrServerConnector extends AbstractSolrConnector implements SolrCo
     	assert id.length() == 12;
         // construct query
     	char[] q = new char[17];
-    	System.arraycopy(queryIDTemplate, 0, q, 0, 17);
+    	System.arraycopy(this.queryIDTemplate, 0, q, 0, 17);
     	System.arraycopy(id.toCharArray(), 0, q, 4, 12);
         final SolrQuery query = new SolrQuery();
         query.setQuery(new String(q));
@@ -242,23 +239,14 @@ public class SolrServerConnector extends AbstractSolrConnector implements SolrCo
         query.setStart(0);
 
         // query the server
-        Throwable error = null; // well this is a bad hack; see https://issues.apache.org/jira/browse/LUCENE-2239
-        // also: https://issues.apache.org/jira/browse/SOLR-2247
-        // we might try also: $JAVA_OPTS -Dsolr.directoryFactory=solr.MMapDirectoryFactory
-        for (int retry = 30; retry > 0; retry--) {
-            try {
-                final QueryResponse rsp = this.server.query(query);
-                final SolrDocumentList docs = rsp.getResults();
-                if (docs.isEmpty()) return null;
-                if (error != null) Log.logWarning("AbstractSolrConnector", "produced search result by silently ignoring an error before, message = " + error.getMessage());
-                return docs.get(0);
-            } catch (final Throwable e) {
-                Log.logWarning("AbstractSolrConnection", "problem with id=" + id, e);
-                error = e;
-                continue;
-            }
+        try {
+            final QueryResponse rsp = this.server.query(query);
+            final SolrDocumentList docs = rsp.getResults();
+            if (docs.isEmpty()) return null;
+            return docs.get(0);
+        } catch (final Throwable e) {
+            throw new IOException(e.getMessage(), e);
         }
-        throw new IOException(error.getMessage(), error);
     }
 
 }

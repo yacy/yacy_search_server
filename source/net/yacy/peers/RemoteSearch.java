@@ -24,6 +24,7 @@
 
 package net.yacy.peers;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedMap;
@@ -162,6 +163,16 @@ public class RemoteSearch extends Thread {
                             burstMultiwordPercent)
                   : PeerSelection.selectClusterPeers(event.peers, clusterselection);
         if (targetPeers == null) return;
+
+        // start solr searches
+        Set<Seed> omit = new HashSet<Seed>();
+        for (Seed s: targetPeers) omit.add(s);
+        Seed[] nodes = PeerSelection.selectNodeSearchTargets(event.peers, 20, omit);
+        for (Seed s: nodes) {
+            solrRemoteSearch(event, count, event.getQuery().query_include_hashes, time, s, blacklist);
+        }
+
+        // start search to YaCy peers
         final int targets = targetPeers.length;
         if (targets == 0) return;
         for (int i = 0; i < targets; i++) {
@@ -242,6 +253,52 @@ public class RemoteSearch extends Thread {
         };
         secondary.start();
         return secondary;
+    }
+
+    public static Thread solrRemoteSearch(
+                    final SearchEvent event,
+                    final int count,
+                    final HandleSet wordhashes,
+                    final long time,
+                    final Seed targetPeer,
+                    final Blacklist blacklist) {
+
+        // check own peer status
+        if (event.peers.mySeed() == null || event.peers.mySeed().getPublicAddress() == null) { return null; }
+
+        // prepare seed targets and threads
+        if (targetPeer != null && targetPeer.hash != null && event.preselectedPeerHashes != null) targetPeer.setAlternativeAddress(event.preselectedPeerHashes.get(ASCII.getBytes(targetPeer.hash)));
+        Thread solr = new Thread() {
+            @Override
+            public void run() {
+                event.rankingProcess.oneFeederStarted();
+                try {
+                    int urls = Protocol.solrQuery(
+                                    event,
+                                    wordhashes,
+                                    0,
+                                    count,
+                                    time,
+                                    targetPeer,
+                                    blacklist);
+                    if (urls >= 0) {
+                        // urls is an array of url hashes. this is only used for log output
+                        event.peers.mySeed().incRI(urls);
+                        event.peers.mySeed().incRU(urls);
+                    } else {
+                        if (targetPeer != null) {
+                            Network.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
+                        }
+                    }
+                } catch (final Exception e) {
+                    Log.logException(e);
+                } finally {
+                    event.rankingProcess.oneFeederTerminated();
+                }
+            }
+        };
+        solr.start();
+        return solr;
     }
 
     public static int remainingWaiting(final RemoteSearch[] searchThreads) {

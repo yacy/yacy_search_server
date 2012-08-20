@@ -76,12 +76,15 @@ import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.cora.services.federated.solr.RemoteSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -100,12 +103,15 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.query.RWIProcess;
+import net.yacy.search.index.YaCySchema;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.snippet.TextSnippet;
 
 import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
@@ -642,7 +648,7 @@ public final class Protocol
                     );
         } catch ( final IOException e ) {
             Network.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
-            //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
+            event.peers.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return -1;
         }
         // computation time
@@ -722,7 +728,7 @@ public final class Protocol
                     );
         } catch ( final IOException e ) {
             Network.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
-            //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
+            event.peers.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return -1;
         }
         // computation time
@@ -1012,20 +1018,132 @@ public final class Protocol
         }
     }
 
-    public static void solrQuery(
-            final RWIProcess containerCache,
-            final String solrURL, final String querystring, final int offset, final int count) {
-        containerCache.oneFeederStarted();
-    	SolrConnector solrConnector;
-		try {
-			solrConnector = new RemoteSolrConnector(solrURL);
-	    	SolrDocumentList docList = solrConnector.query(querystring, offset, count);
+    public static int solrQuery(
+            final SearchEvent event,
+            final HandleSet wordhashes,
+            final int offset,
+            final int count,
+            final long time,
+            final Seed target,
+            final Blacklist blacklist) {
+        event.rankingProcess.addExpectedRemoteReferences(count);
+        SolrDocumentList docList = null;
+        final String solrQuerystring = YaCySchema.text_t + ":" + event.getQuery().queryString(true).replace(' ', '+');
+        boolean localsearch = target == null || target.equals(event.peers.mySeed());
+        if (localsearch) {
+            // search the local index
+            try {
+                docList = event.rankingProcess.getQuery().getSegment().fulltext().getSolr().query(solrQuerystring, offset, count);
+            } catch (SolrException e) {
+                Network.log.logInfo("SEARCH failed (solr), localpeer (" + e.getMessage() + ")");
+                return -1;
+            } catch (IOException e) {
+                Network.log.logInfo("SEARCH failed (solr), localpeer (" + e.getMessage() + ")");
+                return -1;
+            }
+        } else {
+            final String solrURL = "http://" + target.getPublicAddress() + "/solr";
+            try {
+                SolrConnector solrConnector = new RemoteSolrConnector(solrURL);
+                docList = solrConnector.query(solrQuerystring, offset, count);
+                // no need to close this here because that sends a commit to remote solr which is not wanted here
+            } catch (IOException e) {
+                Network.log.logInfo("SEARCH failed (solr), Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
+                event.peers.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
+                return -1;
+            }
+        }
 
-		} catch (IOException e) {
-			Log.logException(e);
-		} finally {
-	    	containerCache.oneFeederTerminated();
+        // evaluate result
+		if (docList.size() > 0) {// create containers
+            final List<ReferenceContainer<WordReference>> container = new ArrayList<ReferenceContainer<WordReference>>(wordhashes.size());
+            for (byte[] hash: wordhashes) {
+                try {
+                    container.add(ReferenceContainer.emptyContainer(
+                                Segment.wordReferenceFactory,
+                                hash,
+                                count));
+                } catch (SpaceExceededException e) {
+                } // throws SpaceExceededException
+            }
+
+        	int term = count;
+            for (final SolrDocument doc: docList) {
+                if ( term-- <= 0 ) {
+                    break; // do not process more that requested (in case that evil peers fill us up with rubbish)
+                }
+                // get one single search result
+                if ( doc == null ) {
+                    continue;
+                }
+                URIMetadataNode urlEntry = new URIMetadataNode(doc);
+
+                if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry) ) {
+                    if ( Network.log.isInfo() ) {
+                        if (localsearch) {
+                            Network.log.logInfo("local search (solr): filtered blacklisted url " + urlEntry.url());
+                        } else {
+                            Network.log.logInfo("remote search (solr): filtered blacklisted url " + urlEntry.url() + " from peer " + target.getName());
+                        }
+                    }
+                    continue; // block with backlist
+                }
+
+                final String urlRejectReason =
+                    Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(urlEntry.url());
+                if ( urlRejectReason != null ) {
+                    if ( Network.log.isInfo() ) {
+                        if (localsearch) {
+                            Network.log.logInfo("local search (solr): rejected url '" + urlEntry.url() + "' (" + urlRejectReason + ")");
+                        } else {
+                            Network.log.logInfo("remote search (solr): rejected url '" + urlEntry.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
+                        }
+                    }
+                    continue; // reject url outside of our domain
+                }
+
+                // passed all checks, store url
+                if (!localsearch) {
+                    try {
+                        event.getQuery().getSegment().fulltext().putDocument(ClientUtils.toSolrInputDocument(doc));
+                        ResultURLs.stack(
+                            urlEntry,
+                            event.peers.mySeed().hash.getBytes(),
+                            UTF8.getBytes(target.hash),
+                            EventOrigin.QUERIES);
+                    } catch ( final IOException e ) {
+                        Network.log.logWarning("could not store search result", e);
+                        continue; // db-error
+                    }
+                }
+
+                // we create virtual word references here which are necessary to feed search results into retrieval process
+                Reference entry = new WordReferenceVars(urlEntry);
+
+                // add the url entry to the word indexes
+                for ( final ReferenceContainer<WordReference> c : container ) {
+                    try {
+                        c.add(entry);
+                    } catch ( final SpaceExceededException e ) {
+                        Log.logException(e);
+                        break;
+                    }
+                }
+            }
+
+            if (localsearch) {
+                event.rankingProcess.add(container.get(0), true, "localpeer", docList.size(), time);
+                event.rankingProcess.addFinalize();
+                event.rankingProcess.addExpectedRemoteReferences(-count);
+                Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
+            } else {
+                event.rankingProcess.add(container.get(0), false, target.getName() + "/" + target.hash, docList.size(), time);
+                event.rankingProcess.addFinalize();
+                event.rankingProcess.addExpectedRemoteReferences(-count);
+                Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + container.get(0).size() + "/" + docList.size() + " references");
+            }
 		}
+        return docList.size();
     }
 
     public static Map<String, String> permissionMessage(final SeedDB seedDB, final String targetHash) {
