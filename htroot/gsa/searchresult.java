@@ -81,11 +81,13 @@ public class searchresult {
         sb.peers.peerActions.setUserAgent(clientip, userAgent);
 
         // check if user is allowed to search (can be switched in /ConfigPortal.html)
-        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
+        boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final boolean searchAllowed = authenticated || sb.getConfigBool("publicSearchpage", true);
         if (!searchAllowed) return null;
 
         // check post
         if (post == null) return null;
+        sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
 
         // rename post fields according to result style
         //post.put(CommonParams.Q, post.remove("q")); // same as solr
@@ -94,6 +96,8 @@ public class searchresult {
         //post.put(, post.remove("client"));//required, example: myfrontend
         //post.put(, post.remove("output"));//required, example: xml,xml_no_dtd
         post.put(CommonParams.ROWS, post.remove("num"));
+        post.put(CommonParams.ROWS, Math.min(post.getInt("num", 10), (authenticated) ? 5000 : 100));
+        post.remove("num");
 
         // get the embedded connector
         EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.fulltext().getLocalSolr();

@@ -121,16 +121,19 @@ public class select {
         sb.peers.peerActions.setUserAgent(clientip, userAgent);
 
         // check if user is allowed to search (can be switched in /ConfigPortal.html)
-        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
+        boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final boolean searchAllowed = authenticated || sb.getConfigBool("publicSearchpage", true);
         if (!searchAllowed) return null;
 
         // check post
         if (post == null) return null;
+        sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
 
         // rename post fields according to result style
         if (!post.containsKey(CommonParams.Q)) post.put(CommonParams.Q, post.remove("query")); // sru patch
         if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, post.remove("startRecord")); // sru patch
-        if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, post.remove("maximumRecords")); // sru patch
+        post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, post.getInt("maximumRecords", 10)), (authenticated) ? 5000 : 100));
+        post.remove("maximumRecords");
 
         // get a response writer for the result
         String wt = post.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
