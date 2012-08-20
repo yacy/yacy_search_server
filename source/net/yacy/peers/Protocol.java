@@ -1031,7 +1031,7 @@ public final class Protocol
         }
         event.rankingProcess.addExpectedRemoteReferences(count);
         SolrDocumentList docList = null;
-        final String solrQuerystring = YaCySchema.text_t + ":" + event.getQuery().queryString(true).replace(' ', '+');
+        final String solrQuerystring = YaCySchema.text_t + ":" + event.getQuery().solrQueryString();
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch) {
             // search the local index

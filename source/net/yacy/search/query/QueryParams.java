@@ -466,12 +466,21 @@ public final class QueryParams {
 
     public String queryString(final boolean encodeHTML) {
         final String ret;
-    	if (encodeHTML){
+        if (encodeHTML){
             ret = CharacterCoding.unicode2html(this.queryString, true);
-    	} else {
+        } else {
             ret = this.queryString;
         }
-    	return ret;
+        return ret;
+    }
+
+    public String solrQueryString() {
+        final StringBuilder q = new StringBuilder();
+        if (this.query_include_words != null) {
+            for (String s: this.query_include_words) q.append('+').append(s);
+            for (String s: this.query_exclude_words) q.append("+-").append(s);
+        }
+        return CharacterCoding.unicode2html(q.length() > 0 ? q.substring(1) : q.toString(), true);
     }
 
     public String queryStringForUrl() {

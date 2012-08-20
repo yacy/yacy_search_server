@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.search.index.YaCySchema;
 
@@ -60,6 +58,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         CRAWLDATE,  // An optional element that shows the date when the page was crawled. It is shown only for pages that have been crawled within the past two days.
         U,          // The URL of the search result.
         UE,         // The URL-encoded version of the URL that is in the U parameter.
+        GD,         // Contains the description of a KeyMatch result..
         T,          // The title of the search result.
         RK,         // Provides a ranking number used internally by the search appliance.
         ENT_SOURCE, // Identifies the application ID (serial number) of the search appliance that contributes to a result. Example: <ENT_SOURCE>S5-KUB000F0ADETLA</ENT_SOURCE>
@@ -179,7 +178,6 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
                 if (YaCySchema.description.name().equals(fieldName)) {
                     description = value.stringValue();
-                    OpensearchResponseWriter.solitaireTag(writer, DublinCore.Description.getURIref(), description);
                     texts.add(description);
                     continue;
                 }
@@ -208,7 +206,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
             }
             // compute snippet from texts
-            OpensearchResponseWriter.solitaireTag(writer, RSSMessage.Token.description.name(), description);
+            OpensearchResponseWriter.solitaireTag(writer, GSAToken.GD.name(), description);
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.ENT_SOURCE.name(), "YaCy");
             OpensearchResponseWriter.closeTag(writer, "R");
         }
