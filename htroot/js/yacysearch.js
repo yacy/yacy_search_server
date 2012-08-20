@@ -109,15 +109,15 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
          resnav += (i + 1);
          resnav += (".gif\" alt=\"page");
          resnav += (i + 1);
-         resnav += ("\" width=\"16\" height=\"16\" /></a>&nbsp;");
+         resnav += ("\" title=\"use the TAB key to navigate to next page\" width=\"16\" height=\"16\" /></a>&nbsp;");
       }
   }
   if (thispage >= numberofpages) {
-  	resnav += ("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
+  	resnav += ("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" title=\"use the TAB key to navigate to next page\" width=\"16\" height=\"16\" />");
   } else {
       resnav += ("<a id=\"nextpage\" href=\"");
       resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
-      resnav += ("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
+      resnav += ("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" title=\"use the TAB key to navigate to next page\" width=\"16\" height=\"16\" /></a>");
   }
  
   document.getElementById("resNav").innerHTML = resnav;
