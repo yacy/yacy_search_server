@@ -146,7 +146,9 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public String hosthash() {
-        return (String) this.doc.getFieldValue(YaCySchema.host_id_s.name());
+        String hosthash = (String) this.doc.getFieldValue(YaCySchema.host_id_s.name());
+        if (hosthash == null) hosthash = ASCII.String(this.hash, 6, 6);
+        return hosthash;
     }
 
     @Override
