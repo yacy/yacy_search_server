@@ -30,7 +30,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.GSAResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.YaCySchema;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.solr.common.SolrException;
@@ -65,23 +64,6 @@ public class searchresult {
         return "text/xml";
     }
 
-    public static class Sort {
-        public String sort, action, direction, mode, format;
-        public Sort(String d) {
-            this.sort = d;
-            String[] s = d.split(":");
-            this.action = s[0]; // date
-            this.direction = s[1]; // A or D
-            this.mode = s[2]; // S, R, L
-            this.format = s[3]; // d1
-        }
-        public String toSolr() {
-            if ("date".equals(this.action)) {
-                return YaCySchema.last_modified.name() + " " + (("D".equals(this.direction) ? "desc" : "asc"));
-            }
-            return null;
-        }
-    }
 
     /**
      * @param header
@@ -118,7 +100,7 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt("num", 10), (authenticated) ? 5000 : 100));
         post.remove("num");
-        Sort sort = new Sort(post.get(CommonParams.SORT, ""));
+        GSAResponseWriter.Sort sort = new GSAResponseWriter.Sort(post.get(CommonParams.SORT, ""));
         String sorts = sort.toSolr();
         if (sorts == null) {
             post.remove(CommonParams.SORT);

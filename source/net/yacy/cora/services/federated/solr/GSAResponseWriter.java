@@ -98,6 +98,25 @@ public class GSAResponseWriter implements QueryResponseWriter {
         //public float maxScore;
     }
 
+    public static class Sort {
+        public String sort = null, action = null, direction = null, mode = null, format = null;
+        public Sort(String d) {
+            this.sort = d;
+            String[] s = d.split(":");
+            if (s.length != 4) return;
+            this.action = s[0]; // date
+            this.direction = s[1]; // A or D
+            this.mode = s[2]; // S, R, L
+            this.format = s[3]; // d1
+        }
+        public String toSolr() {
+            if ("date".equals(this.action)) {
+                return YaCySchema.last_modified.name() + " " + (("D".equals(this.direction) ? "desc" : "asc"));
+            }
+            return null;
+        }
+    }
+
     public GSAResponseWriter() {
         super();
     }
@@ -166,7 +185,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         SolrIndexSearcher searcher = request.getSearcher();
         DocIterator iterator = response.iterator();
         for (int i = 0; i < responseCount; i++) {
-            writer.write("<R N=\"" + (resHead.offset + i + 1)  + "\"" + (i == 1 ? " L=\"\"" : "") + ">"); writer.write(lb);
+            writer.write("<R N=\"" + (resHead.offset + i + 1)  + "\"" + (i == 1 ? " L=\"2\"" : "") + ">"); writer.write(lb);
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id, SOLR_FIELDS);
             List<Fieldable> fields = doc.getFields();
