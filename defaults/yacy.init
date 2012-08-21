@@ -727,8 +727,8 @@ search.options = true
 # search domains. If set to false then that search is not available
 search.text = true
 search.image = true
-search.audio = false
-search.video = false
+search.audio = true
+search.video = true
 search.app = false
 
 # number of search results displayed by default
