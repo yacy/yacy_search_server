@@ -270,7 +270,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	if (text == null || text.length() == 0) return;
     	if (sb.length() != 0) sb.append(' ');
     	text = text.trim();
-    	if (text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
+    	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
     public SolrDoc yacy2solr(final String id, final ResponseHeader header, final Document yacydoc, final URIMetadata metadata) {
