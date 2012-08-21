@@ -177,9 +177,12 @@ public class GSAResponseWriter implements QueryResponseWriter {
         writer.write("<RES SN=\"" + (resHead.offset + 1) + "\" EN=\"" + (resHead.offset + responseCount) + "\">"); writer.write(lb); // The index (1-based) of the first and last search result returned in this result set.
         writer.write("<M>" + response.matches() + "</M>"); writer.write(lb); // The estimated total number of results for the search.
         writer.write("<FI/>"); writer.write(lb); // Indicates that document filtering was performed during this search.
-        XML.escapeCharData("<NB><NU>/search?q=" + request.getParams().get("q") + "&site=" + (String) context.get("site") +
+        writer.write("<NB><NU>");
+        XML.escapeCharData("/search?q=" + request.getParams().get("q") + "&site=" + (String) context.get("site") +
                      "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + (String) context.get("client") + "&access=" + (String) context.get("access") +
-                     "&sort=" + (String) context.get("sort") + "&start=" + resHead.offset + responseCount + "&sa=N</NU></NB>", writer); writer.write(lb); // a relative URL pointing to the NEXT results page.
+                     "&sort=" + (String) context.get("sort") + "&start=" + resHead.offset + responseCount + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
+        writer.write("</NU></NB>");
+        writer.write(lb);
 
         // parse body
         SolrIndexSearcher searcher = request.getSearcher();
