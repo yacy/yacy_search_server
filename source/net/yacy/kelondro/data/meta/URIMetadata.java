@@ -23,14 +23,56 @@
 package net.yacy.kelondro.data.meta;
 
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.order.Bitfield;
 import de.anomic.crawler.retrieval.Request;
 
 
-public interface URIMetadata extends URIReference {
+public interface URIMetadata {
 
+	/**
+	 * The hash of a URIReference is a unique key for the stored URL.
+	 * It is in fact equal to url().hash()
+	 * @return the hash of the stored url
+	 */
+    public byte[] hash();
+
+    /**
+     * the second half of a uri hash is the host hash
+     * @return
+     */
+    public String hosthash();
+
+    /**
+     * The modification date of the URIReference is given if
+     * the record was created first and is defined with the
+     * creation date. If the record is modified later, the date shall change.
+     * @return the modification date of this record
+     */
+    public Date moddate();
+
+    /**
+     * The DigestURI is the payload of the URIReference
+     * @return the url as DigestURI with assigned URL hash according to the record hash
+     */
+    public DigestURI url();
+
+    /**
+     * check if the url matches agains a given matcher
+     * @param matcher
+     * @return true if the url() matches
+     */
+    public boolean matches(final Pattern matcher);
+
+    /**
+     * produce a visible representation of the record
+     * @return a string for the url()
+     */
+    @Override
+    public String toString();
+    
     public String dc_title();
 
     public String dc_creator();
