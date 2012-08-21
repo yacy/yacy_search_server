@@ -26,6 +26,7 @@ import java.util.List;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.index.YaCySchema;
 
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -133,9 +134,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
      */
     @Override
     public void clear() throws IOException {
-        this.hitCache.clear();
-        this.missCache.clear();
-        this.documentCache.clear();
+        this.clearCache();
         if (this.solr0 != null) this.solr0.clear();
         if (this.solr1 != null) this.solr1.clear();
     }
@@ -174,9 +173,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     public void deleteByQuery(final String querystring) throws IOException {
         if (this.solr0 != null) this.solr0.deleteByQuery(querystring);
         if (this.solr1 != null) this.solr1.deleteByQuery(querystring);
-        this.hitCache.clear();
-        this.missCache.clear();
-        this.documentCache.clear();
+        this.clearCache();
     }
 
     /**
@@ -260,15 +257,24 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
      */
     @Override
     public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
-        final SolrDocumentList list = new SolrDocumentList();
-        if (this.solr0 == null && this.solr1 == null) return list;
+        if (this.solr0 == null && this.solr1 == null) return new SolrDocumentList();
         if (offset == 0 && count == 1 && querystring.startsWith("id:")) {
+            final SolrDocumentList list = new SolrDocumentList();
             SolrDocument doc = get(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3));
             list.add(doc);
+            // no addToCache(list) here because that was already handlet in get();
             return list;
         }
-        if (this.solr0 != null && this.solr1 == null) return this.solr0.query(querystring, offset, count);
-        if (this.solr1 != null && this.solr0 == null) return this.solr1.query(querystring, offset, count);
+        if (this.solr0 != null && this.solr1 == null) {
+            SolrDocumentList list = this.solr0.query(querystring, offset, count);
+            addToCache(list);
+            return list;
+        }
+        if (this.solr1 != null && this.solr0 == null) {
+            SolrDocumentList list = this.solr1.query(querystring, offset, count);
+            addToCache(list);
+            return list;
+        }
 
         // combine both lists
         SolrDocumentList l;
@@ -284,11 +290,18 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         }
 
         // now use the size of the first query to do a second query
+        final SolrDocumentList list = new SolrDocumentList();
         for (final SolrDocument d: l) list.add(d);
         l = this.solr1.query(querystring, offset + l.size() - size0, count - l.size());
         for (final SolrDocument d: l) list.add(d);
 
         // add caching
+        addToCache(list);
+        return list;
+    }
+
+    private void addToCache(SolrDocumentList list) {
+        if (MemoryControl.shortStatus()) clearCache();
         for (final SolrDocument solrdoc: list) {
             String id = (String) solrdoc.getFieldValue(YaCySchema.id.name());
             if (id != null) {
@@ -296,7 +309,6 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
                 this.documentCache.put(id, solrdoc);
             }
         }
-        return list;
     }
 
     @Override
