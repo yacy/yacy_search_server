@@ -103,7 +103,6 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.YaCySchema;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.snippet.TextSnippet;
 
@@ -1031,7 +1030,7 @@ public final class Protocol
         }
         event.rankingProcess.addExpectedRemoteReferences(count);
         SolrDocumentList docList = null;
-        final String solrQuerystring = YaCySchema.text_t + ":" + event.getQuery().solrQueryString();
+        final String solrQuerystring = "{!lucene q.op=AND df=text_t}" + event.getQuery().solrQueryString(false);
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch) {
             // search the local index

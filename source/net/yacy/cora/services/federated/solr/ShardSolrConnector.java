@@ -174,15 +174,6 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
         return list;
     }
 
-    public SolrDocumentList[] getList(final String querystring, final int offset, final int count) throws IOException {
-        final SolrDocumentList[] list = new SolrDocumentList[this.connectors.size()];
-        int i = 0;
-        for (final SolrConnector connector: this.connectors) {
-            list[i++] = connector.query(querystring, offset, count);
-        }
-        return list;
-    }
-
     public long[] getSizeList() {
         final long[] size = new long[this.connectors.size()];
         int i = 0;

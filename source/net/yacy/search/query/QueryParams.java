@@ -474,13 +474,14 @@ public final class QueryParams {
         return ret;
     }
 
-    public String solrQueryString() {
+    public String solrQueryString(boolean urlencoded) {
         final StringBuilder q = new StringBuilder();
         if (this.query_include_words != null) {
-            for (String s: this.query_include_words) q.append('+').append(s);
-            for (String s: this.query_exclude_words) q.append("+-").append(s);
+            for (String s: this.query_include_words) q.append(urlencoded ? '+' : ' ').append(s);
+            for (String s: this.query_exclude_words) q.append(urlencoded ? "+-" : " -").append(s);
         }
-        return CharacterCoding.unicode2html(q.length() > 0 ? q.substring(1) : q.toString(), true);
+        if (urlencoded) return CharacterCoding.unicode2html(q.length() > 0 ? q.substring(1) : q.toString(), true);
+        return q.length() > 0 ? q.substring(1) : q.toString();
     }
 
     public String queryStringForUrl() {
