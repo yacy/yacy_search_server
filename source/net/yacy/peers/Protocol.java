@@ -954,7 +954,7 @@ public final class Protocol
                 //resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
             }
 
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 20000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 8000);
             byte[] a = httpClient.POSTbytes(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false);
             if (a != null && a.length > 200000) {
                 // there is something wrong. This is too large, maybe a hack on the other side?
@@ -1051,7 +1051,6 @@ public final class Protocol
                 // no need to close this here because that sends a commit to remote solr which is not wanted here
             } catch (IOException e) {
                 Network.log.logInfo("SEARCH failed (solr), Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
-                event.peers.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
                 return -1;
             }
         }
@@ -1282,7 +1281,7 @@ public final class Protocol
     public static String transferIndex(
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
-        final SortedMap<byte[], URIMetadata> urlCache,
+        final SortedMap<byte[], URIMetadataRow> urlCache,
         final boolean gzipBody,
         final int timeout) {
 

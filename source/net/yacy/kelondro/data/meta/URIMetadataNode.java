@@ -99,6 +99,10 @@ public class URIMetadataNode implements URIMetadata {
         this.ranking = ranking;
     }
 
+    public URIMetadataRow toRow() {
+        return URIMetadataRow.importEntry(this.toString());
+    }
+
     public SolrDocument getDocument() {
         return this.doc;
     }

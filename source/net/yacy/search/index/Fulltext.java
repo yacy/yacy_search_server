@@ -303,11 +303,10 @@ public final class Fulltext implements Iterable<byte[]> {
 	            Log.logException(e);
 	            oldEntry = null;
 	        }
-	        URIMetadata entry = new URIMetadataNode(ClientUtils.toSolrDocument(doc));
+	        URIMetadataNode entry = new URIMetadataNode(ClientUtils.toSolrDocument(doc));
 	        if (oldEntry == null || oldEntry.isOlder(entry)) {
 		        try {
-		        	URIMetadataRow row = URIMetadataRow.importEntry(entry.toString());
-		        	this.urlIndexFile.put(row.toRowEntry());
+		        	this.urlIndexFile.put(entry.toRow().toRowEntry());
 		        } catch (final SpaceExceededException e) {
 		            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
 		        }
@@ -356,7 +355,7 @@ public final class Fulltext implements Iterable<byte[]> {
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
     }
-    
+
     public boolean remove(final byte[] urlHash) {
         if (urlHash == null) return false;
         try {
@@ -446,7 +445,7 @@ public final class Fulltext implements Iterable<byte[]> {
             }
         };
     }
-    
+
     // export methods
     public Export export(final File f, final String filter, final HandleSet set, final int format, final boolean dom) {
         if ((this.exportthread != null) && (this.exportthread.isAlive())) {
@@ -723,7 +722,7 @@ public final class Fulltext implements Iterable<byte[]> {
         assert hosthash.length() == 6;
         // delete in solr
         this.solr.deleteByQuery(YaCySchema.host_id_s.name() + ":\"" + hosthash + "\"");
-        
+
         // delete in old metadata structure
         final ArrayList<String> l = new ArrayList<String>();
         synchronized (this) {

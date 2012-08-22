@@ -45,6 +45,7 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -309,8 +310,8 @@ public class IndexControlRWIs_p {
                         index = segment.termIndex().get(keyhash, null);
                         // built urlCache
                         final Iterator<WordReference> urlIter = index.entries();
-                        final TreeMap<byte[], URIMetadata> knownURLs =
-                                new TreeMap<byte[], URIMetadata>(Base64Order.enhancedCoder);
+                        final TreeMap<byte[], URIMetadataRow> knownURLs =
+                                new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
                         final HandleSet unknownURLEntries =
                                 new RowHandleSet(
                                 WordReferenceRow.urlEntryRow.primaryKeyLength,
@@ -329,7 +330,11 @@ public class IndexControlRWIs_p {
                                 }
                                 urlIter.remove();
                             } else {
-                                knownURLs.put(iEntry.urlhash(), lurl);
+                                if (lurl instanceof URIMetadataRow) {
+                                    knownURLs.put(iEntry.urlhash(), (URIMetadataRow) lurl);
+                                } else if (lurl instanceof URIMetadataNode) {
+                                    knownURLs.put(iEntry.urlhash(), ((URIMetadataNode) lurl).toRow());
+                                }
                             }
                         }
 
