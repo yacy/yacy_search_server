@@ -291,6 +291,7 @@ public final class Switchboard extends serverSwitch
 
         // set loglevel and log
         setLog(new Log("SWITCHBOARD"));
+        AccessTracker.setDumpFile(new File("DATA/LOG/queries.log"));
 
         // set default peer name
         Seed.ANON_PREFIX = getConfig("peernameprefix", "_anon");
@@ -1589,7 +1590,7 @@ public final class Switchboard extends serverSwitch
         Cache.close();
         this.tables.close();
         Domains.close();
-        AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
+        AccessTracker.dumpLog();
         Switchboard.urlBlacklist.close();
         UPnP.deletePortMapping();
         this.tray.remove();

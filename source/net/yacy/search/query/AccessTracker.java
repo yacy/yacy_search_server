@@ -42,15 +42,23 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class AccessTracker {
 
+    private final static long DUMP_PERIOD = 60000L;
+
     public static final int minSize = 100;
     public static final int maxSize = 1000;
     public static final int maxAge = 24 * 60 * 60 * 1000;
 
     public enum Location {local, remote}
 
-    private static LinkedList<QueryParams> localSearches = new LinkedList<QueryParams>();
-    private static LinkedList<QueryParams> remoteSearches = new LinkedList<QueryParams>();
-    private static ArrayList<String> log = new ArrayList<String>();
+    private static final LinkedList<QueryParams> localSearches = new LinkedList<QueryParams>();
+    private static final LinkedList<QueryParams> remoteSearches = new LinkedList<QueryParams>();
+    private static final ArrayList<String> log = new ArrayList<String>();
+    private static long lastLogDump = System.currentTimeMillis();
+    private static File dumpFile = null;
+
+    public static void setDumpFile(File f) {
+        dumpFile = f;
+    }
 
     public static void add(final Location location, final QueryParams query) {
         if (location == Location.local) synchronized (localSearches) {add(localSearches, query);}
@@ -100,36 +108,62 @@ public class AccessTracker {
     }
 
     private static void addToDump(final QueryParams query) {
-        //if (query.resultcount == 0) return;
         if (query.queryString == null || query.queryString.isEmpty()) return;
-        final StringBuilder sb = new StringBuilder(40);
-        sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(query.starttime)));
-        sb.append(' ');
-        sb.append(Integer.toString(query.resultcount));
-        sb.append(' ');
-        sb.append(query.queryString);
-        log.add(sb.toString());
+        addToDump(query.queryString, Integer.toString(query.resultcount), new Date(query.starttime));
     }
 
-    public static void dumpLog(final File file) {
+    public static void addToDump(String querystring, String resultcount) {
+        addToDump(querystring, resultcount, new Date());
+        if (lastLogDump + DUMP_PERIOD < System.currentTimeMillis()) {
+            lastLogDump = System.currentTimeMillis();
+            dumpLog();
+        }
+    }
+
+    private static void addToDump(String querystring, String resultcount, Date d) {
+        //if (query.resultcount == 0) return;
+        if (querystring == null || querystring.isEmpty()) return;
+        final StringBuilder sb = new StringBuilder(40);
+        sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(d));
+        sb.append(' ');
+        sb.append(resultcount);
+        sb.append(' ');
+        sb.append(querystring);
+        synchronized (log) {
+            log.add(sb.toString());
+        }
+    }
+
+    public static void dumpLog() {
         while (!localSearches.isEmpty()) {
             addToDump(localSearches.removeFirst());
         }
-        RandomAccessFile raf = null;
-        try {
-            raf = new RandomAccessFile(file, "rw");
-            raf.seek(raf.length());
-            for (final String s: log) {
-                raf.write(UTF8.getBytes(s));
-                raf.writeByte(10);
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                ArrayList<String> logCopy = new ArrayList<String>();
+                synchronized (log) {
+                    logCopy.addAll(log);
+                    log.clear();
+                }
+                RandomAccessFile raf = null;
+                try {
+                    raf = new RandomAccessFile(dumpFile, "rw");
+                    raf.seek(raf.length());
+                    for (final String s: logCopy) {
+                        raf.write(UTF8.getBytes(s));
+                        raf.writeByte(10);
+                    }
+                    logCopy.clear();
+                } catch (final FileNotFoundException e) {
+                    Log.logException(e);
+                } catch (final IOException e) {
+                    Log.logException(e);
+                } finally {
+                    if (raf != null) try {raf.close();} catch (IOException e) {}
+                }
             }
-            log.clear();
-        } catch (final FileNotFoundException e) {
-            Log.logException(e);
-        } catch (final IOException e) {
-            Log.logException(e);
-        } finally {
-            if (raf != null) try {raf.close();} catch (IOException e) {}
-        }
+        };
+        t.start();
     }
 }

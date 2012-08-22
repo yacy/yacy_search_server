@@ -30,6 +30,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.GSAResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 
@@ -38,6 +39,7 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.FastWriter;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.search.DocSlice;
 
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -98,6 +100,7 @@ public class searchresult {
         //post.put(, post.remove("site"));//required, example: col1|col2
         //post.put(, post.remove("client"));//required, example: myfrontend
         //post.put(, post.remove("output"));//required, example: xml,xml_no_dtd
+        String q = post.get(CommonParams.Q, "");
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt("num", 10), (authenticated) ? 5000 : 100));
         post.remove("num");
@@ -152,6 +155,11 @@ public class searchresult {
             try {ow.close();} catch (IOException e1) {}
         }
 
+        // log result
+        Object rv = response.getValues().get("response");
+        if (rv != null && rv instanceof DocSlice) {
+            AccessTracker.addToDump(q, Integer.toString(((DocSlice) rv).matches()));
+        }
         return null;
     }
 }

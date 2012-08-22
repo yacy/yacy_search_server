@@ -35,6 +35,7 @@ import net.yacy.cora.services.federated.solr.OpensearchResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 import net.yacy.search.solr.SolrServlet;
@@ -48,6 +49,7 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.response.XSLTResponseWriter;
+import org.apache.solr.search.DocSlice;
 
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -132,6 +134,7 @@ public class select {
 
         // rename post fields according to result style
         if (!post.containsKey(CommonParams.Q)) post.put(CommonParams.Q, post.remove("query")); // sru patch
+        String q = post.get(CommonParams.Q, "");
         if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, post.remove("startRecord")); // sru patch
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, post.getInt("maximumRecords", 10)), (authenticated) ? 5000 : 100));
         post.remove("maximumRecords");
@@ -183,6 +186,11 @@ public class select {
             try {ow.close();} catch (IOException e1) {}
         }
 
+        // log result
+        Object rv = response.getValues().get("response");
+        if (rv != null && rv instanceof DocSlice) {
+            AccessTracker.addToDump(q, Integer.toString(((DocSlice) rv).matches()));
+        }
         return null;
     }
 }
