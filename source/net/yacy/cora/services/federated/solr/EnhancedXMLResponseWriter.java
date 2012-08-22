@@ -74,9 +74,11 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
         DocSlice response = (DocSlice) rsp.getValues().get("response");
+        @SuppressWarnings("unchecked")
+        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) rsp.getValues().get("highlighting");
         writeProps(writer, "responseHeader", responseHeader); // this.writeVal("responseHeader", responseHeader);
         writeDocs(writer, request, response); // this.writeVal("response", response);
-
+        writeProps(writer, "highlighting", highlighting);
         writer.write(XML_STOP);
     }
 
@@ -89,6 +91,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             v = val.getVal(i);
             if (v instanceof Integer) writeTag(writer, "int", n, ((Integer) v).toString(), false);
             else if (v instanceof String) writeTag(writer, "str", n, (String) v, true);
+            else if (v instanceof String[]) writeTag(writer, "str", n, (String[]) v, true);
             else if (v instanceof NamedList) writeProps(writer, n, (NamedList<?>) v);
         }
         if (sz > 0) {
@@ -203,6 +206,14 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             writer.write(val, 0, contentLen);
         }
         writer.write("</"); writer.write(tag); writer.write('>'); writer.write(lb);
+    }
+
+    private static void writeTag(final Writer writer, final String tag, final String nameAttr, final String[] vals, final boolean escape) throws IOException {
+        startTagOpen(writer, "arr", nameAttr);
+        for (String val: vals) {
+            writeTag(writer, tag, null, val, escape);
+        }
+        writer.write("</arr>"); writer.write(lb);
     }
 
     private static void startTagOpen(final Writer writer, final String tag, final String nameAttr) throws IOException {

@@ -114,6 +114,9 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
         DocSlice response = (DocSlice) rsp.getValues().get("response");
+        @SuppressWarnings("unchecked")
+        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) rsp.getValues().get("highlighting");
+        Map<String, List<String>> snippets = highlighting(highlighting);
 
         // parse response header
         ResHead resHead = new ResHead();
@@ -144,6 +147,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         final int responseCount = response.size();
         SolrIndexSearcher searcher = request.getSearcher();
         DocIterator iterator = response.iterator();
+        String urlhash = null;
         for (int i = 0; i < responseCount; i++) {
             openTag(writer, "item");
             int id = iterator.nextDoc();
@@ -165,7 +169,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
 
                 // if the rule is not generic, use the specific here
                 if (YaCySchema.id.name().equals(fieldName)) {
-                    solitaireTag(writer, RSSMessage.Token.guid.name(), value.stringValue(), "isPermaLink=\"false\"");
+                    urlhash = value.stringValue();
+                    solitaireTag(writer, RSSMessage.Token.guid.name(), urlhash, "isPermaLink=\"false\"");
                     continue;
                 }
                 if (YaCySchema.title.name().equals(fieldName)) {
@@ -198,12 +203,37 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 }
             }
             // compute snippet from texts
-            solitaireTagNocheck(writer, RSSMessage.Token.description.name(), description);
+            List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+            solitaireTagNocheck(writer, RSSMessage.Token.description.name(), snippet == null || snippet.size() == 0 ? description : snippet.get(0));
             closeTag(writer, "item");
         }
 
         closeTag(writer, "channel");
         writer.write(XML_STOP);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, List<String>> highlighting(final SimpleOrderedMap<Object> val) {
+        Map<String, List<String>> snippets = new HashMap<String, List<String>>();
+        if (val == null) return snippets;
+        int sz = val.size();
+        Object v, vv;
+        for (int i = 0; i < sz; i++) {
+            String n = val.getName(i);
+            v = val.getVal(i);
+            if (v instanceof SimpleOrderedMap) {
+                int sz1 = ((SimpleOrderedMap<Object>) v).size();
+                List<String> t = new ArrayList<String>(sz1);
+                for (int j = 0; j < sz1; j++) {
+                    vv = ((SimpleOrderedMap<Object>) v).getVal(j);
+                    if (vv instanceof String[]) {
+                        for (String t0: ((String[]) vv)) t.add(t0);
+                    }
+                }
+                snippets.put(n, t);
+            }
+        }
+        return snippets;
     }
 
     public static void openTag(final Writer writer, final String tag) throws IOException {

@@ -69,6 +69,7 @@ public class SnippetProcess {
 
 	public static Log log = new Log("SEARCH");
 
+	public static final int SNIPPET_MAX_LENGTH = 220;
     private final static int SNIPPET_WORKER_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
 
     // input values
@@ -579,7 +580,7 @@ public class SnippetProcess {
                     //this.query.queryString,
                     null,
                     ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
-                    220,
+                    SNIPPET_MAX_LENGTH,
                     !this.query.isLocal());
             return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, dbRetrievalTime, 0); // result without snippet
         }

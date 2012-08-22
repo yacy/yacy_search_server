@@ -140,6 +140,9 @@ public class GSAResponseWriter implements QueryResponseWriter {
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
         DocSlice response = (DocSlice) rsp.getValues().get("response");
+        @SuppressWarnings("unchecked")
+        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) rsp.getValues().get("highlighting");
+        Map<String, List<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);
         Map<Object,Object> context = request.getContext();
 
         // parse response header
@@ -187,6 +190,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         // parse body
         SolrIndexSearcher searcher = request.getSearcher();
         DocIterator iterator = response.iterator();
+        String urlhash = null;
         for (int i = 0; i < responseCount; i++) {
             writer.write("<R N=\"" + (resHead.offset + i + 1)  + "\"" + (i == 1 ? " L=\"2\"" : "") + ">"); writer.write(lb);
             int id = iterator.nextDoc();
@@ -207,6 +211,10 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
 
                 // if the rule is not generic, use the specific here
+                if (YaCySchema.id.name().equals(fieldName)) {
+                    urlhash = value.stringValue();
+                    continue;
+                }
                 if (YaCySchema.sku.name().equals(fieldName)) {
                     OpensearchResponseWriter.solitaireTag(writer, GSAToken.U.name(), value.stringValue());
                     OpensearchResponseWriter.solitaireTag(writer, GSAToken.UE.name(), value.stringValue());
@@ -247,6 +255,8 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
             }
             // compute snippet from texts
+            List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+            OpensearchResponseWriter.solitaireTag(writer, GSAToken.S.name(), snippet == null || snippet.size() == 0 ? description : snippet.get(0));
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.GD.name(), description);
             if (YaCyVer == null) YaCyVer = yacyVersion.thisVersion().getName() + "/" + Switchboard.getSwitchboard().peers.mySeed().hash;
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.ENT_SOURCE.name(), YaCyVer);

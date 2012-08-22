@@ -35,6 +35,7 @@ import net.yacy.cora.services.federated.solr.OpensearchResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 import net.yacy.search.solr.SolrServlet;
 
@@ -71,7 +72,7 @@ public class select {
         xsltWriter.init(initArgs);
         RESPONSE_WRITER.put("xslt", xsltWriter); // try i.e. http://localhost:8090/solr/select?q=*:*&start=0&rows=10&wt=xslt&tr=json.xsl
         RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
-        RESPONSE_WRITER.put("rss", new OpensearchResponseWriter()); //try http://localhost:8090/solr/select?wt=rss&q=olympia
+        RESPONSE_WRITER.put("rss", new OpensearchResponseWriter()); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
     }
 
     /**
@@ -146,6 +147,14 @@ public class select {
                                 "network.unit.description",
                                 "") : env.getConfig(SwitchboardConstants.GREETING, "");
             ((OpensearchResponseWriter) responseWriter).setTitle(promoteSearchPageGreeting);
+        }
+        if (responseWriter instanceof OpensearchResponseWriter) {
+            // add options for snippet generation
+            post.put("hl", "true");
+            post.put("hl.fl", "text_t,h1,h2");
+            post.put("hl.simple.pre", "");
+            post.put("hl.simple.post", "");
+            post.put("hl.fragsize", Integer.toString(SnippetProcess.SNIPPET_MAX_LENGTH));
         }
 
         // get the embedded connector

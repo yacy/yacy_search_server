@@ -30,6 +30,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.GSAResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.solr.common.SolrException;
@@ -42,7 +43,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 // try
-// http://localhost:8090/gsa/search?q=chicken+teriyaki&output=xml&client=test&site=test&sort=date:D:S:d1
+// http://localhost:8090/gsa/searchresult?q=chicken+teriyaki&output=xml&client=test&site=test&sort=date:D:S:d1
 
 /**
  * This is a gsa result formatter for solr search results.
@@ -100,6 +101,11 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt("num", 10), (authenticated) ? 5000 : 100));
         post.remove("num");
+        post.put("hl", "true");
+        post.put("hl.fl", "text_t,h1,h2");
+        post.put("hl.simple.pre", "<b>");
+        post.put("hl.simple.post", "</b>");
+        post.put("hl.fragsize", Integer.toString(SnippetProcess.SNIPPET_MAX_LENGTH));
         GSAResponseWriter.Sort sort = new GSAResponseWriter.Sort(post.get(CommonParams.SORT, ""));
         String sorts = sort.toSolr();
         if (sorts == null) {
