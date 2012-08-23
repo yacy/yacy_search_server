@@ -24,6 +24,11 @@
 
 package net.yacy.search.index;
 
+import java.util.Date;
+import java.util.List;
+
+import org.apache.solr.common.SolrInputDocument;
+
 import net.yacy.cora.services.federated.solr.Schema;
 import net.yacy.cora.services.federated.solr.SolrType;
 
@@ -218,6 +223,46 @@ public enum YaCySchema implements Schema {
     public final String getComment() {
         return this.comment;
     }    
-    
+
+    public final void add(final SolrInputDocument doc, final String value) {
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    public final void add(final SolrInputDocument doc, final Date value) {
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    public final void add(final SolrInputDocument doc, final int value) {
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    public final void add(final SolrInputDocument doc, final long value) {
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    public final void add(final SolrInputDocument doc, final String[] value) {
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    public final void add(final SolrInputDocument doc, final List<String> value) {
+        doc.setField(this.getSolrFieldName(), value.toArray(new String[value.size()]));
+    }
+
+    public final void add(final SolrInputDocument doc, final float value) {
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    public final void add(final SolrInputDocument doc, final double value) {
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    public final void add(final SolrInputDocument doc, final boolean value) {
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    public final void add(final SolrInputDocument doc, final String value, final float boost) {
+        doc.setField(this.getSolrFieldName(), value, boost);
+    }
+
 }
 

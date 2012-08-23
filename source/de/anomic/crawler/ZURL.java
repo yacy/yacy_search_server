@@ -34,11 +34,12 @@ import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.solr.common.SolrInputDocument;
+
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
-import net.yacy.cora.services.federated.solr.SolrDoc;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
@@ -173,7 +174,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (this.solrConnector != null && failCategory.store) {
             // send the error to solr
             try {
-                SolrDoc errorDoc = this.solrConfiguration.err(bentry.url(), failCategory.name() + " " + reason, httpcode);
+                SolrInputDocument errorDoc = this.solrConfiguration.err(bentry.url(), failCategory.name() + " " + reason, httpcode);
                 this.solrConnector.add(errorDoc);
             } catch (final IOException e) {
                 Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true, false) + " to solr: " + e.getMessage());
