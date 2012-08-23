@@ -40,6 +40,8 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
 
 public class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -188,7 +190,7 @@ public class SolrServerConnector extends AbstractSolrConnector implements SolrCo
             throw new IOException(e);
         }
     }
-
+    
     /**
      * get a query result from solr
      * to get all results set the query String to "*:*"
@@ -198,26 +200,35 @@ public class SolrServerConnector extends AbstractSolrConnector implements SolrCo
     @Override
     public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
         // construct query
-        final SolrQuery query = new SolrQuery();
-        query.setQuery(querystring);
-        query.setRows(count);
-        query.setStart(offset);
-        //query.addSortField( "price", SolrQuery.ORDER.asc );
+        final SolrQuery params = new SolrQuery();
+        params.setQuery(querystring);
+        params.setRows(count);
+        params.setStart(offset);
+        //params.addSortField( "price", SolrQuery.ORDER.asc );
 
         // query the server
+        QueryResponse rsp = query(params);
+        final SolrDocumentList docs = rsp.getResults();
+        return docs;
+    }
+    
+    public QueryResponse query(SolrParams params) throws IOException {
         try {
-            QueryRequest request = new QueryRequest(query);
+            QueryRequest request = new QueryRequest(params);
             ResponseParser responseParser = new XMLResponseParser();
             request.setResponseParser(responseParser);
-            final QueryResponse rsp = request.process(this.server);
-            final SolrDocumentList docs = rsp.getResults();
-            return docs;
-        } catch (final Throwable e) {
-            //Log.logException(e);
-            throw new IOException(e.getMessage(), e);
+            long t = System.currentTimeMillis();
+            NamedList<Object> result = server.request(request);
+            QueryResponse response = new QueryResponse(result, server);
+            response.setElapsedTime(System.currentTimeMillis() - t);
+            return response;
+        } catch (SolrServerException e) {
+            throw new IOException(e);
+        } catch (Throwable e) {
+            throw new IOException("Error executing query", e);
         }
     }
-
+    
     private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
 
     /**

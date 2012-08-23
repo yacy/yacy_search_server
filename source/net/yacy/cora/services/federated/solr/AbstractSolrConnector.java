@@ -47,7 +47,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         catchallQuery.setStart(0);
     }
     private final static int pagesize = 10;
-
+    
     @Override
     public boolean exists(final String id) throws IOException {
         try {
