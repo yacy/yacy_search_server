@@ -19,23 +19,19 @@
  */
 
 
-package net.yacy.search.solr;
+package net.yacy.cora.services.federated.solr;
 
 import java.io.File;
 import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import net.yacy.cora.services.federated.solr.SolrServerConnector;
-import net.yacy.cora.services.federated.solr.SolrConnector;
-import net.yacy.cora.services.federated.solr.SolrDoc;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.search.index.YaCySchema;
 
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
@@ -79,7 +75,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
                     try {
                         Files.copy(new File(source, cfl), new File(target, cfl));
                     } catch (IOException e) {
-                        Log.logException(e);
+                        e.printStackTrace();
                     }
                 }
             } else {
@@ -88,17 +84,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
                 try {
                     Files.copy(source, target);
                 } catch (IOException e) {
-                    Log.logException(e);
+                    e.printStackTrace();
                 }
             }
         }
-        /*
-        try {
-            CheckIndex.main(new String[]{new File(new File(storagePath, "data"), "index").getAbsolutePath(), "-fix"});
-        } catch (InterruptedException e1) {
-            Log.logException(e1);
-        }
-        */
+        
         try {
             this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
         } catch (ParserConfigurationException e) {
@@ -171,13 +161,13 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         storage.mkdirs();
         try {
             EmbeddedSolrConnector solr = new EmbeddedSolrConnector(storage, solr_config);
-            SolrDoc solrdoc = new SolrDoc();
-            solrdoc.addSolr(YaCySchema.id, "ABCD0000abcd");
-            solrdoc.addSolr(YaCySchema.title, "Lorem ipsum");
-            solrdoc.addSolr(YaCySchema.text_t, "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
-            solr.add(solrdoc);
+            SolrInputDocument doc = new SolrInputDocument();
+            doc.addField("id", "ABCD0000abcd");
+            doc.addField("title", "Lorem ipsum");
+            doc.addField("text_t", "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+            solr.add(doc);
             SolrServlet.startServer("/solr", 8091, solr);
-            SolrDocumentList searchresult = solr.query(YaCySchema.text_t.name() + ":tempor", 0, 10);
+            SolrDocumentList searchresult = solr.query("text_t:tempor", 0, 10);
             for (SolrDocument d : searchresult) {
                 System.out.println(d.toString());
             }
@@ -185,7 +175,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             try {Thread.sleep(1000 * 1000);} catch (InterruptedException e) {}
             solr.close();
         } catch (IOException e) {
-            Log.logException(e);
+            e.printStackTrace();
         }
 
     }

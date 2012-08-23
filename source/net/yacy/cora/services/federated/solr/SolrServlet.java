@@ -1,4 +1,4 @@
-package net.yacy.search.solr;
+package net.yacy.cora.services.federated.solr;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.logging.Log;
 
 import org.apache.lucene.document.Document;
 import org.apache.solr.common.SolrException;
@@ -200,7 +199,7 @@ public class SolrServlet implements Filter {
                 server.start();
                 waitForSolr(context, port);
             } catch (Exception e) {
-                Log.logException(e);
+                e.printStackTrace();
             }
         }
         return server;

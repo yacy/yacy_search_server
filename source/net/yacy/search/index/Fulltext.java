@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.services.federated.solr.EmbeddedSolrConnector;
 import net.yacy.cora.services.federated.solr.MirrorSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
@@ -56,7 +57,6 @@ import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
-import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.lucene.util.Version;
 import org.apache.solr.client.solrj.util.ClientUtils;

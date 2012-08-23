@@ -27,12 +27,12 @@ import java.util.Map;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.solr.EmbeddedSolrConnector;
 import net.yacy.cora.services.federated.solr.GSAResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SnippetProcess;
-import net.yacy.search.solr.EmbeddedSolrConnector;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
