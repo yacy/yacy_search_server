@@ -74,6 +74,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                             try {queue.put(d);} catch (InterruptedException e) {break;}
                         }
                         if (sdl.size() < pagesize) break;
+                        o += pagesize;
                     } catch (SolrException e) {
                         break;
                     } catch (IOException e) {
