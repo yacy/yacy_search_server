@@ -33,12 +33,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.services.federated.solr.AbstractSolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
@@ -54,7 +56,6 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -195,64 +196,33 @@ public class Segment {
     }
 
     /**
-     * discover all urls that belong to a specific host
-     * and return an iterator for the url hashes of those urls
-     * @param host
-     * @return an iterator for all url hashes that belong to a specific host
-     */
-    private Iterator<byte[]> hostSelector(String host) {
-        String hh = DigestURI.hosthash(host);
-        final HandleSet ref = new RowHandleSet(12, Base64Order.enhancedCoder, 100);
-        for (byte[] b: this.fulltext) {
-            if (hh.equals(ASCII.String(b, 6, 6))) {
-                try {
-                    ref.putUnique(b);
-                } catch (SpaceExceededException e) {
-                    Log.logException(e);
-                    break;
-                }
-            }
-        }
-        return ref.iterator();
-    }
-
-    /**
      * discover all urls that start with a given url stub
      * @param stub
      * @return an iterator for all matching urls
      */
     public Iterator<DigestURI> urlSelector(MultiProtocolURI stub) {
         final String host = stub.getHost();
-        final Iterator<byte[]> bi = hostSelector(host);
+        String hh = DigestURI.hosthash(host);
+        final BlockingQueue<String> hostQueue = this.fulltext.getSolr().concurrentIDs(YaCySchema.host_id_s + ":" + hh, 0, Integer.MAX_VALUE, 10000);
+        
         final String urlstub = stub.toNormalform(false, false);
-
-        // get all urls from the specific domain
-        final Iterator<DigestURI> urls = new Iterator<DigestURI>() {
-            @Override
-            public boolean hasNext() {
-                return bi.hasNext();
-            }
-            @Override
-            public DigestURI next() {
-                URIMetadata umr = Segment.this.fulltext.getMetadata(bi.next());
-                return umr.url();
-            }
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
 
         // now filter the stub from the iterated urls
         return new LookAheadIterator<DigestURI>() {
             @Override
             protected DigestURI next0() {
-                DigestURI u;
-                while (urls.hasNext()) {
-                    u = urls.next();
-                    if (u.toNormalform(false, false).startsWith(urlstub)) return u;
+                while (true) {
+                    String id;
+                    try {
+                        id = hostQueue.take();
+                    } catch (InterruptedException e) {
+                        Log.logException(e);
+                        return null;
+                    }
+                    if (id == null || id == AbstractSolrConnector.POISON_ID) return null;
+                    DigestURI u = Segment.this.fulltext.getMetadata(ASCII.getBytes(id)).url();
+                    if (u.toNormalform(true, false).startsWith(urlstub)) return u;
                 }
-                return null;
             }
         };
     }

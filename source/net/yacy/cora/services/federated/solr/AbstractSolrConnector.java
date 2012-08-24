@@ -38,7 +38,7 @@ import org.apache.solr.common.SolrException;
 public abstract class AbstractSolrConnector implements SolrConnector {
 
     public final SolrDocument POISON_DOCUMENT = new SolrDocument();
-    public final String POISON_ID = "POISON_ID";
+    public final static String POISON_ID = "POISON_ID";
     public final static SolrQuery catchallQuery = new SolrQuery();
     static {
         catchallQuery.setQuery("*:*");
@@ -102,13 +102,14 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                             try {queue.put((String) d.getFieldValue(YaCySchema.id.name()));} catch (InterruptedException e) {break;}
                         }
                         if (sdl.size() < pagesize) break;
+                        o += pagesize;
                     } catch (SolrException e) {
                         break;
                     } catch (IOException e) {
                         break;
                     }
                 }
-                try {queue.put(AbstractSolrConnector.this.POISON_ID);} catch (InterruptedException e1) {}
+                try {queue.put(AbstractSolrConnector.POISON_ID);} catch (InterruptedException e1) {}
             }
         };
         t.start();
@@ -123,7 +124,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             protected String next0() {
                 try {
                     String s = queue.poll(60000, TimeUnit.MILLISECONDS);
-                    if (s == AbstractSolrConnector.this.POISON_ID) return null;
+                    if (s == AbstractSolrConnector.POISON_ID) return null;
                     return s;
                 } catch (InterruptedException e) {
                     return null;
