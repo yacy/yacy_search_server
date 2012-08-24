@@ -89,8 +89,9 @@ public class ConfigBasic {
         }
 
         // peer name settings
-        final String peerName = (post == null) ? sb.peers.mySeed().getName() : post.get("peername", "");
-
+        String peerName = (post == null) ? sb.peers.mySeed().getName() : post.get("peername", "");
+        if (peerName != null) peerName = peerName.replace(' ', '-');
+        
         // port settings
         final long port;
         if (post != null && post.getInt("port", 0) > 1023) {

@@ -94,7 +94,7 @@ public class IndexControlRWIs_p {
         prop.put("keyhash", "");
         prop.put("result", "");
         prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
-        prop.put("cleanup_solr", sb.index.fulltext().connectedSolr() ? 1 : 0);
+        prop.put("cleanup_solr", sb.index.fulltext().connectedRemoteSolr() ? 1 : 0);
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);

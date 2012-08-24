@@ -345,7 +345,7 @@ public class CrawlQueues {
                 this.log.logSevere("Unsupported protocol in URL '" + url.toString());
             }
         } else {
-            this.log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
+            if (this.log.isFine()) this.log.logFine(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
         }
     }
 

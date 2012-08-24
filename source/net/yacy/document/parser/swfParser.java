@@ -130,7 +130,7 @@ public class swfParser extends AbstractParser implements Parser {
 
             // if an unexpected error occures just log the error and raise a new Parser.Failure
             final String errorMsg = "Unable to parse the swf document '" + location + "':" + e.getMessage();
-            AbstractParser.log.logSevere(errorMsg);
+            //AbstractParser.log.logSevere(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
     }

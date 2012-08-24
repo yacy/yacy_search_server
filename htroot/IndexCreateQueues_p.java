@@ -64,7 +64,6 @@ public class IndexCreateQueues_p {
 
                         if (option == PROFILE) {
                             // search and delete the crawl profile (_much_ faster, independant of queue size)
-                            // XXX: what to do about the annoying LOST PROFILE messages in the log?
                             CrawlProfile entry;
                             for (final byte[] handle: sb.crawler.getActive()) {
                                 entry = sb.crawler.getActive(handle);
