@@ -28,22 +28,18 @@ import java.util.List;
 
 import net.yacy.kelondro.logging.Log;
 
-import org.apache.solr.client.solrj.ResponseParser;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
-import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.util.NamedList;
 
-public class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
+public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
     protected SolrServer server;
     protected int commitWithinMs; // max time (in ms) before a commit will happen
@@ -211,23 +207,8 @@ public class SolrServerConnector extends AbstractSolrConnector implements SolrCo
         final SolrDocumentList docs = rsp.getResults();
         return docs;
     }
-    
-    public QueryResponse query(SolrParams params) throws IOException {
-        try {
-            QueryRequest request = new QueryRequest(params);
-            ResponseParser responseParser = new XMLResponseParser();
-            request.setResponseParser(responseParser);
-            long t = System.currentTimeMillis();
-            NamedList<Object> result = server.request(request);
-            QueryResponse response = new QueryResponse(result, server);
-            response.setElapsedTime(System.currentTimeMillis() - t);
-            return response;
-        } catch (SolrServerException e) {
-            throw new IOException(e);
-        } catch (Throwable e) {
-            throw new IOException("Error executing query", e);
-        }
-    }
+
+    abstract public QueryResponse query(SolrParams params) throws IOException;
     
     private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
 

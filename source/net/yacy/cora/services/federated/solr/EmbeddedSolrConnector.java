@@ -27,7 +27,9 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
@@ -155,6 +157,16 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return rsp;
     }
 
+    public QueryResponse query(SolrParams params) throws IOException {
+        try {
+            return server.query(params);
+        } catch (SolrServerException e) {
+            throw new IOException(e);
+        } catch (Throwable e) {
+            throw new IOException("Error executing query", e);
+        }
+    }
+    
     public static void main(String[] args) {
         File solr_config = new File("defaults/solr");
         File storage = new File("DATA/INDEX/webportal/SEGMENTS/text/solr/");

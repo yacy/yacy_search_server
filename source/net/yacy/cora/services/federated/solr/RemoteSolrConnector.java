@@ -50,7 +50,14 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
+import org.apache.solr.client.solrj.ResponseParser;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.XMLResponseParser;
+import org.apache.solr.client.solrj.request.QueryRequest;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
 
 
 public class RemoteSolrConnector extends SolrServerConnector implements SolrConnector {
@@ -148,6 +155,23 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         this.terminate();
     }
 
+    public QueryResponse query(SolrParams params) throws IOException {
+        try {
+            QueryRequest request = new QueryRequest(params);
+            ResponseParser responseParser = new XMLResponseParser();
+            request.setResponseParser(responseParser);
+            long t = System.currentTimeMillis();
+            NamedList<Object> result = server.request(request);
+            QueryResponse response = new QueryResponse(result, server);
+            response.setElapsedTime(System.currentTimeMillis() - t);
+            return response;
+        } catch (SolrServerException e) {
+            throw new IOException(e);
+        } catch (Throwable e) {
+            throw new IOException("Error executing query", e);
+        }
+    }
+    
     public String getAdminInterface() {
         final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
         final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();
