@@ -867,7 +867,7 @@ public final class HTTPDFileHandler {
                         }
                     }
                 }
-            } else if (targetClass != null && (path.endsWith(".stream") || path.indexOf('.') < 0)) {
+            } else if (targetClass != null && (path.endsWith(".stream") || path.substring(path.length() - 8).indexOf('.') < 0)) {
                 // call rewrite-class
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
@@ -1200,6 +1200,9 @@ public final class HTTPDFileHandler {
                     }
                 }
             } else {
+                if (!targetFile.exists()) Log.logWarning("HTTPFileHandler", "target file " + targetFile.getAbsolutePath() + " does not exist");
+                //if (!targetFile.isFile()) Log.logWarning("HTTPFileHandler", "target file " + targetFile.getAbsolutePath() + " is not a file");
+                //if (!targetFile.canRead()) Log.logWarning("HTTPFileHandler", "target file " + targetFile.getAbsolutePath() + " cannot read");
                 HTTPDemon.sendRespondError(conProp,out,3,404,"File not Found",null,null);
                 return;
             }
@@ -1328,8 +1331,14 @@ public final class HTTPDFileHandler {
     private static final File rewriteClassFile(final File template) {
         try {
             String f = template.getCanonicalPath();
-            final int p = f.lastIndexOf('.');
-            f = p < 0 ? f + ".class" : f.substring(0, p) + ".class";
+            int cp = f.length() - 8;
+            if (cp < 0) {
+                final int p = f.lastIndexOf('.');
+                f = p < 0 ? f + ".class" : f.substring(0, p) + ".class";
+            } else {
+                final int p = f.substring(cp).lastIndexOf('.');
+                f = p < 0 ? f + ".class" : f.substring(0, cp + p) + ".class";
+            }
             final File cf = new File(f);
             if (cf.exists()) return cf;
             return null;
