@@ -775,7 +775,7 @@ public final class Switchboard extends serverSwitch
         // that an automatic authorization of localhost is done, because in this case crawls from local
         // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
         // addresses that can steer a YaCy peer
-        if ( (getConfigBool("adminAccountForLocalhost", false)) ) {
+        if ( !getConfigBool("adminAccountForLocalhost", false) ) {
             if ( getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000") ) {
                 // the password was set automatically with a random value.
                 // We must remove that here to prevent that a user cannot log in any more
