@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.HandleSet;
@@ -189,7 +190,7 @@ public class WorkTables extends Tables {
 
             // insert APICALL attributes
             data.put(TABLE_API_COL_APICALL_COUNT, UTF8.getBytes("1"));
-            data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, UTF8.getBytes(Integer.toString(time)));
+            data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, ASCII.getBytes(Integer.toString(time)));
             data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, UTF8.getBytes(unit));
             calculateAPIScheduler(data, false); // set next execution time
             pk = super.insert(TABLE_API_NAME, data);

@@ -113,11 +113,11 @@ public class RobotsTxtEntry {
 
         this.mem = new LinkedHashMap<String, byte[]>(10);
         this.mem.put(HOST_NAME, UTF8.getBytes(this.hostName));
-        if (loadedDate != null) this.mem.put(LOADED_DATE, UTF8.getBytes(Long.toString(loadedDate.getTime())));
-        if (modDate != null) this.mem.put(MOD_DATE, UTF8.getBytes(Long.toString(modDate.getTime())));
+        if (loadedDate != null) this.mem.put(LOADED_DATE, ASCII.getBytes(Long.toString(loadedDate.getTime())));
+        if (modDate != null) this.mem.put(MOD_DATE, ASCII.getBytes(Long.toString(modDate.getTime())));
         if (eTag != null) this.mem.put(ETAG, UTF8.getBytes(eTag));
         if (sitemap != null) this.mem.put(SITEMAP, UTF8.getBytes(sitemap));
-        if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, UTF8.getBytes(Long.toString(crawlDelayMillis)));
+        if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, ASCII.getBytes(Long.toString(crawlDelayMillis)));
         if (agentName != null) this.mem.put(AGENT_NAME, UTF8.getBytes(agentName));
 
         if (allowPathList != null && !allowPathList.isEmpty()) {
@@ -187,7 +187,7 @@ public class RobotsTxtEntry {
 
     protected void setLoadedDate(final Date newLoadedDate) {
         if (newLoadedDate != null) {
-            this.mem.put(LOADED_DATE, UTF8.getBytes(Long.toString(newLoadedDate.getTime())));
+            this.mem.put(LOADED_DATE, ASCII.getBytes(Long.toString(newLoadedDate.getTime())));
         }
     }
 
