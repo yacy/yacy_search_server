@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -434,11 +435,11 @@ public class Tables implements Iterable<String> {
         }
 
         public void put(final String colname, final int value) {
-            super.put(colname, UTF8.getBytes(Integer.toString(value)));
+            super.put(colname, ASCII.getBytes(Integer.toString(value)));
         }
 
         public void put(final String colname, final long value) {
-            super.put(colname, UTF8.getBytes(Long.toString(value)));
+            super.put(colname, ASCII.getBytes(Long.toString(value)));
         }
 
         public void put(final String colname, final Date value) {
