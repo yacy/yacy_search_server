@@ -199,6 +199,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
             int fieldc = fields.size();
             List<String> texts = new ArrayList<String>();
             String description = "";
+            int size = 0;
             for (int j = 0; j < fieldc; j++) {
                 Fieldable value = fields.get(j);
                 String fieldName = value.name();
@@ -253,11 +254,16 @@ public class GSAResponseWriter implements QueryResponseWriter {
                     texts.add(value.stringValue());
                     continue;
                 }
+                if (YaCySchema.size_i.name().equals(fieldName)) {
+                    size = Integer.parseInt(value.stringValue());
+                    continue;
+                }
             }
             // compute snippet from texts
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.S.name(), snippet == null || snippet.size() == 0 ? description : snippet.get(0));
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.GD.name(), description);
+            writer.write("<HAS><L/><C SZ=\""); writer.write(Integer.toString(size / 1024)); writer.write("k\" CID=\""); writer.write(urlhash); writer.write("\" ENC=\"UTF-8\"/></HAS>");
             if (YaCyVer == null) YaCyVer = yacyVersion.thisVersion().getName() + "/" + Switchboard.getSwitchboard().peers.mySeed().hash;
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.ENT_SOURCE.name(), YaCyVer);
             OpensearchResponseWriter.closeTag(writer, "R");
