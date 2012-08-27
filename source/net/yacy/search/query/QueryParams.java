@@ -473,7 +473,7 @@ public final class QueryParams {
         q.append("{!lucene q.op=AND}");
 
         // add text query
-        q.append("text_t:");
+        q.append("[sku,title,h1_txt,h2_txt,author,description,keywords,text_t]:");
         int wc = 0;
         for (String s: this.query_include_words) {
             if (wc > 0) q.append(urlencoded ? '+' : ' ');
@@ -486,20 +486,27 @@ public final class QueryParams {
             wc++;
         }
 
+        // add filter to prevent that results come from failed urls
+        q.append(urlencoded ? "+-failreason_t:[*+TO+*]" : " -failreason_t:[* TO *]");
+
         // add constraints
         if ( this.sitehash == null ) {
             if (this.siteexcludes != null) {
                 for (String ex: this.siteexcludes) {
-                    q.append(urlencoded ? "+AND+-host_id_s:" : " AND -host_id_s:").append(ex);
+                    q.append(urlencoded ? "+-host_id_s:" : " -host_id_s:").append(ex);
                 }
             }
         } else {
-            q.append(urlencoded ? "+AND+host_id_s:" : " AND host_id_s:").append(this.sitehash);
+            q.append(urlencoded ? "+host_id_s:" : " host_id_s:").append(this.sitehash);
         }
 
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
+            // localtion search, no special ranking
             q.append("&fq={!bbox sfield=").append(YaCySchema.coordinate_p.name()).append("}&pt=");
             q.append(Double.toString(this.lat)).append(',').append(Double.toString(this.lon)).append("&d=").append(GeoLocation.degreeToKm(this.radius));
+        } else {
+            // boost fields
+            q.append("&defType=edismax&qf=sku^20.0,title^15.0,h1_txt^11.0,h2_txt^10.0,author^8.0,description^5.0,keywords^2.0,text_t^1.0");
         }
 
         // prepare result
