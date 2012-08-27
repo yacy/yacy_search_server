@@ -27,10 +27,10 @@ package net.yacy.search.index;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.solr.common.SolrInputDocument;
-
 import net.yacy.cora.services.federated.solr.Schema;
 import net.yacy.cora.services.federated.solr.SolrType;
+
+import org.apache.solr.common.SolrInputDocument;
 
 public enum YaCySchema implements Schema {
 
@@ -46,7 +46,7 @@ public enum YaCySchema implements Schema {
     process_s(SolrType.string, true, true, "index creation comment"),
     failreason_t(SolrType.text_general, true, true, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
     httpstatus_i(SolrType.integer, true, true, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
-    
+
     // optional but recommended, part of index distribution
     load_date_dt(SolrType.date, true, true, "time when resource was loaded"),
     fresh_date_dt(SolrType.date, true, true, "date until resource shall be considered as fresh"),
@@ -56,10 +56,11 @@ public enum YaCySchema implements Schema {
     audiolinkscount_i(SolrType.integer, true, true, "number of links to audio resources"),// int laudio();
     videolinkscount_i(SolrType.integer, true, true, "number of links to video resources"),// int lvideo();
     applinkscount_i(SolrType.integer, true, true, "number of links to application resources"),// int lapp();
-    
+
     // optional but recommended
-    lon_coordinate(SolrType.tdouble, true, true, "longitude of location as declared in WSG84"),
-    lat_coordinate(SolrType.tdouble, true, true, "latitude of location as declared in WSG84"),
+    lon_coordinate(SolrType.tdouble, true, true, "longitude of location as declared in WSG84"), // deprecated
+    lat_coordinate(SolrType.tdouble, true, true, "latitude of location as declared in WSG84"), // deprecated
+    coordinate_p(SolrType.location, true, true, "point in degrees of latitude,longitude as declared in WSG84"),
     ip_s(SolrType.string, true, true, "ip of host of url (after DNS lookup)"),
     author(SolrType.text_general, true, true, "content of author-tag"),
     description(SolrType.text_general, true, true, "content of description-tag"),
@@ -73,8 +74,8 @@ public enum YaCySchema implements Schema {
     imagescount_i(SolrType.integer, true, true, "number of images"),
     responsetime_i(SolrType.integer, true, true, "response time of target server in milliseconds"),
     text_t(SolrType.text_general, true, true, "all visible text"),
-   
-    // optional values    
+
+    // optional values
     csscount_i(SolrType.integer, true, true, "number of entries in css_tag_txt and css_url_txt"),
     css_tag_txt(SolrType.text_general, true, true, true, "full css tag with normalized url"),
     css_url_txt(SolrType.text_general, true, true, true, "normalized urls within a css tag"),
@@ -146,7 +147,7 @@ public enum YaCySchema implements Schema {
     ext_tracker_val(SolrType.integer, true, true, true, "number of attribute counts in ext_tracker_txt"),
     ext_title_txt(SolrType.text_general, true, true, true, "names matching title expressions"),
     ext_title_val(SolrType.integer, true, true, true, "number of matching title expressions");
-    
+
     private String solrFieldName = null; // solr field name in custom solr schema, defaults to solcell schema field name (= same as this.name() )
     private final SolrType type;
     private final boolean indexed, stored;
@@ -222,7 +223,7 @@ public enum YaCySchema implements Schema {
     @Override
     public final String getComment() {
         return this.comment;
-    }    
+    }
 
     public final void add(final SolrInputDocument doc, final String value) {
         doc.setField(this.getSolrFieldName(), value);

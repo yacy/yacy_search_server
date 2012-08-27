@@ -29,6 +29,7 @@ public enum SolrType {
     string,
     text_general,
     text_en_splitting_tight,
+    location,
     date,
     integer("int"),
     bool("boolean"),

@@ -150,7 +150,7 @@ public final class SearchEvent {
         this.rankingProcess = new RWIProcess(this.query, this.order, remote);
 
         // start a local solr search
-        RemoteSearch.solrRemoteSearch(this, 100, this.query.query_include_hashes, 10000, null, Switchboard.urlBlacklist);
+        RemoteSearch.solrRemoteSearch(this, 100, 10000, null /*this peer*/, Switchboard.urlBlacklist);
 
         // start a local RWI search concurrently
         this.rankingProcess.start();

@@ -156,12 +156,12 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         Date x = (Date) doc.getFieldValue(key.name());
         return (x == null) ? new Date(0) : x;
     }
-    
+
     public Date getDate(SolrDocument doc, final YaCySchema key) {
         Date x = (Date) doc.getFieldValue(key.name());
         return (x == null) ? new Date(0) : x;
     }
-    
+
     /**
      * save configuration to file and update enum SolrFields
      * @throws IOException
@@ -186,8 +186,8 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     public SolrInputDocument metadata2solr(final URIMetadata md) {
     	if (md instanceof URIMetadataNode) {
     		return ClientUtils.toSolrInputDocument(((URIMetadataNode) md).getDocument());
-    	} 
-    	
+    	}
+
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = new DigestURI(md.url());
         boolean allAttr = this.isEmpty();
@@ -206,7 +206,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.content_type)) add(doc, YaCySchema.content_type, Response.doctype2mime(digestURI.getFileExtension(), md.doctype()));
         if (allAttr || contains(YaCySchema.last_modified)) add(doc, YaCySchema.last_modified, md.moddate());
         if (allAttr || contains(YaCySchema.wordcount_i)) add(doc, YaCySchema.wordcount_i, md.wordCount());
-        
+
         String keywords = md.dc_subject();
     	Bitfield flags = md.flags();
     	if (flags.get(Condenser.flag_cat_indexof)) {
@@ -214,7 +214,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     			if (keywords.indexOf(',') > 0) keywords += ", indexof"; else keywords += " indexof";
     		}
     	}
-        if (allAttr || contains(YaCySchema.keywords)) {        	
+        if (allAttr || contains(YaCySchema.keywords)) {
         	add(doc, YaCySchema.keywords, keywords);
         }
 
@@ -233,7 +233,8 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         // coordinates
         if (md.lat() != 0.0f && md.lon() != 0.0f) {
             if (allAttr || contains(YaCySchema.lat_coordinate)) add(doc, YaCySchema.lat_coordinate, md.lat());
-        	if (allAttr || contains(YaCySchema.lon_coordinate)) add(doc, YaCySchema.lon_coordinate, md.lon());
+            if (allAttr || contains(YaCySchema.lon_coordinate)) add(doc, YaCySchema.lon_coordinate, md.lon());
+            if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(md.lat()) + "," + Double.toString(md.lon()));
         }
         if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, 200);
 
@@ -261,10 +262,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         	accText(sb, keywords);
         	add(doc, YaCySchema.text_t, sb.toString());
         }
-        
+
         return doc;
     }
-    
+
     private static void accText(final StringBuilder sb, String text) {
     	if (text == null || text.length() == 0) return;
     	if (sb.length() != 0) sb.append(' ');
@@ -616,6 +617,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (yacydoc.lat() != 0.0f && yacydoc.lon() != 0.0f) {
             if (allAttr || contains(YaCySchema.lat_coordinate)) add(doc, YaCySchema.lat_coordinate, yacydoc.lat());
         	if (allAttr || contains(YaCySchema.lon_coordinate)) add(doc, YaCySchema.lon_coordinate, yacydoc.lon());
+            if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(yacydoc.lat()) + "," + Double.toString(yacydoc.lon()));
         }
         if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, header == null ? 200 : header.getStatusCode());
 

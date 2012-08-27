@@ -1019,18 +1019,21 @@ public final class Protocol
 
     public static int solrQuery(
             final SearchEvent event,
-            final HandleSet wordhashes,
             final int offset,
             final int count,
             final long time,
             final Seed target,
             final Blacklist blacklist) {
+
+        final HandleSet wordhashes = event.getQuery().query_include_hashes;
+
         if (event.getQuery().queryString == null || event.getQuery().queryString.length() == 0) {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
         event.rankingProcess.addExpectedRemoteReferences(count);
         SolrDocumentList docList = null;
-        final String solrQuerystring = "{!lucene q.op=AND df=text_t}" + event.getQuery().solrQueryString(false);
+        final String solrQuerystring = event.getQuery().solrQueryString(false);
+        Log.logInfo("Protocol", "SOLR QUERY: " + solrQuerystring);
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch) {
             // search the local index

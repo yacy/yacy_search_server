@@ -56,7 +56,7 @@ public class URIMetadataNode implements URIMetadata {
     private DigestURI url;
     Bitfield flags;
     private final int imagec, audioc, videoc, appc;
-    private final double lon, lat;
+    private double lat, lon;
     private long ranking; // during generation of a search result this value is set
     private final SolrDocument doc;
     private final String snippet;
@@ -84,6 +84,14 @@ public class URIMetadataNode implements URIMetadata {
         this.appc = getInt(YaCySchema.videolinkscount_i);
         this.lon = getDouble(YaCySchema.lon_coordinate);
         this.lat = getDouble(YaCySchema.lat_coordinate);
+        String latlon = (String) this.doc.getFieldValue(YaCySchema.coordinate_p.name());
+        if (latlon != null) {
+            int p = latlon.indexOf(',');
+            if (p > 0) {
+                this.lat = Double.parseDouble(latlon.substring(0, p));
+                this.lon = Double.parseDouble(latlon.substring(p + 1));
+            }
+        }
         this.flags = new Bitfield();
         if (this.keywords != null && this.keywords.indexOf("indexof") >= 0) this.flags.set(Condenser.flag_cat_indexof, true);
         if (this.lon != 0.0d || this.lat != 0.0d) this.flags.set(Condenser.flag_cat_haslocation, true);

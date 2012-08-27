@@ -169,7 +169,7 @@ public class RemoteSearch extends Thread {
         for (Seed s: targetPeers) omit.add(s);
         Seed[] nodes = PeerSelection.selectNodeSearchTargets(event.peers, 20, omit);
         for (Seed s: nodes) {
-            solrRemoteSearch(event, count, event.getQuery().query_include_hashes, time, s, blacklist);
+            solrRemoteSearch(event, count, time, s, blacklist);
         }
 
         // start search to YaCy peers
@@ -258,10 +258,10 @@ public class RemoteSearch extends Thread {
     public static Thread solrRemoteSearch(
                     final SearchEvent event,
                     final int count,
-                    final HandleSet wordhashes,
                     final long time,
                     final Seed targetPeer,
                     final Blacklist blacklist) {
+
 
         // check own peer status
         if (event.peers.mySeed() == null || event.peers.mySeed().getPublicAddress() == null) { return null; }
@@ -275,7 +275,6 @@ public class RemoteSearch extends Thread {
                 try {
                     int urls = Protocol.solrQuery(
                                     event,
-                                    wordhashes,
                                     0,
                                     count,
                                     time,

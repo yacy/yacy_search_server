@@ -80,6 +80,9 @@ lon_coordinate
 ## longitude of location as declared in WSG84, tdouble
 lat_coordinate
 
+## point in degrees of latitude,longitude as declared in WSG84, location
+coordinate_p
+
 ## ip of host of url (after DNS lookup), string
 ip_s
 

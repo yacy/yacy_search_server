@@ -92,4 +92,8 @@ public class GeoLocation extends IntegerGeoPoint implements Comparable<GeoLocati
         return o1.compareTo(o2);
     }
 
+    public static int degreeToKm(double degree) {
+        return (int) (degree * 111.32d);
+    }
+
 }

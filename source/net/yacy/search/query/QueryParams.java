@@ -48,6 +48,7 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
+import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -60,6 +61,7 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
+import net.yacy.search.index.YaCySchema;
 import net.yacy.search.ranking.RankingProfile;
 
 public final class QueryParams {
@@ -323,15 +325,6 @@ public final class QueryParams {
         return this.domType == Searchdom.LOCAL;
     }
 
-    public String solrQuery() {
-        if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
-        StringBuilder sb = new StringBuilder(80);
-        for (String s: this.query_include_words) {sb.append('+'); sb.append(s);}
-        for (String s: this.query_exclude_words) {sb.append("+-"); sb.append(s);}
-        if (sb.length() == 0) return null;
-        return "text_t:" + sb.substring(1, sb.length());
-    }
-
     public static HandleSet hashes2Set(final String query) {
         final HandleSet keyhashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
@@ -475,13 +468,42 @@ public final class QueryParams {
     }
 
     public String solrQueryString(boolean urlencoded) {
-        final StringBuilder q = new StringBuilder();
-        if (this.query_include_words != null) {
-            for (String s: this.query_include_words) q.append(urlencoded ? '+' : ' ').append(s);
-            for (String s: this.query_exclude_words) q.append(urlencoded ? "+-" : " -").append(s);
+        if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
+        final StringBuilder q = new StringBuilder(80);
+        q.append("{!lucene q.op=AND}");
+
+        // add text query
+        q.append("text_t:");
+        int wc = 0;
+        for (String s: this.query_include_words) {
+            if (wc > 0) q.append(urlencoded ? '+' : ' ');
+            q.append(s);
+            wc++;
         }
-        if (urlencoded) return CharacterCoding.unicode2html(q.length() > 0 ? q.substring(1) : q.toString(), true);
-        return q.length() > 0 ? q.substring(1) : q.toString();
+        for (String s: this.query_exclude_words){
+            if (wc > 0) q.append(urlencoded ? "+-" : " -");
+            q.append(s);
+            wc++;
+        }
+
+        // add constraints
+        if ( this.sitehash == null ) {
+            if (this.siteexcludes != null) {
+                for (String ex: this.siteexcludes) {
+                    q.append(urlencoded ? "+AND+-host_id_s:" : " AND -host_id_s:").append(ex);
+                }
+            }
+        } else {
+            q.append(urlencoded ? "+AND+host_id_s:" : " AND host_id_s:").append(this.sitehash);
+        }
+
+        if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
+            q.append("&fq={!bbox sfield=").append(YaCySchema.coordinate_p.name()).append("}&pt=");
+            q.append(Double.toString(this.lat)).append(',').append(Double.toString(this.lon)).append("&d=").append(GeoLocation.degreeToKm(this.radius));
+        }
+
+        // prepare result
+        return (urlencoded) ? CharacterCoding.unicode2html(q.toString(), true) : q.toString();
     }
 
     public String queryStringForUrl() {
