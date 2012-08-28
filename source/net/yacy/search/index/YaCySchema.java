@@ -35,52 +35,57 @@ import org.apache.solr.common.SolrInputDocument;
 public enum YaCySchema implements Schema {
 
     // mandatory
-    id(SolrType.string, true, true, "primary key of document, the URL hash **mandatory field**"),
+    id(SolrType.string, true, true, false, "primary key of document, the URL hash **mandatory field**"),
     sku(SolrType.text_en_splitting_tight, true, true, false, true, "url of document"),
-    last_modified(SolrType.date, true, true, "last-modified from http header"),
+    last_modified(SolrType.date, true, true, false, "last-modified from http header"),
     content_type(SolrType.string, true, true, true, "mime-type of document"),
     title(SolrType.text_general, true, true, true, "content of title tag"),
-    host_id_s(SolrType.string, true, true, "id of the host, a 6-byte hash that is part of the document id"),// String hosthash();
-    md5_s(SolrType.string, true, true, "the md5 of the raw source"),// String md5();
-    size_i(SolrType.integer, true, true, "the size of the raw source"),// int size();
-    process_s(SolrType.string, true, true, "index creation comment"),
-    failreason_t(SolrType.text_general, true, true, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
-    httpstatus_i(SolrType.integer, true, true, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
+    host_id_s(SolrType.string, true, true, false, "id of the host, a 6-byte hash that is part of the document id"),// String hosthash();
+    md5_s(SolrType.string, true, true, false, "the md5 of the raw source"),// String md5();
+    size_i(SolrType.integer, true, true, false, "the size of the raw source"),// int size();
+    process_s(SolrType.string, true, true, false, "index creation comment"),
+    failreason_t(SolrType.text_general, true, true, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
+    httpstatus_i(SolrType.integer, true, true, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
+    httpstatus_redirect_s(SolrType.integer, true, true, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
 
     // optional but recommended, part of index distribution
-    load_date_dt(SolrType.date, true, true, "time when resource was loaded"),
-    fresh_date_dt(SolrType.date, true, true, "date until resource shall be considered as fresh"),
+    load_date_dt(SolrType.date, true, true, false, "time when resource was loaded"),
+    fresh_date_dt(SolrType.date, true, true, false, "date until resource shall be considered as fresh"),
     referrer_id_txt(SolrType.string, true, true, true, "ids of referrer to this document"),// byte[] referrerHash();
-    publisher_t(SolrType.text_general, true, true, "the name of the publisher of the document"),// String dc_publisher();
-    language_txt(SolrType.string, true, true, "the language used in the document; starts with primary language"),// byte[] language();
-    audiolinkscount_i(SolrType.integer, true, true, "number of links to audio resources"),// int laudio();
-    videolinkscount_i(SolrType.integer, true, true, "number of links to video resources"),// int lvideo();
-    applinkscount_i(SolrType.integer, true, true, "number of links to application resources"),// int lapp();
+    publisher_t(SolrType.text_general, true, true, false, "the name of the publisher of the document"),// String dc_publisher();
+    language_s(SolrType.string, true, true, false, "the language used in the document"),// byte[] language();
+    audiolinkscount_i(SolrType.integer, true, true, false, "number of links to audio resources"),// int laudio();
+    videolinkscount_i(SolrType.integer, true, true, false, "number of links to video resources"),// int lvideo();
+    applinkscount_i(SolrType.integer, true, true, false, "number of links to application resources"),// int lapp();
 
     // optional but recommended
-    lon_coordinate(SolrType.tdouble, true, true, "longitude of location as declared in WSG84"), // deprecated
-    lat_coordinate(SolrType.tdouble, true, true, "latitude of location as declared in WSG84"), // deprecated
-    coordinate_p(SolrType.location, true, true, "point in degrees of latitude,longitude as declared in WSG84"),
-    ip_s(SolrType.string, true, true, "ip of host of url (after DNS lookup)"),
-    author(SolrType.text_general, true, true, "content of author-tag"),
-    description(SolrType.text_general, true, true, "content of description-tag"),
-    keywords(SolrType.text_general, true, true, "content of keywords tag; words are separated by space"),
-    charset_s(SolrType.string, true, true, "character encoding"),
-    wordcount_i(SolrType.integer, true, true, "number of words in visible area"),
-    inboundlinkscount_i(SolrType.integer, true, true, "total number of inbound links"),
-    inboundlinksnofollowcount_i(SolrType.integer, true, true, "number of inbound links with nofollow tag"),
-    outboundlinkscount_i(SolrType.integer, true, true, "external number of inbound links"),
-    outboundlinksnofollowcount_i(SolrType.integer, true, true, "number of external links with nofollow tag"),
-    imagescount_i(SolrType.integer, true, true, "number of images"),
-    responsetime_i(SolrType.integer, true, true, "response time of target server in milliseconds"),
-    text_t(SolrType.text_general, true, true, "all visible text"),
+    coordinate_p(SolrType.location, true, true, false, "point in degrees of latitude,longitude as declared in WSG84"),
+    ip_s(SolrType.string, true, true, false, "ip of host of url (after DNS lookup)"),
+    author(SolrType.text_general, true, true, false, "content of author-tag"),
+    description(SolrType.text_general, true, true, false, "content of description-tag"),
+    keywords(SolrType.text_general, true, true, false, "content of keywords tag; words are separated by space"),
+    charset_s(SolrType.string, true, true, false, "character encoding"),
+    wordcount_i(SolrType.integer, true, true, false, "number of words in visible area"),
+    inboundlinkscount_i(SolrType.integer, true, true, false, "total number of inbound links"),
+    inboundlinksnofollowcount_i(SolrType.integer, true, true, false, "number of inbound links with nofollow tag"),
+    outboundlinkscount_i(SolrType.integer, true, true, false, "external number of inbound links"),
+    outboundlinksnofollowcount_i(SolrType.integer, true, true, false, "number of external links with nofollow tag"),
+    imagescount_i(SolrType.integer, true, true, false, "number of images"),
+    responsetime_i(SolrType.integer, true, true, false, "response time of target server in milliseconds"),
+    text_t(SolrType.text_general, true, true, false, "all visible text"),
+    h1_txt(SolrType.text_general, true, true, true, "h1 header"),
+    h2_txt(SolrType.text_general, true, true, true, "h2 header"),
+    h3_txt(SolrType.text_general, true, true, true, "h3 header"),
+    h4_txt(SolrType.text_general, true, true, true, "h4 header"),
+    h5_txt(SolrType.text_general, true, true, true, "h5 header"),
+    h6_txt(SolrType.text_general, true, true, true, "h6 header"),
 
     // optional values
-    csscount_i(SolrType.integer, true, true, "number of entries in css_tag_txt and css_url_txt"),
+    csscount_i(SolrType.integer, true, true, false, "number of entries in css_tag_txt and css_url_txt"),
     css_tag_txt(SolrType.text_general, true, true, true, "full css tag with normalized url"),
     css_url_txt(SolrType.text_general, true, true, true, "normalized urls within a css tag"),
     scripts_txt(SolrType.text_general, true, true, true, "normalized urls within a scripts tag"),
-    scriptscount_i(SolrType.integer, true, true, "number of entries in scripts_txt"),
+    scriptscount_i(SolrType.integer, true, true, false, "number of entries in scripts_txt"),
     // encoded as binary value into an integer:
     // bit  0: "all" contained in html header meta
     // bit  1: "index" contained in html header meta
@@ -91,50 +96,52 @@ public enum YaCySchema implements Schema {
     // bit 10: "noindex" contained in http header properties
     // bit 11: "nofollow" contained in http header properties
     // bit 12: "unavailable_after" contained in http header properties
-    robots_i(SolrType.integer, true, true, "content of <meta name=\"robots\" content=#content#> tag and the \"X-Robots-Tag\" HTTP property"),
-    metagenerator_t(SolrType.text_general, true, true, "content of <meta name=\"generator\" content=#content#> tag"),
+    robots_i(SolrType.integer, true, true, false, "content of <meta name=\"robots\" content=#content#> tag and the \"X-Robots-Tag\" HTTP property"),
+    metagenerator_t(SolrType.text_general, true, true, false, "content of <meta name=\"generator\" content=#content#> tag"),
     inboundlinks_tag_txt(SolrType.text_general, true, true, true, "internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
-    inboundlinks_protocol_txt(SolrType.text_general, true, true, true, "internal links, only the protocol"),
+    inboundlinks_protocol_sxt(SolrType.string, true, true, true, "internal links, only the protocol"),
     inboundlinks_urlstub_txt(SolrType.text_general, true, true, true, "internal links, the url only without the protocol"),
     inboundlinks_name_txt(SolrType.text_general, true, true, true, "internal links, the name property of the a-tag"),
-    inboundlinks_rel_txt(SolrType.text_general, true, true, true, "internal links, the rel property of the a-tag"),
-    inboundlinks_relflags_txt(SolrType.text_general, true, true, true, "internal links, the rel property of the a-tag, coded binary"),
+    inboundlinks_rel_sxt(SolrType.string, true, true, true, "internal links, the rel property of the a-tag"),
+    inboundlinks_relflags_sxt(SolrType.string, true, true, true, "internal links, the rel property of the a-tag, coded binary"),
     inboundlinks_text_txt(SolrType.text_general, true, true, true, "internal links, the text content of the a-tag"),
     outboundlinks_tag_txt(SolrType.text_general, true, true, true, "external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
-    outboundlinks_protocol_txt(SolrType.text_general, true, true, true, "external links, only the protocol"),
+    outboundlinks_protocol_sxt(SolrType.string, true, true, true, "external links, only the protocol"),
     outboundlinks_urlstub_txt(SolrType.text_general, true, true, true, "external links, the url only without the protocol"),
     outboundlinks_name_txt(SolrType.text_general, true, true, true, "external links, the name property of the a-tag"),
-    outboundlinks_rel_txt(SolrType.text_general, true, true, true, "external links, the rel property of the a-tag"),
-    outboundlinks_relflags_txt(SolrType.text_general, true, true, true, "external links, the rel property of the a-tag, coded binary"),
+    outboundlinks_rel_sxt(SolrType.string, true, true, true, "external links, the rel property of the a-tag"),
+    outboundlinks_relflags_sxt(SolrType.string, true, true, true, "external links, the rel property of the a-tag, coded binary"),
     outboundlinks_text_txt(SolrType.text_general, true, true, true, "external links, the text content of the a-tag"),
     images_tag_txt(SolrType.text_general, true, true, true, " all image tags, encoded as <img> tag inclusive alt- and title property"),
     images_urlstub_txt(SolrType.text_general, true, true, true, "all image links without the protocol and '://'"),
-    images_protocol_txt(SolrType.text_general, true, true, true, "all image link protocols"),
+    images_protocol_sxt(SolrType.text_general, true, true, true, "all image link protocols"),
     images_alt_txt(SolrType.text_general, true, true, true, "all image link alt tag"),
-    h1_txt(SolrType.text_general, true, true, true, "h1 header"),
-    h2_txt(SolrType.text_general, true, true, true, "h2 header"),
-    h3_txt(SolrType.text_general, true, true, true, "h3 header"),
-    h4_txt(SolrType.text_general, true, true, true, "h4 header"),
-    h5_txt(SolrType.text_general, true, true, true, "h5 header"),
-    h6_txt(SolrType.text_general, true, true, true, "h6 header"),
-    htags_i(SolrType.integer, true, true, "binary pattern for the existance of h1..h6 headlines"),
+    htags_i(SolrType.integer, true, true, false, "binary pattern for the existance of h1..h6 headlines"),
     paths_txt(SolrType.text_general, true, true, true, "all path elements in the url"),
-    host_s(SolrType.string, true, true, "host of the url"),
-    canonical_s(SolrType.string, true, true, "url inside the canonical link element"),
-    refresh_s(SolrType.string, true, true, "link from the url property inside the refresh link element"),
+    canonical_t(SolrType.text_general, true, true, false, "url inside the canonical link element"),
+    refresh_s(SolrType.string, true, true, false, "link from the url property inside the refresh link element"),
     li_txt(SolrType.text_general, true, true, true, "all texts in <li> tags"),
-    licount_i(SolrType.integer, true, true, "number of <li> tags"),
+    licount_i(SolrType.integer, true, true, false, "number of <li> tags"),
     bold_txt(SolrType.text_general, true, true, true, "all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order"),
-    bold_val(SolrType.integer, true, true, true, "number of occurrences of texts in bold_txt"),
-    boldcount_i(SolrType.integer, true, true, "total number of occurrences of <b> or <strong>"),
+    boldcount_i(SolrType.integer, true, true, false, "total number of occurrences of <b> or <strong>"),
     italic_txt(SolrType.text_general, true, true, true, "all texts inside of <i> tags. no doubles. listed in the order of number of occurrences in decreasing order"),
-    italic_val(SolrType.integer, true, true, true, "number of occurrences of texts in italic_txt"),
-    italiccount_i(SolrType.integer, true, true, "total number of occurrences of <i>"),
-    flash_b(SolrType.bool, true, true, "flag that shows if a swf file is linked"),
+    italiccount_i(SolrType.integer, true, true, false, "total number of occurrences of <i>"),
+    flash_b(SolrType.bool, true, true, false, "flag that shows if a swf file is linked"),
     frames_txt(SolrType.text_general, true, true, true, "list of all links to frames"),
-    framesscount_i(SolrType.integer, true, true, "number of frames_txt"),
+    framesscount_i(SolrType.integer, true, true, false, "number of frames_txt"),
     iframes_txt(SolrType.text_general, true, true, true, "list of all links to iframes"),
-    iframesscount_i(SolrType.integer, true, true, "number of iframes_txt"),
+    iframesscount_i(SolrType.integer, true, true, false, "number of iframes_txt"),
+
+    host_s(SolrType.string, true, true, false, "host of the url"),
+    host_protocol_s(SolrType.string, true, true, false, "the protocol of the url"),
+    host_dnc_s(SolrType.string, true, true, false, "the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used."),
+    host_organization_s(SolrType.string, true, true, false, "either the second level domain or, if a ccSLD is used, the third level domain"),
+    host_organizationdnc_s(SolrType.string, true, true, false, "the organization and dnc concatenated with '.'"),
+    host_subdomain_s(SolrType.string, true, true, false, "the remaining part of the host without organizationdnc"),
+
+    // special values; can only be used if '_val' type is defined in schema file; this is not standard
+    bold_val(SolrType.integer, true, true, true, "number of occurrences of texts in bold_txt"),
+    italic_val(SolrType.integer, true, true, true, "number of occurrences of texts in italic_txt"),
     ext_cms_txt(SolrType.text_general, true, true, true, "names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias"),
     ext_cms_val(SolrType.integer, true, true, true, "number of attributes that count for a specific cms in ext_cms_txt"),
     ext_ads_txt(SolrType.text_general, true, true, true, "names of ad-servers/ad-services"),
@@ -154,23 +161,20 @@ public enum YaCySchema implements Schema {
     private boolean multiValued, omitNorms;
     private String comment;
 
-    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final String comment) {
+    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final String comment) {
         this.type = type;
         this.indexed = indexed;
         this.stored = stored;
-        this.multiValued = false;
+        this.multiValued = multiValued;
         this.omitNorms = false;
         this.comment = comment;
-    }
-
-    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final String comment) {
-        this(type, indexed, stored, comment);
-        this.multiValued = multiValued;
+        assert type.appropriateName(this.name(), this.multiValued) : "bad configuration: " + this.name();
     }
 
     private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final String comment) {
         this(type, indexed, stored, multiValued, comment);
         this.omitNorms = omitNorms;
+        assert type.appropriateName(this.name(), this.multiValued) : "bad configuration: " + this.name();
     }
 
     /**

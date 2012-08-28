@@ -26,25 +26,37 @@
 package net.yacy.cora.services.federated.solr;
 
 public enum SolrType {
-    string,
-    text_general,
-    text_en_splitting_tight,
-    location,
-    date,
-    integer("int"),
-    bool("boolean"),
-    tlong("long"),
-    tfloat("float"),
-    tdouble("double");
+    string("s", "sxt"), // The type is not analyzed, but indexed/stored verbatim
+    text_general("t", "txt"), // tokenizes with StandardTokenizer, removes stop words from case-insensitive "stopwords.txt", down cases, applies synonyms.
+    text_en_splitting_tight(null, null),// can insert dashes in the wrong place and still match
+    location("p", null), // lat,lon - format: specialized field for geospatial search. If indexed, this fieldType must not be multivalued.
+    date("dt", null), // date format as in http://www.w3.org/TR/xmlschema-2/#dateTime with trailing 'Z'
+    integer("i", "val", "int"),
+    bool("b", null, "boolean"),
+    tlong(null, null, "long"), // not used in schema yet
+    tfloat(null, null, "float"), // not used in schema yet
+    tdouble(null, null, "double"); // not used in schema yet
 
-    private String printName;
-    private SolrType() {
+    private String printName, singlevalExt, multivalExt;
+    private SolrType(final String singlevalExt, final String multivalExt) {
         this.printName = this.name();
+        this.singlevalExt = singlevalExt;
+        this.multivalExt = multivalExt;
     }
-    private SolrType(String printName) {
+    private SolrType(final String singlevalExt, final String multivalExt, final String printName) {
         this.printName = printName;
+        this.singlevalExt = singlevalExt;
+        this.multivalExt = multivalExt;
     }
     public String printName() {
         return this.printName;
+    }
+    public boolean appropriateName(final String field, final boolean multivalue) {
+        int p = field.indexOf('_');
+        if (p < 0 || field.length() - p > 4) return true; // special names may have no type extension
+        String ext = field.substring(p + 1);
+        boolean ok = multivalue ? this.multivalExt.equals(ext) : this.singlevalExt.equals(ext);
+        assert ok : "SolrType = " + this.name() + ", field = " + field + ", ext = " + ext + ", multivalue = " + new Boolean(multivalue).toString() + ", singlevalExt = " + this.singlevalExt + ", multivalExt = " + this.multivalExt;
+        return ok;
     }
 }

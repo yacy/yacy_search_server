@@ -41,6 +41,7 @@ import java.util.Set;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.ConfigurationSet;
@@ -91,7 +92,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 YaCySchema f = YaCySchema.valueOf(etr.key());
                 f.setSolrFieldName(etr.getValue());
             } catch (IllegalArgumentException e) {
-                Log.logWarning("SolrScheme", "solr scheme file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
+                Log.logFine("SolrScheme", "solr scheme file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
                 it.remove();
             }
         }
@@ -199,7 +200,20 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         	final InetAddress address = digestURI.getInetAddress();
         	if (address != null) add(doc, YaCySchema.ip_s, address.getHostAddress());
         }
-        if (digestURI.getHost() != null) add(doc, YaCySchema.host_s, digestURI.getHost());
+        if (allAttr || contains(YaCySchema.host_protocol_s)) add(doc, YaCySchema.host_protocol_s, digestURI.getProtocol());
+        String host = null;
+        if ((host = digestURI.getHost()) != null) {
+            String dnc = Domains.getDNC(host);
+            String subdomOrga = host.substring(0, host.length() - dnc.length() - 1);
+            int p = subdomOrga.lastIndexOf('.');
+            String subdom = (p < 0) ? "" : subdomOrga.substring(0, p);
+            String orga = (p < 0) ? subdomOrga : subdomOrga.substring(p + 1);
+            if (allAttr || contains(YaCySchema.host_s)) add(doc, YaCySchema.host_s, host);
+            if (allAttr || contains(YaCySchema.host_dnc_s)) add(doc, YaCySchema.host_dnc_s, dnc);
+            if (allAttr || contains(YaCySchema.host_organization_s)) add(doc, YaCySchema.host_organization_s, orga);
+            if (allAttr || contains(YaCySchema.host_organizationdnc_s)) add(doc, YaCySchema.host_organizationdnc_s, orga + '.' + dnc);
+            if (allAttr || contains(YaCySchema.host_subdomain_s)) add(doc, YaCySchema.host_subdomain_s, subdom);
+        }
         if (allAttr || contains(YaCySchema.title)) add(doc, YaCySchema.title, md.dc_title());
         if (allAttr || contains(YaCySchema.author)) add(doc, YaCySchema.author, md.dc_creator());
         if (allAttr || contains(YaCySchema.description)) add(doc, YaCySchema.description, md.snippet());
@@ -232,8 +246,6 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         // coordinates
         if (md.lat() != 0.0f && md.lon() != 0.0f) {
-            if (allAttr || contains(YaCySchema.lat_coordinate)) add(doc, YaCySchema.lat_coordinate, md.lat());
-            if (allAttr || contains(YaCySchema.lon_coordinate)) add(doc, YaCySchema.lon_coordinate, md.lon());
             if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(md.lat()) + "," + Double.toString(md.lon()));
         }
         if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, 200);
@@ -245,7 +257,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if ((allAttr || contains(YaCySchema.referrer_id_txt)) && md.referrerHash() != null) add(doc, YaCySchema.referrer_id_txt, new String[]{ASCII.String(md.referrerHash())});
         if (allAttr || contains(YaCySchema.md5_s)) add(doc, YaCySchema.md5_s, md.md5());
         if (allAttr || contains(YaCySchema.publisher_t)) add(doc, YaCySchema.publisher_t, md.dc_publisher());
-        if ((allAttr || contains(YaCySchema.language_txt)) && md.language() != null) add(doc, YaCySchema.language_txt,new String[]{UTF8.String(md.language())});
+        if ((allAttr || contains(YaCySchema.language_s)) && md.language() != null) add(doc, YaCySchema.language_s, UTF8.String(md.language()));
         if (allAttr || contains(YaCySchema.size_i)) add(doc, YaCySchema.size_i, md.size());
         if (allAttr || contains(YaCySchema.audiolinkscount_i)) add(doc, YaCySchema.audiolinkscount_i, md.laudio());
         if (allAttr || contains(YaCySchema.videolinkscount_i)) add(doc, YaCySchema.videolinkscount_i, md.lvideo());
@@ -285,7 +297,20 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         	final InetAddress address = digestURI.getInetAddress();
         	if (address != null) add(doc, YaCySchema.ip_s, address.getHostAddress());
         }
-        if (digestURI.getHost() != null) add(doc, YaCySchema.host_s, digestURI.getHost());
+        if (allAttr || contains(YaCySchema.host_protocol_s)) add(doc, YaCySchema.host_protocol_s, digestURI.getProtocol());
+        String host = null;
+        if ((host = digestURI.getHost()) != null) {
+            String dnc = Domains.getDNC(host);
+            String subdomOrga = host.substring(0, host.length() - dnc.length() - 1);
+            int p = subdomOrga.lastIndexOf('.');
+            String subdom = (p < 0) ? "" : subdomOrga.substring(0, p);
+            String orga = (p < 0) ? subdomOrga : subdomOrga.substring(p + 1);
+            if (allAttr || contains(YaCySchema.host_s)) add(doc, YaCySchema.host_s, host);
+            if (allAttr || contains(YaCySchema.host_dnc_s)) add(doc, YaCySchema.host_dnc_s, dnc);
+            if (allAttr || contains(YaCySchema.host_organization_s)) add(doc, YaCySchema.host_organization_s, orga);
+            if (allAttr || contains(YaCySchema.host_organizationdnc_s)) add(doc, YaCySchema.host_organizationdnc_s, orga + '.' + dnc);
+            if (allAttr || contains(YaCySchema.host_subdomain_s)) add(doc, YaCySchema.host_subdomain_s, subdom);
+        }
         if (allAttr || contains(YaCySchema.title)) add(doc, YaCySchema.title, yacydoc.dc_title());
         if (allAttr || contains(YaCySchema.author)) add(doc, YaCySchema.author, yacydoc.dc_creator());
         if (allAttr || contains(YaCySchema.description)) add(doc, YaCySchema.description, yacydoc.dc_description());
@@ -411,7 +436,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
             if (allAttr || contains(YaCySchema.imagescount_i)) add(doc, YaCySchema.imagescount_i, imgtags.size());
             if (allAttr || contains(YaCySchema.images_tag_txt)) add(doc, YaCySchema.images_tag_txt, imgtags);
-            if (allAttr || contains(YaCySchema.images_protocol_txt)) add(doc, YaCySchema.images_protocol_txt, protocolList2indexedList(imgprots));
+            if (allAttr || contains(YaCySchema.images_protocol_sxt)) add(doc, YaCySchema.images_protocol_sxt, protocolList2indexedList(imgprots));
             if (allAttr || contains(YaCySchema.images_urlstub_txt)) add(doc, YaCySchema.images_urlstub_txt, imgstubs);
             if (allAttr || contains(YaCySchema.images_alt_txt)) add(doc, YaCySchema.images_alt_txt, imgalts);
 
@@ -479,12 +504,12 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // canonical tag
-            if (allAttr || contains(YaCySchema.canonical_s)) {
+            if (allAttr || contains(YaCySchema.canonical_t)) {
                 final MultiProtocolURI canonical = html.getCanonical();
                 if (canonical != null) {
                     inboundLinks.remove(canonical);
                     ouboundLinks.remove(canonical);
-                    add(doc, YaCySchema.canonical_s, canonical.toNormalform(false, false));
+                    add(doc, YaCySchema.canonical_t, canonical.toNormalform(false, false));
                 }
             }
 
@@ -565,11 +590,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             c++;
         }
         if (allAttr || contains(YaCySchema.inboundlinks_tag_txt)) add(doc, YaCySchema.inboundlinks_tag_txt, inboundlinksTag);
-        if (allAttr || contains(YaCySchema.inboundlinks_protocol_txt)) add(doc, YaCySchema.inboundlinks_protocol_txt, protocolList2indexedList(inboundlinksURLProtocol));
+        if (allAttr || contains(YaCySchema.inboundlinks_protocol_sxt)) add(doc, YaCySchema.inboundlinks_protocol_sxt, protocolList2indexedList(inboundlinksURLProtocol));
         if (allAttr || contains(YaCySchema.inboundlinks_urlstub_txt)) add(doc, YaCySchema.inboundlinks_urlstub_txt, inboundlinksURLStub);
         if (allAttr || contains(YaCySchema.inboundlinks_name_txt)) add(doc, YaCySchema.inboundlinks_name_txt, inboundlinksName);
-        if (allAttr || contains(YaCySchema.inboundlinks_rel_txt)) add(doc, YaCySchema.inboundlinks_rel_txt, inboundlinksRel);
-        if (allAttr || contains(YaCySchema.inboundlinks_relflags_txt)) add(doc, YaCySchema.inboundlinks_relflags_txt, relEval(inboundlinksRel));
+        if (allAttr || contains(YaCySchema.inboundlinks_rel_sxt)) add(doc, YaCySchema.inboundlinks_rel_sxt, inboundlinksRel);
+        if (allAttr || contains(YaCySchema.inboundlinks_relflags_sxt)) add(doc, YaCySchema.inboundlinks_relflags_sxt, relEval(inboundlinksRel));
         if (allAttr || contains(YaCySchema.inboundlinks_text_txt)) add(doc, YaCySchema.inboundlinks_text_txt, inboundlinksText);
 
         c = 0;
@@ -603,11 +628,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             c++;
         }
         if (allAttr || contains(YaCySchema.outboundlinks_tag_txt)) add(doc, YaCySchema.outboundlinks_tag_txt, outboundlinksTag);
-        if (allAttr || contains(YaCySchema.outboundlinks_protocol_txt)) add(doc, YaCySchema.outboundlinks_protocol_txt, protocolList2indexedList(outboundlinksURLProtocol));
+        if (allAttr || contains(YaCySchema.outboundlinks_protocol_sxt)) add(doc, YaCySchema.outboundlinks_protocol_sxt, protocolList2indexedList(outboundlinksURLProtocol));
         if (allAttr || contains(YaCySchema.outboundlinks_urlstub_txt)) add(doc, YaCySchema.outboundlinks_urlstub_txt, outboundlinksURLStub);
         if (allAttr || contains(YaCySchema.outboundlinks_name_txt)) add(doc, YaCySchema.outboundlinks_name_txt, outboundlinksName);
-        if (allAttr || contains(YaCySchema.outboundlinks_rel_txt)) add(doc, YaCySchema.outboundlinks_rel_txt, outboundlinksRel);
-        if (allAttr || contains(YaCySchema.outboundlinks_relflags_txt)) add(doc, YaCySchema.outboundlinks_relflags_txt, relEval(inboundlinksRel));
+        if (allAttr || contains(YaCySchema.outboundlinks_rel_sxt)) add(doc, YaCySchema.outboundlinks_rel_sxt, outboundlinksRel);
+        if (allAttr || contains(YaCySchema.outboundlinks_relflags_sxt)) add(doc, YaCySchema.outboundlinks_relflags_sxt, relEval(inboundlinksRel));
         if (allAttr || contains(YaCySchema.outboundlinks_text_txt)) add(doc, YaCySchema.outboundlinks_text_txt, outboundlinksText);
 
         // charset
@@ -615,8 +640,6 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         // coordinates
         if (yacydoc.lat() != 0.0f && yacydoc.lon() != 0.0f) {
-            if (allAttr || contains(YaCySchema.lat_coordinate)) add(doc, YaCySchema.lat_coordinate, yacydoc.lat());
-        	if (allAttr || contains(YaCySchema.lon_coordinate)) add(doc, YaCySchema.lon_coordinate, yacydoc.lon());
             if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(yacydoc.lat()) + "," + Double.toString(yacydoc.lon()));
         }
         if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, header == null ? 200 : header.getStatusCode());
@@ -628,7 +651,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if ((allAttr || contains(YaCySchema.referrer_id_txt)) && metadata.referrerHash() != null) add(doc, YaCySchema.referrer_id_txt, new String[]{ASCII.String(metadata.referrerHash())});
         //if (allAttr || contains(SolrField.md5_s)) add(solrdoc, SolrField.md5_s, new byte[0]);
         if (allAttr || contains(YaCySchema.publisher_t)) add(doc, YaCySchema.publisher_t, yacydoc.dc_publisher());
-        if ((allAttr || contains(YaCySchema.language_txt)) && metadata.language() != null) add(doc, YaCySchema.language_txt,new String[]{UTF8.String(metadata.language())});
+        if ((allAttr || contains(YaCySchema.language_s)) && metadata.language() != null) add(doc, YaCySchema.language_s, UTF8.String(metadata.language()));
         if (allAttr || contains(YaCySchema.size_i)) add(doc, YaCySchema.size_i, metadata.size());
         if (allAttr || contains(YaCySchema.audiolinkscount_i)) add(doc, YaCySchema.audiolinkscount_i, yacydoc.getAudiolinks().size());
         if (allAttr || contains(YaCySchema.videolinkscount_i)) add(doc, YaCySchema.videolinkscount_i, yacydoc.getVideolinks().size());

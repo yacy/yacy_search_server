@@ -38,6 +38,22 @@ public class schema_p {
 
         // write scheme
         int c = 0;
+        /*
+        //<field name="#[solrname]#" type="#[type]#"#(indexedChecked)#:: indexed="true"#(/indexedChecked)##(storedChecked)#:: stored="true"#(/storedChecked)##(multiValuedChecked)#:: multiValued="true"#(/multiValuedChecked)##(omitNormsChecked)#:: omitNorms="true"#(/omitNormsChecked)#/>
+        if (sb == null) {
+            for (SolrType type : SolrType.values()) {
+                prop.put("fields_" + c + "_solrname", field.getSolrFieldName());
+                prop.put("fields_" + c + "_type", field.getType().printName());
+                prop.put("fields_" + c + "_comment", field.getComment());
+                prop.put("fields_" + c + "_indexedChecked", field.isIndexed() ? 1 : 0);
+                prop.put("fields_" + c + "_storedChecked", field.isStored() ? 1 : 0);
+                prop.put("fields_" + c + "_multiValuedChecked", field.isMultiValued() ? 1 : 0);
+                prop.put("fields_" + c + "_omitNormsChecked", field.isOmitNorms() ? 1 : 0);
+                c++;
+            }
+            prop.put("fields", c);
+        } else {
+        */
         SolrConfiguration solrScheme = sb.index.fulltext().getSolrScheme();
         for (YaCySchema field : YaCySchema.values()) {
             if (solrScheme.contains(field.name())) {
@@ -52,6 +68,7 @@ public class schema_p {
             }
         }
         prop.put("fields", c);
+        //}
 
         prop.put("solruniquekey",YaCySchema.id.getSolrFieldName());
         prop.put("solrdefaultsearchfield",YaCySchema.text_t.getSolrFieldName());

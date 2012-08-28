@@ -86,7 +86,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         };
     private static final Set<String> SOLR_FIELDS = new HashSet<String>();
     static {
-        field2tag.put(YaCySchema.language_txt.name(), GSAToken.LANG.name());
+        field2tag.put(YaCySchema.language_s.name(), GSAToken.LANG.name());
         SOLR_FIELDS.addAll(field2tag.keySet());
         for (YaCySchema field: extrafields) SOLR_FIELDS.add(field.name());
     }

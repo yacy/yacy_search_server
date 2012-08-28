@@ -467,22 +467,29 @@ public final class QueryParams {
         return ret;
     }
 
+    final static String[] fields = new String[]{"sku","title","h1_txt","h2_txt","author","description","keywords","text_t"};
+
     public String solrQueryString(boolean urlencoded) {
         if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
         final StringBuilder q = new StringBuilder(80);
-        q.append("{!lucene q.op=AND}");
 
         // add text query
-        q.append("[sku,title,h1_txt,h2_txt,author,description,keywords,text_t]:");
         int wc = 0;
+        StringBuilder w = new StringBuilder(80);
         for (String s: this.query_include_words) {
-            if (wc > 0) q.append(urlencoded ? '+' : ' ');
-            q.append(s);
+            if (wc > 0) w.append(urlencoded ? "+AND+" : " AND ");
+            w.append(s);
             wc++;
         }
         for (String s: this.query_exclude_words){
-            if (wc > 0) q.append(urlencoded ? "+-" : " -");
-            q.append(s);
+            if (wc > 0) w.append(urlencoded ? "+AND+-" : " AND -");
+            w.append(s);
+            wc++;
+        }
+        wc = 0;
+        for (String a: fields) {
+            if (wc > 0) q.append(urlencoded ? "+OR+" : " OR ");
+            q.append('(').append(a).append(':').append(w).append(')');
             wc++;
         }
 

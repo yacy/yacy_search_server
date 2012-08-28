@@ -82,8 +82,8 @@ public class URIMetadataNode implements URIMetadata {
         this.audioc = getInt(YaCySchema.audiolinkscount_i);
         this.videoc = getInt(YaCySchema.videolinkscount_i);
         this.appc = getInt(YaCySchema.videolinkscount_i);
-        this.lon = getDouble(YaCySchema.lon_coordinate);
-        this.lat = getDouble(YaCySchema.lat_coordinate);
+        this.lon = 0.0d;
+        this.lat = 0.0d;
         String latlon = (String) this.doc.getFieldValue(YaCySchema.coordinate_p.name());
         if (latlon != null) {
             int p = latlon.indexOf(',');
@@ -120,13 +120,13 @@ public class URIMetadataNode implements URIMetadata {
         if (x == null) return 0;
         return x.intValue();
     }
-
+    /*
     private double getDouble(YaCySchema field) {
         Double x = (Double) this.doc.getFieldValue(field.name());
         if (x == null) return 0.0d;
         return x.doubleValue();
     }
-
+    */
     private Date getDate(YaCySchema field) {
         Date x = (Date) this.doc.getFieldValue(field.name());
         if (x == null) return new Date(0);
@@ -239,9 +239,9 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public byte[] language() {
-        ArrayList<String> languages = getArrayList(YaCySchema.language_txt);
-        if (languages == null || languages.size() == 0) return ASCII.getBytes("en");
-        return UTF8.getBytes(languages.get(0));
+        String language = getString(YaCySchema.language_s);
+        if (language == null || language.length() == 0) return ASCII.getBytes("en");
+        return UTF8.getBytes(language);
     }
 
 
