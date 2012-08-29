@@ -195,12 +195,22 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, "");
         add(doc, YaCySchema.id, ASCII.String(md.hash()));
-        add(doc, YaCySchema.sku, digestURI.toNormalform(true, false));
+        String us = digestURI.toNormalform(true, false);
+        add(doc, YaCySchema.sku, us);
         if (allAttr || contains(YaCySchema.ip_s)) {
         	final InetAddress address = digestURI.getInetAddress();
         	if (address != null) add(doc, YaCySchema.ip_s, address.getHostAddress());
         }
-        if (allAttr || contains(YaCySchema.host_protocol_s)) add(doc, YaCySchema.host_protocol_s, digestURI.getProtocol());
+        if (allAttr || contains(YaCySchema.url_protocol_s)) add(doc, YaCySchema.url_protocol_s, digestURI.getProtocol());
+        Map<String, String> searchpart = digestURI.getSearchpartMap();
+        if (searchpart == null) {
+            if (allAttr || contains(YaCySchema.url_parameter_i)) add(doc, YaCySchema.url_parameter_i, 0);
+        } else {
+            if (allAttr || contains(YaCySchema.url_parameter_i)) add(doc, YaCySchema.url_parameter_i, searchpart.size());
+            if (allAttr || contains(YaCySchema.url_parameter_key_sxt)) add(doc, YaCySchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
+            if (allAttr || contains(YaCySchema.url_parameter_value_sxt)) add(doc, YaCySchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
+        }
+        if (allAttr || contains(YaCySchema.url_chars_i)) add(doc, YaCySchema.url_chars_i, us.length());
         String host = null;
         if ((host = digestURI.getHost()) != null) {
             String dnc = Domains.getDNC(host);
@@ -234,9 +244,9 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         // path elements of link
         final String path = digestURI.getPath();
-        if (path != null && (allAttr || contains(YaCySchema.paths_txt))) {
+        if (path != null && (allAttr || contains(YaCySchema.url_paths_sxt))) {
             final String[] paths = path.split("/");
-            if (paths.length > 0) add(doc, YaCySchema.paths_txt, paths);
+            if (paths.length > 0) add(doc, YaCySchema.url_paths_sxt, paths);
         }
 
         if (allAttr || contains(YaCySchema.imagescount_i)) add(doc, YaCySchema.imagescount_i, md.limage());
@@ -291,13 +301,23 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
         boolean allAttr = this.isEmpty();
         add(doc, YaCySchema.id, id);
-        add(doc, YaCySchema.sku, digestURI.toNormalform(true, false));
         if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
+        String us = digestURI.toNormalform(true, false);
+        add(doc, YaCySchema.sku, us);
         if (allAttr || contains(YaCySchema.ip_s)) {
-        	final InetAddress address = digestURI.getInetAddress();
-        	if (address != null) add(doc, YaCySchema.ip_s, address.getHostAddress());
+            final InetAddress address = digestURI.getInetAddress();
+            if (address != null) add(doc, YaCySchema.ip_s, address.getHostAddress());
         }
-        if (allAttr || contains(YaCySchema.host_protocol_s)) add(doc, YaCySchema.host_protocol_s, digestURI.getProtocol());
+        if (allAttr || contains(YaCySchema.url_protocol_s)) add(doc, YaCySchema.url_protocol_s, digestURI.getProtocol());
+        Map<String, String> searchpart = digestURI.getSearchpartMap();
+        if (searchpart == null) {
+            if (allAttr || contains(YaCySchema.url_parameter_i)) add(doc, YaCySchema.url_parameter_i, 0);
+        } else {
+            if (allAttr || contains(YaCySchema.url_parameter_i)) add(doc, YaCySchema.url_parameter_i, searchpart.size());
+            if (allAttr || contains(YaCySchema.url_parameter_key_sxt)) add(doc, YaCySchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
+            if (allAttr || contains(YaCySchema.url_parameter_value_sxt)) add(doc, YaCySchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
+        }
+        if (allAttr || contains(YaCySchema.url_chars_i)) add(doc, YaCySchema.url_chars_i, us.length());
         String host = null;
         if ((host = digestURI.getHost()) != null) {
             String dnc = Domains.getDNC(host);
@@ -326,9 +346,9 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         // path elements of link
         final String path = digestURI.getPath();
-        if (path != null && (allAttr || contains(YaCySchema.paths_txt))) {
+        if (path != null && (allAttr || contains(YaCySchema.url_paths_sxt))) {
             final String[] paths = path.split("/");
-            if (paths.length > 0) add(doc, YaCySchema.paths_txt, paths);
+            if (paths.length > 0) add(doc, YaCySchema.url_paths_sxt, paths);
         }
 
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr scheme
@@ -751,7 +771,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         final String path = digestURI.getPath();
         if (path != null) {
             final String[] paths = path.split("/");
-            if (paths.length > 0) add(solrdoc, YaCySchema.paths_txt, paths);
+            if (paths.length > 0) add(solrdoc, YaCySchema.url_paths_sxt, paths);
         }
         add(solrdoc, YaCySchema.failreason_t, failReason);
         add(solrdoc, YaCySchema.httpstatus_i, httpstatus);

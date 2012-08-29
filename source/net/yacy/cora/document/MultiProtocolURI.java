@@ -88,7 +88,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     // class variables
     protected final String protocol, userInfo;
-    protected       String host, path, quest, ref;
+    protected       String host, path, searchpart, anchor;
     protected       int port;
     protected       InetAddress hostAddress;
     protected       ContentDomain contentDomain;
@@ -102,8 +102,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.hostAddress = null;
         this.userInfo = null;
         this.path = null;
-        this.quest = null;
-        this.ref = null;
+        this.searchpart = null;
+        this.anchor = null;
         this.contentDomain = null;
         this.port = -1;
     }
@@ -118,8 +118,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.hostAddress = null;
         this.userInfo = url.userInfo;
         this.path = url.path;
-        this.quest = url.quest;
-        this.ref = url.ref;
+        this.searchpart = url.searchpart;
+        this.anchor = url.anchor;
         this.contentDomain = null;
         this.port = url.port;
     }
@@ -187,8 +187,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             if (this.host.indexOf('&') >= 0) throw new MalformedURLException("invalid '&' in host");
             this.path = resolveBackpath(this.path);
             identPort(url, (isHTTP() ? 80 : (isHTTPS() ? 443 : (isFTP() ? 21 : (isSMB() ? 445 : -1)))));
-            identRef();
-            identQuest();
+            identAnchor();
+            identSearchpart();
             escape();
         } else {
             // this is not a http or ftp url
@@ -202,8 +202,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 this.host = url.substring(q + 1);
                 this.path = null;
                 this.port = -1;
-                this.quest = null;
-                this.ref = null;
+                this.searchpart = null;
+                this.anchor = null;
             } else if (this.protocol.equals("file")) {
                 // parse file url
                 final String h = url.substring(p + 1);
@@ -229,8 +229,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 }
                 this.userInfo = null;
                 this.port = -1;
-                this.quest = null;
-                this.ref = null;
+                this.searchpart = null;
+                this.anchor = null;
             } else {
                 throw new MalformedURLException("unknown protocol: " + url);
             }
@@ -352,12 +352,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 }
             }
         }
-        this.quest = baseURL.quest;
-        this.ref = baseURL.ref;
+        this.searchpart = baseURL.searchpart;
+        this.anchor = baseURL.anchor;
 
         this.path = resolveBackpath(this.path);
-        identRef();
-        identQuest();
+        identAnchor();
+        identSearchpart();
         escape();
     }
 
@@ -368,11 +368,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.host = host;
         this.port = port;
         this.path = path;
-        this.quest = null;
+        this.searchpart = null;
         this.userInfo = null;
-        this.ref = null;
-        identRef();
-        identQuest();
+        this.anchor = null;
+        identAnchor();
+        identSearchpart();
         escape();
     }
 
@@ -401,8 +401,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      */
     private void escape() {
         if (this.path != null && this.path.indexOf('%') == -1) escapePath();
-        if (this.quest != null && this.quest.indexOf('%') == -1) escapeQuest();
-        if (this.ref != null && this.ref.indexOf('%') == -1) escapeRef();
+        if (this.searchpart != null && this.searchpart.indexOf('%') == -1) escapeSearchpart();
+        if (this.anchor != null && this.anchor.indexOf('%') == -1) escapeAnchor();
     }
 
     private void escapePath() {
@@ -415,13 +415,13 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.path = ptmp.substring((ptmp.length() > 0) ? 1 : 0);
     }
 
-    private void escapeRef() {
-        this.ref = escape(this.ref).toString();
+    private void escapeAnchor() {
+        this.anchor = escape(this.anchor).toString();
     }
 
-    private void escapeQuest() {
-        final String[] questp = patternAmp.split(this.quest, -1);
-        final StringBuilder qtmp = new StringBuilder(this.quest.length() + 10);
+    private void escapeSearchpart() {
+        final String[] questp = patternAmp.split(this.searchpart, -1);
+        final StringBuilder qtmp = new StringBuilder(this.searchpart.length() + 10);
         for (final String element : questp) {
             if (element.indexOf('=') != -1) {
                 qtmp.append('&');
@@ -433,7 +433,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 qtmp.append(escape(element));
             }
         }
-        this.quest = qtmp.substring((qtmp.length() > 0) ? 1 : 0);
+        this.searchpart = qtmp.substring((qtmp.length() > 0) ? 1 : 0);
     }
 
     private final static String[] hex = {
@@ -610,24 +610,24 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         }
     }
 
-    private void identRef() {
+    private void identAnchor() {
         // identify ref in file
         final int r = this.path.indexOf('#');
         if (r < 0) {
-            this.ref = null;
+            this.anchor = null;
         } else {
-            this.ref = this.path.substring(r + 1);
+            this.anchor = this.path.substring(r + 1);
             this.path = this.path.substring(0, r);
         }
     }
 
-    private void identQuest() {
+    private void identSearchpart() {
         // identify quest in file
         final int r = this.path.indexOf('?');
         if (r < 0) {
-            this.quest = null;
+            this.searchpart = null;
         } else {
-            this.quest = this.path.substring(r + 1);
+            this.searchpart = this.path.substring(r + 1);
             this.path = this.path.substring(0, r);
         }
     }
@@ -640,25 +640,25 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         // this is the path plus quest plus ref
         // if there is no quest and no ref the result is identical to getPath
         // this is defined according to http://java.sun.com/j2se/1.4.2/docs/api/java/net/URL.html#getFile()
-        if (this.quest == null) {
-            if (excludeReference || this.ref == null) return this.path;
+        if (this.searchpart == null) {
+            if (excludeReference || this.anchor == null) return this.path;
             final StringBuilder sb = new StringBuilder(120);
             sb.append(this.path);
             sb.append('#');
-            sb.append(this.ref);
+            sb.append(this.anchor);
             return sb.toString();
         }
-        String q = this.quest;
+        String q = this.searchpart;
         if (removeSessionID) {
             for (final String sid: sessionIDnames.keySet()) {
                 if (q.toLowerCase().startsWith(sid.toLowerCase() + "=")) {
                     final int p = q.indexOf('&');
                     if (p < 0) {
-                        if (excludeReference || this.ref == null) return this.path;
+                        if (excludeReference || this.anchor == null) return this.path;
                         final StringBuilder sb = new StringBuilder(120);
                         sb.append(this.path);
                         sb.append('#');
-                        sb.append(this.ref);
+                        sb.append(this.anchor);
                         return sb.toString();
                     }
                     q = q.substring(p + 1);
@@ -678,9 +678,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         sb.append(this.path);
         sb.append('?');
         sb.append(q);
-        if (excludeReference || this.ref == null) return sb.toString();
+        if (excludeReference || this.anchor == null) return sb.toString();
         sb.append('#');
-        sb.append(this.ref);
+        sb.append(this.anchor);
         return sb.toString();
     }
 
@@ -758,11 +758,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public String getRef() {
-        return this.ref;
+        return this.anchor;
     }
 
     public void removeRef() {
-        this.ref = null;
+        this.anchor = null;
     }
 
     /**
@@ -773,8 +773,20 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return this.userInfo;
     }
 
-    public String getQuery() {
-        return this.quest;
+    public String getSearchpart() {
+        return this.searchpart;
+    }
+
+    public Map<String, String> getSearchpartMap() {
+        if (this.searchpart == null) return null;
+        this.searchpart = this.searchpart.replaceAll("&amp;", "&");
+        String[] parts = this.searchpart.split("&");
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        for (String part: parts) {
+            int p = part.indexOf('=');
+            if (p > 0) map.put(part.substring(0, p), part.substring(p + 1)); else map.put(part, "");
+        }
+        return map;
     }
 
     @Override
@@ -926,7 +938,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
           ((this.host == null && other.host == null) || (this.host != null && other.host != null && this.host.equals(other.host))) &&
           ((this.userInfo == null && other.userInfo == null) || (this.userInfo != null && other.userInfo != null && this.userInfo.equals(other.userInfo))) &&
           ((this.path == null && other.path == null) || (this.path != null && other.path != null && this.path.equals(other.path))) &&
-          ((this.quest == null && other.quest == null) || (this.quest != null && other.quest != null && this.quest.equals(other.quest))) &&
+          ((this.searchpart == null && other.searchpart == null) || (this.searchpart != null && other.searchpart != null && this.searchpart.equals(other.searchpart))) &&
           this.port == other.port;
     }
 
@@ -936,7 +948,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public boolean isPOST() {
-        return (this.quest != null) && (this.quest.length() > 0);
+        return (this.searchpart != null) && (this.searchpart.length() > 0);
     }
 
     public final boolean isCGI() {

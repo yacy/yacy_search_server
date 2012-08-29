@@ -117,7 +117,6 @@ public enum YaCySchema implements Schema {
     images_protocol_sxt(SolrType.text_general, true, true, true, "all image link protocols"),
     images_alt_txt(SolrType.text_general, true, true, true, "all image link alt tag"),
     htags_i(SolrType.integer, true, true, false, "binary pattern for the existance of h1..h6 headlines"),
-    paths_txt(SolrType.text_general, true, true, true, "all path elements in the url"),
     canonical_t(SolrType.text_general, true, true, false, "url inside the canonical link element"),
     refresh_s(SolrType.string, true, true, false, "link from the url property inside the refresh link element"),
     li_txt(SolrType.text_general, true, true, true, "all texts in <li> tags"),
@@ -132,12 +131,22 @@ public enum YaCySchema implements Schema {
     iframes_txt(SolrType.text_general, true, true, true, "list of all links to iframes"),
     iframesscount_i(SolrType.integer, true, true, false, "number of iframes_txt"),
 
+    url_paths_sxt(SolrType.string, true, true, true, "all path elements in the url"),
+    url_parameter_i(SolrType.integer, true, true, false, "number of key-value pairs in search part of the url"),
+    url_parameter_key_sxt(SolrType.string, true, true, true, "the keys from key-value pairs in the search part of the url"),
+    url_parameter_value_sxt(SolrType.string, true, true, true, "the values from key-value pairs in the search part of the url"),
+    url_chars_i(SolrType.integer, true, true, false, "number of all characters in the url == length of sku field"),
+
     host_s(SolrType.string, true, true, false, "host of the url"),
-    host_protocol_s(SolrType.string, true, true, false, "the protocol of the url"),
+    url_protocol_s(SolrType.string, true, true, false, "the protocol of the url"),
     host_dnc_s(SolrType.string, true, true, false, "the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used."),
     host_organization_s(SolrType.string, true, true, false, "either the second level domain or, if a ccSLD is used, the third level domain"),
     host_organizationdnc_s(SolrType.string, true, true, false, "the organization and dnc concatenated with '.'"),
     host_subdomain_s(SolrType.string, true, true, false, "the remaining part of the host without organizationdnc"),
+
+    //title_count_i(SolrType.integer, true, true, false, ""),
+    //title_chars_i(SolrType.integer, true, true, false, ""),
+    //title_words_i(SolrType.integer, true, true, false, ""),
 
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.integer, true, true, true, "number of occurrences of texts in bold_txt"),

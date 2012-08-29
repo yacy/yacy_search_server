@@ -89,7 +89,7 @@ author
 ## content of description-tag, text
 description
 
-## content of keywords tag; words are separated by space, textgen
+## content of keywords tag; words are separated by space
 keywords
 
 ## character encoding, string
@@ -119,37 +119,37 @@ responsetime_i
 ## all visible text, text
 text_t
 
-## h1 header, textgen
+## h1 header
 h1_txt
 
-## h2 header, textgen
+## h2 header
 h2_txt
 
-## h3 header, textgen
+## h3 header
 h3_txt
 
-## h4 header, textgen
+## h4 header
 h4_txt
 
-## h5 header, textgen
+## h5 header
 h5_txt
 
-## h6 header, textgen
+## h6 header
 h6_txt
 
 
 ### optional values, not part of standard YaCy handling (but useful for external applications)
 
-## tags of css entries, normalized with absolute URL, textgen
+## tags of css entries, normalized with absolute URL
 #css_tag_txt
 
-## urls of css entries, normalized with absolute URL, textgen
+## urls of css entries, normalized with absolute URL
 #css_url_txt
 
 ## number of css entries, int
 #csscount_i
 
-## urls of script entries, normalized with absolute URL, textgen
+## urls of script entries, normalized with absolute URL
 #scripts_txt
 
 ## number of script entries, int
@@ -171,7 +171,7 @@ h6_txt
 ## content of <meta name="generator" content=#content#> tag, text
 #metagenerator_t
 
-## internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
+## internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow
 #inboundlinks_tag_txt
 
 ## internal links, only the protocol
@@ -192,7 +192,7 @@ h6_txt
 ## internal links, the text content of the a-tag
 #inboundlinks_text_txt
 
-## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
+## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow
 #outboundlinks_tag_txt
 
 ## external links, only the protocol
@@ -213,7 +213,7 @@ h6_txt
 ## external links, the text content of the a-tag
 #outboundlinks_text_txt
 
-## all image tags, encoded as <img> tag inclusive alt- and title property, textgen
+## all image tags, encoded as <img> tag inclusive alt- and title property
 #images_tag_txt
 
 ## all image links without the protocol and '://'
@@ -228,34 +228,31 @@ h6_txt
 ## binary pattern for the existance of h1..h6 headlines, int
 #htags_i
 
-## all path elements in the url, textgen
-#paths_txt
-
 ## url inside the canonical link element, string
 #canonical_t
 
 ## link from the url property inside the refresh link element, string
 #refresh_s
 
-## all texts in <li> tags, textgen
+## all texts in <li> tags
 #li_txt
 
 ## number of <li> tags, int
 #licount_i
 
-## all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order, textgen
+## all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order
 bold_txt
 
-## number of occurrences of texts in bold_txt, textgen
+## number of occurrences of texts in bold_txt
 #bold_val
 
 ## total number of occurrences of <b> or <strong>, int
 #boldcount_i
 
-## all texts inside of <i> tags. no doubles. listed in the order of number of occurrences in decreasing order, textgen
+## all texts inside of <i> tags. no doubles. listed in the order of number of occurrences in decreasing order
 italic_txt
 
-## number of occurrences of texts in italic_txt, textgen
+## number of occurrences of texts in italic_txt
 #italic_val
 
 ## total number of occurrences of <i>, int
@@ -264,23 +261,38 @@ italic_txt
 ## flag that shows if a swf file is linked, boolean
 #flash_b
 
-## list of all links to frames, textgen
+## list of all links to frames
 #frames_txt
 
 ## number of attr_frames, int
 #framesscount_i
 
-## list of all links to iframes, textgen
+## list of all links to iframes
 #iframes_txt
 
 ## number of attr_iframes, int
 #iframesscount_i
 
+## the protocol of the url
+#url_protocol_s
+
+## all path elements in the url
+#url_paths_sxt
+
+## number of key-value pairs in search part of the url
+#url_parameter_i
+
+## the keys from key-value pairs in the search part of the url
+#url_parameter_key_sxt
+
+## the values from key-value pairs in the search part of the url
+#url_parameter_value_sxt
+
+## number of all characters in the url == length of sku field
+#url_chars_i
+
 ## host of the url, string
 #host_s
-
-## the protocol of the url
-#host_protocol_s
 
 ## the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used.
 #host_dnc_s
@@ -294,38 +306,38 @@ italic_txt
 ## the remaining part of the host without organizationdnc
 #host_subdomain_s
 
-## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias, textgen
+## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias
 #ext_cms_txt
 
-##number of attributes that count for a specific cms in attr_cms, textgen
+##number of attributes that count for a specific cms in attr_cms
 #ext_cms_val
 
-## names of ad-servers/ad-services, textgen
+## names of ad-servers/ad-services
 #ext_ads_txt
 
-## number of attributes counts in attr_ads, textgen
+## number of attributes counts in attr_ads
 #ext_ads_val
 
-## names of recognized community functions, textgen
+## names of recognized community functions
 #ext_community_txt
 
-## number of attribute counts in attr_community, textgen
+## number of attribute counts in attr_community
 #ext_community_val
 
-## names of map services, textgen
+## names of map services
 #ext_maps_txt
 
-## number of attribute counts in attr_maps, textgen
+## number of attribute counts in attr_maps
 #ext_maps_val
 
-## names of tracker server, textgen
+## names of tracker server
 #ext_tracker_txt
 
-## number of attribute counts in attr_tracker, textgen
+## number of attribute counts in attr_tracker
 #ext_tracker_val
 
-## names matching title expressions, textgen
+## names matching title expressions
 #ext_title_txt
 
-## number of matching title expressions, textgen
+## number of matching title expressions
 #ext_title_val
