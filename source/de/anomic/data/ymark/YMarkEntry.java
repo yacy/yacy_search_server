@@ -13,6 +13,7 @@ public class YMarkEntry extends TreeMap<String, String> {
     private static final long serialVersionUID = 2179622977348536148L;
     
     public static final YMarkEntry POISON = new YMarkEntry();
+    public static final YMarkEntry EMPTY = new YMarkEntry();
     public static final String BOOKMARKS_ID = "id";
     public static final String BOOKMARKS_REF = "ref";
     public static final String FOLDERS_IMPORTED = "/imported";
@@ -28,7 +29,11 @@ public class YMarkEntry extends TreeMap<String, String> {
     	PUBLIC         ("public",          "",                 "false",        "private",          "yacy:public",  "",             "lock"),
     	TAGS           ("tags",            "dc:subject",       "unsorted",     "shortcuturl",      "yacy:tags",    "keyword",      "tag"),
     	VISITS         ("visits",          "",                 "0",            "",                 "yacy:visits",  "",             "stat"),
-    	FOLDERS        ("folders",         "",                 "/unsorted",    "",                 "",             "",             "folder");
+    	FOLDERS        ("folders",         "",                 "/unsorted",    "",                 "",             "",             "folder"),
+    	FILTER		   ("filter",          "",                 "",             "",                 "yacy:filter",  "",             "filter"),	
+    	OAI		       ("oai",             "",                 "",             "",                 "yacy:oai",     "",             "oai"),
+    	URLHASH	       ("urlhash",         "",                 "",             "",                 "yacy:urlhash", "",             "urlhash"),	
+    	STARRATING     ("starrating",         "",                 "",             "",                 "yacy:starrating", "",             "stat");
     	    	
     	private String key;
     	private String dc_attrb;

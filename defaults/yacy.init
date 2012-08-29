@@ -1069,7 +1069,20 @@ augmentation.reflect = false
 augmentation.addDoctype = false
 augmentation.reparse = false
 
+# Content control settings
+contentcontrol.enabled = false
+contentcontrol.bookmarklist = contentcontrol
+contentcontrol.mandatoryfilterlist = yacy
+contentcontrol.smwimport.enabled = false
+contentcontrol.smwimport.baseurl = 
+contentcontrol.smwimport.purgelistoninit = true
+contentcontrol.smwimport.targetlist = contentcontrol
+contentcontrol.smwimport.defaultcategory = yacy
+
 # Interaction settings
+interaction.enabled = false
+interaction.target = yacy
+
 interaction.feedback.enabled = true
 interaction.feedback.url = 
 interaction.feedback.accept = false

@@ -56,6 +56,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
+import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -68,6 +69,7 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.repository.FilterEngine;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
@@ -706,6 +708,29 @@ public final class RWIProcess extends Thread
                 this.sortout++;
                 continue;
             }
+            
+            // content control
+            
+			if (Switchboard.getSwitchboard().getConfigBool(
+					"contentcontrol.enabled", false) == true) {
+
+				// check global network filter from bookmark list
+				if (!Switchboard.getSwitchboard()
+						.getConfig("contentcontrol.mandatoryfilterlist", "")
+						.equals("")) {
+
+					FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
+
+					if (f != null) {
+						if (!f.isListed(page.url(), null)) {
+
+							this.sortout++;
+							continue;
+						}
+					}
+
+				}
+			}
 
             final String pageurl = page.url().toNormalform(true, true);
             final String pageauthor = page.dc_creator();
