@@ -27,6 +27,7 @@
 package de.anomic.data.ymark;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -44,6 +45,7 @@ import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
 import de.anomic.data.WorkTables;
 
@@ -338,11 +340,20 @@ public class YMarkTables {
 	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean mergeTags, final boolean mergeFolders) throws IOException, SpaceExceededException {
 		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final String date = String.valueOf(System.currentTimeMillis());
-		final byte[] urlHash = YMarkUtil.getBookmarkId(bmk.get(YMarkEntry.BOOKMARK.URL.key()));
+		byte[] urlHash = null;
+        try {
+			urlHash = YMarkUtil.getBookmarkId(bmk.get(YMarkEntry.BOOKMARK.URL.key()));
+        } catch (MalformedURLException e) {
+        	Log.logInfo("BOOKMARKIMPORT", "invalid url: "+bmk.get(YMarkEntry.BOOKMARK.URL.key()));
+        }
 		Tables.Row bmk_row = null;
 
 		if (urlHash != null) {
-			bmk_row = this.worktables.select(bmk_table, urlHash);
+			try {
+				bmk_row = this.worktables.select(bmk_table, urlHash);
+			} catch (Exception e) {
+				
+			}
 	        if (bmk_row == null) {
 	        	// create and insert new entry
 				if(!bmk.containsKey(YMarkEntry.BOOKMARK.DATE_ADDED.key())) {
