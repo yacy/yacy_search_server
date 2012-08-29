@@ -102,8 +102,7 @@ public class searchresult {
         //post.put(, post.remove("output"));//required, example: xml,xml_no_dtd
         String q = post.get(CommonParams.Q, "");
         post.put(CommonParams.ROWS, post.remove("num"));
-        post.put(CommonParams.ROWS, Math.min(post.getInt("num", 10), (authenticated) ? 5000 : 100));
-        post.remove("num");
+        post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
         post.put("hl", "true");
         post.put("hl.fl", "text_t,h1,h2");
         post.put("hl.simple.pre", "<b>");

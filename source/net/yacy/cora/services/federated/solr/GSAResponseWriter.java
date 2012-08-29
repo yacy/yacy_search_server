@@ -233,7 +233,8 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
                 if (YaCySchema.last_modified.name().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
-                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.CACHE_LAST_MODIFIED.name(), HeaderFramework.formatRFC1123(d));
+                    writer.write("<FS NAME=\"date\" VALUE=\"" + HeaderFramework.formatGSAFS(d) + "\"/>");
+                    //OpensearchResponseWriter.solitaireTag(writer, GSAToken.CACHE_LAST_MODIFIED.name(), HeaderFramework.formatRFC1123(d));
                     texts.add(value.stringValue());
                     continue;
                 }
