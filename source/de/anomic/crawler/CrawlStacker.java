@@ -44,6 +44,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
+import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
@@ -535,6 +536,27 @@ public final class CrawlStacker {
         		return "the url '" + url + "' is not in domainList of this network";
         	}
         }
+        
+        if (Switchboard.getSwitchboard().getConfigBool(
+				"contentcontrol.enabled", false) == true) {
+
+			if (!Switchboard.getSwitchboard()
+					.getConfig("contentcontrol.mandatoryfilterlist", "")
+					.equals("")) {
+				FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
+				if (f != null) {
+					if (!f.isListed(url, null)) {
+
+						return "the url '"
+								+ url
+								+ "' does not belong to the network mandatory filter list";
+
+					}
+				}
+			}
+
+		}
+        
         final boolean local = url.isLocal();
         if (this.acceptLocalURLs && local) return null;
         if (this.acceptGlobalURLs && !local) return null;

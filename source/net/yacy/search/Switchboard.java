@@ -110,6 +110,8 @@ import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Tray;
+import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
+import net.yacy.interaction.contentcontrol.ContentControlImportThread;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
@@ -775,7 +777,7 @@ public final class Switchboard extends serverSwitch
         // that an automatic authorization of localhost is done, because in this case crawls from local
         // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
         // addresses that can steer a YaCy peer
-        if ( (getConfigBool("adminAccountForLocalhost", false)) ) {
+        if ( !getConfigBool("adminAccountForLocalhost", false) ) {
             if ( getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000") ) {
                 // the password was set automatically with a random value.
                 // We must remove that here to prevent that a user cannot log in any more
@@ -969,7 +971,39 @@ public final class Switchboard extends serverSwitch
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_IDLESLEEP, "5000")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_BUSYSLEEP, "0")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_MEMPREREQ, "1000000")));
-
+        
+        // content control: initialize list sync thread
+        deployThread(
+                "720_ccimport",
+                "Content Control Import",
+                "this is the content control import thread",
+                null,
+                new InstantBusyThread(
+                    new ContentControlImportThread(sb),
+                    "run",
+                    SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
+                    SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
+                    3000,
+                    10000,
+                    3000,
+                    10000),
+                2000);
+        deployThread(
+                "730_ccfilter",
+                "Content Control Filter",
+                "this is the content control filter update thread",
+                null,
+                new InstantBusyThread(
+                    new ContentControlFilterUpdateThread(sb),
+                    "run",
+                    SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
+                    SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
+                    3000,
+                    10000,
+                    3000,
+                    10000),
+                2000);
+        
         // set network-specific performance attributes
         if ( this.firstInit ) {
             setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
@@ -981,7 +1015,7 @@ public final class Switchboard extends serverSwitch
         //query.add(CrawlSwitchboardEntry.word2hash("Zahl"));
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/mobil/newsticker/meldung/mail/54980"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
-        //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
+        //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);              
 
         this.trail = new LinkedBlockingQueue<String>();
 

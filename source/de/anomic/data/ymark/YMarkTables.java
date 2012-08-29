@@ -27,6 +27,7 @@
 package de.anomic.data.ymark;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -44,6 +45,7 @@ import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
 import de.anomic.data.WorkTables;
 
@@ -99,9 +101,12 @@ public class YMarkTables {
     public final static int BUFFER_LENGTH = 256;
 
     private final WorkTables worktables;
+    
+    public boolean dirty = false;
 
     public YMarkTables(final Tables wt) {
     	this.worktables = (WorkTables)wt;
+    	dirty = true;
     }
 
     public void deleteBookmark(final String bmk_user, final byte[] urlHash) throws IOException, SpaceExceededException {
@@ -111,6 +116,7 @@ public class YMarkTables {
         if(bmk_row != null) {
     		this.worktables.delete(bmk_table,urlHash);
         }
+        dirty = true;
     }
 
     public void deleteBookmark(final String bmk_user, final String url) throws IOException, SpaceExceededException {
@@ -215,6 +221,16 @@ public class YMarkTables {
     	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
     }
+    
+    public Iterator<Tables.Row> getBookmarksByTag(final String bmk_user, String regex) throws IOException {
+    	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
+        final StringBuilder patternBuilder = new StringBuilder(BUFFER_LENGTH);
+    	patternBuilder.setLength(0);
+    	patternBuilder.append(regex);
+    	
+    	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
+    	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
+    }
 
     public List<Row> orderBookmarksBy(final Iterator<Row> rowIterator, final String sortname, final String sortorder) {
         final List<Row> sortList = new ArrayList<Row>();
@@ -236,6 +252,7 @@ public class YMarkTables {
         	bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(tagString));
         	addBookmark(bmk_user, bmk, merge, true);
     	}
+    	dirty = true;
     }
 
     public void replaceTags(final Iterator<Row> rowIterator, final String bmk_user, final String tagString, final String replaceString) throws IOException {
@@ -255,6 +272,7 @@ public class YMarkTables {
             row.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(t.toString()));
             this.worktables.update(TABLES.BOOKMARKS.tablename(bmk_user), row);
         }
+        dirty = true;
     }
 
     public void addFolder(final String bmk_user, final String url, final String folder) throws IOException, SpaceExceededException {
@@ -322,11 +340,20 @@ public class YMarkTables {
 	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean mergeTags, final boolean mergeFolders) throws IOException, SpaceExceededException {
 		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final String date = String.valueOf(System.currentTimeMillis());
-		final byte[] urlHash = YMarkUtil.getBookmarkId(bmk.get(YMarkEntry.BOOKMARK.URL.key()));
+		byte[] urlHash = null;
+        try {
+			urlHash = YMarkUtil.getBookmarkId(bmk.get(YMarkEntry.BOOKMARK.URL.key()));
+        } catch (MalformedURLException e) {
+        	Log.logInfo("BOOKMARKIMPORT", "invalid url: "+bmk.get(YMarkEntry.BOOKMARK.URL.key()));
+        }
 		Tables.Row bmk_row = null;
 
 		if (urlHash != null) {
-			bmk_row = this.worktables.select(bmk_table, urlHash);
+			try {
+				bmk_row = this.worktables.select(bmk_table, urlHash);
+			} catch (Exception e) {
+				
+			}
 	        if (bmk_row == null) {
 	        	// create and insert new entry
 				if(!bmk.containsKey(YMarkEntry.BOOKMARK.DATE_ADDED.key())) {
@@ -391,6 +418,8 @@ public class YMarkTables {
                 // update bmk_table
                 this.worktables.update(bmk_table, bmk_row);
             }
+	        
+	        dirty = true;
 		}
 	}
 }
