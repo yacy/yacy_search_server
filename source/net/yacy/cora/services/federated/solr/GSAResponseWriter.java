@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.peers.operation.yacyVersion;
@@ -160,8 +161,9 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
         // write header
         writer.write(XML_START);
+        String query = request.getParams().get("q");
         OpensearchResponseWriter.solitaireTag(writer, "TM", Long.toString(System.currentTimeMillis() - start));
-        OpensearchResponseWriter.solitaireTag(writer, "Q", request.getParams().get("q"));
+        OpensearchResponseWriter.solitaireTag(writer, "Q", query);
         paramTag(writer, "sort", (String) context.get("sort"));
         paramTag(writer, "output", "xml_no_dtd");
         paramTag(writer, "ie", "UTF-8");
@@ -222,7 +224,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
                     continue;
                 }
                 if (YaCySchema.title.name().equals(fieldName)) {
-                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), value.stringValue());
+                    OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), highlight(value.stringValue(), query));
                     texts.add(value.stringValue());
                     continue;
                 }
@@ -282,5 +284,15 @@ public class GSAResponseWriter implements QueryResponseWriter {
         writer.write("\" original_value=\"");
         writer.write(value);
         writer.write("\"/>"); writer.write(lb);
+    }
+
+    public static String highlight(String text, String query) {
+        String[] q = query.trim().toLowerCase().replaceAll(Pattern.quote("+"), " ").split(" ");
+        for (String s: q) {
+            int p = text.toLowerCase().indexOf(s.toLowerCase());
+            if (p < 0) continue;
+            text = text.substring(0, p) + "<b>" + text.substring(p, p + s.length()) + "</b>" + text.substring(p + s.length());
+        }
+        return text;
     }
 }

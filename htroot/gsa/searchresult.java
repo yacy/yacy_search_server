@@ -31,6 +31,7 @@ import net.yacy.cora.services.federated.solr.EmbeddedSolrConnector;
 import net.yacy.cora.services.federated.solr.GSAResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.index.YaCySchema;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SnippetProcess;
 
@@ -104,7 +105,8 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
         post.put("hl", "true");
-        post.put("hl.fl", "text_t,h1,h2");
+        post.put("hl.fl", YaCySchema.h1_txt.name() + ","+ YaCySchema.h1_txt.name() + ","+ YaCySchema.text_t.name());
+        post.put("hl.alternateField", YaCySchema.description.name());
         post.put("hl.simple.pre", "<b>");
         post.put("hl.simple.post", "</b>");
         post.put("hl.fragsize", Integer.toString(SnippetProcess.SNIPPET_MAX_LENGTH));
