@@ -331,6 +331,14 @@ public class Segment {
         return language;
     }
 
+    public void storeRWI(final ReferenceContainer<WordReference> wordContainer) throws IOException, SpaceExceededException {
+        if (this.termIndex != null) this.termIndex.add(wordContainer);
+    }
+
+    public void storeRWI(final byte[] termHash, final WordReference entry) throws IOException, SpaceExceededException {
+        if (this.termIndex != null) this.termIndex.add(termHash, entry);
+    }
+
     public URIMetadata storeDocument(
             final DigestURI url,
             final DigestURI referrerURL,

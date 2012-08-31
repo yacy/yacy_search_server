@@ -433,7 +433,7 @@ public class Dispatcher {
         if (this.transmissionCloud != null) {
         	outerLoop: for (final Map.Entry<ByteArray, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
         		for (final ReferenceContainer<WordReference> i : e.getValue()) try {
-        		    this.segment.termIndex().add(i);
+        		    this.segment.storeRWI(i);
         		} catch (final Exception e1) {
         		    Log.logException(e1);
         		    break outerLoop;

@@ -852,7 +852,7 @@ public final class Protocol
         // insert the containers to the index
         for ( final ReferenceContainer<WordReference> c : container ) {
             try {
-                event.getQuery().getSegment().termIndex().add(c);
+                event.getQuery().getSegment().storeRWI(c);
             } catch ( final Exception e ) {
                 Log.logException(e);
             }

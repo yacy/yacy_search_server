@@ -37,11 +37,9 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.Network;
@@ -159,7 +157,6 @@ public final class transferRWI {
             int received = 0;
             int blocked = 0;
             int receivedURL = 0;
-            final IndexCell<WordReference> cell = sb.index.termIndex();
             int count = 0;
             while (it.hasNext()) {
                 serverCore.checkInterruption();
@@ -196,7 +193,7 @@ public final class transferRWI {
 
                 // learn entry
                 try {
-                    cell.add(wordHash.getBytes(), iEntry);
+                    sb.index.storeRWI(wordHash.getBytes(), iEntry);
                 } catch (final Exception e) {
                     Log.logException(e);
                 }

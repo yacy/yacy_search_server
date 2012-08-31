@@ -302,8 +302,10 @@ public class WorkTables extends Tables {
     public void failURLsRegisterMissingWord(IndexCell<WordReference> indexCell, final DigestURI url, HandleSet queryHashes, final String reason) {
 
         // remove words from index
-        for (final byte[] word: queryHashes) {
-            indexCell.removeDelayed(word, url.hash());
+        if (indexCell != null) {
+            for (final byte[] word: queryHashes) {
+                indexCell.removeDelayed(word, url.hash());
+            }
         }
 
         // insert information about changed url into database

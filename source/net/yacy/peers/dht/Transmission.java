@@ -142,7 +142,7 @@ public class Transmission {
             for (final byte[] b : selected) container.removeReference(b);
             // put container back
             try {
-                Transmission.this.segment.termIndex().add(container);
+                Transmission.this.segment.storeRWI(container);
             } catch (final Exception e) {
                 Log.logException(e);
             }
@@ -161,7 +161,7 @@ public class Transmission {
             if (remaining <= 0) {
                 // No space left in this chunk
                 try {
-                    Transmission.this.segment.termIndex().add(container);
+                    Transmission.this.segment.storeRWI(container);
                 } catch (final Exception e) {
                     Log.logException(e);
                 }
@@ -304,7 +304,7 @@ public class Transmission {
 
         public void restore() {
             for (final ReferenceContainer<WordReference> ic : this) try {
-                Transmission.this.segment.termIndex().add(ic);
+                Transmission.this.segment.storeRWI(ic);
             } catch (final Exception e) {
                 Log.logException(e);
             }
