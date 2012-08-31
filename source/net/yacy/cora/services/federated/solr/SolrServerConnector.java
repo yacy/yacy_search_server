@@ -78,7 +78,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public synchronized void close() {
         try {
-            this.server.commit();
+            synchronized (this.server) {
+                this.server.commit();
+            }
             this.server = null;
         } catch (SolrServerException e) {
             Log.logException(e);
@@ -108,8 +110,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void clear() throws IOException {
         try {
-            this.server.deleteByQuery("*:*");
-            this.server.commit();
+            synchronized (this.server) {
+                this.server.deleteByQuery("*:*");
+                this.server.commit();
+            }
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -118,7 +122,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void delete(final String id) throws IOException {
         try {
-            this.server.deleteById(id, this.commitWithinMs);
+            synchronized (this.server) {
+                this.server.deleteById(id, this.commitWithinMs);
+            }
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -127,7 +133,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void delete(final List<String> ids) throws IOException {
         try {
-            this.server.deleteById(ids, this.commitWithinMs);
+            synchronized (this.server) {
+                this.server.deleteById(ids, this.commitWithinMs);
+            }
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -141,7 +149,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void deleteByQuery(final String querystring) throws IOException {
         try {
-            this.server.deleteByQuery(querystring, this.commitWithinMs);
+            synchronized (this.server) {
+                this.server.deleteByQuery(querystring, this.commitWithinMs);
+            }
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -156,8 +166,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         up.setCommitWithin(this.commitWithinMs);
         //up.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
         try {
-            this.server.request(up);
-            this.server.commit();
+            synchronized (this.server) {
+                this.server.request(up);
+                this.server.commit();
+            }
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -166,8 +178,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         try {
-            this.server.add(solrdoc, this.commitWithinMs);
-            //this.server.commit();
+            synchronized (this.server) {
+                this.server.add(solrdoc, this.commitWithinMs);
+                //this.server.commit();
+            }
         } catch (SolrServerException e) {
             Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdoc.toString());
             throw new IOException(e);
@@ -179,8 +193,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
         for (SolrInputDocument d: solrdocs) l.add(d);
         try {
-            this.server.add(l, this.commitWithinMs);
-            //this.server.commit();
+            synchronized (this.server) {
+                this.server.add(l, this.commitWithinMs);
+                //this.server.commit();
+            }
         } catch (SolrServerException e) {
             Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdocs.toString());
             throw new IOException(e);
