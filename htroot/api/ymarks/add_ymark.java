@@ -1,7 +1,6 @@
 import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -46,9 +45,6 @@ public class add_ymark {
 				} catch (final Failure e) {
 					// TODO Auto-generated catch block
 					Log.logException(e);
-				} catch (final SpaceExceededException e) {
-					// TODO Auto-generated catch block
-					Log.logException(e);
 				}
 
             } else if(post.containsKey(YMarkEntry.BOOKMARK.URL.key())) {
@@ -77,8 +73,7 @@ public class add_ymark {
 					sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
 					} catch (final IOException e) {
 					    Log.logException(e);
-					} catch (final SpaceExceededException e) {
-				}
+					}
 	            prop.put("status", "1");
             } else {
             	prop.put("status", "0");

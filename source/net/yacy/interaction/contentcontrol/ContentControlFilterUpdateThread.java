@@ -9,69 +9,63 @@ import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
 
 public class ContentControlFilterUpdateThread {
-	
-	private Switchboard sb;
-	
+
+	private final Switchboard sb;
+
 	private Boolean locked = false;
-	
+
 	private static FilterEngine networkfilter;
 
 	public ContentControlFilterUpdateThread(final Switchboard sb) {
-        final long time = System.currentTimeMillis();
-
+        //final long time = System.currentTimeMillis();
         this.sb = sb;
-        
-        
+
 		if (this.sb.getConfigBool("contentcontrol.smwimport.purgelistoninit",
 				false)) {
 			this.sb.tables.clear(this.sb.getConfig(
 					"contentcontrol.smwimport.targetlist", "contentcontrol"));
 
 		}
-        
     }
-	
-	
-	
-	@SuppressWarnings("deprecation")
+
 	public final void run() {
 
-		if (!locked) {
+		if (!this.locked) {
 
-			locked = true;
-			
+			this.locked = true;
+
 			if (this.sb.getConfigBool("contentcontrol.enabled", false) == true) {
-				
+
 				if (!this.sb
 						.getConfig("contentcontrol.mandatoryfilterlist", "")
-						.equals("")) {	
-					
-					if (sb.tables.bookmarks.dirty) {
+						.equals("")) {
+
+					if (this.sb.tables.bookmarks.dirty) {
 
 						networkfilter = updateFilter();
-						
-						sb.tables.bookmarks.dirty = false;
-					
+
+						this.sb.tables.bookmarks.dirty = false;
+
 					}
 
 				}
 
 			}
 
-			locked = false;
-			
+			this.locked = false;
+
 		}
 
 
 		return;
 	}
-	
+
 	private static FilterEngine updateFilter () {
-		
+
 		FilterEngine newfilter = new FilterEngine();
-		
+
 		Switchboard sb = Switchboard.getSwitchboard();
-		
+
 		Iterator<Tables.Row> it;
 		try {
 			it = sb.tables.bookmarks.getBookmarksByTag(
@@ -96,11 +90,11 @@ public class ContentControlFilterUpdateThread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+
 		return newfilter;
 	}
-	
-		
+
+
 	public static FilterEngine getNetworkFilter() {
 		FilterEngine f = networkfilter;
 

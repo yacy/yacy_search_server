@@ -101,12 +101,12 @@ public class YMarkTables {
     public final static int BUFFER_LENGTH = 256;
 
     private final WorkTables worktables;
-    
+
     public boolean dirty = false;
 
     public YMarkTables(final Tables wt) {
     	this.worktables = (WorkTables)wt;
-    	dirty = true;
+    	this.dirty = true;
     }
 
     public void deleteBookmark(final String bmk_user, final byte[] urlHash) throws IOException, SpaceExceededException {
@@ -116,7 +116,7 @@ public class YMarkTables {
         if(bmk_row != null) {
     		this.worktables.delete(bmk_table,urlHash);
         }
-        dirty = true;
+        this.dirty = true;
     }
 
     public void deleteBookmark(final String bmk_user, final String url) throws IOException, SpaceExceededException {
@@ -221,13 +221,13 @@ public class YMarkTables {
     	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
     }
-    
+
     public Iterator<Tables.Row> getBookmarksByTag(final String bmk_user, String regex) throws IOException {
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final StringBuilder patternBuilder = new StringBuilder(BUFFER_LENGTH);
     	patternBuilder.setLength(0);
     	patternBuilder.append(regex);
-    	
+
     	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
     }
@@ -244,7 +244,7 @@ public class YMarkTables {
         return sortList;
     }
 
-    public void addTags(final String bmk_user, final String url, final String tagString, final boolean merge) throws IOException, SpaceExceededException {
+    public void addTags(final String bmk_user, final String url, final String tagString, final boolean merge) throws IOException {
     	if(!tagString.isEmpty()) {
         	// do not set defaults as we only want to update tags
     		final YMarkEntry bmk = new YMarkEntry(false);
@@ -252,7 +252,7 @@ public class YMarkTables {
         	bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(tagString));
         	addBookmark(bmk_user, bmk, merge, true);
     	}
-    	dirty = true;
+    	this.dirty = true;
     }
 
     public void replaceTags(final Iterator<Row> rowIterator, final String bmk_user, final String tagString, final String replaceString) throws IOException {
@@ -272,10 +272,10 @@ public class YMarkTables {
             row.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(t.toString()));
             this.worktables.update(TABLES.BOOKMARKS.tablename(bmk_user), row);
         }
-        dirty = true;
+        this.dirty = true;
     }
 
-    public void addFolder(final String bmk_user, final String url, final String folder) throws IOException, SpaceExceededException {
+    public void addFolder(final String bmk_user, final String url, final String folder) throws IOException {
     	if(!folder.isEmpty()) {
         	// do not set defaults as we only want to add a folder
     		final YMarkEntry bmk = new YMarkEntry(false);
@@ -285,7 +285,7 @@ public class YMarkTables {
     	}
     }
 
-    public void visited(final String bmk_user, final String url) throws IOException, SpaceExceededException {
+    public void visited(final String bmk_user, final String url) throws IOException {
     	// do not set defaults
 		final YMarkEntry bmk = new YMarkEntry(false);
     	bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);
@@ -293,11 +293,11 @@ public class YMarkTables {
     	addBookmark(bmk_user, bmk, true, true);
     }
 
-    public void createBookmark(final LoaderDispatcher loader, final String url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure, SpaceExceededException {
+    public void createBookmark(final LoaderDispatcher loader, final String url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
     	createBookmark(loader, new DigestURI(url), bmk_user, autotag, tagsString, foldersString);
     }
 
-    public void createBookmark(final LoaderDispatcher loader, final DigestURI url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure, SpaceExceededException {
+    public void createBookmark(final LoaderDispatcher loader, final DigestURI url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
 
     	final YMarkEntry bmk_entry = new YMarkEntry(false);
         final YMarkMetadata meta = new YMarkMetadata(url);
@@ -337,7 +337,7 @@ public class YMarkTables {
         }
     }
 
-	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean mergeTags, final boolean mergeFolders) throws IOException, SpaceExceededException {
+	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean mergeTags, final boolean mergeFolders) throws IOException {
 		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final String date = String.valueOf(System.currentTimeMillis());
 		byte[] urlHash = null;
@@ -352,7 +352,7 @@ public class YMarkTables {
 			try {
 				bmk_row = this.worktables.select(bmk_table, urlHash);
 			} catch (Exception e) {
-				
+
 			}
 	        if (bmk_row == null) {
 	        	// create and insert new entry
@@ -418,8 +418,8 @@ public class YMarkTables {
                 // update bmk_table
                 this.worktables.update(bmk_table, bmk_row);
             }
-	        
-	        dirty = true;
+
+	        this.dirty = true;
 		}
 	}
 }

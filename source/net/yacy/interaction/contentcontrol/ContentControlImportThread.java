@@ -2,123 +2,108 @@ package net.yacy.interaction.contentcontrol;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.blob.Tables.Row;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkSMWJSONImporter;
-import de.anomic.data.ymark.YMarkUtil;
 
 public class ContentControlImportThread {
-	
-	private Switchboard sb;
-	
+
+	private final Switchboard sb;
+
 	private Boolean locked = false;
-	
+
 	private String lastsync = "1900-01-01T01:00:00";
-	
+
 	private String currenttimestamp = "1900-01-01T01:00:00";
-	
+
 	private long offset = 0;
-	
-	private long limit = 500;
-	
+
+	private final long limit = 500;
+
 	private long currentmax = 0;
-	
+
 	private boolean runningjob = false;
 
 	public ContentControlImportThread(final Switchboard sb) {
-        final long time = System.currentTimeMillis();
+        //final long time = System.currentTimeMillis();
 
         this.sb = sb;
-        
-        
 		if (this.sb.getConfigBool("contentcontrol.smwimport.purgelistoninit",
 				false)) {
 			this.sb.tables.clear(this.sb.getConfig(
 					"contentcontrol.smwimport.targetlist", "contentcontrol"));
 
 		}
-        
     }
-	
+
 	private final String wikiurlify (String s) {
-		
+
 		String ret = s;
-		
+
 		ret = ret.replace("-", "-2D");
 		ret = ret.replace("+", "-2B");
 		ret = ret.replace(" ", "-20");
-		
+
 		ret = ret.replace("[", "-5B");
 		ret = ret.replace("]", "-5D");
-		
+
 		ret = ret.replace(":", "-3A");
 		ret = ret.replace(">", "-3E");
-		
+
 		ret = ret.replace("?", "-3F");
-		
-		
+
 		return ret;
 	}
-	
-	@SuppressWarnings("deprecation")
+
 	public final void run() {
 
-		if (!locked) {
+		if (!this.locked) {
 
-			locked = true;
+			this.locked = true;
 
-			if (sb.getConfigBool("contentcontrol.smwimport.enabled", false) == true) {
+			if (this.sb.getConfigBool("contentcontrol.smwimport.enabled", false) == true) {
 
-				if (runningjob) {
+				if (this.runningjob) {
 
 					Log.logInfo("CONTENTCONTROL",
-							"CONTENTCONTROL importing max. " + limit
-									+ " elements at " + offset + " of "
-									+ currentmax + ", since "
-									+ currenttimestamp);
+							"CONTENTCONTROL importing max. " + this.limit
+									+ " elements at " + this.offset + " of "
+									+ this.currentmax + ", since "
+									+ this.currenttimestamp);
 
 					URL bmks_json;
 
-					String currenttimestampurl = wikiurlify (currenttimestamp);
+					//String currenttimestampurl = wikiurlify (this.currenttimestamp);
 
 					try {
 
-						if (!sb.getConfig("contentcontrol.smwimport.baseurl",
+						if (!this.sb.getConfig("contentcontrol.smwimport.baseurl",
 								"").equals("")) {
-							
-							
+
+
 
 							bmks_json = new URL(
-									sb.getConfig(
+									this.sb.getConfig(
 											"contentcontrol.smwimport.baseurl",
 											"")
-											+ wikiurlify ("/[[Category:Web Page]] [[Modification date::>" +currenttimestamp+ "]]")
-													
+											+ wikiurlify ("/[[Category:Web Page]] [[Modification date::>" +this.currenttimestamp+ "]]")
+
 											+ wikiurlify ("/?Url/?Filter/?Article has average rating/?Category")
-											+ "/mainlabel%3D" 
-											+ "/offset%3D" + offset
-											+ "/limit%3D" + limit
+											+ "/mainlabel%3D"
+											+ "/offset%3D" + this.offset
+											+ "/limit%3D" + this.limit
 											+ "/format%3Djson");
 
-							offset += limit;
+							this.offset += this.limit;
 
-							if (offset > currentmax) {
-								runningjob = false;
+							if (this.offset > this.currentmax) {
+								this.runningjob = false;
 							}
 
 							InputStreamReader reader = null;
@@ -128,7 +113,7 @@ public class ContentControlImportThread {
 							} catch (Exception e) {
 
 								Log.logException(e);
-								runningjob = false;
+								this.runningjob = false;
 							}
 
 							if (reader != null) {
@@ -139,7 +124,7 @@ public class ContentControlImportThread {
 								} catch (final Exception e) {
 									// TODO: display an error message
 									Log.logException(e);
-									runningjob = false;
+									this.runningjob = false;
 								}
 
 								Thread t;
@@ -153,13 +138,13 @@ public class ContentControlImportThread {
 
 									if (bmk == YMarkEntry.EMPTY) {
 
-										runningjob = false;
+										this.runningjob = false;
 
 									} else {
 
 										try {
-											sb.tables.bookmarks.addBookmark(
-													sb.getConfig("contentcontrol.smwimport.targetlist", "contentcontrol"), bmk,
+											this.sb.tables.bookmarks.addBookmark(
+													this.sb.getConfig("contentcontrol.smwimport.targetlist", "contentcontrol"), bmk,
 													true, true);
 
 										} catch (Exception e) {
@@ -187,20 +172,20 @@ public class ContentControlImportThread {
 
 					try {
 
-						if (!sb.getConfig("contentcontrol.smwimport.baseurl",
+						if (!this.sb.getConfig("contentcontrol.smwimport.baseurl",
 								"").equals("")) {
 
 							URL bmks_count;
 
 							bmks_count = new URL(
-									sb.getConfig(
+									this.sb.getConfig(
 											"contentcontrol.smwimport.baseurl",
 											"")
-											+ wikiurlify ("/[[Category:Web Page]] [[Modification date::>" +lastsync+ "]]")
-											
-											
+											+ wikiurlify ("/[[Category:Web Page]] [[Modification date::>" +this.lastsync+ "]]")
+
+
 											+ wikiurlify ("/?Url/?Filter/?Article has average rating/?Category")
-											+ "/mainlabel%3D" 
+											+ "/mainlabel%3D"
 											+ "/format%3Dsupercount");
 
 							String reply = UTF8.String(new HTTPClient()
@@ -210,22 +195,22 @@ public class ContentControlImportThread {
 
 							String lastsyncstring = reply.split(",")[1];
 
-							currentmax = Integer.parseInt(overallcount);
+							this.currentmax = Integer.parseInt(overallcount);
 
-							if (currentmax > 0) {
+							if (this.currentmax > 0) {
 
 								Log.logInfo("CONTENTCONTROL",
 										"CONTENTCONTROL import job counts "
-												+ currentmax
+												+ this.currentmax
 												+ " new elements between "
-												+ lastsync + " and "
-												+ currenttimestamp);
+												+ this.lastsync + " and "
+												+ this.currenttimestamp);
 
-								currenttimestamp = lastsync;
+								this.currenttimestamp = this.lastsync;
 
-								runningjob = true;
-								lastsync = lastsyncstring;
-								offset = 0;
+								this.runningjob = true;
+								this.lastsync = lastsyncstring;
+								this.offset = 0;
 							}
 						} else {
 							Log.logWarning("CONTENTCONTROL",
@@ -242,7 +227,7 @@ public class ContentControlImportThread {
 
 				}
 
-				locked = false;
+				this.locked = false;
 
 			}
 		}

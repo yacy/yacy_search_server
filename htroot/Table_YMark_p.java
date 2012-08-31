@@ -167,8 +167,6 @@ public class Table_YMark_p {
                 sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
             } catch (final IOException e) {
                 Log.logException(e);
-            } catch (final SpaceExceededException e) {
-                Log.logException(e);
             }
         }
 

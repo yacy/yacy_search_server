@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
-import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.blob.Tables;
@@ -169,9 +168,6 @@ public class import_ymark {
 				} catch (final IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (final SpaceExceededException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				} catch (final Failure e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -204,9 +200,6 @@ public class import_ymark {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (final IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (final SpaceExceededException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -253,8 +246,6 @@ public class import_ymark {
                 }
 			}
 		} catch (final IOException e) {
-			Log.logException(e);
-		} catch (final SpaceExceededException e) {
 			Log.logException(e);
 		} catch (final InterruptedException e) {
 			Log.logException(e);

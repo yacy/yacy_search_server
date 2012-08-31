@@ -11,7 +11,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
-import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -267,8 +266,6 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			Log.logException(e);
 		} catch (final IOException e) {
 			Log.logWarning(YMarkTables.BOOKMARKS_LOG.toString(), "autoTagger - IOException for URL: "+url);
-		} catch (final SpaceExceededException e) {
-			Log.logException(e);
 		} finally {
 		}
 	}
