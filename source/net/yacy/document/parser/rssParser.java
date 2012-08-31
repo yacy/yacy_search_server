@@ -92,7 +92,7 @@ public class rssParser extends AbstractParser implements Parser {
                     this,
                     languages,
                     item.getSubject(),
-                    item.getTitle(),
+                    singleList(item.getTitle()),
                     item.getAuthor(),
                     item.getCopyright(),
                     new String[0],

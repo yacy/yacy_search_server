@@ -43,6 +43,7 @@ public class genericParser extends AbstractParser implements Parser {
         // this parser is used if no other fits. This parser fits all
     }
 
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source1)
             throws Parser.Failure, InterruptedException {
@@ -54,7 +55,7 @@ public class genericParser extends AbstractParser implements Parser {
                 this,
                 null,
                 null,
-                location.getFileName().isEmpty() ? location.toTokens() : MultiProtocolURI.unescape(location.getFileName()), // title
+                singleList(location.getFileName().isEmpty() ? location.toTokens() : MultiProtocolURI.unescape(location.getFileName())), // title
                 "", // author
                 location.getHost(),
                 null,

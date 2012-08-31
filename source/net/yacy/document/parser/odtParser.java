@@ -185,7 +185,7 @@ public class odtParser extends AbstractParser implements Parser {
                     this,
                     languages,
                     docKeywords,
-                    docLongTitle,
+                    singleList(docLongTitle),
                     docAuthor,
                     "",
                     null,

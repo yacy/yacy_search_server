@@ -215,7 +215,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     this,
                     null,                       // set of languages
                     null,                       // a list of extracted keywords
-                    parsedTitle.toString(),     // a long document title
+                    singleList(parsedTitle.toString()), // a long document title
                     "",                         // TODO: AUTHOR
                     "",                         // the publisher
                     sections,                   // an array of section headlines

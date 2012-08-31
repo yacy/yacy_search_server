@@ -88,7 +88,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     this,
                     null,
                     null,
-                    "",
+                    singleList(""),
                     "",
                     "",
                     new String[0],

@@ -110,11 +110,11 @@ public class swfParser extends AbstractParser implements Parser {
                     this,
                     null,
                     null,          //keywords
-                      ((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
+                    singleList(((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
                           replaceAll("\r\n"," ").
                           replaceAll("\n"," ").
                           replaceAll("\r"," ").
-                          replaceAll("\t"," "), // title
+                          replaceAll("\t"," ")), // title
                     "", // TODO: AUTHOR
                     "",
                     sections,     // an array of section headlines

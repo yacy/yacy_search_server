@@ -44,6 +44,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class Document {
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
-    private       StringBuilder title;          // a document title, taken from title or h1 tag; shall appear as headline of search result
+    private       List<String> titles;          // the document titles, taken from title and/or h1 tag; shall appear as headline of search result
     private final StringBuilder creator;        // author or copyright
     private final String publisher;             // publisher
     private final List<String>  sections;       // if present: more titles/headlines appearing in the document
@@ -99,7 +100,9 @@ public class Document {
     public Document(final DigestURI location, final String mimeType, final String charset,
                     final Object parserObject,
                     final Set<String> languages,
-                    final String[] keywords, final String title, final String author, final String publisher,
+                    final String[] keywords,
+                    final List<String> titles,
+                    final String author, final String publisher,
                     final String[] sections, final String abstrct,
                     final double lon, final double lat,
                     final Object text,
@@ -113,7 +116,7 @@ public class Document {
         this.parserObject = parserObject;
         this.keywords = new LinkedList<String>();
         if (keywords != null) this.keywords.addAll(Arrays.asList(keywords));
-        this.title = (title == null) ? new StringBuilder(0) : new StringBuilder(title);
+        this.titles = titles;
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
         this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
@@ -186,11 +189,20 @@ dc_rights
      */
 
     public String dc_title() {
-        return (this.title == null) ? "" : this.title.toString();
+        return (this.titles == null || this.titles.size() == 0) ? "" : this.titles.iterator().next();
+    }
+
+    public List<String> titles() {
+        return this.titles;
     }
 
     public void setTitle(final String title) {
-        this.title = new StringBuilder(title);
+        this.titles = new ArrayList<String>();
+        if (title != null) this.titles.add(title);
+    }
+
+    public void addTitle(final String title) {
+        if (title != null) this.titles.add(title);
     }
 
     public String dc_creator() {
@@ -620,10 +632,7 @@ dc_rights
     public void addSubDocuments(final Document[] docs) throws IOException {
         for (final Document doc: docs) {
             this.sections.addAll(Arrays.asList(doc.getSectionTitles()));
-
-            if (this.title.length() > 0) this.title.append('\n');
-            this.title.append(doc.dc_title());
-
+            this.titles.addAll(doc.titles());
             this.keywords.addAll(doc.getKeywords());
 
             if (this.description.length() > 0) this.description.append('\n');
@@ -760,10 +769,9 @@ dc_rights
         final StringBuilder      authors       = new StringBuilder(80);
         final StringBuilder      publishers    = new StringBuilder(80);
         final StringBuilder      subjects      = new StringBuilder(80);
-        final StringBuilder      title         = new StringBuilder(80);
         final StringBuilder      description   = new StringBuilder(80);
-        final LinkedList<String> sectionTitles = new LinkedList<String>();
-
+        final Collection<String> titles        = new LinkedHashSet<String>();
+        final Collection<String> sectionTitles = new LinkedHashSet<String>();
         final Map<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
         final Map<MultiProtocolURI, String> rss = new HashMap<MultiProtocolURI, String>();
         final Map<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
@@ -790,9 +798,7 @@ dc_rights
                 subjects.append(subject);
             }
 
-            if (title.length() > 0) title.append("\n");
-            title.append(doc.dc_title());
-
+            titles.addAll(doc.titles());
             sectionTitles.addAll(Arrays.asList(doc.getSectionTitles()));
 
             if (description.length() > 0) description.append("\n");
@@ -822,6 +828,8 @@ dc_rights
         }
 
         // return consolidation
+        ArrayList<String> titlesa = new ArrayList<String>();
+        titlesa.addAll(titles);
         return new Document(
                 location,
                 globalMime,
@@ -829,7 +837,7 @@ dc_rights
                 null,
                 null,
                 subjects.toString().split(" |,"),
-                title.toString(),
+                titlesa,
                 authors.toString(),
                 publishers.toString(),
                 sectionTitles.toArray(new String[sectionTitles.size()]),

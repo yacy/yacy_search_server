@@ -32,8 +32,10 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -125,7 +127,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final Map<MultiProtocolURI, EmbedEntry> embeds; // urlhash/embed relation
     private final Map<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
     private final Map<String, String> metas;
-    private String title;
+    private Collection<String> titles;
     //private String headline;
     private List<String>[] headlines;
     private final ClusteredScoreMap<String> bold, italic;
@@ -170,7 +172,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.iframes = new SizeLimitedSet<MultiProtocolURI>(maxLinks);
         this.metas = new SizeLimitedMap<String, String>(maxLinks);
         this.script = new SizeLimitedSet<MultiProtocolURI>(maxLinks);
-        this.title = EMPTY_STRING;
+        this.titles = new LinkedHashSet<String>();
         this.headlines = new ArrayList[6];
         for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
         this.bold = new ClusteredScoreMap<String>();
@@ -391,7 +393,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     this.images.put(ie.url(), ie);
                     this.favicon = newLink;
                 } else if (rel.equalsIgnoreCase("canonical")) {
-                    tagopts.put("name", this.title);
+                    tagopts.put("name", this.titles.size() == 0 ? "" : this.titles.iterator().next());
                     mergeAnchors(newLink, tagopts);
                     this.canonical = newLink;
                 } else if (rel.equalsIgnoreCase("alternate") && type.equalsIgnoreCase("application/rss+xml")) {
@@ -480,8 +482,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             h = recursiveParse(text);
             if (h.length() > 0) this.headlines[5].add(h);
         } else if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) {
-            this.title = recursiveParse(text);
-            this.evaluationScores.match(Element.title, this.title);
+            String t = recursiveParse(text);
+            this.titles.add(t);
+            this.evaluationScores.match(Element.title, t);
         } else if ((tagname.equalsIgnoreCase("b")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) this.bold.inc(h);
@@ -542,35 +545,37 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return line;
     }
 
-    public String getTitle() {
-        // construct a title string, even if the document has no title
+    public List<String> getTitles() {
 
         // some documents have a title tag as meta tag
         String s = this.metas.get("title");
+        if (s != null && s.length() > 0) {
+            LinkedHashSet<String> t = new LinkedHashSet<String>();
+            t.add(s);
+            t.addAll(this.titles);
+            this.titles = t;
+        }
 
-        // try to construct the title with the content of the title tag
-        if (this.title.length() > 0) {
-            if (s == null) {
-                return this.title;
+        if (this.titles.size() == 0) {
+            // take any headline
+            for (int i = 0; i < this.headlines.length; i++) {
+                if (!this.headlines[i].isEmpty()) {
+                    this.titles.add(this.headlines[i].get(0));
+                    break;
+                }
             }
-            if ((this.title.compareToIgnoreCase(s) == 0) || (this.title.indexOf(s) >= 0)) return s;
-            return this.title + ": " + s;
-        }
-        if (s != null) {
-            return s;
         }
 
-        // otherwise take any headline
-        for (int i = 0; i < this.headlines.length; i++) {
-            if (!this.headlines[i].isEmpty()) return this.headlines[i].get(0);
+        if (this.titles.size() == 0) {
+            // take description tag
+            s = getDescription();
+            if (!s.isEmpty()) this.titles.add(s);
         }
-
-        // take description tag
-        s = getDescription();
-        if (!s.isEmpty()) return s;
 
         // extract headline from file name
-        return MultiProtocolURI.unescape(this.root.getFileName());
+        ArrayList<String> t = new ArrayList<String>();
+        t.addAll(this.titles);
+        return t;
     }
 
     public String[] getHeadlines(final int i) {
@@ -875,7 +880,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.embeds.clear();
         this.images.clear();
         this.metas.clear();
-        this.title = null;
+        this.titles.clear();
         this.headlines = null;
         this.bold.clear();
         this.italic.clear();
@@ -884,7 +889,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     public void print() {
-        System.out.println("TITLE    :" + this.title);
+        for (String t: this.titles) {
+            System.out.println("TITLE    :" + t);
+        }
         for (int i = 0; i < 4; i++) {
             System.out.println("HEADLINE" + i + ":" + this.headlines[i].toString());
         }

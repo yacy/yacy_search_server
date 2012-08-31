@@ -84,7 +84,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
         @Override
         public String toString() {
-            return this.keys.iterator().next();
+            return this.keys.size() == 0 ? "" : this.keys.iterator().next();
         }
     }
 

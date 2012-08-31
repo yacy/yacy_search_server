@@ -117,21 +117,21 @@ public class Response {
         return doctype;
     }
 
-    public static String doctype2mime(String ext, char doctype) {
-        if (doctype == DT_PDFPS) return "application/pdf";
-        if (doctype == DT_HTML) return "text/html";
-        if (doctype == DT_DOC) return "application/msword";
-        if (doctype == DT_FLASH) return "application/x-shockwave-flash";
-        if (doctype == DT_SHARE) return "text/plain";
-        if (doctype == DT_BINARY) return "application/octet-stream";
+    public static String[] doctype2mime(String ext, char doctype) {
+        if (doctype == DT_PDFPS) return new String[]{"application/pdf"};
+        if (doctype == DT_HTML) return new String[]{"text/html"};
+        if (doctype == DT_DOC) return new String[]{"application/msword"};
+        if (doctype == DT_FLASH) return new String[]{"application/x-shockwave-flash"};
+        if (doctype == DT_SHARE) return new String[]{"text/plain"};
+        if (doctype == DT_BINARY) return new String[]{"application/octet-stream"};
         String mime = Classification.ext2mime(ext);
         int p = mime.indexOf('/');
-        if (p < 0) return mime;
-        if (doctype == DT_TEXT) return "text" + mime.substring(p);
-    	if (doctype == DT_IMAGE) return "image" + mime.substring(p);
-    	if (doctype == DT_AUDIO) return "audio" + mime.substring(p);
-    	if (doctype == DT_MOVIE) return "video" + mime.substring(p);
-    	return mime;
+        if (p < 0) return new String[]{mime};
+        if (doctype == DT_TEXT) return new String[]{"text" + mime.substring(p)};
+    	if (doctype == DT_IMAGE) return new String[]{"image" + mime.substring(p)};
+    	if (doctype == DT_AUDIO) return new String[]{"audio" + mime.substring(p)};
+    	if (doctype == DT_MOVIE) return new String[]{"video" + mime.substring(p)};
+    	return new String[]{mime};
     }
 
     public static final int QUEUE_STATE_FRESH             = 0;

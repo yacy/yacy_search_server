@@ -85,7 +85,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         this,
                         null,
                         null,
-                        header.get("name"),
+                        singleList(header.get("name")),
                         header.get("author"),
                         header.get("publisher"),
                         null,

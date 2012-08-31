@@ -103,14 +103,14 @@ public enum YaCySchema implements Schema {
     inboundlinks_urlstub_txt(SolrType.text_general, true, true, true, "internal links, the url only without the protocol"),
     inboundlinks_name_txt(SolrType.text_general, true, true, true, "internal links, the name property of the a-tag"),
     inboundlinks_rel_sxt(SolrType.string, true, true, true, "internal links, the rel property of the a-tag"),
-    inboundlinks_relflags_sxt(SolrType.string, true, true, true, "internal links, the rel property of the a-tag, coded binary"),
+    inboundlinks_relflags_val(SolrType.integer, true, true, true, "internal links, the rel property of the a-tag, coded binary"),
     inboundlinks_text_txt(SolrType.text_general, true, true, true, "internal links, the text content of the a-tag"),
     outboundlinks_tag_txt(SolrType.text_general, true, true, true, "external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
     outboundlinks_protocol_sxt(SolrType.string, true, true, true, "external links, only the protocol"),
     outboundlinks_urlstub_txt(SolrType.text_general, true, true, true, "external links, the url only without the protocol"),
     outboundlinks_name_txt(SolrType.text_general, true, true, true, "external links, the name property of the a-tag"),
     outboundlinks_rel_sxt(SolrType.string, true, true, true, "external links, the rel property of the a-tag"),
-    outboundlinks_relflags_sxt(SolrType.string, true, true, true, "external links, the rel property of the a-tag, coded binary"),
+    outboundlinks_relflags_val(SolrType.integer, true, true, true, "external links, the rel property of the a-tag, coded binary"),
     outboundlinks_text_txt(SolrType.text_general, true, true, true, "external links, the text content of the a-tag"),
     images_tag_txt(SolrType.text_general, true, true, true, " all image tags, encoded as <img> tag inclusive alt- and title property"),
     images_urlstub_txt(SolrType.text_general, true, true, true, "all image links without the protocol and '://'"),
@@ -131,6 +131,7 @@ public enum YaCySchema implements Schema {
     iframes_txt(SolrType.text_general, true, true, true, "list of all links to iframes"),
     iframesscount_i(SolrType.integer, true, true, false, "number of iframes_txt"),
 
+    url_protocol_s(SolrType.string, true, true, false, "the protocol of the url"),
     url_paths_sxt(SolrType.string, true, true, true, "all path elements in the url"),
     url_parameter_i(SolrType.integer, true, true, false, "number of key-value pairs in search part of the url"),
     url_parameter_key_sxt(SolrType.string, true, true, true, "the keys from key-value pairs in the search part of the url"),
@@ -138,15 +139,18 @@ public enum YaCySchema implements Schema {
     url_chars_i(SolrType.integer, true, true, false, "number of all characters in the url == length of sku field"),
 
     host_s(SolrType.string, true, true, false, "host of the url"),
-    url_protocol_s(SolrType.string, true, true, false, "the protocol of the url"),
     host_dnc_s(SolrType.string, true, true, false, "the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used."),
     host_organization_s(SolrType.string, true, true, false, "either the second level domain or, if a ccSLD is used, the third level domain"),
     host_organizationdnc_s(SolrType.string, true, true, false, "the organization and dnc concatenated with '.'"),
     host_subdomain_s(SolrType.string, true, true, false, "the remaining part of the host without organizationdnc"),
 
-    //title_count_i(SolrType.integer, true, true, false, ""),
-    //title_chars_i(SolrType.integer, true, true, false, ""),
-    //title_words_i(SolrType.integer, true, true, false, ""),
+    title_count_i(SolrType.integer, true, true, false, "number of titles (counting the 'title' field) in the document"),
+    title_chars_val(SolrType.integer, true, true, true, "number of characters for each title"),
+    title_words_val(SolrType.integer, true, true, true, "number of words in each title"),
+
+    description_count_i(SolrType.integer, true, true, false, "number of descriptions in the document. Its not counting the 'description' field since there is only one. But it counts the number of descriptions that appear in the document (if any)"),
+    description_chars_val(SolrType.integer, true, true, true, "number of characters for each description"),
+    description_words_val(SolrType.integer, true, true, true, "number of words in each description"),
 
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.integer, true, true, true, "number of occurrences of texts in bold_txt"),
@@ -239,42 +243,77 @@ public enum YaCySchema implements Schema {
     }
 
     public final void add(final SolrInputDocument doc, final String value) {
+        assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
     public final void add(final SolrInputDocument doc, final Date value) {
+        assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
     public final void add(final SolrInputDocument doc, final int value) {
+        assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
     public final void add(final SolrInputDocument doc, final long value) {
+        assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
     public final void add(final SolrInputDocument doc, final String[] value) {
+        assert this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
-    public final void add(final SolrInputDocument doc, final List<String> value) {
-        doc.setField(this.getSolrFieldName(), value.toArray(new String[value.size()]));
+    public final void add(final SolrInputDocument doc, final Integer[] value) {
+        assert this.isMultiValued();
+        doc.setField(this.getSolrFieldName(), value);
+    }
+
+    public final void add(final SolrInputDocument doc, final List<?> value) {
+        assert this.isMultiValued();
+        if (value == null || value.size() == 0) {
+            if (this.type == SolrType.integer) {
+                doc.setField(this.getSolrFieldName(), new Integer[0]);
+            } else if (this.type == SolrType.string) {
+                doc.setField(this.getSolrFieldName(), new String[0]);
+            } else {
+                assert false;
+                doc.setField(this.getSolrFieldName(), new Object[0]);
+            }
+            return;
+        }
+        if (this.type == SolrType.integer) {
+            assert (value.iterator().next() instanceof Integer);
+            doc.setField(this.getSolrFieldName(), value.toArray(new Integer[value.size()]));
+        } else if (this.type == SolrType.string || this.type == SolrType.text_general) {
+            assert (value.iterator().next() instanceof String);
+            doc.setField(this.getSolrFieldName(), value.toArray(new String[value.size()]));
+        } else {
+            assert false : "ADD: type is " + this.type.name();
+            doc.setField(this.getSolrFieldName(), value.toArray(new Object[value.size()]));
+        }
     }
 
     public final void add(final SolrInputDocument doc, final float value) {
+        assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
     public final void add(final SolrInputDocument doc, final double value) {
+        assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
     public final void add(final SolrInputDocument doc, final boolean value) {
+        assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value);
     }
 
     public final void add(final SolrInputDocument doc, final String value, final float boost) {
+        assert !this.isMultiValued();
         doc.setField(this.getSolrFieldName(), value, boost);
     }
 

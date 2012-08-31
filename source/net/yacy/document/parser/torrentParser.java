@@ -100,7 +100,7 @@ public class torrentParser extends AbstractParser implements Parser {
 		        this,
 		        null,
 		        null,
-		        title, // title
+		        singleList(title), // title
 		        comment, // author
 		        location.getHost(),
 		        null,

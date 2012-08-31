@@ -80,6 +80,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -493,7 +494,8 @@ public final class HTTPDFileHandler {
                         } else {
                             if (element.endsWith("html") || (element.endsWith("htm"))) {
                                 scraper = ContentScraper.parseResource(f, 10000);
-                                headline = scraper.getTitle();
+                                Collection<String> t = scraper.getTitles();
+                                headline = t.size() > 0 ? t.iterator().next() : "";
                                 author = scraper.getAuthor();
                                 publisher = scraper.getPublisher();
                                 description = scraper.getDescription();

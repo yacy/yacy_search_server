@@ -31,6 +31,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.services.federated.solr.SolrType;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
@@ -116,31 +117,38 @@ public class URIMetadataNode implements URIMetadata {
     }
 
     private int getInt(YaCySchema field) {
+        assert !field.isMultiValued();
+        assert field.getType() == SolrType.integer;
         Integer x = (Integer) this.doc.getFieldValue(field.name());
         if (x == null) return 0;
         return x.intValue();
     }
-    /*
-    private double getDouble(YaCySchema field) {
-        Double x = (Double) this.doc.getFieldValue(field.name());
-        if (x == null) return 0.0d;
-        return x.doubleValue();
-    }
-    */
+
     private Date getDate(YaCySchema field) {
+        assert !field.isMultiValued();
+        assert field.getType() == SolrType.date;
         Date x = (Date) this.doc.getFieldValue(field.name());
         if (x == null) return new Date(0);
         return x;
     }
 
     private String getString(YaCySchema field) {
-        String x = (String) this.doc.getFieldValue(field.name());
+        assert !field.isMultiValued();
+        assert field.getType() == SolrType.string || field.getType() == SolrType.text_general || field.getType() == SolrType.text_en_splitting_tight;
+        Object x = this.doc.getFieldValue(field.name());
         if (x == null) return "";
-        return x;
+        if (x instanceof ArrayList) {
+            @SuppressWarnings("unchecked")
+            ArrayList<String> xa = (ArrayList<String>) x;
+            return xa.size() == 0 ? "" : xa.get(0);
+        }
+        return (String) x;
     }
 
     @SuppressWarnings("unchecked")
     private ArrayList<String> getArrayList(YaCySchema field) {
+        assert field.isMultiValued();
+        assert field.getType() == SolrType.string || field.getType() == SolrType.text_general;
         Object r = this.doc.getFieldValue(field.name());
         if (r == null) return new ArrayList<String>(0);
         if (r instanceof ArrayList) {

@@ -60,14 +60,14 @@ public class AugmentParser extends AbstractParser implements Parser {
 	private static Document analyze (Document alreadyParsedDocument, DigestURI url,
 			String mimeType, String charset) {
 
-		Document newDoc = new Document(url, mimeType, charset, null, null, null, "", "",
+		Document newDoc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
 				"", null, "", 0, 0, null, null, null, null, false);
 
 		// if the magic word appears in the document, perform extra actions.
 		if (alreadyParsedDocument.getKeywords().contains("magicword")) {
 			String all = "";
 			all = "yacylatest";
-			newDoc = new Document(url, mimeType, charset, null, null, null, "", "",
+			newDoc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
 					"", null, "", 0, 0, all, null, null, null, false);
 		}
 
@@ -77,7 +77,7 @@ public class AugmentParser extends AbstractParser implements Parser {
 	private Document parseAndAugment(DigestURI url, String mimeType, String charset) {
 
 		String all = "";
-		Document newDoc = new Document(url, mimeType, charset, null, null, null, "", "",
+		Document newDoc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
 				"", null, "", 0, 0, all, null, null, null, false);
 
 		Iterator<net.yacy.kelondro.blob.Tables.Row> it;

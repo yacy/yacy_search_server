@@ -190,7 +190,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 this,
                 null,
                 docKeywords,
-                docTitle,
+                singleList(docTitle),
                 docAuthor,
                 docPublisher,
                 null,

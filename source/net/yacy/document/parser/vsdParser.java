@@ -62,6 +62,7 @@ public class vsdParser extends AbstractParser implements Parser {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
@@ -108,7 +109,7 @@ public class vsdParser extends AbstractParser implements Parser {
                     this,
                     null,         // language
                     keywords,
-                    title,
+                    singleList(title),
                     author,
                     "",
                     null,         // an array of section headlines

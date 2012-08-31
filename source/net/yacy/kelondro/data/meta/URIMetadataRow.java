@@ -111,7 +111,7 @@ public class URIMetadataRow implements URIMetadata {
     public URIMetadataRow() {
         // create a dummy entry, good to produce poison objects
         this.entry = rowdef.newEntry();
-        this.snippet = null;
+        this.snippet = "";
         this.word = null;
         this.ranking = 0;
         this.comp = null;
@@ -161,7 +161,7 @@ public class URIMetadataRow implements URIMetadata {
         this.entry.setCol(col_lvideo, lvideo);
         this.entry.setCol(col_lapp, lapp);
         //System.out.println("===DEBUG=== " + load.toString() + ", " + decodeDate(col_load).toString());
-        this.snippet = null;
+        this.snippet = "";
         this.word = null;
         this.ranking = 0;
         this.comp = null;
@@ -207,7 +207,7 @@ public class URIMetadataRow implements URIMetadata {
 
     public URIMetadataRow(final Row.Entry entry, final WordReference searchedWord, final long ranking) {
         this.entry = entry;
-        this.snippet = null;
+        this.snippet = "";
         this.word = searchedWord;
         this.ranking = ranking;
         this.comp = null;

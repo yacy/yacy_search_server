@@ -58,6 +58,7 @@ public class pptParser extends AbstractParser implements Parser {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source) throws Parser.Failure,
             InterruptedException {
@@ -88,7 +89,7 @@ public class pptParser extends AbstractParser implements Parser {
                     this,
                     null,
                     null,
-                    title,
+                    singleList(title),
                     "", // TODO: AUTHOR
                     pptExtractor.getDocSummaryInformation().getCompany(),
                     null,

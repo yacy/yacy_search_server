@@ -707,6 +707,10 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return this.path;
     }
 
+    public String[] getPaths() {
+        return this.path == null ? null : this.path.charAt(0) == '/' ? this.path.substring(1).split("/") : this.path.split("/");
+    }
+
     /**
      * return the file object to a local file
      * this patches also 'strange' windows file paths

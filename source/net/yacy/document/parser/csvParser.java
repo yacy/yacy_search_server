@@ -67,7 +67,7 @@ public class csvParser extends AbstractParser implements Parser {
 		        this,
 		        null,
 		        null,
-		        concatRow(table.get(0)),
+		        singleList(concatRow(table.get(0))),
 		        "",
 		        "",
 		        null,

@@ -78,7 +78,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 			Log.logWarning("RDFA PARSER", "Triple extraction failed");
 		}
 
-		Document doc = new Document(url, mimeType, charset, null, null, null, "", "",
+		Document doc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
 				"", null, "", 0, 0, null, null, null, null, false);
 
 		try {
@@ -137,7 +137,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 			all += string + ",";
 		}
 
-		Document doc = new Document(url, mimeType, charset, null, null, null, "", "",
+		Document doc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
 				"", null, "", 0, 0, all, null, null, null, false);
 		return doc;
 	}

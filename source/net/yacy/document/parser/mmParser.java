@@ -68,6 +68,7 @@ public class mmParser extends AbstractParser implements Parser {
     	return parser;
     }
 
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException
@@ -105,7 +106,7 @@ public class mmParser extends AbstractParser implements Parser {
             this,
             null,
             null,
-            rootElementText,
+            singleList(rootElementText),
             null,
             null,
             null,

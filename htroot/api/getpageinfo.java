@@ -124,7 +124,7 @@ public class getpageinfo {
                     prop.putXML("desc", removelinebreaks(scraper.dc_description()));
                     // put language
                     final Set<String> languages = scraper.getContentLanguages();
-                    prop.putXML("lang", (languages == null) ? "unknown" : languages.iterator().next());
+                    prop.putXML("lang", (languages == null || languages.size() == 0) ? "unknown" : languages.iterator().next());
 
                     // get links and put them into a semicolon-separated list
                     final Set<MultiProtocolURI> uris = scraper.getAnchors().keySet();

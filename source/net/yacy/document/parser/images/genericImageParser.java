@@ -199,7 +199,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              this,
              languages,
              keywords == null ? new String[]{} : keywords.split(keywords.indexOf(',') > 0 ? "," : " "), // keywords
-             title, // title
+             singleList(title), // title
              author == null ? "" : author, // author
              location.getHost(), // Publisher
              new String[]{}, // sections

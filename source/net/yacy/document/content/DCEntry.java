@@ -30,8 +30,10 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.text.Collator;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 
@@ -261,7 +263,8 @@ public class DCEntry extends TreeMap<String, String> {
     public Document document() {
         HashSet<String> languages = new HashSet<String>();
         languages.add(getLanguage());
-
+        List<String> t = new ArrayList<String>(1);
+        t.add(getTitle());
         return new Document(
             getIdentifier(true),
             "text/html",
@@ -269,7 +272,7 @@ public class DCEntry extends TreeMap<String, String> {
             this,
             languages,
             getSubject(),
-            getTitle(),
+            t,
             getCreator(),
             getPublisher(),
             null,

@@ -28,10 +28,12 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
+
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
 public class docParser extends AbstractParser implements Parser {
@@ -50,6 +52,7 @@ public class docParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/x-msword");
     }
 
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
@@ -90,7 +93,7 @@ public class docParser extends AbstractParser implements Parser {
                   this,
                   null,
                   null,
-                  title,
+                  singleList(title),
                   "", // TODO: AUTHOR
                   extractor.getDocSummaryInformation().getCompany(), // publisher
                   null,

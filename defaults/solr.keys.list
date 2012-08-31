@@ -187,7 +187,7 @@ h6_txt
 #inboundlinks_rel_sxt
 
 ## internal links, the rel property of the a-tag, coded binary
-#inboundlinks_relflags_sxt
+#inboundlinks_relflags_val
 
 ## internal links, the text content of the a-tag
 #inboundlinks_text_txt
@@ -208,7 +208,7 @@ h6_txt
 #outboundlinks_rel_sxt
 
 ## external links, the rel property of the a-tag, coded binary
-#outboundlinks_relflags_sxt
+#outboundlinks_relflags_val
 
 ## external links, the text content of the a-tag
 #outboundlinks_text_txt
@@ -306,10 +306,28 @@ italic_txt
 ## the remaining part of the host without organizationdnc
 #host_subdomain_s
 
+## number of titles (counting the 'title' field) in the document
+#title_count_i
+
+## number of characters for each title
+#title_chars_val
+
+## number of words in each title
+#title_words_val
+
+## number of descriptions in the document. Its not counting the 'description' field since there is only one. But it counts the number of descriptions that appear in the document (if any)
+#description_count_i
+
+## number of characters for each description
+#description_chars_val
+
+## number of words in each description
+#description_words_val
+
 ## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias
 #ext_cms_txt
 
-##number of attributes that count for a specific cms in attr_cms
+## number of attributes that count for a specific cms in attr_cms
 #ext_cms_val
 
 ## names of ad-servers/ad-services

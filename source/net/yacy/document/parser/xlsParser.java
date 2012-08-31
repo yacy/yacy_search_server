@@ -119,7 +119,7 @@ public class xlsParser extends AbstractParser implements Parser {
                         this,
                         null,
                         null,
-                        location.getFile(),
+                        singleList(location.getFile()),
                         "", // TODO: AUTHOR
                         "", // TODO: publisher
                         null,
