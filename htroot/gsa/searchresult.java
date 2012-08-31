@@ -139,7 +139,7 @@ public class searchresult {
         // set some context for the writer
         Map<Object,Object> context = req.getContext();
         context.put("ip", header.get("CLIENTIP", ""));
-        context.put("client", header.get("User-Agent", ""));
+        context.put("client", "vsm_frontent");
         context.put("sort", sort.sort);
         context.put("site", site == null ? "" : site);
         context.put("access", access == null ? "p" : access);

@@ -180,13 +180,29 @@ public class GSAResponseWriter implements QueryResponseWriter {
         // body introduction
         final int responseCount = response.size();
         writer.write("<RES SN=\"" + (resHead.offset + 1) + "\" EN=\"" + (resHead.offset + responseCount) + "\">"); writer.write(lb); // The index (1-based) of the first and last search result returned in this result set.
-        writer.write("<M>" + response.matches() + "</M>"); writer.write(lb); // The estimated total number of results for the search.
+        writer.write("<M>" + resHead.numFound + "</M>"); writer.write(lb); // The estimated total number of results for the search.
         writer.write("<FI/>"); writer.write(lb); // Indicates that document filtering was performed during this search.
-        writer.write("<NB><NU>");
-        XML.escapeCharData("/search?q=" + request.getParams().get("q") + "&site=" + (String) context.get("site") +
-                     "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + (String) context.get("client") + "&access=" + (String) context.get("access") +
-                     "&sort=" + (String) context.get("sort") + "&start=" + resHead.offset + responseCount + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
-        writer.write("</NU></NB>");
+        int nextStart = resHead.offset + responseCount;
+        int nextNum = Math.min(resHead.numFound - nextStart, responseCount < resHead.rows ? 0 : resHead.rows);
+        int prevStart = resHead.offset - resHead.rows;
+        if (prevStart >= 0 || nextNum > 0) {
+            writer.write("<NB>");
+            if (prevStart >= 0) {
+                writer.write("<PU>");
+                XML.escapeCharData("/gsa/search?q=" + request.getParams().get("q") + "&site=" + (String) context.get("site") +
+                         "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + (String) context.get("client") + "&access=" + (String) context.get("access") +
+                         "&sort=" + (String) context.get("sort") + "&start=" + prevStart + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
+                writer.write("</PU>");
+            }
+            if (nextNum > 0) {
+                writer.write("<NU>");
+                XML.escapeCharData("/gsa/search?q=" + request.getParams().get("q") + "&site=" + (String) context.get("site") +
+                         "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + (String) context.get("client") + "&access=" + (String) context.get("access") +
+                         "&sort=" + (String) context.get("sort") + "&start=" + nextStart + "&num=" + nextNum + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
+                writer.write("</NU>");
+            }
+            writer.write("</NB>");
+        }
         writer.write(lb);
 
         // parse body

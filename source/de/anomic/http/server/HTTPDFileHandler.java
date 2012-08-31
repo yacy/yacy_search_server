@@ -302,6 +302,10 @@ public final class HTTPDFileHandler {
             if (path.startsWith("/bookmarks/")) {
                 path = "/api/bookmarks/" + path.substring(11);
             }
+            // another patch for the gsa interface
+            if (path.startsWith("/gsa/search")) {
+                path = "/gsa/searchresult" + path.substring(11);
+            }
 
             // these are the 5 cases where an access granted:
             // (the alternative is that we deliver a 401 to request authorization)
