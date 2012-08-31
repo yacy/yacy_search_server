@@ -27,9 +27,7 @@ import java.util.Iterator;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segment;
 import de.anomic.data.DidYouMean;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -67,15 +65,9 @@ public class suggest {
         final int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
         final int count = (post == null) ? 20 : post.getInt("count", 20);
 
-        // get segment
-        final Segment indexSegment = sb.index;
-
         int c = 0;
-        if (more ||
-                (indexSegment != null &&
-                !indexSegment.termIndex().has(Word.word2hash(querystring))))
-        {
-            final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), new StringBuilder(querystring));
+        if (more || (sb.index.getQueryCount(querystring) == 0)) {
+            final DidYouMean didYouMean = new DidYouMean(sb.index, new StringBuilder(querystring));
             final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
             String suggestion;
             //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]

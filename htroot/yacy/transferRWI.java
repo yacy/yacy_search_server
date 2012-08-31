@@ -123,9 +123,9 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted. This peer is in robinson mode");
             result = "not_granted";
             pause = 60000;
-        } else if (sb.index.termIndex().getBufferSize() > cachelimit) {
+        } else if (sb.index.RWIBufferCount() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.index.termIndex().getBufferSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.index.RWIBufferCount() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
@@ -237,7 +237,7 @@ public final class transferRWI {
             }
             result = "ok";
 
-            pause = (int) (sb.index.termIndex().getBufferSize() * 20000 / sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
+            pause = (int) (sb.index.RWIBufferCount() * 20000 / sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
         }
 
         prop.put("unknownURL", unknownURLs.toString());

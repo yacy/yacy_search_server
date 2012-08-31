@@ -708,9 +708,9 @@ public final class RWIProcess extends Thread
                 this.sortout++;
                 continue;
             }
-            
+
             // content control
-            
+
 			if (Switchboard.getSwitchboard().getConfigBool(
 					"contentcontrol.enabled", false) == true) {
 
@@ -990,7 +990,6 @@ public final class RWIProcess extends Thread
         final Map<String, Float> counts = new HashMap<String, Float>();
         final Iterator<String> i = this.ref.keys(false);
         String word;
-        byte[] termHash;
         int c;
         float q, min = Float.MAX_VALUE, max = Float.MIN_VALUE;
         int ic = count;
@@ -999,8 +998,7 @@ public final class RWIProcess extends Thread
             if ( word == null ) {
                 continue;
             }
-            termHash = Word.word2hash(word);
-            c = this.query.getSegment().termIndex().count(termHash);
+            c = this.query.getSegment().getQueryCount(word);
             if ( c > 0 ) {
                 q = ((float) this.ref.get(word)) / ((float) c);
                 min = Math.min(min, q);

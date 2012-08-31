@@ -489,7 +489,7 @@ public class IndexControlRWIs_p {
         }
 
         // insert constants
-        prop.putNum("wcount", segment.termIndex().sizesMax());
+        prop.putNum("wcount", segment.RWICount());
         prop.put("cleanup_maxReferencesRadioChecked", ReferenceContainer.maxReferences > 0 ? 1 : 0);
         prop.put("cleanup_maxReferences", ReferenceContainer.maxReferences > 0
             ? ReferenceContainer.maxReferences

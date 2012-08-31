@@ -163,6 +163,12 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
         return this.solr.query(querystring, offset, count);
     }
 
+
+    @Override
+    public long getQueryCount(final String querystring) throws IOException {
+        return this.solr.getQueryCount(querystring);
+    }
+
     @Override
     public long getSize() {
         return this.solr.getSize();

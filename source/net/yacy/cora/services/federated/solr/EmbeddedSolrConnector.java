@@ -26,7 +26,6 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -90,7 +89,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
                 }
             }
         }
-        
+
         try {
             this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
         } catch (ParserConfigurationException e) {
@@ -157,16 +156,17 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return rsp;
     }
 
+    @Override
     public QueryResponse query(SolrParams params) throws IOException {
         try {
-            return server.query(params);
+            return this.server.query(params);
         } catch (SolrServerException e) {
             throw new IOException(e);
         } catch (Throwable e) {
             throw new IOException("Error executing query", e);
         }
     }
-    
+
     public static void main(String[] args) {
         File solr_config = new File("defaults/solr");
         File storage = new File("DATA/INDEX/webportal/SEGMENTS/text/solr/");

@@ -23,6 +23,7 @@ package net.yacy.cora.services.federated.solr;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
@@ -298,6 +299,39 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         // add caching
         addToCache(list);
         return list;
+    }
+
+    @Override
+    public long getQueryCount(final String querystring) throws IOException {
+        if (this.solr0 == null && this.solr1 == null) return 0;
+        if (this.solr0 != null && this.solr1 == null) {
+            return this.solr0.getQueryCount(querystring);
+        }
+        if (this.solr1 != null && this.solr0 == null) {
+            return this.solr1.getQueryCount(querystring);
+        }
+        final AtomicLong count = new AtomicLong(0);
+        Thread t0 = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    count.addAndGet(MirrorSolrConnector.this.solr0.getQueryCount(querystring));
+                } catch (IOException e) {}
+            }
+        };
+        t0.start();
+        Thread t1 = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    count.addAndGet(MirrorSolrConnector.this.solr1.getQueryCount(querystring));
+                } catch (IOException e) {}
+            }
+        };
+        t1.start();
+        try {t0.join();} catch (InterruptedException e) {}
+        try {t1.join();} catch (InterruptedException e) {}
+        return count.get();
     }
 
     private void addToCache(SolrDocumentList list) {

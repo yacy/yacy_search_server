@@ -12,10 +12,8 @@ import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.StringBuilderComparator;
-import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.rwi.IndexCell;
+import net.yacy.search.index.Segment;
 
 
 /**
@@ -62,7 +60,7 @@ public class DidYouMean {
     public  static final int AVAILABLE_CPU = Runtime.getRuntime().availableProcessors();
     private static final wordLengthComparator WORD_LENGTH_COMPARATOR = new wordLengthComparator();
 
-    private final IndexCell<WordReference> index;
+    private final Segment segment;
     private final StringBuilder word;
     private final int wordLen;
     private final LinkedBlockingQueue<StringBuilder> guessGen, guessLib;
@@ -77,11 +75,11 @@ public class DidYouMean {
      * @param index a termIndex - most likely retrieved from a switchboard object.
      * @param sort true/false -  sorts the resulting TreeSet by index.count(); <b>Warning:</b> this causes heavy i/o.
      */
-    public DidYouMean(final IndexCell<WordReference> index, final StringBuilder word0) {
+    public DidYouMean(final Segment segment, final StringBuilder word0) {
         this.resultSet = Collections.synchronizedSortedSet(new TreeSet<StringBuilder>(new headMatchingComparator(word0, WORD_LENGTH_COMPARATOR)));
         this.word = word0;
         this.wordLen = this.word.length();
-        this.index = index;
+        this.segment = segment;
         this.guessGen = new LinkedBlockingQueue<StringBuilder>();
         this.guessLib = new LinkedBlockingQueue<StringBuilder>();
         this.createGen = true;
@@ -143,7 +141,7 @@ public class DidYouMean {
         final long startTime = System.currentTimeMillis();
         final long timelimit = startTime + timeout;
         if (StringBuilderComparator.CASE_INSENSITIVE_ORDER.indexOf(this.word, ' ') > 0) {
-            return getSuggestions(StringBuilderComparator.CASE_INSENSITIVE_ORDER.split(this.word, ' '), timeout, preSortSelection, this.index);
+            return getSuggestions(StringBuilderComparator.CASE_INSENSITIVE_ORDER.split(this.word, ' '), timeout, preSortSelection, this.segment);
         }
         final SortedSet<StringBuilder> preSorted = getSuggestions(timeout);
         if (System.currentTimeMillis() > timelimit) {
@@ -161,12 +159,12 @@ public class DidYouMean {
 	            if (!(scored.sizeSmaller(2 * preSortSelection))) {
 	                break;
 	            }
-	            scored.inc(s, this.index.count(Word.word2hash(s)));
+	            scored.inc(s, this.segment.getQueryCount(s));
 	        }
         } catch (ConcurrentModificationException e) {
         }
         final SortedSet<StringBuilder> countSorted = Collections.synchronizedSortedSet(new TreeSet<StringBuilder>(new headMatchingComparator(this.word, this.INDEX_SIZE_COMPARATOR)));
-        final int wc = this.index.count(Word.word2hash(this.word)); // all counts must be greater than this
+        final int wc = this.segment.getQueryCount(this.word); // all counts must be greater than this
         while (!scored.isEmpty() && countSorted.size() < preSortSelection) {
             final StringBuilder s = scored.getMaxKey();
             final int score = scored.delete(s);
@@ -198,10 +196,10 @@ public class DidYouMean {
      * @return
      */
     @SuppressWarnings("unchecked")
-    private static SortedSet<StringBuilder> getSuggestions(final StringBuilder[] words, final long timeout, final int preSortSelection, final IndexCell<WordReference> index) {
+    private static SortedSet<StringBuilder> getSuggestions(final StringBuilder[] words, final long timeout, final int preSortSelection, final Segment segment) {
         final SortedSet<StringBuilder>[] s = new SortedSet[words.length];
         for (int i = 0; i < words.length; i++) {
-            s[i] = new DidYouMean(index, words[i]).getSuggestions(timeout / words.length, preSortSelection);
+            s[i] = new DidYouMean(segment, words[i]).getSuggestions(timeout / words.length, preSortSelection);
         }
         // make all permutations
         final SortedSet<StringBuilder> result = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
@@ -435,7 +433,7 @@ public class DidYouMean {
                 StringBuilder s;
                 try {
                     while ((s = DidYouMean.this.guessLib.take()) != POISON_STRING) {
-                        if (s.length() >= MinimumOutputWordLength && DidYouMean.this.index.has(Word.word2hash(s))) {
+                        if (s.length() >= MinimumOutputWordLength && DidYouMean.this.segment.getQueryCount(s) > 0) {
                             DidYouMean.this.resultSet.add(s);
                         }
                         if (System.currentTimeMillis() > DidYouMean.this.timeLimit) {
@@ -454,8 +452,8 @@ public class DidYouMean {
 
         @Override
         public int compare(final StringBuilder o1, final StringBuilder o2) {
-            final int i1 = DidYouMean.this.index.count(Word.word2hash(o1));
-            final int i2 = DidYouMean.this.index.count(Word.word2hash(o2));
+            final int i1 = DidYouMean.this.segment.getQueryCount(o1);
+            final int i2 = DidYouMean.this.segment.getQueryCount(o2);
             if (i1 == i2) {
                 return WORD_LENGTH_COMPARATOR.compare(o1, o2);
             }

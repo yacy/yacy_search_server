@@ -29,6 +29,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.protocol.Domains;
 
@@ -165,13 +166,48 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
     @Override
     public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
         final SolrDocumentList list = new SolrDocumentList();
+        List<Thread> t = new ArrayList<Thread>();
         for (final SolrConnector connector: this.connectors) {
-            final SolrDocumentList l = connector.query(querystring, offset, count);
-            for (final SolrDocument d: l) {
-                list.add(d);
-            }
+            Thread t0 = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        final SolrDocumentList l = connector.query(querystring, offset, count);
+                        for (final SolrDocument d: l) {
+                            list.add(d);
+                        }
+                    } catch (IOException e) {}
+                }
+            };
+            t0.start();
+            t.add(t0);
+        }
+        for (Thread t0: t) {
+            try {t0.join();} catch (InterruptedException e) {}
         }
         return list;
+    }
+
+    @Override
+    public long getQueryCount(final String querystring) throws IOException {
+        final AtomicLong count = new AtomicLong(0);
+        List<Thread> t = new ArrayList<Thread>();
+        for (final SolrConnector connector: this.connectors) {
+            Thread t0 = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        count.addAndGet(connector.getQueryCount(querystring));
+                    } catch (IOException e) {}
+                }
+            };
+            t0.start();
+            t.add(t0);
+        }
+        for (Thread t0: t) {
+            try {t0.join();} catch (InterruptedException e) {}
+        }
+        return count.get();
     }
 
     public long[] getSizeList() {

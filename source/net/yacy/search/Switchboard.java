@@ -971,7 +971,7 @@ public final class Switchboard extends serverSwitch
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_IDLESLEEP, "5000")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_BUSYSLEEP, "0")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_MEMPREREQ, "1000000")));
-        
+
         // content control: initialize list sync thread
         deployThread(
                 "720_ccimport",
@@ -1003,7 +1003,7 @@ public final class Switchboard extends serverSwitch
                     3000,
                     10000),
                 2000);
-        
+
         // set network-specific performance attributes
         if ( this.firstInit ) {
             setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
@@ -1015,7 +1015,7 @@ public final class Switchboard extends serverSwitch
         //query.add(CrawlSwitchboardEntry.word2hash("Zahl"));
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/mobil/newsticker/meldung/mail/54980"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
-        //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);              
+        //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
         this.trail = new LinkedBlockingQueue<String>();
 
@@ -2971,9 +2971,9 @@ public final class Switchboard extends serverSwitch
         if ( size < 10 ) {
             return "no DHT distribution: loadedURL.size() = " + size;
         }
-        if ( indexSegment.termIndex().sizesMax() < 100 ) {
+        if ( indexSegment.RWICount() < 100 ) {
             return "no DHT distribution: not enough words - wordIndex.size() = "
-                + indexSegment.termIndex().sizesMax();
+                + indexSegment.RWICount();
         }
         if ( (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false")
             .equalsIgnoreCase("false")) && (this.crawlQueues.noticeURL.notEmptyLocal()) ) {

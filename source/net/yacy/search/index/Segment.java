@@ -191,6 +191,18 @@ public class Segment {
         return this.termIndex.getBufferSize();
     }
 
+    public int getQueryCount(String word) {
+        int count = this.termIndex == null ? 0 : this.termIndex.count(Word.word2hash(word));
+        try {count += this.fulltext.getSolr().getQueryCount(YaCySchema.text_t.name() + ':' + word);} catch (IOException e) {}
+        return count;
+    }
+
+    public int getQueryCount(StringBuilder word) {
+        int count = this.termIndex == null ? 0 : this.termIndex.count(Word.word2hash(word));
+        try {count += this.fulltext.getSolr().getQueryCount(YaCySchema.text_t.name() + ':' + word.toString());} catch (IOException e) {}
+        return count;
+    }
+
     public boolean exists(final byte[] urlhash) {
         return this.fulltext.exists(urlhash);
     }
@@ -204,7 +216,7 @@ public class Segment {
         final String host = stub.getHost();
         String hh = DigestURI.hosthash(host);
         final BlockingQueue<String> hostQueue = this.fulltext.getSolr().concurrentIDs(YaCySchema.host_id_s + ":" + hh, 0, Integer.MAX_VALUE, 10000);
-        
+
         final String urlstub = stub.toNormalform(false, false);
 
         // now filter the stub from the iterated urls

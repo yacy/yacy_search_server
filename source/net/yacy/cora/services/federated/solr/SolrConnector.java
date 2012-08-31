@@ -112,7 +112,15 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws IOException
      */
     public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException, SolrException;
-        
+
+    /**
+     * get the number of results when this query is done.
+     * This should only be called if the actual result is never used, and only the count is interesting
+     * @param querystring
+     * @return the number of results for this query
+     */
+    public long getQueryCount(final String querystring) throws IOException;
+
     /**
      * Get a query result from solr as a stream of documents.
      * The result queue is considered as terminated if AbstractSolrConnectro.POISON_DOCUMENT is returned.

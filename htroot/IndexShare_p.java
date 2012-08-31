@@ -50,7 +50,7 @@ public class IndexShare_p {
             prop.put("wordfreq", sb.getConfigLong("defaultWordReceiveFrequency",10));
             prop.put("dtable", "");
             prop.put("rtable", "");
-            prop.putNum("wcount", indexSegment.termIndex().sizesMax());
+            prop.putNum("wcount", indexSegment.RWICount());
             prop.putNum("ucount", indexSegment.fulltext().size());
             return prop; // be save
         }
@@ -63,7 +63,7 @@ public class IndexShare_p {
         }
 
         // insert constants
-        prop.putNum("wcount", indexSegment.termIndex().sizesMax());
+        prop.putNum("wcount", indexSegment.RWICount());
         prop.putNum("ucount", indexSegment.fulltext().size());
 
         // return rewrite properties

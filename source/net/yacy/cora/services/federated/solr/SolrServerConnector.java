@@ -186,7 +186,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             throw new IOException(e);
         }
     }
-    
+
     /**
      * get a query result from solr
      * to get all results set the query String to "*:*"
@@ -208,8 +208,22 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         return docs;
     }
 
+    @Override
+    public long getQueryCount(String querystring) throws IOException {
+        // construct query
+        final SolrQuery params = new SolrQuery();
+        params.setQuery(querystring);
+        params.setRows(1);
+        params.setStart(0);
+
+        // query the server
+        QueryResponse rsp = query(params);
+        final SolrDocumentList docs = rsp.getResults();
+        return docs.getNumFound();
+    }
+
     abstract public QueryResponse query(SolrParams params) throws IOException;
-    
+
     private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
 
     /**

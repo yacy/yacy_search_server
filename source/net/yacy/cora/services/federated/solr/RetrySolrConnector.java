@@ -184,6 +184,21 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
+    public long getQueryCount(final String querystring) throws IOException {
+        final long t = System.currentTimeMillis() + this.retryMaxTime;
+        Throwable ee = null;
+        while (System.currentTimeMillis() < t) try {
+            return this.solrConnector.getQueryCount(querystring);
+        } catch (final Throwable e) {
+            ee = e;
+            try {Thread.sleep(10);} catch (final InterruptedException e1) {}
+            continue;
+        }
+        if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
+        return 0;
+    }
+
+    @Override
     public long getSize() {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         while (System.currentTimeMillis() < t) try {
