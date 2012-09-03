@@ -53,14 +53,14 @@
         <div style="text-decoration:blink">Running</div>
         <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
-        <input type="submit" name="terminate" value="Terminate" />
+        <input type="submit" name="terminate" value="Terminate"/>
         </div></form>
         #(/terminateButton)#
 	    #(deleteButton)#::
 	    Finished
         <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
-        <input type="submit" name="delete" value="Delete" />
+        <input type="submit" name="delete" value="Delete"/>
         </div></form>
         #(/deleteButton)#
 	</td>
@@ -94,7 +94,7 @@
         <select name="handle">#{profiles}# 
           <option value="#[handle]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>#{/profiles}# 
         </select>
-        <input type="submit" name="edit" value="Edit profile" />
+        <input type="submit" name="edit" value="Edit profile" class="submitready"/>
       </fieldset>
     </form>
     
@@ -116,7 +116,7 @@
                     type="text" value="#[value]#"#(/type)# />::
             <strong>#(type)##(checked)#false::true#(/checked)#::#[value]#::#[value]##(/type)#</strong>#(/readonly)# 
           </dd>#{/entries}# 
-        <dt>&nbsp;</dt><dd><input type="submit" name="submit" value="Submit changes" /></dd>
+        <dt>&nbsp;</dt><dd><input type="submit" name="submit" value="Submit changes" class="submitready"/></dd>
         </dl>
       </fieldset>
     </form>

@@ -304,7 +304,7 @@ form dd, dl.pairs dd {
 }
 
 .submitready {
-	height:30px;
+	height:26px;
 	width:180px;
     font-size:1.3em;
     color:white;
@@ -319,7 +319,7 @@ form dd, dl.pairs dd {
     background-image:url("/env/grafics/ok.png");
     background-size: 20px 20px;
     background-repeat:no-repeat;
-    background-position: 6px center;
+    background-position: 4px center;
 }
 
 .submitready:hover {
@@ -327,5 +327,5 @@ form dd, dl.pairs dd {
     background-image:url("/env/grafics/ok.png");
     background-size: 20px 20px;
     background-repeat:no-repeat;
-    background-position: 6px center;
+    background-position: 4px center;
 }

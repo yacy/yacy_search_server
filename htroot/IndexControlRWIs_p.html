@@ -14,13 +14,13 @@
       <dl>        
         <dt class="TableCellDark">Retrieve by Word:</dt>
         <dd><input type="text" name="keystring" value="#[keystring]#" size="40" maxlength="80" />
-            <input type="submit" name="keystringsearch" value="Show URL Entries for Word" />
+            <input type="submit" name="keystringsearch" value="Show URL Entries for Word" class="submitready" style="width:300px;"/>
         </dd>
           
         <dt class="TableCellDark">Retrieve by Word-Hash:</dt>
         <dd><input type="text" name="keyhash" value="#[keyhash]#" size="40" maxlength="12" />
-            <input type="submit" name="keyhashsearch" value="Show URL Entries for Word-Hash" />
-            <input type="submit" name="keyhashsimilar" value="Generate List" />
+            <input type="submit" name="keyhashsearch" value="Show URL Entries for Word-Hash" class="submitready" style="width:300px;"/>
+            <input type="submit" name="keyhashsimilar" value="Generate List" class="submitready" style="width:300px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -42,7 +42,7 @@
             <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /><label for="deleteCrawlQueues">Stop Crawler and delete Crawl Queues</label><br/>
             <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" /><label for="deleteRobots">Delete robots.txt Cache</label><br/>
             <input type="checkbox" name="deleteSearchFl" id="deleteSearchFl" disabled="disabled" /><label for="deleteSearchFl">Delete cached snippet-fetching failures during search</label><br/><br/>
-            <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled"/>
+            <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled" class="submitready" style="width:300px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -56,7 +56,7 @@
             No reference size limitation (this may cause strong CPU load when words are searched that appear very often)<br/>
             <input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOn" value="on" #(maxReferencesRadioChecked)#::checked="checked"#(/maxReferencesRadioChecked)# onclick="window.location.href='IndexControlRWIs_p.html?maxReferencesRadio=on&maxReferencesLimit=&maxReferences=#[maxReferences]#'"/>
             Limitation of number of references per word: <input type="text" name="maxReferences" value="#[maxReferences]#" size="9" maxlength="12" onfocus="document.getElementById('maxReferencesRadioOff').checked = false;document.getElementById('maxReferencesRadioOn').checked = true"/> (this causes that old references als deleted if that limit is reached)<br/><br/>
-            <input type="submit" name="maxReferencesLimit" id="maxReferencesLimit" value="Set References Limit"/>
+            <input type="submit" name="maxReferencesLimit" id="maxReferencesLimit" value="Set References Limit" class="submitready" style="width:300px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -130,7 +130,7 @@
             <input type="radio" name="lines" value="1000" />1000&nbsp;&nbsp;
         </dd>
         <dt class="TableCellLight"></dt>
-        <dd><input type="submit" name="urllist" value="List Selected URLs" />
+        <dd><input type="submit" name="urllist" value="List Selected URLs" class="submitready" style="width:300px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -146,7 +146,7 @@
           </dd>
           <dt class="TableCellLight"></dt>
           <dd>
-            <input type="submit" value="Delete Word" name="keyhashdeleteall" />
+            <input type="submit" value="Delete Word" name="keyhashdeleteall" class="submitready" style="width:300px;"/>
           </dd>
         </dl>
     </fieldset>
@@ -154,7 +154,7 @@
       <dl>
         <dt class="TableCellDark">Transfer by Word-Hash:</dt>
         <dd><input type="text" name="keyhash" value="#[keyhash]#" size="40" maxlength="12" />
-            <input type="submit" name="keyhashtransfer" value="Transfer to other peer" />
+            <input type="submit" name="keyhashtransfer" value="Transfer to other peer" class="submitready" style="width:300px;"/>
         </dd>
         <dt class="TableCellDark">to Peer:</dt>
         <dd>select <select name="hostHash">
@@ -268,7 +268,7 @@
           </dd>
           <dt class="TableCellLight"></dt>
           <dd>
-            <input type="submit" value="Delete reference to selected URLs" name="keyhashdelete" /><br />
+            <input type="submit" value="Delete reference to selected URLs" name="keyhashdelete" class="submitready" style="width:300px;"/><br />
           </dd>
         </dl>
       </fieldset>
@@ -280,8 +280,8 @@
             </select>
           </dt>
           <dd>
-            <input type="submit" value="Add selected URLs to blacklist" name="blacklisturls" /><br />
-            <input type="submit" value="Add selected domains to blacklist" name="blacklistdomains" />
+            <input type="submit" value="Add selected URLs to blacklist" name="blacklisturls class="submitready" style="width:300px;"/><br />
+            <input type="submit" value="Add selected domains to blacklist" name="blacklistdomains" class="submitready" style="width:300px;"/>
           </dd>
         </dl>
       </fieldset>
