@@ -15,7 +15,6 @@ a:link:hover {
   background-color:transparent;
 }
 
-
 /* Menu */
 
 .menugroup h3 {
@@ -302,4 +301,31 @@ form dt, dl.pairs dt {
 
 form dd, dl.pairs dd {
   background-color:#DEE6F3;
+}
+
+.submitready {
+	height:30px;
+	width:180px;
+    font-size:1.3em;
+    color:white;
+	
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -khtml-border-radius: 20px;
+    border-radius: 20px;
+    border: 0px;
+	
+    background:#5090D0;
+    background-image:url("/env/grafics/ok.png");
+    background-size: 20px 20px;
+    background-repeat:no-repeat;
+    background-position: 6px center;
+}
+
+.submitready:hover {
+    background:#65AC2A;
+    background-image:url("/env/grafics/ok.png");
+    background-size: 20px 20px;
+    background-repeat:no-repeat;
+    background-position: 6px center;
 }
