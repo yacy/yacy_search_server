@@ -173,6 +173,7 @@ public class DocumentIndex extends Segment {
                     new Date(),
                     url.length(),
                     null,
+                    null,
                     document,
                     condenser,
                     null,

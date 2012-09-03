@@ -296,6 +296,15 @@
             check this box.
           </td>
         </tr>
+        <tr valign="top" class="TableCellLight">
+          <td><label for="collection">Add Crawl result to collection(s)</label>:</td>
+          <td>
+			<input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# />
+	      </td>
+          <td>
+            A crawl result can be tagged with names which are candidates for a collection request. These tags can be selected with the <a href="/gsa/search?q=www&site=#[collection]#">GSA interface</a> using the 'site' operator. To use this option, the 'collection_sxt'-field must be switched on in the <a href="/IndexFederated_p.html">Solr Schema</a>
+          </td>
+        </tr>
         <!--
         <tr valign="top" class="TableCellDark">
           <td>Exclude <em>dynamic</em> Stop-Words</td>
@@ -314,8 +323,8 @@
           </td>
         </tr>
         -->
-        <tr valign="top" class="TableCellLight">
-          <td colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl" /></td>
+        <tr valign="top" class="TableCellSummary">
+          <td colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl" class="submitready"/></td>
         </tr>
       </table>
     </form>

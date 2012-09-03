@@ -68,6 +68,7 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.retrieval.Response;
 
@@ -345,6 +346,7 @@ public class Segment {
             Date modDate,
             final Date loadDate,
             final long sourcesize,
+            final CrawlProfile profile,
             final ResponseHeader responseHeader,
             final Document document,
             final Condenser condenser,
@@ -394,7 +396,7 @@ public class Segment {
         // we do not store the data in metadatadb any more if a solr is connected
         if (this.fulltext.connectedSolr()) {
             try {
-                this.fulltext.putDocument(this.fulltext.getSolrScheme().yacy2solr(id, responseHeader, document, metadata));
+                this.fulltext.putDocument(this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, metadata));
             } catch ( final IOException e ) {
                 Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
             }

@@ -121,6 +121,11 @@ public class searchresult {
         String access = post.remove("access");
         String entqr = post.remove("entqr");
 
+        if (site != null && site.length() > 0) {
+            q = q + " AND " + YaCySchema.collection_sxt.name() + ":" + site;
+            post.put(CommonParams.Q, q);
+        }
+
         // get the embedded connector
         EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.fulltext().getLocalSolr();
         if (connector == null) return null;

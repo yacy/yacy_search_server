@@ -105,6 +105,7 @@ public class QuickCrawlLink_p {
         final boolean xsstopw        = post.get("xsstopw", "").equals("on");
         final boolean xdstopw        = post.get("xdstopw", "").equals("on");
         final boolean xpstopw        = post.get("xpstopw", "").equals("on");
+        final String collection      = post.get("collection", "user");
 
         prop.put("mode_url", (crawlingStart == null) ? "unknown" : crawlingStart);
         prop.putHTML("mode_title", (title == null) ? "unknown" : title);
@@ -151,7 +152,8 @@ public class QuickCrawlLink_p {
                         xsstopw,
                         xdstopw,
                         xpstopw,
-                        CacheStrategy.IFFRESH);
+                        CacheStrategy.IFFRESH,
+                        collection);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);
             } catch (final Exception e) {
                 // mist

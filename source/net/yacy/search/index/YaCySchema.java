@@ -80,7 +80,8 @@ public enum YaCySchema implements Schema {
     h5_txt(SolrType.text_general, true, true, true, "h5 header"),
     h6_txt(SolrType.text_general, true, true, true, "h6 header"),
 
-    // optional values
+    // optional values, not part of standard YaCy handling (but useful for external applications)
+    collection_sxt(SolrType.string, true, true, true, "tags that are attached to crawls/index generation to separate the search result into user-defined subsets"),
     csscount_i(SolrType.integer, true, true, false, "number of entries in css_tag_txt and css_url_txt"),
     css_tag_txt(SolrType.text_general, true, true, true, "full css tag with normalized url"),
     css_url_txt(SolrType.text_general, true, true, true, "normalized urls within a css tag"),

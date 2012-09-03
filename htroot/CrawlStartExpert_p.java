@@ -27,6 +27,7 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.YaCySchema;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -78,6 +79,10 @@ public class CrawlStartExpert_p {
         prop.put("xsstopwChecked", env.getConfigBool("xsstopw", true) ? "1" : "0");
         prop.put("xdstopwChecked", env.getConfigBool("xdstopw", true) ? "1" : "0");
         prop.put("xpstopwChecked", env.getConfigBool("xpstopw", true) ? "1" : "0");
+
+        boolean collectionEnabled = sb.index.fulltext().getSolrScheme().isEmpty() || sb.index.fulltext().getSolrScheme().contains(YaCySchema.collection_sxt);
+        prop.put("collectionEnabled", collectionEnabled ? 1 : 0);
+        prop.put("collection", collectionEnabled ? sb.getConfig("collection", "user") : "");
 
         // return rewrite properties
         return prop;

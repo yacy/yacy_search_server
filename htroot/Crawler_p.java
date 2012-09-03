@@ -53,7 +53,6 @@ import net.yacy.peers.NewsPool;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.Segment;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.SitemapImporter;
@@ -94,9 +93,6 @@ public class Crawler_p {
         prop.put("noloadCrawlState", "");
         prop.put("list-remote", 0);
         prop.put("forwardToCrawlStart", "0");
-
-        // get segment
-        Segment indexSegment = sb.index;
 
         prop.put("info", "0");
 
@@ -198,6 +194,9 @@ public class Crawler_p {
                 final boolean directDocByURL = "on".equals(post.get("directDocByURL", "on")); // catch also all linked media documents without loading them
                 env.setConfig("crawlingDirectDocByURL", directDocByURL);
 
+                final String collection = post.get("collection", sb.getConfig("collection", "user"));
+                env.setConfig("collection", collection);
+
                 // recrawl
                 final String recrawl = post.get("recrawl", "nodoubles"); // nodoubles, reload, scheduler
                 boolean crawlingIfOlderCheck = "on".equals(post.get("crawlingIfOlderCheck", "off"));
@@ -284,7 +283,8 @@ public class Crawler_p {
                                 xsstopw,
                                 xdstopw,
                                 xpstopw,
-                                cachePolicy);
+                                cachePolicy,
+                                collection);
                         sb.crawler.putActive(profile.handle().getBytes(), profile);
                         sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                         final DigestURI url = crawlingStartURL;
@@ -319,7 +319,7 @@ public class Crawler_p {
                         // first delete old entry, if exists
                         final DigestURI url = new DigestURI(crawlingStart);
                         final byte[] urlhash = url.hash();
-                        indexSegment.fulltext().remove(urlhash);
+                        sb.index.fulltext().remove(urlhash);
                         sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                         sb.crawlQueues.errorURL.remove(urlhash);
 
@@ -349,7 +349,8 @@ public class Crawler_p {
                                 xsstopw,
                                 xdstopw,
                                 xpstopw,
-                                cachePolicy);
+                                cachePolicy,
+                                collection);
                         sb.crawler.putActive(pe.handle().getBytes(), pe);
                         final String reasonString = sb.crawlStacker.stackCrawl(new Request(
                                 sb.peers.mySeed().hash.getBytes(),
@@ -496,7 +497,8 @@ public class Crawler_p {
                                     xsstopw,
                                     xdstopw,
                                     xpstopw,
-                                    cachePolicy);
+                                    cachePolicy,
+                                    collection);
                             sb.crawler.putActive(profile.handle().getBytes(), profile);
                             sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                             sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks);
@@ -537,7 +539,8 @@ public class Crawler_p {
                 				xsstopw,
                 				xdstopw,
                 				xpstopw,
-                				cachePolicy);
+                				cachePolicy,
+                				collection);
                 		sb.crawler.putActive(pe.handle().getBytes(), pe);
                 		final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, pe);
                 		importer.start();
@@ -581,7 +584,8 @@ public class Crawler_p {
                                 xsstopw,
                                 xdstopw,
                                 xpstopw,
-                                cachePolicy);
+                                cachePolicy,
+                                collection);
                         sb.crawler.putActive(profile.handle().getBytes(), profile);
                         sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                         final Iterator<Map.Entry<MultiProtocolURI, Properties>> linkiterator = hyperlinks.entrySet().iterator();
@@ -592,7 +596,7 @@ public class Crawler_p {
                             nexturl = new DigestURI(e.getKey());
                             // remove the url from the database to be prepared to crawl them again
                             final byte[] urlhash = nexturl.hash();
-                            indexSegment.fulltext().remove(urlhash);
+                            sb.index.fulltext().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
                             sb.crawlStacker.enqueueEntry(new Request(
@@ -630,7 +634,6 @@ public class Crawler_p {
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 30000)) ? "1" : "0");
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
         prop.put("customPPMdefault", Integer.toString(LCppm));
-
 
         // generate crawl profile table
         int count = 0;

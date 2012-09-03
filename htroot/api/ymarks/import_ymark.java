@@ -268,7 +268,8 @@ public class import_ymark {
                 "", depth, medialink,
                 CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE), -1, crawlingQ,
                 true, true, true, false, true, true, true,
-                CacheStrategy.IFFRESH);
+                CacheStrategy.IFFRESH,
+                "robot_import");
         sb.crawler.putActive(pe.handle().getBytes(), pe);
         return sb.crawlStacker.stackCrawl(new Request(
                 sb.peers.mySeed().hash.getBytes(),

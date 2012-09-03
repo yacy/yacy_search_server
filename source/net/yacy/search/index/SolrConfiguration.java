@@ -59,6 +59,7 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 
 public class SolrConfiguration extends ConfigurationSet implements Serializable {
@@ -105,7 +106,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         this.lazy = lazy;
     }
 
-    private boolean contains(YaCySchema field) {
+    public boolean contains(YaCySchema field) {
     	return this.contains(field.name());
     }
 
@@ -332,7 +333,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
-    public SolrInputDocument yacy2solr(final String id, final ResponseHeader header, final Document yacydoc, final URIMetadata metadata) {
+    public SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader header, final Document yacydoc, final URIMetadata metadata) {
         // we use the SolrCell design as index scheme
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
@@ -345,6 +346,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             final InetAddress address = digestURI.getInetAddress();
             if (address != null) add(doc, YaCySchema.ip_s, address.getHostAddress());
         }
+        if (allAttr || contains(YaCySchema.collection_sxt) && profile != null) add(doc, YaCySchema.collection_sxt, profile.collections());
         if (allAttr || contains(YaCySchema.url_protocol_s)) add(doc, YaCySchema.url_protocol_s, digestURI.getProtocol());
         Map<String, String> searchpart = digestURI.getSearchpartMap();
         if (searchpart == null) {

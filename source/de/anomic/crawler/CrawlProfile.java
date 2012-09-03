@@ -75,6 +75,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String FILTER_IP_MUSTMATCH      = "crawlingIPMustMatch";
     public static final String FILTER_IP_MUSTNOTMATCH   = "crawlingIPMustNotMatch";
     public static final String FILTER_COUNTRY_MUSTMATCH = "crawlingCountryMustMatch";
+    public static final String COLLECTIONS = "collections";
 
     private Pattern urlmustmatch = null, urlmustnotmatch = null, ipmustmatch = null, ipmustnotmatch = null;
 
@@ -120,6 +121,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @param xdstopw true if dynamic stop words shall be ignored
      * @param xpstopw true if parent stop words shall be ignored
      * @param cacheStrategy determines if and how cache is used loading content
+     * @param collections a comma-separated list of tags which are attached to index entries
      */
     public CrawlProfile(
                  final String name,
@@ -141,7 +143,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final boolean xsstopw,
                  final boolean xdstopw,
                  final boolean xpstopw,
-                 final CacheStrategy cacheStrategy) {
+                 final CacheStrategy cacheStrategy,
+                 final String collections) {
         super(40);
         if (name == null || name.isEmpty()) {
             throw new NullPointerException("name must not be null or empty");
@@ -172,6 +175,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(XDSTOPW,          xdstopw); // exclude dynamic stop-word
         put(XPSTOPW,          xpstopw); // exclude parent stop-words
         put(CACHE_STRAGEGY,   cacheStrategy.toString());
+        put(COLLECTIONS,      collections.trim().replaceAll(" ", ""));
     }
 
     /**
@@ -183,7 +187,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (ext != null) putAll(ext);
         this.doms = new ConcurrentHashMap<String, DomProfile>();
     }
-
 
     public void domInc(final String domain, final String referrer, final int depth) {
         final DomProfile dp = this.doms.get(domain);
@@ -257,6 +260,16 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         final String r = get(HANDLE);
         //if (r == null) return null;
         return r;
+    }
+
+    /**
+     * get the collections for this crawl
+     * @return a list of collection names
+     */
+    public String[] collections() {
+        final String r = get(COLLECTIONS);
+        if (r == null) return new String[0];
+        return r.split(",");
     }
 
     /**

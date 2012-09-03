@@ -2560,6 +2560,7 @@ public final class Switchboard extends serverSwitch
                     queueEntry.lastModified(),
                     new Date(),
                     queueEntry.size(),
+                    queueEntry.profile(),
                     queueEntry.getResponseHeader(),
                     document,
                     condenser,
