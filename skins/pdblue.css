@@ -304,9 +304,10 @@ form dd, dl.pairs dd {
 }
 
 .submitready {
-	height:26px;
-	width:180px;
-    font-size:1.3em;
+	height:20px;
+	width:160px;
+    font-size:1.2em;
+    text-indent:9px;
     color:white;
 	
     -webkit-border-radius: 20px;
@@ -317,15 +318,15 @@ form dd, dl.pairs dd {
 	
     background:#5090D0;
     background-image:url("/env/grafics/ok.png");
-    background-size: 20px 20px;
+    background-size: 16px 16px;
     background-repeat:no-repeat;
-    background-position: 4px center;
+    background-position: 2px center;
 }
 
 .submitready:hover {
     background:#65AC2A;
     background-image:url("/env/grafics/ok.png");
-    background-size: 20px 20px;
+    background-size: 16px 16px;
     background-repeat:no-repeat;
-    background-position: 4px center;
+    background-position: 2px center;
 }
