@@ -153,6 +153,13 @@ public enum YaCySchema implements Schema {
     description_chars_val(SolrType.integer, true, true, true, "number of characters for each description"),
     description_words_val(SolrType.integer, true, true, true, "number of words in each description"),
 
+    h1_i(SolrType.integer, true, true, false, "number of h1 header lines"),
+    h2_i(SolrType.integer, true, true, false, "number of h2 header lines"),
+    h3_i(SolrType.integer, true, true, false, "number of h3 header lines"),
+    h4_i(SolrType.integer, true, true, false, "number of h4 header lines"),
+    h5_i(SolrType.integer, true, true, false, "number of h5 header lines"),
+    h6_i(SolrType.integer, true, true, false, "number of h6 header lines"),
+
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.integer, true, true, true, "number of occurrences of texts in bold_txt"),
     italic_val(SolrType.integer, true, true, true, "number of occurrences of texts in italic_txt"),

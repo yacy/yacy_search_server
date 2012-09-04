@@ -327,6 +327,14 @@ italic_txt
 ## number of words in each description
 #description_words_val
 
+## number of h1..h6 header lines
+#h1_i
+#h2_i
+#h3_i
+#h4_i
+#h5_i
+#h6_i
+
 ## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias
 #ext_cms_txt
 

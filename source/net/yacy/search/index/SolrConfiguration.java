@@ -431,12 +431,12 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             int f = 1;
             String[] hs;
 
-            hs = html.getHeadlines(1); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h1_txt, hs);
-            hs = html.getHeadlines(2); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h2_txt, hs);
-            hs = html.getHeadlines(3); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h3_txt, hs);
-            hs = html.getHeadlines(4); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h4_txt, hs);
-            hs = html.getHeadlines(5); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h5_txt, hs);
-            hs = html.getHeadlines(6); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h6_txt, hs);
+            hs = html.getHeadlines(1); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h1_txt, hs); add(doc, YaCySchema.h1_i, hs.length);
+            hs = html.getHeadlines(2); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h2_txt, hs); add(doc, YaCySchema.h2_i, hs.length);
+            hs = html.getHeadlines(3); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h3_txt, hs); add(doc, YaCySchema.h3_i, hs.length);
+            hs = html.getHeadlines(4); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h4_txt, hs); add(doc, YaCySchema.h4_i, hs.length);
+            hs = html.getHeadlines(5); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h5_txt, hs); add(doc, YaCySchema.h5_i, hs.length);
+            hs = html.getHeadlines(6); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h6_txt, hs); add(doc, YaCySchema.h6_i, hs.length);
 
             add(doc, YaCySchema.htags_i, h);
 
