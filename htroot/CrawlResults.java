@@ -26,6 +26,7 @@
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
@@ -39,6 +40,7 @@ import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+import net.yacy.search.index.YaCySchema;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.ResultURLs.InitExecEntry;
@@ -54,6 +56,7 @@ public class CrawlResults {
         final serverObjects prop = new serverObjects();
 
         int lines = 500;
+        boolean showCollection = sb.index.fulltext().getSolrScheme().isEmpty() || sb.index.fulltext().getSolrScheme().contains(YaCySchema.collection_sxt);
         boolean showInit    = env.getConfigBool("IndexMonitorInit", false);
         boolean showExec    = env.getConfigBool("IndexMonitorExec", false);
         boolean showDate    = env.getConfigBool("IndexMonitorDate", true);
@@ -166,6 +169,7 @@ public class CrawlResults {
 
             prop.putHTML("table_feedbackpage", "CrawlResults.html");
             prop.put("table_tabletype", tabletype.getCode());
+            prop.put("table_showCollection", (showCollection) ? "1" : "0");
             prop.put("table_showInit",    (showInit) ? "1" : "0");
             prop.put("table_showExec",    (showExec) ? "1" : "0");
             prop.put("table_showDate",    (showDate) ? "1" : "0");
@@ -203,6 +207,12 @@ public class CrawlResults {
                     prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");
                     prop.put("table_indexed_" + cnt + "_tabletype", tabletype.getCode());
                     prop.put("table_indexed_" + cnt + "_urlhash", entry.getKey());
+
+                    if (showCollection) {
+                        prop.put("table_indexed_" + cnt + "_showCollection", "1");
+                        prop.put("table_indexed_" + cnt + "_showCollection_collection", Arrays.toString(urle.collections()));
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showCollection", "0");
 
                     if (showInit) {
                         prop.put("table_indexed_" + cnt + "_showInit", "1");

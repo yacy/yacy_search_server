@@ -389,7 +389,8 @@ public class Segment {
                 document.getAudiolinks().size(),           // laudio
                 document.getImages().size(),               // limage
                 document.getVideolinks().size(),           // lvideo
-                document.getApplinks().size()              // lapp
+                document.getApplinks().size(),             // lapp
+                profile.collections()                      // collections
         );
 
         // STORE TO SOLR

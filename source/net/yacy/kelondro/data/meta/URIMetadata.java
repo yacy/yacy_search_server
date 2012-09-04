@@ -72,7 +72,7 @@ public interface URIMetadata {
      */
     @Override
     public String toString();
-    
+
     public String dc_title();
 
     public String dc_creator();
@@ -116,6 +116,8 @@ public interface URIMetadata {
     public int lapp();
 
     public String snippet();
+
+    public String[] collections();
 
     public WordReference word();
 

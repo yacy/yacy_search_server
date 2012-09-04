@@ -223,7 +223,7 @@ public final class ResultURLs {
     public static void main(final String[] args) {
         try {
             final DigestURI url = new DigestURI("http", "www.yacy.net", 80, "/");
-            final URIMetadata urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", 0.0d, 0.0d, new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), UTF8.getBytes("de"), 0, 0, 0, 0, 0, 0);
+            final URIMetadata urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", 0.0d, 0.0d, new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), UTF8.getBytes("de"), 0, 0, 0, 0, 0, 0, new String[0]);
             final EventOrigin stackNo = EventOrigin.LOCAL_CRAWLING;
             System.out.println("valid test:\n=======");
             // add

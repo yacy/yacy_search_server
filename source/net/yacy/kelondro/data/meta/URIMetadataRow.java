@@ -104,6 +104,7 @@ public class URIMetadataRow implements URIMetadata {
 
     private final Row.Entry entry;
     private final String snippet;
+    private final String[] collections;
     private WordReference word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
     private Components comp;
@@ -112,6 +113,7 @@ public class URIMetadataRow implements URIMetadata {
         // create a dummy entry, good to produce poison objects
         this.entry = rowdef.newEntry();
         this.snippet = "";
+        this.collections = new String[0];
         this.word = null;
         this.ranking = 0;
         this.comp = null;
@@ -139,7 +141,8 @@ public class URIMetadataRow implements URIMetadata {
             final int laudio,
             final int limage,
             final int lvideo,
-            final int lapp) {
+            final int lapp,
+            final String[] collections) {
         // create new entry
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash());
@@ -162,6 +165,7 @@ public class URIMetadataRow implements URIMetadata {
         this.entry.setCol(col_lapp, lapp);
         //System.out.println("===DEBUG=== " + load.toString() + ", " + decodeDate(col_load).toString());
         this.snippet = "";
+        this.collections = collections;
         this.word = null;
         this.ranking = 0;
         this.comp = null;
@@ -211,6 +215,7 @@ public class URIMetadataRow implements URIMetadata {
         this.word = searchedWord;
         this.ranking = ranking;
         this.comp = null;
+        this.collections = new String[0];
     }
 
     public URIMetadataRow(final Properties prop) throws kelondroException {
@@ -277,6 +282,7 @@ public class URIMetadataRow implements URIMetadata {
         }
         this.ranking = 0;
         this.comp = null;
+        this.collections = new String[0];
     }
 
     public static URIMetadataRow importEntry(final String propStr) {
@@ -476,6 +482,11 @@ public class URIMetadataRow implements URIMetadata {
         // the snippet may appear here if the url was transported in a remote search
         // it will not be saved anywhere, but can only be requested here
         return this.snippet;
+    }
+
+    @Override
+    public String[] collections() {
+        return this.collections;
     }
 
     @Override

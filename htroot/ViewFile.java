@@ -29,6 +29,7 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -371,6 +372,7 @@ public class ViewFile {
             prop.put("error_laudio", "");
             prop.put("error_lvideo", "");
             prop.put("error_lapp", "");
+            prop.put("error_collections", "");
         } else {
             prop.put("error_referrerHash", urlEntry.referrerHash());
             prop.put("error_moddate", urlEntry.moddate());
@@ -393,6 +395,7 @@ public class ViewFile {
             prop.put("error_laudio", urlEntry.laudio());
             prop.put("error_lvideo", urlEntry.lvideo());
             prop.put("error_lapp", urlEntry.lapp());
+            prop.put("error_collections", Arrays.toString(urlEntry.collections()));
         }
 
         return prop;

@@ -311,6 +311,12 @@ public class URIMetadataNode implements URIMetadata {
     }
 
     @Override
+    public String[] collections() {
+        ArrayList<String> a = getArrayList(YaCySchema.collection_sxt);
+        return a.toArray(new String[a.size()]);
+    }
+
+    @Override
     public WordReference word() {
         return this.word;
     }
