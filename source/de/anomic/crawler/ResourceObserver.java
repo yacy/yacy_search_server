@@ -69,22 +69,23 @@ public class ResourceObserver {
 
     	if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0 || this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
 
-    		if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0 ) { // pause crawls
-    			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-    				log.logInfo("pausing local crawls");
-    				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-    			}
-    			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
-    				log.logInfo("pausing remote triggered crawls");
-    				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-    			}
-    		}
+			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+				log.logInfo("pausing local crawls");
+				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+			}
+			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+				log.logInfo("pausing remote triggered crawls");
+				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+			}
 
     		if ((this.normalizedDiskFree == Space.LOW || this.normalizedMemoryFree.compareTo(Space.HIGH) < 0) && this.sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
     			log.logInfo("disabling index receive");
     			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
     			this.sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
     			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
+    		}
+    		if (this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
+    			this.sb.index.fulltext().clearCache();
     		}
     	}
 
