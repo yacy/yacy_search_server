@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -121,8 +123,23 @@ public class searchresult {
         String access = post.remove("access");
         String entqr = post.remove("entqr");
 
+        // add sites operator
         if (site != null && site.length() > 0) {
-            q = q + " AND " + YaCySchema.collection_sxt.name() + ":" + site;
+            String[] s0 = site.split(Pattern.quote("|"));
+            ArrayList<String> sites = new ArrayList<String>(2);
+            for (String s: s0) {
+                s = s.trim().toLowerCase();
+                if (s.length() > 0) sites.add(s);
+            }
+            if (sites.size() > 1) {
+                q += " AND (" + YaCySchema.collection_sxt.name() + ":" + sites.get(0);
+                for (int i = 1; i < sites.size(); i++) {
+                    q += " OR " + YaCySchema.collection_sxt.name() + ":" + sites.get(i);
+                }
+                q += ")";
+            } else if (sites.size() == 1) {
+                q += " AND " + YaCySchema.collection_sxt.name() + ":" + sites.get(0);
+            }
             post.put(CommonParams.Q, q);
         }
 
