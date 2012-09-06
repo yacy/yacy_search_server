@@ -160,6 +160,7 @@ public final class Fulltext implements Iterable<byte[]> {
         if (this.urlIndexFile != null && this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
         if (this.statsDump != null) this.statsDump.clear();
         this.statsDump = null;
+        this.solr.clearCache();
     }
 
     public void clear() throws IOException {
