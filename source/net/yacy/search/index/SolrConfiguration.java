@@ -32,6 +32,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -419,12 +420,14 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr scheme
         Set<MultiProtocolURI> inboundLinks = yacydoc.inboundLinks();
-        Set<MultiProtocolURI> ouboundLinks = yacydoc.outboundLinks();
+        Set<MultiProtocolURI> outboundLinks = yacydoc.outboundLinks();
 
         int c = 0;
         final Object parser = yacydoc.getParserObject();
+        Map<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
         if (parser instanceof ContentScraper) {
             final ContentScraper html = (ContentScraper) parser;
+            images = html.getImages();
 
             // header tags
             int h = 0;
@@ -505,7 +508,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             if (li.length > 0) add(doc, YaCySchema.li_txt, li);
 
             // images
-            final Collection<ImageEntry> imagesc = html.getImages().values();
+            final Collection<ImageEntry> imagesc = images.values();
             final List<String> imgtags  = new ArrayList<String>(imagesc.size());
             final List<String> imgprots = new ArrayList<String>(imagesc.size());
             final List<String> imgstubs = new ArrayList<String>(imagesc.size());
@@ -513,7 +516,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             for (final ImageEntry ie: imagesc) {
                 final MultiProtocolURI uri = ie.url();
                 inboundLinks.remove(uri);
-                ouboundLinks.remove(uri);
+                outboundLinks.remove(uri);
                 imgtags.add(ie.toString());
                 String protocol = uri.getProtocol();
                 imgprots.add(protocol);
@@ -535,7 +538,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 for (final Map.Entry<MultiProtocolURI, String> entry: csss.entrySet()) {
                     final String url = entry.getKey().toNormalform(false, false);
                     inboundLinks.remove(url);
-                    ouboundLinks.remove(url);
+                    outboundLinks.remove(url);
                     css_tag[c] =
                         "<link rel=\"stylesheet\" type=\"text/css\" media=\"" + entry.getValue() + "\"" +
                         " href=\""+ url + "\" />";
@@ -554,7 +557,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 c = 0;
                 for (final MultiProtocolURI url: scriptss) {
                     inboundLinks.remove(url);
-                    ouboundLinks.remove(url);
+                    outboundLinks.remove(url);
                     scripts[c++] = url.toNormalform(false, false);
                 }
                 add(doc, YaCySchema.scriptscount_i, scripts.length);
@@ -568,7 +571,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 c = 0;
                 for (final MultiProtocolURI url: framess) {
                     inboundLinks.remove(url);
-                    ouboundLinks.remove(url);
+                    outboundLinks.remove(url);
                     frames[c++] = url.toNormalform(false, false);
                 }
                 add(doc, YaCySchema.framesscount_i, frames.length);
@@ -582,7 +585,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 c = 0;
                 for (final MultiProtocolURI url: iframess) {
                     inboundLinks.remove(url);
-                    ouboundLinks.remove(url);
+                    outboundLinks.remove(url);
                     iframes[c++] = url.toNormalform(false, false);
                 }
                 add(doc, YaCySchema.iframesscount_i, iframes.length);
@@ -594,7 +597,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 final MultiProtocolURI canonical = html.getCanonical();
                 if (canonical != null) {
                     inboundLinks.remove(canonical);
-                    ouboundLinks.remove(canonical);
+                    outboundLinks.remove(canonical);
                     add(doc, YaCySchema.canonical_t, canonical.toNormalform(false, false));
                 }
             }
@@ -608,7 +611,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                         refreshURL = refresh.startsWith("http") ? new MultiProtocolURI(html.getRefreshPath()) : new MultiProtocolURI(digestURI, html.getRefreshPath());
                         if (refreshURL != null) {
                             inboundLinks.remove(refreshURL);
-                            ouboundLinks.remove(refreshURL);
+                            outboundLinks.remove(refreshURL);
                             add(doc, YaCySchema.refresh_s, refreshURL.toNormalform(false, false));
                         }
                     } catch (MalformedURLException e) {
@@ -623,7 +626,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 for (MultiProtocolURI u: flashURLs) {
                     // remove all flash links from ibound/outbound links
                     inboundLinks.remove(u);
-                    ouboundLinks.remove(u);
+                    outboundLinks.remove(u);
                 }
                 add(doc, YaCySchema.flash_b, flashURLs.length > 0);
             }
@@ -654,6 +657,9 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         final List<String> inboundlinksName = new ArrayList<String>(inboundLinks.size());
         final List<String> inboundlinksRel = new ArrayList<String>(inboundLinks.size());
         final List<String> inboundlinksText = new ArrayList<String>(inboundLinks.size());
+        final List<Integer> inboundlinksTextChars = new ArrayList<Integer>(inboundLinks.size());
+        final List<Integer> inboundlinksTextWords = new ArrayList<Integer>(inboundLinks.size());
+        final List<String> inboundlinksAltTag = new ArrayList<String>(inboundLinks.size());
         for (final MultiProtocolURI url: inboundLinks) {
             final Properties p = alllinks.get(url);
             if (p == null) continue;
@@ -667,12 +673,16 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             inboundlinksName.add(name.length() > 0 ? name : "");
             inboundlinksRel.add(rel.length() > 0 ? rel : "");
             inboundlinksText.add(text.length() > 0 ? text : "");
+            inboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
+            inboundlinksTextWords.add(text.length() > 0 ? text.split(" ").length : 0);
             inboundlinksTag.add(
                 "<a href=\"" + url.toNormalform(false, false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                 (name.length() > 0 ? " name=\"" + name + "\"" : "") +
                 ">" +
                 ((text.length() > 0) ? text : "") + "</a>");
+            ImageEntry ientry = images.get(url);
+            inboundlinksAltTag.add(ientry == null ? "" : ientry.alt());
             c++;
         }
         if (allAttr || contains(YaCySchema.inboundlinks_tag_txt)) add(doc, YaCySchema.inboundlinks_tag_txt, inboundlinksTag);
@@ -682,17 +692,23 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.inboundlinks_rel_sxt)) add(doc, YaCySchema.inboundlinks_rel_sxt, inboundlinksRel);
         if (allAttr || contains(YaCySchema.inboundlinks_relflags_val)) add(doc, YaCySchema.inboundlinks_relflags_val, relEval(inboundlinksRel));
         if (allAttr || contains(YaCySchema.inboundlinks_text_txt)) add(doc, YaCySchema.inboundlinks_text_txt, inboundlinksText);
+        if (allAttr || contains(YaCySchema.inboundlinks_text_chars_val)) add(doc, YaCySchema.inboundlinks_text_chars_val, inboundlinksTextChars);
+        if (allAttr || contains(YaCySchema.inboundlinks_text_words_val)) add(doc, YaCySchema.inboundlinks_text_words_val, inboundlinksTextWords);
+        if (allAttr || contains(YaCySchema.inboundlinks_alttag_txt)) add(doc, YaCySchema.inboundlinks_alttag_txt, inboundlinksAltTag);
 
         c = 0;
-        if (allAttr || contains(YaCySchema.outboundlinkscount_i)) add(doc, YaCySchema.outboundlinkscount_i, ouboundLinks.size());
+        if (allAttr || contains(YaCySchema.outboundlinkscount_i)) add(doc, YaCySchema.outboundlinkscount_i, outboundLinks.size());
         if (allAttr || contains(YaCySchema.outboundlinksnofollowcount_i)) add(doc, YaCySchema.outboundlinksnofollowcount_i, yacydoc.outboundLinkNofollowCount());
-        final List<String> outboundlinksTag = new ArrayList<String>(ouboundLinks.size());
-        final List<String> outboundlinksURLProtocol = new ArrayList<String>(ouboundLinks.size());
-        final List<String> outboundlinksURLStub = new ArrayList<String>(ouboundLinks.size());
-        final List<String> outboundlinksName = new ArrayList<String>(ouboundLinks.size());
-        final List<String> outboundlinksRel = new ArrayList<String>(ouboundLinks.size());
-        final List<String> outboundlinksText = new ArrayList<String>(ouboundLinks.size());
-        for (final MultiProtocolURI url: ouboundLinks) {
+        final List<String> outboundlinksTag = new ArrayList<String>(outboundLinks.size());
+        final List<String> outboundlinksURLProtocol = new ArrayList<String>(outboundLinks.size());
+        final List<String> outboundlinksURLStub = new ArrayList<String>(outboundLinks.size());
+        final List<String> outboundlinksName = new ArrayList<String>(outboundLinks.size());
+        final List<String> outboundlinksRel = new ArrayList<String>(outboundLinks.size());
+        final List<Integer> outboundlinksTextChars = new ArrayList<Integer>(outboundLinks.size());
+        final List<Integer> outboundlinksTextWords = new ArrayList<Integer>(outboundLinks.size());
+        final List<String> outboundlinksText = new ArrayList<String>(outboundLinks.size());
+        final List<String> outboundlinksAltTag = new ArrayList<String>(outboundLinks.size());
+        for (final MultiProtocolURI url: outboundLinks) {
             final Properties p = alllinks.get(url);
             if (p == null) continue;
             final String name = p.getProperty("name", ""); // the name attribute
@@ -705,12 +721,16 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             outboundlinksName.add(name.length() > 0 ? name : "");
             outboundlinksRel.add(rel.length() > 0 ? rel : "");
             outboundlinksText.add(text.length() > 0 ? text : "");
+            outboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
+            outboundlinksTextWords.add(text.length() > 0 ? text.split(" ").length : 0);
             outboundlinksTag.add(
                 "<a href=\"" + url.toNormalform(false, false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                 (name.length() > 0 ? " name=\"" + name + "\"" : "") +
                 ">" +
                 ((text.length() > 0) ? text : "") + "</a>");
+            ImageEntry ientry = images.get(url);
+            inboundlinksAltTag.add(ientry == null ? "" : ientry.alt());
             c++;
         }
         if (allAttr || contains(YaCySchema.outboundlinks_tag_txt)) add(doc, YaCySchema.outboundlinks_tag_txt, outboundlinksTag);
@@ -718,8 +738,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.outboundlinks_urlstub_txt)) add(doc, YaCySchema.outboundlinks_urlstub_txt, outboundlinksURLStub);
         if (allAttr || contains(YaCySchema.outboundlinks_name_txt)) add(doc, YaCySchema.outboundlinks_name_txt, outboundlinksName);
         if (allAttr || contains(YaCySchema.outboundlinks_rel_sxt)) add(doc, YaCySchema.outboundlinks_rel_sxt, outboundlinksRel);
-        if (allAttr || contains(YaCySchema.outboundlinks_relflags_val)) add(doc, YaCySchema.outboundlinks_relflags_val, relEval(inboundlinksRel));
+        if (allAttr || contains(YaCySchema.outboundlinks_relflags_val)) add(doc, YaCySchema.outboundlinks_relflags_val, relEval(outboundlinksRel));
         if (allAttr || contains(YaCySchema.outboundlinks_text_txt)) add(doc, YaCySchema.outboundlinks_text_txt, outboundlinksText);
+        if (allAttr || contains(YaCySchema.outboundlinks_text_chars_val)) add(doc, YaCySchema.outboundlinks_text_chars_val, outboundlinksTextChars);
+        if (allAttr || contains(YaCySchema.outboundlinks_text_words_val)) add(doc, YaCySchema.outboundlinks_text_words_val, outboundlinksTextWords);
+        if (allAttr || contains(YaCySchema.outboundlinks_alttag_txt)) add(doc, YaCySchema.outboundlinks_alttag_txt, outboundlinksAltTag);
 
         // charset
         if (allAttr || contains(YaCySchema.charset_s)) add(doc, YaCySchema.charset_s, yacydoc.getCharset());

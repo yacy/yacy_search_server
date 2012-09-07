@@ -195,6 +195,15 @@ h6_txt
 ## internal links, the text content of the a-tag
 #inboundlinks_text_txt
 
+## internal links, the length of the a-tag as number of characters
+#inboundlinks_text_chars_val
+
+## internal links, the length of the a-tag as number of words
+#inboundlinks_text_words_val
+    
+##if the link is an image link, this contains the alt tag if the image is also liked as img link
+#inboundlinks_alttag_txt
+
 ## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow
 #outboundlinks_tag_txt
 
@@ -215,6 +224,15 @@ h6_txt
 
 ## external links, the text content of the a-tag
 #outboundlinks_text_txt
+
+## external links, the length of the a-tag as number of characters
+#outboundlinks_text_chars_val
+
+## external links, the length of the a-tag as number of words
+#outboundlinks_text_words_val
+    
+##if the link is an image link, this contains the alt tag if the image is also liked as img link
+#outboundlinks_alttag_txt
 
 ## all image tags, encoded as <img> tag inclusive alt- and title property
 #images_tag_txt
