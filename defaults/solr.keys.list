@@ -228,6 +228,9 @@ h6_txt
 ## all image link alt tag
 #images_alt_txt
 
+## number of image links with alt tag
+#images_withalt_i
+
 ## binary pattern for the existance of h1..h6 headlines, int
 #htags_i
 
