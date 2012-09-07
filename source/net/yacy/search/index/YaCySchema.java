@@ -123,6 +123,7 @@ public enum YaCySchema implements Schema {
     images_urlstub_txt(SolrType.text_general, true, true, true, "all image links without the protocol and '://'"),
     images_protocol_sxt(SolrType.text_general, true, true, true, "all image link protocols"),
     images_alt_txt(SolrType.text_general, true, true, true, "all image link alt tag"),
+    images_withalt_i(SolrType.integer, true, true, false, "number of image links with alt tag"),
     htags_i(SolrType.integer, true, true, false, "binary pattern for the existance of h1..h6 headlines"),
     canonical_t(SolrType.text_general, true, true, false, "url inside the canonical link element"),
     refresh_s(SolrType.string, true, true, false, "link from the url property inside the refresh link element"),

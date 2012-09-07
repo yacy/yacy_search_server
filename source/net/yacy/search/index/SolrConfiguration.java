@@ -513,6 +513,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             final List<String> imgprots = new ArrayList<String>(imagesc.size());
             final List<String> imgstubs = new ArrayList<String>(imagesc.size());
             final List<String> imgalts  = new ArrayList<String>(imagesc.size());
+            int withalt = 0;
             for (final ImageEntry ie: imagesc) {
                 final MultiProtocolURI uri = ie.url();
                 inboundLinks.remove(uri);
@@ -522,12 +523,14 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 imgprots.add(protocol);
                 imgstubs.add(uri.toString().substring(protocol.length() + 3));
                 imgalts.add(ie.alt());
+                if (ie.alt() != null && ie.alt().length() > 0) withalt++;
             }
             if (allAttr || contains(YaCySchema.imagescount_i)) add(doc, YaCySchema.imagescount_i, imgtags.size());
             if (allAttr || contains(YaCySchema.images_tag_txt)) add(doc, YaCySchema.images_tag_txt, imgtags);
             if (allAttr || contains(YaCySchema.images_protocol_sxt)) add(doc, YaCySchema.images_protocol_sxt, protocolList2indexedList(imgprots));
             if (allAttr || contains(YaCySchema.images_urlstub_txt)) add(doc, YaCySchema.images_urlstub_txt, imgstubs);
             if (allAttr || contains(YaCySchema.images_alt_txt)) add(doc, YaCySchema.images_alt_txt, imgalts);
+            if (allAttr || contains(YaCySchema.images_withalt_i)) add(doc, YaCySchema.images_alt_txt, withalt);
 
             // style sheets
             if (allAttr || contains(YaCySchema.css_tag_txt)) {
