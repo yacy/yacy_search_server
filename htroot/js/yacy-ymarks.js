@@ -8,7 +8,7 @@ $(document).ready(function() {
 	
 	/* Initialize Bookmark Dialog */
 	bm_dialog();
-	
+		
 	/* Initialize Flexigrid */
 	$('#ymarks_flexigrid').flexigrid({
  		url: '/api/ymarks/get_ymark.json',
@@ -103,10 +103,22 @@ $(document).ready(function() {
 	    	$("input[name='root']").attr("disabled","disabled");
 	     } else if ($("input[name=importer]:checked").val() == 'bmks') {             
 		    	$("input[name='bmkfile']").attr("disabled","disabled");
+	     } else if ($("input[name=importer]:checked").val() == 'dmoz') {             
+		    	$("input[name='bmkfile']").attr("disabled","disabled");
+		    	$("input[name='root']").setValue("/DMOZ");
+		    	$("input[name='source']").removeAttr("disabled");
+		    	$("input[name='source']").setValue("Top/");
+		    	alert("The DMOZ RDF dump is exspected on your YaCy peer at DATA/WORK/content.rdf.u8.gz" +
+		    			"\nYou can download the file from http://rdf.dmoz.org/rdf/content.rdf.u8.gz (ca. 320 MB)." +
+		    			"\n\nPlease check http://www.dmoz.org/license.html before you import any DMOZ data into YaCy!" +
+		    			"\n\nDue to the large number of links contained in the dmoz file it is recommended" +
+		    			"\nto limit the import volume with an appropriate value for the source folder (e.g. Top/Games).")
 	     } else {
 	    	 $("input[name='bmkfile']").removeAttr("disabled");
 	    	 $("input[name='root']").removeAttr("disabled");
 	     	 $("input[name='root']").setValue("/Imported Bookmarks");
+	     	 $("input[name='source']").attr("disabled","disabled");
+	     	 $("input[name='source']").setValue("");
 	     }
 	  });
 
@@ -155,6 +167,38 @@ $(document).ready(function() {
 		minWidth: 200,
 		maxWidth: 200,
 		header: "",
+		multiple: false,
+		selectedList: 1
+	});
+	
+	$("#ymarks_importer").multiselect({
+		noneSelectedText: "Select an Importer ...",
+		minWidth: 200,
+		maxWidth: 200,
+		header: "",
+		multiple: false,
+		selectedList: 1
+	});
+	
+	$("#ymarks_autotag").multiselect({
+		noneSelectedText: "Select an option ...",
+		minWidth: 200,
+		maxWidth: 200,
+		header: "",
+		multiple: false,
+		selectedList: 1
+	});
+	
+	$("#ymarks_indexing").multiselect({
+	   position: {
+		      my: 'left bottom',
+		      at: 'left top'
+		   },
+		noneSelectedText: "Select an option ...",
+		minWidth: 200,
+		maxWidth: 200,
+		header: "",
+		multiple: false,
 		selectedList: 1
 	});
 	
@@ -254,12 +298,12 @@ function loadTagCloud() {
 };
 
 function loadTreeView() {
-	$("#ymarks_treeview").empty();
+	$("#ymarks_treeview").empty();	
 	$("#ymarks_treeview").treeview({
 		url: "/api/ymarks/get_treeview.json?bmtype=href",
-		unique: true,
+		unique: false,
 		persist: "location"
-	});						
+	});
 
 	$("#ymarks_treeview").bind("click", function(event) {
 		if ($(event.target).is("li") || $(event.target).parents("li").length) {
@@ -270,7 +314,8 @@ function loadTreeView() {
 				newp: 1
 			});
 			$('#ymarks_flexigrid').flexReload();
-			return false;
-		}	
+		}
+		return false;
 	});
+	return false;
 }

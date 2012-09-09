@@ -1,27 +1,80 @@
+import java.io.IOException;
+import java.util.Iterator;
+
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkEntry;
+import de.anomic.data.ymark.YMarkRDF;
 import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkTables.TABLES;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class YMarks {
-	public static serverObjects respond(final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
+	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header));
         final boolean isAuthUser = user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
 
+        final String path = header.get(HeaderFramework.CONNECTION_PROP_PATH);
+        if(path != null && path.endsWith(".rdf")) {
+            YMarkRDF rdf = new YMarkRDF("http://"+sb.peers.myAlternativeAddress());
+            
+            if(post != null && post.containsKey(YMarkEntry.BOOKMARKS_ID)) {
+            	final String id = post.get(YMarkEntry.BOOKMARKS_ID);
+            	final int i = id.indexOf(':');
+            	final String bmk_user = id.substring(0,i);
+            	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
+            	final byte[] urlHash = UTF8.getBytes(id.substring(i+1, id.length()));
+            	Tables.Row bmk_row;
+				try {
+					bmk_row = sb.tables.select(bmk_table, urlHash);
+		           	rdf.addBookmark(bmk_user, bmk_row);
+				} catch (IOException e) {
+				} catch (SpaceExceededException e) {
+				}            	
+            } else {
+            	final Iterator<String> iter = sb.tables.iterator();
+            	while(iter.hasNext()) {
+            		final String bmk_table = iter.next();
+            		final int i = bmk_table.indexOf(TABLES.BOOKMARKS.basename());
+            		if(i > 0) {
+                		final String bmk_user = bmk_table.substring(0, i);
+                		try {
+            				// TODO select only public bookmarks
+                			rdf.addBookmarks(bmk_user, sb.tables.iterator(bmk_table));
+            			} catch (IOException e) {
+            				// TODO exception handling
+            			}
+                	}
+            	}	
+            }
+			prop.put("rdf", rdf.getRDF("RDF/XML"));
+            return prop;
+        }        
         if(isAdmin || isAuthUser) {
         	prop.put("login", 1);
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
         	prop.putHTML("user", bmk_user.substring(0,1).toUpperCase() + bmk_user.substring(1));
-
+            int size;
+			try {
+				size = sb.tables.bookmarks.getSize(bmk_user);
+			} catch (IOException e) {
+				Log.logException(e);
+				size = 0;
+			}
+            prop.put("size", size);
         } else {
         	prop.put("login", 0);
-        }
-
+        }        
         return prop;
 	}
 }

@@ -46,12 +46,8 @@ public class get_tags {
             YMarkTag t;
 
         	if (post != null && post.containsKey(TAG) && !post.get(TAG).isEmpty()) {
-    	    	final String[] tagArray = YMarkUtil.cleanTagsString(post.get(TAG)).split(YMarkUtil.TAGS_SEPARATOR);
-    	    	try {
-					tags = new TreeSet<YMarkTag>(sb.tables.bookmarks.getTags(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray)).values());
-				} catch (final IOException e) {
-					return prop;
-				}
+    	    	final String tagsString = YMarkUtil.cleanTagsString(post.get(TAG));
+    	    	tags = new TreeSet<YMarkTag>(sb.tables.bookmarks.getTags(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagsString)).values());
         	} else {
         		try {
 					tags = new TreeSet<YMarkTag>(sb.tables.bookmarks.getTags(bmk_user).values());

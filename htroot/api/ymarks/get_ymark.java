@@ -13,6 +13,7 @@ import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkCrawlStart;
 import de.anomic.data.ymark.YMarkDate;
 import de.anomic.data.ymark.YMarkEntry;
+import de.anomic.data.ymark.YMarkRDF;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkTables.TABLES;
 import de.anomic.data.ymark.YMarkUtil;
@@ -31,7 +32,7 @@ public class get_ymark {
         prop = new serverObjects();
 
         int rp;         // items per page
-        int page;                 // page
+        int page;       // page
         int total;
         String sortorder;
         String sortname;
@@ -68,8 +69,8 @@ public class get_ymark {
                 if(!query.isEmpty()) {
                     if(!qtype.isEmpty()) {
                         if(qtype.equals("_tags")) {
-                        	final String[] tagArray = YMarkUtil.cleanTagsString(query).split(YMarkUtil.TAGS_SEPARATOR);
-                        	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray), sortname, sortorder);
+                        	final String tags = YMarkUtil.cleanTagsString(query);
+                        	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tags), sortname, sortorder);
                         } else if(qtype.equals("_folder")) {
                         	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.bookmarks.getBookmarksByFolder(bmk_user, query), sortname, sortorder);
                         } else {
@@ -89,7 +90,6 @@ public class get_ymark {
             prop.put("page", page);
             prop.put("total", total);
 	    	putProp(bookmarks, rp, page);
-
         } else {
         	prop.put(serverObjects.ACTION_AUTHENTICATE, YMarkTables.USER_AUTHENTICATE_MSG);
         }

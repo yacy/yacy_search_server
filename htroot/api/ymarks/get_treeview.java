@@ -119,43 +119,38 @@ public class get_treeview {
 	    	    		count++;
 	        		}
 	        	}
-	        	// loop through bookmarkList
-	        	try {
-	        		if(displayBmk && !root.isEmpty()) {
-	        			bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, root);
-			        	while (bit.hasNext()) {
-			        		bmk_row = bit.next();
-			        		if(bmk_row != null) {
-			        			final String url = UTF8.String(bmk_row.get(YMarkEntry.BOOKMARK.URL.key()));
-			        			final String title = bmk_row.get(YMarkEntry.BOOKMARK.TITLE.key(), YMarkEntry.BOOKMARK.TITLE.deflt());
+	        	if(displayBmk && !root.isEmpty()) {
+					bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, root);
+					while (bit.hasNext()) {
+						bmk_row = bit.next();
+						if(bmk_row != null) {
+							final String url = UTF8.String(bmk_row.get(YMarkEntry.BOOKMARK.URL.key()));
+							final String title = bmk_row.get(YMarkEntry.BOOKMARK.TITLE.key(), YMarkEntry.BOOKMARK.TITLE.deflt());
 
-				        		// TODO: get_treeview - get rid of bmtype
-				        		if (post.containsKey("bmtype")) {
-				        			if (post.get("bmtype").equals("title")) {
-				        				prop.putJSON("folders_"+count+"_foldername", title);
-				        			} else if (post.get("bmtype").equals("href")) {
-				        				prop.putJSON("folders_"+count+"_foldername", "<a href='"+url+"' target='_blank'>"+title+"</a>");
-				        			}
-				        		} else {
-				        				prop.putJSON("folders_"+count+"_foldername", url);
-			        			}
-				        		prop.put("folders_"+count+"_expanded", "false");
-				        		prop.put("folders_"+count+"_url", url);
-				        		prop.put("folders_"+count+"_type", "file");
-				        		prop.put("folders_"+count+"_hash", "b:"+new String(bmk_row.getPK()));
-				        		prop.put("folders_"+count+"_hasChildren", "true");
-				        		prop.put("folders_"+count+"_comma", ",");
-				        		count++;
-				        	}
-			        	}
-	        		}
-		        	count--;
-		        	prop.put("folders_"+count+"_comma", "");
-		        	count++;
-		        	prop.put("folders", count);
-				} catch (final IOException e) {
-					Log.logException(e);
+				    		// TODO: get_treeview - get rid of bmtype
+				    		if (post.containsKey("bmtype")) {
+				    			if (post.get("bmtype").equals("title")) {
+				    				prop.putJSON("folders_"+count+"_foldername", title);
+				    			} else if (post.get("bmtype").equals("href")) {
+				    				prop.putJSON("folders_"+count+"_foldername", "<a href='"+url+"' target='_blank'>"+title+"</a>");
+				    			}
+				    		} else {
+				    				prop.putJSON("folders_"+count+"_foldername", url);
+							}
+				    		prop.put("folders_"+count+"_expanded", "false");
+				    		prop.put("folders_"+count+"_url", url);
+				    		prop.put("folders_"+count+"_type", "file");
+				    		prop.put("folders_"+count+"_hash", "b:"+new String(bmk_row.getPK()));
+				    		prop.put("folders_"+count+"_hasChildren", "true");
+				    		prop.put("folders_"+count+"_comma", ",");
+				    		count++;
+				    	}
+					}
 				}
+				count--;
+				prop.put("folders_"+count+"_comma", "");
+				count++;
+				prop.put("folders", count);
 	        } else if(displayBmk && isBookmark) {
 	        	try {
 					final String urlHash = post.get(ROOT).substring(2);

@@ -33,9 +33,13 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.util.SpaceExceededException;
@@ -43,7 +47,9 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
+import net.yacy.kelondro.blob.TablesColumnIndex;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
 import de.anomic.data.WorkTables;
 
@@ -89,19 +95,61 @@ public class YMarkTables {
     public final static String USER_ADMIN = "admin";
 	public final static String USER_AUTHENTICATE_MSG = "Bookmark user authentication required!";
 
-    public final static String p1 = "(?:^|.*,)";
-    public final static String p4 = "(?:,.*|$)";
-    public final static String p5 = "((?:";
-    public final static String p6 = ")(?:,.*|$)){";
-    public final static String p7 = "/.*)";
-    public final static String p8 = "(?:,|$)";
-
     public final static int BUFFER_LENGTH = 256;
 
     private final WorkTables worktables;
+    private final Map<String, ChangeListener> progressListeners;
 
     public YMarkTables(final Tables wt) {
     	this.worktables = (WorkTables)wt;
+    	this.progressListeners = new ConcurrentHashMap<String, ChangeListener>();
+    	this.buildIndex();
+    }
+    
+    public ChangeListener getProgressListener(String thread) {
+    	final ChangeListener l = new ProgressListener();
+    	this.progressListeners.put(thread, l);
+    	return l;
+    }
+    
+    public void removeProgressListener(String thread) {
+    	this.progressListeners.remove(thread);
+    }
+    
+    public class ProgressListener implements ChangeListener {
+    	// the progress in %
+    	private int progress = 0;
+    	public void stateChanged(ChangeEvent e) {
+    		final MonitoredReader mreader = (MonitoredReader)e.getSource();
+    		this.progress = (int)((mreader.getProgress() / mreader.maxProgress())*100);
+    	}
+    	public int progress() {
+    		return this.progress;
+    	}
+    }
+    
+    public void buildIndex() { 	    	
+    	final Iterator<String> iter = this.worktables.iterator();
+    	while(iter.hasNext()) {
+    		final String bmk_table = iter.next();
+        	if(bmk_table.endsWith(TABLES.BOOKMARKS.basename())) {
+        		try {				
+    				final long time = System.currentTimeMillis();
+    				final TablesColumnIndex index = this.worktables.getIndex(bmk_table);	   					
+					if(index.getType() == TablesColumnIndex.INDEXTYPE.RAM || index.size() == 0) {
+						Log.logInfo(YMarkTables.BOOKMARKS_LOG, "buildIndex() "+YMarkEntry.BOOKMARK.indexColumns().keySet().toString());
+						index.buildIndex(YMarkEntry.BOOKMARK.indexColumns(), this.worktables.iterator(bmk_table));
+						Log.logInfo(YMarkTables.BOOKMARKS_LOG, "build "+index.getType().name()+" index for columns "+YMarkEntry.BOOKMARK.indexColumns().keySet().toString()
+								+" of table "+bmk_table+" containing "+this.worktables.size(bmk_table)+ " bookmarks"
+								+" ("+(System.currentTimeMillis()-time)+"ms)");  
+					}  										
+    			} catch (IOException e) {
+					Log.logException(e);
+				} catch (Exception e) {
+					Log.logException(e);
+				}
+    		}
+    	}	
     }
 
     public void deleteBookmark(final String bmk_user, final byte[] urlHash) throws IOException, SpaceExceededException {
@@ -111,10 +159,18 @@ public class YMarkTables {
         if(bmk_row != null) {
     		this.worktables.delete(bmk_table,urlHash);
         }
+    	if(this.worktables.hasIndex(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key())) {
+    		try {
+				this.worktables.getIndex(bmk_table).delete(urlHash);
+			} catch (Exception e) {
+				// nothing to do
+			}
+    	}
     }
 
     public void deleteBookmark(final String bmk_user, final String url) throws IOException, SpaceExceededException {
-    	this.deleteBookmark(bmk_user, YMarkUtil.getBookmarkId(url));
+    	final byte[] urlHash = YMarkUtil.getBookmarkId(url);
+    	this.deleteBookmark(bmk_user, urlHash);
     }
 
     public TreeMap<String, YMarkTag> getTags(final Iterator<Row> rowIterator) {
@@ -141,32 +197,65 @@ public class YMarkTables {
 
     public TreeMap<String, YMarkTag> getTags(final String bmk_user) throws IOException {
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-    	final TreeMap<String,YMarkTag> tags = getTags(this.worktables.iterator(bmk_table));
-    	return tags;
+    	final TreeMap<String,YMarkTag> tags = new TreeMap<String,YMarkTag>();
+    	if(this.worktables.hasIndex(bmk_table, YMarkEntry.BOOKMARK.TAGS.key())) {
+    		try {
+				final TablesColumnIndex index = this.worktables.getIndex(bmk_table);
+				final Iterator<String> iter = index.keySet(YMarkEntry.BOOKMARK.TAGS.key()).iterator();
+				while(iter.hasNext()) {
+    				final String tag = iter.next();
+    				tags.put(tag, new YMarkTag(tag, index.get(YMarkEntry.BOOKMARK.TAGS.key(), tag).size()));
+				}
+				return tags;
+			} catch (Exception e) {
+				// nothing to do
+			}
+    	}
+    	return getTags(this.worktables.iterator(bmk_table));
     }
 
-
-    public TreeSet<String> getFolders(final String bmk_user, final String root) throws IOException {
-    	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
+    public TreeSet<String> getFolders(final String bmk_user, String root) throws IOException {
     	final TreeSet<String> folders = new TreeSet<String>();
-    	final StringBuilder path = new StringBuilder(200);
-    	final StringBuffer patternBuilder = new StringBuffer(BUFFER_LENGTH);
-    	patternBuilder.setLength(0);
-    	patternBuilder.append(p1);
-    	patternBuilder.append('(');
-    	patternBuilder.append(root);
-    	patternBuilder.append(p7);
-    	patternBuilder.append(p8);
-    	final Pattern r = Pattern.compile(patternBuilder.toString());
-    	final Iterator<Tables.Row> bit = this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), r);
-    	Tables.Row bmk_row = null;
+    	final StringBuilder path = new StringBuilder(BUFFER_LENGTH);
+    	final String r = root + YMarkUtil.FOLDERS_SEPARATOR;
+    	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user); 
 
+    	// if exists, try the index first
+    	if(this.worktables.hasIndex(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key())) {  
+    		TablesColumnIndex index;
+			try {
+				index = this.worktables.getIndex(bmk_table);
+	    		final Iterator<String> fiter = index.keySet(YMarkEntry.BOOKMARK.FOLDERS.key()).iterator();
+	    		while(fiter.hasNext()) {
+	    			final String folder = fiter.next();
+	    			if(folder.startsWith(r)) {
+						path.setLength(0);
+		                path.append(folder);
+		                while(path.length() > 0 && !path.toString().equals(root)){
+		                	final String p = path.toString();
+		                	if(folders.isEmpty() || !p.equals(folders.floor(p))) {
+		                		folders.add(p);
+		                	}	
+		                	path.setLength(path.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
+		                }
+		        	}
+	    		}
+	        	if (!root.equals(YMarkTables.FOLDERS_ROOT)) { folders.add(root); }
+	        	return folders; 
+			} catch (Exception e) {
+				Log.logException(e);
+			}
+    	}
+		
+    	// by default iterate all bookmarks and extract folder information
+    	final Iterator<Tables.Row> bit = this.worktables.iterator(bmk_table);        	
+    	Tables.Row bmk_row = null;     	
     	while(bit.hasNext()) {
     		bmk_row = bit.next();
-    		if(bmk_row.containsKey(YMarkEntry.BOOKMARK.FOLDERS.key())) {
+    		if(bmk_row.containsKey(YMarkEntry.BOOKMARK.FOLDERS.key())) {      			
     			final String[] folderArray = (new String(bmk_row.get(YMarkEntry.BOOKMARK.FOLDERS.key()),"UTF8")).split(YMarkUtil.TAGS_SEPARATOR);
     	        for (final String folder : folderArray) {
-    	            if(folder.length() > root.length() && folder.substring(0, root.length()+1).equals(root+'/')) {
+    	        	if(folder.length() > root.length() && folder.substring(0, root.length()+1).equals(r)) {
     	                if(!folders.contains(folder)) {
         	        		path.setLength(0);
         	                path.append(folder);
@@ -178,42 +267,25 @@ public class YMarkTables {
     	        		}
     	        	}
     	        }
-    		}
+    		}   		    		
     	}
-        if (!root.equals(YMarkTables.FOLDERS_ROOT)) { folders.add(root); }
-        return folders;
+    	if (!root.equals(YMarkTables.FOLDERS_ROOT)) { folders.add(root); }
+    	return folders;     
+    }
+    
+    public int getSize(final String bmk_user) throws IOException {
+    	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
+    	return this.worktables.size(bmk_table);
     }
 
-    public Iterator<Tables.Row> getBookmarksByFolder(final String bmk_user, final String folder) throws IOException {
+    public Iterator<Tables.Row> getBookmarksByFolder(final String bmk_user, final String foldersString) {
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-        final StringBuilder patternBuilder = new StringBuilder(BUFFER_LENGTH);
-    	patternBuilder.setLength(0);
-    	patternBuilder.append(p1);
-    	patternBuilder.append('(');
-		patternBuilder.append(Pattern.quote(folder));
-		patternBuilder.append(')');
-		patternBuilder.append(p4);
-    	final Pattern p = Pattern.compile(patternBuilder.toString());
-    	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), p);
+    	return this.worktables.getByIndex(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkEntry.BOOKMARK.FOLDERS.seperator(), foldersString);    		
     }
 
-    public Iterator<Tables.Row> getBookmarksByTag(final String bmk_user, final String[] tagArray) throws IOException {
+    public Iterator<Tables.Row> getBookmarksByTag(final String bmk_user, final String tagsString) {
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-        final StringBuilder patternBuilder = new StringBuilder(BUFFER_LENGTH);
-    	patternBuilder.setLength(0);
-    	patternBuilder.append(p1);
-    	patternBuilder.append(p5);
-    	for (final String tag : tagArray) {
-    		patternBuilder.append(Pattern.quote(tag));
-        	patternBuilder.append('|');
-		}
-    	patternBuilder.deleteCharAt(patternBuilder.length()-1);
-    	patternBuilder.append(p6);
-
-    	patternBuilder.append(tagArray.length);
-    	patternBuilder.append('}');
-    	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
-    	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
+    	return this.worktables.getByIndex(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.seperator(), tagsString);
     }
 
     public List<Row> orderBookmarksBy(final Iterator<Row> rowIterator, final String sortname, final String sortorder) {
@@ -239,6 +311,7 @@ public class YMarkTables {
     }
 
     public void replaceTags(final Iterator<Row> rowIterator, final String bmk_user, final String tagString, final String replaceString) throws IOException {
+    	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
     	final HashSet<String> remove = YMarkUtil.keysStringToSet(YMarkUtil.cleanTagsString(tagString.toLowerCase()));
         final StringBuilder t = new StringBuilder(200);
     	HashSet<String> tags;
@@ -253,7 +326,14 @@ public class YMarkTables {
             t.append(YMarkUtil.TAGS_SEPARATOR);
             t.append(replaceString);
             row.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(t.toString()));
-            this.worktables.update(TABLES.BOOKMARKS.tablename(bmk_user), row);
+            this.worktables.update(bmk_table, row);
+            if(this.worktables.hasIndex(bmk_table)) {
+            	try {
+					this.worktables.getIndex(bmk_table).update(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.seperator(), row);
+				} catch (Exception e) {
+					// nothing to do
+				}
+            }
         }
     }
 
@@ -334,6 +414,12 @@ public class YMarkTables {
 					bmk.put(YMarkEntry.BOOKMARK.DATE_MODIFIED.key(), date);
 				}
 	        	this.worktables.insert(bmk_table, urlHash, bmk.getData());
+	        	try {
+	        		if(this.worktables.hasIndex(bmk_table))
+	        			this.worktables.getIndex(bmk_table).add(YMarkEntry.BOOKMARK.indexColumns(), bmk, urlHash);
+				} catch (Exception e) {
+					// nothing to do
+				}
 	        } else {
 	        	// modify and update existing entry
                 HashSet<String> oldSet;
@@ -343,7 +429,7 @@ public class YMarkTables {
 	            	switch(b) {
 	    				case DATE_ADDED:
 	    					if(!bmk_row.containsKey(b.key()))
-	    						bmk_row.put(b.key(), date);
+	    						bmk_row.put(b.key(), date);	    					
 	    					break;
 	    				case DATE_MODIFIED:
 	    					bmk_row.put(b.key(), date);
@@ -386,10 +472,16 @@ public class YMarkTables {
 	    					} else {
 	    						bmk_row.put(b.key(), bmk_row.get(b.key(), b.deflt()));
 	    					}
-	            	 }
+	            	 }	            	
 	             }
                 // update bmk_table
                 this.worktables.update(bmk_table, bmk_row);
+	        	try {
+					if(this.worktables.hasIndex(bmk_table))
+						this.worktables.getIndex(bmk_table).update(YMarkEntry.BOOKMARK.indexColumns(), bmk_row);
+				} catch (Exception e) {
+					// nothing to do
+				}
             }
 		}
 	}

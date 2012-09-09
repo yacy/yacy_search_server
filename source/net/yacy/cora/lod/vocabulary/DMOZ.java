@@ -1,11 +1,7 @@
 /**
- *  Rdf
+ *  DMOZ
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 17.12.2011 at http://yacy.net
- *
- *  $LastChangedDate: 2011-04-14 00:04:23 +0200 (Do, 14 Apr 2011) $
- *  $LastChangedRevision: 7653 $
- *  $LastChangedBy: orbiter $
+ *  First released 16.12.2011 at http://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -22,6 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 package net.yacy.cora.lod.vocabulary;
 
 import java.util.Set;
@@ -29,27 +26,60 @@ import java.util.Set;
 import net.yacy.cora.lod.Literal;
 import net.yacy.cora.lod.Vocabulary;
 
-public enum Rdf implements Vocabulary {
+/**
+ * The Open Directory Project is the largest, most comprehensive human-edited directory of the Web. 
+ * It is constructed and maintained by a vast, global community of volunteer editors.
+ * 
+ * RDF dumps of the Open Directory database are available for download at http://www.dmoz.org/rdf.html * 
+ * An overview of the vocabulary can be found at http://rdf.dmoz.org/rdf/tags.html
+ */
+public enum DMOZ implements Vocabulary {
 
-    RDF,
-    Description,
-    Bag,
-    Seq,
-    Alt,
-    type;
-
-    public final static String IDENTIFIER = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-    public final static String PREFIX = "rdf";
+	// Content
+	ExternalPage,
+	atom,
+	link,
+	link1,
+	mediadate,
+	pdf,
+	pdf1,
+	priority,
+	rss,
+	rss1,
+	topic,
+	type,
+	
+	// Structure
+	Alias,
+	Target,
+	Topic,
+	altlang,
+	altlang1,
+	catid,
+	editor,
+	lastUpdate,
+	letterbar,
+	narrow,
+	narrow1,
+	narrow2,
+	newsgroup,
+	related,
+	symbolic,
+	symbolic1,
+	symbolic2;	
+	
+    public final static String NAMESPACE = "http://dmoz.org/rdf/";
+    public final static String PREFIX = "dmoz";
 
     private final String predicate;
 
-    private Rdf() {
-        this.predicate = IDENTIFIER + this.name();
+    private DMOZ() {
+        this.predicate = NAMESPACE +  this.name().toLowerCase();
     }
 
     @Override
     public String getNamespace() {
-        return IDENTIFIER;
+        return NAMESPACE;
     }
 
     @Override
@@ -67,9 +97,8 @@ public enum Rdf implements Vocabulary {
         return this.predicate;
     }
 
-    @Override
-    public String getURIref() {
+	@Override
+	public String getURIref() {
         return PREFIX + ':' + this.name();
-    }
-
+	}
 }

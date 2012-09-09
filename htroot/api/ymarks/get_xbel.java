@@ -85,12 +85,7 @@ public class get_xbel {
                 		prop.put("xbel_"+count+"_elements", "<title>" + CharacterCoding.unicode2xml(foldername[n], true) + "</title>");
                 		count++;
         			}
-					try {
-						bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, folder);
-					} catch (final IOException e) {
-						// TODO: better error handling (avoid NPE)
-						bit = null;
-					}
+					bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, folder);
 					Tables.Row bmk_row = null;
 					String urlHash;
 					final YMarkDate date = new YMarkDate();
