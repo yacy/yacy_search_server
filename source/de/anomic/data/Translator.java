@@ -50,6 +50,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import de.anomic.server.serverSwitch;
+import java.util.*;
 
 /**
  * Wordlist based translator
@@ -79,12 +80,14 @@ public class Translator {
 
     /**
      * Load multiple translationLists from one File. Each List starts with #File: relative/path/to/file
+     * (within each file section translation is done in order of the language file entries, on conflicts
+     * put the shorter key to the end of the list)
      * @param translationFile the File, which contains the Lists
      * @return a HashMap, which contains for each File a HashMap with translations.
      */
     public static Map<String, Map<String, String>> loadTranslationsLists(final File translationFile){
         final Map<String, Map<String, String>> lists = new HashMap<String, Map<String, String>>(); //list of translationLists for different files.
-        Map<String, String> translationList = new HashMap<String, String>(); //current Translation Table
+        Map<String, String> translationList = new LinkedHashMap<String, String>(); //current Translation Table (maintaining input order)
 
         final List<String> list = FileUtils.getListArray(translationFile);
         String forFile = "";
@@ -108,7 +111,7 @@ public class Translator {
                 if (lists.containsKey(forFile)) {
                     translationList = lists.get(forFile);
                 } else {
-                    translationList = new HashMap<String, String>();
+                    translationList = new LinkedHashMap<String, String>();
                 }
             }
         }
