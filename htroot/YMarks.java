@@ -29,18 +29,19 @@ public class YMarks {
             YMarkRDF rdf = new YMarkRDF("http://"+sb.peers.myAlternativeAddress());
             
             if(post != null && post.containsKey(YMarkEntry.BOOKMARKS_ID)) {
-            	final String id = post.get(YMarkEntry.BOOKMARKS_ID);
-            	final int i = id.indexOf(':');
-            	final String bmk_user = id.substring(0,i);
-            	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-            	final byte[] urlHash = UTF8.getBytes(id.substring(i+1, id.length()));
-            	Tables.Row bmk_row;
-				try {
-					bmk_row = sb.tables.select(bmk_table, urlHash);
-		           	rdf.addBookmark(bmk_user, bmk_row);
-				} catch (IOException e) {
-				} catch (SpaceExceededException e) {
-				}            	
+            	final String id[] = post.get(YMarkEntry.BOOKMARKS_ID).split(":");
+            	if(id[1].equals("b")) {
+                	final String bmk_user = id[0];
+                	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
+                	final byte[] urlHash = UTF8.getBytes(id[2]);
+                	Tables.Row bmk_row;
+    				try {
+    					bmk_row = sb.tables.select(bmk_table, urlHash);
+    		           	rdf.addBookmark(bmk_user, bmk_row);
+    				} catch (IOException e) {
+    				} catch (SpaceExceededException e) {
+    				}    
+            	}
             } else {
             	final Iterator<String> iter = sb.tables.iterator();
             	while(iter.hasNext()) {
@@ -57,7 +58,7 @@ public class YMarks {
                 	}
             	}	
             }
-			prop.put("rdf", rdf.getRDF("RDF/XML"));
+			prop.put("rdf", rdf.getRDF("RDF/XML-ABBREV"));
             return prop;
         }        
         if(isAdmin || isAuthUser) {
