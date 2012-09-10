@@ -39,19 +39,19 @@ import de.anomic.data.ymark.YMarkUtil;
 public class TablesColumnBLOBIndex extends TablesColumnIndex{
 
 	// Map<ColumnName, Map<ColumnValue, T<PrimaryKey>>>
-	private final BEncodedHeap index;	
+	private final BEncodedHeap index;
 	private final static byte SEPERATOR = (byte) ',';
-	
-    public TablesColumnBLOBIndex(final BEncodedHeap bheap) {    	
+
+    public TablesColumnBLOBIndex(final BEncodedHeap bheap) {
     	super(TablesColumnIndex.INDEXTYPE.BLOB);
-    	this.index = bheap;    	
+    	this.index = bheap;
     }
-    
+
     public static Collection<byte[]> byteToCollection(final byte[] b) {
     	final Collection<byte[]> PKset = ByteBuffer.split(b, SEPERATOR);
     	return PKset;
     }
-    
+
     public static byte[] CollectionToByte(final Collection<byte[]> bc) {
     	final ByteBuffer buf = new ByteBuffer(15 * bc.size());
     	final Iterator<byte[]> iter = bc.iterator();
@@ -59,9 +59,12 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
     		buf.append(iter.next());
     		buf.append(SEPERATOR);
     	}
-    	return buf.getBytes();
+    	byte[] b = buf.getBytes();
+    	try {buf.close(); } catch (IOException e) {}
+    	return b;
     }
-    
+
+    @Override
     public void deleteIndex(final String columnName) {
     	final byte[] column = YMarkUtil.getKeyId(columnName);
     	try {
@@ -72,16 +75,17 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			Log.logException(e);
 		}
     }
-         
-	protected void  insertPK(final String columnName, final String columnValue, final byte[] pk) {
+
+	@Override
+    protected void  insertPK(final String columnName, final String columnValue, final byte[] pk) {
 		Map<String, byte[]> valueIdxMap;
-		Collection<byte[]> PKset;	
+		Collection<byte[]> PKset;
 		final byte[] column = YMarkUtil.getKeyId(columnName);
 		try {
 			valueIdxMap = this.index.get(column);
-			if(valueIdxMap != null) {				
+			if(valueIdxMap != null) {
 				if(valueIdxMap.containsKey(columnValue)) {
-					PKset = byteToCollection(valueIdxMap.get(columnValue));	
+					PKset = byteToCollection(valueIdxMap.get(columnValue));
 					if(!ByteBuffer.contains(PKset, pk)) {
 						PKset.add(pk);
 					}
@@ -95,29 +99,30 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 				PKset.add(pk);
 				valueIdxMap = new ConcurrentHashMap<String, byte[]>();
 			}
-			valueIdxMap.put(columnValue, CollectionToByte(PKset));	
+			valueIdxMap.put(columnValue, CollectionToByte(PKset));
 			this.index.insert(column, valueIdxMap);
 			return;
 		} catch (IOException e) {
 			Log.logException(e);
 		} catch (SpaceExceededException e) {
 			Log.logException(e);
-		}	
+		}
 	}
-	
-	protected void removePK(final byte[] pk) {
-		final Iterator<Map.Entry<byte[], Map<String, byte[]>>> niter = this.index.iterator();		
+
+	@Override
+    protected void removePK(final byte[] pk) {
+		final Iterator<Map.Entry<byte[], Map<String, byte[]>>> niter = this.index.iterator();
 		while (niter.hasNext()) {
 			final Map.Entry<byte[], Map<String,byte[]>> entry = niter.next();
 			final Iterator<Map.Entry<String, byte[]>> viter = entry.getValue().entrySet().iterator();
 			while(viter.hasNext()) {
 				final Map.Entry<String, byte[]> columnValue = viter.next();
 				final Collection<byte[]> PKset = byteToCollection(columnValue.getValue());
-				ByteBuffer.remove(PKset, pk);			
+				ByteBuffer.remove(PKset, pk);
 				if(PKset.isEmpty()) {
-					viter.remove();					
+					viter.remove();
 				} else {
-					columnValue.setValue(CollectionToByte(PKset));	
+					columnValue.setValue(CollectionToByte(PKset));
 				}
 			}
 			try {
@@ -129,16 +134,19 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			}
 		}
 	}
-	
-	public void clear() {
+
+	@Override
+    public void clear() {
 		this.index.clear();
 	}
-	
-	public Collection<String> columns() {
+
+	@Override
+    public Collection<String> columns() {
 		return this.index.columns();
 	}
-	
-	public Set<String> keySet(final String columnName) {
+
+	@Override
+    public Set<String> keySet(final String columnName) {
 		final byte[] column = YMarkUtil.getKeyId(columnName);
 		// a TreeSet is used to get sorted set of keys (e.g. folders)
 		if(this.index.containsKey(column)) {
@@ -149,11 +157,12 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			} catch (SpaceExceededException e) {
 				Log.logException(e);
 			}
-		}		
+		}
 		return new TreeSet<String>();
 	}
-	
-	public boolean containsKey(final String columnName, final String key) {
+
+	@Override
+    public boolean containsKey(final String columnName, final String key) {
 		final byte[] column = YMarkUtil.getKeyId(columnName);
 		if(this.index.containsKey(column)) {
 			try {
@@ -166,13 +175,15 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 		}
 		return false;
 	}
-	
-	public boolean hasIndex(final String columnName) {
+
+	@Override
+    public boolean hasIndex(final String columnName) {
 		final byte[] column = YMarkUtil.getKeyId(columnName);
 		return this.index.containsKey(column);
 	}
-	
-	public Collection<byte[]> get(final String columnName, final String key) {
+
+	@Override
+    public Collection<byte[]> get(final String columnName, final String key) {
 		final byte[] column = YMarkUtil.getKeyId(columnName);
 		// deserialize
 		try {
@@ -184,8 +195,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 		}
 		return new ArrayList<byte[]>();
 	}
-	
-	public int size(final String columnName) {
+
+	@Override
+    public int size(final String columnName) {
 		final byte[] column = YMarkUtil.getKeyId(columnName);
 		if(this.index.containsKey(column)) {
 			try {
@@ -197,9 +209,10 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			}
 		}
 		return -1;
-	}	
-	
-	public int size() {
+	}
+
+	@Override
+    public int size() {
 		return this.index.size();
 	}
 }

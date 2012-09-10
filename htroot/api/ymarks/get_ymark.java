@@ -13,7 +13,6 @@ import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkCrawlStart;
 import de.anomic.data.ymark.YMarkDate;
 import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkRDF;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkTables.TABLES;
 import de.anomic.data.ymark.YMarkUtil;

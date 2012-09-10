@@ -90,10 +90,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 	}
 
 	public boolean hasSchedule() {
-		if(!this.isEmpty() && this.date_next_exec.after(new Date()))
-			return true;
-		else
-			return false;
+		return (!this.isEmpty() && this.date_next_exec.after(new Date()));
 	}
 
 	public boolean isRunning(final CrawlSwitchboard crawler) {

@@ -581,7 +581,7 @@ public final class SearchEvent {
         public void run() {
             try {
                 boolean aquired;
-                while ( aquired = this.trigger.tryAcquire(3000, TimeUnit.MILLISECONDS) ) {
+                while ( (aquired = this.trigger.tryAcquire(3000, TimeUnit.MILLISECONDS)) == true ) { // compare to true to remove warning: "Possible accidental assignement"
                     if ( !aquired || MemoryControl.shortStatus()) {
                         break;
                     }

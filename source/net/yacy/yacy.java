@@ -587,7 +587,7 @@ public final class yacy {
 	        // check assertion status
 	        //ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
 	        boolean assertionenabled = false;
-	        assert assertionenabled = true;
+	        assert (assertionenabled = true) == true; // compare to true to remove warning: "Possible accidental assignement"
 	        if (assertionenabled) System.out.println("Asserts are enabled");
 
 	        // check memory amount

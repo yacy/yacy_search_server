@@ -267,7 +267,7 @@ public class dbtest {
         System.out.println("*** YaCy Database Test");
         // print out command line
         boolean assertionenabled = false;
-        assert assertionenabled = true;
+        assert (assertionenabled = true) == true; // compare to true to remove warning: "Possible accidental assignement"
         if (assertionenabled) System.out.println("*** Asserts are enabled"); else System.out.println("*** HINT: YOU SHOULD ENABLE ASSERTS! (include -ea in start arguments");
         final long mb = MemoryControl.available() / 1024 / 1024;
         System.out.println("*** RAM = " + mb + " MB");

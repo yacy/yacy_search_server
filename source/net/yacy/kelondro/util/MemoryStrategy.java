@@ -131,6 +131,6 @@ public abstract class MemoryStrategy {
     /**
      * set the memory to be available for properState - StandardMemoryStrategy only
      */
-    protected void setProperMbyte(final long mbyte) {
+    protected void setProperMbyte(@SuppressWarnings("unused") final long mbyte) {
     }
 }
