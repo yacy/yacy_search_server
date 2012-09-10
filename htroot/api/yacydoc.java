@@ -26,6 +26,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import net.yacy.cora.date.ISO8601Formatter;
@@ -68,6 +69,7 @@ public class yacydoc {
         prop.put("dc_type", "");
         prop.put("dc_identifier", "");
         prop.put("dc_language", "");
+        prop.put("collection", "");
         prop.put("geo_lat", "");
         prop.put("geo_long", "");
 
@@ -115,6 +117,7 @@ public class yacydoc {
         prop.putXML("dc_type", String.valueOf(entry.doctype()));
         prop.putXML("dc_identifier", entry.url().toNormalform(false, true));
         prop.putXML("dc_language", ASCII.String(entry.language()));
+        prop.putXML("collection", Arrays.toString(entry.collections()));
         prop.put("geo_lat", entry.lat());
         prop.put("geo_long", entry.lon());
 

@@ -95,6 +95,7 @@ public class searchresult {
 
         // check post
         if (post == null) return null;
+        Log.logInfo("GSA Query", post.toString());
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
 
         // rename post fields according to result style
