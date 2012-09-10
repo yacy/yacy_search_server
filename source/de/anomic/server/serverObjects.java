@@ -223,7 +223,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         return put(key, toJSON(value.toString()));
     }
 
-    private static String toJSON(String value) {
+    public static String toJSON(String value) {
         // value = value.replaceAll("\\", "\\\\");
         value = patternDoublequote.matcher(value).replaceAll("'");
         value = patternSlash.matcher(value).replaceAll("\\/");
