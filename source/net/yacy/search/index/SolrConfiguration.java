@@ -530,7 +530,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             if (allAttr || contains(YaCySchema.images_protocol_sxt)) add(doc, YaCySchema.images_protocol_sxt, protocolList2indexedList(imgprots));
             if (allAttr || contains(YaCySchema.images_urlstub_txt)) add(doc, YaCySchema.images_urlstub_txt, imgstubs);
             if (allAttr || contains(YaCySchema.images_alt_txt)) add(doc, YaCySchema.images_alt_txt, imgalts);
-            if (allAttr || contains(YaCySchema.images_withalt_i)) add(doc, YaCySchema.images_alt_txt, withalt);
+            if (allAttr || contains(YaCySchema.images_withalt_i)) add(doc, YaCySchema.images_withalt_i, withalt);
 
             // style sheets
             if (allAttr || contains(YaCySchema.css_tag_txt)) {
