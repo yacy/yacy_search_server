@@ -34,10 +34,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -50,16 +52,25 @@ import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
+import de.anomic.data.ymark.YMarkUtil;
 
 
 public class Tables implements Iterable<String> {
 
-    private static final String suffix = ".bheap";
+    public final static String p1 = "(?:^|.*,)";
+    public final static String p2 = "((?:";
+    public final static String p3 = ")(?:,.*|$)){";
+    public final static String CIDX = "_cidx";
+    public final static int NOINDEX = 50000;
+    public final static int RAMINDEX = 100000;
+    	
+	private static final String suffix = ".bheap";
     private static final String system_table_pkcounter = "pkcounter";
     private static final String system_table_pkcounter_counterName = "pk";
 
     private final File location;
     private final ConcurrentHashMap<String, BEncodedHeap> tables;
+    private final ConcurrentHashMap<String, TablesColumnIndex> cidx;
     int keymaxlen;
 
     // use our own formatter to prevent concurrency locks with other processes
@@ -82,6 +93,143 @@ public class Tables implements Iterable<String> {
                 }
             }
         }
+        this.cidx = new ConcurrentHashMap<String, TablesColumnIndex>();
+    }
+    
+    public TablesColumnIndex getIndex(final String tableName, TablesColumnIndex.INDEXTYPE indexType) throws Exception {
+    	final TablesColumnIndex index;
+    	switch(indexType) {
+	    	case RAM:
+	    		index = new TablesColumnRAMIndex();
+	    		break;
+	    	case BLOB:
+	    		final String idx_table = tableName+CIDX;
+	    		BEncodedHeap bheap;				
+	   			bheap = this.getHeap(idx_table);
+	   			index =  new TablesColumnBLOBIndex(bheap);
+	   			break;
+	   		default:
+	   			throw new Exception("Unsupported TableColumnIndex: "+indexType.name());
+    	}
+    	return index;
+    }
+    
+    public TablesColumnIndex getIndex(final String tableName) throws Exception {
+    	// return an existing index
+    	if(this.cidx.containsKey(tableName)) {
+    		return this.cidx.get(tableName);
+    	}
+    	
+    	// create a new index
+    	int size;
+    	try {
+			size = this.size(tableName);
+		} catch (IOException e) {
+			size = 0;
+		}
+
+    	final TablesColumnIndex index;
+		
+    	if(size < NOINDEX) {
+    		throw new Exception("TableColumnIndex not available for tables with less than "+NOINDEX+" rows: "+tableName);
+    	} 
+    	if(size < RAMINDEX) {
+    		index = new TablesColumnRAMIndex();
+    	} else {
+        	final String idx_table = tableName+CIDX;
+    		BEncodedHeap bheap;				
+    		try {
+    			bheap = this.getHeap(idx_table);
+    		} catch (IOException e) {
+    			bheap = null;
+    			Log.logException(e);
+    		}
+    		if(bheap != null) {
+    			index =  new TablesColumnBLOBIndex(bheap);
+    		} else {			
+    			index = new TablesColumnRAMIndex();
+    		}	     		
+    	}
+    	this.cidx.put(tableName, index); 
+    	return index;
+    }
+    
+    public boolean hasIndex (final String tableName) {
+    	return this.cidx.contains(tableName);
+    }
+    
+    public boolean hasIndex (final String tableName, final String columnName) {
+    	if(this.cidx.containsKey(tableName)) { 		
+    		return this.cidx.get(tableName).hasIndex(columnName);
+    	}
+    	try {
+			if(this.has(tableName+CIDX, YMarkUtil.getKeyId(columnName))) {
+				return true;
+			}
+		} catch (IOException e) {
+			Log.logException(e);
+		}  
+    	return false;
+    }
+
+    public Iterator<Row> getByIndex(final String table, final String whereColumn, final String separator, final String whereValue) { 
+    	final HashSet<Tables.Row> rows = new HashSet<Tables.Row>();
+    	final TreeSet<byte[]> set1 = new TreeSet<byte[]>(TablesColumnIndex.NATURALORDER);
+    	final TreeSet<byte[]> set2 = new TreeSet<byte[]>(TablesColumnIndex.NATURALORDER);
+    	final String[] values = whereValue.split(separator);
+    	if(this.hasIndex(table, whereColumn)) {
+    		try {	
+    			final TablesColumnIndex index = this.getIndex(table);
+    			for(int i=0; i<values.length; i++) {
+        			if(index.containsKey(whereColumn, values[i])) {
+    	        		final Iterator<byte[]> biter = index.get(whereColumn, values[i]).iterator();
+    	        		while(biter.hasNext()) {        			
+    	        			set1.add(biter.next());
+    	        		}
+    	        		if(i==0) {
+    	        			set2.addAll(set1);
+    	        		} else {
+    	        			set2.retainAll(set1);
+    	        		}
+    	        		set1.clear();
+    	    		}	
+    			}
+    			for(byte[] pk : set2) {
+    				rows.add(this.select(table, pk));
+    			}
+    			
+			} catch (Exception e) {
+				Log.logException(e);
+				return new HashSet<Row>().iterator();
+			}
+    	} else if (!separator.isEmpty()) {
+        	final StringBuilder patternBuilder = new StringBuilder(256);
+        	patternBuilder.append(p1);
+        	patternBuilder.append(p2);
+        	for (final String value : values) {
+        		patternBuilder.append(Pattern.quote(value));
+            	patternBuilder.append('|');
+    		}
+        	patternBuilder.deleteCharAt(patternBuilder.length()-1);
+        	patternBuilder.append(p3);
+        	patternBuilder.append(values.length);
+        	patternBuilder.append('}');
+        	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);        	
+    		try {
+				return this.iterator(table, whereColumn, p);
+			} catch (IOException e) {				
+				Log.logException(e);
+				return new HashSet<Row>().iterator();
+			}
+    	} else {
+    		try {
+				return this.iterator(table, whereColumn, UTF8.getBytes(whereValue));
+			} catch (IOException e) {
+				Log.logException(e);
+				return new HashSet<Row>().iterator();
+			}
+    	}
+    	return rows.iterator();
     }
 
     @Override

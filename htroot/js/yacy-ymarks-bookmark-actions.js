@@ -62,7 +62,7 @@ function bm_action(com,grid) {
         $("#bm_desc").setValue($('.trSelected',grid).find('p.desc').text().trim());            		
         $('#bm_tags').importTags($('.trSelected',grid).find('p.tags').text().trim().replace(/,\s/g,","));
         /* $("#bm_tags").setValue($('.trSelected',grid).find('p.tags').text().trim().replace(/,\s/g,",")); */                 
-        $("#bm_path").setValue($('.trSelected',grid).find('p.folders').text().replace(/,\s/g,","));
+        $("#bm_path").setValue($('.trSelected',grid).find('p.folders').text().replace(/, \s/g,","));
         $("#bm_public").setValue($('.trSelected',grid).find('img').attr('alt'));
         $("#ymarks_add_dialog").dialog('open');
 	} else if (com=='Crawl') {

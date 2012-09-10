@@ -1,6 +1,6 @@
 // YMarkCrawlStart.java
-// (C) 2011 by Stefan Förster, sof@gmx.de, Norderstedt, Germany
-// first published 2010 on http://yacy.net
+// (C) 2012 by Stefan Förster, sof@gmx.de, Norderstedt, Germany
+// first published 2011 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -33,9 +33,13 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.search.Switchboard;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlSwitchboard;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.WorkTables;
 
 public class YMarkCrawlStart extends HashMap<String,String>{
@@ -47,6 +51,10 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 	private Date date_recording;
 	private String apicall_pk;
 	private String url;
+
+	public static enum CRAWLSTART {
+		SINGLE, ONE_LINK, FULL_DOMAIN
+	}
 
 	public YMarkCrawlStart(final WorkTables worktables) {
 		super();
@@ -82,7 +90,10 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 	}
 
 	public boolean hasSchedule() {
-		return !this.isEmpty() && this.date_next_exec.after(new Date());
+		if(!this.isEmpty() && this.date_next_exec.after(new Date()))
+			return true;
+		else
+			return false;
 	}
 
 	public boolean isRunning(final CrawlSwitchboard crawler) {
@@ -157,5 +168,38 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 		}
+	}
+
+	public static String crawlStart(
+        final Switchboard sb,
+        final DigestURI startURL,
+        final String urlMustMatch,
+        final String urlMustNotMatch,
+        final int depth,
+        final boolean crawlingQ, final boolean medialink) {
+		final CrawlProfile pe = new CrawlProfile(
+		                (startURL.getHost() == null) ? startURL.toNormalform(true, false) : startURL.getHost(), null,
+		                urlMustMatch,
+		                urlMustNotMatch,
+		                CrawlProfile.MATCH_ALL_STRING,
+		                CrawlProfile.MATCH_NEVER_STRING,
+		                "",
+		                depth,
+		                medialink,
+		                CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE),
+		                -1,
+		                crawlingQ,
+		                true, true, true, false, true, true, true,
+		                CacheStrategy.IFFRESH,
+		                "robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA); // TODO: make this a default profile in CrawlSwitchboard
+		sb.crawler.putActive(pe.handle().getBytes(), pe);
+		return sb.crawlStacker.stackCrawl(new Request(
+        sb.peers.mySeed().hash.getBytes(),
+        startURL,
+        null,
+        "CRAWLING-ROOT",
+        new Date(),
+        pe.handle(), 0, 0, 0, 0
+        ));
 	}
 }

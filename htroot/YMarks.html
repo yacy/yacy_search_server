@@ -37,7 +37,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 		#%env/templates/header.template%#
 		
 		<div class="SubMenu">
-			<h3>Bookmarks</h3>
+			<h3>Bookmarks (user: #[user]# size: #[size]#)</h3>
 			<!-- 
 			<ul class="SubMenu">
 				#(login)#<li><a href="YMarks.html" class="MenuItemLink">Login</a></li>::#(/login)#
@@ -161,7 +161,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 								<td>Surrogate XML</td>
 							</tr>
 							<tr>
-								<td><input type="radio" name="importer" value="dmoz" disabled="disabled" /></td>
+								<td><input type="radio" name="importer" value="dmoz" /></td>
 								<td>DMOZ XML</td>
 							</tr>
 							<tr>
@@ -260,7 +260,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 		</div>
 		
 		<!-- Bookmarks Edit Dialog -->	
-		<div id="ymarks_add_dialog" class="bm_dialog" title="Add & Edit Bookmark">
+		<div id="ymarks_add_dialog" class="bm_dialog" title="Add & Edit Bookmark">					
+			<form id="bmaddform" method="post" accept-charset="UTF-8" action="jQuery">
 			<table>
 				<tr>
 					<td>
@@ -275,8 +276,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 						</select>
 					</td>
 				</tr>
-			</table>					
-			<form id="bmaddform" method="post" accept-charset="UTF-8" action="jQuery"><div>
+			</table>
+			<div>
 				<label for="bm_url">URL:</label>
 				<br />					
 				<input type="text" name="url" id="bm_url" class="bm_input" size="80" />
@@ -297,7 +298,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 				<label for="bm_tags">Tags (comma separated):</label>
 				<br />
 				<input type="text" name="tags" id="bm_tags" class="bm_input" size="80" />
-			</div></form>
+			</div>
+			</form>
 		</div>
 		<div id="ymarks_crawlstart" class="bm_dialog" title="Craw Start">
 		     

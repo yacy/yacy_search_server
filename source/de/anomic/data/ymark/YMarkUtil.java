@@ -1,6 +1,6 @@
 // YMarkUtil.java
-// (C) 2011 by Stefan Förster, sof@gmx.de, Norderstedt, Germany
-// first published 2010 on http://yacy.net
+// (C) 2011 by Stefan Foerster, sof@gmx.de, Norderstedt, Germany
+// first published 2011 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -30,12 +30,14 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 
 public class YMarkUtil {
     public final static String TAGS_SEPARATOR = ",";
     public final static String FOLDERS_SEPARATOR = "/";
+    public final static String SPACE = " ";
     public final static String EMPTY_STRING = new String();
 
     /**
@@ -60,7 +62,7 @@ public class YMarkUtil {
     }
 
     public final static byte[] keySetToBytes(final HashSet<String> urlSet) {
-    	return keySetToString(urlSet).getBytes();
+    	return UTF8.getBytes(keySetToString(urlSet));
     }
 
     public final static String keySetToString(final HashSet<String> urlSet) {
@@ -106,17 +108,21 @@ public class YMarkUtil {
 			ts.deleteCharAt(0);
 		if (ts.length()>0 && ts.charAt(ts.length()-1) == TAGS_SEPARATOR.charAt(0))
 			ts.deleteCharAt(ts.length()-1);
-    	return ts.toString();
+    	return new String(ts);
     }
 
     public final static String cleanFoldersString(final String foldersString) {
     	return cleanFoldersString(foldersString, YMarkUtil.EMPTY_STRING);
     }
-
+    
     public final static String cleanFoldersString(final String foldersString, final String dflt) {
-    	if(foldersString.isEmpty())
+    	if(foldersString.isEmpty()) {
     		return dflt;
-    	StringBuilder fs = new StringBuilder(cleanTagsString(foldersString));
+    	}
+    	return cleanFoldersString(new StringBuilder(cleanTagsString(foldersString)));
+    }
+
+    public final static String cleanFoldersString(final StringBuilder fs) {
     	if(fs.length() == 0)
     		return YMarkEntry.BOOKMARK.FOLDERS.deflt();
     	for (int i = 0; i < fs.length()-1; i++) {
@@ -132,7 +138,7 @@ public class YMarkUtil {
     	}
 		if (fs.charAt(fs.length()-1) == FOLDERS_SEPARATOR.charAt(0)) {
 			fs.deleteCharAt(fs.length()-1);
-		}
-    	return fs.toString();
+		}		
+    	return new String(fs);
     }
 }

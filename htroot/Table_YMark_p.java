@@ -240,8 +240,8 @@ public class Table_YMark_p {
                     	mapIterator = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, post.get("folders"));
                     } else if(post.containsKey("tags") && !post.get("tags").isEmpty()) {
                     	// mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.tags.getBookmarks(bmk_user, post.get("tags")), maxcount).iterator();
-                    	final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR);
-                    	mapIterator = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
+                    	final String tagsString = YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key()));
+                    	mapIterator = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagsString);
                     } else {
                     	mapIterator = sb.tables.orderByPK(sb.tables.iterator(table, matcher), maxcount).iterator();
                     }

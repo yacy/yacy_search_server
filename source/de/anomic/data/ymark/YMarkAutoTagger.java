@@ -58,7 +58,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		this.merge = true;
 	}
 
-	private static Document loadDocument(final String url, final LoaderDispatcher loader) {
+	private static Document loadDocument(final String url, final LoaderDispatcher loader) throws IOException {
 		DigestURI uri;
 		Response response;
 		try {
@@ -67,12 +67,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			Log.logWarning(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to malformed url: "+url);
 			return null;
 		}
-		try {
-			response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
-		} catch (final IOException e) {
-			Log.logWarning(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to IOException for url: "+url);
-			return null;
-		}
+		response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
 		try {
 			return Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		} catch (final Failure e) {
@@ -214,8 +209,18 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 	}
 
 	public static String autoTag(final String url, final LoaderDispatcher loader, final int max, final TreeMap<String, YMarkTag> tags) {
-		final Document document = loadDocument(url, loader);
-		return (document != null) ? autoTag(document, max, tags) : "/IOExceptions";
+		Document document = null;
+		String exception = "/IOExceptions";
+		try {
+			document = loadDocument(url, loader);
+		} catch (IOException e) {
+			exception = e.getMessage();
+			int start = exception.indexOf('\'')+9;
+			int end = exception.indexOf('\'', start);
+			if(start >= 0 && end > 0 && start < exception.length() && end < exception.length())
+				exception = "/IOExceptions/" + exception.substring(start, end);
+		}
+		return (document != null) ? autoTag(document, max, tags) : exception;
 	}
 
 	public static boolean isDigitSpace(String str) {
@@ -233,17 +238,15 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 
 	@Override
     public void run() {
-		Log.logInfo(YMarkTables.BOOKMARKS_LOG, "autoTagger run()");
 		Thread.currentThread().setUncaughtExceptionHandler(this);
 		String url = null;
 		String tagString;
 		Iterator<String> tit;
 		try {
 			final TreeMap<String, YMarkTag> tags = this.ymarks.getTags(this.bmk_user);
-			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "autoTagger queue size: "+this.bmkQueue.size());
 			while((url = this.bmkQueue.take()) != POISON) {
 				tagString = autoTag(url, this.loader, 5, tags);
-				if (tagString.equals("/IOExceptions")) {
+				if (tagString.startsWith("/IOExceptions")) {
 					this.ymarks.addFolder(this.bmk_user, url, tagString);
 					tagString = "";
 				}
@@ -261,7 +264,6 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
     				}
 				}
 			}
-			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "autoTagger has been poisoned");
 		} catch (final InterruptedException e) {
 			Log.logException(e);
 		} catch (final IOException e) {

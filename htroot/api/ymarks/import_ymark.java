@@ -1,32 +1,35 @@
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.search.Switchboard;
 
 import org.xml.sax.SAXException;
 
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.CrawlSwitchboard;
-import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.UserDB;
 import de.anomic.data.WorkTables;
+import de.anomic.data.ymark.MonitoredReader;
 import de.anomic.data.ymark.YMarkAutoTagger;
+import de.anomic.data.ymark.YMarkCrawlStart;
+import de.anomic.data.ymark.YMarkDMOZImporter;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkHTMLImporter;
 import de.anomic.data.ymark.YMarkJSONImporter;
@@ -47,7 +50,6 @@ public class import_ymark {
         final boolean isAuthUser = user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
         final int queueSize = 200;
 
-        Thread t;
         YMarkEntry bmk;
         // String root = YMarkEntry.FOLDERS_IMPORTED;
         String root = "";
@@ -70,8 +72,8 @@ public class import_ymark {
                 if(post.get("autotag").equals("empty")) {
                 	empty = true;
                 }
-                t = new Thread(new YMarkAutoTagger(autoTaggingQueue, sb.loader, sb.tables.bookmarks, bmk_user, merge),"YMarks - autoTagger");
-                t.start();
+                YMarkAutoTagger autoTagger = new YMarkAutoTagger(autoTaggingQueue, sb.loader, sb.tables.bookmarks, bmk_user, merge);
+                InstantBusyThread.oneTimeJob(autoTagger, 0);
         	}
 
             if(isAdmin && post.containsKey("table") && post.get("table").length() > 0) {
@@ -85,7 +87,8 @@ public class import_ymark {
                 root = post.get("root");
             }
         	if(post.containsKey("bmkfile") && !post.get("bmkfile").isEmpty() && post.containsKey("importer")){
-        		stream = new ByteArrayInputStream(UTF8.getBytes(post.get("bmkfile$file")));
+        		final byte[] bytes = UTF8.getBytes(post.get("bmkfile$file"));
+        		stream = new ByteArrayInputStream(bytes);
         		if(post.get("importer").equals("surro") && stream != null) {
                     SurrogateReader surrogateReader;
                     try {
@@ -96,16 +99,15 @@ public class import_ymark {
                         prop.put("status", "0");
                         return prop;
                     }
-                    t = new Thread(surrogateReader, "YMarks - Surrogate Reader");
-                    t.start();
+                    InstantBusyThread.oneTimeJob(surrogateReader, 0);
                     while ((bmk = new YMarkEntry(surrogateReader.take())) != YMarkEntry.POISON) {
                         putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
                     }
                     prop.put("status", "1");
                 } else {
-                    InputStreamReader reader = null;
+                    MonitoredReader reader = null;
                     try {
-                        reader = new InputStreamReader(stream,"UTF-8");
+                        reader = new MonitoredReader(new InputStreamReader(stream,"UTF-8"), 1024*16, bytes.length);
                     } catch (final UnsupportedEncodingException e1) {
                         //TODO: display an error message
                         Log.logException(e1);
@@ -114,11 +116,8 @@ public class import_ymark {
                     }
                     if(post.get("importer").equals("html") && reader != null) {
                         final YMarkHTMLImporter htmlImporter = new YMarkHTMLImporter(reader, queueSize, root);
-                        t = new Thread(htmlImporter, "YMarks - HTML Importer");
-                        t.start();
-                        while ((bmk = htmlImporter.take()) != YMarkEntry.POISON) {
-                            putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
-                        }
+                        InstantBusyThread.oneTimeJob(htmlImporter, 0);
+                        InstantBusyThread.oneTimeJob(htmlImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
                         prop.put("status", "1");
                     } else if(post.get("importer").equals("xbel") && reader != null) {
                         final YMarkXBELImporter xbelImporter;
@@ -131,17 +130,13 @@ public class import_ymark {
                             prop.put("status", "0");
                             return prop;
                         }
-                        t = new Thread(xbelImporter, "YMarks - XBEL Importer");
-                        t.start();
-                        while ((bmk = xbelImporter.take()) != YMarkEntry.POISON) {
-                            putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
-                        }
+                        InstantBusyThread.oneTimeJob(xbelImporter, 0);
+                        InstantBusyThread.oneTimeJob(xbelImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
                         prop.put("status", "1");
                     } else if(post.get("importer").equals("json") && reader != null) {
                         YMarkJSONImporter jsonImporter;
                         jsonImporter = new YMarkJSONImporter(reader, queueSize, root);
-                        t = new Thread(jsonImporter, "YMarks - JSON Importer");
-                        t.start();
+                        InstantBusyThread.oneTimeJob(jsonImporter, 0);
                         while ((bmk = jsonImporter.take()) != YMarkEntry.POISON) {
                         	putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
                         }
@@ -166,11 +161,9 @@ public class import_ymark {
 	    			}
 	    			prop.put("status", "1");
 				} catch (final IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Log.logException(e);
 				} catch (final Failure e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Log.logException(e);
 				}
         	} else if(post.containsKey("importer") && post.get("importer").equals("bmks")) {
         		if(!isAdmin) {
@@ -197,22 +190,37 @@ public class import_ymark {
 						sb.tables.bookmarks.addBookmark(bmk_user, bmk_entry, merge, true);
 			        	prop.put("status", "1");
 					} catch (final MalformedURLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						Log.logException(e);
 					} catch (final IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						Log.logException(e);
 					}
             	}
+            } else if(post.containsKey("importer") && post.get("importer").equals("dmoz")) {
+        		if(!isAdmin) {
+        			prop.authenticationRequired();
+        			return prop;
+        		}
+        		try {
+        			final File in = new File(sb.workPath, "content.rdf.u8.gz");
+        			final InputStream gzip = new FileInputStream(in);
+        			final InputStream content = new GZIPInputStream(gzip);
+        			final InputStreamReader reader = new InputStreamReader(content, "UTF-8");
+        			final BufferedReader breader = new BufferedReader(reader);
+        			final MonitoredReader mreader = new MonitoredReader(breader, 1024*1024, in.length());
+
+        			final String source = post.get("source", "");
+        			final YMarkDMOZImporter DMOZImporter = new YMarkDMOZImporter(mreader, queueSize, root, source);
+
+        			mreader.addChangeListener(sb.tables.bookmarks.getProgressListener("DMOZImporter"));
+        			DMOZImporter.setDepth(6);
+        			InstantBusyThread.oneTimeJob(DMOZImporter, 0);
+        			InstantBusyThread.oneTimeJob(DMOZImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
+
+        			prop.put("status", "1");
+				} catch (Exception e) {
+					Log.logException(e);
+				}
             }
-        	if(post.containsKey("autotag") && !post.get("autotag", "off").equals("off")) {
-            	try {
-    				autoTaggingQueue.put(YMarkAutoTagger.POISON);
-    				Log.logInfo(YMarkTables.BOOKMARKS_LOG, "Importer inserted poison pill in autoTagging queue");
-    			} catch (final InterruptedException e) {
-    				Log.logException(e);
-    			}
-        	}
         }  else {
         	prop.put(serverObjects.ACTION_AUTHENTICATE, YMarkTables.USER_AUTHENTICATE_MSG);
         }
@@ -234,15 +242,13 @@ public class import_ymark {
 						autoTaggingQueue.put(url);
 					}
 				}
-
 				// fill crawler
 				if (indexing.equals("single")) {
-				    crawlStart(sb, new DigestURI(url), CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, 0, true, medialink);
+					bmk.crawl(YMarkCrawlStart.CRAWLSTART.SINGLE, medialink, sb);
 				} else if (indexing.equals("onelink")) {
-                    crawlStart(sb, new DigestURI(url), CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, 1, true, medialink);
+					bmk.crawl(YMarkCrawlStart.CRAWLSTART.ONE_LINK, medialink, sb);
                 } else if (indexing.equals("fulldomain")) {
-                    final DigestURI u = new DigestURI(url);
-                    crawlStart(sb, u, CrawlProfile.mustMatchFilterFullDomain(u), CrawlProfile.MATCH_NEVER_STRING, 99, false, medialink);
+                	bmk.crawl(YMarkCrawlStart.CRAWLSTART.FULL_DOMAIN, medialink, sb);
                 }
 			}
 		} catch (final IOException e) {
@@ -251,43 +257,4 @@ public class import_ymark {
 			Log.logException(e);
 		}
 	}
-
-	public static String crawlStart(
-	                final Switchboard sb,
-	                final DigestURI startURL,
-	                final String urlMustMatch,
-	                final String urlMustNotMatch,
-	                final int depth,
-	                final boolean crawlingQ, final boolean medialink) {
-	    final CrawlProfile pe = new CrawlProfile(
-                (startURL.getHost() == null) ? startURL.toNormalform(true, false) : startURL.getHost(), null,
-                urlMustMatch,
-                urlMustNotMatch,
-                CrawlProfile.MATCH_ALL_STRING,
-                CrawlProfile.MATCH_NEVER_STRING,
-                "", depth, medialink,
-                CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE), -1, crawlingQ,
-                true, true, true, false, true, true, true,
-                CacheStrategy.IFFRESH,
-                "robot_import");
-        sb.crawler.putActive(pe.handle().getBytes(), pe);
-        return sb.crawlStacker.stackCrawl(new Request(
-                sb.peers.mySeed().hash.getBytes(),
-                startURL,
-                null,
-                "CRAWLING-ROOT",
-                new Date(),
-                pe.handle(), 0, 0, 0, 0
-                ));
-	}
-
 }
-
-
-
-
-
-
-
-
-

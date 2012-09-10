@@ -1,7 +1,7 @@
 /**
- *  Rdf
+ *  DublinCore
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 17.12.2011 at http://yacy.net
+ *  First released 16.12.2011 at http://yacy.net
  *
  *  $LastChangedDate: 2011-04-14 00:04:23 +0200 (Do, 14 Apr 2011) $
  *  $LastChangedRevision: 7653 $
@@ -22,6 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 package net.yacy.cora.lod.vocabulary;
 
 import java.util.Set;
@@ -29,22 +30,23 @@ import java.util.Set;
 import net.yacy.cora.lod.Literal;
 import net.yacy.cora.lod.Vocabulary;
 
-public enum Rdf implements Vocabulary {
+public enum DCElements implements Vocabulary {
 
-    RDF,
-    Description,
-    Bag,
-    Seq,
-    Alt,
-    type;
 
-    public final static String IDENTIFIER = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-    public final static String PREFIX = "rdf";
+    creator,
+    date,
+    description,
+    subject,
+    title;
 
-    private final String predicate;
+    public final static String IDENTIFIER = "http://purl.org/dc/elements/1.1/";
+    public final static String PREFIX = "dc";
 
-    private Rdf() {
-        this.predicate = IDENTIFIER + this.name();
+    private final String predicate, uriref;
+
+    private DCElements() {
+        this.predicate = IDENTIFIER +  this.name().toLowerCase();
+        this.uriref = PREFIX + ':' + this.name().toLowerCase();
     }
 
     @Override
@@ -69,7 +71,6 @@ public enum Rdf implements Vocabulary {
 
     @Override
     public String getURIref() {
-        return PREFIX + ':' + this.name();
+        return this.uriref;
     }
-
 }

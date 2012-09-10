@@ -1,6 +1,5 @@
 package net.yacy.interaction.contentcontrol;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import net.yacy.kelondro.blob.Tables;
@@ -67,29 +66,23 @@ public class ContentControlFilterUpdateThread {
 		Switchboard sb = Switchboard.getSwitchboard();
 
 		Iterator<Tables.Row> it;
-		try {
-			it = sb.tables.bookmarks.getBookmarksByTag(
-					sb.getConfig(
-							"contentcontrol.bookmarklist",
-							"contentcontrol"),
-					"^((?!sc:"
-							+ sb
-									.getConfig(
-											"contentcontrol.mandatoryfilterlist",
-											"") + ").*)$");
-			while (it.hasNext()) {
-				Row b = it.next();
+		it = sb.tables.bookmarks.getBookmarksByTag(
+        		sb.getConfig(
+        				"contentcontrol.bookmarklist",
+        				"contentcontrol"),
+        		"^((?!sc:"
+        				+ sb
+        						.getConfig(
+        								"contentcontrol.mandatoryfilterlist",
+        								"") + ").*)$");
+        while (it.hasNext()) {
+        	Row b = it.next();
 
-				if (!b.get("filter", "").equals("")) {
+        	if (!b.get("filter", "").equals("")) {
 
-					newfilter.add(b.get("filter", ""), null);
-				}
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        		newfilter.add(b.get("filter", ""), null);
+        	}
+        }
 
 		return newfilter;
 	}
