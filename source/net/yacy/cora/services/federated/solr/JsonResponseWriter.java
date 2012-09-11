@@ -146,7 +146,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123(d));
                     continue;
                 }
-                if (YaCySchema.size_i.equals(fieldName)) {
+                if (YaCySchema.size_i.name().equals(fieldName)) {
                     int size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
                     int sizekb = size / 1024;
                     int sizemb = sizekb / 1024;
