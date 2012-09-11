@@ -151,7 +151,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             List<Fieldable> fields = doc.getFields();
             int fieldc = fields.size();
             List<String> texts = new ArrayList<String>();
-            String description = "";
+            String description = "", title = "";
             for (int j = 0; j < fieldc; j++) {
                 Fieldable value = fields.get(j);
                 String fieldName = value.name();
@@ -170,14 +170,13 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     continue;
                 }
                 if (YaCySchema.title.name().equals(fieldName)) {
-                    solitaireTag(writer, RSSMessage.Token.title.name(), value.stringValue());
-                    texts.add(value.stringValue());
+                    title = value.stringValue();
+                    texts.add(title);
                     continue;
                 }
                 if (YaCySchema.last_modified.name().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     solitaireTag(writer, RSSMessage.Token.pubDate.name(), HeaderFramework.formatRFC1123(d));
-                    texts.add(value.stringValue());
                     continue;
                 }
                 if (YaCySchema.description.name().equals(fieldName)) {
@@ -199,6 +198,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 }
             }
             // compute snippet from texts
+
+            solitaireTag(writer, RSSMessage.Token.title.name(), title.length() == 0 ? (texts.size() == 0 ? "" : texts.get(0)) : title);
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             String tagname = RSSMessage.Token.description.name();
             writer.write("<"); writer.write(tagname); writer.write('>');

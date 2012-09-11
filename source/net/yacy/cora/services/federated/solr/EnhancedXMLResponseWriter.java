@@ -83,6 +83,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
     }
 
     private static void writeProps(final Writer writer, final String name, final NamedList<?> val) throws IOException {
+        if (val == null) return;
         int sz = val.size();
         if (sz <= 0) startTagClose(writer, "lst", name); else startTagOpen(writer, "lst", name);
         Object v;
@@ -153,7 +154,8 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             if (fidx1 + 1 == fidx2) {
                 if (sf.multiValued()) {
                     startTagOpen(writer, "arr", fieldName);
-                    writeField(writer, type, null, value.stringValue()); //sf.write(this, null, f1);
+                    String sv = value.stringValue();
+                    writeField(writer, type, null, sv); //sf.write(this, null, f1);
                     writer.write("</arr>");
                 } else {
                     writeField(writer, type, value.name(), value.stringValue()); //sf.write(this, f1.name(), f1);
@@ -161,7 +163,8 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             } else {
                 startTagOpen(writer, "arr", fieldName);
                 for (int i = fidx1; i < fidx2; i++) {
-                    writeField(writer, type, null, fields.get(i).stringValue()); //sf.write(this, null, (Fieldable)this.tlst.get(i));
+                    String sv = fields.get(i).stringValue();
+                    writeField(writer, type, null, sv); //sf.write(this, null, (Fieldable)this.tlst.get(i));
                 }
                 writer.write("</arr>");
                 writer.write(lb);

@@ -109,17 +109,17 @@ public class JsonResponseWriter implements QueryResponseWriter {
             List<Fieldable> fields = doc.getFields();
             int fieldc = fields.size();
             List<String> texts = new ArrayList<String>();
-            String description = "";
+            String description = "", title = "";
+            StringBuilder path = new StringBuilder(80);
             for (int j = 0; j < fieldc; j++) {
                 Fieldable value = fields.get(j);
                 String fieldName = value.name();
                 if (YaCySchema.title.name().equals(fieldName)) {
-                    solitaireTag(writer, "title", value.stringValue());
-                    texts.add(value.stringValue());
+                    title = value.stringValue();
+                    texts.add(title);
                     continue;
                 }
                 if (YaCySchema.sku.name().equals(fieldName)) {
-                    urlhash = value.stringValue();
                     solitaireTag(writer, "link", value.stringValue());
                     continue;
                 }
@@ -133,14 +133,20 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, "guid", urlhash);
                     continue;
                 }
+                if (YaCySchema.host_s.name().equals(fieldName)) {
+                    solitaireTag(writer, "host", value.stringValue());
+                    continue;
+                }
+                if (YaCySchema.url_paths_sxt.name().equals(fieldName)) {
+                    path.append('/').append(value.stringValue());
+                    continue;
+                }
                 if (YaCySchema.last_modified.name().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123(d));
-                    texts.add(value.stringValue());
                     continue;
                 }
                 if (YaCySchema.size_i.equals(fieldName)) {
-                    urlhash = value.stringValue();
                     int size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
                     int sizekb = size / 1024;
                     int sizemb = sizekb / 1024;
@@ -161,6 +167,9 @@ public class JsonResponseWriter implements QueryResponseWriter {
                 }
             }
             // compute snippet from texts
+
+            solitaireTag(writer, "path", path.toString());
+            solitaireTag(writer, "title", title.length() == 0 ? (texts.size() == 0 ? path.toString() : texts.get(0)) : title);
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippet == null || snippet.size() == 0 ? description : snippet.get(0))); writer.write("\"\n}\n");
             if (i < responseCount - 1) {
