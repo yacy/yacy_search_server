@@ -24,7 +24,6 @@
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Manager==Gestionnaire des listes noire
-Blacklist==Liste noire
 Used Blacklist engine:==Moteur de liste noire utilisé:
 This function provides an URL filter to the proxy; any blacklisted URL is blocked from being loaded.==Cette fonction fournis un filtre d'URL sur le serveur Proxy;. Toute URL provenant de la liste noire ne pourra être chargé.
 You can define several blacklists and activate them separately.==Vous pouvez définir de nombreuses listes noires et les activer séparément.
@@ -981,7 +980,7 @@ cache will speed up crawls with a depth > 3.==le cache accélère les crawls ave
 HTTP Response Header==Réponse HTTP
 The Response Header database stores the HTTP heades that other servers send when YaCy retrieves web pages==La base d'entêtes de réponses stocke les entêtes HTTP que les autres serveurs envoient lorsque YaCy retrouve les pages Web
 during proxy mode, when performing crawls or if it fetches pages for snippet generation.==durant le mode proxy en exécutant des crawl ou en parcourant les pages pour la génération d'extraits.
-Increasing this cache will be most important for a fast proxy mode.==Augmenter ce cache est important pour avoir un mode proxy rapide.	
+Increasing this cache will be most important for a fast proxy mode.==Augmenter ce cache est important pour avoir un mode proxy rapide.  
 'loaded' URLs==URLs chargées
 This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.==C'est la base de données qui maintient la relation hâchage/url et les propriétés concernant l'URL comme la date de chargement et la date du serveur.
 This cache is very important for a fast search process.==Ce cache est très important pour un processus de recherche rapide.
@@ -1880,7 +1879,7 @@ Detailed Search==Recherche détaillée
 Index Create==Création d'index
 Index Control==Contrôle d'Index
 Index Monitor==Moniteur d'index
-Blacklist==Liste noire
+Filter &amp; Blacklists==Filtre &amp; Liste noire
 Proxy Indexing==Indexation de Proxy
 Cache Monitor==Moniteur de cache
 Cookie Monitor==Moniteur de cookies
