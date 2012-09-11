@@ -22,11 +22,14 @@ package net.yacy.cora.services.federated.solr;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.services.federated.solr.OpensearchResponseWriter.ResHead;
 import net.yacy.search.index.YaCySchema;
@@ -50,6 +53,14 @@ import de.anomic.server.serverObjects;
  */
 public class JsonResponseWriter implements QueryResponseWriter {
 
+    // define a list of simple YaCySchema -> json Token matchings
+    private static final Map<String, String> field2tag = new HashMap<String, String>();
+    static {
+        field2tag.put(YaCySchema.url_protocol_s.name(), "protocol");
+        field2tag.put(YaCySchema.host_s.name(), "host");
+        field2tag.put(YaCySchema.url_file_ext_s.name(), "ext");
+    }
+     
     private String title;
 
     public JsonResponseWriter() {
@@ -109,18 +120,33 @@ public class JsonResponseWriter implements QueryResponseWriter {
             List<Fieldable> fields = doc.getFields();
             int fieldc = fields.size();
             List<String> texts = new ArrayList<String>();
+            MultiProtocolURI url = null;
             String description = "", title = "";
             StringBuilder path = new StringBuilder(80);
             for (int j = 0; j < fieldc; j++) {
                 Fieldable value = fields.get(j);
                 String fieldName = value.name();
+
+                // apply generic matching rule
+                String stag = field2tag.get(fieldName);
+                if (stag != null) {
+                    solitaireTag(writer, stag, value.stringValue());
+                    continue;
+                }
+                
+                // some special handling here
+                if (YaCySchema.sku.name().equals(fieldName)) {
+                    String u = value.stringValue();
+                    try {
+                        url = new MultiProtocolURI(u);
+                        solitaireTag(writer, "link", u);
+                        solitaireTag(writer, "file", url.getFileName());
+                    } catch (MalformedURLException e) {}
+                    continue;
+                }
                 if (YaCySchema.title.name().equals(fieldName)) {
                     title = value.stringValue();
                     texts.add(title);
-                    continue;
-                }
-                if (YaCySchema.sku.name().equals(fieldName)) {
-                    solitaireTag(writer, "link", value.stringValue());
                     continue;
                 }
                 if (YaCySchema.description.name().equals(fieldName)) {
@@ -133,16 +159,8 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, "guid", urlhash);
                     continue;
                 }
-                if (YaCySchema.host_s.name().equals(fieldName)) {
-                    solitaireTag(writer, "host", value.stringValue());
-                    continue;
-                }
                 if (YaCySchema.url_paths_sxt.name().equals(fieldName)) {
                     path.append('/').append(value.stringValue());
-                    continue;
-                }
-                if (YaCySchema.url_file_ext_s.name().equals(fieldName)) {
-                    solitaireTag(writer, "ext", value.stringValue());
                     continue;
                 }
                 if (YaCySchema.last_modified.name().equals(fieldName)) {
@@ -169,9 +187,11 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     texts.add(value.stringValue());
                     continue;
                 }
-            }
-            // compute snippet from texts
 
+                //missing: "code","faviconCode"
+            }
+            
+            // compute snippet from texts            
             solitaireTag(writer, "path", path.toString());
             solitaireTag(writer, "title", title.length() == 0 ? (texts.size() == 0 ? path.toString() : texts.get(0)) : title);
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);

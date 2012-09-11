@@ -82,7 +82,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
             int p = host.indexOf('.');
             final String hash = Seed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
             final Seed seed = peers.getConnected(hash);
-            final String filename = urlentry.url().getFile();
+            final String path = urlentry.url().getFile();
             String address = null;
             if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                 // seed is not known from here
@@ -90,7 +90,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                     indexSegment.termIndex().remove(
                         Word.words2hashesHandles(Condenser.getWords(
                             ("yacyshare " +
-                             filename.replace('?', ' ') +
+                             path.replace('?', ' ') +
                              " " +
                              urlentry.dc_title()), null).keySet()),
                              urlentry.hash());
@@ -100,8 +100,8 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                 indexSegment.fulltext().remove(urlentry.hash()); // clean up
                 throw new RuntimeException("index void");
             }
-            this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
-            this.alternative_urlname = "http://share." + seed.getName() + ".yacy" + filename;
+            this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + path;
+            this.alternative_urlname = "http://share." + seed.getName() + ".yacy" + path;
             if ((p = this.alternative_urlname.indexOf('?')) > 0) this.alternative_urlname = this.alternative_urlname.substring(0, p);
         }
     }

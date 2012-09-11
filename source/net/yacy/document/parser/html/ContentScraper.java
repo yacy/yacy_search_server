@@ -447,7 +447,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String href = tagopts.getProperty("href", EMPTY_STRING);
             MultiProtocolURI url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
-                final String f = url.getFile();
+                final String f = url.getFileName();
                 final int p = f.lastIndexOf('.');
                 final String type = (p < 0) ? EMPTY_STRING : f.substring(p + 1);
                 if (type.equals("png") || type.equals("gif") || type.equals("jpg") || type.equals("jpeg") || type.equals("tiff") || type.equals("tif")) {

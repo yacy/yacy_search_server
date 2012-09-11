@@ -69,13 +69,12 @@ public class ResultImages {
             if (doubleCheck.contains(url)) continue;
             doubleCheck.add(url);
 
-            final String name = image.url().getFile();
             boolean good = false;
             if (image.width() > 120 &&
                 image.height() > 100 &&
                 image.width() < 1200 &&
                 image.height() < 1000 &&
-                name.lastIndexOf(".gif") == -1) {
+                !"gif".equals(image.url().getFileExtension())) {
                 // && ((urlString.lastIndexOf(".jpg") != -1)) ||
                 // ((urlString.lastIndexOf(".png") != -1)){
 

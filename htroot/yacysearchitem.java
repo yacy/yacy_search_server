@@ -201,7 +201,7 @@ public class yacysearchitem {
             prop.putHTML("content_sizename", sizename(result.filesize()));
             prop.putHTML("content_showSize_sizename", sizename(result.filesize()));
             prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
-            prop.putHTML("content_file", resultURL.getFile());
+            prop.putHTML("content_file", resultURL.getFileName());
             prop.putHTML("content_path", resultURL.getPath());
             prop.put("content_nl", (item == theQuery.offset) ? 0 : 1);
             prop.putHTML("content_publisher", result.publisher());

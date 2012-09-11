@@ -632,16 +632,29 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         }
     }
 
+    /**
+     * get the hpath plus search field plus anchor.
+     * see http://www.ietf.org/rfc/rfc1738.txt for naming.
+     * if there is no search and no anchor the result is identical to getPath
+     * this is defined according to http://docs.oracle.com/javase/1.4.2/docs/api/java/net/URL.html#getFile()
+     * @return
+     */
     public String getFile() {
         return getFile(false, false);
     }
 
-    public String getFile(final boolean excludeReference, final boolean removeSessionID) {
-        // this is the path plus quest plus ref
-        // if there is no quest and no ref the result is identical to getPath
-        // this is defined according to http://java.sun.com/j2se/1.4.2/docs/api/java/net/URL.html#getFile()
+    /**
+     * get the hpath plus search field plus anchor (if wanted)
+     * see http://www.ietf.org/rfc/rfc1738.txt for naming.
+     * if there is no search and no anchor the result is identical to getPath
+     * this is defined according to http://docs.oracle.com/javase/1.4.2/docs/api/java/net/URL.html#getFile()
+     * @param excludeAnchor
+     * @param removeSessionID
+     * @return
+     */
+    public String getFile(final boolean excludeAnchor, final boolean removeSessionID) {
         if (this.searchpart == null) {
-            if (excludeReference || this.anchor == null) return this.path;
+            if (excludeAnchor || this.anchor == null) return this.path;
             final StringBuilder sb = new StringBuilder(120);
             sb.append(this.path);
             sb.append('#');
@@ -654,7 +667,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 if (q.toLowerCase().startsWith(sid.toLowerCase() + "=")) {
                     final int p = q.indexOf('&');
                     if (p < 0) {
-                        if (excludeReference || this.anchor == null) return this.path;
+                        if (excludeAnchor || this.anchor == null) return this.path;
                         final StringBuilder sb = new StringBuilder(120);
                         sb.append(this.path);
                         sb.append('#');
@@ -678,7 +691,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         sb.append(this.path);
         sb.append('?');
         sb.append(q);
-        if (excludeReference || this.anchor == null) return sb.toString();
+        if (excludeAnchor || this.anchor == null) return sb.toString();
         sb.append('#');
         sb.append(this.anchor);
         return sb.toString();
