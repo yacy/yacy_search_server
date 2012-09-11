@@ -167,6 +167,12 @@ public class JsonResponseWriter implements QueryResponseWriter {
                 writer.write(",\n".toCharArray());
             }
         }
+        writer.write("]\n".toCharArray());
+        writer.write(",\n\"navigation\":[\n");
+        writer.write("{\"facetname\":\"filetypes\",\"displayname\":\"Filetypes\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());
+        writer.write("{\"facetname\":\"protocols\",\"displayname\":\"Protocol\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());
+        writer.write("{\"facetname\":\"domains\",\"displayname\":\"Domains\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());
+        writer.write("{\"facetname\":\"topics\",\"displayname\":\"Topics\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]}\n".toCharArray());
         writer.write("]}]}\n".toCharArray());
     }
 
@@ -212,9 +218,8 @@ public class JsonResponseWriter implements QueryResponseWriter {
       "ranking": "6983282"
     }
     ,
-..
-}
-],
+    ..
+  }],
 "navigation": [
 {
   "facetname": "filetypes",
