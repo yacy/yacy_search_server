@@ -96,6 +96,11 @@ public class Crawler_p {
 
         prop.put("info", "0");
 
+        if (post != null) {
+            String c = post.toString();
+            if (c.length() < 1000) Log.logInfo("Crawl Start", c);
+        }
+
         if (post != null && post.containsKey("continue")) {
             // continue queue
             final String queue = post.get("continue", "");
