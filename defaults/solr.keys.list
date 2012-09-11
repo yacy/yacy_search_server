@@ -301,7 +301,7 @@ italic_txt
 #url_protocol_s
 
 ## all path elements in the url
-#url_paths_sxt
+url_paths_sxt
 
 ## number of key-value pairs in search part of the url
 #url_parameter_i
@@ -316,7 +316,7 @@ italic_txt
 #url_chars_i
 
 ## host of the url, string
-#host_s
+host_s
 
 ## the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used.
 #host_dnc_s
