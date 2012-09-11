@@ -286,9 +286,8 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
 
         // path elements of link
-        if (allAttr || contains(YaCySchema.url_paths_sxt)) {
-            add(doc, YaCySchema.url_paths_sxt, digestURI.getPaths());
-        }
+        if (allAttr || contains(YaCySchema.url_paths_sxt)) add(doc, YaCySchema.url_paths_sxt, digestURI.getPaths());
+        if (allAttr || contains(YaCySchema.url_file_ext_s)) add(doc, YaCySchema.url_file_ext_s, digestURI.getFileExtension());
 
         if (allAttr || contains(YaCySchema.imagescount_i)) add(doc, YaCySchema.imagescount_i, md.limage());
         if (allAttr || contains(YaCySchema.inboundlinkscount_i)) add(doc, YaCySchema.inboundlinkscount_i, md.llocal());
@@ -416,9 +415,8 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
 
         // path elements of link
-        if (allAttr || contains(YaCySchema.url_paths_sxt)) {
-            add(doc, YaCySchema.url_paths_sxt, digestURI.getPaths());
-        }
+        if (allAttr || contains(YaCySchema.url_paths_sxt)) add(doc, YaCySchema.url_paths_sxt, digestURI.getPaths());
+        if (allAttr || contains(YaCySchema.url_file_ext_s)) add(doc, YaCySchema.url_file_ext_s, digestURI.getFileExtension());
 
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr scheme
         Set<MultiProtocolURI> inboundLinks = yacydoc.inboundLinks();
@@ -860,13 +858,16 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         add(solrdoc, YaCySchema.id, ASCII.String(digestURI.hash()));
         add(solrdoc, YaCySchema.sku, digestURI.toNormalform(true, false));
         final InetAddress address = digestURI.getInetAddress();
-        if (address != null) add(solrdoc, YaCySchema.ip_s, address.getHostAddress());
-        if (digestURI.getHost() != null) add(solrdoc, YaCySchema.host_s, digestURI.getHost());
+        if (contains(YaCySchema.ip_s) && address != null) add(solrdoc, YaCySchema.ip_s, address.getHostAddress());
+        if (contains(YaCySchema.host_s) && digestURI.getHost() != null) add(solrdoc, YaCySchema.host_s, digestURI.getHost());
 
         // path elements of link
-        add(solrdoc, YaCySchema.url_paths_sxt, digestURI.getPaths());
-        add(solrdoc, YaCySchema.failreason_t, failReason);
-        add(solrdoc, YaCySchema.httpstatus_i, httpstatus);
+        if (contains(YaCySchema.url_paths_sxt)) add(solrdoc, YaCySchema.url_paths_sxt, digestURI.getPaths());
+        if (contains(YaCySchema.url_file_ext_s)) add(solrdoc, YaCySchema.url_file_ext_s, digestURI.getFileExtension());
+        
+        // fail reason and status
+        if (contains(YaCySchema.failreason_t)) add(solrdoc, YaCySchema.failreason_t, failReason);
+        if (contains(YaCySchema.httpstatus_i)) add(solrdoc, YaCySchema.httpstatus_i, httpstatus);
         return solrdoc;
     }
 

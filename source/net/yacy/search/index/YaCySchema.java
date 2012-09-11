@@ -141,6 +141,7 @@ public enum YaCySchema implements Schema {
 
     url_protocol_s(SolrType.string, true, true, false, "the protocol of the url"),
     url_paths_sxt(SolrType.string, true, true, true, "all path elements in the url"),
+    url_file_ext_s(SolrType.string, true, true, false, "the file name extension"),
     url_parameter_i(SolrType.integer, true, true, false, "number of key-value pairs in search part of the url"),
     url_parameter_key_sxt(SolrType.string, true, true, true, "the keys from key-value pairs in the search part of the url"),
     url_parameter_value_sxt(SolrType.string, true, true, true, "the values from key-value pairs in the search part of the url"),

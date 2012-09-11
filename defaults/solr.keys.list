@@ -298,10 +298,13 @@ italic_txt
 #iframesscount_i
 
 ## the protocol of the url
-#url_protocol_s
+url_protocol_s
 
 ## all path elements in the url
 url_paths_sxt
+
+## the file name extension
+url_file_ext_s
 
 ## number of key-value pairs in search part of the url
 #url_parameter_i

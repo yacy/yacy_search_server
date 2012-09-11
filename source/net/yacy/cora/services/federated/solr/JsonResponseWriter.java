@@ -141,6 +141,10 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     path.append('/').append(value.stringValue());
                     continue;
                 }
+                if (YaCySchema.url_file_ext_s.name().equals(fieldName)) {
+                    solitaireTag(writer, "ext", value.stringValue());
+                    continue;
+                }
                 if (YaCySchema.last_modified.name().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123(d));
