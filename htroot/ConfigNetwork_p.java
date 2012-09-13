@@ -93,6 +93,7 @@ public class ConfigNetwork_p
                     // remove heuristics
                     sb.setConfig("heuristic.site", false);
                     sb.setConfig("heuristic.blekko", false);
+                    sb.setConfig("heuristic.twitter", false);
                 }
                 final boolean robinsonmode = "robinson".equals(post.get("network", ""));
                 if ( robinsonmode ) {

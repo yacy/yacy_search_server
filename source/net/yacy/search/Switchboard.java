@@ -1208,6 +1208,7 @@ public final class Switchboard extends serverSwitch
             // remove heuristics
             setConfig("heuristic.site", false);
             setConfig("heuristic.blekko", false);
+            setConfig("heuristic.twitter", false);
 
             // relocate
             this.peers.relocate(
