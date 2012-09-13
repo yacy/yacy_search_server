@@ -275,7 +275,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
                     continue;
                 }
                 if (YaCySchema.size_i.name().equals(fieldName)) {
-                    size = Integer.parseInt(value.stringValue());
+                    size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
                     continue;
                 }
             }

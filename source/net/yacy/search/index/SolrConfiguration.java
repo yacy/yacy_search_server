@@ -53,6 +53,7 @@ import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 
@@ -203,6 +204,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     }
 
     public SolrInputDocument metadata2solr(final URIMetadata md) {
+        assert md instanceof URIMetadataRow;
     	if (md instanceof URIMetadataNode) {
     		return ClientUtils.toSolrInputDocument(((URIMetadataNode) md).getDocument());
     	}
