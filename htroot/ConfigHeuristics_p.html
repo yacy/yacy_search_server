@@ -71,6 +71,19 @@
     </fieldset>
     </form>
     
+    <form id="HeuristicFormTwitter" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset>
+      <legend>
+        <input type="checkbox" name="twitter_check" id="twitter" onclick="window.location.href='ConfigHeuristics_p.html?#(twitter.checked)#twitter_on=::twitter_off=#(/twitter.checked)#'" value="twitter"#(twitter.checked)#:: checked="checked"#(/twitter.checked)# />
+        <label for="twitter">twitter: load external search result list from <a href="http://search.twitter.com">twitter</a></label>
+      </legend>
+      <p>
+      When using this heuristic, then every search request line is used for a call to twitter.
+      50 results are taken from twitter and loaded simultanously, parsed and indexed immediately.
+      </p>
+    </fieldset>
+    </form>
+    
     <form id="HeuristicFormBlekko" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>

@@ -539,6 +539,12 @@ public class yacysearch {
                 querystring = querystring.replace("/heuristic/blekko", "");
                 modifier.append("/heuristic/blekko ");
             }
+            
+            final int heuristicTwitter = querystring.indexOf("/heuristic/twitter", 0);
+            if ( heuristicBlekko >= 0 ) {
+                querystring = querystring.replace("/heuristic/twitter", "");
+                modifier.append("/heuristic/twitter ");
+            }
 
             final int authori = querystring.indexOf("author:", 0);
             String authorhash = null;
@@ -829,6 +835,9 @@ public class yacysearch {
                 }
                 if ( (heuristicBlekko >= 0 || sb.getConfigBool("heuristic.blekko", false)) && authenticated ) {
                     sb.heuristicRSS("http://blekko.com/ws/$+/rss", theSearch, "blekko");
+                }
+                if ( (heuristicTwitter >= 0 || sb.getConfigBool("heuristic.twitter", false)) && authenticated ) {
+                    sb.heuristicRSS("http://search.twitter.com/search.rss?rpp=50&q=$", theSearch, "twitter");
                 }
             }
 
