@@ -98,9 +98,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		while(iter.hasNext()) {
 			final byte[] key = iter.next();
 			final CrawlProfile crawl = crawler.getActive(key);
-			if (crawl.startURL().equals(this.url)) {
-				return true;
-			}
+			if (crawl != null) return true;
 		}
 		return false;
 	}
@@ -175,7 +173,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
         final int depth,
         final boolean crawlingQ, final boolean medialink) {
 		final CrawlProfile pe = new CrawlProfile(
-		                (startURL.getHost() == null) ? startURL.toNormalform(true, false) : startURL.getHost(), null,
+		                (startURL.getHost() == null) ? startURL.toNormalform(true, false) : startURL.getHost(),
 		                urlMustMatch,
 		                urlMustNotMatch,
 		                CrawlProfile.MATCH_ALL_STRING,

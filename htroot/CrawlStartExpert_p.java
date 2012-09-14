@@ -40,7 +40,7 @@ public class CrawlStartExpert_p {
         final serverObjects prop = new serverObjects();
 
         // define visible variables
-        prop.put("starturl", /*(intranet) ? repository :*/ "http://");
+        prop.put("starturl", /*(intranet) ? repository :*/ "");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", Math.min(3, env.getConfigLong("crawlingDepth", 0)));
         prop.put("directDocByURLChecked", sb.getConfigBool("crawlingDirectDocByURL", true) ? "1" : "0");

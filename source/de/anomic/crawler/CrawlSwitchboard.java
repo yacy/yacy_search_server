@@ -292,7 +292,6 @@ public final class CrawlSwitchboard
             this.defaultProxyProfile =
                 new CrawlProfile(
                     CRAWL_PROFILE_PROXY,
-                    null,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
@@ -321,7 +320,6 @@ public final class CrawlSwitchboard
             this.defaultRemoteProfile =
                 new CrawlProfile(
                     CRAWL_PROFILE_REMOTE,
-                    null,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
@@ -350,7 +348,6 @@ public final class CrawlSwitchboard
             this.defaultTextSnippetLocalProfile =
                 new CrawlProfile(
                     CRAWL_PROFILE_SNIPPET_LOCAL_TEXT,
-                    null,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
@@ -379,7 +376,6 @@ public final class CrawlSwitchboard
             this.defaultTextSnippetGlobalProfile =
                 new CrawlProfile(
                     CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
-                    null,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
@@ -409,7 +405,6 @@ public final class CrawlSwitchboard
             this.defaultMediaSnippetLocalProfile =
                 new CrawlProfile(
                     CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA,
-                    null,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
@@ -438,7 +433,6 @@ public final class CrawlSwitchboard
             this.defaultMediaSnippetGlobalProfile =
                 new CrawlProfile(
                     CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
-                    null,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
@@ -467,7 +461,6 @@ public final class CrawlSwitchboard
             this.defaultSurrogateProfile =
                 new CrawlProfile(
                     CRAWL_PROFILE_SURROGATE,
-                    null,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,

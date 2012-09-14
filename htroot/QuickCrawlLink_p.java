@@ -133,8 +133,7 @@ public class QuickCrawlLink_p {
             CrawlProfile pe = null;
             try {
                 pe = new CrawlProfile(
-                        crawlingStartURL.getHost(),
-                        crawlingStartURL,
+                        crawlingStartURL.toNormalform(true, false),
                         crawlingMustMatch,
                         CrawlProfile.MATCH_ALL_STRING,
                         CrawlProfile.MATCH_NEVER_STRING,

@@ -315,6 +315,7 @@ public class CrawlQueues {
      * @param stats String for log prefixing
      * @return
      */
+    @SuppressWarnings("unused")
     private void load(final Request urlEntry, final String stats, final String profileHandle) {
         final CrawlProfile profile = this.sb.crawler.getActive(UTF8.getBytes(profileHandle));
         if (profile != null) {

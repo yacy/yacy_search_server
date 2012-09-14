@@ -44,7 +44,7 @@
                 <td><label for="url"><span class="nobr">From URL&nbsp;(must start with<br/>http:// https:// ftp:// smb:// file://)</span></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" /></td>
                 <td>
-                  <input name="crawlingURL" id="crawlingURL" type="text" size="41" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" />
+                  <textarea name="crawlingURL" id="crawlingURL" cols="41" rows="3" size="41" onkeypress="changed()" onfocus="check('url')" >#[starturl]#</textarea>
                 </td>
               </tr>
               <tr>
@@ -83,7 +83,8 @@
             </table>
           </td>
           <td colspan="3">
-            Existing start URLs are always re-crawled.
+            Define the start-url(s) here. You can submit more than one URL, each line one URL please.
+            Each of these URLs are the root for a crawl start, existing start URLs are always re-loaded.
             Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
           </td>
         </tr>

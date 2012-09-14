@@ -33,10 +33,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -55,7 +53,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     // this is a simple record structure that hold all properties of a single crawl start
     public static final String HANDLE           = "handle";
     public static final String NAME             = "name";
-    public static final String START_URL        = "startURL";
     public static final String DEPTH            = "generalDepth";
     public static final String DIRECT_DOC_BY_URL= "directDocByURL";
     public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
@@ -124,8 +121,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @param collections a comma-separated list of tags which are attached to index entries
      */
     public CrawlProfile(
-                 final String name,
-                 final DigestURI startURL,
+                 String name,
                  final String urlMustMatch,
                  final String urlMustNotMatch,
                  final String ipMustMatch,
@@ -149,14 +145,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (name == null || name.isEmpty()) {
             throw new NullPointerException("name must not be null or empty");
         }
+        if (name.length() > 60) name = name.substring(0, 60);
         this.doms = new ConcurrentHashMap<String, DomProfile>();
-
-        final String handle = (startURL == null)
-                ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength)
-                : ASCII.String(startURL.hash());
+        final String handle = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength);
         put(HANDLE,           handle);
         put(NAME,             name);
-        put(START_URL,        (startURL == null) ? "" : startURL.toNormalform(true, false));
         put(FILTER_URL_MUSTMATCH,     (urlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : urlMustMatch);
         put(FILTER_URL_MUSTNOTMATCH,  (urlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : urlMustNotMatch);
         put(FILTER_IP_MUSTMATCH,      (ipMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : ipMustMatch);
@@ -258,6 +251,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      */
     public String handle() {
         final String r = get(HANDLE);
+        assert r != null;
         //if (r == null) return null;
         return r;
     }
@@ -279,15 +273,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public String name() {
         final String r = get(NAME);
         if (r == null) return "";
-        return r;
-    }
-
-    /**
-     * Gets the root URL of the crawl job.
-     * @return root URL
-     */
-    public String startURL() {
-        final String r = get(START_URL);
         return r;
     }
 
@@ -540,7 +525,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", this.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", (active) ? "0" : "1");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", this.handle());
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_startURL", this.startURL());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_handle", this.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", this.depth());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_mustmatch", this.urlMustMatchPattern().toString());

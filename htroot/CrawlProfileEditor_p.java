@@ -66,7 +66,6 @@ public class CrawlProfileEditor_p {
     private static final List <eentry> labels = new ArrayList<eentry>();
     static {
         labels.add(new eentry(CrawlProfile.NAME,                "Name",                  true,  eentry.STRING));
-        labels.add(new eentry(CrawlProfile.START_URL,           "Start URL",             true,  eentry.STRING));
         labels.add(new eentry(CrawlProfile.FILTER_URL_MUSTMATCH,    "Must-Match Filter",     false, eentry.STRING));
         labels.add(new eentry(CrawlProfile.FILTER_URL_MUSTNOTMATCH, "Must-Not-Match Filter", false, eentry.STRING));
         labels.add(new eentry(CrawlProfile.DEPTH,               "Crawl Depth",           false, eentry.INTEGER));
