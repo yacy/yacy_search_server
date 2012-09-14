@@ -67,15 +67,16 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
         writer.write(XML_START);
-
-        assert rsp.getValues().get("responseHeader") != null;
-        assert rsp.getValues().get("response") != null;
+        NamedList<?> values = rsp.getValues();
+        
+        assert values.get("responseHeader") != null;
+        assert values.get("response") != null;
 
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocSlice response = (DocSlice) rsp.getValues().get("response");
+        DocSlice response = (DocSlice) values.get("response");
         @SuppressWarnings("unchecked")
-        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) rsp.getValues().get("highlighting");
+        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
         writeProps(writer, "responseHeader", responseHeader); // this.writeVal("responseHeader", responseHeader);
         writeDocs(writer, request, response); // this.writeVal("response", response);
         writeProps(writer, "highlighting", highlighting);

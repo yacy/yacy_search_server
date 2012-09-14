@@ -82,14 +82,21 @@ public class JsonResponseWriter implements QueryResponseWriter {
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
-        assert rsp.getValues().get("responseHeader") != null;
-        assert rsp.getValues().get("response") != null;
+
+        NamedList<?> values = rsp.getValues();
+        
+        assert values.get("responseHeader") != null;
+        assert values.get("response") != null;
 
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocSlice response = (DocSlice) rsp.getValues().get("response");
+        DocSlice response = (DocSlice) values.get("response");
         @SuppressWarnings("unchecked")
-        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) rsp.getValues().get("highlighting");
+        SimpleOrderedMap<Object> facetCounts = (SimpleOrderedMap<Object>) values.get("facet_counts");
+        @SuppressWarnings("unchecked")
+        SimpleOrderedMap<Object> facetFields = facetCounts == null || facetCounts.size() == 0 ? null : (SimpleOrderedMap<Object>) facetCounts.get("facet_fields");
+        @SuppressWarnings("unchecked")
+        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
         Map<String, List<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);
 
         // parse response header
@@ -202,6 +209,14 @@ public class JsonResponseWriter implements QueryResponseWriter {
         }
         writer.write("]\n".toCharArray());
         writer.write(",\n\"navigation\":[\n");
+
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> hosts = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.host_s.name());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> exts = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_file_ext_s.name());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> prots = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_protocol_s.name());
+        
         writer.write("{\"facetname\":\"filetypes\",\"displayname\":\"Filetypes\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());
         writer.write("{\"facetname\":\"protocols\",\"displayname\":\"Protocol\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());
         writer.write("{\"facetname\":\"domains\",\"displayname\":\"Domains\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());

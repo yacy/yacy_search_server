@@ -149,7 +149,7 @@ public class searchresult {
         if (connector == null) return null;
 
         // do the solr request
-        SolrQueryRequest req = connector.request(post.toSolrParams());
+        SolrQueryRequest req = connector.request(post.toSolrParams(null));
         SolrQueryResponse response = null;
         Exception e = null;
         try {response = connector.query(req);} catch (SolrException ee) {e = ee;}

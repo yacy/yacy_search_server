@@ -38,11 +38,13 @@ import net.yacy.cora.services.federated.solr.SolrServlet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.YaCySchema;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SnippetProcess;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.FastWriter;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
@@ -154,7 +156,9 @@ public class select {
                                 "") : env.getConfig(SwitchboardConstants.GREETING, "");
             ((OpensearchResponseWriter) responseWriter).setTitle(promoteSearchPageGreeting);
         }
-        if (responseWriter instanceof OpensearchResponseWriter) {
+        
+        // if this is a call to YaCys special search formats, enhance the query with field assignments
+        if (responseWriter instanceof JsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) {
             // add options for snippet generation
             post.put("hl", "true");
             post.put("hl.fl", "text_t,h1,h2");
@@ -167,8 +171,9 @@ public class select {
         EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.fulltext().getLocalSolr();
         if (connector == null) return null;
 
-        // do the solr request
-        SolrQueryRequest req = connector.request(post.toSolrParams());
+        // do the solr request, generate facets if we use a special YaCy format
+        SolrParams params = post.toSolrParams(responseWriter instanceof JsonResponseWriter ? new YaCySchema[]{YaCySchema.host_s, YaCySchema.url_file_ext_s, YaCySchema.url_protocol_s} : null);
+        SolrQueryRequest req = connector.request(params);
         SolrQueryResponse response = null;
         Exception e = null;
         try {response = connector.query(req);} catch (SolrException ee) {e = ee;}
