@@ -30,6 +30,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+import de.anomic.crawler.CrawlStacker;
 import de.anomic.crawler.ZURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -89,7 +90,17 @@ public class IndexCreateParserErrors_p {
                 prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));
-                prop.putHTML("rejected_list_"+j+"_failreason", entry.anycause());
+                
+                String cause = entry.anycause();
+                if (cause.startsWith(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER)) {
+                    prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false, true) +
+                            "&regex=" + cause.substring(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER.length()) + "\">test</a>) " + cause);
+                } else if (cause.startsWith(CrawlStacker.ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER)) {
+                    prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false, true) +
+                            "&regex=" + cause.substring(CrawlStacker.ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER.length()) + "\">test</a>) " + cause);
+                } else {
+                    prop.putHTML("rejected_list_"+j+"_failreason", cause);
+                }
                 prop.put("rejected_list_"+j+"_dark", dark ? "1" : "0");
                 dark = !dark;
                 j++;
